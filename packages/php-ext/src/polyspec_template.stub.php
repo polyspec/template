@@ -1282,6 +1282,102 @@ final class Registry
     public static function isBuiltin(string $name): bool {}
 }
 
+namespace Polyspec\Template\Format;
+
+/**
+ * Why the formatter returned no text.
+ */
+final class FormatError
+{
+    /** Kind of failure: parse, invariant or html. */
+    public readonly string $reason;
+
+    /** Error code of the parser, or null. */
+    public readonly ?string $code;
+
+    /** 1-based line of the error position */
+    public readonly int $line;
+
+    /** 1-based byte column of the error position, as in parser errors (ERR-1) */
+    public readonly int $col;
+
+    public readonly string $message;
+
+    /**
+     * `parse`: the source does not parse. `invariant`: the formatted text does not parse to the same AST. `html`:
+     * the HTML structure is not balanced, so the lines cannot be indented. The column is a 1-based byte column, as in
+     * parser errors (ERR-1).
+     */
+        public function __construct(string $reason, ?string $code, int $line, int $col, string $message) {}
+
+    /**
+     * @return array
+     * @phpstan-return array{reason: string, code: string|null, line: int, col: int, message: string}
+     */
+    public function toArray(): array {}
+}
+
+/**
+ * The result of the formatter: the formatted text and whether it differs from the source, or the reason why the
+ * source is kept.
+ */
+final class FormatResult
+{
+    public readonly ?string $text;
+
+    public readonly bool $changed;
+
+    public readonly ?FormatError $error;
+
+    public function __construct(?string $text, bool $changed, ?FormatError $error) {}
+
+    public static function text(string $text, bool $changed): FormatResult {}
+
+    public static function error(FormatError $error): FormatResult {}
+}
+
+/**
+ * Expression spacing: joins the expression tokens of one tag with the separators of the formatting style.
+ *
+ * A token is its text and the EDT-8 class that the parser gives it.
+ */
+final class Expression
+{
+    /**
+     * Joins expression tokens with the separators of the formatting style: one space around binary and ternary
+     * operators, `|`, `=>` and `in`; one space after `,`; no space after `(`, `[`, `...` and unary `!` and `-`; no
+     * space before `,`, `)`, `]` and accessors; no space between a function or method name and `(`, between an
+     * operand and an index `[`, and around the `::` token of `Class::name`.
+     *
+     * @param array $tokens
+     * @phpstan-param list<array{text: string, kind: string}> $tokens
+     */
+    public static function join(array $tokens): string {}
+}
+
+/**
+ * Safety invariant: two templates are equivalent when their ASTs are equal after every `span` field is removed (AST-2,
+ * AST-7), and, for indented lines, after the spaces and tabs at the start of every line of text are removed.
+ */
+final class Invariant
+{
+    /**
+     * Returns a copy of an AST value without `span` fields.
+     */
+    public static function withoutSpans(mixed $value): mixed {}
+
+    /**
+     * Returns a copy of an AST value whose `Text` nodes have no spaces or tabs at the start of a line. A `Text` node
+     * that becomes empty is removed: indentation after a line that the renderer removes is a `Text` node of its own.
+     */
+    public static function withoutLineIndentation(mixed $value): mixed {}
+
+    /**
+     * Compares two AST values structurally, ignoring the key order of maps and every `span` field.
+     */
+    public static function sameTree(mixed $left, mixed $right): bool {}
+}
+
 namespace Polyspec\Template\Expr;
 
 /**

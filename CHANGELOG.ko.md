@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 66d787a5aaf85e094795a6a683d2a03e97d58eb26963422266dd6c4c6027fd1a -->
+<!-- source-sha256: a5689581b33f4107ba69f636ee0c08aa930cb19b7236cd628fc0ab22ef9ebd4a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-7-1: 확장은 `Format\FormatError`, `Format\FormatResult`, `Format\Expression`, `Format\Invariant`를 library와 같은 이름과 signature의 class로 등록한다(`packages/php-ext/src/pt_format.c`). `FormatResult::text`와 `FormatResult::error`는 library가 선언한 대로 `FormatResult`를 반환한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatClassesTest.php`가 `Polyspec\Template\Format\FormatError is not registered by the extension`으로 실패한다(1 failure); green: 같은 명령이 `OK (4 tests, 19 assertions)`로 통과한다 (T26.7-2-7-1).
 
 - T26.7-40: 확장이 이 test가 load하는 class를 등록하므로(T26.7-2-8-7, PageCache는 T26.7-2-4) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (EngineRefreshTest, LoaderTest, PageCacheTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-40).
 

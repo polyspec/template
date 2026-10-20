@@ -386,6 +386,8 @@ pt_ranges pt_standalone_ranges(pt_arena *arena, const pt_lines *lines, const cha
 /* The classes Ast, Parser\Scanner and Parser\Standalone (pt_scanner.c). */
 void pt_ast_declare_constants(zend_class_entry *ce);
 void pt_scanner_declare_constants(zend_class_entry *ce);
+/* The classes FormatError and FormatResult of the formatter (pt_format.c). */
+void pt_format_register(zend_class_entry *error, zend_class_entry *result);
 void pt_ast_is_loop_meta_field(INTERNAL_FUNCTION_PARAMETERS);
 void pt_ast_node(INTERNAL_FUNCTION_PARAMETERS);
 void pt_ast_to_json(INTERNAL_FUNCTION_PARAMETERS);

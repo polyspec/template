@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-7-1: the PHP extension registers `Format\FormatError`, `Format\FormatResult`, `Format\Expression` and `Format\Invariant` as classes of the library's names and signatures, in `packages/php-ext/src/pt_format.c`; `FormatResult::text` and `FormatResult::error` return `FormatResult`, as the library declares them. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatClassesTest.php` fails with `Polyspec\Template\Format\FormatError is not registered by the extension` (1 failure); green: the same command `OK (4 tests, 19 assertions)` (T26.7-2-7-1).
+
 - T26.7-40: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (EngineRefreshTest, LoaderTest, PageCacheTest), now that the extension registers the classes that these tests load (T26.7-2-8-7, and PageCache in T26.7-2-4); with the other checks of its Verification the row is done (T26.7-40).
 
 - T26.7-40-1: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (EngineRefreshTest), now that the extension registers the classes that these tests load (T26.7-2-8-7); with the other checks of its Verification the row is done (T26.7-40-1).

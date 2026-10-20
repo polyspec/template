@@ -17,12 +17,12 @@ final class FormatResult
     ) {
     }
 
-    public static function text(string $text, bool $changed): self
+    public static function text(string $text, bool $changed): FormatResult
     {
         return new self($text, $changed, null);
     }
 
-    public static function error(FormatError $error): self
+    public static function error(FormatError $error): FormatResult
     {
         return new self(null, false, $error);
     }

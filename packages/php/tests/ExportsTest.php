@@ -75,6 +75,8 @@ final class ExportsTest extends TestCase
             ['Polyspec\Template\Source', 'fromBytes'],
             ['Polyspec\Template\TemplateError', 'at'],
             ['Polyspec\Template\TemplateError', 'withoutPosition'],
+            ['Polyspec\Template\Format\FormatResult', 'text'],
+            ['Polyspec\Template\Format\FormatResult', 'error'],
         ];
         foreach ($factories as [$class, $method]) {
             $type = (new \ReflectionMethod($class, $method))->getReturnType();

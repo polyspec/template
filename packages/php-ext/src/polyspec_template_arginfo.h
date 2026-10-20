@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6289cfe5a509ff379345f8eac6bcdb0fd9baf3cd */
+ * Stub hash: faaa01914bd8b7c8459273a788175d04c7794c34 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -674,6 +674,44 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Function
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Format_FormatError___construct, 0, 0, 5)
+	ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, line, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, col, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Format_FormatError_toArray arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Format_FormatResult___construct, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, changed, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, error, Polyspec\\Template\\Format\\FormatError, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Format_FormatResult_text, 0, 2, Polyspec\\Template\\Format\\FormatResult, 0)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, changed, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Format_FormatResult_error, 0, 1, Polyspec\\Template\\Format\\FormatResult, 0)
+	ZEND_ARG_OBJ_INFO(0, error, Polyspec\\Template\\Format\\FormatError, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_Expression_join, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, tokens, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Format_Invariant_withoutSpans arginfo_class_Polyspec_Template_Value_HostArgument_of
+
+#define arginfo_class_Polyspec_Template_Format_Invariant_withoutLineIndentation arginfo_class_Polyspec_Template_Value_HostArgument_of
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_Invariant_sameTree, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, left, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Token___construct, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
@@ -942,6 +980,15 @@ ZEND_METHOD(Polyspec_Template_Functions_Dates, format);
 ZEND_METHOD(Polyspec_Template_Functions_Dates, table);
 ZEND_METHOD(Polyspec_Template_Functions_Registry, builtins);
 ZEND_METHOD(Polyspec_Template_Functions_Registry, isBuiltin);
+ZEND_METHOD(Polyspec_Template_Format_FormatError, __construct);
+ZEND_METHOD(Polyspec_Template_Format_FormatError, toArray);
+ZEND_METHOD(Polyspec_Template_Format_FormatResult, __construct);
+ZEND_METHOD(Polyspec_Template_Format_FormatResult, text);
+ZEND_METHOD(Polyspec_Template_Format_FormatResult, error);
+ZEND_METHOD(Polyspec_Template_Format_Expression, join);
+ZEND_METHOD(Polyspec_Template_Format_Invariant, withoutSpans);
+ZEND_METHOD(Polyspec_Template_Format_Invariant, withoutLineIndentation);
+ZEND_METHOD(Polyspec_Template_Format_Invariant, sameTree);
 ZEND_METHOD(Polyspec_Template_Expr_Token, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, error);
@@ -1326,6 +1373,31 @@ static const zend_function_entry class_Polyspec_Template_Functions_Dates_methods
 static const zend_function_entry class_Polyspec_Template_Functions_Registry_methods[] = {
 	ZEND_ME(Polyspec_Template_Functions_Registry, builtins, arginfo_class_Polyspec_Template_Functions_Registry_builtins, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Functions_Registry, isBuiltin, arginfo_class_Polyspec_Template_Functions_Registry_isBuiltin, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_FormatError_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_FormatError, __construct, arginfo_class_Polyspec_Template_Format_FormatError___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Format_FormatError, toArray, arginfo_class_Polyspec_Template_Format_FormatError_toArray, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_FormatResult_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_FormatResult, __construct, arginfo_class_Polyspec_Template_Format_FormatResult___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Format_FormatResult, text, arginfo_class_Polyspec_Template_Format_FormatResult_text, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Format_FormatResult, error, arginfo_class_Polyspec_Template_Format_FormatResult_error, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_Expression_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_Expression, join, arginfo_class_Polyspec_Template_Format_Expression_join, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_Invariant_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_Invariant, withoutSpans, arginfo_class_Polyspec_Template_Format_Invariant_withoutSpans, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Format_Invariant, withoutLineIndentation, arginfo_class_Polyspec_Template_Format_Invariant_withoutLineIndentation, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Format_Invariant, sameTree, arginfo_class_Polyspec_Template_Format_Invariant_sameTree, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -2728,6 +2800,115 @@ static zend_class_entry *register_class_Polyspec_Template_Functions_Registry(voi
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "Registry", class_Polyspec_Template_Functions_Registry_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_FormatError(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "FormatError", class_Polyspec_Template_Format_FormatError_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_reason_default_value;
+	ZVAL_UNDEF(&property_reason_default_value);
+	zend_string *property_reason_name = zend_string_init("reason", sizeof("reason") - 1, 1);
+	zend_declare_typed_property(class_entry, property_reason_name, &property_reason_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_reason_name);
+
+	zval property_code_default_value;
+	ZVAL_UNDEF(&property_code_default_value);
+	zend_string *property_code_name = zend_string_init("code", sizeof("code") - 1, 1);
+	zend_declare_typed_property(class_entry, property_code_name, &property_code_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_code_name);
+
+	zval property_line_default_value;
+	ZVAL_UNDEF(&property_line_default_value);
+	zend_string *property_line_name = zend_string_init("line", sizeof("line") - 1, 1);
+	zend_declare_typed_property(class_entry, property_line_name, &property_line_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_line_name);
+
+	zval property_col_default_value;
+	ZVAL_UNDEF(&property_col_default_value);
+	zend_string *property_col_name = zend_string_init("col", sizeof("col") - 1, 1);
+	zend_declare_typed_property(class_entry, property_col_name, &property_col_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_col_name);
+
+	zval property_message_default_value;
+	ZVAL_UNDEF(&property_message_default_value);
+	zend_string *property_message_name = zend_string_init("message", sizeof("message") - 1, 1);
+	zend_declare_typed_property(class_entry, property_message_name, &property_message_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_message_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_FormatResult(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "FormatResult", class_Polyspec_Template_Format_FormatResult_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_text_default_value;
+	ZVAL_UNDEF(&property_text_default_value);
+	zend_string *property_text_name = zend_string_init("text", sizeof("text") - 1, 1);
+	zend_declare_typed_property(class_entry, property_text_name, &property_text_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_text_name);
+
+	zval property_changed_default_value;
+	ZVAL_UNDEF(&property_changed_default_value);
+	zend_string *property_changed_name = zend_string_init("changed", sizeof("changed") - 1, 1);
+	zend_declare_typed_property(class_entry, property_changed_name, &property_changed_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
+	zend_string_release(property_changed_name);
+
+	zval property_error_default_value;
+	ZVAL_UNDEF(&property_error_default_value);
+	zend_string *property_error_name = zend_string_init("error", sizeof("error") - 1, 1);
+	zend_string *property_error_class_Polyspec_Template_Format_FormatError = zend_string_init("Polyspec\\Template\\Format\\FormatError", sizeof("Polyspec\\Template\\Format\\FormatError")-1, 1);
+	zend_declare_typed_property(class_entry, property_error_name, &property_error_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_error_class_Polyspec_Template_Format_FormatError, 0, MAY_BE_NULL));
+	zend_string_release(property_error_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_Expression(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Expression", class_Polyspec_Template_Format_Expression_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_Invariant(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Invariant", class_Polyspec_Template_Format_Invariant_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
