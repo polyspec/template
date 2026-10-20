@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 331602c67f8402c714684497d42d99f7c32dfef8cd4f1d9c82eb0f637f54d077 -->
+<!-- source-sha256: fdfa511b713693ffea53431564ef01d3037b82b2435954d58107212e9e1d27c1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-14: TypeScript, Python, C source는 같은 코드를 한 곳에만 둔다. TypeScript package entry는 render 전용 entry의 목록을 되풀이하지 않고 `export * from './render.js'`로 내보내며(build된 `dist/index.mjs`는 같은 이름 30개를 내보낸다), Python은 줄 정보와 함께 parse하는 코드를 `engine.py`의 `parse_with_lines`에만 두고, PHP 확장은 실패한 실행의 오류를 `pt_begin_failure`에서 시작하고, render의 출력을 `pt_return_output`에서 돌려주며, identifier를 `pt_identifier_end`에서 찾고, 반복되던 banner 없이 파일을 연다. Red: `make duplication-check`가 이 source에서 clone 7개를 찾았고, green: 0개이다(repository에 남은 clone 1개는 T26.7-2-8이 제거하는 Native class 쌍이다). `packages/ts`의 vitest 파일, unittest 파일 `test_api`, `test_analysis`, `test_exports`, `test_cli`, 다시 build한 확장으로 실행한 `packages/php-ext`의 PHPUnit 파일 13개가 통과한다(T26.7-14).
 
 - T26.7-13: `packages/rust`는 같은 코드를 한 곳에만 둔다. expression parser의 binary 단계는 `parse_binary_level` 하나이고(`or_op`, `and_op`는 다른 연산자 table 옆에 둔다), parser는 `open_frame`으로 block을 열며, `template` 명령은 `parse`와 `tokens`의 입력을 `read_input`에서 읽고, engine은 target의 이름을 `RenderTarget::name`에서, 기본 환경을 `RenderOptions::environment`에서, target의 template를 `resolve_target`에서 얻는다. Red: `make duplication-check`가 `packages/rust`에서 clone 8개를 찾았고, green: 0개이며 cargo test `parser`, `cli`, `bound`, `decode`, `functions`, `expr_fixtures`, `object_calls`, `host_values`, `analyze`, `format`, `value`, `exports`가 통과한다(T26.7-13).
 

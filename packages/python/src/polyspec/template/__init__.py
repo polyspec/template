@@ -14,6 +14,7 @@ from .engine import (
     PreparedRender,
     Program,
     RenderOptions,
+    parse_with_lines,
 )
 from .errors import ERROR_CODES, TemplateError, internal_boundary
 from .formatter import FormatError, FormatOptions, FormatResult, format_template
@@ -133,7 +134,7 @@ def parse(source: "str | bytes", name: str, options: "ParseOptions | None" = Non
     """RT-2: parses one template source without loading other templates."""
     delimiters = _delimiters_of(options.delimiters if options else None)
     return internal_boundary(
-        name, lambda: _parse_with_lines(source, name, delimiters)["ast"]
+        name, lambda: parse_with_lines(source, name, delimiters)["ast"]
     )
 
 
@@ -161,12 +162,3 @@ def analyze_prefix(
     return internal_boundary(name, lambda: analyze_template_prefix(parsed, delimiters))
 
 
-def _parse_with_lines(
-    source: "str | bytes", name: str, delimiters: tuple[str, str]
-) -> dict:
-    parsed = (
-        Source.from_text(name, source)
-        if isinstance(source, str)
-        else Source.from_bytes(name, source)
-    )
-    return {"ast": parse_template(parsed, delimiters), "lines": parsed.lines}

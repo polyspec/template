@@ -7,22 +7,11 @@ import type { ParsedTemplate } from './render/context.js';
 import { internalBoundary } from './errors.js';
 import { Source } from './source.js';
 
-export type { Template, Comment, Node, Expr, Span } from './ast.js';
-export { decodeTemplate, AstDecodeError } from './decode.js';
-export { TemplateError, internalBoundary, type ErrorCode, type ErrorObject } from './errors.js';
-export { NativeObject, SafeString, type Value, type MapValue, type ListValue } from './value/value.js';
-export { bindValue, bindMap, bindData, checkText, BindError } from './value/bind.js';
-export { bind, merge } from './value/bound-operations.js';
-export type { BoundMap } from './value/bound.js';
-export { parseJson, parseJsonBytes } from './value/json.js';
-export { MapLoader, PathError, resolvePath, type Loader, type LoadResult } from './loader.js';
-export type { ArtifactRefresh, EngineOptions, Program, RenderOptions, DefineInput } from './render/engine.js';
-export { Engine } from './render/engine.js';
-export { RuntimeEnvironment } from './render/runtime-environment.js';
-export { Frame, RenderContext, Scope } from './render/context.js';
-export { RuntimeBindings } from './render/runtime-bindings.js';
-export type { Limits, RuntimeServices } from './render/context.js';
-export type { HostFunction, Env, FunctionContext } from './functions/index.js';
+// The exports of the render-only entry (render.ts) are exported here too; this entry adds the parser and the engine with it.
+export * from './render.js';
+export type { Comment } from './ast.js';
+export { PathError } from './loader.js';
+export type { ArtifactRefresh } from './render/engine.js';
 export type { Delimiters } from './parser/scanner.js';
 export type { PrefixAnalysis, SyntaxTag, SyntaxToken } from './parser/parser.js';
 export { Source } from './source.js';

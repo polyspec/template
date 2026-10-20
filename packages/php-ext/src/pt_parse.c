@@ -6,9 +6,7 @@
 #include "pt.h"
 #include "Zend/zend_strtod.h"
 
-/* ----------------------------------------------------------------------------------------------- */
-/* Source                                                                                           */
-/* ----------------------------------------------------------------------------------------------- */
+/* Source */
 
 typedef struct pt_source {
     pt_run *run;
@@ -1015,25 +1013,31 @@ static const char *pt_sigil_after(const pt_source *source, size_t open)
     return NULL;
 }
 
-/* /^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/ on the text from `index` (LEX-5). */
-static bool pt_loop_form(const pt_source *source, size_t index)
+/* The index after the identifier [A-Za-z_][A-Za-z0-9_]* at `index`, or `index` when none starts there. */
+static size_t pt_identifier_end(const pt_source *source, size_t index)
 {
     size_t limit = source->length;
     size_t i = index;
-    while (i < limit && pt_horizontal((unsigned char)source->text[i])) {
-        i++;
-    }
     if (i >= limit || !pt_ident_start((unsigned char)source->text[i])) {
-        return false;
+        return index;
     }
     i++;
     while (i < limit && pt_ident_part((unsigned char)source->text[i])) {
         i++;
     }
-    while (i < limit && pt_horizontal((unsigned char)source->text[i])) {
-        i++;
+    return i;
+}
+
+/* /^[ \t]*[A-Za-z_][A-Za-z0-9_]*[ \t]*=/ on the text from `index` (LEX-5). */
+static bool pt_loop_form(const pt_source *source, size_t index)
+{
+    size_t start = pt_skip_horizontal(source, index);
+    size_t end = pt_identifier_end(source, start);
+    if (end == start) {
+        return false;
     }
-    return i < limit && source->text[i] == '=';
+    size_t i = pt_skip_horizontal(source, end);
+    return i < source->length && source->text[i] == '=';
 }
 
 static bool pt_starts_tag(const pt_source *source, size_t open, char close)
@@ -1647,18 +1651,12 @@ static size_t pt_parse_loop(pt_tparser *parser, size_t start, size_t open, int c
 static bool pt_assign_head(const pt_source *source, size_t index, size_t *name_end, size_t *operator_start, size_t *operator_end)
 {
     size_t limit = source->length;
-    size_t i = index;
-    if (i >= limit || !pt_ident_start((unsigned char)source->text[i])) {
+    size_t end = pt_identifier_end(source, index);
+    if (end == index) {
         return false;
     }
-    i++;
-    while (i < limit && pt_ident_part((unsigned char)source->text[i])) {
-        i++;
-    }
-    *name_end = i;
-    while (i < limit && pt_horizontal((unsigned char)source->text[i])) {
-        i++;
-    }
+    *name_end = end;
+    size_t i = pt_skip_horizontal(source, end);
     if (i >= limit) {
         return false;
     }

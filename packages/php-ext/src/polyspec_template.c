@@ -213,6 +213,20 @@ static bool pt_run_work(pt_work work, void *input)
     return pt_run_finish(&run);
 }
 
+/* Runs the render `work` that writes into `output`, and returns the text; a failed run frees the output and leaves the exception. */
+static void pt_return_output(pt_work work, void *input, smart_str *output, zval *return_value)
+{
+    if (!pt_run_work(work, input)) {
+        smart_str_free(output);
+        RETURN_THROWS();
+    }
+    smart_str_0(output);
+    if (output->s == NULL) {
+        RETURN_EMPTY_STRING();
+    }
+    RETURN_STR(output->s);
+}
+
 static bool pt_run_finish(pt_run *run)
 {
     bool failed = run->error.code != NULL || run->error.exception != NULL;
@@ -707,15 +721,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
 
     smart_str output = {0};
     pt_json_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, define, env, &output};
-    if (!pt_run_work(pt_render_json_into, &input)) {
-        smart_str_free(&output);
-        RETURN_THROWS();
-    }
-    smart_str_0(&output);
-    if (output.s == NULL) {
-        RETURN_EMPTY_STRING();
-    }
-    RETURN_STR(output.s);
+    pt_return_output(pt_render_json_into, &input, &output, return_value);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -951,15 +957,7 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, render)
 
     smart_str output = {0};
     pt_php_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, options, &output};
-    if (!pt_run_work(pt_render_php_into, &input)) {
-        smart_str_free(&output);
-        RETURN_THROWS();
-    }
-    smart_str_0(&output);
-    if (output.s == NULL) {
-        RETURN_EMPTY_STRING();
-    }
-    RETURN_STR(output.s);
+    pt_return_output(pt_render_php_into, &input, &output, return_value);
 }
 
 /* ----------------------------------------------------------------------------------------------- */

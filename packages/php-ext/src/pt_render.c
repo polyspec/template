@@ -10,9 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-/* ----------------------------------------------------------------------------------------------- */
-/* Template names (RT-7, RT-8)                                                                      */
-/* ----------------------------------------------------------------------------------------------- */
+/* Template names (RT-7, RT-8) */
 
 bool pt_resolve_path(pt_arena *arena, pt_s current, pt_s path, pt_s *name)
 {

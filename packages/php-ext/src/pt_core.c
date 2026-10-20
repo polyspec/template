@@ -8,9 +8,7 @@
 #include "Zend/zend_strtod.h"
 #include <math.h>
 
-/* ----------------------------------------------------------------------------------------------- */
-/* Arena                                                                                            */
-/* ----------------------------------------------------------------------------------------------- */
+/* Arena */
 
 struct pt_chunk {
     pt_chunk *next;
@@ -206,13 +204,20 @@ void pt_error_clear(pt_error *error)
     memset(error, 0, sizeof(*error));
 }
 
-ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, const pt_lines *lines, size_t start, size_t end, zend_string *message)
+/* Starts the error of a failed run: the code, the template and the message. */
+static pt_error *pt_begin_failure(pt_run *run, const char *code, pt_s template, zend_string *message)
 {
     pt_error *error = &run->error;
     pt_error_clear(error);
     error->code = code;
     error->template = zend_string_init(template.s, template.n, 0);
     error->message = message;
+    return error;
+}
+
+ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, const pt_lines *lines, size_t start, size_t end, zend_string *message)
+{
+    pt_error *error = pt_begin_failure(run, code, template, message);
     error->offset = (zend_long)start;
     error->end = (zend_long)end;
     if (lines != NULL) {
@@ -223,11 +228,7 @@ ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, cons
 
 ZEND_NORETURN void pt_fail_bare(pt_run *run, const char *code, pt_s template, zend_string *message)
 {
-    pt_error *error = &run->error;
-    pt_error_clear(error);
-    error->code = code;
-    error->template = zend_string_init(template.s, template.n, 0);
-    error->message = message;
+    pt_begin_failure(run, code, template, message);
     longjmp(run->jump, 1);
 }
 
