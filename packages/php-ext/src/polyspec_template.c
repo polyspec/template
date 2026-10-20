@@ -2701,6 +2701,25 @@ static void pt_prepare_into_run(pt_run *run, void *context)
     input->root = pt_prepare_root(run, input->engine, &request, input->ast);
 }
 
+/* The assign of a prepared render bound once to a bound map (RT-61); a bind failure throws the error, located at `name`,
+ * and returns false. */
+static bool pt_bind_assign_once(zend_string *name, zval *assign, zval *result)
+{
+    zend_object *bound_object = pt_bound_create(pt_bound_ce);
+    pt_bound *bound = pt_bound_from(bound_object);
+    pt_bind_error error = {NULL, NULL};
+    if (!pt_bind_map(&bound->arena, assign, &bound->map, &error)) {
+        OBJ_RELEASE(bound_object);
+        zval exception;
+        ZVAL_OBJ(&exception, pt_error_object(error.code, name, 0, 0, 0, 0, error.message));
+        zend_string_release(error.message);
+        zend_throw_exception_object(&exception);
+        return false;
+    }
+    ZVAL_OBJ(result, bound_object);
+    return true;
+}
+
 /* Prepares a render of the program in `program`; the assign is bound once to a bound map, and the entry template is
  * loaded now. */
 static void pt_prepare_into(zval *program, HashTable *target_array, zend_string *target_name, zval *assign, HashTable *options, zval *return_value)
@@ -2715,25 +2734,17 @@ static void pt_prepare_into(zval *program, HashTable *target_array, zend_string 
         ZVAL_UNDEF(&tree);
     }
     pt_engine *engine = pt_engine_of(Z_OBJ_P(program));
-    zend_object *bound_object = pt_bound_create(pt_bound_ce);
-    pt_bound *bound = pt_bound_from(bound_object);
-    pt_bind_error error = {NULL, NULL};
     zval nothing;
     ZVAL_NULL(&nothing);
-    if (!pt_bind_map(&bound->arena, assign != NULL ? assign : &nothing, &bound->map, &error)) {
-        OBJ_RELEASE(bound_object);
-        zval exception;
-        ZVAL_OBJ(&exception, pt_error_object(error.code, name, 0, 0, 0, 0, error.message));
-        zend_string_release(error.message);
+    zval bound_value;
+    if (!pt_bind_assign_once(name, assign != NULL ? assign : &nothing, &bound_value)) {
         if (target_array != NULL) {
             zend_string_release(name);
         }
-        zend_throw_exception_object(&exception);
         RETURN_THROWS();
     }
-    zval prepared_options, bound_value;
+    zval prepared_options;
     pt_prepared_options(options, &prepared_options);
-    ZVAL_OBJ(&bound_value, bound_object);
     pt_prepare_input input = {engine, name, &bound_value, Z_ARRVAL(prepared_options), target_array != NULL ? &tree : NULL, NULL};
     bool prepared = pt_run_work(pt_prepare_into_run, &input);
     if (!prepared) {
@@ -2759,6 +2770,112 @@ static void pt_prepare_into(zval *program, HashTable *target_array, zend_string 
     if (target_array != NULL) {
         zend_string_release(name);
     }
+}
+
+/* The definitions of a registry as the options of a prepared render: an entry whose data is null has no data key (RT-24). */
+static HashTable *pt_registry_defines(HashTable *registry)
+{
+    HashTable *defines = zend_array_dup(registry);
+    zval *entry;
+    ZEND_HASH_FOREACH_VAL(defines, entry) {
+        ZVAL_DEREF(entry);
+        zval *data = Z_TYPE_P(entry) == IS_ARRAY ? zend_hash_str_find_deref(Z_ARRVAL_P(entry), "data", 4) : NULL;
+        if (data != NULL && Z_TYPE_P(data) == IS_NULL) {
+            zval plain;
+            ZVAL_ARR(&plain, zend_array_dup(Z_ARRVAL_P(entry)));
+            zend_hash_str_del(Z_ARRVAL(plain), "data", 4);
+            zval_ptr_dtor(entry);
+            ZVAL_COPY_VALUE(entry, &plain);
+        }
+    } ZEND_HASH_FOREACH_END();
+    return defines;
+}
+
+typedef struct pt_construct_input {
+    pt_prepare_input prepare;
+    zval *lines; /* the line index of the template as a list, or NULL */
+} pt_construct_input;
+
+/* The work of the constructor: the entry template is the AST of the template, checked as a prepare checks it, and it takes
+ * the line index of the template. */
+static void pt_construct_into_run(pt_run *run, void *context)
+{
+    pt_construct_input *input = context;
+    pt_prepare_into_run(run, &input->prepare);
+    zval *lines = input->lines;
+    if (lines == NULL || Z_TYPE_P(lines) != IS_ARRAY || zend_hash_num_elements(Z_ARRVAL_P(lines)) == 0) {
+        return;
+    }
+    pt_template *template = input->prepare.root;
+    pt_s name = {ZSTR_VAL(input->prepare.name), ZSTR_LEN(input->prepare.name)};
+    /* A bad line index leaves the template to the run to release. */
+    run->parsing = template;
+    template->lines.count = zend_hash_num_elements(Z_ARRVAL_P(lines));
+    template->lines.starts = pt_alloc(&template->arena, sizeof(size_t) * template->lines.count);
+    size_t i = 0;
+    zval *value;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(lines), value) {
+        ZVAL_DEREF(value);
+        if (Z_TYPE_P(value) != IS_LONG || Z_LVAL_P(value) < 0) {
+            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init(ZEND_STRL("lines holds an entry that is not a byte offset"), 0));
+        }
+        template->lines.starts[i++] = (size_t)Z_LVAL_P(value);
+    } ZEND_HASH_FOREACH_END();
+    run->parsing = NULL;
+}
+
+/* AstPreparedExecution::__construct(AstProgram $engine, MapValue $rootData, array $registry, array $env, string $targetName,
+ * array $template) (RT-61): the state that prepare gives a prepared execution, from the arguments. */
+ZEND_METHOD(Polyspec_Template_AstPreparedExecution, __construct)
+{
+    zval *engine, *root_data, *registry, *env, *template;
+    zend_string *target_name;
+    ZEND_PARSE_PARAMETERS_START(6, 6)
+        Z_PARAM_OBJECT_OF_CLASS(engine, pt_ast_program_ce)
+        Z_PARAM_OBJECT_OF_CLASS(root_data, pt_map_value_ce)
+        Z_PARAM_ARRAY(registry)
+        Z_PARAM_ARRAY(env)
+        Z_PARAM_STR(target_name)
+        Z_PARAM_ARRAY(template)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_execution *execution = pt_execution_of(Z_OBJ_P(ZEND_THIS));
+    if (execution->name != NULL) {
+        zend_throw_error(NULL, "the prepared execution is constructed already");
+        RETURN_THROWS();
+    }
+    zval *ast = zend_hash_str_find_deref(Z_ARRVAL_P(template), "ast", 3);
+    if (ast == NULL || Z_TYPE_P(ast) != IS_ARRAY) {
+        pt_throw_bare(PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("the template has no AST array", 29, 0));
+        RETURN_THROWS();
+    }
+    zval *lines = zend_hash_str_find_deref(Z_ARRVAL_P(template), "lines", 5);
+
+    zval options;
+    array_init(&options);
+    zval defines;
+    ZVAL_ARR(&defines, pt_registry_defines(Z_ARRVAL_P(registry)));
+    add_assoc_zval_ex(&options, "define", 6, &defines);
+    zval env_value;
+    ZVAL_COPY(&env_value, env);
+    add_assoc_zval_ex(&options, "env", 3, &env_value);
+
+    zval bound_value;
+    if (!pt_bind_assign_once(target_name, root_data, &bound_value)) {
+        zval_ptr_dtor(&options);
+        RETURN_THROWS();
+    }
+    pt_construct_input input = {{pt_engine_of(Z_OBJ_P(engine)), target_name, &bound_value, Z_ARRVAL(options), ast, NULL}, lines};
+    if (!pt_run_work(pt_construct_into_run, &input)) {
+        zval_ptr_dtor(&bound_value);
+        zval_ptr_dtor(&options);
+        RETURN_THROWS();
+    }
+    ZVAL_COPY(&execution->program, engine);
+    ZVAL_COPY_VALUE(&execution->assign, &bound_value);
+    ZVAL_COPY_VALUE(&execution->options, &options);
+    execution->name = zend_string_copy(target_name);
+    execution->root = input.prepare.root;
 }
 
 ZEND_METHOD(Polyspec_Template_AstProgram, prepare)

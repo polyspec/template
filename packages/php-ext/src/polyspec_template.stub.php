@@ -599,6 +599,16 @@ interface PreparedExecution
 /** Prepared AST interpreter execution. */
 final class AstPreparedExecution implements PreparedExecution
 {
+    /** Creates an AST execution from normalized request state. */
+    public function __construct(
+        AstProgram $engine,
+        \Polyspec\Template\Value\MapValue $rootData,
+        array $registry,
+        array $env,
+        string $targetName,
+        array $template,
+    ) {}
+
     /** Renders the prepared template with fresh execution state. */
     public function render(): string {}
 }

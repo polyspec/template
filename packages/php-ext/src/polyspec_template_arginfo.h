@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6b60ca5cbc7fb989de2b5a732baa986fa73b205f */
+ * Stub hash: cd9afefb83c43a77a35a3b747c163df00d9a501e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -300,6 +300,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Polyspec_Template_Engine_render arginfo_class_Polyspec_Template_Program_render
 
 #define arginfo_class_Polyspec_Template_PreparedExecution_render arginfo_class_Polyspec_Template_Render_Context_output
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_AstPreparedExecution___construct, 0, 0, 6)
+	ZEND_ARG_OBJ_INFO(0, engine, Polyspec\\Template\\AstProgram, 0)
+	ZEND_ARG_OBJ_INFO(0, rootData, Polyspec\\Template\\Value\\MapValue, 0)
+	ZEND_ARG_TYPE_INFO(0, registry, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, env, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, targetName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, template, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_AstPreparedExecution_render arginfo_class_Polyspec_Template_Render_Context_output
 
@@ -695,6 +704,7 @@ ZEND_METHOD(Polyspec_Template_PreparedRender, render);
 ZEND_METHOD(Polyspec_Template_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Engine, prepare);
 ZEND_METHOD(Polyspec_Template_Engine, render);
+ZEND_METHOD(Polyspec_Template_AstPreparedExecution, __construct);
 ZEND_METHOD(Polyspec_Template_AstPreparedExecution, render);
 ZEND_METHOD(Polyspec_Template_AstProgram, __construct);
 ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate);
@@ -943,6 +953,7 @@ static const zend_function_entry class_Polyspec_Template_PreparedExecution_metho
 };
 
 static const zend_function_entry class_Polyspec_Template_AstPreparedExecution_methods[] = {
+	ZEND_ME(Polyspec_Template_AstPreparedExecution, __construct, arginfo_class_Polyspec_Template_AstPreparedExecution___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstPreparedExecution, render, arginfo_class_Polyspec_Template_AstPreparedExecution_render, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
