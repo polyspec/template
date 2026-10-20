@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 129bd790f1e906763308a21d6d275d544f59e6a6dbff4598c80a1cc1f35b75b7 -->
+<!-- source-sha256: 4a44b9635de466079754e3102d6801e8f464b1737bcb4c9dc2f45e88bb380194 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -32,3 +32,4 @@
 | T26.7-19 | packages/ts의 AST validator는 make가 만들고 추적하지 않는다 | scripts/generate-ast-validator.mts, the Makefile, .gitignore and the owner and knip declarations | `make build-ts`, `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/decode.test.ts` | [o] |
 | T26.7-20 | kit 복사본은 연결된 kit을 따르고 CHECK_TARGETS는 link-state-check와 bypass-check를 실행한다 | PRINCIPLES.md, PRINCIPLES.ko.md, config/php-lint, Makefile, .github/workflows/ci.yml | `make kit-check` | [o] |
 | T26.7-21 | showcase의 compile된 AST artifact와 generated program은 make가 만들고 추적하지 않는다 | RT-57 and the showcase documents, the Makefile, .gitignore, pages.yml and the removal of scripts/check-artifact-digests.mts | `make typed-generator`, `make typed-generator-check`, `var/tools/bin/node --test tests/scripts/ignored-files.test.mts` | [o] |
+| T26.7-22 | browser 설정 test는 make template-install-browsers를 인식한다 | tests/scripts/suite-parity.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts` | [o] |

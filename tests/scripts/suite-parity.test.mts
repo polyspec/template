@@ -86,7 +86,7 @@ export function browserSetupViolations(text: string) {
     let installed = false;
     for (const step of job.steps) {
       if (step.run === undefined) continue;
-      if (/\bmake (?:-\S+ )*install-browsers\b/.test(step.run)) installed = true;
+      if (/\bmake (?:-\S+ )*(?:template-)?install-browsers\b/.test(step.run)) installed = true;
       for (const match of step.run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
         for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/).filter(target => BROWSER_TARGETS.includes(target))) {
           if (!installed) found.push(`job ${job.name} runs ${target} without make template-install-browsers before it`);
@@ -102,7 +102,7 @@ test('a job that runs a browser target installs the browsers before it', () => {
   const workflow = (runs: string[]) => `name: CI\njobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n${runs.map(run => `      - run: ${run}\n`).join('')}`;
   assert.deepEqual(browserSetupViolations(workflow(['make template-install-browsers', 'make ci-targets TARGETS="template-test-scripts lint-go"'])), []);
   assert.deepEqual(browserSetupViolations(workflow(['make ci-targets TARGETS="template-test-scripts"', 'make template-install-browsers'])), [
-    'job one runs test-scripts without make template-install-browsers before it',
+    'job one runs template-test-scripts without make template-install-browsers before it',
   ]);
 });
 

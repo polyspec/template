@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c6c4be1f098c825a5be9edfbe281fa163255b777b4d5317bb73c95feda8a19a4 -->
+<!-- source-sha256: ad560a8b24aca7bdf134be00ceb22a4172f091540ea58ce75437c4e9dd4957e6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-22: `tests/scripts/suite-parity.test.mts`의 browser 설정 test는 `make template-install-browsers` step을 인식한다(T26.2가 이름을 바꾸기 전의 `install-browsers`만 인식했다). 그래서 `ci.yml`의 `scripts`, `browser`, `editor` job이 통과한다. Red: test가 위반 3건으로 실패했고, green: test 6개 중 6개가 통과한다(T26.7-22).
 
 - T26.7-21: `examples/site/scenarios/*/compiled/`의 compile된 AST artifact와 showcase의 generated program(`examples/showcase/adapters/generated/{typed,php,javascript}/`, `adapters/go/generated/`) 133개 파일은 `make showcase-compile`과 `make typed-generator`가 만들며 더 이상 추적하지 않는다(RT-57, `docs/operations/showcase.md`, `publication.md`). 이를 읽는 target(`showcase-build-check`, `showcase-site-check`, `contract-check`, `generated-lint-check`, `lint-go`, `pages` workflow)은 그 target에 의존하고, `typed-generator-check`는 다시 생성해 비교하며, `make artifact-digest-check`와 그 script, test, owner 항목, 추적을 끊은 파일의 rebuild 항목은 제거했다. Red: `git ls-files`가 생성 파일 133개를 나열했고, green: 파일을 지운 뒤 `make typed-generator`가 graph 5개와 program 30개를 만들고 `make typed-generator-check`가 artifact 30개를 검사한다. `owner-validate`, `rebuild-check`, `layout-check`는 통과한다(T26.7-21).
 
