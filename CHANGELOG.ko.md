@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0cc4439f228754c00fa19b1b2980c6f36569ba70549e62eb1db4426d47b8673a -->
+<!-- source-sha256: 902a6c766120d0d265b27fa6c47369192d0026c4763b812b4760640afad72654 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-6: `config/rebuild.json`은 kit이 repository의 layout으로 찾는 tool source 173개의 class를 선언한다(K286): showcase generator가 만든 commit된 산출물 88개, 생태계 도구(ajv, oxc-parser, esbuild, smol-toml, tsc, go, cargo, composer, npm)를 쓰는 script, 이 repository의 규칙을 검사하는 script, showcase 도구. `scripts/publish-build.mts`에는 재구현 기록 `docs/rebuild/publish-build.md`가 있고(byte가 바뀔 때만 rename으로 build를 게시하는 도구는 모든 platform에 없다), `scripts/python-wheelhouse.mts`는 T26.7-7에서 `pip download --require-hashes`로 `replaced`된다. Red: `make rebuild-check`가 `config/rebuild.json does not exist`로 종료 코드 2를 냈고, green: `every tool that config/rebuild.json selects has its class`를 출력하며 0으로 종료한다(T26.7-6).
 
 - T26.7-3: 문서는 `config/parity.json`의 구현을 있는 그대로 세고 나열한다. README, 안내서, showcase, 명세의 목록은 PHP 확장을 다른 다섯 구현과 함께 적고, 구현을 뜻한 언어 수는 모든 구현이라고 쓰며, compiler backend 목록은 선택한 언어의 backend라고 쓰고, 확장의 한국어 표기 `PHP 확장`을 선언한다. Red: `make parity-declarations-check`가 R10 60건을 보고했고, green: R10은 0건이다(R1 15, R2 56, R9 1, R13 1, R15 10222건은 남으며 T26.7-2, T26.7-4, T26.7-5에 등록한다)(T26.7-3).
 

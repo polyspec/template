@@ -1,0 +1,698 @@
+{
+  "schema": 1,
+  "comment": "The class of each tool of the repository (S1): ecosystem names the tool it uses, replaced the library and its item, record the rebuild record, policy the reason no ecosystem tool applies (S8). kit finds the tool sources by the layout (K286).",
+  "tools": {
+    "examples/showcase/adapters/generated/javascript/compiler-coverage.js": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/javascript/empty-state.js": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/javascript/html-slot.js": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/javascript/react-boundary.js": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/javascript/scope-precedence.js": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php-adapter/DefineEntry.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php-adapter/Environment.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php-adapter/RenderAdapter.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php-adapter/RenderRequest.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php-adapter/RepeatResult.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php-adapter/Scenario.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/ArtifactManifest.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/Assign.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/Definition.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/DefinitionDataCardTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/DefinitionDataLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/DefinitionDataPartialTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/Definitions.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/GeneratedExecution.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/GeneratedProgram.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/GeneratedRuntime.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/GeneratedTemplates.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/InputCardTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/InputLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/InputPartialTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/Page.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/Row.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/compiler-coverage/Slot.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/ArtifactManifest.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/Assign.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/Definition.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/DefinitionDataLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/Definitions.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/GeneratedExecution.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/GeneratedProgram.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/GeneratedRuntime.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/GeneratedTemplates.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/empty-state/InputLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/ArtifactManifest.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/Assign.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/Definition.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/DefinitionDataLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/Definitions.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/GeneratedExecution.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/GeneratedProgram.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/GeneratedRuntime.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/GeneratedTemplates.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/html-slot/InputLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/ArtifactManifest.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/Assign.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/Definition.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/DefinitionDataContentTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/DefinitionDataLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/Definitions.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/GeneratedExecution.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/GeneratedProgram.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/GeneratedRuntime.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/GeneratedTemplates.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/InputContentTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/InputLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/Page.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/react-boundary/Slot.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/ArtifactManifest.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/Assign.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/Definition.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/DefinitionDataContentTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/DefinitionDataLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/Definitions.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/GeneratedExecution.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/GeneratedProgram.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/GeneratedRuntime.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/GeneratedTemplates.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/InputContentTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/InputLayoutTpl.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/php/scope-precedence/Page.php": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/render_adapter.mjs": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/render_adapter.py": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/render_adapter.ts": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/compiler-coverage.ts": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/compiler_coverage.py": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/empty-state.ts": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/empty_state.py": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/html-slot.ts": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/html_slot.py": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/react-boundary.ts": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/react_boundary.py": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/scope-precedence.ts": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/generated/typed/scope_precedence.py": {
+      "kind": "policy",
+      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
+    },
+    "examples/showcase/adapters/javascript.mjs": {
+      "kind": "policy",
+      "reason": "the showcase adapter of JavaScript implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/adapters/php.php": {
+      "kind": "policy",
+      "reason": "the showcase adapter of PHP implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/adapters/php/Adapter.php": {
+      "kind": "policy",
+      "reason": "the showcase adapter of PHP implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/adapters/php/Inputs.php": {
+      "kind": "policy",
+      "reason": "the showcase adapter of PHP implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/adapters/php/Output.php": {
+      "kind": "policy",
+      "reason": "the showcase adapter of PHP implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/adapters/python.py": {
+      "kind": "policy",
+      "reason": "the showcase adapter of Python implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/adapters/typescript.ts": {
+      "kind": "policy",
+      "reason": "the showcase adapter of TypeScript implements the adapter contract of packages/compiler/interface.json (RT-52)"
+    },
+    "examples/showcase/benchmark-modes.mts": {
+      "kind": "policy",
+      "reason": "the mode benchmark of the showcase: warm renders of every AST and generated artifact under one output contract"
+    },
+    "examples/showcase/build-site.mts": {
+      "kind": "policy",
+      "reason": "builds the showcase as static HTML from the committed results; the browser renders no template"
+    },
+    "examples/showcase/build.mts": {
+      "kind": "policy",
+      "reason": "builds and verifies the example site: every implementation renders the same inputs twice and agrees with the expected bytes"
+    },
+    "examples/showcase/compile-generated.mts": {
+      "kind": "ecosystem",
+      "tool": "esbuild compiles the TypeScript backend output into the JavaScript delivery of the showcase"
+    },
+    "examples/showcase/compile.mts": {
+      "kind": "policy",
+      "reason": "compiles each showcase source graph through the product AST compiler of this repository"
+    },
+    "examples/showcase/delivery-digest.mts": {
+      "kind": "policy",
+      "reason": "computes the digest of the delivery compilation that artifact refresh records (RT-57)"
+    },
+    "examples/showcase/json.mts": {
+      "kind": "policy",
+      "reason": "reads the JSON documents of the showcase and fails with the document and the part that is missing instead of a cast (PRINCIPLES.md Standards, no fallback)"
+    },
+    "examples/showcase/php-namespace.mts": {
+      "kind": "policy",
+      "reason": "names the PHP namespace of the generated program of a showcase scenario, as adapters/php.php derives it"
+    },
+    "examples/showcase/python-module.mts": {
+      "kind": "policy",
+      "reason": "names the Python module of the generated program of a showcase scenario, as adapters/python.py imports it"
+    },
+    "packages/language/bin/template-fmt.mjs": {
+      "kind": "ecosystem",
+      "tool": "node runs the built entry of the command template-fmt; the command line is parsed by args.ts of the package"
+    },
+    "packages/language/bin/template-language.mjs": {
+      "kind": "ecosystem",
+      "tool": "node runs the built entry of the conformance command of the formatter (CNF-4)"
+    },
+    "packages/lsp/bin/template-lsp.mjs": {
+      "kind": "ecosystem",
+      "tool": "node runs the built vscode-languageserver entry of the language server (EDT-14)"
+    },
+    "packages/php/bin/template-ext.php": {
+      "kind": "ecosystem",
+      "tool": "symfony/console parses the conformance command line (CNF-4) on the engine of the extension"
+    },
+    "packages/php/bin/template.php": {
+      "kind": "ecosystem",
+      "tool": "symfony/console parses the conformance command line (CNF-4) on the PHP package"
+    },
+    "packages/ts/bin/template.mjs": {
+      "kind": "ecosystem",
+      "tool": "node:util parseArgs parses the conformance command line (CNF-4)"
+    },
+    "scripts/artifact-manifest.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/benchmark-result.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/build-package.mts": {
+      "kind": "ecosystem",
+      "tool": "esbuild and tsc build a package of packages/; the script orders them and publishes the build by a rename"
+    },
+    "scripts/build-php-extension.mts": {
+      "kind": "ecosystem",
+      "tool": "phpize, configure and make of the php-config of PATH build the extension; kit S10 builds it the same way (make build-php-ext, T26.7-2 moves the build to it)"
+    },
+    "scripts/check-artifact-digests.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule RT-57: every committed compiled artifact records the digest of the compiler of the tree; no ecosystem tool knows our artifact manifest"
+    },
+    "scripts/check-ast-artifact.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule RT-57, RT-71: the refresh, integrity and failed-build preservation of the canonical AST artifact of our compiler"
+    },
+    "scripts/check-benchmark-results.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule of the mode benchmark: the committed result holds every language and mode row with identical output hashes"
+    },
+    "scripts/check-benchmark-smoke.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule of the mode benchmark: a short run is a correctness regression, not a speed score"
+    },
+    "scripts/check-clean-release.mts": {
+      "kind": "ecosystem",
+      "tool": "git status --porcelain lists the files that a build in a clean clone leaves untracked"
+    },
+    "scripts/check-compiler-interface-mutations.mts": {
+      "kind": "policy",
+      "reason": "proves that the compiler interface check of this repository fails on each planted drift (a check that cannot fail proves nothing)"
+    },
+    "scripts/check-compiler-interface.mts": {
+      "kind": "ecosystem",
+      "tool": "oxc-parser parses the sources into an ESTree AST, and go test, cargo test, php Reflection and python ast read the other languages; the rule RT-67 is ours"
+    },
+    "scripts/check-compiler-ir.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule of the typed IR: the compiler rejects undeclared symbols and covers every canonical node"
+    },
+    "scripts/check-conformance-type-manifest.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule: every parseable conformance case derives a type manifest in the compiler"
+    },
+    "scripts/check-doc-coverage.mts": {
+      "kind": "ecosystem",
+      "tool": "oxc-parser parses the sources of every package to list the public symbols that a document must name"
+    },
+    "scripts/check-docs-static.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule of the static documentation site: the built VitePress pages link their translations and resolve their links"
+    },
+    "scripts/check-function-contract.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule FUN: the registry of each implementation equals packages/compiler/functions.json"
+    },
+    "scripts/check-generated-arguments.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc, go, cargo and php compile and run the generated programs of the typed argument fixtures"
+    },
+    "scripts/check-generated-artifact.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule RT-57: a generated program records the digests of its source, types and contract"
+    },
+    "scripts/check-generated-bound-data.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc, go, cargo and php compile and run the generated programs of the bound data fixture (VAL-22)"
+    },
+    "scripts/check-generated-lint.mts": {
+      "kind": "ecosystem",
+      "tool": "gofmt, cargo clippy, phpcs, ruff and vulture lint the generated programs as the code of a consumer"
+    },
+    "scripts/check-generated-native-calls.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc, go, cargo and php compile and run the generated programs of the native call fixture (VAL-21)"
+    },
+    "scripts/check-generated-typed-locals.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc and go compile and run the generated programs of the typed locals fixture"
+    },
+    "scripts/check-generated-typed-values.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc, go, cargo and php compile and run the generated programs of the typed values fixture"
+    },
+    "scripts/check-install-workspace.mts": {
+      "kind": "policy",
+      "reason": "proves that the install check removes its workspace, including a read-only Go module cache, and fails with the path of a workspace it cannot remove"
+    },
+    "scripts/check-package-installs.mts": {
+      "kind": "ecosystem",
+      "tool": "npm pack and install, go mod, cargo and composer install the packages of the repository outside the workspace"
+    },
+    "scripts/check-rules.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule CNF-2, CNF-3: the stage of a conformance case is 1, 2 or 3; kit checks its requirements"
+    },
+    "scripts/check-schema-mutations.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv rejects each planted mutation of a schema fixture"
+    },
+    "scripts/check-schema.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv and ajv-formats validate the schemas and the fixtures of contracts/schema"
+    },
+    "scripts/check-showcase-contract.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc, go, cargo, php Reflection and python ast check the declarations of each showcase adapter against the manifest"
+    },
+    "scripts/check-showcase-html.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule of the showcase: the generated page is well formed HTML, holds no script and no unresolved template marker"
+    },
+    "scripts/check-typed-generator.mts": {
+      "kind": "ecosystem",
+      "tool": "tsc, go, cargo, php and python compile each generated artifact in an install project and exercise its Program"
+    },
+    "scripts/compare-text.mts": {
+      "kind": "ecosystem",
+      "tool": "the comparison of strings by UTF-16 code unit that Array.prototype.sort uses without a comparator, named for its callers"
+    },
+    "scripts/compiler-manifest.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/composer-install.mts": {
+      "kind": "ecosystem",
+      "tool": "composer install of composer.lock into the vendor directory of a package"
+    },
+    "scripts/conformance-case-files.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv validates the token and format files of the conformance cases against contracts/schema"
+    },
+    "scripts/conformance-cases.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule: a change under tests/cases runs the conformance of the changed cases only, in every mode of every implementation"
+    },
+    "scripts/editor-fixtures.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule EDT-17: the expected results of the language service for every editor fixture"
+    },
+    "scripts/fixture-documents.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/function-contract.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/generate-ast-validator.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv standalone code generation and esbuild bundle the AST validator of packages/ts"
+    },
+    "scripts/generate-compiler-interface.mts": {
+      "kind": "policy",
+      "reason": "generates the declarations and diagrams of packages/compiler/interface.json, our manifest of the compiler contract (RT-67)"
+    },
+    "scripts/generate-error-codes.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule R7: the error-code list of each implementation is generated from the code tables of docs/spec/errors.md"
+    },
+    "scripts/generate-showcase-contract.mts": {
+      "kind": "policy",
+      "reason": "generates the declarations and diagrams of the showcase adapters from our interface manifest"
+    },
+    "scripts/install-cli.mts": {
+      "kind": "ecosystem",
+      "tool": "npm install --prefix installs the command template-fmt under a declared prefix"
+    },
+    "scripts/install-workspace.mts": {
+      "kind": "ecosystem",
+      "tool": "node:fs mkdtemp creates the temporary directory of an install project, and smol-toml reads the module files"
+    },
+    "scripts/inventory-template-functions.mts": {
+      "kind": "policy",
+      "reason": "polyspec inventory of the function-shaped calls in the template sources of a tree given explicitly"
+    },
+    "scripts/json-document.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv validates a JSON document against the JSON Schema of its type"
+    },
+    "scripts/language-checks.mts": {
+      "kind": "policy",
+      "reason": "PRINCIPLES.md Idempotency, every failure in one run: a check of several languages runs each language to its end and names every language that failed"
+    },
+    "scripts/package-manifests.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/parity-config.mts": {
+      "kind": "policy",
+      "reason": "reads the implementations of config/parity.json with node: modules only, because make reads the Python environment before make install-packages installs ajv (bootstrap order)"
+    },
+    "scripts/php-program.mts": {
+      "kind": "ecosystem",
+      "tool": "composer PSR-4 autoload (vendor/autoload.php) loads the one-class-per-file PHP program that the compiler returns"
+    },
+    "scripts/process-group.mts": {
+      "kind": "ecosystem",
+      "tool": "process.kill and ps stop a process group and wait until no process of it is left"
+    },
+    "scripts/publish-build.mts": {
+      "kind": "record",
+      "record": "docs/rebuild/publish-build.md"
+    },
+    "scripts/python-toolchain.mts": {
+      "kind": "policy",
+      "reason": "polyspec rule (AGENTS, Idempotency, toolchains): no check runs the python3 of PATH, only the interpreter that mise.toml pins"
+    },
+    "scripts/python-venv.mts": {
+      "kind": "ecosystem",
+      "tool": "uv venv: the script names the directory of the environment once for make and the scripts"
+    },
+    "scripts/python-wheelhouse.mts": {
+      "kind": "replaced",
+      "reason": "pip download --require-hashes replaces the download of the pinned build requirements; the item T26.7-7 replaces this script"
+    },
+    "scripts/required.mts": {
+      "kind": "policy",
+      "reason": "PRINCIPLES.md Standards, no fallback: a required value that is missing fails with an error that names it"
+    },
+    "scripts/showcase-documents.mts": {
+      "kind": "ecosystem",
+      "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
+    },
+    "scripts/temporary-workspace.mts": {
+      "kind": "ecosystem",
+      "tool": "node:fs mkdtemp creates a workspace of the system temporary directory, and cargo metadata and go.work give the crate and the module of a workspace"
+    },
+    "scripts/test-progress/step.mts": {
+      "kind": "policy",
+      "reason": "the progress lines that every long step prints with its elapsed time (AGENTS, Required checks); kit test-progress.mts prints them for the runners of tests"
+    },
+    "scripts/toml.mts": {
+      "kind": "ecosystem",
+      "tool": "smol-toml reads the TOML files of the scripts"
+    },
+    "scripts/tools.mts": {
+      "kind": "ecosystem",
+      "tool": "npm links the command of each package into node_modules/.bin; the script names the commands of the installed tools"
+    },
+    "scripts/update-benchmark-docs.mts": {
+      "kind": "policy",
+      "reason": "writes the tables of the benchmark documents from the committed result of the mode benchmark"
+    }
+  }
+}

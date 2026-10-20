@@ -65,6 +65,14 @@
     },
     {
       "paths": [
+        "config/rebuild.json"
+      ],
+      "targets": [
+        "rebuild-check"
+      ]
+    },
+    {
+      "paths": [
         "tests/fixtures/filesystem/**"
       ],
       "targets": [

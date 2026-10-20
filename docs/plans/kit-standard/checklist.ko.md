@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 59594d52abdc8a1a91b4f8c628d8c86788cf7ff879d6960066b9c3498a057e4b -->
+<!-- source-sha256: f75a58d708dda0f9009a1c499a4d4f631f6c8c2c23f1bc2d75998cf63b677285 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -16,3 +16,5 @@
 | T26.7-2 | config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol 또는 binding을 가진다(R1, R2) | The PHP extension registers the classes and functions of packages/php under the same names (S10), and the missing bindings of the units, spec first | `make parity-declarations-check` | [ ] |
 | T26.7-4 | 모든 unit은 각 binding의 test가 이름으로 적은 requirement만 인용하고, 모든 requirement는 인용된다(R13, R15) | The requirements of the units of config/parity.json and the names of the requirements in the tests of every implementation | `make parity-declarations-check` | [ ] |
 | T26.7-5 | Makefile의 언어 목록은 모든 구현을 적는다(R9) | SHOWCASE_LANGS of the Makefile and the showcase adapter of the PHP extension | `make parity-declarations-check` | [ ] |
+| T26.7-6 | repository의 모든 tool source는 config/rebuild.json에 class를 가진다(kit K286) | config/rebuild.json and the rebuild record docs/rebuild/publish-build.md with its Korean twin | `make rebuild-check` | [o] |
+| T26.7-7 | Python package의 build requirement를 scripts/python-wheelhouse.mts 대신 pip download --require-hashes로 내려받는다 | scripts/python-wheelhouse.mts, packages/python/build-requirements.json and the recipes that read var/python/wheelhouse | `make rebuild-check` | [ ] |
