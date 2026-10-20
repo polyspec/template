@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: fe1ff00262167ce39511bff66cf57633d71b7c64caa370c1a7b98e41908205bd -->
+<!-- source-sha256: 5c732bcdf69aaa0c6b995e4600d3402c9c208ec8a58cba24a51e3f77f58a9fc5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-58: kit 복사본은 f7c1f10c의 연결된 kit을 따른다(K354, K394, K386, K348-1, K360-2, K349-2, K390-1, K392-1, K393과 f9eb43dd 이후의 다른 kit 행). `make kit-sync`가 `scripts/kit/kit-bootstrap.mk`를 쓰며, 그 `KIT`는 저장소 옆에 kit checkout이 있으면 그 dist이고(K348-1), `make install`은 모든 설치 단계 뒤에 link한다(K360-2). `make hooks`는 `.git/info/attributes`에 `CHANGELOG.md`와 영어 checklist의 `merge=union`, 그 한국어 twin의 한국어 twin merge driver `kit-twin`을 설정한다(K354). Red: `make kit-check` finding 1개(`scripts/kit/kit-bootstrap.mk`가 kit 복사본과 다르다); green: `make kit-check`가 통과하고, `make link-check`가 kit을 linked로 나열하며, `make hooks-check`와 `make link-state-check`가 통과한다 (T26.7-58).
 
 - T26.7-2-6-1: PHP 확장은 `RuntimeServices`와 `RuntimeEnvironment`를 library와 같은 이름과 signature로 등록한다. `AstProgram`은 `RuntimeServices`를 구현하고 자기 `RuntimeEnvironment`를 `runtime`으로 가지며, render는 그 environment의 함수와 limits를 읽는다. Red: `RuntimeEnvironmentTest.php`의 `run-tests.mjs phpunit` 실패 2개("Polyspec\Template\Render\RuntimeServices is not registered by the extension"), `ExprFixturesTest.php` 오류 56개(`Context::__construct()`에 `AstProgram`이 전달됨), `CompilerInterfaceTest.php` 실패 1개 (T26.7-2-6-1); green: 같은 일곱 파일이 통과한다(RuntimeEnvironmentTest OK (4 tests, 18 assertions); CompilerInterfaceTest OK (2 tests, 56 assertions); ExprFixturesTest OK (73 tests, 239 assertions); ExportsTest OK (18 tests, 27 assertions); AstProgramTest OK (8 tests, 11 assertions); ProgramEngineTest OK (4 tests, 12 assertions); ConformanceTest OK (765 tests, 1020 assertions)), `make lint-php-ext` exit 0, `make parity-declarations-check`는 RuntimeEnvironmentTest에 대해 0줄을 출력한다 (T26.7-2-6-1).
 
