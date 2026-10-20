@@ -539,6 +539,9 @@ void pt_collection_table(INTERNAL_FUNCTION_PARAMETERS);
 void pt_encoding_to_json(INTERNAL_FUNCTION_PARAMETERS);
 void pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAMETERS);
 void pt_dates_table(INTERNAL_FUNCTION_PARAMETERS);
+/* Functions\Registry (pt_groups.c): builtins joins the tables of the groups; isBuiltin reads the table of the renderer. */
+void pt_registry_builtins(INTERNAL_FUNCTION_PARAMETERS);
+void pt_registry_is_builtin(INTERNAL_FUNCTION_PARAMETERS);
 void pt_dates_parse_offset(INTERNAL_FUNCTION_PARAMETERS);
 void pt_dates_days_from_civil(INTERNAL_FUNCTION_PARAMETERS);
 void pt_dates_civil_from_days(INTERNAL_FUNCTION_PARAMETERS);

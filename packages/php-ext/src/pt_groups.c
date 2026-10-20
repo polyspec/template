@@ -221,6 +221,39 @@ void pt_dates_table(INTERNAL_FUNCTION_PARAMETERS)
     pt_group_table(return_value, &pt_dates_group);
 }
 
+/* Adds the table of a group to the array, as array_merge does: a name already there keeps its place and takes the new entry. */
+static void pt_group_merge_table(zval *return_value, const pt_group *group)
+{
+    zval table;
+    pt_group_table(&table, group);
+    zend_hash_merge(Z_ARRVAL_P(return_value), Z_ARRVAL(table), zval_add_ref, 1);
+    zval_ptr_dtor(&table);
+}
+
+/* Registry::builtins: the tables of the groups joined in the order of the library (Encoding, Strings, Collection, Numbers,
+ * Dates). */
+void pt_registry_builtins(INTERNAL_FUNCTION_PARAMETERS)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    array_init(return_value);
+    pt_group_merge_table(return_value, &pt_encoding_group);
+    pt_group_merge_table(return_value, &pt_strings_group);
+    pt_group_merge_table(return_value, &pt_collection_group);
+    pt_group_merge_table(return_value, &pt_numbers_group);
+    pt_group_merge_table(return_value, &pt_dates_group);
+}
+
+/* Registry::isBuiltin: the name is in the table that pt_builtin_find reads, which the renderer calls. */
+void pt_registry_is_builtin(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zend_string *name;
+
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(name)
+    ZEND_PARSE_PARAMETERS_END();
+    RETURN_BOOL(pt_builtin_find(ZSTR_VAL(name), ZSTR_LEN(name)) != NULL);
+}
+
 /* Runs the built-in function of a name on one argument, as a method of a group runs it: a FunctionError is thrown the
  * way the dispatcher throws it, and false then. */
 static bool pt_group_call_one(pt_arena *arena, pt_value input, const char *name, zval *return_value)

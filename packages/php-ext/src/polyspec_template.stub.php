@@ -1210,3 +1210,18 @@ final class Dates implements FunctionGroup
 
     public static function table(): array {}
 }
+
+/**
+ * The built-in functions of the library (docs/spec/functions.md): builtins joins the tables of the groups in the order
+ * of the library, and isBuiltin tells whether a name is a built-in function.
+ */
+final class Registry
+{
+    /**
+     * @return array
+     * @phpstan-return array<string, array{min: int, max: int, call: callable}>
+     */
+    public static function builtins(): array {}
+
+    public static function isBuiltin(string $name): bool {}
+}

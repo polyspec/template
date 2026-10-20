@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f34744043675425ec05ffbdad0aafc38db0999a1a0a93a3151aa5326f39ad326 -->
+<!-- source-sha256: 05efebce29ddf4ef6326711b11b43cfdf8f5eed56ce7d44c42a680614d125e63 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-3-3: 확장은 library의 Functions\Registry(builtins, isBuiltin)를 final class로 등록한다. builtins는 Encoding, Strings, Collection, Numbers, Dates의 table을 library의 순서로 합치고, isBuiltin은 renderer가 호출하는 table(pt_builtin_find)을 읽는다. 이 table은 builtins의 37개 이름과 일치한다. Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/RegistryTest.php` 1 failed, "Registry is not registered by the extension" (1 passed, 1 failed); green: 같은 명령 2 passed, 0 failed; Verification의 FunctionsTest, RuntimeEnvironmentTest, ConformanceTest가 통과하고(5, 4, 768 passed), ExprFixturesTest, ExportsTest, CompilerInterfaceTest, RenderStateTest도 통과한다(73, 18, 2, 8 passed); `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 RegistryTest에 대한 finding을 0개 출력한다 (T26.7-2-3-3).
 
 - T26.7-51-1: 전에는 적지 않았던 program 옵션의 실패 방식을 spec이 적는다 (P33). RT-6: TypeScript, PHP, PHP 확장, Python에서 map이 아닌 `limits`, RT-33이 나열하지 않는 key, 정수가 아닌 값은 ERR-13의 인자 오류로 program 생성에 실패한다 (`limits is not an object`, `limits.<key> is not a limit`, `limits.<key> is not an integer`); Go와 Rust에서는 `Limits` 타입이 RT-33의 제한만 가진다. RT-5: `functions`는 호스트 함수의 map이고 각 항목은 `register`가 추가하듯이 추가되며, map이 아닌 `functions`나 호출할 수 없는 항목은 같은 방식으로 생성에 실패한다 (`functions is not an object`, `functions.<name> is not a function`). RT-4: map이 아닌 `define`이나 `env`는 `AstProgram`의 `prepare`와 `render`에서 `E_DATA_UNSUPPORTED_TYPE`, `define is not an object` 또는 `env is not an object`로 실패한다; 지금 TypeScript와 PHP 확장은 그렇게 하고(Rust와 Go는 타입이 있는 옵션을 받고, Rust의 JSON reader는 같은 메시지를 쓴다), PHP 라이브러리와 Python은 그것을 `E_INTERNAL`로 보고하거나 받아들인다. 구현은 T26.7-51의 행들이 이어서 따른다 (T26.7-51-1).
 

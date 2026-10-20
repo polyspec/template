@@ -141,6 +141,17 @@ ZEND_METHOD(Polyspec_Template_Functions_Dates, table)
     pt_dates_table(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+/* Functions\Registry::builtins and isBuiltin (pt_groups.c). */
+ZEND_METHOD(Polyspec_Template_Functions_Registry, builtins)
+{
+    pt_registry_builtins(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Registry, isBuiltin)
+{
+    pt_registry_is_builtin(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 ZEND_METHOD(Polyspec_Template_Functions_Dates, parseOffset)
 {
     pt_dates_parse_offset(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -2990,6 +3001,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
         register_class_Polyspec_Template_Functions_Encoding(function_group),
         register_class_Polyspec_Template_Functions_Collection(function_group),
         register_class_Polyspec_Template_Functions_Dates(function_group));
+    register_class_Polyspec_Template_Functions_Registry();
     register_class_Polyspec_Template_ErrorCode();
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();

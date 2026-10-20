@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6bc9590f4b46460a9f72f1049c0b843419dcba10 */
+ * Stub hash: 5e8b18b1f743b211feea4856d924c0ffae3e38f0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -536,6 +536,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Functions_Dates_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
 
+#define arginfo_class_Polyspec_Template_Functions_Registry_builtins arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Registry_isBuiltin, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -667,6 +673,8 @@ ZEND_METHOD(Polyspec_Template_Functions_Dates, civilFromDays);
 ZEND_METHOD(Polyspec_Template_Functions_Dates, toUnixSeconds);
 ZEND_METHOD(Polyspec_Template_Functions_Dates, format);
 ZEND_METHOD(Polyspec_Template_Functions_Dates, table);
+ZEND_METHOD(Polyspec_Template_Functions_Registry, builtins);
+ZEND_METHOD(Polyspec_Template_Functions_Registry, isBuiltin);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -992,6 +1000,12 @@ static const zend_function_entry class_Polyspec_Template_Functions_Dates_methods
 	ZEND_ME(Polyspec_Template_Functions_Dates, toUnixSeconds, arginfo_class_Polyspec_Template_Functions_Dates_toUnixSeconds, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Functions_Dates, format, arginfo_class_Polyspec_Template_Functions_Dates_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Functions_Dates, table, arginfo_class_Polyspec_Template_Functions_Dates_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_Registry_methods[] = {
+	ZEND_ME(Polyspec_Template_Functions_Registry, builtins, arginfo_class_Polyspec_Template_Functions_Registry_builtins, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Registry, isBuiltin, arginfo_class_Polyspec_Template_Functions_Registry_isBuiltin, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -2318,6 +2332,21 @@ static zend_class_entry *register_class_Polyspec_Template_Functions_Dates(zend_c
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Functions_FunctionGroup);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_Registry(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "Registry", class_Polyspec_Template_Functions_Registry_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 
 	return class_entry;
 }
