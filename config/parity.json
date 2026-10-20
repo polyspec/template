@@ -508,10 +508,14 @@
     },
     {
       "id": "export-list",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-72"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/smoke.test.ts", "id": "entry points › export the documented API" },
+        { "implementation": "go", "test": "packages/go/exports_test.go", "id": "TestExportedEntryPoints" },
+        { "implementation": "rust", "test": "packages/rust/tests/exports.rs", "id": "the_entry_points_of_the_api_are_public_items" },
+        { "implementation": "php", "test": "packages/php/tests/ExportsTest.php", "id": "testTheStaticEntryPointsExist" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/ExportsTest.php", "id": "testTheExtensionRegistersItsEntryPoints" },
         { "implementation": "python", "test": "packages/python/tests/test_exports.py", "id": "test_every_exported_name_resolves" }
       ]
     },

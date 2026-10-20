@@ -1,4 +1,4 @@
-// Package entry points export the public API.
+// RT-72: the package entry points export the public API.
 import { describe, expect, it } from 'vitest';
 import * as main from '../src/index.js';
 import * as render from '../src/render.js';

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Export tests of the polyspec.template package.
+"""Export tests of the polyspec.template package (RT-72).
 
 The export list names every public function and class that the package module defines, and every name that the
 documents import from polyspec.template is exported.

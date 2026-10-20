@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ba324f143091b0190010b07eedc88ae877edc6060aa77fba27d3fb05f658a7ca -->
+<!-- source-sha256: 30c6c858ed34052df33d88dfa64aec8418dcb8426b8d478142b57a898f088c58 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-34: 중립 규칙 RT-72(package는 API의 공개 진입점을 자기 생태계의 진입 방식으로 노출한다)를 `docs/spec/runtime.md`에 쓰고, unit `export-list`가 이를 인용하며 각 구현의 native test를 bind한다. TypeScript와 Python은 기존 test이고 Go(`exports_test.go`), Rust(`tests/exports.rs`), PHP(`ExportsTest.php`), PHP 확장(`ExportsTest.php`)은 새 test다. Red: `export-list`는 구현 6개 중 2개에만 binding이 있었고 test가 이름으로 적지 않은 requirement 70개를 인용했다(R2 4, R15 138). green: binding 6개 중 6개, 인용 requirement 1개이고 새 test가 통과한다(`go test -run TestExportedEntryPoints`, `cargo test --test exports`, PHPUnit 17개와 1개). R2는 47건, R15는 9338건이다(T26.7-34).
 
 - T26.7-35: npm 명령 `template-fmt`의 test(`packages/language/tests/cli.test.ts`)는 TypeScript language package의 internal test이며 `internal` glob(`ecosystem:`)으로 선언하고, unit `template-fmt`는 제거했다(P32). 이 명령은 TypeScript 생태계에서 formatter의 packaging 형태이고, 포맷 동작은 모든 구현의 FMT requirement unit이 가진다. Red: `make parity-declarations-check`가 R2 56건(`template-fmt` 5건)을 보고했고, green: R2 51건이다(T26.7-35).
 
