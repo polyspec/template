@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 41964b19e8edf794ccc4be430dac7cf28a5cd3bf37a837ff2f980b27a131f7dc -->
+<!-- source-sha256: f8e04e22fbf2c13cb87d2b9c2a1fc17bab4cf2a92adb4a4e0a1d33146f9ba84f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-2-2-1: `packages/php` 밖에서 `MapValue::entries()`를 부르는 모든 PHP 코드는 T26.7-2-2-2가 `entries()`가 돌려주게 한 `[key, value]` 쌍을 읽는다(확장은 generator를 돌려줄 수 없다). compiler의 PHP backend(`packages/compiler/src/backends/php.mts`, 생성 runtime의 루프 세 개), showcase의 PHP adapter(Adapter.php, Inputs.php, Output.php), `scripts/check-package-installs.mts`, `scripts/check-typed-generator.mts`, `tests/runner/conformance-generated-php.mts`의 PHP probe다. Red: `make generated-typed-values-check`가 PHP에서 실패했고(생성 runtime의 "assign.tags.key is not a string"), `typed-generator-compile-check`와 `package-installs-check`는 "Call to a member function entries() on array"로 실패했다; green: 세 check가 다섯 언어 모두에서 통과한다 (T26.7-2-2-2-1).
 
 - T26.7-2-8-7: PHP library의 `BoundMap::bind`, `BoundMap::merge`, `Source::fromBytes`, `TemplateError::at`, `TemplateError::withoutPosition`은 반환 타입에 `self` 대신 자기 class 이름을 적는다. PHP 확장이 그렇게 선언하므로(gen_stub은 `self`를 받지 않는다) `make test-php-ext`는 확장과 library의 선언에서 차이를 찾지 않고 테스트를 실행한다. Red: 새 `ExportsTest::testTheFactoriesNameTheirClassAsTheirReturnType`가 `BoundMap::bind`에서 실패하고, `make test-php-ext CASES='ExtensionClassesTest'`는 `self` 반환 타입 다섯 개에서 멈춘다; green: ExportsTest가 확장 유무와 관계없이 통과하고, `make test-php-ext`가 ExtensionClassesTest를 실행해 2개 통과한다 (T26.7-2-8-7).
 

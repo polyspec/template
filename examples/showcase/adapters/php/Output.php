@@ -48,7 +48,7 @@ final class Output
     public static function requestJson(RenderRequest $request): array
     {
         $define = [];
-        foreach ($request->define->entries() as $id => $entry) {
+        foreach ($request->define->entries() as [$id, $entry]) {
             if (!$entry instanceof DefineEntry) {
                 throw new RuntimeException('invalid define entry');
             }

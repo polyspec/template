@@ -33,7 +33,7 @@ use Polyspec\\Template\\Value\\BindError;
 use Polyspec\\Template\\Value\\Json;
 use Polyspec\\Template\\Value\\MapValue;
 // Definitions are given as PHP arrays, the form that every PHP program accepts (RT-24).
-function plain(mixed $value): mixed { if ($value instanceof MapValue) { $result = []; foreach ($value->entries() as $key => $item) $result[$key] = plain($item); return $result; } return is_array($value) ? array_map('plain', $value) : $value; }
+function plain(mixed $value): mixed { if ($value instanceof MapValue) { $result = []; foreach ($value->entries() as [$key, $item]) $result[$key] = plain($item); return $result; } return is_array($value) ? array_map('plain', $value) : $value; }
 try {
     $assign = $argv[3] === '' ? [] : Json::parse(file_get_contents($argv[3]));
     $define = $argv[4] === '' ? [] : plain(Json::parse(file_get_contents($argv[4])));

@@ -320,7 +320,7 @@ function runtimeMembers(context: BackendContext): CodeDefinition[] {
             throw new InvalidArgumentException($path . ' is not an object');
         }
         $result = new MapValue();
-        foreach ($value->entries() as $key => $item) {
+        foreach ($value->entries() as [$key, $item]) {
             $result->set(
                 (string) self::bindType($key, $type['key'], $path . '.key'),
                 self::bindType($item, $type['value'], $path . '.' . $key),
@@ -357,7 +357,7 @@ function runtimeMembers(context: BackendContext): CodeDefinition[] {
     }
     if ($type['kind'] === 'map') {
         $map = new MapValue();
-        foreach ($value->entries() as $key => $item) {
+        foreach ($value->entries() as [$key, $item]) {
             $map->set($key, self::toValue($item, $type['value']));
         }
 
@@ -481,7 +481,7 @@ function runtimeMembers(context: BackendContext): CodeDefinition[] {
     $result = new MapValue();
     foreach ($items as $item) {
         if ($item['spread']) {
-            foreach ($item['value']->entries() as $key => $value) {
+            foreach ($item['value']->entries() as [$key, $value]) {
                 $result->set($key, $value);
             }
         } else {

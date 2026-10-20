@@ -65,7 +65,7 @@ final class Adapter implements RenderAdapter
     private function prepare(RenderRequest $request): PreparedRender
     {
         $define = [];
-        foreach ($request->define->entries() as $id => $entry) {
+        foreach ($request->define->entries() as [$id, $entry]) {
             if (!$entry instanceof DefineEntry) {
                 throw new RuntimeException('define.' . $id . ' has an invalid entry');
             }

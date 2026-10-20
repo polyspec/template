@@ -110,7 +110,7 @@ final class Inputs
     {
         $object = self::objectValue($value, 'define.json');
         $define = new MapValue();
-        foreach ($object->entries() as $id => $raw) {
+        foreach ($object->entries() as [$id, $raw]) {
             if (is_string($raw)) {
                 $define->set($id, new DefineEntry($raw, null, null));
                 continue;
