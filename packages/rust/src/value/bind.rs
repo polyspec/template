@@ -80,7 +80,8 @@ fn bind_json_at(input: &serde_json::Value, level: usize) -> Result<Value, BindEr
         serde_json::Value::Number(number) => {
             // With arbitrary precision the number keeps its literal text; the nearest double decides (VAL-2).
             let literal = number.to_string();
-            let value: f64 = literal.parse().unwrap_or(f64::INFINITY);
+            // serde_json writes a JSON number literal, which f64 parses; an overflowing literal is infinity, which check_number rejects.
+            let value: f64 = literal.parse().expect("serde_json writes a JSON number literal, which f64 parses");
             check_number(value).map(Value::Number)
         }
         serde_json::Value::String(text) => Ok(Value::text(text.clone())),
@@ -109,7 +110,10 @@ pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
         return Ok(OrderedMap::new());
     }
     match bind_json(input)? {
-        Value::Map(map) => Ok(Rc::try_unwrap(map).unwrap_or_else(|shared| (*shared).clone())),
+        Value::Map(map) => Ok(match Rc::try_unwrap(map) {
+            Ok(map) => map,
+            Err(shared) => (*shared).clone(),
+        }),
         _ => Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "assign is not a map")),
     }
 }
@@ -162,7 +166,12 @@ pub fn value_from_json(input: &serde_json::Value) -> Value {
     match input {
         serde_json::Value::Null => Value::Null,
         serde_json::Value::Bool(value) => Value::Bool(*value),
-        serde_json::Value::Number(number) => Value::Number(number.to_string().parse().unwrap_or(f64::NAN)),
+        serde_json::Value::Number(number) => Value::Number(
+            number
+                .to_string()
+                .parse::<f64>()
+                .expect("serde_json writes a JSON number literal, which f64 parses"),
+        ),
         serde_json::Value::String(text) => Value::text(text.clone()),
         serde_json::Value::Array(items) => Value::list(items.iter().map(value_from_json).collect()),
         serde_json::Value::Object(entries) => {

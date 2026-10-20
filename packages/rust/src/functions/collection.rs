@@ -18,9 +18,13 @@ fn lookup_path(value: &Value, path: &str) -> Value {
                 Some(next) => next,
                 None => return Value::Null,
             },
-            Value::List(list) if is_index(segment) => match list.get(segment.parse::<usize>().unwrap_or(usize::MAX)) {
-                Some(next) => next,
-                None => return Value::Null,
+            Value::List(list) if is_index(segment) => match segment.parse::<usize>() {
+                Ok(index) => match list.get(index) {
+                    Some(next) => next,
+                    None => return Value::Null,
+                },
+                // An index too large for usize is beyond every list, so the lookup is absent as for any missing index.
+                Err(_) => return Value::Null,
             },
             _ => return Value::Null,
         };

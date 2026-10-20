@@ -65,14 +65,22 @@ pub fn case_delimiters(dir: &Path) -> Option<String> {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return None,
         Err(error) => panic!("{}: {error}", path.display()),
     };
-    let options: serde_json::Value = serde_json::from_str(&text).unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+    let options: serde_json::Value = serde_json::from_str(&text)
+        .map_err(|error| format!("{}: {error}", path.display()))
+        .expect("the options file is valid JSON");
     options.get("delimiters").and_then(|value| value.as_str()).map(str::to_string)
 }
 
 fn entries(dir: &Path) -> Vec<PathBuf> {
     std::fs::read_dir(dir)
-        .unwrap_or_else(|error| panic!("{}: {error}", dir.display()))
-        .map(|entry| entry.unwrap_or_else(|error| panic!("{}: {error}", dir.display())).path())
+        .map_err(|error| format!("{}: {error}", dir.display()))
+        .expect("the directory is readable")
+        .map(|entry| {
+            entry
+                .map_err(|error| format!("{}: {error}", dir.display()))
+                .expect("a directory entry is readable")
+                .path()
+        })
         .collect()
 }
 

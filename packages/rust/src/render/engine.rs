@@ -65,16 +65,27 @@ pub struct RenderOptions {
     pub env: Option<Env>,
 }
 
+/// The current time in seconds since the Unix epoch; a clock before the epoch is an error, not zero.
+fn current_time() -> Result<f64, BindError> {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as f64)
+        .map_err(|error| BindError {
+            code: ErrorCode::E_INTERNAL,
+            message: format!("system clock is before the Unix epoch: {error}"),
+        })
+}
+
 impl RenderOptions {
     /// The environment of the render: the given one, or `Z` and the current time.
-    fn environment(&self) -> Env {
-        self.env.clone().unwrap_or_else(|| Env {
-            timezone: "Z".to_string(),
-            now: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_secs() as f64)
-                .unwrap_or(0.0),
-        })
+    fn environment(&self) -> Result<Env, BindError> {
+        match self.env.clone() {
+            Some(env) => Ok(env),
+            None => Ok(Env {
+                timezone: "Z".to_string(),
+                now: current_time()?,
+            }),
+        }
     }
 }
 
@@ -339,7 +350,7 @@ impl AstProgram {
                 Root::Bound(bound) => bound_root(bound),
             };
             let registry = bind_defines(&options.define)?;
-            let env = options.environment();
+            let env = options.environment()?;
             Ok(BoundRequest { root, registry, env })
         })();
         let BoundRequest { root, registry, env } =
@@ -383,7 +394,7 @@ impl AstProgram {
         let bind_failure = |error: BindError| TemplateError::without_position(error.code, name, error.message);
         let assign = bind_values(assign).map_err(bind_failure)?;
         let registry = bind_defines(&options.define).map_err(bind_failure)?;
-        let env = options.environment();
+        let env = options.environment().map_err(bind_failure)?;
         let (target_name, template) = self.resolve_target(target, &registry)?;
         AstPreparedExecution {
             engine: self,
@@ -562,10 +573,7 @@ pub fn env_from_json(value: &serde_json::Value) -> Result<Env, BindError> {
         }
     };
     let now = match object.get("now") {
-        None => std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_secs() as f64)
-            .unwrap_or(0.0),
+        None => current_time()?,
         Some(serde_json::Value::Number(number)) => number.as_f64().unwrap_or(0.0),
         Some(_) => {
             return Err(BindError {

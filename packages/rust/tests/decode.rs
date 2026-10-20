@@ -15,7 +15,9 @@ fn decode_reads_the_ast_of_every_conformance_case() {
         let Ok(text) = std::fs::read_to_string(dir.join("expected.ast.json")) else {
             continue;
         };
-        let decoded = decode_template(&text).unwrap_or_else(|error| panic!("{id}: {error}"));
+        let decoded = decode_template(&text)
+            .map_err(|error| format!("{id}: {error}"))
+            .expect("the template decodes");
         let expected: serde_json::Value = serde_json::from_str(&text).expect("expected.ast.json");
         let actual = serde_json::to_value(&decoded).expect("encode");
         assert!(common::json_equal(&actual, &expected), "{id}: the decoded AST encodes as {actual}");
@@ -73,7 +75,11 @@ fn decode_fails_naming_the_json_pointer_of_the_invalid_node() {
 #[test]
 fn the_embedded_schema_is_the_contract_schema() {
     let root = common::repo_root();
-    let read = |path: &str| std::fs::read(root.join(path)).unwrap_or_else(|error| panic!("{path}: {error}"));
+    let read = |path: &str| {
+        std::fs::read(root.join(path))
+            .map_err(|error| format!("{path}: {error}"))
+            .expect("the file is readable")
+    };
     assert!(
         read("packages/rust/src/ast.schema.json") == read("contracts/schema/ast.schema.json"),
         "packages/rust/src/ast.schema.json differs from contracts/schema/ast.schema.json: copy the contract schema to it"

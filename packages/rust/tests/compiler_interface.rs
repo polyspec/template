@@ -102,8 +102,11 @@ struct Operation {
 /// RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json.
 #[test]
 fn runtime_declarations_match_manifest() {
-    let manifest_path =
-        std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../packages/compiler/interface.json".to_string());
+    let manifest_path = match std::env::var("TEMPLATE_INTERFACE_MANIFEST") {
+        Ok(path) => path,
+        Err(std::env::VarError::NotPresent) => "../../packages/compiler/interface.json".to_string(),
+        Err(error) => panic!("TEMPLATE_INTERFACE_MANIFEST: {error}"),
+    };
     let manifest: Manifest = serde_json::from_str(&fs::read_to_string(manifest_path).unwrap()).unwrap();
     let source = syn::parse_file(&fs::read_to_string("src/render/engine.rs").unwrap()).unwrap();
 
@@ -392,8 +395,11 @@ fn runtime_declarations_match_manifest() {
 /// that it declares for generated programs.
 #[test]
 fn bound_map_declarations_match_manifest() {
-    let manifest_path =
-        std::env::var("TEMPLATE_INTERFACE_MANIFEST").unwrap_or_else(|_| "../../packages/compiler/interface.json".to_string());
+    let manifest_path = match std::env::var("TEMPLATE_INTERFACE_MANIFEST") {
+        Ok(path) => path,
+        Err(std::env::VarError::NotPresent) => "../../packages/compiler/interface.json".to_string(),
+        Err(error) => panic!("TEMPLATE_INTERFACE_MANIFEST: {error}"),
+    };
     let manifest: Manifest = serde_json::from_str(&fs::read_to_string(manifest_path).unwrap()).unwrap();
     let mapping = &manifest.languages.rust.bound_map;
     let source = syn::parse_file(&fs::read_to_string("src/value/bound.rs").unwrap()).unwrap();

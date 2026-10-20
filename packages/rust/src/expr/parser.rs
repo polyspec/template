@@ -472,7 +472,17 @@ impl<'a> ExpressionParser<'a> {
             }
             TokenType::Number => {
                 self.next_token()?;
-                let value: f64 = token.value.parse().unwrap_or(0.0);
+                let value: f64 = match token.value.parse::<f64>() {
+                    Ok(value) => value,
+                    Err(error) => {
+                        return Err(self.lexer.error(
+                            ErrorCode::E_PARSE_INVALID_NUMBER,
+                            token.start,
+                            token.end,
+                            format!("invalid number {}: {error}", token.value),
+                        ));
+                    }
+                };
                 Ok(Expr::Literal {
                     kind: "number".to_string(),
                     value: LiteralValue::Number(value),

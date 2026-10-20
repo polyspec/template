@@ -130,11 +130,10 @@ impl OrderedMap {
     pub fn remove(&mut self, key: &str) -> Option<Value> {
         let position = self.index.remove(key)?;
         let (_, value) = self.entries.remove(position);
-        for (name, index) in self.index.iter_mut() {
+        for index in self.index.values_mut() {
             if *index > position {
                 *index -= 1;
             }
-            let _ = name;
         }
         Some(value)
     }
@@ -253,6 +252,10 @@ impl Value {
     /// Returns the original native object of a native object value when it has the type
     /// `T` (VAL-18). A host function receives a native object argument as `Value::Object` and
     /// recovers its own type with this method.
+    #[allow(
+        clippy::disallowed_methods,
+        reason = "a native object of another type is no T, so the lookup is absent (VAL-18); the error only says which type it is"
+    )]
     pub fn downcast_object<T: TemplateObject>(&self) -> Option<Rc<T>> {
         match self {
             Value::Object(object) => (Rc::clone(object) as Rc<dyn Any>).downcast::<T>().ok(),
@@ -388,7 +391,9 @@ pub fn parse_numeric_string(text: &str) -> Option<f64> {
     if i != bytes.len() {
         return None;
     }
-    let parsed: f64 = trimmed.parse().ok()?;
+    let Ok(parsed) = trimmed.parse::<f64>() else {
+        return None;
+    };
     if parsed.is_finite() { Some(parsed) } else { None }
 }
 

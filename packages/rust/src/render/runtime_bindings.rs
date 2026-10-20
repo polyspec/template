@@ -6,7 +6,7 @@ use crate::escape::escape_html;
 use crate::functions::{FunctionContext, builtins, to_number};
 use crate::render::context::{Frame, RenderContext};
 use crate::value::bind::bind_value;
-use crate::value::{HostError, MAX_DEPTH, Value, compare_values, loose_equals, strict_equals, stringify};
+use crate::value::{HostError, MAX_DEPTH, StringifyError, Value, compare_values, loose_equals, strict_equals, stringify};
 use std::cmp::Ordering;
 
 /// One iterable key and value pair.
@@ -144,7 +144,7 @@ impl RuntimeBindings {
 
     /// Converts one value to text at its source location.
     pub fn stringify(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<String, TemplateError> {
-        stringify(value).map_err(|_| {
+        stringify(value).map_err(|StringifyError| {
             self.error(
                 context,
                 frame,
@@ -298,6 +298,11 @@ impl RuntimeBindings {
                 Ok(Value::Null)
             }
             Value::List(list) => {
+                // An index that does not fit i64 names no element, so it reads as absent like any missing index.
+                #[allow(
+                    clippy::disallowed_methods,
+                    reason = "a text index that does not parse as i64 is beyond every list: absent, which the match below reads as null"
+                )]
                 let position: Option<i64> = match key {
                     Value::Number(number) if number.fract() == 0.0 => Some(*number as i64),
                     other => other

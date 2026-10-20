@@ -70,10 +70,7 @@ fn check_values(text: &str) -> Result<(), (usize, BindError)> {
                     index += 1;
                 }
                 // The token is ASCII, so the slice is valid UTF-8; a malformed token is left to the parser.
-                if let Some(value) = std::str::from_utf8(&bytes[start..=index])
-                    .ok()
-                    .and_then(|literal| literal.parse::<f64>().ok())
-                {
+                if let Ok(Ok(value)) = std::str::from_utf8(&bytes[start..=index]).map(|literal| literal.parse::<f64>()) {
                     check_number(value).map_err(|error| (start, error))?;
                 }
             }
@@ -93,10 +90,14 @@ fn check_string(bytes: &[u8], start: usize) -> Result<usize, BindError> {
         match bytes[index] {
             b'"' => break,
             b'\\' if bytes.get(index + 1) == Some(&b'u') => {
-                let unit = bytes
+                // Not four hex digits is no unit: the escape is then judged by the rest of this check, as before.
+                let unit = match bytes
                     .get(index + 2..index + 6)
-                    .and_then(|hex| std::str::from_utf8(hex).ok())
-                    .and_then(|hex| u16::from_str_radix(hex, 16).ok());
+                    .map(|hex| std::str::from_utf8(hex).map(|hex| u16::from_str_radix(hex, 16)))
+                {
+                    Some(Ok(Ok(unit))) => Some(unit),
+                    _ => None,
+                };
                 match unit {
                     Some(unit) if (0xd800..=0xdbff).contains(&unit) => {
                         if pending_high {

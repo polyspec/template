@@ -124,6 +124,6 @@ pub fn round_number(value: f64, decimals: usize) -> f64 {
     } else {
         format!("{integer}.{fraction}")
     };
-    let result: f64 = text.parse().unwrap_or(0.0);
+    let result: f64 = text.parse().expect("round_decimal writes a decimal literal");
     if negative && result != 0.0 { -result } else { result }
 }

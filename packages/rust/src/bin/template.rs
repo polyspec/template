@@ -109,10 +109,13 @@ fn argument(error: ArgumentError) -> ! {
 
 /// The JSON text of a result or an error; a value that does not serialize ends the command with status 1.
 fn json<T: serde::Serialize>(value: &T) -> String {
-    serde_json::to_string(value).unwrap_or_else(|error| {
-        eprintln!("cannot write JSON: {error}");
-        exit(1)
-    })
+    match serde_json::to_string(value) {
+        Ok(text) => text,
+        Err(error) => {
+            eprintln!("cannot write JSON: {error}");
+            exit(1)
+        }
+    }
 }
 
 /// Writes a result to stdout; a write error ends the command with status 1.
@@ -130,7 +133,10 @@ fn fail(error: TemplateError) -> ! {
 }
 
 fn read_json(root: &Path, path: &str, template: &str) -> serde_json::Value {
-    let bytes = std::fs::read(root.join(path)).unwrap_or_else(|error| usage(&format!("cannot read {path}: {error}")));
+    let bytes = match std::fs::read(root.join(path)) {
+        Ok(bytes) => bytes,
+        Err(error) => usage(&format!("cannot read {path}: {error}")),
+    };
     let text = match std::str::from_utf8(&bytes) {
         Ok(text) => text,
         Err(error) => fail(TemplateError::without_position(
@@ -140,7 +146,10 @@ fn read_json(root: &Path, path: &str, template: &str) -> serde_json::Value {
         )),
     };
     // Syntax, numbers, unpaired surrogates and the nesting depth are data errors (VAL-12, VAL-20).
-    parse_json_text(text).unwrap_or_else(|error| bind_failure(template, error))
+    match parse_json_text(text) {
+        Ok(value) => value,
+        Err(error) => bind_failure(template, error),
+    }
 }
 
 fn bind_failure(template: &str, error: BindError) -> ! {
@@ -150,13 +159,21 @@ fn bind_failure(template: &str, error: BindError) -> ! {
 /// The root directory and the template name of FILE: the name is FILE relative to the root.
 fn locate(file: &str, root: Option<&str>) -> (PathBuf, PathBuf, String) {
     let root = match root {
-        Some(root) => std::fs::canonicalize(root).unwrap_or_else(|_| PathBuf::from(root)),
-        None => std::fs::canonicalize(file)
-            .ok()
-            .and_then(|path| path.parent().map(Path::to_path_buf))
-            .unwrap_or_else(|| PathBuf::from(".")),
+        Some(root) => match std::fs::canonicalize(root) {
+            Ok(path) => path,
+            Err(error) => usage(&format!("cannot resolve --root {root}: {error}")),
+        },
+        None => match std::fs::canonicalize(file) {
+            Ok(path) => path.parent().map(Path::to_path_buf).unwrap_or_else(|| PathBuf::from(".")),
+            // A FILE that cannot be resolved is read from its joined path below, where read_source reports the error.
+            Err(_) => PathBuf::from("."),
+        },
     };
-    let file_path = std::fs::canonicalize(file).unwrap_or_else(|_| root.join(file));
+    // A FILE that cannot be resolved is read from its joined path, where read_source reports the error.
+    let file_path = match std::fs::canonicalize(file) {
+        Ok(path) => path,
+        Err(_) => root.join(file),
+    };
     let relative = match file_path.strip_prefix(&root) {
         Ok(relative) => relative.to_path_buf(),
         Err(_) => usage("FILE is outside of --root"),
@@ -183,11 +200,17 @@ fn read_input(input: Input) -> (Vec<u8>, String, ParseOptions) {
 }
 
 fn read_source(file_path: &Path, file: &str) -> Vec<u8> {
-    std::fs::read(file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")))
+    match std::fs::read(file_path) {
+        Ok(bytes) => bytes,
+        Err(error) => usage(&format!("cannot read {file}: {error}")),
+    }
 }
 
 fn main() {
-    let cli = Cli::try_parse().unwrap_or_else(|error| usage_error(error));
+    let cli = match Cli::try_parse() {
+        Ok(cli) => cli,
+        Err(error) => usage_error(error),
+    };
     match cli.command {
         Command::Format { indent, delimiters, file } => {
             let (_, file_path, name) = locate(&file, None);
@@ -235,14 +258,16 @@ fn main() {
 
 fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<String>, define: Option<String>, env: Option<String>) {
     let engine = Engine::new(
-        AstProgram::new(EngineOptions {
+        match AstProgram::new(EngineOptions {
             loader: Some(Box::new(polyspec_template::FsLoader::new(root))),
             functions: Default::default(),
             limits: None,
             delimiters,
             artifact_refresh: Default::default(),
-        })
-        .unwrap_or_else(|error| argument(error)),
+        }) {
+            Ok(program) => program,
+            Err(error) => argument(error),
+        },
     );
     let assign = match &data {
         Some(path) => read_json(root, path, name),
@@ -250,10 +275,16 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
     };
     let mut render_options = RenderOptions::default();
     if let Some(path) = &define {
-        render_options.define = defines_from_json(&read_json(root, path, name)).unwrap_or_else(|error| bind_failure(name, error));
+        render_options.define = match defines_from_json(&read_json(root, path, name)) {
+            Ok(define) => define,
+            Err(error) => bind_failure(name, error),
+        };
     }
     if let Some(path) = &env {
-        render_options.env = Some(env_from_json(&read_json(root, path, name)).unwrap_or_else(|error| bind_failure(name, error)));
+        render_options.env = Some(match env_from_json(&read_json(root, path, name)) {
+            Ok(env) => env,
+            Err(error) => bind_failure(name, error),
+        });
     }
     match engine.render(RenderTarget::Name(name), &assign, &render_options) {
         Ok(output) => write_stdout(&output),

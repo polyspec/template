@@ -77,7 +77,11 @@ impl MapLoader {
 
     /// Adds a parsed template.
     pub fn set_ast(&mut self, name: &str, ast: Template) {
-        let version = content_hash(serde_json::to_string(&ast).unwrap_or_default().as_bytes());
+        let version = content_hash(
+            serde_json::to_string(&ast)
+                .expect("a parsed template serializes to JSON")
+                .as_bytes(),
+        );
         self.entries.insert(name.to_string(), Loaded::Ast { ast, version });
     }
 }
@@ -191,10 +195,10 @@ impl Loader for FsLoader {
         drop(files);
         let modified = metadata
             .modified()
-            .ok()
-            .and_then(|time| time.duration_since(std::time::UNIX_EPOCH).ok())
-            .map(|d| d.as_nanos())
-            .unwrap_or(0);
+            .map_err(failure)?
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_err(|error| format!("{}: {error}", path.display()))?
+            .as_nanos();
         Ok(Some(Loaded::Source {
             bytes,
             version: format!("{modified}:{}", metadata.len()),

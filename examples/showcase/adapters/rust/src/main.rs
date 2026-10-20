@@ -337,51 +337,58 @@ fn request_json(request: &RenderRequest) -> Value {
     Value::Object(result)
 }
 
+trait OrPanic<T> {
+    fn or_panic(self) -> T;
+}
+
+impl<T, E: std::fmt::Display> OrPanic<T> for Result<T, E> {
+    fn or_panic(self) -> T {
+        match self {
+            Ok(value) => value,
+            Err(error) => panic!("{error}"),
+        }
+    }
+}
+
 fn main() {
     let root = std::env::args().nth(1).unwrap_or_else(|| {
         eprintln!("usage: showcase-adapter-rust SCENARIO_DIR");
         std::process::exit(1);
     });
-    let adapter = Adapter::new(root).unwrap_or_else(|error| panic!("{error}"));
-    let scenario = adapter
-        .load_scenario()
-        .unwrap_or_else(|error| panic!("{error}"));
-    let request = adapter
-        .build_request(&scenario)
-        .unwrap_or_else(|error| panic!("{error}"));
+    let adapter = Adapter::new(root).or_panic();
+    let scenario = adapter.load_scenario().or_panic();
+    let request = adapter.build_request(&scenario).or_panic();
     if let Ok(raw_iterations) = std::env::var("SHOWCASE_BENCH_ITERATIONS") {
-        let iterations: usize = raw_iterations
-            .parse()
-            .ok()
-            .filter(|value| *value > 0)
-            .unwrap_or_else(|| panic!("SHOWCASE_BENCH_ITERATIONS must be a positive integer"));
-        let warmup: usize = std::env::var("SHOWCASE_BENCH_WARMUP")
-            .unwrap_or_else(|_| "0".to_string())
-            .parse()
-            .unwrap_or_else(|_| panic!("SHOWCASE_BENCH_WARMUP must be a non-negative integer"));
+        let iterations: usize = match raw_iterations.parse::<usize>() {
+            Ok(value) if value > 0 => value,
+            Ok(_) => panic!("SHOWCASE_BENCH_ITERATIONS must be a positive integer"),
+            Err(error) => panic!("SHOWCASE_BENCH_ITERATIONS must be a positive integer: {error}"),
+        };
+        let warmup: usize = match std::env::var("SHOWCASE_BENCH_WARMUP") {
+            Ok(raw) => raw
+                .parse::<usize>()
+                .map_err(|error| {
+                    format!("SHOWCASE_BENCH_WARMUP must be a non-negative integer: {error}")
+                })
+                .or_panic(),
+            Err(std::env::VarError::NotPresent) => 0,
+            Err(error) => panic!("SHOWCASE_BENCH_WARMUP: {error}"),
+        };
         for _ in 0..warmup {
-            adapter
-                .render(&request)
-                .unwrap_or_else(|error| panic!("{error}"));
+            adapter.render(&request).or_panic();
         }
         let mut measured = String::new();
         let started = std::time::Instant::now();
         for _ in 0..iterations {
-            measured = adapter
-                .render(&request)
-                .unwrap_or_else(|error| panic!("{error}"));
+            measured = adapter.render(&request).or_panic();
         }
         let render_seconds = started.elapsed().as_secs_f64();
-        let repeated = adapter
-            .render(&request)
-            .unwrap_or_else(|error| panic!("{error}"));
-        let prepared = adapter
-            .prepare(&request)
-            .unwrap_or_else(|error| panic!("{error}"));
+        let repeated = adapter.render(&request).or_panic();
+        let prepared = adapter.prepare(&request).or_panic();
         let mut prepared_output = String::new();
         let prepared_started = std::time::Instant::now();
         for _ in 0..iterations {
-            prepared_output = prepared.render().unwrap_or_else(|error| panic!("{error}"));
+            prepared_output = prepared.render().or_panic();
         }
         let prepared_render_seconds = prepared_started.elapsed().as_secs_f64();
         println!(
@@ -395,19 +402,13 @@ fn main() {
         );
         return;
     }
-    let repeated = adapter
-        .render_twice(&request)
-        .unwrap_or_else(|error| panic!("{error}"));
+    let repeated = adapter.render_twice(&request).or_panic();
     let mut invalid = request.clone();
     invalid.target = "__contract_missing_target__".to_string();
-    let before_failure =
-        serde_json::to_vec(&request_json(&request)).unwrap_or_else(|error| panic!("{error}"));
+    let before_failure = serde_json::to_vec(&request_json(&request)).or_panic();
     let failure_observed = adapter.render(&invalid).is_err();
-    let after_failure =
-        serde_json::to_vec(&request_json(&request)).unwrap_or_else(|error| panic!("{error}"));
-    let recovered = adapter
-        .render(&request)
-        .unwrap_or_else(|error| panic!("{error}"));
+    let after_failure = serde_json::to_vec(&request_json(&request)).or_panic();
+    let recovered = adapter.render(&request).or_panic();
     let output = serde_json::json!({
         "language": "rust",
         "type": "Adapter",

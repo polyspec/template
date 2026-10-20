@@ -31,9 +31,12 @@ pub fn parse_offset(text: &str) -> Option<i64> {
         return None;
     }
     let (hour_text, minute_text) = (text.get(1..3)?, text.get(4..6)?);
-    let hours: i64 = hour_text.parse().ok()?;
-    let minutes: i64 = minute_text.parse().ok()?;
-    if !hour_text.bytes().all(|b| b.is_ascii_digit()) || !minute_text.bytes().all(|b| b.is_ascii_digit()) || hours > 23 || minutes > 59 {
+    if !hour_text.bytes().all(|b| b.is_ascii_digit()) || !minute_text.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    let hours: i64 = hour_text.parse().expect("two ASCII digits parse as i64");
+    let minutes: i64 = minute_text.parse().expect("two ASCII digits parse as i64");
+    if hours > 23 || minutes > 59 {
         return None;
     }
     let sign = if bytes[0] == b'-' { -1 } else { 1 };
@@ -83,7 +86,7 @@ fn parse_date_text(text: &str) -> Option<DateText> {
     let digits = |range: std::ops::Range<usize>| -> Option<i64> {
         let part = text.get(range)?;
         if part.bytes().all(|b| b.is_ascii_digit()) {
-            part.parse().ok()
+            Some(part.parse::<i64>().expect("ASCII digits of at most four places parse as i64"))
         } else {
             None
         }
@@ -102,7 +105,7 @@ fn parse_date_text(text: &str) -> Option<DateText> {
         let time_digits = |range: std::ops::Range<usize>| -> Option<i64> {
             let part = time.get(range)?;
             if part.bytes().all(|b| b.is_ascii_digit()) {
-                part.parse().ok()
+                Some(part.parse::<i64>().expect("ASCII digits of at most four places parse as i64"))
             } else {
                 None
             }

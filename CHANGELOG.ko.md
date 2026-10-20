@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 10f7851fbc10a8965086d0627f06d400e8f764ed0aeac29819d5927449d0f21c -->
+<!-- source-sha256: aaf247e3a50ab679083bc161560641b89746776d5853f8fdd3ab62c75afc9c18 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-57: `packages/rust`와 컴파일러가 showcase용으로 생성하는 Rust가 K334의 clippy 규칙 아래 `make lint-rust`를 통과한다. Rust backend(`packages/compiler/src/backends/rust.mts`)는 타입 없는 `let _ =` 대신 `let _: T = x;`를 쓰고, 시스템 시계에 `unwrap_or(0.0)`를 더 이상 쓰지 않으므로 `make typed-generator`가 만든 파일이 깨끗하게 린트된다. 파싱, 시계, 인덱스의 fallback은 이제 오류를 반환하거나(`E_PARSE_INVALID_NUMBER`; Unix epoch 이전 시계는 `E_INTERNAL`), 명시적 match로 쓰거나, 입력이 실패할 수 없는 곳에서는 `expect`를 쓰거나, 가장 작은 item에 이유를 단 allow를 둔다(`downcast_object`, `runtime_bindings`의 list 인덱스). CLI는 메시지를 그대로 유지하는 match로 종료하고, test helper는 실패한 파일을 이름으로 적는다. Red: `make lint-rust` exit 2, 최소 71개 메시지(타입 없는 `let` 27, `unwrap_or_else` 15, `ok` 14, `unwrap_or` 12, `unwrap_or_default` 1, `map_err(|_|` 2); clippy는 library가 통과한 뒤에야 CLI와 test 대상을 보고하므로 개수는 하한이다. Green: `make lint-rust` exit 0(clippy 두 번 모두 통과); 21개 cargo test 대상(decode, format, expr_fixtures, bound, cli, conformance, compiler_interface, functions, value, parser, loaders, loader_files, load_failures, host_values, object_calls, cases, analyze, delimiters, exports, package_data, page_cache)이 통과하고, `make typed-generator-check`가 artifact 30개로 exit 0 (T26.7-57).
 
 - T26.7-41-2: unit 두 개가 마지막으로 남은 함수 requirement에 모든 구현의 test를 준다. `host-function-rules`는 FUN-43, FUN-44, FUN-45, FUN-47, FUN-48을 인용한다. 등록한 함수가 호출되고 그 문자열 결과는 plain이라 echo가 escape하며, built-in 이름의 등록은 실패하고 같은 이름을 두 번 등록하면 함수가 바뀌며, binding할 수 없는 결과(1e19)는 E_DATA_NUMBER_RANGE로 실패하고, 그 함수가 없는 program은 같은 템플릿을 E_RUNTIME_UNKNOWN_FUNCTION으로 실패한다. `safe-string-text`는 FUN-9를 인용한다. `raw('<b>') == '<b>'`는 true이고, `raw('<b>') + '!'`와 `str(raw('<i>'))`는 plain text다. test는 TypeScript(`engine.test.ts`), Go(`TestHostFunctionRules`, `TestSafeStringIsItsText`), Rust(`host_function_rules`, `a_safe_string_is_its_text`), PHP(`testHostFunctionRules`, `testASafeStringIsItsText`, PHP extension이 binding한다), Python(`test_host_function_rules`, `test_a_safe_string_is_its_text`)에 새로 있다. Red: 9191a30f에서 `make parity-declarations-check`는 R13 7(FUN-9, FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, RT-71); green: R13 1(RT-71), 새 finding 없음. owner test는 통과한다: vitest `engine.test.ts`(11), 두 test의 `go test`(2), `cargo test --test functions`(11), 두 test의 PHPUnit(2), Python `test_object_calls`(12). 확인하지 않음: T26.7-2-6-1과 T26.7-2-8까지 S10 선언 검사(AstProgram과 `Native\Engine`)에서 멈추는 PHP extension 실행. 이 항목은 그때까지 진행 중으로 남는다 (T26.7-41-2).
 

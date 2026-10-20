@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 846d733fb8154bb1ffe69a2fd9fb8dcfe52fd7fe422f89fcc39477b0392525fc -->
+<!-- source-sha256: 53662580c6b362bbad1aeb2e6979db6163d44a17270bef94fe203bf5e62ce798 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -109,4 +109,4 @@
 | T26.7-54 | PHP package의 AST decoder는 AST의 잘못된 property만 보고한다. collect-all mode의 upstream 2.6은 올바른 property를 additionalProperties 아래에 보고하므로, package는 orm이 고정한 opis/json-schema의 fork pin 2.6.0-p1에 의존한다(S4, 모든 repository에 같은 pin) | packages/php/composer.json and composer.lock, the root composer.json and composer.lock where they resolve opis/json-schema, the dependency review, and a test in packages/php/tests/AstDecodeTest.php | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/AstDecodeTest.php` | [o] |
 | T26.7-55 | template은 f9eb43dd의 kit 복사본을 받는다: worktree-setup, worktree link, platform 요구, 설치 순서, link-check sibling, commit-msg hook, 오래된 twin 거부, install-dir link 검사(K348 K385 K384 K360-1 K383 K380 K382 K375) | The copies that make kit-sync writes and the hooks of make hooks | `make kit-check` | [o] |
 | T26.7-56 | packages/go와 showcase의 Go는 kit K334의 규칙으로 make lint-go를 통과한다. 오류를 그럴듯한 값으로 바꾸지 않고, 필요한 사용은 그 이유와 함께 밝힌다 | packages/go, examples/showcase/adapters/go and the Go backend of packages/compiler where it writes the generated Go | `make lint-go` | [o] |
-| T26.7-57 | packages/rust와 compiler가 showcase를 위해 만드는 Rust는 kit K334의 clippy 규칙으로 make lint-rust를 통과한다(오류를 버리는 unwrap_or, unwrap_or_else, ok, 타입 없는 let _ 없음; 필요한 사용은 이유를 가진다) | packages/rust, examples/showcase/adapters/rust and the Rust backend of packages/compiler | `make lint-rust` | [ ] |
+| T26.7-57 | packages/rust와 compiler가 showcase를 위해 만드는 Rust는 kit K334의 clippy 규칙으로 make lint-rust를 통과한다(오류를 버리는 unwrap_or, unwrap_or_else, ok, 타입 없는 let _ 없음; 필요한 사용은 이유를 가진다) | packages/rust, examples/showcase/adapters/rust and the Rust backend of packages/compiler | `make lint-rust` | [o] |

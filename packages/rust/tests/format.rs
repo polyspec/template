@@ -439,7 +439,9 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
     let mut checked = 0;
     for file in templates() {
         let dir = file.parent().expect("case directory");
-        let bytes = fs::read(&file).unwrap_or_else(|error| panic!("{}: {error}", file.display()));
+        let bytes = fs::read(&file)
+            .map_err(|error| format!("{}: {error}", file.display()))
+            .expect("the file is readable");
         let delimiters = case_delimiters(dir);
         let parse_options = ParseOptions {
             delimiters: delimiters.clone(),

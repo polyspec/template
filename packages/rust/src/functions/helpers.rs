@@ -1,7 +1,7 @@
 //! Argument helpers and the error type shared by the function groups.
 
 use crate::error::ErrorCode;
-use crate::value::{Value, parse_numeric_string, stringify};
+use crate::value::{StringifyError, Value, parse_numeric_string, stringify};
 
 /// Environment of a render (FUN-42).
 #[derive(Debug, Clone, PartialEq)]
@@ -86,7 +86,7 @@ pub fn arg_integer(value: &Value) -> Result<i64, FunctionError> {
 
 /// Stringifies an argument; a list or map is E_RUNTIME_STRINGIFY.
 pub fn stringify_arg(value: &Value) -> Result<String, FunctionError> {
-    stringify(value).map_err(|_| FunctionError {
+    stringify(value).map_err(|StringifyError| FunctionError {
         code: ErrorCode::E_RUNTIME_STRINGIFY,
         message: "a list or map cannot be converted to text".to_string(),
     })

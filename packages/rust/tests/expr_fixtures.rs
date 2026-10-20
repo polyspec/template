@@ -83,8 +83,12 @@ fn vector(item: &Vector) -> Result<(), Failed> {
 fn main() {
     let arguments = Arguments::from_args();
     let path = repo_root().join("tests").join("fixtures").join("expr").join("cases.json");
-    let text = std::fs::read_to_string(&path).unwrap_or_else(|error| panic!("{}: {error}", path.display()));
-    let vectors: Vec<Vector> = serde_json::from_str(&text).unwrap_or_else(|error| panic!("{}: {error}", path.display()));
+    let text = std::fs::read_to_string(&path)
+        .map_err(|error| format!("{}: {error}", path.display()))
+        .expect("the fixture file is readable");
+    let vectors: Vec<Vector> = serde_json::from_str(&text)
+        .map_err(|error| format!("{}: {error}", path.display()))
+        .expect("the fixture file is valid JSON");
     assert!(!vectors.is_empty(), "{} holds no vector", path.display());
     let trials = vectors
         .into_iter()
