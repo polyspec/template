@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 64799f3f774a1bff5bb6cc01352154f43568411a083481b4225480b438a989b7 -->
+<!-- source-sha256: 64025efbad8ce15daca05bf9746adbaa0689620a782d9bfe85dbc8f8d255e175 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-11: 모든 하위 행이 끝났으므로(T26.7-2-11-1과 T26.7-2-11-2) 행은 끝났다. Verification은 하위 행의 라이브러리 test(ParserTest, AnalyzeTest)에 `make test-php-ext`를 실행하고, 그 밖의 owner test를 `var/php-ext`의 확장으로 실행하며, 범위 없는 검사 대신 그 test에 binding된 unit(parse-spans delimiters delimiter-argument-error analysis error-object)의 parity 검사를 실행한다. Red: `make item-red BEFORE=ecb396d9`가 첫 하위 행 이전의 main에서 실행했고, 그때 `make test-php-ext`는 test가 라이브러리의 Parser class를 load하므로 exit 2다; green: 모든 명령이 통과한다 (T26.7-2-11).
 
 - T26.7-2-7: 모든 하위 행이 끝났으므로(T26.7-2-7-1부터 T26.7-2-7-3) 행은 끝났다. Verification은 하위 행의 라이브러리 test(FormatterTest, IndentTest, InvariantTest, ExpressionTest)에 `make test-php-ext`를 실행하고, 그 밖의 owner test를 `var/php-ext`의 확장으로 실행하며, 범위 없는 검사 대신 그 test에 binding된 unit(format-delimiters format-unchanged format-indentation format-raw-elements format-expression format-invariant)의 parity 검사를 실행한다. Red: `make item-red BEFORE=62b48de0`가 첫 하위 행 이전의 main에서 실행했고, 그때 `make test-php-ext`는 test가 라이브러리의 Format class를 load하므로 exit 2다; green: 모든 명령이 통과한다 (T26.7-2-7).
 
