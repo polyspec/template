@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 05efebce29ddf4ef6326711b11b43cfdf8f5eed56ce7d44c42a680614d125e63 -->
+<!-- source-sha256: a83bb760f52685d30ebd1de542ba410975af49d5d36da4e8648c14ca61cac2de -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-8-4: PHP 확장은 `Native\Engine`을 등록하지 않는다. stub과 C에는 Native class가 없고, 확장의 모든 class는 library의 class다(S10). Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/ExtensionClassesTest.php` 실패 2, `Polyspec\Template\Native\Engine`; green: 같은 명령 통과 2개 test, `make lint-php-ext` exit 0 (T26.7-2-8-4).
 
 - T26.7-2-3-3: 확장은 library의 Functions\Registry(builtins, isBuiltin)를 final class로 등록한다. builtins는 Encoding, Strings, Collection, Numbers, Dates의 table을 library의 순서로 합치고, isBuiltin은 renderer가 호출하는 table(pt_builtin_find)을 읽는다. 이 table은 builtins의 37개 이름과 일치한다. Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/RegistryTest.php` 1 failed, "Registry is not registered by the extension" (1 passed, 1 failed); green: 같은 명령 2 passed, 0 failed; Verification의 FunctionsTest, RuntimeEnvironmentTest, ConformanceTest가 통과하고(5, 4, 768 passed), ExprFixturesTest, ExportsTest, CompilerInterfaceTest, RenderStateTest도 통과한다(73, 18, 2, 8 passed); `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 RegistryTest에 대한 finding을 0개 출력한다 (T26.7-2-3-3).
 

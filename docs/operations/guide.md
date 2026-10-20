@@ -382,7 +382,7 @@ let data = merge(&shared, &bind(&serde_json::json!({ "items": items }))?);
 let page = engine.render_bound(RenderTarget::Name("page.tpl"), &data, &RenderOptions::default())?;
 ```
 
-The PHP extension provides `Polyspec\Template\Native\BoundMap` with the same operations. A bound map of the PHP package fails in the extension, and a bound map of the extension fails in the PHP package.
+The PHP extension provides `Polyspec\Template\BoundMap` with the same operations. A bound map of the PHP package fails in the extension, and a bound map of the extension fails in the PHP package.
 
 ## Render in a browser
 

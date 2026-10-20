@@ -1,6 +1,5 @@
 /*
- * The PHP classes of the extension: Polyspec\Template\TemplateError and
- * Polyspec\Template\Native\Engine (RT-1 to RT-6, ERR-1). Their signatures are in
+ * The PHP classes of the extension: Polyspec\Template\TemplateError (RT-1 to RT-6, ERR-1). Their signatures are in
  * polyspec_template.stub.php, from which gen_stub.php generates polyspec_template_arginfo.h.
  */
 #ifdef HAVE_CONFIG_H
@@ -26,7 +25,6 @@ zend_class_entry *pt_map_value_ce;
 static zend_class_entry *pt_bind_error_ce;
 static zend_class_entry *pt_ast_decode_error_ce;
 static zend_class_entry *pt_function_error_ce;
-static zend_class_entry *pt_engine_ce;
 
 /* ----------------------------------------------------------------------------------------------- */
 /* TemplateError (ERR-1)                                                                            */
@@ -1242,19 +1240,6 @@ static bool pt_apply_limits(HashTable *values, pt_limits *limits)
     return true;
 }
 
-static bool pt_option_limits(HashTable *options, pt_limits *limits)
-{
-    zval *value = options ? zend_hash_str_find_deref(options, "limits", sizeof("limits") - 1) : NULL;
-    if (value == NULL || Z_TYPE_P(value) == IS_NULL) {
-        return true;
-    }
-    if (Z_TYPE_P(value) != IS_ARRAY) {
-        zend_throw_exception(spl_ce_InvalidArgumentException, "limits is not an array", 0);
-        return false;
-    }
-    return pt_apply_limits(Z_ARRVAL_P(value), limits);
-}
-
 /* The limits before any option: RuntimeEnvironment::DEFAULT_LIMITS (RT-33). */
 static const pt_limits pt_default_limits = {1000000, 32, 16 * 1024 * 1024, 64};
 
@@ -1381,47 +1366,6 @@ static HashTable *pt_engine_get_gc(zend_object *object, zval **table, int *count
     return zend_std_get_properties(object);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, __construct)
-{
-    zend_string *root = NULL;
-    HashTable *options = NULL;
-    ZEND_PARSE_PARAMETERS_START(0, 2)
-        Z_PARAM_OPTIONAL
-        Z_PARAM_STR_OR_NULL(root)
-        Z_PARAM_ARRAY_HT(options)
-    ZEND_PARSE_PARAMETERS_END();
-
-    pt_engine *engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
-    pt_runtime *runtime = pt_engine_runtime(engine);
-    char open, close;
-    pt_limits limits = runtime->limits;
-    if (!pt_option_delimiters(options, &open, &close) || !pt_option_limits(options, &limits)) {
-        RETURN_THROWS();
-    }
-    engine->open = open;
-    engine->close = close;
-    runtime->limits = limits;
-    if (engine->root) {
-        zend_string_release(engine->root);
-        engine->root = NULL;
-    }
-    if (root) {
-        /* RT-10: the real path of the directory, or the path without trailing separators. */
-        char real[MAXPATHLEN];
-        if (VCWD_REALPATH(ZSTR_VAL(root), real)) {
-            engine->root = zend_string_init(real, strlen(real), 0);
-        } else {
-            size_t length = ZSTR_LEN(root);
-            while (length > 0 && ZSTR_VAL(root)[length - 1] == DEFAULT_SLASH) {
-                length--;
-            }
-            engine->root = zend_string_init(ZSTR_VAL(root), length, 0);
-        }
-    }
-    zend_hash_clean(&engine->cache);
-    zend_hash_clean(&engine->files);
-}
-
 typedef struct pt_parse_input {
     zend_string *source, *name;
     char open, close;
@@ -1446,7 +1390,7 @@ static bool pt_parse_source(zend_string *source, zend_string *name, HashTable *o
     return pt_run_work(pt_parse_into, &input);
 }
 
-/* Engine::parse and AstProgram::parse: the template source into its AST. */
+/* AstProgram::parse: the template source into its AST. */
 static void pt_method_parse(INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *source, *name;
@@ -1463,11 +1407,6 @@ static void pt_method_parse(INTERNAL_FUNCTION_PARAMETERS)
         ZVAL_NULL(return_value);
         RETURN_THROWS();
     }
-}
-
-ZEND_METHOD(Polyspec_Template_Native_Engine, parse)
-{
-    pt_method_parse(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 typedef struct pt_analyze_input {
@@ -1513,7 +1452,7 @@ static void pt_analyze_into(pt_run *run, void *context)
     add_assoc_zval_ex(input->result, "tokens", 6, &tokens);
 }
 
-/* Engine::analyze and AstProgram::analyze: the AST, tags and tokens of a template source. */
+/* AstProgram::analyze: the AST, tags and tokens of a template source. */
 static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *source, *name;
@@ -1536,45 +1475,6 @@ static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS)
     }
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, analyze)
-{
-    pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson)
-{
-    zend_string *source, *name;
-    HashTable *options = NULL;
-    ZEND_PARSE_PARAMETERS_START(2, 3)
-        Z_PARAM_STR(source)
-        Z_PARAM_STR(name)
-        Z_PARAM_OPTIONAL
-        Z_PARAM_ARRAY_HT(options)
-    ZEND_PARSE_PARAMETERS_END();
-
-    zval ast;
-    ZVAL_UNDEF(&ast);
-    if (!pt_parse_source(source, name, options, &ast)) {
-        zval_ptr_dtor(&ast);
-        RETURN_THROWS();
-    }
-    smart_str text = {0};
-    zend_result encoded = php_json_encode_ex(&text, &ast, PHP_JSON_UNESCAPED_SLASHES | PHP_JSON_UNESCAPED_UNICODE, INT_MAX);
-    zval_ptr_dtor(&ast);
-    smart_str_0(&text);
-    if (encoded == FAILURE || text.s == NULL) {
-        smart_str_free(&text);
-        zend_string *message = zend_string_init("cannot write the AST as JSON: a number literal is not finite", 61, 0);
-        zend_object *object = pt_error_object(PT_E_INTERNAL, name, 0, 0, 0, 0, message);
-        zend_string_release(message);
-        zval exception;
-        ZVAL_OBJ(&exception, object);
-        zend_throw_exception_object(&exception);
-        RETURN_THROWS();
-    }
-    RETURN_STR(text.s);
-}
-
 /* ----------------------------------------------------------------------------------------------- */
 /* Requests (RT-4, RT-24, RT-25)                                                                    */
 /* ----------------------------------------------------------------------------------------------- */
@@ -1593,162 +1493,6 @@ static HashTable *pt_defines_new(pt_run *run)
     pt_arena_keep(&run->arena, &owner);
     zval_ptr_dtor(&owner);
     return defines;
-}
-
-/* Adds one template definition: an HTML string, or a template path with optional data (RT-24). */
-static void pt_define_add(pt_run *run, pt_s name, HashTable *defines, pt_s id, const pt_value *html, const pt_value *template, bool has_data, pt_map *data, bool data_is_map)
-{
-    pt_define *entry = pt_alloc(&run->arena, sizeof(pt_define));
-    if (html != NULL) {
-        entry->html = true;
-        entry->template = html->u.str;
-    } else if (template != NULL) {
-        pt_s resolved = {NULL, 0};
-        if (!pt_resolve_path(&run->arena, PT_S(""), template->u.str, &resolved)) {
-            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: template path leaves the loader root", id.s));
-        }
-        if (has_data && !data_is_map) {
-            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: data is not a map", id.s));
-        }
-        entry->template = resolved;
-        entry->data = has_data ? data : NULL;
-    } else {
-        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_strpprintf(0, "define %s: entry needs \"template\" or \"html\"", id.s));
-    }
-    zend_hash_str_update_ptr(defines, id.s, id.n, entry);
-}
-
-/* The definitions of JSON text: a map from id to a path or to a map with template, data or html. */
-static HashTable *pt_defines_from_json(pt_run *run, pt_s name, pt_value value)
-{
-    if (value.type != PT_MAP) {
-        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("define is not an object", 23, 0));
-    }
-    HashTable *defines = pt_defines_new(run);
-    const pt_map *map = value.u.map;
-    for (uint32_t i = 0; i < map->used; i++) {
-        if (!map->entries[i].live) {
-            continue;
-        }
-        pt_s id = map->entries[i].key;
-        pt_value input = map->entries[i].value;
-        if (pt_is_string(input)) {
-            pt_define_add(run, name, defines, id, NULL, &input, false, NULL, false);
-            continue;
-        }
-        const pt_value *html = NULL, *template = NULL;
-        pt_value *data = NULL;
-        if (input.type == PT_MAP) {
-            pt_value *found = pt_map_get(input.u.map, "html", 4);
-            html = found && pt_is_string(*found) ? found : NULL;
-            found = pt_map_get(input.u.map, "template", 8);
-            template = found && pt_is_string(*found) ? found : NULL;
-            data = pt_map_get(input.u.map, "data", 4);
-        }
-        pt_map *map_data = NULL;
-        bool is_map = false;
-        if (data != NULL) {
-            if (data->type == PT_MAP) {
-                map_data = data->u.map;
-                is_map = true;
-            } else if (data->type == PT_LIST && data->u.list->count == 0) {
-                map_data = pt_map_new(&run->arena, 0);
-                is_map = true;
-            }
-        }
-        pt_define_add(run, name, defines, id, html, template, data != NULL, map_data, is_map);
-    }
-    return defines;
-}
-
-/* The environment (RT-25): timezone defaults to Z and now to the current time. */
-static void pt_env_from_json(pt_run *run, pt_s name, const pt_value *value, pt_env *env)
-{
-    env->timezone = PT_S("Z");
-    env->now = (double)time(NULL);
-    if (value == NULL || value->type == PT_NULL || value->type == PT_LIST) {
-        return;
-    }
-    if (value->type != PT_MAP) {
-        pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env is not an object", 20, 0));
-    }
-    pt_value *timezone = pt_map_get(value->u.map, "timezone", 8);
-    if (timezone != NULL && timezone->type != PT_NULL) {
-        if (!pt_is_string(*timezone)) {
-            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env.timezone is not a string", 28, 0));
-        }
-        env->timezone = timezone->u.str;
-    }
-    pt_value *now = pt_map_get(value->u.map, "now", 3);
-    if (now != NULL && now->type != PT_NULL) {
-        if (now->type != PT_NUMBER) {
-            pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env.now is not a number", 23, 0));
-        }
-        env->now = now->u.number;
-    }
-}
-
-static pt_value pt_read_json(pt_run *run, pt_s name, zend_string *text)
-{
-    pt_value value = {0};
-    pt_bind_error error = {NULL, NULL};
-    if (!pt_json_parse(&run->arena, ZSTR_VAL(text), ZSTR_LEN(text), &value, &error)) {
-        pt_request_fail(run, name, error.code, error.message);
-    }
-    return value;
-}
-
-typedef struct pt_json_input {
-    pt_engine *engine;
-    zend_string *name, *assign, *define, *env;
-    smart_str *output;
-} pt_json_input;
-
-static void pt_render_json_into(pt_run *run, void *context)
-{
-    pt_json_input *input = context;
-    pt_engine *engine = input->engine;
-    zend_string *name = input->name, *assign = input->assign, *define = input->define, *env = input->env;
-    smart_str *output = input->output;
-    pt_request request;
-    memset(&request, 0, sizeof(request));
-    request.name = pt_strdup(&run->arena, ZSTR_VAL(name), ZSTR_LEN(name));
-    pt_value data = pt_read_json(run, request.name, assign);
-    pt_value definitions = {0}, environment = {0};
-    if (define) {
-        definitions = pt_read_json(run, request.name, define);
-    }
-    if (env) {
-        environment = pt_read_json(run, request.name, env);
-    }
-    if (data.type == PT_MAP) {
-        request.data = data.u.map;
-    } else if (data.type == PT_NULL || (data.type == PT_LIST && data.u.list->count == 0)) {
-        request.data = pt_map_new(&run->arena, 0);
-    } else {
-        pt_request_fail(run, request.name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("assign is not a map", 19, 0));
-    }
-    if (define) {
-        request.defines = pt_defines_from_json(run, request.name, definitions);
-    }
-    pt_env_from_json(run, request.name, env ? &environment : NULL, &request.env);
-    pt_render(run, engine, &request, output);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson)
-{
-    zend_string *name, *assign, *define = NULL, *env = NULL;
-    ZEND_PARSE_PARAMETERS_START(2, 4)
-        Z_PARAM_STR(name)
-        Z_PARAM_STR(assign)
-        Z_PARAM_OPTIONAL
-        Z_PARAM_STR_OR_NULL(define)
-        Z_PARAM_STR_OR_NULL(env)
-    ZEND_PARSE_PARAMETERS_END();
-
-    smart_str output = {0};
-    pt_json_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, define, env, &output};
-    pt_return_output(pt_render_json_into, &input, &output, return_value);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -1790,7 +1534,7 @@ static bool pt_register_function(pt_runtime *runtime, zend_string *name, zval *c
     return true;
 }
 
-/* register of Engine, AstProgram and RuntimeEnvironment: a global function callable under a name, on the runtime
+/* register of AstProgram and RuntimeEnvironment: a global function callable under a name, on the runtime
  * that the method acts on. */
 static void pt_method_register(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS)
 {
@@ -1805,12 +1549,7 @@ static void pt_method_register(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS
     pt_register_function(runtime, name, &fci.function_name);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, register)
-{
-    pt_method_register(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
-}
-
-/* registerClass of Engine, AstProgram and RuntimeEnvironment: a class method callable under Class::method. */
+/* registerClass of AstProgram and RuntimeEnvironment: a class method callable under Class::method. */
 static void pt_method_register_class(pt_runtime *runtime, INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *class_name, *method;
@@ -1831,11 +1570,6 @@ static void pt_method_register_class(pt_runtime *runtime, INTERNAL_FUNCTION_PARA
     ZVAL_COPY(&function, &fci.function_name);
     zend_hash_update(&runtime->classes, key, &function);
     zend_string_release(key);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
-{
-    pt_method_register_class(pt_engine_runtime(pt_engine_of(Z_OBJ_P(ZEND_THIS))), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -1990,23 +1724,6 @@ static void pt_render_php_into(pt_run *run, void *context)
     pt_env_from_php(run, request.name, options ? zend_hash_str_find(options, "env", 3) : NULL, &request.env);
     request.root = input->root;
     pt_render(run, engine, &request, output);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_Engine, render)
-{
-    zend_string *name;
-    zval *assign = NULL;
-    HashTable *options = NULL;
-    ZEND_PARSE_PARAMETERS_START(1, 3)
-        Z_PARAM_STR(name)
-        Z_PARAM_OPTIONAL
-        Z_PARAM_ZVAL(assign)
-        Z_PARAM_ARRAY_HT(options)
-    ZEND_PARSE_PARAMETERS_END();
-
-    smart_str output = {0};
-    pt_php_input input = {pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, assign, options, &output, NULL};
-    pt_return_output(pt_render_php_into, &input, &output, return_value);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -3026,8 +2743,6 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     zend_class_entry *context = register_class_Polyspec_Template_Render_Context();
     pt_render_state_register(runtime_services, frame, scope, context);
 
-    pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
-    pt_engine_ce->create_object = pt_engine_create;
     memcpy(&pt_engine_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     pt_engine_handlers.offset = XtOffsetOf(pt_engine_object, std);
     pt_engine_handlers.free_obj = pt_engine_free;

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-guide -->
-<!-- source-sha256: 9c43eab28dc45e99e6445acea15dc7a1e750dba25fd288ff5fb3360f0491b437 -->
+<!-- source-sha256: 8bea44fe152d43b02cf1319763badd8f631c746f62760a724f7707da6e2efc09 -->
 # 사용법
 
 [English](/operations/guide).
@@ -387,7 +387,7 @@ let data = merge(&shared, &bind(&serde_json::json!({ "items": items }))?);
 let page = engine.render_bound(RenderTarget::Name("page.tpl"), &data, &RenderOptions::default())?;
 ```
 
-PHP extension은 같은 연산을 가진 `Polyspec\Template\Native\BoundMap`을 제공한다. PHP package의 bound map은 extension에서 실패하고, extension의 bound map은 PHP package에서 실패한다.
+PHP extension은 같은 연산을 가진 `Polyspec\Template\BoundMap`을 제공한다. PHP package의 bound map은 extension에서 실패하고, extension의 bound map은 PHP package에서 실패한다.
 
 ## 브라우저에서 렌더
 

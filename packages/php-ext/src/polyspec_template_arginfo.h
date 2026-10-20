@@ -1,48 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5e8b18b1f743b211feea4856d924c0ffae3e38f0 */
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_parse, 0, 2, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_Polyspec_Template_Native_Engine_analyze arginfo_class_Polyspec_Template_Native_Engine_parse
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_parseToJson, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_register, 0, 2, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_registerClass, 0, 3, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, className, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_render, 0, 1, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, assign, IS_MIXED, 0, "[]")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine_renderJson, 0, 2, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, assign, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, define, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, env, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
+ * Stub hash: 48c858e14d4b9079ba7e0ee53e1f849f5169e7b9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -87,13 +44,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeEnvironment
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, hostFunctions, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_register arginfo_class_Polyspec_Template_Native_Engine_register
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_register, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_limits arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
 
 #define arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_hostFunction arginfo_class_Polyspec_Template_Render_RuntimeServices_hostFunction
 
-#define arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_registerClass arginfo_class_Polyspec_Template_Native_Engine_registerClass
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_registerClass, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, className, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Render_RuntimeEnvironment_classFunction arginfo_class_Polyspec_Template_Render_RuntimeServices_classFunction
 
@@ -221,9 +185,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_AstProgr
 	ZEND_ARG_TYPE_INFO(0, json, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_AstProgram_parse arginfo_class_Polyspec_Template_Native_Engine_parse
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_AstProgram_parse, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_AstProgram_analyze arginfo_class_Polyspec_Template_Native_Engine_parse
+#define arginfo_class_Polyspec_Template_AstProgram_analyze arginfo_class_Polyspec_Template_AstProgram_parse
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_AstProgram_register, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -542,14 +510,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Function
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
-ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
-ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
-ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson);
-ZEND_METHOD(Polyspec_Template_Native_Engine, register);
-ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass);
-ZEND_METHOD(Polyspec_Template_Native_Engine, render);
-ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, __construct);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, set);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, load);
@@ -675,18 +635,6 @@ ZEND_METHOD(Polyspec_Template_Functions_Dates, format);
 ZEND_METHOD(Polyspec_Template_Functions_Dates, table);
 ZEND_METHOD(Polyspec_Template_Functions_Registry, builtins);
 ZEND_METHOD(Polyspec_Template_Functions_Registry, isBuiltin);
-
-static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
-	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, parse, arginfo_class_Polyspec_Template_Native_Engine_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, analyze, arginfo_class_Polyspec_Template_Native_Engine_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, parseToJson, arginfo_class_Polyspec_Template_Native_Engine_parseToJson, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, register, arginfo_class_Polyspec_Template_Native_Engine_register, ZEND_ACC_PUBLIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, registerClass, arginfo_class_Polyspec_Template_Native_Engine_registerClass, ZEND_ACC_PUBLIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, render, arginfo_class_Polyspec_Template_Native_Engine_render, ZEND_ACC_PUBLIC)
-	ZEND_ME(Polyspec_Template_Native_Engine, renderJson, arginfo_class_Polyspec_Template_Native_Engine_renderJson, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
 
 static const zend_function_entry class_Polyspec_Template_Loader_LoaderInterface_methods[] = {
 #if (PHP_VERSION_ID >= 80400)
@@ -1008,21 +956,6 @@ static const zend_function_entry class_Polyspec_Template_Functions_Registry_meth
 	ZEND_ME(Polyspec_Template_Functions_Registry, isBuiltin, arginfo_class_Polyspec_Template_Functions_Registry_isBuiltin, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
-
-static zend_class_entry *register_class_Polyspec_Template_Native_Engine(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Native", "Engine", class_Polyspec_Template_Native_Engine_methods);
-#if (PHP_VERSION_ID >= 80400)
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
-#else
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
-#endif
-
-	return class_entry;
-}
 
 static zend_class_entry *register_class_Polyspec_Template_Loader_LoaderInterface(void)
 {
