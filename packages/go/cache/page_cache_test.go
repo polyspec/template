@@ -32,18 +32,34 @@ func TestPageCacheTTL(t *testing.T) {
 	}
 }
 
-func TestPageCacheGetOrSetSkipsRendererOnHit(t *testing.T) {
+// RT-66: GetOrSet returns the cached HTML on a hit without calling render; on a miss it calls render once,
+// stores the HTML with the TTL and returns it.
+func TestPageCacheGetOrSetCallsRenderOnceAndStoresWithTheTTL(t *testing.T) {
 	now := time.Unix(100, 0)
 	cache := NewPageCache(func() time.Time { return now })
+	ttl := 10 * time.Second
 	calls := 0
-	if html, err := cache.GetOrSet("page", nil, func() (string, error) { calls++; return "first", nil }); err != nil || html != "first" {
-		t.Fatalf("first: %q %v", html, err)
-	}
-	if html, err := cache.GetOrSet("page", nil, func() (string, error) { calls++; return "second", nil }); err != nil || html != "first" {
-		t.Fatalf("second: %q %v", html, err)
+	if html, err := cache.GetOrSet("page", &ttl, func() (string, error) { calls++; return "first", nil }); err != nil || html != "first" {
+		t.Fatalf("miss: got %q %v, want \"first\" nil", html, err)
 	}
 	if calls != 1 {
-		t.Fatalf("calls = %d, want 1", calls)
+		t.Fatalf("after miss: calls = %d, want 1", calls)
+	}
+	if html, err := cache.GetOrSet("page", &ttl, func() (string, error) { calls++; return "second", nil }); err != nil || html != "first" {
+		t.Fatalf("hit: got %q %v, want \"first\" nil", html, err)
+	}
+	if calls != 1 {
+		t.Fatalf("after hit: calls = %d, want 1 (a hit must not call render)", calls)
+	}
+	if value, ok := cache.Get("page"); !ok || value != "first" {
+		t.Fatalf("Get after miss: got %q %v, want \"first\" true", value, ok)
+	}
+	now = time.Unix(111, 0)
+	if html, err := cache.GetOrSet("page", &ttl, func() (string, error) { calls++; return "third", nil }); err != nil || html != "third" {
+		t.Fatalf("after TTL: got %q %v, want \"third\" nil", html, err)
+	}
+	if calls != 2 {
+		t.Fatalf("after TTL: calls = %d, want 2 (stored entry should have expired)", calls)
 	}
 }
 

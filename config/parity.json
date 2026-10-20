@@ -510,6 +510,19 @@
       ]
     },
     {
+      "id": "page-cache-get-or-set",
+      "requirements": ["RT-66"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/page-cache.test.ts", "id": "PageCache \u203a calls the renderer once on a miss and stores its HTML with the TTL (RT-66)" },
+        { "implementation": "go", "test": "packages/go/cache/page_cache_test.go", "id": "TestPageCacheGetOrSetCallsRenderOnceAndStoresWithTheTTL" },
+        { "implementation": "rust", "test": "packages/rust/tests/page_cache.rs", "id": "get_or_set_calls_render_once_and_stores_with_the_ttl" },
+        { "implementation": "php", "test": "packages/php/tests/PageCacheTest.php", "id": "testGetOrSetCallsRenderOnceAndStoresWithTheTtl" },
+        { "implementation": "php-ext", "test": "packages/php/tests/PageCacheTest.php", "id": "testGetOrSetCallsRenderOnceAndStoresWithTheTtl" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_get_or_set_calls_render_once_and_stores_with_the_ttl" }
+      ]
+    },
+    {
       "id": "number-to-string",
       "requirements": ["VAL-9", "VAL-10"],
       "kind": "feature",
@@ -721,7 +734,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-33", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-66", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-19", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-33", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-19", "VAL-22", "VAL-23"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },

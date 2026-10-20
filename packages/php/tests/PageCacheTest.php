@@ -25,20 +25,36 @@ final class PageCacheTest extends TestCase
         self::assertSame('null', $cache->get('null'));
     }
 
-    public function testGetOrSetSkipsRendererOnHit(): void
+    /**
+     * RT-66: getOrSet returns the cached HTML on a hit without calling render; on a miss it calls render once,
+     * stores the HTML with the TTL and returns it.
+     */
+    public function testGetOrSetCallsRenderOnceAndStoresWithTheTtl(): void
     {
-        $cache = new PageCache();
+        $now = 100.0;
+        $cache = new PageCache(static function () use (&$now): float {
+            return $now;
+        });
         $calls = 0;
-        self::assertSame('first', $cache->getOrSet('page', null, function () use (&$calls): string {
+        self::assertSame('first', $cache->getOrSet('page', 10.0, function () use (&$calls): string {
             $calls++;
 
             return 'first';
         }));
-        self::assertSame('first', $cache->getOrSet('page', null, function () use (&$calls): string {
+        self::assertSame(1, $calls);
+        self::assertSame('first', $cache->getOrSet('page', 10.0, function () use (&$calls): string {
             $calls++;
 
             return 'second';
         }));
         self::assertSame(1, $calls);
+        self::assertSame('first', $cache->get('page'));
+        $now = 111.0;
+        self::assertSame('third', $cache->getOrSet('page', 10.0, function () use (&$calls): string {
+            $calls++;
+
+            return 'third';
+        }));
+        self::assertSame(2, $calls);
     }
 }

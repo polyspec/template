@@ -15,11 +15,19 @@ describe('PageCache', () => {
     expect(cache.get('null')).toBe('<p>null</p>');
   });
 
-  it('does not call the renderer on a cache hit', () => {
+  // RT-66: getOrSet returns the cached HTML on a hit without calling render; on a miss it calls render once,
+  // stores the HTML with the TTL and returns it.
+  it('calls the renderer once on a miss and stores its HTML with the TTL (RT-66)', () => {
+    let now = 100;
     let calls = 0;
-    const cache = new PageCache(() => 100);
-    expect(cache.getOrSet('page', null, () => { calls++; return 'first'; })).toBe('first');
-    expect(cache.getOrSet('page', null, () => { calls++; return 'second'; })).toBe('first');
+    const cache = new PageCache(() => now);
+    expect(cache.getOrSet('page', 10, () => { calls++; return 'first'; })).toBe('first');
     expect(calls).toBe(1);
+    expect(cache.getOrSet('page', 10, () => { calls++; return 'second'; })).toBe('first');
+    expect(calls).toBe(1);
+    expect(cache.get('page')).toBe('first');
+    now = 111;
+    expect(cache.getOrSet('page', 10, () => { calls++; return 'third'; })).toBe('third');
+    expect(calls).toBe(2);
   });
 });

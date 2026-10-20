@@ -524,6 +524,29 @@ class ValuesAndErrors(unittest.TestCase):
         self.assertEqual(cache.get("zero"), "z")
         self.assertEqual(cache.get("null"), "n")
 
+    def test_get_or_set_calls_render_once_and_stores_with_the_ttl(self):
+        # RT-66: get_or_set returns the cached HTML on a hit without calling render; on a miss it calls render once,
+        # stores the HTML with the TTL and returns it.
+        clock = {"now": 100.0}
+        cache = PageCache(now=lambda: clock["now"])
+        calls = []
+
+        def render_as(html):
+            def render():
+                calls.append(html)
+                return html
+
+            return render
+
+        self.assertEqual(cache.get_or_set("page", 10, render_as("first")), "first")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(cache.get_or_set("page", 10, render_as("second")), "first")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(cache.get("page"), "first")
+        clock["now"] = 111.0
+        self.assertEqual(cache.get_or_set("page", 10, render_as("third")), "third")
+        self.assertEqual(len(calls), 2)
+
 
 def _shout(program):
     from polyspec.template import MapLoader

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 64025efbad8ce15daca05bf9746adbaa0689620a782d9bfe85dbc8f8d255e175 -->
+<!-- source-sha256: 3854786f824cc9323256285a516df58a0212ca842395b3bf1674afe8f95d105c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-9: RT-66을 새 unit `page-cache-get-or-set`이 인용하고, 모든 구현의 그 test가 규칙 전체를 검사한다: miss는 render를 한 번 호출해 그 HTML을 반환하고, hit는 render를 호출하지 않고 캐시 HTML을 반환하며, 항목은 저장되고(`get`이 반환한다), 10초가 지나면 다음 `getOrSet`이 render를 다시 호출하므로 TTL과 함께 저장된다. TypeScript, Go, Rust, PHP의 hit test가 이 test로 커지고, 없는 key를 채우기만 하던 Python은 이 test를 새로 얻으며, PHP 확장은 PHP test를 binding한다. concurrent-bound-map은 RT-66을 더 이상 인용하지 않는다. Red: 새 test가 있는 상태에서 unit이 생기기 전에 `make item-red`가 `make parity-declarations-check UNITS="page-cache-get-or-set"` exit 2를 기록했다. Green: unit의 검사가 통과하고, test가 통과하며(vitest `page-cache.test.ts` 2, TestPageCache의 `go test` 3, `cargo test --test page_cache` 2, PHPUnit과 PHP 확장의 PageCacheTest 2, Python `test_api.py` 45), `make parity-declarations-check`는 go와 python의 concurrent-bound-map에 대한 RT-66의 R15 2건이 줄고 새 finding은 없다 (T26.7-32-9).
 
 - T26.7-2-11: 모든 하위 행이 끝났으므로(T26.7-2-11-1과 T26.7-2-11-2) 행은 끝났다. Verification은 하위 행의 라이브러리 test(ParserTest, AnalyzeTest)에 `make test-php-ext`를 실행하고, 그 밖의 owner test를 `var/php-ext`의 확장으로 실행하며, 범위 없는 검사 대신 그 test에 binding된 unit(parse-spans delimiters delimiter-argument-error analysis error-object)의 parity 검사를 실행한다. Red: `make item-red BEFORE=ecb396d9`가 첫 하위 행 이전의 main에서 실행했고, 그때 `make test-php-ext`는 test가 라이브러리의 Parser class를 load하므로 exit 2다; green: 모든 명령이 통과한다 (T26.7-2-11).
 
