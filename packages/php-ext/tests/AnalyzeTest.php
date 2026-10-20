@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * The native syntax analysis: the accepted tags with their kinds and body ranges and the EDT-8 tokens, equal to those
@@ -199,7 +199,7 @@ final class AnalyzeTest extends TestCase
                 Engine::analyze($source, 'input.tpl', $options);
                 $this->fail('the native analysis accepts a source that the package rejects: ' . $error->errorCode);
             } catch (TemplateError $native) {
-                $this->assertSame($error->errorCode, $native->getErrorCode());
+                $this->assertSame($error->errorCode, $native->errorCode);
             }
 
             return;

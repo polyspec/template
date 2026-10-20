@@ -7,7 +7,7 @@ namespace Polyspec\Template\Native\Tests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * Host argument form (VAL-21) and native object equality (EXP-39) with the shared fixture of
@@ -83,7 +83,7 @@ final class HostValuesTest extends TestCase
                 self::render($target);
                 $this->fail("{$target} did not fail");
             } catch (TemplateError $error) {
-                $this->assertSame($code, $error->getErrorCode(), $target);
+                $this->assertSame($code, $error->errorCode, $target);
             }
         }
     }

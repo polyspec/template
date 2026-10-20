@@ -6,7 +6,7 @@ namespace Polyspec\Template\Native\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * The built-in functions of the extension, as the PHP package tests them (FUN-37 to FUN-40): `date` formats unix
@@ -60,7 +60,7 @@ final class FunctionsTest extends TestCase
                 $engine->render('date.tpl', ['t' => $text, 'f' => 'Y'], ['env' => ['timezone' => 'Z', 'now' => 0]]);
                 self::fail("{$text} is accepted");
             } catch (TemplateError $error) {
-                self::assertSame('E_RUNTIME_TYPE', $error->getErrorCode(), $text);
+                self::assertSame('E_RUNTIME_TYPE', $error->errorCode, $text);
             }
         }
     }

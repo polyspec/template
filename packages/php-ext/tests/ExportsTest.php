@@ -13,12 +13,13 @@ final class ExportsTest extends TestCase
 {
     public function testTheExtensionRegistersItsEntryPoints(): void
     {
-        foreach (['Engine', 'BoundMap', 'TemplateError'] as $name) {
+        foreach (['Engine', 'BoundMap'] as $name) {
             $this->assertTrue(
                 class_exists('Polyspec\Template\Native\\' . $name),
                 $name . ' is not registered by the extension',
             );
         }
+        $this->assertTrue(class_exists('Polyspec\Template\TemplateError'));
         $this->assertTrue(method_exists('Polyspec\Template\Native\Engine', 'parse'));
         $this->assertTrue(method_exists('Polyspec\Template\Native\BoundMap', 'bind'));
         $this->assertTrue(method_exists('Polyspec\Template\Native\BoundMap', 'merge'));

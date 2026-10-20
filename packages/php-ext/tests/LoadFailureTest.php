@@ -6,7 +6,7 @@ namespace Polyspec\Template\Native\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * Loader failures (RT-10, ERR-6) and JSON text that is not one document (VAL-12).
@@ -20,7 +20,7 @@ final class LoadFailureTest extends TestCase
         try {
             $render();
         } catch (TemplateError $error) {
-            return $error->getErrorCode();
+            return $error->errorCode;
         }
 
         return 'OK';

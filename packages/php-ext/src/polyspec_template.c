@@ -1,5 +1,5 @@
 /*
- * The PHP classes of the extension: Polyspec\Template\Native\TemplateError and
+ * The PHP classes of the extension: Polyspec\Template\TemplateError and
  * Polyspec\Template\Native\Engine (RT-1 to RT-6, ERR-1). Their signatures are in
  * polyspec_template.stub.php, from which gen_stub.php generates polyspec_template_arginfo.h.
  */
@@ -20,14 +20,6 @@
 
 #include <limits.h>
 
-ZEND_BEGIN_MODULE_GLOBALS(polyspec_template)
-    /* The fields of the live TemplateError objects of the request, by object handle. */
-    HashTable *errors;
-ZEND_END_MODULE_GLOBALS(polyspec_template)
-
-ZEND_DECLARE_MODULE_GLOBALS(polyspec_template)
-#define PT_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(polyspec_template, v)
-
 zend_class_entry *pt_error_ce;
 static zend_class_entry *pt_engine_ce;
 
@@ -35,49 +27,17 @@ static zend_class_entry *pt_engine_ce;
 /* TemplateError (ERR-1)                                                                            */
 /* ----------------------------------------------------------------------------------------------- */
 
-/* The error object is an exception, which PHP allocates itself, so its fields are kept beside it. */
-typedef struct pt_error_fields {
-    zend_string *code;
-    zend_string *template;
-    zend_long line, col, offset, end;
-} pt_error_fields;
-
-static zend_object_handlers pt_error_handlers;
-static zend_object *(*pt_exception_create)(zend_class_entry *class_type);
-
-static void pt_error_fields_dtor(zval *value)
+/* Writes the fields of an error into the object; the readonly properties are initialized once, from the scope of
+ * the class. */
+static void pt_error_fill(zend_object *object, zend_string *code, zend_string *template, zend_long line, zend_long col, zend_long offset, zend_long end, zend_string *message)
 {
-    pt_error_fields *fields = Z_PTR_P(value);
-    zend_string_release(fields->code);
-    zend_string_release(fields->template);
-    efree(fields);
-}
-
-static zend_object *pt_error_create(zend_class_entry *class_type)
-{
-    zend_object *object = pt_exception_create(class_type);
-    object->handlers = &pt_error_handlers;
-    return object;
-}
-
-static void pt_error_free(zend_object *object)
-{
-    HashTable *errors = PT_G(errors);
-    if (errors) {
-        zend_hash_index_del(errors, object->handle);
-        if (zend_hash_num_elements(errors) == 0) {
-            zend_hash_destroy(errors);
-            FREE_HASHTABLE(errors);
-            PT_G(errors) = NULL;
-        }
-    }
-    zend_object_std_dtor(object);
-}
-
-static pt_error_fields *pt_error_fields_of(zend_object *object)
-{
-    HashTable *errors = PT_G(errors);
-    return errors ? zend_hash_index_find_ptr(errors, object->handle) : NULL;
+    zend_update_property_str(pt_error_ce, object, ZEND_STRL("errorCode"), code);
+    zend_update_property_str(pt_error_ce, object, ZEND_STRL("template"), template);
+    zend_update_property_long(pt_error_ce, object, ZEND_STRL("errorLine"), line);
+    zend_update_property_long(pt_error_ce, object, ZEND_STRL("errorCol"), col);
+    zend_update_property_long(pt_error_ce, object, ZEND_STRL("offset"), offset);
+    zend_update_property_long(pt_error_ce, object, ZEND_STRL("end"), end);
+    zend_update_property_str(zend_ce_exception, object, ZEND_STRL("message"), message);
 }
 
 /* Creates a TemplateError object with the fields of an error. */
@@ -85,25 +45,101 @@ static zend_object *pt_error_object(const char *code, zend_string *template, zen
 {
     zval exception;
     object_init_ex(&exception, pt_error_ce);
-    zend_object *object = Z_OBJ(exception);
-    /* No constructor runs, so the message that getMessage() reads is written directly. */
-    zval text;
-    ZVAL_STR_COPY(&text, message);
-    zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_MESSAGE), &text);
-    zval_ptr_dtor(&text);
-    pt_error_fields *fields = emalloc(sizeof(pt_error_fields));
-    fields->code = zend_string_init(code, strlen(code), 0);
-    fields->template = zend_string_copy(template);
-    fields->line = line;
-    fields->col = col;
-    fields->offset = offset;
-    fields->end = end;
-    if (PT_G(errors) == NULL) {
-        ALLOC_HASHTABLE(PT_G(errors));
-        zend_hash_init(PT_G(errors), 8, NULL, pt_error_fields_dtor, 0);
+    zend_string *name = zend_string_init(code, strlen(code), 0);
+    pt_error_fill(Z_OBJ(exception), name, template, line, col, offset, end, message);
+    zend_string_release(name);
+    return Z_OBJ(exception);
+}
+
+ZEND_METHOD(Polyspec_Template_TemplateError, __construct)
+{
+    zend_string *code, *template, *message;
+    zend_long line, col, offset, end;
+    ZEND_PARSE_PARAMETERS_START(7, 7)
+        Z_PARAM_STR(code)
+        Z_PARAM_STR(template)
+        Z_PARAM_LONG(line)
+        Z_PARAM_LONG(col)
+        Z_PARAM_LONG(offset)
+        Z_PARAM_LONG(end)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_error_fill(Z_OBJ_P(ZEND_THIS), code, template, line, col, offset, end, message);
+}
+
+/* Returns the 1-based line and column of a byte offset in a line index (the offsets at which the lines start). */
+static void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend_long *col)
+{
+    zend_long low = 0, high = (zend_long)zend_hash_num_elements(lines) - 1;
+    while (low < high) {
+        zend_long mid = (low + high + 1) / 2;
+        zval *start = zend_hash_index_find(lines, (zend_ulong)mid);
+        if (start != NULL && zval_get_long(start) <= offset) {
+            low = mid;
+        } else {
+            high = mid - 1;
+        }
     }
-    zend_hash_index_update_ptr(PT_G(errors), object->handle, fields);
-    return object;
+    zval *start = zend_hash_index_find(lines, (zend_ulong)low);
+    *line = low + 1;
+    *col = offset - (start != NULL ? zval_get_long(start) : 0) + 1;
+}
+
+ZEND_METHOD(Polyspec_Template_TemplateError, at)
+{
+    zend_string *code, *template, *message;
+    HashTable *lines;
+    zend_long start, end;
+    ZEND_PARSE_PARAMETERS_START(6, 6)
+        Z_PARAM_STR(code)
+        Z_PARAM_STR(template)
+        Z_PARAM_ARRAY_HT_OR_NULL(lines)
+        Z_PARAM_LONG(start)
+        Z_PARAM_LONG(end)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_long line = 0, col = 0;
+    if (lines != NULL) {
+        pt_error_position(lines, start, &line, &col);
+    }
+    object_init_ex(return_value, pt_error_ce);
+    pt_error_fill(Z_OBJ_P(return_value), code, template, line, col, start, end, message);
+}
+
+ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition)
+{
+    zend_string *code, *template, *message;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_STR(code)
+        Z_PARAM_STR(template)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    object_init_ex(return_value, pt_error_ce);
+    pt_error_fill(Z_OBJ_P(return_value), code, template, 0, 0, 0, 0, message);
+}
+
+ZEND_METHOD(Polyspec_Template_TemplateError, toArray)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zend_object *object = Z_OBJ_P(ZEND_THIS);
+    zval rv;
+    array_init_size(return_value, 7);
+#define PT_ERROR_FIELD(key, name)                                                                 \
+    do {                                                                                          \
+        zval *value = zend_read_property(pt_error_ce, object, ZEND_STRL(name), 1, &rv);           \
+        Z_TRY_ADDREF_P(value);                                                                    \
+        add_assoc_zval_ex(return_value, ZEND_STRL(key), value);                                   \
+    } while (0)
+    PT_ERROR_FIELD("code", "errorCode");
+    PT_ERROR_FIELD("template", "template");
+    PT_ERROR_FIELD("line", "errorLine");
+    PT_ERROR_FIELD("col", "errorCol");
+    PT_ERROR_FIELD("offset", "offset");
+    PT_ERROR_FIELD("end", "end");
+#undef PT_ERROR_FIELD
+    zval *message = zend_read_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_MESSAGE), 1, &rv);
+    Z_TRY_ADDREF_P(message);
+    add_assoc_zval_ex(return_value, ZEND_STRL("message"), message);
 }
 
 /* Throws the error of a run, or the native TemplateError of host code that passes unchanged. */
@@ -120,65 +156,6 @@ static void pt_throw(pt_error *error)
     zval exception;
     ZVAL_OBJ(&exception, object);
     zend_throw_exception_object(&exception);
-}
-
-#define PT_ERROR_FIELDS()                                                     \
-    ZEND_PARSE_PARAMETERS_NONE();                                             \
-    pt_error_fields *fields = pt_error_fields_of(Z_OBJ_P(ZEND_THIS));         \
-    if (fields == NULL) {                                                     \
-        zend_throw_error(NULL, "The TemplateError object has no error fields"); \
-        RETURN_THROWS();                                                      \
-    }
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, getErrorCode)
-{
-    PT_ERROR_FIELDS();
-    RETURN_STR_COPY(fields->code);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, getTemplate)
-{
-    PT_ERROR_FIELDS();
-    RETURN_STR_COPY(fields->template);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, getErrorLine)
-{
-    PT_ERROR_FIELDS();
-    RETURN_LONG(fields->line);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, getErrorCol)
-{
-    PT_ERROR_FIELDS();
-    RETURN_LONG(fields->col);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, getOffset)
-{
-    PT_ERROR_FIELDS();
-    RETURN_LONG(fields->offset);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, getEnd)
-{
-    PT_ERROR_FIELDS();
-    RETURN_LONG(fields->end);
-}
-
-ZEND_METHOD(Polyspec_Template_Native_TemplateError, toArray)
-{
-    PT_ERROR_FIELDS();
-    zval rv;
-    zval *message = zend_read_property_ex(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZSTR_KNOWN(ZEND_STR_MESSAGE), 1, &rv);
-    array_init_size(return_value, 7);
-    add_assoc_str_ex(return_value, "code", 4, zend_string_copy(fields->code));
-    add_assoc_str_ex(return_value, "template", 8, zend_string_copy(fields->template));
-    add_assoc_long_ex(return_value, "line", 4, fields->line);
-    add_assoc_long_ex(return_value, "col", 3, fields->col);
-    add_assoc_long_ex(return_value, "offset", 6, fields->offset);
-    add_assoc_long_ex(return_value, "end", 3, fields->end);
-    add_assoc_str_ex(return_value, "message", 7, zval_get_string(message));
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -1300,22 +1277,9 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge)
 /* Module                                                                                           */
 /* ----------------------------------------------------------------------------------------------- */
 
-static PHP_GINIT_FUNCTION(polyspec_template)
-{
-#if defined(COMPILE_DL_POLYSPEC_TEMPLATE) && defined(ZTS)
-    ZEND_TSRMLS_CACHE_UPDATE();
-#endif
-    polyspec_template_globals->errors = NULL;
-}
-
 static PHP_MINIT_FUNCTION(polyspec_template)
 {
-    pt_error_ce = register_class_Polyspec_Template_Native_TemplateError(zend_ce_exception);
-    pt_exception_create = zend_ce_exception->create_object;
-    pt_error_ce->create_object = pt_error_create;
-    memcpy(&pt_error_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-    pt_error_handlers.clone_obj = NULL;
-    pt_error_handlers.free_obj = pt_error_free;
+    pt_error_ce = register_class_Polyspec_Template_TemplateError(spl_ce_RuntimeException);
 
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;
@@ -1344,7 +1308,6 @@ static PHP_RINIT_FUNCTION(polyspec_template)
 #if defined(COMPILE_DL_POLYSPEC_TEMPLATE) && defined(ZTS)
     ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-    PT_G(errors) = NULL;
     return SUCCESS;
 }
 
@@ -1374,8 +1337,9 @@ zend_module_entry polyspec_template_module_entry = {
     NULL,
     PHP_MINFO(polyspec_template),
     PHP_POLYSPEC_TEMPLATE_VERSION,
-    PHP_MODULE_GLOBALS(polyspec_template),
-    PHP_GINIT(polyspec_template),
+    0,
+    NULL,
+    NULL,
     NULL,
     NULL,
     STANDARD_MODULE_PROPERTIES_EX

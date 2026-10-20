@@ -7,7 +7,7 @@ namespace Polyspec\Template\Native\Tests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * The expression vectors of tests/fixtures/expr/cases.json in the extension (CNF-12 to CNF-14). The extension exposes
@@ -69,7 +69,7 @@ final class ExprFixturesTest extends TestCase
             try {
                 Engine::parse($source, 'expression.tpl');
             } catch (TemplateError $error) {
-                $code = $error->getErrorCode();
+                $code = $error->errorCode;
             }
             self::assertSame($case['error'], $code);
 

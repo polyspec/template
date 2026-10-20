@@ -6,7 +6,7 @@ namespace Polyspec\Template\Native\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * The filesystem loader of the extension, which has no loader or path API of its own: an include path resolves against
@@ -47,7 +47,7 @@ final class LoaderTest extends TestCase
         try {
             $engine->render('o.tpl');
         } catch (TemplateError $error) {
-            $code = $error->getErrorCode();
+            $code = $error->errorCode;
         }
         self::assertSame('E_LOAD_OUTSIDE_ROOT', $code);
     }

@@ -11,7 +11,7 @@ use Polyspec\Template\Format\Formatter;
 use Polyspec\Template\Format\Invariant;
 use Polyspec\Template\Native\Engine;
 use Polyspec\Template\Native\NativeAnalyzer;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * The formatter of the PHP package over the native analysis: the expected formatted text of the cases, the safety

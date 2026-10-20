@@ -7,7 +7,7 @@ namespace Polyspec\Template\Native\Tests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * Conformance cases rendered by the extension (CNF-6 to CNF-9).
@@ -52,7 +52,7 @@ final class ExtConformanceTest extends TestCase
         try {
             $output = (new Engine($directory, $options))->renderJson('input.tpl', $assign, $define, $env);
         } catch (TemplateError $error) {
-            $this->assertNotNull($expectedError, "unexpected error {$error->getErrorCode()}");
+            $this->assertNotNull($expectedError, "unexpected error {$error->errorCode}");
             $expected = Support::json($expectedError);
             $actual = $error->toArray();
             $this->assertSame(

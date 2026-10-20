@@ -6,7 +6,7 @@ namespace Polyspec\Template\Native\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * The public API of the native engine (RT-1 to RT-6, FUN-43 to FUN-46).
@@ -60,10 +60,10 @@ final class EngineTest extends TestCase
             Engine::parse("a\n{? x}", 'x.tpl');
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_PARSE_UNCLOSED_BLOCK', $error->getErrorCode());
-            $this->assertSame('x.tpl', $error->getTemplate());
-            $this->assertSame(2, $error->getErrorLine());
-            $this->assertSame(1, $error->getErrorCol());
+            $this->assertSame('E_PARSE_UNCLOSED_BLOCK', $error->errorCode);
+            $this->assertSame('x.tpl', $error->template);
+            $this->assertSame(2, $error->errorLine);
+            $this->assertSame(1, $error->errorCol);
             $this->assertNotSame('', $error->getMessage());
             $this->assertSame(
                 ['code', 'template', 'line', 'col', 'offset', 'end', 'message'],
@@ -92,8 +92,8 @@ final class EngineTest extends TestCase
             $engine->render('echo.tpl', ['title' => 9007199254740992]);
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_DATA_NUMBER_RANGE', $error->getErrorCode());
-            $this->assertSame(0, $error->getErrorLine());
+            $this->assertSame('E_DATA_NUMBER_RANGE', $error->errorCode);
+            $this->assertSame(0, $error->errorLine);
         }
     }
 
@@ -105,7 +105,7 @@ final class EngineTest extends TestCase
             $engine->render('echo.tpl', ['title' => 1e21]);
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_DATA_NUMBER_RANGE', $error->getErrorCode());
+            $this->assertSame('E_DATA_NUMBER_RANGE', $error->errorCode);
         }
     }
 
@@ -116,7 +116,7 @@ final class EngineTest extends TestCase
             $engine->render('echo.tpl', ['title' => "\xff"]);
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_DATA_INVALID_UTF8', $error->getErrorCode());
+            $this->assertSame('E_DATA_INVALID_UTF8', $error->errorCode);
         }
     }
 
@@ -169,7 +169,7 @@ final class EngineTest extends TestCase
                 $engine->render($template, ['o' => self::object()]);
                 $this->fail("expected {$code} for {$template}");
             } catch (TemplateError $error) {
-                $this->assertSame($code, $error->getErrorCode(), $template);
+                $this->assertSame($code, $error->errorCode, $template);
             }
         }
     }
@@ -221,7 +221,7 @@ final class EngineTest extends TestCase
             $engine->renderJson('echo.tpl', '{"title": 9007199254740992}');
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_DATA_NUMBER_RANGE', $error->getErrorCode());
+            $this->assertSame('E_DATA_NUMBER_RANGE', $error->errorCode);
         }
     }
 
@@ -252,7 +252,7 @@ final class EngineTest extends TestCase
             $engine->render('host-function.tpl', ['n' => 1]);
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_RUNTIME_HOST_FUNCTION', $error->getErrorCode());
+            $this->assertSame('E_RUNTIME_HOST_FUNCTION', $error->errorCode);
         }
     }
 
@@ -270,7 +270,7 @@ final class EngineTest extends TestCase
             $engine->render('host-function.tpl', ['n' => 1]);
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_RUNTIME_UNKNOWN_FUNCTION', $error->getErrorCode());
+            $this->assertSame('E_RUNTIME_UNKNOWN_FUNCTION', $error->errorCode);
         }
     }
 
@@ -281,7 +281,7 @@ final class EngineTest extends TestCase
             $engine->renderJson('loop.tpl', '{"items": [1, 2, 3]}');
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_RUNTIME_LIMIT', $error->getErrorCode());
+            $this->assertSame('E_RUNTIME_LIMIT', $error->errorCode);
         }
     }
 
@@ -312,7 +312,7 @@ final class EngineTest extends TestCase
             $engine->render('absent.tpl', []);
             $this->fail('expected an error');
         } catch (TemplateError $error) {
-            $this->assertSame('E_LOAD_NOT_FOUND', $error->getErrorCode());
+            $this->assertSame('E_LOAD_NOT_FOUND', $error->errorCode);
         }
     }
 }

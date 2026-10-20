@@ -6,7 +6,7 @@ namespace Polyspec\Template\Native\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 
 /**
  * Host binding of PHP values and native objects (VAL-2, VAL-14, VAL-17 to VAL-20, FUN-46).
@@ -40,7 +40,7 @@ final class HostBindingTest extends TestCase
         $error = $this->failure('date-multibyte.tpl', []);
         $this->assertSame(
             ['E_RUNTIME_TYPE', 1, 4],
-            [$error->getErrorCode(), $error->getErrorLine(), $error->getErrorCol()],
+            [$error->errorCode, $error->errorLine, $error->errorCol],
         );
     }
 
@@ -48,10 +48,10 @@ final class HostBindingTest extends TestCase
     {
         // VAL-14, VAL-17: array keys and property names are checked like strings.
         foreach ([['m' => ["\xff" => 1]], ['m' => [["\xff" => 1]]], ['m' => (object) ["\xff" => 1]]] as $assign) {
-            $this->assertSame('E_DATA_INVALID_UTF8', $this->failure('keys.tpl', $assign)->getErrorCode());
+            $this->assertSame('E_DATA_INVALID_UTF8', $this->failure('keys.tpl', $assign)->errorCode);
         }
         $error = $this->failure('keys.tpl', [], ['define' => ["\xff" => 'keys.tpl']]);
-        $this->assertSame('E_DATA_INVALID_UTF8', $error->getErrorCode());
+        $this->assertSame('E_DATA_INVALID_UTF8', $error->errorCode);
     }
 
     public function testVisibilityDoesNotDependOnTheCallerScope(): void
@@ -63,7 +63,7 @@ final class HostBindingTest extends TestCase
             $holder->renderInside($this->engine, 'object-hidden.tpl');
             $this->fail('a private method was called');
         } catch (TemplateError $error) {
-            $this->assertSame('E_RUNTIME_UNKNOWN_FUNCTION', $error->getErrorCode());
+            $this->assertSame('E_RUNTIME_UNKNOWN_FUNCTION', $error->errorCode);
         }
     }
 
@@ -73,7 +73,7 @@ final class HostBindingTest extends TestCase
         foreach (['object-magic.tpl', 'object-hidden.tpl'] as $template) {
             $this->assertSame(
                 'E_RUNTIME_UNKNOWN_FUNCTION',
-                $this->failure($template, ['o' => new MagicHolder()])->getErrorCode(),
+                $this->failure($template, ['o' => new MagicHolder()])->errorCode,
                 $template,
             );
         }
@@ -87,14 +87,14 @@ final class HostBindingTest extends TestCase
             $error = $this->failure($template, ['o' => $object]);
             $this->assertSame(
                 ['E_DATA_INVALID_UTF8', 1, 5],
-                [$error->getErrorCode(), $error->getErrorLine(), $error->getErrorCol()],
+                [$error->errorCode, $error->errorLine, $error->errorCol],
                 $template,
             );
         }
         $error = $this->failure('object-result.tpl', ['o' => $object]);
         $this->assertSame(
             ['E_DATA_INVALID_UTF8', 1, 5],
-            [$error->getErrorCode(), $error->getErrorLine(), $error->getErrorCol()],
+            [$error->errorCode, $error->errorLine, $error->errorCol],
         );
     }
 
@@ -113,7 +113,7 @@ final class HostBindingTest extends TestCase
         $closed = fopen('php://memory', 'r');
         fclose($closed);
         foreach ([static fn () => 1, strlen(...), fopen('php://memory', 'r'), $closed] as $value) {
-            $this->assertSame('E_DATA_UNSUPPORTED_TYPE', $this->failure('keys.tpl', ['m' => $value])->getErrorCode());
+            $this->assertSame('E_DATA_UNSUPPORTED_TYPE', $this->failure('keys.tpl', ['m' => $value])->errorCode);
         }
     }
 
@@ -121,10 +121,10 @@ final class HostBindingTest extends TestCase
     {
         // FUN-46, VAL-14: the pending PHP exception is taken and its message is reported.
         $error = $this->failure('keys.tpl', ['m' => new FailingSerializable()]);
-        $this->assertSame(['E_RUNTIME_HOST_FUNCTION', 0], [$error->getErrorCode(), $error->getErrorLine()]);
+        $this->assertSame(['E_RUNTIME_HOST_FUNCTION', 0], [$error->errorCode, $error->errorLine]);
         $this->assertStringContainsString('serialize exploded', $error->getMessage());
         $error = $this->failure('object-fail.tpl', ['o' => new Exploding()]);
-        $this->assertSame('E_RUNTIME_HOST_FUNCTION', $error->getErrorCode());
+        $this->assertSame('E_RUNTIME_HOST_FUNCTION', $error->errorCode);
         $this->assertStringContainsString('method exploded', $error->getMessage());
         $this->engine->register('twice', static function (array $args): int {
             throw new \RuntimeException('function exploded');
@@ -168,27 +168,27 @@ final class HostBindingTest extends TestCase
         $reference = [];
         $reference['x'] = &$reference;
         foreach ([$cycle, $deep, $reference, new SelfSerializing()] as $value) {
-            $this->assertSame('E_DATA_DEPTH', $this->failure('keys.tpl', ['m' => $value])->getErrorCode());
+            $this->assertSame('E_DATA_DEPTH', $this->failure('keys.tpl', ['m' => $value])->errorCode);
         }
         $this->assertSame(
             str_repeat('[', 63) . str_repeat(']', 63) . "\n",
             $this->engine->render('keys.tpl', ['m' => self::nested(63)]),
         );
-        $this->assertSame('E_DATA_DEPTH', $this->failure('keys.tpl', ['m' => self::nested(64)])->getErrorCode());
+        $this->assertSame('E_DATA_DEPTH', $this->failure('keys.tpl', ['m' => self::nested(64)])->errorCode);
         $define = static fn (int $levels): array => [
             'define' => ['content' => ['template' => 'define-body.tpl', 'data' => ['y' => self::nested($levels)]]],
         ];
         $this->assertSame("[\n]\n", $this->engine->render('define-object.tpl', [], $define(63)));
-        $this->assertSame('E_DATA_DEPTH', $this->failure('define-object.tpl', [], $define(64))->getErrorCode());
+        $this->assertSame('E_DATA_DEPTH', $this->failure('define-object.tpl', [], $define(64))->errorCode);
     }
 
     public function testNumbersAreCheckedByValue(): void
     {
         // VAL-2: the magnitude limit applies to integers and floats alike.
         foreach ([1e19, 2 ** 53, 9007199254740992.0, -9007199254740992] as $value) {
-            $this->assertSame('E_DATA_NUMBER_RANGE', $this->failure('echo.tpl', ['title' => $value])->getErrorCode());
+            $this->assertSame('E_DATA_NUMBER_RANGE', $this->failure('echo.tpl', ['title' => $value])->errorCode);
         }
-        $this->assertSame('E_DATA_NUMBER_NOT_FINITE', $this->failure('echo.tpl', ['title' => NAN])->getErrorCode());
+        $this->assertSame('E_DATA_NUMBER_NOT_FINITE', $this->failure('echo.tpl', ['title' => NAN])->errorCode);
         $this->assertSame(
             "<p>-9007199254740991</p>\n",
             $this->engine->render('echo.tpl', ['title' => -9007199254740991.0]),

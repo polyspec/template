@@ -13,37 +13,6 @@
 namespace Polyspec\Template\Native;
 
 /**
- * Error object as defined in docs/spec/errors.md.
- *
- * The accessor names avoid getCode(), getLine() and getFile(), which \Exception declares final.
- */
-final class TemplateError extends \Exception
-{
-    /** Error code of the specification, such as E_PARSE_UNCLOSED_BLOCK. */
-    public function getErrorCode(): string {}
-
-    /** Name of the template in which the error is located. */
-    public function getTemplate(): string {}
-
-    /** 1-based line, or 0 when the error has no position. */
-    public function getErrorLine(): int {}
-
-    /** 1-based byte column, or 0 when the error has no position. */
-    public function getErrorCol(): int {}
-
-    /** Start byte offset of the related token or node. */
-    public function getOffset(): int {}
-
-    /** End byte offset of the related token or node. */
-    public function getEnd(): int {}
-
-    /**
-     * @return array{code: string, template: string, line: int, col: int, offset: int, end: int, message: string}
-     */
-    public function toArray(): array {}
-}
-
-/**
  * The template engine backed by the native implementation.
  */
 final class Engine
@@ -209,4 +178,56 @@ final class FilesystemLoader implements LoaderInterface
      * @phpstan-return array{source: string, version: string}|null
      */
     public function load(string $name): ?array {}
+}
+
+namespace Polyspec\Template;
+
+/**
+ * Error object as defined in docs/spec/errors.md.
+ */
+final class TemplateError extends \RuntimeException
+{
+    public readonly string $errorCode;
+
+    public readonly string $template;
+
+    public readonly int $errorLine;
+
+    public readonly int $errorCol;
+
+    public readonly int $offset;
+
+    public readonly int $end;
+
+    /**
+     * Creates an error from its fields. The names avoid the properties of the base exception.
+     */
+    public function __construct(
+        string $errorCode,
+        string $template,
+        int $errorLine,
+        int $errorCol,
+        int $offset,
+        int $end,
+        string $message,
+    ) {}
+
+    /**
+     * Creates an error located at a byte span of a template whose line index is known.
+     *
+     * @param array|null $lines
+     * @phpstan-param list<int>|null $lines
+     */
+    public static function at(string $code, string $template, ?array $lines, int $start, int $end, string $message): TemplateError {}
+
+    /**
+     * Creates an error with no source position.
+     */
+    public static function withoutPosition(string $code, string $template, string $message): TemplateError {}
+
+    /**
+     * @return array
+     * @phpstan-return array{code: string, template: string, line: int, col: int, offset: int, end: int, message: string}
+     */
+    public function toArray(): array {}
 }

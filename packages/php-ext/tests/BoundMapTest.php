@@ -11,7 +11,7 @@ use Polyspec\Template\BoundMap as PhpBoundMap;
 use Polyspec\Template\Loader\FilesystemLoader;
 use Polyspec\Template\Native\BoundMap;
 use Polyspec\Template\Native\Engine;
-use Polyspec\Template\Native\TemplateError;
+use Polyspec\Template\TemplateError;
 use Polyspec\Template\TemplateError as PhpTemplateError;
 
 /**
@@ -68,12 +68,12 @@ final class BoundMapTest extends TestCase
         self::assertSame(
             [$code, '', 0, 0, 0, 0],
             [
-                $error->getErrorCode(),
-                $error->getTemplate(),
-                $error->getErrorLine(),
-                $error->getErrorCol(),
-                $error->getOffset(),
-                $error->getEnd(),
+                $error->errorCode,
+                $error->template,
+                $error->errorLine,
+                $error->errorCol,
+                $error->offset,
+                $error->end,
             ],
             $error->getMessage(),
         );
@@ -160,7 +160,7 @@ final class BoundMapTest extends TestCase
         $position = $cases['rejections'][$name];
         self::assertSame(
             ['E_DATA_UNSUPPORTED_TYPE', $position['template'], $position['line'], $position['col']],
-            [$error->getErrorCode(), $error->getTemplate(), $error->getErrorLine(), $error->getErrorCol()],
+            [$error->errorCode, $error->template, $error->errorLine, $error->errorCol],
             $error->getMessage(),
         );
     }
@@ -172,11 +172,11 @@ final class BoundMapTest extends TestCase
         $php = PhpBoundMap::bind($cases['assign']);
         self::assertSame(
             'E_DATA_UNSUPPORTED_TYPE',
-            self::failure(static fn () => self::engine()->render('page.tpl', $php))->getErrorCode(),
+            self::failure(static fn () => self::engine()->render('page.tpl', $php))->errorCode,
         );
         self::assertSame(
             'E_DATA_UNSUPPORTED_TYPE',
-            self::failure(static fn () => BoundMap::bind($php))->getErrorCode(),
+            self::failure(static fn () => BoundMap::bind($php))->errorCode,
         );
         self::assertBindFailure(
             self::failure(static fn () => BoundMap::merge($native, $php)),
