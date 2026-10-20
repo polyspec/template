@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c3a10cedcddf662bead71ebe83ad395e06c6883a */
+ * Stub hash: 214e1cf1d0cbeb1ccb4ac1921a7aa71d44e81dde */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -238,6 +238,25 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Render_Ru
 	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Render_Evaluator___construct arginfo_class_Polyspec_Template_Render_RuntimeBindings___construct
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Evaluator_evaluate, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, expr, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, scope, Polyspec\\Template\\Render\\Scope, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Render_Renderer___construct, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, context, Polyspec\\Template\\Render\\Context, 0)
+	ZEND_ARG_OBJ_INFO(0, program, Polyspec\\Template\\AstProgram, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Render_Renderer_renderNodes, 0, 3, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, nodes, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, frame, Polyspec\\Template\\Render\\Frame, 0)
+	ZEND_ARG_OBJ_INFO(0, scope, Polyspec\\Template\\Render\\Scope, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_TemplateError___construct, 0, 0, 7)
@@ -911,6 +930,10 @@ ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, mapSpread);
 ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, call);
 ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, limit);
 ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, error);
+ZEND_METHOD(Polyspec_Template_Render_Evaluator, __construct);
+ZEND_METHOD(Polyspec_Template_Render_Evaluator, evaluate);
+ZEND_METHOD(Polyspec_Template_Render_Renderer, __construct);
+ZEND_METHOD(Polyspec_Template_Render_Renderer, renderNodes);
 ZEND_METHOD(Polyspec_Template_TemplateError, __construct);
 ZEND_METHOD(Polyspec_Template_TemplateError, at);
 ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition);
@@ -1168,6 +1191,18 @@ static const zend_function_entry class_Polyspec_Template_Render_RuntimeBindings_
 	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, call, arginfo_class_Polyspec_Template_Render_RuntimeBindings_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, limit, arginfo_class_Polyspec_Template_Render_RuntimeBindings_limit, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Render_RuntimeBindings, error, arginfo_class_Polyspec_Template_Render_RuntimeBindings_error, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Render_Evaluator_methods[] = {
+	ZEND_ME(Polyspec_Template_Render_Evaluator, __construct, arginfo_class_Polyspec_Template_Render_Evaluator___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Evaluator, evaluate, arginfo_class_Polyspec_Template_Render_Evaluator_evaluate, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Render_Renderer_methods[] = {
+	ZEND_ME(Polyspec_Template_Render_Renderer, __construct, arginfo_class_Polyspec_Template_Render_Renderer___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Render_Renderer, renderNodes, arginfo_class_Polyspec_Template_Render_Renderer_renderNodes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1793,6 +1828,43 @@ static zend_class_entry *register_class_Polyspec_Template_Render_RuntimeBindings
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "RuntimeBindings", class_Polyspec_Template_Render_RuntimeBindings_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Render_Evaluator(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "Evaluator", class_Polyspec_Template_Render_Evaluator_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_runtime_default_value;
+	ZVAL_UNDEF(&property_runtime_default_value);
+	zend_string *property_runtime_name = zend_string_init("runtime", sizeof("runtime") - 1, 1);
+	zend_string *property_runtime_class_Polyspec_Template_Render_RuntimeBindings = zend_string_init("Polyspec\\Template\\Render\\RuntimeBindings", sizeof("Polyspec\\Template\\Render\\RuntimeBindings")-1, 1);
+	zend_declare_typed_property(class_entry, property_runtime_name, &property_runtime_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_runtime_class_Polyspec_Template_Render_RuntimeBindings, 0, 0));
+	zend_string_release(property_runtime_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Render_Renderer(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Render", "Renderer", class_Polyspec_Template_Render_Renderer_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else

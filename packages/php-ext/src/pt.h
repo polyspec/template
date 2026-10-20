@@ -703,6 +703,14 @@ void pt_bindings_call(INTERNAL_FUNCTION_PARAMETERS);
 void pt_bindings_limit(INTERNAL_FUNCTION_PARAMETERS);
 void pt_bindings_error(INTERNAL_FUNCTION_PARAMETERS);
 
+/* Evaluator and Renderer (pt_render_classes.c): registered by MINIT with the classes they use. */
+void pt_render_classes_register(zend_class_entry *evaluator, zend_class_entry *renderer, zend_class_entry *runtime_bindings,
+                                zend_class_entry *scope, zend_class_entry *path, zend_class_entry *program);
+void pt_evaluator_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_evaluator_evaluate(INTERNAL_FUNCTION_PARAMETERS);
+void pt_renderer_construct(INTERNAL_FUNCTION_PARAMETERS);
+void pt_renderer_render_nodes(INTERNAL_FUNCTION_PARAMETERS);
+
 /* PageCache (pt_page_cache.c): the final HTML pages of the library, held by the object. */
 void pt_page_cache_register(zend_class_entry *ce);
 void pt_page_cache_construct(INTERNAL_FUNCTION_PARAMETERS);

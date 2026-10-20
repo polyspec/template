@@ -2586,6 +2586,26 @@ ZEND_METHOD(Polyspec_Template_Render_RuntimeBindings, error)
     pt_bindings_error(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+ZEND_METHOD(Polyspec_Template_Render_Evaluator, __construct)
+{
+    pt_evaluator_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Evaluator, evaluate)
+{
+    pt_evaluator_evaluate(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Renderer, __construct)
+{
+    pt_renderer_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Render_Renderer, renderNodes)
+{
+    pt_renderer_render_nodes(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
 /* A prepared execution (RT-61): the program, the bound assign, the options and the entry template, which stays loaded
  * beyond the run that loaded it. */
 typedef struct pt_execution {
@@ -3089,7 +3109,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     register_class_Polyspec_Template_InternalBoundary();
     pt_expr_register(register_class_Polyspec_Template_Expr_Token(), register_class_Polyspec_Template_Expr_Lexer(),
         register_class_Polyspec_Template_Expr_Parser());
-    register_class_Polyspec_Template_Loader_Path();
+    zend_class_entry *loader_path = register_class_Polyspec_Template_Loader_Path();
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_ast_decode_error_ce = register_class_Polyspec_Template_AstDecodeError(spl_ce_InvalidArgumentException);
@@ -3138,7 +3158,10 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     zend_class_entry *context = register_class_Polyspec_Template_Render_Context();
     pt_frame_class = frame;
     pt_render_state_register(runtime_services, frame, scope, context);
-    pt_bindings_register(register_class_Polyspec_Template_Render_RuntimeBindings());
+    zend_class_entry *runtime_bindings = register_class_Polyspec_Template_Render_RuntimeBindings();
+    pt_bindings_register(runtime_bindings);
+    zend_class_entry *evaluator = register_class_Polyspec_Template_Render_Evaluator();
+    zend_class_entry *renderer = register_class_Polyspec_Template_Render_Renderer();
 
     memcpy(&pt_engine_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     pt_engine_handlers.offset = XtOffsetOf(pt_engine_object, std);
@@ -3168,6 +3191,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_execution_handlers.get_gc = pt_execution_get_gc;
     pt_ast_program_ce = register_class_Polyspec_Template_AstProgram(program, runtime_services);
     pt_ast_program_ce->create_object = pt_engine_create;
+    pt_render_classes_register(evaluator, renderer, runtime_bindings, scope, loader_path, pt_ast_program_ce);
 
     zend_class_entry *loader_interface = register_class_Polyspec_Template_Loader_LoaderInterface();
     pt_loader_interface_ce = loader_interface;

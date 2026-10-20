@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d1fc19ea1071f0df6b70b61e36fdb481d762c99b10331dc5631b547d1a32fee5 -->
+<!-- source-sha256: db0629f6b89ef0163cd8f5b50329833735f4c55cdf3ce885f2b5b31b6a4f6d3f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-14: 확장이 라이브러리의 Render\Evaluator와 Render\Renderer를 라이브러리와 같은 이름과 시그니처의 final class로 등록하며, 상태는 객체 안에 있고 모든 값 연산은 라이브러리가 호출하는 RuntimeBindings 메서드다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/RenderClassesTest.php` 4 passed, 1 failed (Evaluator is not registered by the extension); green: 같은 명령 OK (5 tests, 20 assertions) (T26.7-2-14).
 
 - T26.7-2-7-2: 확장이 `Format\Indent`를 라이브러리와 같은 이름과 signature의 final class로 등록한다: private 생성자와 static `edits`(C, `packages/php-ext/src/pt_indent.c`)이며, `config/parity.json`은 `IndentClassTest.php`를 그 test로 든다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/IndentClassTest.php` 1 failure, `Polyspec\Template\Format\Indent is not registered by the extension`; green: 같은 명령 3 passed (9 assertions), 확장을 로드한 상태에서 `packages/php/tests/Format/IndentTest.php` 17 passed와 `packages/php/tests/Format/FormatterTest.php` 20 passed (T26.7-2-7-2).
 

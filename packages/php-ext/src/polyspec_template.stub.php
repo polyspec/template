@@ -333,6 +333,26 @@ final class RuntimeBindings
     public function error(Frame $frame, array $span, string $code, string $message): \Polyspec\Template\TemplateError {}
 }
 
+/** Expression evaluation (docs/spec/expressions.md). */
+final class Evaluator
+{
+    public readonly RuntimeBindings $runtime;
+
+    public function __construct(Context $context) {}
+
+    /** @phpstan-param array<string, mixed> $expr */
+    public function evaluate(array $expr, Frame $frame, ?Scope $scope = null): mixed {}
+}
+
+/** Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32). */
+final class Renderer
+{
+    public function __construct(Context $context, \Polyspec\Template\AstProgram $program) {}
+
+    /** @phpstan-param list<array<string, mixed>> $nodes */
+    public function renderNodes(array $nodes, Frame $frame, Scope $scope): void {}
+}
+
 namespace Polyspec\Template;
 
 /**
