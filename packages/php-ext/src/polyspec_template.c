@@ -3136,6 +3136,9 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     register_class_Polyspec_Template_Value_Json();
     register_class_Polyspec_Template_Value_Value();
     register_class_Polyspec_Template_Value_Number();
+    pt_ast_declare_constants(register_class_Polyspec_Template_Ast());
+    pt_scanner_declare_constants(register_class_Polyspec_Template_Parser_Scanner());
+    register_class_Polyspec_Template_Parser_Standalone();
     register_class_Polyspec_Template_Value_HostArgument();
 
     /* The runtime services come first: AstProgram and RuntimeEnvironment implement the interface. */
@@ -3240,3 +3243,16 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(polyspec_template)
 #endif
+
+/* Ast, Parser\Scanner and Parser\Standalone (pt_scanner.c). */
+ZEND_METHOD(Polyspec_Template_Ast, isLoopMetaField) { pt_ast_is_loop_meta_field(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Ast, node) { pt_ast_node(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Ast, toJson) { pt_ast_to_json(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, skipHorizontalSpace) { pt_scanner_skip_horizontal_space(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, isHorizontalSpace) { pt_scanner_is_horizontal_space(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, sigilAfter) { pt_scanner_sigil_after(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, startsTag) { pt_scanner_starts_tag(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, wrappedTagAt) { pt_scanner_wrapped_tag_at(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, isDelimiterChar) { pt_scanner_is_delimiter_char(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Scanner, parseDelimiters) { pt_scanner_parse_delimiters(INTERNAL_FUNCTION_PARAM_PASSTHRU); }
+ZEND_METHOD(Polyspec_Template_Parser_Standalone, ranges) { pt_standalone_ranges_of(INTERNAL_FUNCTION_PARAM_PASSTHRU); }

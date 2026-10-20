@@ -1398,3 +1398,80 @@ final class Parser
      */
     public function parsePostfix(bool $adjacentOnly): array {}
 }
+
+namespace Polyspec\Template;
+
+/**
+ * The AST helpers of docs/spec/ast.md: the node shape and the canonical JSON of an AST (AST-7, AST-10). The array
+ * constant LOOP_META_FIELDS is declared at module start, since gen_stub does not take an array constant.
+ */
+final class Ast
+{
+    public static function isLoopMetaField(string $name): bool {}
+
+    /**
+     * @param array $fields
+     * @phpstan-param array<string, mixed> $fields
+     * @return array
+     * @phpstan-return array<string, mixed>
+     */
+    public static function node(string $type, array $fields, int $start, int $end): array {}
+
+    public static function toJson(mixed $node): string {}
+}
+
+namespace Polyspec\Template\Parser;
+
+/**
+ * Tag start detection (LEX-5, LEX-6, LEX-9, LEX-17, LEX-18) and delimiter validation (LEX-21). The array constants
+ * SIGILS and WRAPPERS are declared at module start, since gen_stub does not take an array constant.
+ */
+final class Scanner
+{
+    public static function skipHorizontalSpace(string $text, int $index): int {}
+
+    public static function isHorizontalSpace(string $char): bool {}
+
+    /**
+     * Returns the sigil after the open delimiter at $open, or null (LEX-5).
+     */
+    public static function sigilAfter(string $text, int $open): ?string {}
+
+    /**
+     * Whether the open delimiter at $open starts a tag (LEX-5 or LEX-6).
+     */
+    public static function startsTag(string $text, int $open, string $close): bool {}
+
+    /**
+     * @return array|null
+     * @phpstan-return array{0: string, 1: string}|null
+     */
+    public static function wrappedTagAt(string $text, int $index, string $open, string $close): ?array {}
+
+    /**
+     * LEX-21.
+     */
+    public static function isDelimiterChar(string $char): bool {}
+
+    /**
+     * @return array|null
+     * @phpstan-return array{0: string, 1: string}|null open and close
+     */
+    public static function parseDelimiters(string $value): ?array {}
+}
+
+/**
+ * Standalone line groups (LEX-14, LEX-15).
+ */
+final class Standalone
+{
+    /**
+     * Returns the byte ranges [start, end) that standalone line groups remove from the output.
+     *
+     * @param array $tags
+     * @phpstan-param list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}> $tags
+     * @return array
+     * @phpstan-return list<array{0: int, 1: int}>
+     */
+    public static function ranges(string $text, array $tags): array {}
+}

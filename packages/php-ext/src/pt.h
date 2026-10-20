@@ -356,6 +356,48 @@ typedef struct pt_analysis {
  * leading byte order mark. */
 pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const char *source, size_t length, char open, char close, pt_analysis *analysis);
 
+/* The tables of the tag scanner: the sigils (LEX-5) and the wrappers [opener, closer] (LEX-17, LEX-18). */
+#define PT_SIGIL_COUNT 11
+#define PT_WRAPPER_COUNT 4
+extern const char *const pt_sigils[PT_SIGIL_COUNT];
+extern const char *const pt_wrappers[PT_WRAPPER_COUNT][2];
+
+/* The scanner over bytes; see pt_parse.c. Offsets are not negative. */
+size_t pt_scan_skip_horizontal(const char *text, size_t length, size_t index);
+bool pt_scan_is_horizontal(const char *text, size_t length);
+const char *pt_scan_sigil_after(const char *text, size_t length, size_t open);
+bool pt_scan_starts_tag(const char *text, size_t length, size_t open, int close);
+int pt_scan_wrapped_tag_at(const char *text, size_t length, size_t index, int open, int close);
+bool pt_scan_delimiter_char(const char *text, size_t length);
+
+/* A byte range that a standalone line group removes (LEX-14, LEX-15). */
+typedef struct pt_range {
+    size_t start, end;
+} pt_range;
+
+typedef struct pt_ranges {
+    pt_range *v;
+    uint32_t count;
+} pt_ranges;
+
+/* The ranges that the standalone tags of the accepted tags (in source order) remove from a text with the given lines. */
+pt_ranges pt_standalone_ranges(pt_arena *arena, const pt_lines *lines, const char *text, size_t length, const pt_syntax_tag *tags, uint32_t tag_count);
+
+/* The classes Ast, Parser\Scanner and Parser\Standalone (pt_scanner.c). */
+void pt_ast_declare_constants(zend_class_entry *ce);
+void pt_scanner_declare_constants(zend_class_entry *ce);
+void pt_ast_is_loop_meta_field(INTERNAL_FUNCTION_PARAMETERS);
+void pt_ast_node(INTERNAL_FUNCTION_PARAMETERS);
+void pt_ast_to_json(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_skip_horizontal_space(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_is_horizontal_space(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_sigil_after(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_starts_tag(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_wrapped_tag_at(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_is_delimiter_char(INTERNAL_FUNCTION_PARAMETERS);
+void pt_scanner_parse_delimiters(INTERNAL_FUNCTION_PARAMETERS);
+void pt_standalone_ranges_of(INTERNAL_FUNCTION_PARAMETERS);
+
 /* LEX-21. */
 bool pt_parse_delimiters(const char *value, size_t length, char *open, char *close);
 

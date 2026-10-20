@@ -1025,7 +1025,7 @@ static void pt_eparser_init(pt_eparser *parser, pt_source *source, size_t start,
 /* Tag detection (LEX-5, LEX-6, LEX-9, LEX-17, LEX-18, LEX-21)                                      */
 /* ----------------------------------------------------------------------------------------------- */
 
-static const char *const pt_sigils[] = {"?#", ":?", "=", "@", "?", ":", "/", "+", "#", "*", "%"};
+const char *const pt_sigils[PT_SIGIL_COUNT] = {"?#", ":?", "=", "@", "?", ":", "/", "+", "#", "*", "%"};
 
 static const char *pt_sigil_after(const pt_source *source, size_t open)
 {
@@ -1065,7 +1065,7 @@ static bool pt_loop_form(const pt_source *source, size_t index)
     return i < source->length && source->text[i] == '=';
 }
 
-static bool pt_starts_tag(const pt_source *source, size_t open, char close)
+static bool pt_starts_tag(const pt_source *source, size_t open, int close)
 {
     const char *sigil = pt_sigil_after(source, open);
     if (sigil == NULL) {
@@ -1073,7 +1073,7 @@ static bool pt_starts_tag(const pt_source *source, size_t open, char close)
     }
     size_t after = pt_skip_horizontal(source, open + 1) + strlen(sigil);
     if (strcmp(sigil, "/") == 0) {
-        return pt_char_at(source, pt_skip_horizontal(source, after)) == (unsigned char)close;
+        return close >= 0 && pt_char_at(source, pt_skip_horizontal(source, after)) == close;
     }
     if (strcmp(sigil, "@") == 0) {
         return pt_loop_form(source, after);
@@ -1081,9 +1081,9 @@ static bool pt_starts_tag(const pt_source *source, size_t open, char close)
     return true;
 }
 
-static const char *const pt_wrappers[][2] = {{"\"", "\""}, {"'", "'"}, {"/*", "*/"}, {"<!--", "-->"}};
+const char *const pt_wrappers[PT_WRAPPER_COUNT][2] = {{"\"", "\""}, {"'", "'"}, {"/*", "*/"}, {"<!--", "-->"}};
 
-static int pt_wrapped_tag_at(const pt_source *source, size_t index, char open, char close)
+static int pt_wrapped_tag_at(const pt_source *source, size_t index, int open, int close)
 {
     for (int w = 0; w < 4; w++) {
         size_t opener = strlen(pt_wrappers[w][0]);
@@ -1091,7 +1091,7 @@ static int pt_wrapped_tag_at(const pt_source *source, size_t index, char open, c
             continue;
         }
         size_t after = pt_skip_horizontal(source, index + opener);
-        if (pt_char_at(source, after) == (unsigned char)open && pt_char_at(source, after + 1) == (unsigned char)open && pt_starts_tag(source, after + 1, close)) {
+        if (open >= 0 && pt_char_at(source, after) == open && pt_char_at(source, after + 1) == open && pt_starts_tag(source, after + 1, close)) {
             return w;
         }
         return -1;
@@ -1119,6 +1119,52 @@ bool pt_parse_delimiters(const char *value, size_t length, char *open, char *clo
     *open = value[0];
     *close = value[1];
     return true;
+}
+
+/* The tag scanner of the PHP package's Parser\Scanner over bytes (LEX-5, LEX-6, LEX-9, LEX-17, LEX-18, LEX-21). The PHP
+ * methods of Parser\Scanner call these, and the tag parser of this file uses the same functions. A delimiter that is not
+ * one byte is passed as -1, which never matches. */
+static pt_source pt_scan_view(const char *text, size_t length)
+{
+    pt_source source;
+    memset(&source, 0, sizeof(source));
+    source.text = text;
+    source.length = length;
+    return source;
+}
+
+size_t pt_scan_skip_horizontal(const char *text, size_t length, size_t index)
+{
+    pt_source source = pt_scan_view(text, length);
+    return pt_skip_horizontal(&source, index);
+}
+
+bool pt_scan_is_horizontal(const char *text, size_t length)
+{
+    return length == 1 && pt_horizontal((unsigned char)text[0]);
+}
+
+const char *pt_scan_sigil_after(const char *text, size_t length, size_t open)
+{
+    pt_source source = pt_scan_view(text, length);
+    return pt_sigil_after(&source, open);
+}
+
+bool pt_scan_starts_tag(const char *text, size_t length, size_t open, int close)
+{
+    pt_source source = pt_scan_view(text, length);
+    return pt_starts_tag(&source, open, close);
+}
+
+int pt_scan_wrapped_tag_at(const char *text, size_t length, size_t index, int open, int close)
+{
+    pt_source source = pt_scan_view(text, length);
+    return pt_wrapped_tag_at(&source, index, open, close);
+}
+
+bool pt_scan_delimiter_char(const char *text, size_t length)
+{
+    return length == 1 && pt_delimiter_char(text[0]);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -1153,12 +1199,8 @@ typedef struct pt_frame {
     size_t open_start;
 } pt_frame;
 
-typedef struct pt_tag {
-    size_t start, end;
-    bool echo;
-    const char *kind;
-    size_t body_start, body_end;
-} pt_tag;
+/* An accepted tag of the parse, with the fields of an accepted tag of the analysis (EDT-8). */
+typedef pt_syntax_tag pt_tag;
 
 /* A growable list of syntax tokens in an arena. */
 typedef struct pt_tokens {
@@ -2018,20 +2060,20 @@ static void pt_scan(pt_tparser *parser)
     while (index < length) {
         char c = text[index];
         char open = parser->open;
-        if (c == '\\' && pt_char_at(source, index + 1) == (unsigned char)open && pt_starts_tag(source, index + 1, parser->close)) {
+        if (c == '\\' && pt_char_at(source, index + 1) == (unsigned char)open && pt_starts_tag(source, index + 1, (unsigned char)parser->close)) {
             pt_flush_text(parser, text_start, index);
             pt_push_text(parser, index, index + 2, pt_strdup(source->arena, &open, 1));
             index += 2;
             text_start = index;
             continue;
         }
-        if (c == open && pt_starts_tag(source, index, parser->close)) {
+        if (c == open && pt_starts_tag(source, index, (unsigned char)parser->close)) {
             pt_flush_text(parser, text_start, index);
             index = pt_parse_tag(parser, index, index, 1, -1);
             text_start = index;
             continue;
         }
-        int wrapper = pt_wrapped_tag_at(source, index, open, parser->close);
+        int wrapper = pt_wrapped_tag_at(source, index, (unsigned char)open, (unsigned char)parser->close);
         if (wrapper >= 0) {
             pt_flush_text(parser, text_start, index);
             size_t open_index = pt_skip_horizontal(source, index + strlen(pt_wrappers[wrapper][0])) + 1;
@@ -2045,15 +2087,6 @@ static void pt_scan(pt_tparser *parser)
 }
 
 /* ---- standalone line groups (LEX-14, LEX-15) ---- */
-
-typedef struct pt_range {
-    size_t start, end;
-} pt_range;
-
-typedef struct pt_ranges {
-    pt_range *v;
-    uint32_t count;
-} pt_ranges;
 
 static size_t pt_line_of(const pt_lines *lines, size_t index)
 {
@@ -2072,23 +2105,27 @@ static size_t pt_line_of(const pt_lines *lines, size_t index)
 static pt_ranges pt_standalone(pt_tparser *parser)
 {
     pt_source *source = parser->source;
-    const pt_lines *lines = &source->lines;
+    return pt_standalone_ranges(source->arena, &source->lines, source->text, source->length, parser->tags, parser->tag_count);
+}
+
+pt_ranges pt_standalone_ranges(pt_arena *arena, const pt_lines *lines, const char *text, size_t length, const pt_syntax_tag *tags, uint32_t tag_count)
+{
     size_t line_count = lines->count;
     pt_ranges ranges = {NULL, 0};
-    if (parser->tag_count == 0) {
+    if (tag_count == 0) {
         return ranges;
     }
     /* The tags are in source order, so the tags of a line are a contiguous run. */
-    uint32_t *first = pt_alloc(source->arena, sizeof(uint32_t) * line_count);
-    uint32_t *count = pt_alloc(source->arena, sizeof(uint32_t) * line_count);
-    for (uint32_t t = 0; t < parser->tag_count; t++) {
-        size_t line = pt_line_of(lines, parser->tags[t].start);
+    uint32_t *first = pt_alloc(arena, sizeof(uint32_t) * line_count);
+    uint32_t *count = pt_alloc(arena, sizeof(uint32_t) * line_count);
+    for (uint32_t t = 0; t < tag_count; t++) {
+        size_t line = pt_line_of(lines, tags[t].start);
         if (count[line] == 0) {
             first[line] = t;
         }
         count[line]++;
     }
-    ranges.v = pt_alloc(source->arena, sizeof(pt_range) * parser->tag_count);
+    ranges.v = pt_alloc(arena, sizeof(pt_range) * tag_count);
     size_t line = 0;
     while (line < line_count) {
         size_t group_end = line;
@@ -2097,7 +2134,7 @@ static pt_ranges pt_standalone(pt_tparser *parser)
         for (size_t cursor = line; cursor <= group_end; cursor++) {
             for (uint32_t k = 0; k < count[cursor]; k++) {
                 uint32_t t = first[cursor] + k;
-                const pt_tag *tag = &parser->tags[t];
+                const pt_tag *tag = &tags[t];
                 has_tag = true;
                 if (tag->echo) {
                     has_echo = true;
@@ -2115,16 +2152,16 @@ static pt_ranges pt_standalone(pt_tparser *parser)
         }
         if (has_tag && !has_echo) {
             size_t start = lines->starts[line];
-            size_t end = group_end + 1 < line_count ? lines->starts[group_end + 1] : source->length;
+            size_t end = group_end + 1 < line_count ? lines->starts[group_end + 1] : length;
             bool only = true;
             size_t index = start;
             for (uint32_t t = group_first; t <= group_last && only; t++) {
-                if (parser->tags[t].start > index && !pt_whitespace_only(source->text, index, parser->tags[t].start)) {
+                if (tags[t].start > index && !pt_whitespace_only(text, index, tags[t].start)) {
                     only = false;
                 }
-                index = parser->tags[t].end;
+                index = tags[t].end;
             }
-            if (only && (end <= index || pt_whitespace_only(source->text, index, end))) {
+            if (only && (end <= index || pt_whitespace_only(text, index, end))) {
                 ranges.v[ranges.count].start = start;
                 ranges.v[ranges.count].end = end;
                 ranges.count++;

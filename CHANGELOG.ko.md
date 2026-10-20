@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c8981e59164a3c72229876edea8f22849dad0aa5e4c7efcbbc75f086f50f763d -->
+<!-- source-sha256: 5e2437c08c967efe2b9380663dc1d08a5e04615bd7011f47c698a5d303563f58 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-11-1: PHP 확장은 라이브러리의 `Ast`, `Parser\Scanner`, `Parser\Standalone`을 확장의 class로 등록한다 (S10). 이름, final static 메서드, 상수를 그대로 가지며(배열 상수는 모듈 시작 때 선언한다), tag scanner와 standalone 줄은 C parser가 쓰는 함수(`pt_parse.c`)이고, `Ast::toJson`은 canonical JSON 작성기다(`pt_scanner.c`). Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/ScannerClassesTest.php` exit 1, "Polyspec\Template\Ast is not registered by the extension", Failures: 1; green: 같은 명령 OK (4 tests, 14 assertions); `ParserTest` OK (7 tests, 19 assertions), `AnalyzeTest` OK (15 tests, 18 assertions), `ConformanceTest` OK (771 tests, 1028 assertions) (T26.7-2-11-1).
 
 - T26.7-2-12: PHP 확장은 라이브러리의 `Polyspec\Template\Expr`의 `Token`, `Lexer`, `Parser`를 확장의 class로 등록한다 (S10). 이 class들의 뒤에서 C lexer와 expression parser가 동작하며, Parser는 자기 Lexer object의 state(`$parser->lexer`) 위에서 실행된다. Red: 위 ExprClassesTest 명령이 exit 1, "Polyspec\Template\Expr\Token is not registered by the extension", Failures: 1; green: 같은 명령 OK (4 tests, 15 assertions) (T26.7-2-12).
 
