@@ -34,8 +34,21 @@ final class RuntimeEnvironment implements RuntimeServices
      */
     public function __construct(array $limits = [], array $hostFunctions = [])
     {
+        // RT-6: a limit is a key of RT-33 with an integer value.
+        foreach ($limits as $key => $value) {
+            if (!array_key_exists($key, self::DEFAULT_LIMITS)) {
+                throw new \InvalidArgumentException("limits.{$key} is not a limit");
+            }
+            if (!is_int($value)) {
+                throw new \InvalidArgumentException("limits.{$key} is not an integer");
+            }
+        }
         $this->limits = array_merge(self::DEFAULT_LIMITS, $limits);
         foreach ($hostFunctions as $name => $function) {
+            // RT-5: every entry of functions is callable.
+            if (!is_callable($function)) {
+                throw new \InvalidArgumentException("functions.{$name} is not a function");
+            }
             $this->register((string) $name, $function);
         }
     }

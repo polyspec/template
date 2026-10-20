@@ -70,4 +70,51 @@ final class EngineRefreshTest extends TestCase
         $engine = new Engine(new AstProgram(new ArrayLoader(['x.tpl' => $ast])));
         self::assertSame('3', $engine->render('x.tpl', ['a' => 2]));
     }
+
+    /** RT-5, RT-6: the limits and the functions of a program are checked when the program is created. */
+    public function testTheLimitsAndFunctionsOfAProgramAreChecked(): void
+    {
+        $loader = new ArrayLoader();
+        $cases = [
+            [['limits' => 5], 'limits is not an object'],
+            [['limits' => [1]], 'limits is not an object'],
+            [['limits' => ['loops' => 1]], 'limits.loops is not a limit'],
+            [['limits' => ['iterations' => 1.5]], 'limits.iterations is not an integer'],
+            [['limits' => ['depth' => '3']], 'limits.depth is not an integer'],
+            [['functions' => 5], 'functions is not an object'],
+            [['functions' => ['f' => 1]], 'functions.f is not a function'],
+        ];
+        foreach ($cases as [$options, $message]) {
+            try {
+                new AstProgram($loader, $options);
+                self::fail("options should fail with: {$message}");
+            } catch (\InvalidArgumentException $error) {
+                self::assertSame($message, $error->getMessage());
+            }
+        }
+
+        $program = new AstProgram($loader, ['limits' => ['iterations' => 10], 'functions' => ['f' => fn () => 1]]);
+        self::assertSame(10, $program->limits()['iterations']);
+    }
+
+    /** RT-4: a define or an env that is not a map fails the render with E_DATA_UNSUPPORTED_TYPE. */
+    public function testADefineOrAnEnvThatIsNotAMapIsUnsupported(): void
+    {
+        $engine = new Engine(new AstProgram(new ArrayLoader(['a.tpl' => 'x', 'b.tpl' => 'y'])));
+        $cases = [
+            [['define' => 'b.tpl'], 'define is not an object'],
+            [['define' => [1]], 'define is not an object'],
+            [['env' => 0], 'env is not an object'],
+            [['env' => ['Z']], 'env is not an object'],
+        ];
+        foreach ($cases as [$options, $message]) {
+            try {
+                $engine->render('a.tpl', [], $options);
+                self::fail("render should fail with: {$message}");
+            } catch (TemplateError $error) {
+                self::assertSame('E_DATA_UNSUPPORTED_TYPE', $error->errorCode);
+                self::assertSame($message, $error->getMessage());
+            }
+        }
+    }
 }

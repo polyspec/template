@@ -45,7 +45,16 @@ final class AstProgram implements Program, RuntimeServices
     public function __construct(?LoaderInterface $loader = null, array $options = [])
     {
         $this->loader = $loader ?? new ArrayLoader();
-        $this->runtime = new RuntimeEnvironment($options['limits'] ?? [], $options['functions'] ?? []);
+        $limits = $options['limits'] ?? [];
+        $functions = $options['functions'] ?? [];
+        // RT-5, RT-6: a limits or a functions that is not a map fails the creation of the program.
+        if (!self::isMap($limits)) {
+            throw new \InvalidArgumentException('limits is not an object');
+        }
+        if (!self::isMap($functions)) {
+            throw new \InvalidArgumentException('functions is not an object');
+        }
+        $this->runtime = new RuntimeEnvironment($limits, $functions);
         if (isset($options['delimiters'])) {
             $delimiters = Scanner::parseDelimiters($options['delimiters']);
             if ($delimiters === null) {
@@ -247,8 +256,17 @@ final class AstProgram implements Program, RuntimeServices
     {
         try {
             $rootData = Bind::map($assign);
-            $registry = $this->bindDefines($options['define'] ?? []);
-            $env = $this->bindEnv($options['env'] ?? []);
+            // RT-4: a define or an env that is not a map fails with E_DATA_UNSUPPORTED_TYPE.
+            $define = $options['define'] ?? [];
+            if (!self::isMap($define)) {
+                throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'define is not an object');
+            }
+            $registry = $this->bindDefines($define);
+            $envOption = $options['env'] ?? [];
+            if (!self::isMap($envOption)) {
+                throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'env is not an object');
+            }
+            $env = $this->bindEnv($envOption);
         } catch (BindError $error) {
             throw TemplateError::withoutPosition($error->errorCode, $name, $error->getMessage());
         }
@@ -275,6 +293,12 @@ final class AstProgram implements Program, RuntimeServices
     public function render(string|array $target, mixed $assign = [], array $options = []): string
     {
         return $this->prepare($target, $assign, $options)->render();
+    }
+
+    /** A PHP map is an array that is empty or not a list (RT-4, RT-5, RT-6). */
+    private static function isMap(mixed $value): bool
+    {
+        return is_array($value) && ($value === [] || !array_is_list($value));
     }
 
     /**
