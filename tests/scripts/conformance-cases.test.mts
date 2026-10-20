@@ -4,16 +4,21 @@
 // --dry-run.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { caseIds, RUNNERS } from '../../scripts/conformance-cases.mts';
+import { jsonDocument } from '../../scripts/json-document.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
 const NODE = path.join(ROOT, 'var/tools/bin/node');
 const run = (...args: string[]) => spawnSync(process.execPath, ['scripts/conformance-cases.mts', ...args], { cwd: ROOT, encoding: 'utf8' });
+const parityDocument = jsonDocument<{ implementations: { name: string }[] }>('parity declaration', {
+  type: 'object',
+  required: ['implementations'],
+  properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } } } },
+});
 
 test('changed paths name each case once', () => {
   assert.deepEqual(caseIds(['tests/cases/text/crlf-input/input.tpl', 'tests/cases/text/crlf-input/expected.html', 'tests/cases/data/null-assign']), {
@@ -29,7 +34,7 @@ test('a case runs in every mode and a removed case has nothing to run', () => {
 });
 
 test('every implementation of config/parity.json has its generated runner (S6)', () => {
-  const declared = (JSON.parse(readFileSync(path.join(ROOT, 'config/parity.json'), 'utf8')) as { implementations: { name: string }[] }).implementations.map(item => item.name);
+  const declared = parityDocument.read(path.join(ROOT, 'config/parity.json')).implementations.map(item => item.name);
   assert.deepEqual(RUNNERS.slice(1), declared.map(name => `tests/runner/conformance-generated-${name}.mts`));
 });
 

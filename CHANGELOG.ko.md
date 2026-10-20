@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1c78e8c4cfc8e2e338280a6f89d0c26a9c1cb33d6610307d54dba360a578ffdf -->
+<!-- source-sha256: 797eb6a2fbe1c03d06be561d9ab99d96a3145626d4f950942d07f4b7f810af62 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-48: `tests/scripts`의 두 test는 JSON 파일을 `any`에서 cast한 `JSON.parse` 대신 `scripts/json-document.mts`의 타입 있는 document(JSON Schema를 가진 `jsonDocument`)로 읽어, 다른 모양의 파일은 이름과 함께 실패하고 test는 같은 field를 검사한다. Red: `node_modules/.bin/oxlint --type-aware --deny-warnings -c .oxlintrc.json tests/scripts/conformance-cases.test.mts tests/scripts/pre-commit-hook.test.mts`가 `conformance-cases.test.mts:32:21`과 `pre-commit-hook.test.mts:14:18`에 `Unsafe assertion from \`any\` detected`를 보고하고 2 problems와 함께 1로 끝난다; green: 같은 oxlint가 0으로 끝나고 두 파일의 `node --test`가 8개 중 8개 통과한다 (T26.7-48).
 
 - T26.7-2-2-3: PHP 확장은 `Polyspec\Template\Value\Bind`를 library와 같은 public signature의 internal final class로 등록한다. `MAX_DEPTH` 64, `value`, `checkFloat`, `checkLevel`, `depthWithin`, `publicProperties`, `map`, `data`이다. 이들은 library의 값(map은 string key의 `MapValue`, number는 float, host 객체는 그 instance)을 주고 library의 `BindError`와 그 message로 실패하며, `map`과 `data`는 library bound map의 entry를 다시 bind하지 않고 읽는다. `packages/php-ext/tests/BindTest.php`는 확장의 internal test이다. Red: 새 `BindTest`가 확장을 load하고 7개 중 1개 실패했고(`Bind is not registered by the extension`), 동작의 test 6개는 library만으로 통과한다; green: 확장을 load하고 `BindTest` 7, `Value/ValueTest` 7, `Value/HostBindingTest` 14, `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-3).
 

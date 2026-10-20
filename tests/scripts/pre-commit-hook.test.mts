@@ -6,12 +6,18 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
+import { jsonDocument } from '../../scripts/json-document.mts';
 
 const repository = resolve('.');
 const read = (file: string) => readFileSync(join(repository, file), 'utf8');
+const checklistDocument = jsonDocument<{ hooks: string[] }>('checklist config', {
+  type: 'object',
+  required: ['hooks'],
+  properties: { hooks: { type: 'array', items: { type: 'string' } } },
+});
 
 test('config/checklist.json lists the pre-commit hook with the pre-push hook', () => {
-  const config = JSON.parse(read('config/checklist.json')) as { hooks: string[] };
+  const config = checklistDocument.parse(read('config/checklist.json'), 'config/checklist.json');
   assert.deepEqual(config.hooks, ['pre-commit', 'pre-push']);
 });
 
