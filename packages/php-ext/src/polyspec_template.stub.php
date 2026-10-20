@@ -1477,6 +1477,40 @@ final class Body
     public static function format(string $kind, string $source, int $bodyStart, int $bodyEnd, array $tokens): ?string {}
 }
 
+/**
+ * Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from
+ * the source AST.
+ */
+final class Formatter
+{
+    /**
+     * Formats the whitespace inside the tags of a template and the indentation of its lines. Other text outside tags,
+     * comments and directives are never changed. The source and the result are parsed, and the result is returned
+     * only when both ASTs are equal without their `span` fields and, when lines are indented, without the spaces and
+     * tabs at the start of lines of text.
+     *
+     * Options: `name` (the template name of error results, `template.tpl` by default); `delimiters` (two characters,
+     * LEX-22); `range` (byte offsets `start` and `end`: only tags that lie completely inside it and lines that start
+     * inside it are formatted); `indent` (the indent unit, a run of spaces or one tab, two spaces by default, or null
+     * to keep the indentation of every line); `templateBlocks` (`indent` by default: template blocks add a level like
+     * HTML elements; `flat`: they add none).
+     *
+     * @param array $options
+     * @phpstan-param array{
+     *     name?: string,
+     *     delimiters?: string,
+     *     range?: array{start: int, end: int},
+     *     indent?: string|null,
+     *     templateBlocks?: 'indent'|'flat',
+     * } $options
+     */
+    public static function format(
+        string $source,
+        array $options = [],
+        \Polyspec\Template\Format\Analyzer $analyzer = new \Polyspec\Template\Format\PackageAnalyzer(),
+    ): FormatResult {}
+}
+
 namespace Polyspec\Template\Expr;
 
 /**

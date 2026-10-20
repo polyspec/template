@@ -392,8 +392,9 @@ pt_ranges pt_standalone_ranges(pt_arena *arena, const pt_lines *lines, const cha
 /* The classes Ast, Parser\Scanner and Parser\Standalone (pt_scanner.c). */
 void pt_ast_declare_constants(zend_class_entry *ce);
 void pt_scanner_declare_constants(zend_class_entry *ce);
-/* The classes FormatError and FormatResult of the formatter (pt_format.c). */
-void pt_format_register(zend_class_entry *error, zend_class_entry *result);
+/* The classes FormatError, FormatResult, the Analyzer interface and PackageAnalyzer of the formatter (pt_format.c). */
+void pt_format_register(zend_class_entry *error, zend_class_entry *result, zend_class_entry *analyzer,
+    zend_class_entry *package_analyzer);
 /* An expression token of the formatter: its text and its EDT-8 kind, borrowed from the caller. */
 typedef struct pt_format_token {
     pt_s text;

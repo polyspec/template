@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5f034a72e5c678a8e9cb777b0957142c0a5522b0d6c931810ba94d9b4d4996d5 -->
+<!-- source-sha256: 4c3d25b31d98708c3d0321895ed72aa57138d9da521a1b791514ac7bd5c30c2a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-7-3: 확장은 `Format\Formatter`를 라이브러리와 같은 이름과 signature의 final class로 등록한다: `format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer()): FormatResult`이며, C `packages/php-ext/src/pt_format.c`로 쓴다. BOM, option 검사, analyzer 호출(사용자 Analyzer도 동작), tag와 line edit, edit의 안정적 정렬, invariant를 라이브러리와 같게 하며, 기본 analyzer는 C가 만든다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatterClassTest.php` 1 failure, `Polyspec\Template\Format\Formatter is not registered by the extension` (main의 확장으로 실행, Formatter 없음); green: 같은 명령 5 passed, 0 failed; 라이브러리 test는 확장과 함께 FormatterTest 20 passed, IndentTest 17 passed, ConformanceTest 771 passed (T26.7-2-7-3).
 
 - T26.7-39: 확장이 이 test가 load하는 class를 등록하므로(`Render\Evaluator`는 T26.7-2-14) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (FunctionsTest, NumberTest, ValueTest, ExprFixturesTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-39).
 

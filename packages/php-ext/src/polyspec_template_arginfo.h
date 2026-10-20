@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 85ada26f6c408d5eeffa97ae84a95a162f0a1198 */
+ * Stub hash: 95c1a00c6f1809cf7e710ad830c8bb08d3c67a56 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -765,6 +765,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_B
 	ZEND_ARG_TYPE_INFO(0, tokens, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Format_Formatter_format, 0, 1, Polyspec\\Template\\Format\\FormatResult, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, analyzer, Polyspec\\Template\\Format\\Analyzer, 0, "new Polyspec\\Template\\Format\\PackageAnalyzer()")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Token___construct, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
@@ -1078,6 +1084,7 @@ ZEND_METHOD(Polyspec_Template_Format_Indent, edits);
 ZEND_METHOD(Polyspec_Template_Format_PackageAnalyzer, analyze);
 ZEND_METHOD(Polyspec_Template_Format_PackageAnalyzer, parse);
 ZEND_METHOD(Polyspec_Template_Format_Body, format);
+ZEND_METHOD(Polyspec_Template_Format_Formatter, format);
 ZEND_METHOD(Polyspec_Template_Expr_Token, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, error);
@@ -1536,6 +1543,11 @@ static const zend_function_entry class_Polyspec_Template_Format_PackageAnalyzer_
 
 static const zend_function_entry class_Polyspec_Template_Format_Body_methods[] = {
 	ZEND_ME(Polyspec_Template_Format_Body, format, arginfo_class_Polyspec_Template_Format_Body_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_Formatter_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_Formatter, format, arginfo_class_Polyspec_Template_Format_Formatter_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -3154,6 +3166,21 @@ static zend_class_entry *register_class_Polyspec_Template_Format_Body(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Body", class_Polyspec_Template_Format_Body_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_Formatter(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Formatter", class_Polyspec_Template_Format_Formatter_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else

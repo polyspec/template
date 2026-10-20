@@ -2,7 +2,8 @@
  * The value classes and the helpers of the formatter (S10): FormatError and FormatResult hold the text or the
  * error of a format, Expression joins the tokens of a tag with the separators of the style, and Invariant compares
  * two ASTs without their spans and indentation. Each method is the method of the library class with the same name.
- * The tag bodies (Body) and the analyzers (PackageAnalyzer) are registered here too.
+ * The tag bodies (Body) and the analyzers (PackageAnalyzer) are registered here too, and Formatter::format calls them
+ * and the classes above.
  */
 #include "pt.h"
 #include "Zend/zend_exceptions.h"
@@ -10,16 +11,36 @@
 
 static zend_class_entry *pt_format_error_ce;
 static zend_class_entry *pt_format_result_ce;
+static zend_class_entry *pt_fmt_analyzer_ce;
+static zend_class_entry *pt_fmt_package_analyzer_ce;
 
-void pt_format_register(zend_class_entry *error, zend_class_entry *result)
+void pt_format_register(zend_class_entry *error, zend_class_entry *result, zend_class_entry *analyzer,
+    zend_class_entry *package_analyzer)
 {
     pt_format_error_ce = error;
     pt_format_result_ce = result;
+    pt_fmt_analyzer_ce = analyzer;
+    pt_fmt_package_analyzer_ce = package_analyzer;
 }
 
 /* ----------------------------------------------------------------------------------------------- */
 /* FormatError and FormatResult                                                                     */
 /* ----------------------------------------------------------------------------------------------- */
+
+/* Sets the five properties of a FormatError; a NULL code is null. */
+static void pt_fmt_error_fill(zend_object *self, zend_string *reason, zend_string *code, zend_long line, zend_long col,
+    zend_string *message)
+{
+    zend_update_property_str(pt_format_error_ce, self, ZEND_STRL("reason"), reason);
+    if (code != NULL) {
+        zend_update_property_str(pt_format_error_ce, self, ZEND_STRL("code"), code);
+    } else {
+        zend_update_property_null(pt_format_error_ce, self, ZEND_STRL("code"));
+    }
+    zend_update_property_long(pt_format_error_ce, self, ZEND_STRL("line"), line);
+    zend_update_property_long(pt_format_error_ce, self, ZEND_STRL("col"), col);
+    zend_update_property_str(pt_format_error_ce, self, ZEND_STRL("message"), message);
+}
 
 ZEND_METHOD(Polyspec_Template_Format_FormatError, __construct)
 {
@@ -32,16 +53,7 @@ ZEND_METHOD(Polyspec_Template_Format_FormatError, __construct)
         Z_PARAM_LONG(col)
         Z_PARAM_STR(message)
     ZEND_PARSE_PARAMETERS_END();
-    zend_object *self = Z_OBJ_P(ZEND_THIS);
-    zend_update_property_str(pt_format_error_ce, self, ZEND_STRL("reason"), reason);
-    if (code != NULL) {
-        zend_update_property_str(pt_format_error_ce, self, ZEND_STRL("code"), code);
-    } else {
-        zend_update_property_null(pt_format_error_ce, self, ZEND_STRL("code"));
-    }
-    zend_update_property_long(pt_format_error_ce, self, ZEND_STRL("line"), line);
-    zend_update_property_long(pt_format_error_ce, self, ZEND_STRL("col"), col);
-    zend_update_property_str(pt_format_error_ce, self, ZEND_STRL("message"), message);
+    pt_fmt_error_fill(Z_OBJ_P(ZEND_THIS), reason, code, line, col, message);
 }
 
 /* Puts one property of a FormatError into an array under the property's name. */
@@ -843,4 +855,651 @@ ZEND_METHOD(Polyspec_Template_Format_Body, format)
         RETURN_NULL();
     }
     RETURN_STR(text);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* Formatter                                                                                        */
+/* ----------------------------------------------------------------------------------------------- */
+
+#define PT_FMT_BOM "\xEF\xBB\xBF"
+#define PT_FMT_WHERE "Polyspec\\Template\\Format\\Formatter::format(): "
+#define PT_FMT_SOURCE "Polyspec\\Template\\Source"
+#define PT_FMT_BODY "Polyspec\\Template\\Format\\Body"
+#define PT_FMT_INDENT "Polyspec\\Template\\Format\\Indent"
+
+/* A TemplateError or an InvalidArgumentException of an analyzer call, which Formatter turns into a FormatError. */
+typedef struct pt_fmt_caught {
+    zend_string *code;    /* the errorCode of a TemplateError, owned; null for an InvalidArgumentException */
+    zend_long line, col;
+    zend_string *message; /* owned */
+} pt_fmt_caught;
+
+/* One edit of the text: [start, end) is replaced by text (owned). The index keeps the order of equal starts. */
+typedef struct pt_fmt_edit {
+    zend_long start, end;
+    zend_string *text;
+    uint32_t index;
+} pt_fmt_edit;
+
+typedef struct pt_fmt_edits {
+    pt_fmt_edit *items;
+    uint32_t count, capacity;
+} pt_fmt_edits;
+
+/* The options of Formatter::format, read as the library reads them (before the byte order mark is removed). */
+typedef struct pt_fmt_options {
+    bool indenting;       /* false for indent => null */
+    zend_string *indent;  /* the indent unit, owned; set when indenting */
+    bool counted;         /* templateBlocks is indent */
+    zend_string *name;    /* owned */
+    zval parse_options;   /* the array passed to the analyzer: delimiters when they are set */
+    bool ranged;
+    zend_long range_start, range_end;
+} pt_fmt_options;
+
+/* `Class::name(...)` of a static method of a class of the extension, looked up by its name: the result is set in
+ * result (null first), and the caller checks EG(exception). `name` is the method name in lower case. */
+static void pt_fmt_static(const char *class_name, const char *name, size_t length, zval *result, uint32_t count,
+    zval *args)
+{
+    zend_string *lookup = zend_string_init(class_name, strlen(class_name), 0);
+    zend_class_entry *ce = zend_lookup_class(lookup);
+    zend_string_release(lookup);
+    ZEND_ASSERT(ce != NULL);
+    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
+    ZEND_ASSERT(fn != NULL);
+    ZVAL_NULL(result);
+    zend_call_known_function(fn, NULL, ce, result, count, args, NULL);
+}
+
+/* `$analyzer->name(...)` of an object of a class that implements Analyzer: the result is set in result (null first),
+ * and the caller checks EG(exception). `name` is the method name in lower case. */
+static void pt_fmt_method(zval *object, const char *name, size_t length, zval *result, uint32_t count, zval *args)
+{
+    zend_class_entry *ce = Z_OBJCE_P(object);
+    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
+    ZEND_ASSERT(fn != NULL);
+    ZVAL_NULL(result);
+    zend_call_known_instance_method(fn, Z_OBJ_P(object), result, count, args);
+}
+
+/* The array value of a key of an array (dereferenced), or null when it is missing. */
+static zval *pt_fmt_field(HashTable *table, const char *key, size_t length)
+{
+    zval *value = zend_hash_str_find(table, key, length);
+    if (value != NULL) {
+        ZVAL_DEREF(value);
+    }
+
+    return value;
+}
+
+/* Reads an int field of an array; false when it is missing or not an int. */
+static bool pt_fmt_int(HashTable *table, const char *key, size_t length, zend_long *value)
+{
+    zval *field = pt_fmt_field(table, key, length);
+    if (field == NULL || Z_TYPE_P(field) != IS_LONG) {
+        return false;
+    }
+    *value = Z_LVAL_P(field);
+
+    return true;
+}
+
+static void pt_fmt_malformed(void)
+{
+    zend_type_error(PT_FMT_WHERE "the analysis of the analyzer is malformed");
+}
+
+/* Sets the result to the FormatResult of a text (FormatResult::text). */
+static void pt_fmt_text_result(zval *result, zend_string *text, bool changed)
+{
+    object_init_ex(result, pt_format_result_ce);
+    pt_fmt_result_fill(Z_OBJ_P(result), text, changed, NULL);
+}
+
+/* Sets the result to FormatResult::error of a FormatError with these fields (the code is null when it is NULL). */
+static void pt_fmt_error_result(zval *result, const char *reason, zend_string *code, zend_long line, zend_long col,
+    zend_string *message)
+{
+    zval error;
+    zend_string *reason_string = zend_string_init(reason, strlen(reason), 0);
+    object_init_ex(&error, pt_format_error_ce);
+    pt_fmt_error_fill(Z_OBJ(error), reason_string, code, line, col, message);
+    zend_string_release(reason_string);
+    object_init_ex(result, pt_format_result_ce);
+    pt_fmt_result_fill(Z_OBJ_P(result), NULL, false, Z_OBJ(error));
+    zval_ptr_dtor(&error);
+}
+
+/* Takes the exception of an analyzer call when it is an instance of base: a TemplateError keeps its code, line and
+ * column; an InvalidArgumentException has none. The exception is cleared and the function returns true. Any other
+ * exception stays set and the function returns false. */
+static bool pt_fmt_take(zend_class_entry *base, pt_fmt_caught *caught)
+{
+    zend_object *exception = EG(exception);
+    if (exception == NULL || !instanceof_function(exception->ce, base)) {
+        return false;
+    }
+    zval rv;
+    caught->code = NULL;
+    caught->line = 0;
+    caught->col = 0;
+    caught->message = zval_get_string(zend_read_property(zend_ce_exception, exception, ZEND_STRL("message"), 1, &rv));
+    if (base == pt_error_ce) {
+        caught->code = zval_get_string(zend_read_property(pt_error_ce, exception, ZEND_STRL("errorCode"), 1, &rv));
+        caught->line = zval_get_long(zend_read_property(pt_error_ce, exception, ZEND_STRL("errorLine"), 1, &rv));
+        caught->col = zval_get_long(zend_read_property(pt_error_ce, exception, ZEND_STRL("errorCol"), 1, &rv));
+    }
+    zend_clear_exception();
+
+    return true;
+}
+
+static void pt_fmt_caught_free(pt_fmt_caught *caught)
+{
+    if (caught->code != NULL) {
+        zend_string_release(caught->code);
+    }
+    zend_string_release(caught->message);
+}
+
+static void pt_fmt_edits_add(pt_fmt_edits *edits, zend_long start, zend_long end, zend_string *text)
+{
+    if (edits->count == edits->capacity) {
+        edits->capacity = edits->capacity == 0 ? 8 : edits->capacity * 2;
+        edits->items = erealloc(edits->items, sizeof(pt_fmt_edit) * edits->capacity);
+    }
+    edits->items[edits->count] = (pt_fmt_edit){start, end, text, edits->count};
+    edits->count++;
+}
+
+static void pt_fmt_edits_free(pt_fmt_edits *edits)
+{
+    for (uint32_t i = 0; i < edits->count; i++) {
+        zend_string_release(edits->items[i].text);
+    }
+    if (edits->items != NULL) {
+        efree(edits->items);
+    }
+}
+
+/* Orders edits by start; equal starts keep their order (the library's usort is stable). */
+static int pt_fmt_edit_compare(const void *left, const void *right)
+{
+    const pt_fmt_edit *a = left;
+    const pt_fmt_edit *b = right;
+    if (a->start != b->start) {
+        return a->start < b->start ? -1 : 1;
+    }
+
+    return a->index < b->index ? -1 : (a->index > b->index);
+}
+
+/* substr($text, $from, $length) of the library: the bytes of the text, with a negative length counted from its end. */
+static void pt_fmt_substr(smart_str *out, zend_string *text, zend_long from, zend_long length)
+{
+    zend_long total = (zend_long)ZSTR_LEN(text);
+    if (from > total) {
+        return;
+    }
+    zend_long available = total - from;
+    if (length < 0) {
+        length = available + length;
+        if (length <= 0) {
+            return;
+        }
+    }
+    if (length > available) {
+        length = available;
+    }
+    smart_str_appendl(out, ZSTR_VAL(text) + from, (size_t)length);
+}
+
+/* Formatter::apply of the library: the edits in order, each replacing its range. */
+static zend_string *pt_fmt_apply(zend_string *text, const pt_fmt_edits *edits)
+{
+    smart_str output = {0};
+    zend_long cursor = 0;
+    for (uint32_t i = 0; i < edits->count; i++) {
+        pt_fmt_substr(&output, text, cursor, edits->items[i].start - cursor);
+        smart_str_append(&output, edits->items[i].text);
+        cursor = edits->items[i].end;
+    }
+    pt_fmt_substr(&output, text, cursor, (zend_long)ZSTR_LEN(text) - cursor);
+    smart_str_0(&output);
+
+    return output.s != NULL ? output.s : ZSTR_EMPTY_ALLOC();
+}
+
+/* [line, col] of an offset of a text: Source::position(Source::lineIndex($text), $offset). */
+static bool pt_fmt_position(zend_string *text, zend_long offset, zend_long *line, zend_long *col)
+{
+    zval text_argument, lines, position_arguments[2], position;
+    ZVAL_STR_COPY(&text_argument, text);
+    pt_fmt_static(PT_FMT_SOURCE, "lineindex", 9, &lines, 1, &text_argument);
+    zval_ptr_dtor(&text_argument);
+    if (EG(exception)) {
+        return false;
+    }
+    ZVAL_COPY_VALUE(&position_arguments[0], &lines);
+    ZVAL_LONG(&position_arguments[1], offset);
+    pt_fmt_static(PT_FMT_SOURCE, "position", 8, &position, 2, position_arguments);
+    zval_ptr_dtor(&lines);
+    if (EG(exception)) {
+        return false;
+    }
+    zval *line_value = zend_hash_index_find(Z_ARRVAL(position), 0);
+    zval *col_value = zend_hash_index_find(Z_ARRVAL(position), 1);
+    *line = line_value != NULL ? zval_get_long(line_value) : 0;
+    *col = col_value != NULL ? zval_get_long(col_value) : 0;
+    zval_ptr_dtor(&position);
+
+    return true;
+}
+
+/* The indent unit of the library: a run of spaces or one tab. */
+static bool pt_fmt_is_unit(zend_string *unit)
+{
+    size_t length = ZSTR_LEN(unit);
+    const char *bytes = ZSTR_VAL(unit);
+    if (length == 1 && bytes[0] == '\t') {
+        return true;
+    }
+    if (length == 0) {
+        return false;
+    }
+    for (size_t i = 0; i < length; i++) {
+        if (bytes[i] != ' ') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/* An option of the array, dereferenced; null when the array is null or the key is missing. */
+static zval *pt_fmt_option(HashTable *options, const char *key, size_t length)
+{
+    return options != NULL ? pt_fmt_field(options, key, length) : NULL;
+}
+
+/* Reads the options of format as the library does, and throws the library's errors for the values it refuses. */
+static bool pt_fmt_read_options(HashTable *options, pt_fmt_options *out)
+{
+    zval *value;
+    array_init(&out->parse_options);
+
+    value = pt_fmt_option(options, ZEND_STRL("indent"));
+    if (value == NULL) {
+        out->indenting = true;
+        out->indent = zend_string_init("  ", 2, 0);
+    } else if (Z_TYPE_P(value) == IS_NULL) {
+        out->indenting = false;
+    } else if (Z_TYPE_P(value) == IS_STRING) {
+        out->indenting = true;
+        out->indent = zend_string_copy(Z_STR_P(value));
+        if (!pt_fmt_is_unit(out->indent)) {
+            zend_throw_exception(spl_ce_InvalidArgumentException, "indent must be a run of spaces or one tab", 0);
+            return false;
+        }
+    } else {
+        zend_type_error(PT_FMT_WHERE "indent must be a string or null");
+        return false;
+    }
+
+    value = pt_fmt_option(options, ZEND_STRL("templateBlocks"));
+    if (value == NULL || Z_TYPE_P(value) == IS_NULL) {
+        out->counted = true;
+    } else if (Z_TYPE_P(value) == IS_STRING && zend_string_equals_literal(Z_STR_P(value), "indent")) {
+        out->counted = true;
+    } else if (Z_TYPE_P(value) == IS_STRING && zend_string_equals_literal(Z_STR_P(value), "flat")) {
+        out->counted = false;
+    } else {
+        zend_throw_exception(spl_ce_InvalidArgumentException, "templateBlocks must be indent or flat", 0);
+        return false;
+    }
+
+    value = pt_fmt_option(options, ZEND_STRL("name"));
+    if (value == NULL || Z_TYPE_P(value) == IS_NULL) {
+        out->name = zend_string_init("template.tpl", 12, 0);
+    } else if (Z_TYPE_P(value) == IS_STRING) {
+        out->name = zend_string_copy(Z_STR_P(value));
+    } else {
+        zend_type_error(PT_FMT_WHERE "name must be a string or null");
+        return false;
+    }
+
+    value = pt_fmt_option(options, ZEND_STRL("delimiters"));
+    if (value != NULL && Z_TYPE_P(value) != IS_NULL) {
+        zval copy;
+        ZVAL_COPY(&copy, value);
+        zend_hash_str_update(Z_ARRVAL(out->parse_options), ZEND_STRL("delimiters"), &copy);
+    }
+
+    value = pt_fmt_option(options, ZEND_STRL("range"));
+    if (value != NULL && Z_TYPE_P(value) != IS_NULL) {
+        if (Z_TYPE_P(value) != IS_ARRAY || !pt_fmt_int(Z_ARRVAL_P(value), ZEND_STRL("start"), &out->range_start)
+            || !pt_fmt_int(Z_ARRVAL_P(value), ZEND_STRL("end"), &out->range_end)) {
+            zend_type_error(PT_FMT_WHERE "range must be null or an array with int start and end");
+            return false;
+        }
+        out->ranged = true;
+    }
+
+    return true;
+}
+
+static void pt_fmt_options_free(pt_fmt_options *options)
+{
+    if (options->indent != NULL) {
+        zend_string_release(options->indent);
+    }
+    if (options->name != NULL) {
+        zend_string_release(options->name);
+    }
+    zval_ptr_dtor(&options->parse_options);
+}
+
+/* The tag edits of the library's loop over the accepted tags: the body of each tag that changes (Body::format). */
+static bool pt_fmt_tag_edits(zend_string *text, HashTable *tags, HashTable *tokens, const pt_fmt_options *options,
+    pt_fmt_edits *edits)
+{
+    zval *tag_value;
+    ZEND_HASH_FOREACH_VAL(tags, tag_value) {
+        ZVAL_DEREF(tag_value);
+        zend_long start, end, body_start, body_end;
+        if (Z_TYPE_P(tag_value) != IS_ARRAY) {
+            pt_fmt_malformed();
+            return false;
+        }
+        HashTable *tag = Z_ARRVAL_P(tag_value);
+        zval *kind = pt_fmt_field(tag, ZEND_STRL("kind"));
+        if (kind == NULL || Z_TYPE_P(kind) != IS_STRING || !pt_fmt_int(tag, ZEND_STRL("start"), &start)
+            || !pt_fmt_int(tag, ZEND_STRL("end"), &end) || !pt_fmt_int(tag, ZEND_STRL("bodyStart"), &body_start)
+            || !pt_fmt_int(tag, ZEND_STRL("bodyEnd"), &body_end)) {
+            pt_fmt_malformed();
+            return false;
+        }
+        if (zend_string_equals_literal(Z_STR_P(kind), "directive")) {
+            continue;
+        }
+        if (options->ranged && (start < options->range_start || end > options->range_end)) {
+            continue;
+        }
+
+        zval body_tokens;
+        array_init(&body_tokens);
+        zval *token_value;
+        ZEND_HASH_FOREACH_VAL(tokens, token_value) {
+            ZVAL_DEREF(token_value);
+            zend_long token_start, token_end;
+            if (Z_TYPE_P(token_value) != IS_ARRAY || !pt_fmt_int(Z_ARRVAL_P(token_value), ZEND_STRL("start"), &token_start)
+                || !pt_fmt_int(Z_ARRVAL_P(token_value), ZEND_STRL("end"), &token_end)) {
+                zval_ptr_dtor(&body_tokens);
+                pt_fmt_malformed();
+                return false;
+            }
+            if (token_start >= body_start && token_end <= body_end) {
+                zval copy;
+                ZVAL_COPY(&copy, token_value);
+                zend_hash_next_index_insert(Z_ARRVAL(body_tokens), &copy);
+            }
+        } ZEND_HASH_FOREACH_END();
+
+        zval args[5], body;
+        ZVAL_STR_COPY(&args[0], Z_STR_P(kind));
+        ZVAL_STR_COPY(&args[1], text);
+        ZVAL_LONG(&args[2], body_start);
+        ZVAL_LONG(&args[3], body_end);
+        ZVAL_COPY_VALUE(&args[4], &body_tokens);
+        pt_fmt_static(PT_FMT_BODY, "format", 6, &body, 5, args);
+        zval_ptr_dtor(&args[0]);
+        zval_ptr_dtor(&args[1]);
+        zval_ptr_dtor(&body_tokens);
+        if (EG(exception)) {
+            return false;
+        }
+        if (Z_TYPE(body) != IS_STRING) {
+            continue;
+        }
+        size_t length = (size_t)(body_end - body_start);
+        if (ZSTR_LEN(Z_STR(body)) == length && memcmp(ZSTR_VAL(Z_STR(body)), ZSTR_VAL(text) + body_start, length) == 0) {
+            zval_ptr_dtor(&body);
+        } else {
+            pt_fmt_edits_add(edits, body_start, body_end, Z_STR(body));
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    return true;
+}
+
+/* Formatter::format after its options are read: the analysis, the tag and line edits, the parse of the result and the
+ * invariant. Sets result and returns true, or returns false with an exception set. */
+static bool pt_fmt_run(zend_string *source, HashTable *options, zval *analyzer, zval *result)
+{
+    pt_fmt_options settings = {0};
+    pt_fmt_edits edits = {0};
+    pt_fmt_caught caught = {0};
+    zend_string *text = NULL, *formatted = NULL;
+    zval analysis, after, args[3];
+    zend_long line = 0, col = 0;
+    bool ok = false;
+    ZVAL_NULL(&analysis);
+    ZVAL_NULL(&after);
+
+    if (!pt_fmt_read_options(options, &settings)) {
+        goto done;
+    }
+    size_t shift = ZSTR_LEN(source) >= 3 && memcmp(ZSTR_VAL(source), PT_FMT_BOM, 3) == 0 ? 3 : 0;
+    text = zend_string_init(ZSTR_VAL(source) + shift, ZSTR_LEN(source) - shift, 0);
+
+    ZVAL_STR_COPY(&args[0], text);
+    ZVAL_STR_COPY(&args[1], settings.name);
+    ZVAL_COPY(&args[2], &settings.parse_options);
+    pt_fmt_method(analyzer, ZEND_STRL("analyze"), &analysis, 3, args);
+    zval_ptr_dtor(&args[0]);
+    zval_ptr_dtor(&args[1]);
+    zval_ptr_dtor(&args[2]);
+    if (EG(exception)) {
+        if (pt_fmt_take(pt_error_ce, &caught)) {
+            pt_fmt_error_result(result, "parse", caught.code, caught.line, caught.col, caught.message);
+            pt_fmt_caught_free(&caught);
+            ok = true;
+        } else if (pt_fmt_take(spl_ce_InvalidArgumentException, &caught)) {
+            pt_fmt_error_result(result, "parse", NULL, 0, 0, caught.message);
+            pt_fmt_caught_free(&caught);
+            ok = true;
+        }
+        goto done;
+    }
+
+    if (Z_TYPE(analysis) != IS_ARRAY) {
+        pt_fmt_malformed();
+        goto done;
+    }
+    zval *tags = pt_fmt_field(Z_ARRVAL(analysis), ZEND_STRL("tags"));
+    zval *tokens = pt_fmt_field(Z_ARRVAL(analysis), ZEND_STRL("tokens"));
+    zval *ast = pt_fmt_field(Z_ARRVAL(analysis), ZEND_STRL("ast"));
+    if (tags == NULL || Z_TYPE_P(tags) != IS_ARRAY || tokens == NULL || Z_TYPE_P(tokens) != IS_ARRAY || ast == NULL) {
+        pt_fmt_malformed();
+        goto done;
+    }
+    /* The range is shifted by the byte order mark, which the analysis does not see. */
+    settings.range_start -= (zend_long)shift;
+    settings.range_end -= (zend_long)shift;
+
+    if (!pt_fmt_tag_edits(text, Z_ARRVAL_P(tags), Z_ARRVAL_P(tokens), &settings, &edits)) {
+        goto done;
+    }
+    if (settings.indenting) {
+        zval indent_args[5], indentation;
+        ZVAL_STR_COPY(&indent_args[0], text);
+        ZVAL_COPY(&indent_args[1], tags);
+        ZVAL_STR_COPY(&indent_args[2], settings.indent);
+        ZVAL_STRING(&indent_args[3], settings.counted ? "indent" : "flat");
+        if (settings.ranged) {
+            array_init(&indent_args[4]);
+            add_assoc_long_ex(&indent_args[4], ZEND_STRL("start"), settings.range_start);
+            add_assoc_long_ex(&indent_args[4], ZEND_STRL("end"), settings.range_end);
+        } else {
+            ZVAL_NULL(&indent_args[4]);
+        }
+        pt_fmt_static(PT_FMT_INDENT, "edits", 5, &indentation, 5, indent_args);
+        for (uint32_t i = 0; i < 5; i++) {
+            zval_ptr_dtor(&indent_args[i]);
+        }
+        if (EG(exception)) {
+            goto done;
+        }
+        if (Z_TYPE(indentation) != IS_ARRAY) {
+            zval_ptr_dtor(&indentation);
+            pt_fmt_malformed();
+            goto done;
+        }
+        zval *failure = pt_fmt_field(Z_ARRVAL(indentation), ZEND_STRL("error"));
+        if (failure != NULL) {
+            zend_long index = 0;
+            zval *message = Z_TYPE_P(failure) == IS_ARRAY
+                ? pt_fmt_field(Z_ARRVAL_P(failure), ZEND_STRL("message")) : NULL;
+            bool located = Z_TYPE_P(failure) == IS_ARRAY && pt_fmt_int(Z_ARRVAL_P(failure), ZEND_STRL("index"), &index);
+            if (!located || message == NULL || Z_TYPE_P(message) != IS_STRING) {
+                zval_ptr_dtor(&indentation);
+                pt_fmt_malformed();
+                goto done;
+            }
+            bool positioned = pt_fmt_position(text, index, &line, &col);
+            if (positioned) {
+                pt_fmt_error_result(result, "html", NULL, line, col, Z_STR_P(message));
+                ok = true;
+            }
+            zval_ptr_dtor(&indentation);
+            goto done;
+        }
+        zval *list = pt_fmt_field(Z_ARRVAL(indentation), ZEND_STRL("edits"));
+        if (list == NULL || Z_TYPE_P(list) != IS_ARRAY) {
+            zval_ptr_dtor(&indentation);
+            pt_fmt_malformed();
+            goto done;
+        }
+        zval *item;
+        ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(list), item) {
+            ZVAL_DEREF(item);
+            zend_long start, end;
+            zval *edit_text = Z_TYPE_P(item) == IS_ARRAY ? pt_fmt_field(Z_ARRVAL_P(item), ZEND_STRL("text")) : NULL;
+            if (Z_TYPE_P(item) != IS_ARRAY || !pt_fmt_int(Z_ARRVAL_P(item), ZEND_STRL("start"), &start)
+                || !pt_fmt_int(Z_ARRVAL_P(item), ZEND_STRL("end"), &end) || edit_text == NULL
+                || Z_TYPE_P(edit_text) != IS_STRING) {
+                zval_ptr_dtor(&indentation);
+                pt_fmt_malformed();
+                goto done;
+            }
+            pt_fmt_edits_add(&edits, start, end, zend_string_copy(Z_STR_P(edit_text)));
+        } ZEND_HASH_FOREACH_END();
+        zval_ptr_dtor(&indentation);
+
+        if (edits.count > 1) {
+            qsort(edits.items, edits.count, sizeof(pt_fmt_edit), pt_fmt_edit_compare);
+        }
+    }
+    if (edits.count == 0) {
+        pt_fmt_text_result(result, source, false);
+        ok = true;
+        goto done;
+    }
+
+    if (!pt_fmt_position(text, edits.items[0].start, &line, &col)) {
+        goto done;
+    }
+    formatted = pt_fmt_apply(text, &edits);
+
+    ZVAL_STR_COPY(&args[0], formatted);
+    ZVAL_STR_COPY(&args[1], settings.name);
+    ZVAL_COPY(&args[2], &settings.parse_options);
+    pt_fmt_method(analyzer, ZEND_STRL("parse"), &after, 3, args);
+    zval_ptr_dtor(&args[0]);
+    zval_ptr_dtor(&args[1]);
+    zval_ptr_dtor(&args[2]);
+    if (EG(exception)) {
+        if (pt_fmt_take(pt_error_ce, &caught)) {
+            zend_string *message = zend_strpprintf(0, "formatted text does not parse: %s", ZSTR_VAL(caught.message));
+            pt_fmt_error_result(result, "invariant", NULL, line, col, message);
+            zend_string_release(message);
+            pt_fmt_caught_free(&caught);
+            ok = true;
+        }
+        goto done;
+    }
+
+    zval left, right, stripped;
+    if (settings.indenting) {
+        pt_fmt_without_line_indentation(ast, &stripped);
+        pt_fmt_without_spans(&stripped, &left);
+        zval_ptr_dtor(&stripped);
+        pt_fmt_without_line_indentation(&after, &stripped);
+        pt_fmt_without_spans(&stripped, &right);
+        zval_ptr_dtor(&stripped);
+    } else {
+        pt_fmt_without_spans(ast, &left);
+        pt_fmt_without_spans(&after, &right);
+    }
+    bool same = pt_fmt_equal(&left, &right);
+    zval_ptr_dtor(&left);
+    zval_ptr_dtor(&right);
+    if (!same) {
+        zend_string *message = zend_string_init(ZEND_STRL("formatted text parses to a different AST"), 0);
+        pt_fmt_error_result(result, "invariant", NULL, line, col, message);
+        zend_string_release(message);
+        ok = true;
+        goto done;
+    }
+
+    if (shift > 0) {
+        zend_string *with_bom = zend_string_concat2(PT_FMT_BOM, 3, ZSTR_VAL(formatted), ZSTR_LEN(formatted));
+        pt_fmt_text_result(result, with_bom, true);
+        zend_string_release(with_bom);
+    } else {
+        pt_fmt_text_result(result, formatted, true);
+    }
+    ok = true;
+
+done:
+    zval_ptr_dtor(&analysis);
+    zval_ptr_dtor(&after);
+    if (formatted != NULL) {
+        zend_string_release(formatted);
+    }
+    if (text != NULL) {
+        zend_string_release(text);
+    }
+    pt_fmt_edits_free(&edits);
+    pt_fmt_options_free(&settings);
+
+    return ok;
+}
+
+ZEND_METHOD(Polyspec_Template_Format_Formatter, format)
+{
+    zend_string *source;
+    HashTable *options = NULL;
+    zend_object *analyzer = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_STR(source)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ARRAY_HT(options)
+        Z_PARAM_OBJ_OF_CLASS(analyzer, pt_fmt_analyzer_ce)
+    ZEND_PARSE_PARAMETERS_END();
+
+    /* The default analyzer is the PackageAnalyzer of the library (new PackageAnalyzer()). */
+    zval analyzer_value;
+    if (analyzer != NULL) {
+        ZVAL_OBJ_COPY(&analyzer_value, analyzer);
+    } else {
+        object_init_ex(&analyzer_value, pt_fmt_package_analyzer_ce);
+    }
+    bool ok = pt_fmt_run(source, options, &analyzer_value, return_value);
+    zval_ptr_dtor(&analyzer_value);
+    if (!ok) {
+        RETURN_THROWS();
+    }
 }

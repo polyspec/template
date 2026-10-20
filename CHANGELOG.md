@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-7-3: the PHP extension registers `Format\Formatter` as a final class with the library's name and signature: `format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer()): FormatResult`, written in C in `packages/php-ext/src/pt_format.c` with the BOM, the option checks, the analyzer calls (a userland Analyzer works), the tag and line edits, the stable order of edits and the invariant of the library, and the default analyzer created by the C. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatterClassTest.php` 1 failure, `Polyspec\Template\Format\Formatter is not registered by the extension` (run against the extension of main, which has no Formatter); green: the same command 5 passed, 0 failed; the library tests FormatterTest 20 passed, IndentTest 17 passed, ConformanceTest 771 passed with the extension (T26.7-2-7-3).
+
 - T26.7-39: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (FunctionsTest, NumberTest, ValueTest, ExprFixturesTest), now that the extension registers the classes that these tests load (`Render\Evaluator` in T26.7-2-14); with the other checks of its Verification the row is done (T26.7-39).
 
 - T26.7-2-8-2: the php-ext binding of every unit names the test that its php binding names (49 units hold both, none differs, none has php-ext alone), and the parity check of the 31 units that the row moved to the tests of the library or bound for the first time passes, so the row is done. Its Verification names those units: the unscoped check also reports the findings of units that the row does not own (T26.7-2-8-2).

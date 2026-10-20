@@ -3138,13 +3138,16 @@ static PHP_MINIT_FUNCTION(polyspec_template)
 
     /* The formatter classes: FormatResult returns FormatError, and the helpers have no state. */
     zend_class_entry *format_error = register_class_Polyspec_Template_Format_FormatError();
-    pt_format_register(format_error, register_class_Polyspec_Template_Format_FormatResult());
+    zend_class_entry *format_result = register_class_Polyspec_Template_Format_FormatResult();
     register_class_Polyspec_Template_Format_Expression();
     register_class_Polyspec_Template_Format_Invariant();
     /* PackageAnalyzer implements Analyzer, so the interface is registered first. */
     zend_class_entry *analyzer = register_class_Polyspec_Template_Format_Analyzer();
-    register_class_Polyspec_Template_Format_PackageAnalyzer(analyzer);
+    zend_class_entry *package_analyzer = register_class_Polyspec_Template_Format_PackageAnalyzer(analyzer);
     register_class_Polyspec_Template_Format_Body();
+    /* Formatter uses the classes above (its default analyzer is a PackageAnalyzer). */
+    pt_format_register(format_error, format_result, analyzer, package_analyzer);
+    register_class_Polyspec_Template_Format_Formatter();
 
     /* The runtime services come first: AstProgram and RuntimeEnvironment implement the interface. */
     zend_class_entry *runtime_services = register_class_Polyspec_Template_Render_RuntimeServices();
