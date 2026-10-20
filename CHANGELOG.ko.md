@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 869244b49383dd679bb8016c2863011f34cf0900cd6e07e9c9216e1a9b985d15 -->
+<!-- source-sha256: faaaf15407eef4280be6b794ae307cf6bb9cb9d5cea1c349a5325bb47ee4c4f9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-52-4: gofmt가 T26.7-52가 `packages/go/load_failure_test.go`에 추가한, source나 version이 없는 load 결과 test의 표 값을 정렬한다. Red: `make template-lint-go-format` exit 2, `gofmt -l`이 `packages/go/load_failure_test.go`를 나열한다; green: 통과하고 TestLoadResultWithoutSourceOrVersionIsALoadFailure가 통과한다 (T26.7-52-4).
 
 - T26.7-51-8: rustfmt가 T26.7-51-7이 `packages/rust/tests/functions.rs`에 추가한 program option test(기본 제한의 assert가 줄바꿈된다)와 그 파일의 import 목록을 포맷한다. Red: `make template-lint-rust-format` exit 2, `functions.rs` 5행과 231행의 diff; green: 통과하고 `cargo test --test functions`가 통과한다 (T26.7-51-8).
 

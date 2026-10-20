@@ -62,8 +62,8 @@ func TestLoadResultWithoutSourceOrVersionIsALoadFailure(t *testing.T) {
 		result  template.LoadResult
 		message string
 	}{
-		"no source": {template.LoadResult{Version: "1"}, "template page.tpl cannot be loaded: the loader returned no source text and no AST"},
-		"no version": {template.LoadResult{Source: []byte("a")}, "template page.tpl cannot be loaded: the loader returned no version"},
+		"no source":     {template.LoadResult{Version: "1"}, "template page.tpl cannot be loaded: the loader returned no source text and no AST"},
+		"no version":    {template.LoadResult{Source: []byte("a")}, "template page.tpl cannot be loaded: the loader returned no version"},
 		"empty version": {template.LoadResult{Source: []byte("a"), Version: ""}, "template page.tpl cannot be loaded: the loader returned no version"},
 	} {
 		_, err := renderWith(t, resultLoader{result: message.result}, "page.tpl")
