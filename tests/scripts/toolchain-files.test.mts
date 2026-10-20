@@ -251,17 +251,33 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // commands that download leave the offline settings of the recipes (T20.1-2). npm and the packages of package-lock.json
   // are installed before, by make install-tools TOOLS=npm and make install-packages, which install @polyspec/kit (T24.1).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
-  const kit = 'node_modules/@polyspec/kit/dist';
   const node = path.join(ROOT, 'var/tools/bin/node');
   // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
   // python-package, which prints its own recipe after its command line when the environment is out of date.
   const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
-  // The prerequisites of kit run first; the downloads of the recipe follow in the order that the Makefile gives them, each
-  // online, and make python-package comes last, since it installs offline from what the downloads fetched.
-  assert.deepEqual(lines.slice(0, 2), [`${online} ${node} ${kit}/install-tools.mjs`, `${online} ${node} ${kit}/check-cargo-downloads.mjs --fetch`]);
-  const last = lines.findIndex(line => /\bmake python-package$/.test(line));
-  assert.ok(last > 2, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
-  const downloads = lines.slice(2, last);
+  // KIT is the dist of the kit checkout beside the repository when there is one, else that of the installed @polyspec/kit
+  // (K348-1): the bootstrap line names it, and every later command of kit runs from the same one.
+  const kit = lines.map(line => /^\S.* node (\S+)\/bootstrap\/bootstrap\.mjs$/.exec(line)?.[1]).find(Boolean);
+  assert.ok(kit !== undefined, `make install runs no bootstrap of kit:\n${lines.join('\n')}`);
+  const at = (pattern: RegExp) => lines.findIndex(line => pattern.test(line));
+  // The bootstrap of kit runs first (T24.1): npm with the node of PATH, then the packages of package-lock.json, then the tools.
+  // The downloads of the recipe follow in the order that the Makefile gives them, each online, then make python-package,
+  // which installs offline from what the downloads fetched, and the link of kit comes last, after every install (K360-2).
+  const bootstrap = [
+    at(/\bmake --no-print-directory install-tools TOOLS=npm$/),
+    lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.mjs`),
+    at(/\bmake --no-print-directory install-packages$/),
+    lines.indexOf(`${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`),
+    at(/\bmake --no-print-directory install-tools$/),
+    lines.indexOf(`${online} ${node} ${kit}/install-tools.mjs`),
+    lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.mjs --fetch`),
+  ];
+  assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
+  const fetched = bootstrap.at(-1) ?? -1;
+  const last = at(/\bmake python-package$/);
+  assert.ok(last > fetched, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
+  assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.mjs link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
+  const downloads = lines.slice(fetched + 1, last);
   assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `)), [], 'commands of make install that keep the offline settings of the recipes');
   for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
     assert.ok(downloads.includes(`${online} ${download}`), `make install does not run ${download} online:\n${lines.join('\n')}`);
@@ -404,11 +420,14 @@ test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
   }
 });
 
-test('each workflow of template declares exactly its triggers: CI and the site on a push to main and on a manual run (T17.1-7, T17.1-9)', () => {
-  const onMain = { push: { branches: ['main'] }, workflow_dispatch: null };
+test('each workflow of template declares exactly its triggers: CI on a push to main and on a manual run, the site after a CI run of main and on a manual run for one (T17.1-7, T17.1-9, T26.7-28)', () => {
   const triggers: Record<string, unknown> = {
-    '.github/workflows/ci.yml': onMain,
-    '.github/workflows/pages.yml': onMain,
+    '.github/workflows/ci.yml': { push: { branches: ['main'] }, workflow_dispatch: null },
+    // The site publishes the example-site artifact of a CI run of main, so it runs after one, or by hand for the run named.
+    '.github/workflows/pages.yml': {
+      workflow_run: { workflows: ['CI'], types: ['completed'], branches: ['main'] },
+      workflow_dispatch: { inputs: { 'run-id': { description: 'The CI run of main whose example-site artifact is published', required: true } } },
+    },
     '.github/workflows/dependency-review.yml': { schedule: [{ cron: '17 3 * * *' }], workflow_dispatch: null },
   };
   assert.deepEqual([...WORKFLOWS].sort(compareText), Object.keys(triggers).sort(compareText));
@@ -508,5 +527,7 @@ test('the unit tests of the Python package run in var/python/venv, which python-
   assert.match(makefile, /^PYTHON_VENV := \$\(shell \$\(BOOTSTRAP_NODE\) scripts\/python-venv\.mts\)$/m);
   assert.ok(!makefile.includes('var/python/venv'), 'the Makefile restates the environment that config/parity.json declares');
   assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);
-  assert.match(makefile, /^test-python: python-package .*\n\t\$\(NODE\) \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
+  // test-python of kit runs the recipe template-test-python of the repository (T26.2).
+  assert.match(makefile, /^test-python: template-test-python\b/m);
+  assert.match(makefile, /^template-test-python: python-package\n\t\$\(NODE\) \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
 });

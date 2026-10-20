@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 4efd2b2742eab0e8e5546d89ce675ac03038ca428cd3a7501b9987efc32d7470 -->
+<!-- source-sha256: b7d57b9fbb5f05ebcae42330b227adc4e73a9d2e63a7d64a4880ff5c017e886a -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -61,6 +61,7 @@
 | T26.7-5 | Makefile의 언어 목록은 모든 구현을 적는다(R9) | SHOWCASE_LANGS of the Makefile and the showcase adapter of the PHP extension | `make parity-declarations-check` | [ ] |
 | T26.7-6 | repository의 모든 tool source는 config/rebuild.json에 class를 가진다(kit K286) | config/rebuild.json and the rebuild record docs/rebuild/publish-build.md with its Korean twin | `make rebuild-check` | [o] |
 | T26.7-7 | Python package의 build requirement를 scripts/python-wheelhouse.mts 대신 pip download --require-hashes로 내려받는다 | scripts/python-wheelhouse.mts, packages/python/build-requirements.json and the recipes that read var/python/wheelhouse | `make rebuild-check`, `node --test tests/scripts/python-build-requirements.test.mts` | [o] |
+| T26.7-7-1 | tests/scripts/toolchain-files.test.mts가 트리의 설치, workflow, recipe를 따른다 (T26.7-7의 후속): make install은 kit를 먼저 bootstrap하고, 다음에 내려받고, 마지막에 link한다 (T24.1, K360-2), bootstrap 줄이 명명하는 KIT로; pages.yml은 main의 CI 실행 뒤와 그 실행을 지정한 수동 실행에서 돈다 (T26.7-28); test-python은 template-test-python을 실행한다 (T26.2) | tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test tests/scripts/toolchain-files.test.mts` | [o] |
 | T26.7-8 | config/duplication.json은 중복 검사가 제외하는 generated 파일과 test를 이유와 함께 선언한다 | config/duplication.json and its owner in config/owner-checks.json | `make duplication-check` | [o] |
 | T26.7-9 | script와 runner는 같은 코드를 한 곳에만 둔다 | scripts/, tests/runner/ and examples/ without the clones that make duplication-check finds | `make duplication-check` | [o] |
 | T26.7-10 | packages/compiler의 backend는 같은 코드를 한 곳에만 둔다 | packages/compiler/src/backends without the clones that make duplication-check finds | `make duplication-check` | [o] |

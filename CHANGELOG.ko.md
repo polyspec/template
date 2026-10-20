@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 51c1823a50aaebf5191f86726e973200a53d8df4ebb09bf056c92aee977d8c71 -->
+<!-- source-sha256: 7e4c3fcee9f8a5c9bf5343884eee4c567f88fdb6160110af6d776e5e84100254 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-7-1: `tests/scripts/toolchain-files.test.mts`가 다시 트리를 따른다. `make install`의 test는 kit의 bootstrap(`install-tools TOOLS=npm`, `install-packages`, `install-tools`, T24.1)을 먼저, 그다음 각각 online인 다운로드, 그다음 `make python-package`, 마지막에 kit의 link(K360-2)를 기대하며, bootstrap 줄이 명명하는 KIT(저장소 옆의 kit checkout 또는 설치된 `@polyspec/kit`, K348-1)를 쓴다. workflow test는 `pages.yml`이 main의 CI 실행 뒤와 지정한 실행에 대한 수동 실행에서 돈다고 기대하고(T26.7-28), Python test는 `test-python`이 `template-test-python`을 실행한다고 기대한다(T26.2). Red: main에서 25개 중 3개 test가 실패한다(`make install`, workflow trigger, Python test). Green: 25개 통과; lint-ts와 typecheck 통과 (T26.7-7-1).
 
 - T26.7-2-15-2: PHP 확장은 library의 `Polyspec\Template\Functions\Strings`와 `Polyspec\Template\Functions\Numbers`를 `FunctionGroup`을 구현하는 final class로 library의 table(이름, `min`, `max`, `call`)과 함께 등록한다. 각 `call`은 persistent internal function의 Closure이며, 그 dispatcher가 `pt_functions.c`의 built-in 함수를 실행하고, 실패는 `Functions\FunctionError`를 던진다. Red: 같은 `run-tests.mjs phpunit ... StringNumberGroupsTest.php` 실패 1개("Polyspec\Template\Functions\Strings is not registered by the extension", 3 passed); green: 같은 명령 OK(4 tests, 32 assertions), `packages/php/tests/ExprFixturesTest.php` 73 passed (T26.7-2-15-2).
 
