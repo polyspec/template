@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 03333e96377c674c365358bc1844641c0a4853e813da18bc682a7cfe5cb3a79d -->
+<!-- source-sha256: 1380b296d92f49e096f70334f3d96760c93f967450d7e6982ee1d55f3e3f3912 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -56,7 +56,7 @@
 | T26.7-33 | conformance CLI의 test는 unit cli-parse와 cli-format이 아니라 각 구현의 internal test다(P32, K313) | The internal globs of config/parity.json and the removal of the units cli-parse and cli-format | `make parity-declarations-check` | [o] |
 | T26.7-34 | 중립 규칙 하나: 각 package는 자기 생태계의 manifest로 공개 진입점을 노출하며 각 구현이 자기 native test를 bind한다(unit export-list) | docs/spec rule and its Korean twin, the tests of the six implementations, the unit export-list | `make parity-declarations-check` | [o] |
 | T26.7-35 | template-fmt 명령의 test는 TypeScript language package의 internal test다(P32) | The internal glob of ts in config/parity.json and the removal of the unit template-fmt | `make parity-declarations-check` | [o] |
-| T26.7-36 | unit package-entries는 spec requirement를 가진다: API가 읽는 data는 생태계의 형태로 package와 함께 배포되고 모든 module 형식은 하나의 runtime을 공유한다 | docs/spec rules, the tests of the six implementations and the unit package-entries | `make parity-declarations-check` | [ ] |
+| T26.7-36 | unit package-entries는 spec requirement를 가진다: API가 읽는 data는 생태계의 형태로 package와 함께 배포되고 모든 module 형식은 하나의 runtime을 공유한다 | docs/spec rules, the tests of the six implementations and the unit package-entries | `make parity-declarations-check` | [o] |
 | T26.7-37 | formatting 유닛 묶음(formatting, format-delimiters, format-unchanged, format-indentation, format-expression, format-invariant)은 test가 이름으로 적은 FMT requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-38 | parser 유닛 묶음(parse-spans, delimiters, delimiter-argument-error, analysis)은 test가 이름으로 적은 LEX, GRM requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-39 | 값과 함수 유닛 묶음(expressions, truthiness, number-to-string, function-arity, functions-date)은 test가 이름으로 적은 EXP, FUN, VAL requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |

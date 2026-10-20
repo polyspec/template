@@ -1,4 +1,4 @@
-// VAL-22: every entry point and module format of the package accepts the bound maps that the others
+// RT-74, VAL-22: every entry point and module format of the package accepts the bound maps that the others
 // create, because they share one runtime module. The check runs the built package, which
 // `make test-ts` builds first, in a separate Node.js process, so that the modules load as they load
 // for an installed package and not through the module runner of the test framework.
@@ -34,7 +34,7 @@ const exported = ['index.mjs', 'index.cjs', 'render.mjs', 'render.cjs'].map(name
 process.stdout.write(JSON.stringify({ results, exported }));
 `;
 
-describe('bound maps across entry points and module formats (VAL-22)', () => {
+describe('bound maps across entry points and module formats (RT-74, VAL-22)', () => {
   it('renders a bound map of every entry with the program of every other entry', () => {
     const run = spawnSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8' });
     expect(run.stderr).toBe('');

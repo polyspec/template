@@ -137,3 +137,18 @@ func TestTheEmbeddedSchemaIsTheContractSchema(t *testing.T) {
 		t.Fatal("packages/go/ast/ast.schema.json differs from contracts/schema/ast.schema.json: copy the contract schema to it")
 	}
 }
+
+// TestDecodeReadsTheEmbeddedSchemaOutsideTheRepository (RT-73): the schema is embedded in the package (`embed`), so
+// DecodeTemplate validates from a working directory that holds no file of the repository.
+func TestDecodeReadsTheEmbeddedSchemaOutsideTheRepository(t *testing.T) {
+	t.Chdir(t.TempDir())
+	decoded, err := ast.DecodeTemplate([]byte(`{"type":"Template","name":"x.tpl","body":[],"comments":[]}`))
+	if err != nil || decoded.Name != "x.tpl" {
+		t.Fatalf("a valid AST: %v %v", decoded, err)
+	}
+	_, err = ast.DecodeTemplate([]byte(`{"type":"Template","name":"x.tpl","body":[],"comments":1}`))
+	var failure *ast.DecodeError
+	if !errors.As(err, &failure) || failure.Path != "/comments" {
+		t.Fatalf("an invalid AST: %v", err)
+	}
+}

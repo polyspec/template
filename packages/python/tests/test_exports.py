@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Export tests of the polyspec.template package (RT-72).
+"""Export tests of the polyspec.template package (RT-72, RT-74).
 
 The export list names every public function and class that the package module defines, and every name that the
 documents import from polyspec.template is exported.
@@ -12,7 +12,9 @@ import unittest
 from pathlib import Path
 
 import polyspec.template as template
-from polyspec.template import engine, loader
+from polyspec.template import AstProgram, EngineOptions, MapLoader, Engine
+from polyspec.template import bind_operations, engine, loader
+from polyspec.template.bind import BoundMap
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -89,6 +91,29 @@ class ExportTests(unittest.TestCase):
         self.assertEqual(
             unexported, [], f"documents import names missing from __all__: {unexported}"
         )
+
+    def test_the_entry_points_share_one_runtime(self):
+        # RT-74: the package entry re-exports the objects of the modules that define them, so a bound map that a module
+        # creates is the bound map of the package entry, and a program renders it.
+        self.assertIs(template.bind, bind_operations.bind)
+        self.assertIs(template.merge, bind_operations.merge)
+        self.assertIs(template.BoundMap, BoundMap)
+        program = Engine(
+            AstProgram(
+                EngineOptions(
+                    loader=MapLoader({"page.tpl": "{= a}{@ x = list}{= x}{/}"})
+                )
+            )
+        )
+        from_module = bind_operations.bind({"a": "x", "list": [1, 2]})
+        from_entry = template.bind({"b": 1})
+        self.assertIsInstance(from_module, template.BoundMap)
+        for assign in (
+            from_module,
+            template.merge(from_module, from_entry),
+            bind_operations.merge(from_entry, from_module),
+        ):
+            self.assertEqual(program.render("page.tpl", assign), "x12")
 
 
 if __name__ == "__main__":
