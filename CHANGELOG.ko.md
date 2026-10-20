@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d6dce66a643b09b2fc043ba92a1e05dce14940496e5c64ccb6850727b9ef3718 -->
+<!-- source-sha256: ea1ab483eae8073c0d760f96109cf729506fa78a73fdaf6f03e485193227e380 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-40-1: 확장이 이 test가 load하는 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (EngineRefreshTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-40-1).
 
 - T22.6-12-1: `docs/spec/data-model.ko.md`와 `docs/operations/development.ko.md`가 `config/parity.json`의 `documents` glob 안에 있고, R10이 그 문장을 finding 없이 읽는다; 행의 Verification은 존재하지 않는 test 파일과 전체 검사 대신 통과하는 `make parity-declarations-check RULES=R10`(kit K414)이다 (T22.6-12-1).
 
