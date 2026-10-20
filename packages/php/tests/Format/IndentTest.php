@@ -122,6 +122,7 @@ final class IndentTest extends TestCase
         self::assertSame("<div>\n\n  a   b  \n</div>", self::formatted("<div>\n   \n  a   b  \n</div>"));
     }
 
+    /** FMT-11: the lines inside pre, textarea, script, style and comments keep their indentation. */
     public function testKeepsTheIndentationInsideKeptElementsAndComments(): void
     {
         $source = self::lines(

@@ -1,6 +1,8 @@
 {
   "requirements": [
-    "LEX-5"
+    "LEX-5",
+    "FMT-3",
+    "FMT-4"
   ],
   "stage": 1
 }

@@ -463,6 +463,7 @@ class Indentation(Case):
             "<div>\n\n  a   b  \n</div>",
         )
 
+    # FMT-11: the lines inside pre, textarea, script, style and comments keep their indentation.
     def test_keeps_the_indentation_inside_raw_elements_and_comments(self):
         source = lines(
             "<div>",

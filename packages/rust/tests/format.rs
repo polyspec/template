@@ -272,6 +272,7 @@ fn empties_blank_lines_and_keeps_the_text_after_the_indentation() {
     assert_eq!(formatted("<div>\n   \n  a   b  \n</div>", &options()), "<div>\n\n  a   b  \n</div>");
 }
 
+/// FMT-11: the lines inside pre, textarea, script, style and comments keep their indentation.
 #[test]
 fn keeps_the_indentation_inside_pre_textarea_script_style_and_comments() {
     let source = lines(&[

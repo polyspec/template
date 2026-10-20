@@ -89,6 +89,7 @@ describe('indentation', () => {
     expect(formatted('<div>\n   \n  a   b  \n</div>')).toBe('<div>\n\n  a   b  \n</div>');
   });
 
+  // FMT-11: the lines inside pre, textarea, script, style and comments keep their indentation.
   it('keeps the indentation inside pre, textarea, script, style and comments, including the end tag line', () => {
     const source = lines(
       '<div>',

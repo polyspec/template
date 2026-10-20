@@ -151,11 +151,6 @@ func TestIndentation(t *testing.T) {
 		{lines("<ul>", "        <li>a</li>", "\t<li>b</li>", "</ul>"), lines("<ul>", "    <li>a</li>", "    <li>b</li>", "</ul>"), Options{Indent: "    "}},
 		{"<ul>\n        <li>{=a}</li>\n</ul>", "<ul>\n        <li>{= a}</li>\n</ul>", Options{KeepIndentation: true}},
 		{"<div>\n   \n  a   b  \n</div>", "<div>\n\n  a   b  \n</div>", Options{}},
-		{
-			lines("<div>", "<pre>", "    code {= x}", "</pre>", "<textarea>", "   <b>text</b>", "   </textarea>", "<script>", `  if (a < b) { f("</div>"); }`, "    </script>", "<style>", "      p { color: red; }", "</style>", "<!--", "        <div>", "-->", "<p>a</p>", "</div>"),
-			lines("<div>", "  <pre>", "    code {= x}", "</pre>", "  <textarea>", "   <b>text</b>", "   </textarea>", "  <script>", `  if (a < b) { f("</div>"); }`, "    </script>", "  <style>", "      p { color: red; }", "</style>", "  <!--", "        <div>", "-->", "  <p>a</p>", "</div>"),
-			Options{},
-		},
 		{lines("<div>", "<input", `type="text"`, `      name="q">`, `<p title="first`, `      second">x</p>`, "</div>"), lines("<div>", "  <input", `    type="text"`, `    name="q">`, `  <p title="first`, `      second">x</p>`, "</div>"), Options{}},
 		{lines("<div>", "{= a +", "      b}", "</div>"), lines("<div>", "  {= a +", "      b}", "</div>"), Options{}},
 		{lines("<!DOCTYPE html>", "<div>", "<br>", `<img src="a.png" />`, `<svg><path d="M0"/></svg>`, "<p>x</p>", "</div>"), lines("<!DOCTYPE html>", "<div>", "  <br>", `  <img src="a.png" />`, `  <svg><path d="M0"/></svg>`, "  <p>x</p>", "</div>"), Options{}},
@@ -172,6 +167,15 @@ func TestIndentation(t *testing.T) {
 	start := strings.Index(source, "<li>{=b}")
 	if result, err := Format(source, Options{Range: &Range{Start: start, End: len(source)}}); err != nil || result.Text != lines("<ul>", "<li>a</li>", "  <li>{= b}</li>", "</ul>") {
 		t.Errorf("range indentation: %q %v", result.Text, err)
+	}
+}
+
+// FMT-11: the lines inside pre, textarea, script, style and comments keep their indentation, including the end tag line.
+func TestKeepsTheIndentationInsideRawElements(t *testing.T) {
+	source := lines("<div>", "<pre>", "    code {= x}", "</pre>", "<textarea>", "   <b>text</b>", "   </textarea>", "<script>", `  if (a < b) { f("</div>"); }`, "    </script>", "<style>", "      p { color: red; }", "</style>", "<!--", "        <div>", "-->", "<p>a</p>", "</div>")
+	expected := lines("<div>", "  <pre>", "    code {= x}", "</pre>", "  <textarea>", "   <b>text</b>", "   </textarea>", "  <script>", `  if (a < b) { f("</div>"); }`, "    </script>", "  <style>", "      p { color: red; }", "</style>", "  <!--", "        <div>", "-->", "  <p>a</p>", "</div>")
+	if got := formatted(t, source, Options{}); got != expected {
+		t.Errorf("got %q\nwant %q", got, expected)
 	}
 }
 

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8dd7f6f7f472c282ce237ad5d3e77211b5646fa56c5f371230f9ceee72a7b9a2 -->
+<!-- source-sha256: 701fc5c23d267b84d25be9f9131b782edb147133974ce662b174cc101d577143 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-37: 공유 case가 보이는 formatting requirement를 이름 붙인다. `tests/cases`의 `case.json` 114개가 expected tokens 또는 format 결과가 규칙을 보이는 곳(바뀐 tag, 바뀐 들여쓰기, delimiter와 directive, comment, byte order mark, html 오류와 parse 오류)에 FMT-1~FMT-5, FMT-7~FMT-10, FMT-12, FMT-14를 적고, unit `formatting`과 `tokens`가 이를 인용한다(`tokens`는 FMT-1과 FMT-2를 더한다). FMT-11은 unit `format-raw-elements`를 모든 구현의 test와 함께 가진다(Go는 `TestIndentation`에서 `TestKeepsTheIndentationInsideRawElements`를 떼어 내고, 나머지는 기존 test에 FMT-11을 적으며, PHP 확장은 PHP test에 binding한다). Red: `make parity-declarations-check`는 R13 1, R15 9198(`formatting` 90), R2 43을 보고했다; green: R13 1, R15 9092(`formatting` 0, `format-raw-elements` 0, `tokens`는 이전과 같이 LEX-8과 LEX-12의 12), R2 43이며, format test가 통과하고(vitest `indent.test.ts` 144, `go test ./format`, `cargo test --test format`, PHPUnit `IndentTest` 17, Python `test_format.py` 35) `make schema-check`가 통과한다 (T26.7-37).
 
 - T26.7-2-1-1: PHP 확장은 `Polyspec\Template\Loader\LoaderInterface`, `ArrayLoader`, `FilesystemLoader`를 내부 class로 등록한다. signature, version(source 또는 parse된 template의 JSON에 대한 `crc32b`, file은 수정 시각과 크기), 실패(symbolic link, 한 file의 두 번째 이름, 읽을 수 없는 file)는 library와 같고 Native class 옆에 C로 썼다. PHP 8.4의 `gen_stub.php`는 거기서 generic type을 읽지 못하므로 stub은 generic `@param` type을 `@phpstan-param`으로 옮겼다. Red: 세 loader class는 library의 사용자 class였으므로 새 `packages/php-ext/tests/LoaderClassesTest.php`의 `ReflectionClass::isInternal()`이 false였고, green: test 7개가 통과하며, 확장을 load하고 loader를 확장이 제공하는 상태에서 `packages/php`의 PHPUnit 파일 24개와 `packages/php-ext`의 14개가 통과한다. 단 확장이 load되지 않았음을 확인하는 `testNativeCommandWithoutTheExtensionNamesPie`는 예외이며 T26.7-2-8이 Native class와 함께 제거한다(T26.7-2-1-1).
 - T26.7-2-3-1: PHP 확장은 `Polyspec\Template\TemplateError`를 library와 같은 이름과 API로 등록한다. `RuntimeException`이며 읽기 전용 property `errorCode`, `template`, `errorLine`, `errorCol`, `offset`, `end`, 인자 7개의 생성자, `at`, `withoutPosition`, `toArray`를 가진다. `Polyspec\Template\Native\TemplateError`와 그 accessor를 대체하고, package의 Native class와 확장의 test는 library의 error를 읽는다. PHP 8.4의 `gen_stub.php`는 promoted property를 지원하지 않으므로 stub은 property와 생성자를 promotion 없이 선언한다. Red: `class_exists('Polyspec\Template\TemplateError')`는 library를 통해서만 참이었고 `ReflectionClass::isInternal()`은 거짓이었으며 확장은 accessor가 있는 Native error를 던졌다. Green: `packages/php-ext`의 PHPUnit file 14개와 `packages/php`의 `ConformanceTest`, `CompilerInterfaceTest`, `LoadFailureTest`가 확장을 load한 채로 통과하며, 확장이 load되지 않았음을 단언하는 `testNativeCommandWithoutTheExtensionNamesPie`는 T26.7-2-8이 제거한다 (T26.7-2-3-1).

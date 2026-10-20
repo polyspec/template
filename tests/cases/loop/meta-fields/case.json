@@ -2,7 +2,10 @@
   "requirements": [
     "RT-16",
     "EXP-20",
-    "EXP-21"
+    "EXP-21",
+    "FMT-3",
+    "FMT-9",
+    "FMT-10"
   ],
   "stage": 1
 }

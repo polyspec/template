@@ -1,7 +1,9 @@
 {
   "requirements": [
     "LEX-23",
-    "RT-42"
+    "RT-42",
+    "FMT-7",
+    "FMT-8"
   ],
   "stage": 3
 }

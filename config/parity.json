@@ -49,7 +49,7 @@
     },
     {
       "id": "tokens",
-      "requirements": ["LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23"],
+      "requirements": ["LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23", "FMT-1", "FMT-2"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -64,7 +64,7 @@
     },
     {
       "id": "formatting",
-      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "requirements": ["FMT-3", "FMT-4", "FMT-5", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-12", "FMT-14"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -456,6 +456,19 @@
         { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "indents_html_elements_and_template_blocks" },
         { "implementation": "php", "test": "packages/php/tests/Format/IndentTest.php", "id": "testIndentsHtmlElementsAndTemplateBlocksByTwoSpaces" },
         { "implementation": "python", "test": "packages/python/tests/test_format.py", "id": "test_indents_html_elements_and_template_blocks_by_two_spaces" }
+      ]
+    },
+    {
+      "id": "format-raw-elements",
+      "requirements": ["FMT-11"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/language/tests/indent.test.ts", "id": "indentation \u203a keeps the indentation inside pre, textarea, script, style and comments, including the end tag line" },
+        { "implementation": "go", "test": "packages/go/format/format_test.go", "id": "TestKeepsTheIndentationInsideRawElements" },
+        { "implementation": "rust", "test": "packages/rust/tests/format.rs", "id": "keeps_the_indentation_inside_pre_textarea_script_style_and_comments" },
+        { "implementation": "php", "test": "packages/php/tests/Format/IndentTest.php", "id": "testKeepsTheIndentationInsideKeptElementsAndComments" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Format/IndentTest.php", "id": "testKeepsTheIndentationInsideKeptElementsAndComments" },
+        { "implementation": "python", "test": "packages/python/tests/test_format.py", "id": "test_keeps_the_indentation_inside_raw_elements_and_comments" }
       ]
     },
     {

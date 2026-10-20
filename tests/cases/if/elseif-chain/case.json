@@ -1,7 +1,10 @@
 {
   "requirements": [
     "GRM-10",
-    "EXP-34"
+    "EXP-34",
+    "FMT-3",
+    "FMT-9",
+    "FMT-10"
   ],
   "stage": 1
 }

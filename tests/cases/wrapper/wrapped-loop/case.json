@@ -2,7 +2,10 @@
   "requirements": [
     "LEX-17",
     "LEX-19",
-    "GRM-8"
+    "GRM-8",
+    "FMT-3",
+    "FMT-9",
+    "FMT-10"
   ],
   "stage": 3
 }

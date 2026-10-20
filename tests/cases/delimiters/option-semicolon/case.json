@@ -1,7 +1,11 @@
 {
   "requirements": [
     "LEX-20",
-    "LEX-22"
+    "LEX-22",
+    "FMT-3",
+    "FMT-8",
+    "FMT-9",
+    "FMT-10"
   ],
   "stage": 3
 }
