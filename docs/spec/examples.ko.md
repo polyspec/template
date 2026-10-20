@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-examples -->
-<!-- source-sha256: 49ce69a1ec548ecf9a988c16b185788ad41ee875e2988260ccdf698c11b86638 -->
+<!-- source-sha256: 50d931f72d18bc9c801afe504d117d3ebe7ba56b57fa0d7afa680f2c3cb9eaef -->
 # 예제
 
 [English](/spec/examples).
@@ -116,6 +116,8 @@ $(function () { init({ debug: false }); });
 ```
 
 ## 출력
+
+- **EX-1** 이 문서의 파일을 렌더하면 모든 구현에서 아래 출력이 바이트 단위로 그대로 나온다. conformance case `tests/cases/examples/page`가 이 파일을 담으며, `layout.tpl`을 그 `input.tpl`로, `define.json`의 `content` 항목을 쓰므로, 모든 구현의 conformance test가 이 출력을 검사한다.
 
 ```
 <!DOCTYPE html>

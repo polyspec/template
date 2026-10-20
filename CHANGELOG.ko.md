@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 76357e1f865e487dda7491ab46957f2fc0f4077347bd2cd2108a14b3356696e8 -->
+<!-- source-sha256: 7b2ccf4db70c7e16686aaa7f04ae521a07996414fb6605e57540e218101fa2b0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -23,6 +23,7 @@
 - T26.7-41-2: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (HostBindingTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-41-2).
 
 - T26.7-4-1: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (LoadFailureTest, LoaderTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-4-1).
+- T26.7-32-6: `docs/spec/examples.md`가 EX-1을 정의한다: 그 페이지의 파일은 모든 구현에서 그 출력으로 바이트 단위로 그대로 렌더된다. 새 conformance case `tests/cases/examples/page`가 그 파일을 담으며, `layout.tpl`을 그 `input.tpl`로, `define.json`의 `content` 항목을 쓰고, 그 `expected.html`은 문서의 출력이다; conformance suite가 EX-1을 인용한다. 이 case의 TypeScript 렌더는 문서의 출력을 그대로 냈고, 다른 구현도 같다. Red: kit의 R19가 `docs/spec/examples.md`가 요구사항을 정의하지 않는다고 보고했고, 어떤 test도 이 페이지를 렌더하지 않았다. Green: examples.md의 R19가 사라졌다 (222 findings, 새 finding 없음); conformance, token, format suite가 새 case와 함께 통과한다 (ts 771, go 774, rust 771, php 771, python 771); schema-check, rules-check, conformance unit 검사 통과. `make test-php-ext`는 확장이 아직 C로 등록하지 않은 라이브러리 class를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-6).
 
 - T26.7-2-2-2-1: `packages/php` 밖에서 `MapValue::entries()`를 부르는 모든 PHP 코드는 T26.7-2-2-2가 `entries()`가 돌려주게 한 `[key, value]` 쌍을 읽는다(확장은 generator를 돌려줄 수 없다). compiler의 PHP backend(`packages/compiler/src/backends/php.mts`, 생성 runtime의 루프 세 개), showcase의 PHP adapter(Adapter.php, Inputs.php, Output.php), `scripts/check-package-installs.mts`, `scripts/check-typed-generator.mts`, `tests/runner/conformance-generated-php.mts`의 PHP probe다. Red: `make generated-typed-values-check`가 PHP에서 실패했고(생성 runtime의 "assign.tags.key is not a string"), `typed-generator-compile-check`와 `package-installs-check`는 "Call to a member function entries() on array"로 실패했다; green: 세 check가 다섯 언어 모두에서 통과한다 (T26.7-2-2-2-1).
 

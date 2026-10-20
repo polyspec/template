@@ -116,6 +116,8 @@ Every template file ends with a newline.
 
 ## Output
 
+- **EX-1** Rendering the files of this document produces the output below, byte for byte, in every implementation. The conformance case `tests/cases/examples/page` holds the files, with `layout.tpl` as its `input.tpl` and the `content` entry of `define.json`, so the conformance tests of every implementation check this output.
+
 ```
 <!DOCTYPE html>
 <html lang="ko">
