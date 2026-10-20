@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 12097c1c408a721e763343aec2b3a217517a1380dac80b250b98ad57fb18933d -->
+<!-- source-sha256: d3ecb1172c6da7bae83d3f37ab3d601cee1d5a29165e37d9248737fe923d76bc -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-14: VAL-7을 `host-function-rules`가 인용하고, 모든 구현의 그 test는 `<b>`를 반환하는 호스트 함수를 등록해 `&lt;b&gt;`로 렌더한다: 결과는 일반 문자열이며 safe 문자열이 아니다. test가 FUN-43부터 FUN-48 옆에 VAL-7을 명명한다. concurrent-bound-map은 VAL-7을 더 이상 인용하지 않는다. Red: `make item-red`가 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-7"` exit 2를 기록했다. Green: 통과하고, test가 통과하며(vitest `engine.test.ts` 14, TestHostFunctionRules의 `go test` 1, `cargo test --test functions` 16, PHPUnit과 PHP 확장의 HostBindingTest 16, Python `test_object_calls.py` 13), host-function-rules의 검사가 통과하고, `make parity-declarations-check`는 2건 줄고 새 finding이 없다 (T26.7-32-14).
 
 - T26.7-32-13: RT-2를 conformance suite가 인용한다: case `include/not-found-error`와 `block/undefined-block-error`가 그것을 명명한다. 파싱이 다른 템플릿을 로드하지 않으므로 둘은 `{+ missing.tpl}`과 `{# nothing}`을 해석하지 않은 AST로 파싱되고, 렌더할 때만 `E_LOAD_NOT_FOUND`와 `E_RUNTIME_BLOCK_UNDEFINED`로 실패한다. concurrent-bound-map은 RT-2를 더 이상 인용하지 않는다. Red: `make item-red`가 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-2"` exit 2를 기록했다. Green: 통과하고, conformance suite가 통과하며(ts 260, go 261, rust 260, php와 PHP 확장 780, python 260), conformance unit의 검사가 통과하고, `make parity-declarations-check`는 2건 줄고 새 finding이 없다 (T26.7-32-13).
 

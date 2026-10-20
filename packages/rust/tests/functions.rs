@@ -187,7 +187,7 @@ fn templates(sources: &[(&str, &str)]) -> MapLoader {
     loader
 }
 
-/// FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
+/// FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, VAL-7: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
 #[test]
 fn host_function_rules() {
     let sources = [("a.tpl", "{= tag()}"), ("b.tpl", "{= two()}"), ("c.tpl", "{= big()}")];

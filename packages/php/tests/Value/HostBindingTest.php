@@ -180,7 +180,7 @@ final class HostBindingTest extends TestCase
     }
 
     /**
-     * FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function,
+     * FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, VAL-7: registration, a refused built-in name, a replaced function,
      * the binding of a result, the same names in every host and a plain string result.
      */
     public function testHostFunctionRules(): void

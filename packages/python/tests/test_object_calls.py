@@ -134,7 +134,7 @@ class ObjectCalls(unittest.TestCase):
         self.assertEqual((error["code"], error["line"]), ("E_RUNTIME_HOST_FUNCTION", 2))
 
     def test_host_function_rules(self):
-        # FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name,
+        # FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, VAL-7: registration, a refused built-in name,
         # a replaced function, the binding of a result, the same names in every host and
         # a plain string result.
         templates = {"a.tpl": "{= tag()}", "b.tpl": "{= two()}", "c.tpl": "{= big()}"}

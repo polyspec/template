@@ -342,7 +342,7 @@
     },
     {
       "id": "host-function-rules",
-      "requirements": ["FUN-43", "FUN-44", "FUN-45", "FUN-47", "FUN-48"],
+      "requirements": ["FUN-43", "FUN-44", "FUN-45", "FUN-47", "FUN-48", "VAL-7"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › follows the host function rules (FUN-43, FUN-44, FUN-45, FUN-47, FUN-48)" },
@@ -773,7 +773,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-3", "RT-37", "RT-38", "RT-39", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-3", "RT-37", "RT-38", "RT-39", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-22", "VAL-23"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },

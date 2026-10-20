@@ -24,7 +24,7 @@ describe('Engine', () => {
     expect(() => program.register('upper', () => '')).toThrow();
   });
 
-  // FUN-43, FUN-44, FUN-45, FUN-47, FUN-48: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
+  // FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, VAL-7: registration, a refused built-in name, a replaced function, the binding of a result, the same names in every host and a plain string result.
   it('follows the host function rules (FUN-43, FUN-44, FUN-45, FUN-47, FUN-48)', () => {
     const templates = { 'a.tpl': '{= tag()}', 'b.tpl': '{= two()}', 'c.tpl': '{= big()}' };
     const program = new AstProgram({ loader: new MapLoader(templates) });
