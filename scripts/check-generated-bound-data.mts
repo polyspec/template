@@ -84,7 +84,7 @@ func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGenerat
 use polyspec_template::{DefineData, DefineInput, Program, RenderOptions, RenderTarget, RuntimeEnvironment, bind, merge};
 fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap() }
 #[test] fn generated_programs_render_bound_maps() {
-  let page = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new()));
+  let page = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new()).expect("an empty function map registers"));
   let assign = fixture(${rustString(json(cases.assign))});
   let bound = bind(&assign).unwrap();
   let options = RenderOptions::default();

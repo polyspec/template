@@ -143,26 +143,26 @@ impl Adapter {
     }
 }
 
-fn generated_runtime() -> RuntimeEnvironment {
-    RuntimeEnvironment::new(None, std::collections::HashMap::new())
+fn generated_runtime() -> Result<RuntimeEnvironment, String> {
+    RuntimeEnvironment::new(None, std::collections::HashMap::new()).map_err(|error| error.message)
 }
 
 fn generated_engine(scenario: &str) -> Result<Engine, String> {
     Ok(match scenario {
         "compiler-coverage" => Engine::new(generated::compiler_coverage::GeneratedProgram::new(
-            generated_runtime(),
+            generated_runtime()?,
         )),
         "empty-state" => Engine::new(generated::empty_state::GeneratedProgram::new(
-            generated_runtime(),
+            generated_runtime()?,
         )),
         "html-slot" => Engine::new(generated::html_slot::GeneratedProgram::new(
-            generated_runtime(),
+            generated_runtime()?,
         )),
         "react-boundary" => Engine::new(generated::react_boundary::GeneratedProgram::new(
-            generated_runtime(),
+            generated_runtime()?,
         )),
         "scope-precedence" => Engine::new(generated::scope_precedence::GeneratedProgram::new(
-            generated_runtime(),
+            generated_runtime()?,
         )),
         _ => {
             return Err(format!(

@@ -74,7 +74,7 @@ mod ${name} {
         options.define = polyspec_template::defines_from_json(&define).map_err(super::ActualError::bind)?;` : ''}
         ${testCase.hasEnv ? `let env = polyspec_template::read_json(include_str!(${quote(resolve(join(testCase.dir, 'env.json')))})).map_err(super::ActualError::bind)?;
         options.env = Some(polyspec_template::env_from_json(&env).map_err(super::ActualError::bind)?);` : ''}
-        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
+        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()).expect("an empty function map registers"));
         program.render(polyspec_template::RenderTarget::Name("input.tpl"), &assign, &options).map_err(super::ActualError::request)
     }
 }`;

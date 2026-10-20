@@ -4,7 +4,10 @@ use polyspec_template::functions::builtins;
 use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seconds};
 use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
-use polyspec_template::{ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, RenderOptions, RenderTarget};
+use polyspec_template::{
+    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Loaded, Loader, MapLoader, RenderOptions, RenderTarget,
+    RuntimeEnvironment,
+};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -190,6 +193,32 @@ fn host_function_rules() {
         .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION);
+}
+
+/// RT-5, FUN-43, FUN-44: the functions of the options are registered as `register` registers them, so a name that is no
+/// identifier or a built-in fails the creation of the program and of the runtime, as in the other languages.
+#[test]
+fn the_functions_of_the_options_are_registered_as_register_registers_them() {
+    fn no_op() -> HostFunction {
+        Box::new(|_, _| Ok(Value::Null))
+    }
+    let functions = |name: &str| std::collections::HashMap::from([(name.to_string(), no_op())]);
+    let options = |name: &str| EngineOptions {
+        functions: functions(name),
+        ..Default::default()
+    };
+    let error = AstProgram::new(options("not a name")).err().expect("a name that is no identifier");
+    assert_eq!(error.message, "\"not a name\" is not an identifier");
+    let error = AstProgram::new(options("length")).err().expect("a built-in name");
+    assert_eq!(error.message, "length is a built-in function");
+    let error = RuntimeEnvironment::new(None, functions("not a name"))
+        .err()
+        .expect("a name that is no identifier");
+    assert_eq!(error.message, "\"not a name\" is not an identifier");
+    let error = RuntimeEnvironment::new(None, functions("length")).err().expect("a built-in name");
+    assert_eq!(error.message, "length is a built-in function");
+    assert!(RuntimeEnvironment::new(None, functions("f")).is_ok());
+    assert!(AstProgram::new(options("f")).is_ok());
 }
 
 /// FUN-9: a safe string compares, concatenates and stringifies as its text.

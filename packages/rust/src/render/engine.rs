@@ -252,7 +252,7 @@ impl AstProgram {
         };
         Ok(AstProgram {
             loader: options.loader.unwrap_or_else(|| Box::new(MapLoader::new())),
-            runtime: RuntimeEnvironment::new(options.limits, options.functions),
+            runtime: RuntimeEnvironment::new(options.limits, options.functions)?,
             delimiters,
             artifact_refresh: options.artifact_refresh,
             cache: RefCell::new(HashMap::new()),

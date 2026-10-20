@@ -1,6 +1,7 @@
 //! Host functions and resource limits shared by compiler modes.
 
 use super::context::{Limits, RuntimeServices};
+use crate::error::ArgumentError;
 use crate::functions::HostFunction;
 use std::collections::HashMap;
 
@@ -15,13 +16,18 @@ pub struct RuntimeEnvironment {
 }
 
 impl RuntimeEnvironment {
-    /// Creates runtime services from explicit limits and host functions.
-    pub fn new(limits: Option<Limits>, host_functions: HashMap<String, HostFunction>) -> RuntimeEnvironment {
-        RuntimeEnvironment {
+    /// Creates runtime services from explicit limits and host functions. Each host function is added as `register` adds
+    /// it (RT-5, FUN-43, FUN-44): a name that is no identifier or a built-in is an argument error.
+    pub fn new(limits: Option<Limits>, host_functions: HashMap<String, HostFunction>) -> Result<RuntimeEnvironment, ArgumentError> {
+        let mut runtime = RuntimeEnvironment {
             limits: limits.unwrap_or_default(),
-            host_functions,
+            host_functions: HashMap::new(),
             class_functions: HashMap::new(),
+        };
+        for (name, function) in host_functions {
+            runtime.register(&name, function).map_err(|message| ArgumentError { message })?;
         }
+        Ok(runtime)
     }
 
     /// Registers one logical class function.

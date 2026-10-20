@@ -81,7 +81,7 @@ function checkRust() {
       ['generated_lint', compileFixture(crate.directory, 'rust'), 'page.tpl'],
     ];
     const modules = programs.map(([name, file]) => `mod ${name} {\n    include!(${JSON.stringify(file)});\n}\n`).join('');
-    const renders = programs.map(([name, , entry]) => `    let program = ${name}::GeneratedProgram::new(RuntimeEnvironment::new(None, HashMap::new()));
+    const renders = programs.map(([name, , entry]) => `    let program = ${name}::GeneratedProgram::new(RuntimeEnvironment::new(None, HashMap::new()).expect("an empty function map registers"));
     match program.render(RenderTarget::Name(${JSON.stringify(entry)}), &serde_json::Value::Null, &RenderOptions::default()) {
         Ok(output) => println!("{output}"),
         Err(error) => eprintln!("{error}"),

@@ -158,14 +158,14 @@ function checkRust() {
     include!(${JSON.stringify(generatedSource(id, 'rust'))});
     pub fn execute(target: &str, assign: serde_json::Value, options: polyspec_template::RenderOptions) -> String {
         use polyspec_template::Program;
-        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()));
+        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()).expect("an empty function map registers"));
         program.render(polyspec_template::RenderTarget::Name(target), &assign, &options).unwrap()
     }
     ${index === 0 ? `pub fn execute_limited(target: &str, assign: &serde_json::Value, options: &polyspec_template::RenderOptions) -> Result<String, polyspec_template::RequestError> {
         use polyspec_template::Program;
         let mut limits = polyspec_template::Limits::default();
         limits.output_bytes = 1;
-        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(Some(limits), std::collections::HashMap::new()));
+        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(Some(limits), std::collections::HashMap::new()).expect("an empty function map registers"));
         program.render(polyspec_template::RenderTarget::Name(target), assign, options)
     }` : ''}
 }`).join('\n');
