@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 106ff76c1bb10a155dff737db5784cdb68c11ca2c1879316c82ffec3f2d0eeaf -->
+<!-- source-sha256: 8e97f5d2107b35a71754557fd1a949563533fc32367a84750f29eb7a00901d5e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 - T26.7-51-5-1: PHP 확장의 internal test `AstProgramTest`는 map이 아닌 functions에 대해 예전 `TypeError`가 아니라 T26.7-51이 정하고 T26.7-51-5가 확장에 준 options의 argument error(`InvalidArgumentException` "functions is not an object")를 기대한다. test는 `testFunctionsThatAreNotAMapAreAnArgumentError`다. Red: 확장을 켠 `AstProgramTest`에서 1개 실패(TypeError를 기대한 자리에 InvalidArgumentException); green: 8개 통과 (T26.7-51-5-1).
+- T26.7-4-1: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (LoadFailureTest, LoaderTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-4-1).
 
 - T26.7-2-2-2-1: `packages/php` 밖에서 `MapValue::entries()`를 부르는 모든 PHP 코드는 T26.7-2-2-2가 `entries()`가 돌려주게 한 `[key, value]` 쌍을 읽는다(확장은 generator를 돌려줄 수 없다). compiler의 PHP backend(`packages/compiler/src/backends/php.mts`, 생성 runtime의 루프 세 개), showcase의 PHP adapter(Adapter.php, Inputs.php, Output.php), `scripts/check-package-installs.mts`, `scripts/check-typed-generator.mts`, `tests/runner/conformance-generated-php.mts`의 PHP probe다. Red: `make generated-typed-values-check`가 PHP에서 실패했고(생성 runtime의 "assign.tags.key is not a string"), `typed-generator-compile-check`와 `package-installs-check`는 "Call to a member function entries() on array"로 실패했다; green: 세 check가 다섯 언어 모두에서 통과한다 (T26.7-2-2-2-1).
 - T26.7-51-5: PHP 확장은 PHP 라이브러리처럼 program 옵션을 검사한다 (RT-4, RT-5, RT-6). `AstProgram::__construct`는 map이 아닌 `limits`나 `functions`를 거부하고, `RuntimeEnvironment::__construct`는 받은 limits를 순서대로 읽어 RT-33이 나열하지 않는 key(전에는 무시했다)와 정수가 아닌 값을 거부하며, 호출할 수 없는 함수 항목을 `functions.<name> is not a function`으로 거부한다(전에는 TypeError였다). 모두 `InvalidArgumentException`이다; 비어 있지 않은 list인 `define`이나 `env`도 map이 아니고, prepared render는 그런 env에 더 이상 `now`를 넣지 않는다(넣으면 list가 map처럼 보였다). `RuntimeEnvironment` 자체의 라이브러리 test가 새로 생겼다. Red: `make test-php-ext CASES='EngineRefreshTest'`가 8개 중 3개 실패했다 (`limits` 5에 TypeError, `limits.loops`에 오류 없음, list define에 `define 0: entry needs "template" or "html"`). Green: 확장이 있을 때와 없을 때 모두 8개 중 8개; HostBindingTest, LoadFailureTest, LoaderTest, BoundMapTest, ObjectCallsTest, ParserTest, CompilerInterfaceTest가 확장으로 통과한다 (49); lint-php-ext와 lint-php 통과 (T26.7-51-5).
