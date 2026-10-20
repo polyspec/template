@@ -21,20 +21,30 @@ func requireNumber(v value.Value, name string) (float64, error) {
 	return f, nil
 }
 
+// decimalCount reads the optional decimal count (the second argument) of number and round: zero when absent, never negative.
+func decimalCount(args []value.Value, name string) (int, error) {
+	if len(args) < 2 {
+		return 0, nil
+	}
+	decimals, err := argInteger(args[1])
+	if err != nil {
+		return 0, err
+	}
+	if decimals < 0 {
+		return 0, typeError("%s requires a non-negative decimal count", name)
+	}
+	return decimals, nil
+}
+
 var numberFunctions = map[string]BuiltIn{
 	"number": {1, 4, func(args []value.Value, _ Context) (value.Value, error) {
 		x, err := argNumber(args[0])
 		if err != nil {
 			return nil, err
 		}
-		decimals := 0
-		if len(args) > 1 {
-			if decimals, err = argInteger(args[1]); err != nil {
-				return nil, err
-			}
-			if decimals < 0 {
-				return nil, typeError("number requires a non-negative decimal count")
-			}
+		decimals, err := decimalCount(args, "number")
+		if err != nil {
+			return nil, err
 		}
 		dec, err := optString(args, 2, ".", "number")
 		if err != nil {
@@ -51,14 +61,9 @@ var numberFunctions = map[string]BuiltIn{
 		if err != nil {
 			return nil, err
 		}
-		decimals := 0
-		if len(args) > 1 {
-			if decimals, err = argInteger(args[1]); err != nil {
-				return nil, err
-			}
-			if decimals < 0 {
-				return nil, typeError("round requires a non-negative decimal count")
-			}
+		decimals, err := decimalCount(args, "round")
+		if err != nil {
+			return nil, err
 		}
 		return value.RoundNumber(x, decimals), nil
 	}},

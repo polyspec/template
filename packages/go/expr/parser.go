@@ -241,7 +241,10 @@ func (p *Parser) parseCoalesce() (ast.Expr, error) {
 	return &ast.Binary{Type: "Binary", Op: "??", Left: left, Right: right, Span: p.span(start, p.End())}, nil
 }
 
-func (p *Parser) parseLeftAssoc(next func() (ast.Expr, error), ops map[TokenType]string) (ast.Expr, error) {
+// parseBinaryLevel parses one precedence level of the binary operators: operands of the next level joined by the operators of
+// ops. The operators of a level that chains join from the left; an operator of a level that does not chain (associativity
+// none, EXP-10) is unexpected after the second operand.
+func (p *Parser) parseBinaryLevel(next func() (ast.Expr, error), ops map[TokenType]string, chains bool) (ast.Expr, error) {
 	_, start, err := p.peekType()
 	if err != nil {
 		return nil, err
@@ -251,11 +254,11 @@ func (p *Parser) parseLeftAssoc(next func() (ast.Expr, error), ops map[TokenType
 		return nil, err
 	}
 	for {
-		typ, _, err := p.peekType()
+		tok, err := p.Peek()
 		if err != nil {
 			return nil, err
 		}
-		op, ok := ops[typ]
+		op, ok := ops[tok.Type]
 		if !ok {
 			return left, nil
 		}
@@ -265,64 +268,42 @@ func (p *Parser) parseLeftAssoc(next func() (ast.Expr, error), ops map[TokenType
 			return nil, err
 		}
 		left = &ast.Binary{Type: "Binary", Op: op, Left: left, Right: right, Span: p.span(start, p.End())}
-	}
-}
-
-func (p *Parser) parseNonAssoc(next func() (ast.Expr, error), ops map[TokenType]string) (ast.Expr, error) {
-	_, start, err := p.peekType()
-	if err != nil {
-		return nil, err
-	}
-	left, err := next()
-	if err != nil {
-		return nil, err
-	}
-	typ, _, err := p.peekType()
-	if err != nil {
-		return nil, err
-	}
-	op, ok := ops[typ]
-	if !ok {
+		if chains {
+			continue
+		}
+		after, err := p.Peek()
+		if err != nil {
+			return nil, err
+		}
+		if _, chained := ops[after.Type]; chained {
+			return nil, p.Unexpected(after)
+		}
 		return left, nil
 	}
-	p.Consume()
-	right, err := next()
-	if err != nil {
-		return nil, err
-	}
-	node := &ast.Binary{Type: "Binary", Op: op, Left: left, Right: right, Span: p.span(start, p.End())}
-	tok, err := p.Peek()
-	if err != nil {
-		return nil, err
-	}
-	if _, chained := ops[tok.Type]; chained {
-		return nil, p.Unexpected(tok)
-	}
-	return node, nil
 }
 
 func (p *Parser) parseOr() (ast.Expr, error) {
-	return p.parseLeftAssoc(p.parseAnd, map[TokenType]string{"OR": "||"})
+	return p.parseBinaryLevel(p.parseAnd, map[TokenType]string{"OR": "||"}, true)
 }
 
 func (p *Parser) parseAnd() (ast.Expr, error) {
-	return p.parseLeftAssoc(p.parseEquality, map[TokenType]string{"AND": "&&"})
+	return p.parseBinaryLevel(p.parseEquality, map[TokenType]string{"AND": "&&"}, true)
 }
 
 func (p *Parser) parseEquality() (ast.Expr, error) {
-	return p.parseNonAssoc(p.parseComparison, equalityOps)
+	return p.parseBinaryLevel(p.parseComparison, equalityOps, false)
 }
 
 func (p *Parser) parseComparison() (ast.Expr, error) {
-	return p.parseNonAssoc(p.parseAdditive, comparisonOps)
+	return p.parseBinaryLevel(p.parseAdditive, comparisonOps, false)
 }
 
 func (p *Parser) parseAdditive() (ast.Expr, error) {
-	return p.parseLeftAssoc(p.parseMultiplicative, additiveOps)
+	return p.parseBinaryLevel(p.parseMultiplicative, additiveOps, true)
 }
 
 func (p *Parser) parseMultiplicative() (ast.Expr, error) {
-	return p.parseLeftAssoc(p.parseUnary, multiplicativeOps)
+	return p.parseBinaryLevel(p.parseUnary, multiplicativeOps, true)
 }
 
 func (p *Parser) parseUnary() (ast.Expr, error) {
@@ -377,22 +358,14 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 			if _, err := p.Expect("LPAREN"); err != nil {
 				return nil, err
 			}
-			args, err := p.parseArguments(nil)
-			if err != nil {
-				return nil, err
-			}
-			close, err := p.Expect("RPAREN")
+			args, close, err := p.parseCallArguments()
 			if err != nil {
 				return nil, err
 			}
 			node = &ast.ClassCall{Type: "ClassCall", ClassName: first.Value, Method: method.Value, Args: args, Span: p.span(start, close.End)}
 		case after.Type == "LPAREN" && (!adjacentOnly || after.Start == first.End):
 			p.Consume()
-			args, err := p.parseArguments(nil)
-			if err != nil {
-				return nil, err
-			}
-			close, err := p.Expect("RPAREN")
+			args, close, err := p.parseCallArguments()
 			if err != nil {
 				return nil, err
 			}
@@ -427,11 +400,7 @@ func (p *Parser) ParsePostfix(adjacentOnly bool) (ast.Expr, error) {
 			}
 			if next.Type == "LPAREN" && (!adjacentOnly || next.Start == tok.End) {
 				p.Consume()
-				args, err := p.parseArguments(nil)
-				if err != nil {
-					return nil, err
-				}
-				close, err := p.Expect("RPAREN")
+				args, close, err := p.parseCallArguments()
 				if err != nil {
 					return nil, err
 				}
@@ -577,6 +546,20 @@ func (p *Parser) parseBracket() (ast.Expr, error) {
 		}
 	}
 	return &ast.Map{Type: "Map", Entries: mapEntries, Span: span}, nil
+}
+
+// parseCallArguments parses the arguments of a call, after its opening parenthesis, up to the closing parenthesis, which it
+// returns.
+func (p *Parser) parseCallArguments() ([]ast.Expr, *Token, error) {
+	args, err := p.parseArguments(nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	close, err := p.Expect("RPAREN")
+	if err != nil {
+		return nil, nil, err
+	}
+	return args, close, nil
 }
 
 func (p *Parser) parseArguments(args []ast.Expr) ([]ast.Expr, error) {

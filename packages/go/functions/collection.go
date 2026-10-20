@@ -72,6 +72,30 @@ func sortList(list value.List, key *string) (value.List, error) {
 	return result, nil
 }
 
+// endOf returns the first or the last element of a list or the first or the last character of a string; an empty one has none.
+func endOf(item value.Value, name string, last bool) (value.Value, error) {
+	if list, ok := item.(value.List); ok {
+		if len(list) == 0 {
+			return nil, nil
+		}
+		if last {
+			return list[len(list)-1], nil
+		}
+		return list[0], nil
+	}
+	if text, ok := value.TextOf(item); ok {
+		runes := []rune(text)
+		if len(runes) == 0 {
+			return nil, nil
+		}
+		if last {
+			return string(runes[len(runes)-1]), nil
+		}
+		return string(runes[0]), nil
+	}
+	return nil, typeError("%s requires a list or a string", name)
+}
+
 var collectionFunctions = map[string]BuiltIn{
 	"keys": {1, 1, func(args []value.Value, _ Context) (value.Value, error) {
 		switch x := args[0].(type) {
@@ -104,36 +128,10 @@ var collectionFunctions = map[string]BuiltIn{
 		return nil, typeError("values requires a map or a list")
 	}},
 	"first": {1, 1, func(args []value.Value, _ Context) (value.Value, error) {
-		if list, ok := args[0].(value.List); ok {
-			if len(list) == 0 {
-				return nil, nil
-			}
-			return list[0], nil
-		}
-		if text, ok := value.TextOf(args[0]); ok {
-			runes := []rune(text)
-			if len(runes) == 0 {
-				return nil, nil
-			}
-			return string(runes[0]), nil
-		}
-		return nil, typeError("first requires a list or a string")
+		return endOf(args[0], "first", false)
 	}},
 	"last": {1, 1, func(args []value.Value, _ Context) (value.Value, error) {
-		if list, ok := args[0].(value.List); ok {
-			if len(list) == 0 {
-				return nil, nil
-			}
-			return list[len(list)-1], nil
-		}
-		if text, ok := value.TextOf(args[0]); ok {
-			runes := []rune(text)
-			if len(runes) == 0 {
-				return nil, nil
-			}
-			return string(runes[len(runes)-1]), nil
-		}
-		return nil, typeError("last requires a list or a string")
+		return endOf(args[0], "last", true)
 	}},
 	"reverse": {1, 1, func(args []value.Value, _ Context) (value.Value, error) {
 		if list, ok := args[0].(value.List); ok {

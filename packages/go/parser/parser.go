@@ -534,13 +534,22 @@ func (p *templateParser) parseLoop(c tagContext, bodyStart int) (int, error) {
 	return end, nil
 }
 
-func (p *templateParser) parseIf(c tagContext, bodyStart int) (int, error) {
+// parseTest parses the expression of an if or else-if tag up to the close of the tag and returns it with the end of the tag.
+func (p *templateParser) parseTest(c tagContext, bodyStart int) (ast.Expr, int, error) {
 	parser := p.exprParser(c, bodyStart)
 	test, err := parser.ParseExpression()
 	if err != nil {
-		return 0, err
+		return nil, 0, err
 	}
 	end, err := p.closeExpression(c, parser)
+	if err != nil {
+		return nil, 0, err
+	}
+	return test, end, nil
+}
+
+func (p *templateParser) parseIf(c tagContext, bodyStart int) (int, error) {
+	test, end, err := p.parseTest(c, bodyStart)
 	if err != nil {
 		return 0, err
 	}
@@ -575,12 +584,7 @@ func (p *templateParser) parseElseIf(c tagContext, bodyStart int) (int, error) {
 	if f.hasElse {
 		return 0, p.fail(errs.ParseElseifAfterElse, c.start, c.start+1, "\"{:?}\" after \"{:}\"")
 	}
-	parser := p.exprParser(c, bodyStart)
-	test, err := parser.ParseExpression()
-	if err != nil {
-		return 0, err
-	}
-	end, err := p.closeExpression(c, parser)
+	test, end, err := p.parseTest(c, bodyStart)
 	if err != nil {
 		return 0, err
 	}

@@ -29,6 +29,19 @@ func (e *Evaluator) fail(frame *Frame, span ast.Span, code errs.Code, message st
 	return e.runtime.Error(frame, span, code, message)
 }
 
+// evaluateAll evaluates the argument expressions of a call in order.
+func (e *Evaluator) evaluateAll(exprs []ast.Expr, frame *Frame) ([]value.Value, error) {
+	args := make([]value.Value, len(exprs))
+	for i, expr := range exprs {
+		v, err := e.Evaluate(expr, frame)
+		if err != nil {
+			return nil, err
+		}
+		args[i] = v
+	}
+	return args, nil
+}
+
 // Evaluate evaluates an expression in a frame.
 func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	e.depth++
@@ -72,22 +85,15 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		if err != nil {
 			return nil, err
 		}
-		args := make([]value.Value, len(n.Args))
-		for i, arg := range n.Args {
-			args[i], err = e.Evaluate(arg, frame)
-			if err != nil {
-				return nil, err
-			}
+		args, err := e.evaluateAll(n.Args, frame)
+		if err != nil {
+			return nil, err
 		}
 		return e.runtime.MemberCall(object, n.Method, args, frame, n.Span)
 	case *ast.ClassCall:
-		args := make([]value.Value, len(n.Args))
-		for i, arg := range n.Args {
-			v, err := e.Evaluate(arg, frame)
-			if err != nil {
-				return nil, err
-			}
-			args[i] = v
+		args, err := e.evaluateAll(n.Args, frame)
+		if err != nil {
+			return nil, err
 		}
 		return e.runtime.ClassCall(n.ClassName, n.Method, args, frame, n.Span)
 	case *ast.Index:
@@ -101,13 +107,9 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		}
 		return e.runtime.Index(object, key, frame, n.Span)
 	case *ast.Call:
-		args := make([]value.Value, len(n.Args))
-		for i, arg := range n.Args {
-			v, err := e.Evaluate(arg, frame)
-			if err != nil {
-				return nil, err
-			}
-			args[i] = v
+		args, err := e.evaluateAll(n.Args, frame)
+		if err != nil {
+			return nil, err
 		}
 		return e.runtime.Call(n.Name, args, frame, n.Span)
 	case *ast.Unary:

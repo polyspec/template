@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 868dd0ca30c58c8d85ae8adc7e5df8a33a79da3245735d5767d6d5b5c4f9391a -->
+<!-- source-sha256: 2e20ea9c0e1b90794f5e56b51fe295e3c2f39194bf57ed897d00ef56a22bad8c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-12: `packages/go`는 같은 코드를 한 곳에만 둔다. AST decoder는 첫 실패를 보관하는 `fieldReader` 하나로 node의 field를 읽고(node와 expression decoder가 약 280줄 짧아졌다), expression parser는 chain하는 단계와 chain하지 않는 단계를 `parseBinaryLevel` 하나로, 호출 인자를 `parseCallArguments` 하나로 처리하며, `first`와 `last`는 `endOf`를, `number`와 `round`는 `decimalCount`를 공유하고, if와 else-if tag는 `parseTest`를 공유하며, evaluator는 호출 인자를 `evaluateAll`에서 평가한다. Red: `make duplication-check`가 `packages/go`에서 clone 11개를 찾았고, green: 0개이며 `ast`, `expr`, `functions`, `parser`, `render`, `format`의 `go test`가 통과한다(T26.7-12).
 
 - T26.7-11: `packages/php/src`는 T26.7-2-8이 제거하는 Native class 두 개를 제외하고 같은 코드를 한 곳에만 둔다. AST node는 builder 20개 대신 `Ast::node` 하나로 만들고(호출 38곳), 함수 묶음은 `FunctionGroup`을 구현하며, 표현식 parser의 binary 단계는 table로 구동하는 `parseLevel` 하나이고, parser는 `openFrame`으로 block을 열고 예약어 이름을 한 번만 거부하며, `AstProgram`은 `parsedWith`로 parse와 analyze를 하고, JSON parser는 object나 array의 다음 token을 `continues`에서 정하며, runtime binding은 함수 오류나 binding 오류를 `guarded`에서 막고, docblock에서 반복되던 type은 `@phpstan-type` 별칭(`Wrapper`, `Analysis`, `RenderOptions`, `Limits`, `Span`, `Node`, `Expr`)이다. Red: `make duplication-check`가 `packages/php/src`에서 clone 37개를 찾았고(T26.7-10부터 T26.7-14 시작 때 repository 61개), green: 1개(Native 쌍)이고 repository는 26개다. PHPUnit 파일 ConformanceTest(765개), ExprFixturesTest(73개), ParserTest, AnalyzeTest, FunctionsTest, EngineRefreshTest, ValueTest, HostBindingTest, ObjectCallsTest가 통과한다(T26.7-11).
 

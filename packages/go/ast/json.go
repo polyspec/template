@@ -38,6 +38,19 @@ func DecodeTemplate(data []byte) (*Template, error) {
 	return template, nil
 }
 
+// fieldReader reads the fields of one JSON object of the AST. The first failure is kept and every later read returns the zero
+// value, so a decoder reads all the fields of a node and checks the failure once.
+type fieldReader struct {
+	fields map[string]json.RawMessage
+	err    error
+}
+
+func newFieldReader(data []byte) *fieldReader {
+	reader := &fieldReader{}
+	reader.fields, reader.err = object(data)
+	return reader
+}
+
 func object(data []byte) (map[string]json.RawMessage, error) {
 	var value map[string]json.RawMessage
 	if err := json.Unmarshal(data, &value); err != nil {
@@ -52,6 +65,72 @@ func required[T any](fields map[string]json.RawMessage, name string, target *T) 
 		return fmt.Errorf("ast field %s is missing", name)
 	}
 	return json.Unmarshal(data, target)
+}
+
+// read decodes the field name into target; a failure is kept.
+func read[T any](r *fieldReader, name string, target *T) {
+	if r.err == nil {
+		r.err = required(r.fields, name, target)
+	}
+}
+
+func (r *fieldReader) text(name string) string {
+	var value string
+	read(r, name, &value)
+	return value
+}
+
+func (r *fieldReader) span() Span {
+	var value Span
+	read(r, "span", &value)
+	return value
+}
+
+func (r *fieldReader) raw(name string) json.RawMessage {
+	var value json.RawMessage
+	read(r, name, &value)
+	return value
+}
+
+// expr decodes the expression of the field name.
+func (r *fieldReader) expr(name string) Expr {
+	raw := r.raw(name)
+	if r.err != nil {
+		return nil
+	}
+	value, err := decodeExpr(raw)
+	r.err = err
+	return value
+}
+
+// exprs decodes the list of expressions of the field name.
+func (r *fieldReader) exprs(name string) []Expr {
+	var raws []json.RawMessage
+	read(r, name, &raws)
+	if r.err != nil {
+		return nil
+	}
+	result := make([]Expr, 0, len(raws))
+	for _, raw := range raws {
+		item, err := decodeExpr(raw)
+		if err != nil {
+			r.err = err
+			return nil
+		}
+		result = append(result, item)
+	}
+	return result
+}
+
+// nodes decodes the list of nodes of the field name; JSON null stays nil (AST-3).
+func (r *fieldReader) nodes(name string) []Node {
+	raw := r.raw(name)
+	if r.err != nil {
+		return nil
+	}
+	value, err := nodes(raw)
+	r.err = err
+	return value
 }
 
 func nodes(data json.RawMessage) ([]Node, error) {
@@ -76,476 +155,200 @@ func nodes(data json.RawMessage) ([]Node, error) {
 }
 
 func decodeNode(data []byte) (Node, error) {
-	fields, err := object(data)
-	if err != nil {
-		return nil, err
+	r := newFieldReader(data)
+	typ := r.text("type")
+	if r.err != nil {
+		return nil, r.err
 	}
-	var typ string
-	if err := required(fields, "type", &typ); err != nil {
-		return nil, err
-	}
+	var node Node
 	switch typ {
 	case "Text":
-		var value string
-		var span Span
-		if err := required(fields, "value", &value); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		return &Text{Type: typ, Value: value, Span: span}, nil
+		node = &Text{Type: typ, Value: r.text("value"), Span: r.span()}
 	case "Echo":
-		var expression json.RawMessage
-		var span Span
-		if err := required(fields, "expr", &expression); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		expr, err := decodeExpr(expression)
-		if err != nil {
-			return nil, err
-		}
-		return &Echo{Type: typ, Expr: expr, Span: span}, nil
+		node = &Echo{Type: typ, Expr: r.expr("expr"), Span: r.span()}
 	case "If":
-		var rawBranches []struct {
-			Test json.RawMessage `json:"test"`
-			Body json.RawMessage `json:"body"`
-			Span Span            `json:"span"`
-		}
-		if err := required(fields, "branches", &rawBranches); err != nil {
-			return nil, err
-		}
-		branches := make([]*IfBranch, 0, len(rawBranches))
-		for _, branch := range rawBranches {
-			test, e := decodeExpr(branch.Test)
-			if e != nil {
-				return nil, e
-			}
-			body, e := nodes(branch.Body)
-			if e != nil {
-				return nil, e
-			}
-			branches = append(branches, &IfBranch{Test: test, Body: body, Span: branch.Span})
-		}
-		var elseRaw json.RawMessage
-		if err := required(fields, "else", &elseRaw); err != nil {
-			return nil, err
-		}
-		empty, err := nodes(elseRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &If{Type: typ, Branches: branches, Else: empty, Span: spanOf(fields)}, nil
+		node = decodeIf(r, typ)
 	case "For":
-		var name string
-		var iterRaw json.RawMessage
-		var bodyRaw, emptyRaw json.RawMessage
-		var span Span
-		if err := required(fields, "name", &name); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "iter", &iterRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "body", &bodyRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "empty", &emptyRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		iter, err := decodeExpr(iterRaw)
-		if err != nil {
-			return nil, err
-		}
-		body, err := nodes(bodyRaw)
-		if err != nil {
-			return nil, err
-		}
-		empty, err := nodes(emptyRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &For{Type: typ, Name: name, Iter: iter, Body: body, Empty: empty, Span: span}, nil
+		node = &For{Type: typ, Name: r.text("name"), Iter: r.expr("iter"), Body: r.nodes("body"), Empty: r.nodes("empty"), Span: r.span()}
 	case "Set":
-		var name string
-		var exprRaw json.RawMessage
-		var span Span
-		if err := required(fields, "name", &name); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "expr", &exprRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		expr, err := decodeExpr(exprRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &Set{Type: typ, Name: name, Expr: expr, Span: span}, nil
+		node = &Set{Type: typ, Name: r.text("name"), Expr: r.expr("expr"), Span: r.span()}
 	case "Include":
-		var path string
-		var span Span
-		if err := required(fields, "path", &path); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		return &Include{Type: typ, Path: path, Span: span}, nil
+		node = &Include{Type: typ, Path: r.text("path"), Span: r.span()}
 	case "Block":
-		var id, path *string
-		var scopeRaw json.RawMessage
-		var span Span
-		if err := required(fields, "id", &id); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "path", &path); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "scope", &scopeRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		var rawScope []struct {
-			Name string          `json:"name"`
-			Expr json.RawMessage `json:"expr"`
-		}
-		if err := json.Unmarshal(scopeRaw, &rawScope); err != nil {
-			return nil, err
-		}
-		scope := make([]*ScopeItem, 0, len(rawScope))
-		for _, item := range rawScope {
-			expr, e := decodeExpr(item.Expr)
-			if e != nil {
-				return nil, e
-			}
-			scope = append(scope, &ScopeItem{Name: item.Name, Expr: expr})
-		}
-		return &Block{Type: typ, ID: id, Path: path, Scope: scope, Span: span}, nil
+		node = decodeBlock(r, typ)
 	case "IfBlock":
-		var id string
-		var bodyRaw, elseRaw json.RawMessage
-		var span Span
-		if err := required(fields, "id", &id); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "body", &bodyRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "else", &elseRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "span", &span); err != nil {
-			return nil, err
-		}
-		body, err := nodes(bodyRaw)
-		if err != nil {
-			return nil, err
-		}
-		empty, err := nodes(elseRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &IfBlock{Type: typ, ID: id, Body: body, Else: empty, Span: span}, nil
+		node = &IfBlock{Type: typ, ID: r.text("id"), Body: r.nodes("body"), Else: r.nodes("else"), Span: r.span()}
 	default:
 		return nil, fmt.Errorf("unknown AST node type %q", typ)
 	}
+	if r.err != nil {
+		return nil, r.err
+	}
+	return node, nil
+}
+
+func decodeIf(r *fieldReader, typ string) *If {
+	var rawBranches []struct {
+		Test json.RawMessage `json:"test"`
+		Body json.RawMessage `json:"body"`
+		Span Span            `json:"span"`
+	}
+	read(r, "branches", &rawBranches)
+	branches := make([]*IfBranch, 0, len(rawBranches))
+	for _, branch := range rawBranches {
+		if r.err != nil {
+			break
+		}
+		test, err := decodeExpr(branch.Test)
+		if err != nil {
+			r.err = err
+			break
+		}
+		body, err := nodes(branch.Body)
+		if err != nil {
+			r.err = err
+			break
+		}
+		branches = append(branches, &IfBranch{Test: test, Body: body, Span: branch.Span})
+	}
+	return &If{Type: typ, Branches: branches, Else: r.nodes("else"), Span: r.span()}
+}
+
+func decodeBlock(r *fieldReader, typ string) *Block {
+	var id, path *string
+	read(r, "id", &id)
+	read(r, "path", &path)
+	var rawScope []struct {
+		Name string          `json:"name"`
+		Expr json.RawMessage `json:"expr"`
+	}
+	read(r, "scope", &rawScope)
+	scope := make([]*ScopeItem, 0, len(rawScope))
+	for _, item := range rawScope {
+		if r.err != nil {
+			break
+		}
+		expr, err := decodeExpr(item.Expr)
+		if err != nil {
+			r.err = err
+			break
+		}
+		scope = append(scope, &ScopeItem{Name: item.Name, Expr: expr})
+	}
+	return &Block{Type: typ, ID: id, Path: path, Scope: scope, Span: r.span()}
+}
+
+func decodeExpr(data []byte) (Expr, error) {
+	r := newFieldReader(data)
+	typ := r.text("type")
+	span := r.span()
+	if r.err != nil {
+		return nil, r.err
+	}
+	var expr Expr
+	switch typ {
+	case "Literal":
+		var value any
+		kind := r.text("kind")
+		read(r, "value", &value)
+		expr = &Literal{Type: typ, Kind: kind, Value: value, Span: span}
+	case "Var":
+		expr = &Var{Type: typ, Name: r.text("name"), Span: span}
+	case "LoopMeta":
+		expr = &LoopMeta{Type: typ, Loop: r.text("loop"), Field: r.text("field"), Span: span}
+	case "Member":
+		expr = &Member{Type: typ, Object: r.expr("object"), Key: r.text("key"), Span: span}
+	case "MemberCall":
+		expr = &MemberCall{Type: typ, Object: r.expr("object"), Method: r.text("method"), Args: r.exprs("args"), Span: span}
+	case "ClassCall":
+		expr = &ClassCall{Type: typ, ClassName: r.text("className"), Method: r.text("method"), Args: r.exprs("args"), Span: span}
+	case "Index":
+		expr = &Index{Type: typ, Object: r.expr("object"), Index: r.expr("index"), Span: span}
+	case "Call":
+		expr = &Call{Type: typ, Name: r.text("name"), Args: r.exprs("args"), Span: span}
+	case "Unary":
+		expr = &Unary{Type: typ, Op: r.text("op"), Operand: r.expr("operand"), Span: span}
+	case "Binary":
+		expr = &Binary{Type: typ, Op: r.text("op"), Left: r.expr("left"), Right: r.expr("right"), Span: span}
+	case "Ternary":
+		expr = decodeTernary(r, typ, span)
+	case "List":
+		expr = &List{Type: typ, Items: r.entries("items", decodeListItem), Span: span}
+	case "Map":
+		expr = &Map{Type: typ, Entries: r.entries("entries", decodeMapEntry), Span: span}
+	default:
+		return nil, fmt.Errorf("unknown AST expression type %q", typ)
+	}
+	if r.err != nil {
+		return nil, r.err
+	}
+	return expr, nil
+}
+
+func decodeTernary(r *fieldReader, typ string, span Span) *Ternary {
+	test := r.expr("test")
+	thenRaw := r.raw("then")
+	// The elvis form a ?: b has no then branch, which the artifact writes as null.
+	var thenExpr Expr
+	if r.err == nil && string(thenRaw) != "null" {
+		thenExpr, r.err = decodeExpr(thenRaw)
+	}
+	return &Ternary{Type: typ, Test: test, Then: thenExpr, Else: r.expr("else"), Span: span}
+}
+
+// entries decodes the list of the field name with decode, which reads one item as a reader of its fields.
+func (r *fieldReader) entries(name string, decode func(raw json.RawMessage) (any, error)) []any {
+	var raws []json.RawMessage
+	read(r, name, &raws)
+	if r.err != nil {
+		return nil
+	}
+	result := make([]any, 0, len(raws))
+	for _, raw := range raws {
+		item, err := decode(raw)
+		if err != nil {
+			r.err = err
+			return nil
+		}
+		result = append(result, item)
+	}
+	return result
+}
+
+// spread decodes a spread entry (EXP-16), which a list and a map hold beside their own items.
+func spread(r *fieldReader, itemType string) *Spread {
+	return &Spread{Type: itemType, Expr: r.expr("expr"), Span: spanOf(r.fields)}
+}
+
+func decodeListItem(raw json.RawMessage) (any, error) {
+	r := newFieldReader(raw)
+	itemType := r.text("type")
+	if r.err != nil {
+		return nil, r.err
+	}
+	if itemType != "Spread" {
+		return decodeExpr(raw)
+	}
+	item := spread(r, itemType)
+	return item, r.err
+}
+
+func decodeMapEntry(raw json.RawMessage) (any, error) {
+	r := newFieldReader(raw)
+	if r.err != nil {
+		return nil, r.err
+	}
+	var itemType string
+	if err := json.Unmarshal(r.fields["type"], &itemType); err == nil && itemType == "Spread" {
+		item := spread(r, itemType)
+		return item, r.err
+	}
+	entry := &MapEntry{Key: r.expr("key"), Value: r.expr("value")}
+	return entry, r.err
 }
 
 func spanOf(fields map[string]json.RawMessage) Span {
 	var span Span
 	_ = required(fields, "span", &span)
 	return span
-}
-
-func decodeExpr(data []byte) (Expr, error) {
-	fields, err := object(data)
-	if err != nil {
-		return nil, err
-	}
-	var typ string
-	if err := required(fields, "type", &typ); err != nil {
-		return nil, err
-	}
-	var span Span
-	if err := required(fields, "span", &span); err != nil {
-		return nil, err
-	}
-	switch typ {
-	case "Literal":
-		var kind string
-		var value any
-		if err := required(fields, "kind", &kind); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "value", &value); err != nil {
-			return nil, err
-		}
-		return &Literal{Type: typ, Kind: kind, Value: value, Span: span}, nil
-	case "Var":
-		var name string
-		if err := required(fields, "name", &name); err != nil {
-			return nil, err
-		}
-		return &Var{Type: typ, Name: name, Span: span}, nil
-	case "LoopMeta":
-		var loop, field string
-		if err := required(fields, "loop", &loop); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "field", &field); err != nil {
-			return nil, err
-		}
-		return &LoopMeta{Type: typ, Loop: loop, Field: field, Span: span}, nil
-	case "Member":
-		var raw json.RawMessage
-		var key string
-		if err := required(fields, "object", &raw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "key", &key); err != nil {
-			return nil, err
-		}
-		objectExpr, err := decodeExpr(raw)
-		if err != nil {
-			return nil, err
-		}
-		return &Member{Type: typ, Object: objectExpr, Key: key, Span: span}, nil
-	case "MemberCall":
-		var objectRaw json.RawMessage
-		var method string
-		var argsRaw []json.RawMessage
-		if err := required(fields, "object", &objectRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "method", &method); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "args", &argsRaw); err != nil {
-			return nil, err
-		}
-		objectExpr, err := decodeExpr(objectRaw)
-		if err != nil {
-			return nil, err
-		}
-		args := make([]Expr, 0, len(argsRaw))
-		for _, raw := range argsRaw {
-			item, e := decodeExpr(raw)
-			if e != nil {
-				return nil, e
-			}
-			args = append(args, item)
-		}
-		return &MemberCall{Type: typ, Object: objectExpr, Method: method, Args: args, Span: span}, nil
-	case "ClassCall":
-		var className, method string
-		var argsRaw []json.RawMessage
-		if err := required(fields, "className", &className); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "method", &method); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "args", &argsRaw); err != nil {
-			return nil, err
-		}
-		args := make([]Expr, 0, len(argsRaw))
-		for _, raw := range argsRaw {
-			item, e := decodeExpr(raw)
-			if e != nil {
-				return nil, e
-			}
-			args = append(args, item)
-		}
-		return &ClassCall{Type: typ, ClassName: className, Method: method, Args: args, Span: span}, nil
-	case "Index":
-		var objectRaw, indexRaw json.RawMessage
-		if err := required(fields, "object", &objectRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "index", &indexRaw); err != nil {
-			return nil, err
-		}
-		objectExpr, err := decodeExpr(objectRaw)
-		if err != nil {
-			return nil, err
-		}
-		indexExpr, err := decodeExpr(indexRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &Index{Type: typ, Object: objectExpr, Index: indexExpr, Span: span}, nil
-	case "Call":
-		var name string
-		var argsRaw []json.RawMessage
-		if err := required(fields, "name", &name); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "args", &argsRaw); err != nil {
-			return nil, err
-		}
-		args := make([]Expr, 0, len(argsRaw))
-		for _, raw := range argsRaw {
-			item, e := decodeExpr(raw)
-			if e != nil {
-				return nil, e
-			}
-			args = append(args, item)
-		}
-		return &Call{Type: typ, Name: name, Args: args, Span: span}, nil
-	case "Unary":
-		var op string
-		var raw json.RawMessage
-		if err := required(fields, "op", &op); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "operand", &raw); err != nil {
-			return nil, err
-		}
-		operand, err := decodeExpr(raw)
-		if err != nil {
-			return nil, err
-		}
-		return &Unary{Type: typ, Op: op, Operand: operand, Span: span}, nil
-	case "Binary":
-		var op string
-		var leftRaw, rightRaw json.RawMessage
-		if err := required(fields, "op", &op); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "left", &leftRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "right", &rightRaw); err != nil {
-			return nil, err
-		}
-		left, err := decodeExpr(leftRaw)
-		if err != nil {
-			return nil, err
-		}
-		right, err := decodeExpr(rightRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &Binary{Type: typ, Op: op, Left: left, Right: right, Span: span}, nil
-	case "Ternary":
-		var testRaw, thenRaw, elseRaw json.RawMessage
-		if err := required(fields, "test", &testRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "then", &thenRaw); err != nil {
-			return nil, err
-		}
-		if err := required(fields, "else", &elseRaw); err != nil {
-			return nil, err
-		}
-		test, err := decodeExpr(testRaw)
-		if err != nil {
-			return nil, err
-		}
-		// The elvis form a ?: b has no then branch, which the artifact writes as null.
-		var thenExpr Expr
-		if string(thenRaw) != "null" {
-			if thenExpr, err = decodeExpr(thenRaw); err != nil {
-				return nil, err
-			}
-		}
-		elseExpr, err := decodeExpr(elseRaw)
-		if err != nil {
-			return nil, err
-		}
-		return &Ternary{Type: typ, Test: test, Then: thenExpr, Else: elseExpr, Span: span}, nil
-	case "List":
-		var rawItems []json.RawMessage
-		if err := required(fields, "items", &rawItems); err != nil {
-			return nil, err
-		}
-		items := make([]any, 0, len(rawItems))
-		for _, raw := range rawItems {
-			itemFields, e := object(raw)
-			if e != nil {
-				return nil, e
-			}
-			var itemType string
-			if e = required(itemFields, "type", &itemType); e != nil {
-				return nil, e
-			}
-			if itemType == "Spread" {
-				var exprRaw json.RawMessage
-				if e = required(itemFields, "expr", &exprRaw); e != nil {
-					return nil, e
-				}
-				expr, e := decodeExpr(exprRaw)
-				if e != nil {
-					return nil, e
-				}
-				var itemSpan Span
-				_ = required(itemFields, "span", &itemSpan)
-				items = append(items, &Spread{Type: itemType, Expr: expr, Span: itemSpan})
-			} else {
-				item, e := decodeExpr(raw)
-				if e != nil {
-					return nil, e
-				}
-				items = append(items, item)
-			}
-		}
-		return &List{Type: typ, Items: items, Span: span}, nil
-	case "Map":
-		var rawEntries []json.RawMessage
-		if err := required(fields, "entries", &rawEntries); err != nil {
-			return nil, err
-		}
-		entries := make([]any, 0, len(rawEntries))
-		for _, raw := range rawEntries {
-			entryFields, e := object(raw)
-			if e != nil {
-				return nil, e
-			}
-			var itemType string
-			if e = json.Unmarshal(entryFields["type"], &itemType); e == nil && itemType == "Spread" {
-				var exprRaw json.RawMessage
-				if e = required(entryFields, "expr", &exprRaw); e != nil {
-					return nil, e
-				}
-				expr, e := decodeExpr(exprRaw)
-				if e != nil {
-					return nil, e
-				}
-				var itemSpan Span
-				_ = required(entryFields, "span", &itemSpan)
-				entries = append(entries, &Spread{Type: itemType, Expr: expr, Span: itemSpan})
-			} else {
-				var keyRaw, valueRaw json.RawMessage
-				if e = required(entryFields, "key", &keyRaw); e != nil {
-					return nil, e
-				}
-				if e = required(entryFields, "value", &valueRaw); e != nil {
-					return nil, e
-				}
-				key, e := decodeExpr(keyRaw)
-				if e != nil {
-					return nil, e
-				}
-				value, e := decodeExpr(valueRaw)
-				if e != nil {
-					return nil, e
-				}
-				entries = append(entries, &MapEntry{Key: key, Value: value})
-			}
-		}
-		return &Map{Type: typ, Entries: entries, Span: span}, nil
-	default:
-		return nil, fmt.Errorf("unknown AST expression type %q", typ)
-	}
 }
