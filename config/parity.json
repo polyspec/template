@@ -34,7 +34,7 @@
   "units": [
     {
       "id": "conformance",
-      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24", "FUN-1", "FUN-2", "FUN-3", "FUN-4", "FUN-5", "FUN-6", "FUN-7", "FUN-8", "FUN-10", "FUN-11", "FUN-12", "FUN-13", "FUN-14", "FUN-15", "FUN-16", "FUN-17", "FUN-18", "FUN-19", "FUN-20", "FUN-21", "FUN-22", "FUN-23", "FUN-24", "FUN-25", "FUN-26", "FUN-27", "FUN-28", "FUN-29", "FUN-30", "FUN-31", "FUN-32", "FUN-33", "FUN-34", "FUN-35", "FUN-36", "FUN-37", "FUN-38", "FUN-39", "FUN-40", "FUN-41", "FUN-42", "FUN-49"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",

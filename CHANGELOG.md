@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-41-1: the unit `conformance` cites the built-in functions that its cases name in their `case.json`: FUN-1 to FUN-8, FUN-10 to FUN-42 and FUN-49, which `tests/cases/functions/json-in-attribute` now lists, since it checks that JSON text in a double-quoted attribute has its quotes escaped. The cases run in every implementation, so the 39 requirements that T26.7-41 left without a unit have their test in all six. The six that no case can test, the host-function requirements FUN-43, FUN-44, FUN-45, FUN-47 and FUN-48 and FUN-9, go to T26.7-41-2. Red: `make parity-declarations-check` on bda64c04 reported R13 46 (45 FUN and RT-71); green: R13 7 (FUN-9, FUN-43, FUN-44, FUN-45, FUN-47, FUN-48 and RT-71) with R15 unchanged at 3854. `make template-rules-check`: 255 cases, 0 findings (T26.7-41-1).
+
 - T26.7-52-3: `packages/rust` passes `make template-lint-rust-format` again: rustfmt formats the load-failure test that T26.7-52 added to `packages/rust/tests/load_failures.rs`. Red: `make template-lint-rust-format` exit 2 (a diff at `load_failures.rs:65`); green: it passes, and `cargo test --test load_failures` passes 4 (T26.7-52-3).
 
 - T26.7-2-8-1: the C methods `parse`, `analyze`, `register` and `registerClass` of AstProgram in the PHP extension do their work through shared C functions (`pt_method_parse`, `pt_method_analyze`, `pt_method_register`, `pt_method_register_class`) instead of calling the methods of `Native\Engine`, which a later row removes; behaviour does not change. The owner tests pass before and after under the extension: `AstProgramTest` 8, `Parser/ParserTest` 6, `Parser/AnalyzeTest` 15, `Value/HostBindingTest` 14, `ConformanceTest` 765 and the extension's `EngineTest` 27, and `make lint-php-ext` passes (T26.7-2-8-1).

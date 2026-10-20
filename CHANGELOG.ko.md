@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 71e0e87677feeb88c302eb6d705a065da85f45701c74810fa77f8f8d5b4b80a6 -->
+<!-- source-sha256: 561dc2e81467e349ae631af8b25cf1d94826131b70cb3281113e75cb6308be64 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-41-1: `conformance` unit은 자기 case의 `case.json`이 이름을 적는 built-in 함수를 인용한다. FUN-1부터 FUN-8, FUN-10부터 FUN-42, 그리고 FUN-49이며, `tests/cases/functions/json-in-attribute`는 큰따옴표 속성 안의 JSON 텍스트가 따옴표를 escape하는지 확인하므로 이제 FUN-49를 적는다. case는 모든 구현에서 실행되므로, T26.7-41이 unit 없이 남긴 requirement 39개는 여섯 구현 모두에서 test를 가진다. case로 시험할 수 없는 여섯 개, 즉 host 함수 requirement FUN-43, FUN-44, FUN-45, FUN-47, FUN-48과 FUN-9는 T26.7-41-2로 간다. Red: bda64c04에서 `make parity-declarations-check`는 R13 46(FUN 45개와 RT-71); green: R13 7(FUN-9, FUN-43, FUN-44, FUN-45, FUN-47, FUN-48, RT-71), R15는 3854로 그대로. `make template-rules-check`: 255 cases, 0 findings (T26.7-41-1).
 
 - T26.7-52-3: `packages/rust`는 다시 `make template-lint-rust-format`을 통과한다. T26.7-52가 `packages/rust/tests/load_failures.rs`에 더한 load-failure test를 rustfmt가 정리한다. Red: `make template-lint-rust-format` exit 2(`load_failures.rs:65`의 diff); green: 통과하며 `cargo test --test load_failures`가 4개 통과한다 (T26.7-52-3).
 
