@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-32-5: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (ConformanceTest, AnalyzeTest, FormatterTest), now that the extension registers the Formatter (T26.7-2-7-3); with the other checks of its Verification the row is done. Red: `make item-red BEFORE=7a415e9f` ran the Verification on main before T26.7-2-7-3, where `make test-php-ext` exits 2 because the tests load `packages/php/src/Format` of the library (T26.7-32-5).
+
 - T26.7-32-1: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (ConformanceTest, HostValuesTest), now that the extension registers the Formatter (T26.7-2-7-3); with the other checks of its Verification the row is done. Red: `make item-red BEFORE=7a415e9f` ran the Verification on main before T26.7-2-7-3, where `make test-php-ext` exits 2 because the tests load `packages/php/src/Format` of the library (T26.7-32-1).
 
 - T26.7-4-2: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (BoundMapTest, HostBindingTest, HostValuesTest, LoadFailureTest, FormatterTest, ConformanceTest, AnalyzeTest), now that the extension registers the Formatter (T26.7-2-7-3); with the other checks of its Verification the row is done. Red: `make item-red BEFORE=7a415e9f` ran the Verification on main before T26.7-2-7-3, where `make test-php-ext` exits 2 because the tests load `packages/php/src/Format` of the library (T26.7-4-2).

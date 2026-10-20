@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e5fbd97287ca796fb4801ed38f58fad3419740c8cdc4bfe52f79c6565b5bbf7a -->
+<!-- source-sha256: 04c133104a10510afbc47e7c71f1bc36e12274de5f09a7e9f7588926305d8835 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-5: 확장이 Formatter를 등록하므로(T26.7-2-7-3) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (ConformanceTest, AnalyzeTest, FormatterTest); Verification의 다른 검사와 함께 행은 끝났다. Red: `make item-red BEFORE=7a415e9f`가 T26.7-2-7-3 이전의 main에서 Verification을 실행했고, 그때 `make test-php-ext`는 test가 라이브러리의 `packages/php/src/Format`을 load하므로 exit 2다 (T26.7-32-5).
 
 - T26.7-32-1: 확장이 Formatter를 등록하므로(T26.7-2-7-3) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (ConformanceTest, HostValuesTest); Verification의 다른 검사와 함께 행은 끝났다. Red: `make item-red BEFORE=7a415e9f`가 T26.7-2-7-3 이전의 main에서 Verification을 실행했고, 그때 `make test-php-ext`는 test가 라이브러리의 `packages/php/src/Format`을 load하므로 exit 2다 (T26.7-32-1).
 
