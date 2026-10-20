@@ -65,6 +65,19 @@ pub struct RenderOptions {
     pub env: Option<Env>,
 }
 
+impl RenderOptions {
+    /// The environment of the render: the given one, or `Z` and the current time.
+    fn environment(&self) -> Env {
+        self.env.clone().unwrap_or_else(|| Env {
+            timezone: "Z".to_string(),
+            now: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs() as f64)
+                .unwrap_or(0.0),
+        })
+    }
+}
+
 /// The assign of one request: JSON data that is bound, or a bound map that is not bound again (VAL-22).
 enum Root<'a> {
     Json(&'a serde_json::Value),
@@ -77,6 +90,16 @@ pub enum RenderTarget<'a> {
     Name(&'a str),
     /// A parsed template.
     Ast(&'a Template),
+}
+
+impl RenderTarget<'_> {
+    /// The name of the template: the name that the loader resolves, or the name of the parsed template.
+    fn name(&self) -> String {
+        match self {
+            RenderTarget::Name(name) => (*name).to_owned(),
+            RenderTarget::Ast(ast) => ast.name.clone(),
+        }
+    }
 }
 
 /// A complete AST or generated template program.
@@ -185,6 +208,29 @@ struct AstPreparedExecution<'e> {
 }
 
 impl AstProgram {
+    /// The name of the template that a target renders, through the definitions, and the template itself.
+    fn resolve_target(
+        &self,
+        target: RenderTarget<'_>,
+        registry: &HashMap<String, DefineEntry>,
+    ) -> Result<(String, Rc<ParsedTemplate>), TemplateError> {
+        let target_name = match target {
+            RenderTarget::Name(name) => match registry.get(name) {
+                Some(DefineEntry::Template { template, .. }) => template.clone(),
+                _ => name.to_string(),
+            },
+            RenderTarget::Ast(ast) => ast.name.clone(),
+        };
+        let template = match target {
+            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
+            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
+                ast: ast.clone(),
+                lines: None,
+            }),
+        };
+        Ok((target_name, template))
+    }
+
     /// Creates an engine. A delimiter option that is not a delimiter pair is an argument error (ERR-13).
     pub fn new(options: EngineOptions) -> Result<AstProgram, ArgumentError> {
         let delimiters = match options.delimiters {
@@ -258,10 +304,7 @@ impl AstProgram {
         assign: &serde_json::Value,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
-        let name = match target {
-            RenderTarget::Name(name) => name.to_owned(),
-            RenderTarget::Ast(ast) => ast.name.clone(),
-        };
+        let name = target.name();
         internal_boundary(&name, || self.prepare_request(&name, target, Root::Json(assign), options))
     }
 
@@ -272,10 +315,7 @@ impl AstProgram {
         assign: &BoundMap,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
-        let name = match target {
-            RenderTarget::Name(name) => name.to_owned(),
-            RenderTarget::Ast(ast) => ast.name.clone(),
-        };
+        let name = target.name();
         internal_boundary(&name, || self.prepare_request(&name, target, Root::Bound(assign), options))
     }
 
@@ -292,31 +332,12 @@ impl AstProgram {
                 Root::Bound(bound) => bound_root(bound),
             };
             let registry = bind_defines(&options.define)?;
-            let env = options.env.clone().unwrap_or_else(|| Env {
-                timezone: "Z".to_string(),
-                now: std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .map(|d| d.as_secs() as f64)
-                    .unwrap_or(0.0),
-            });
+            let env = options.environment();
             Ok(BoundRequest { root, registry, env })
         })();
         let BoundRequest { root, registry, env } =
             bound.map_err(|error| TemplateError::without_position(error.code, name, error.message))?;
-        let target_name = match target {
-            RenderTarget::Name(name) => match registry.get(name) {
-                Some(DefineEntry::Template { template, .. }) => template.clone(),
-                _ => name.to_string(),
-            },
-            RenderTarget::Ast(ast) => ast.name.clone(),
-        };
-        let template = match target {
-            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
-            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
-                ast: ast.clone(),
-                lines: None,
-            }),
-        };
+        let (target_name, template) = self.resolve_target(target, &registry)?;
         let execution = AstPreparedExecution {
             engine: self,
             root,
@@ -341,10 +362,7 @@ impl AstProgram {
     /// Renders a native value map while retaining assigned native objects. The map is bound
     /// under VAL-16: numbers, depth and safe strings are checked like every other host value.
     pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, TemplateError> {
-        let name = match target {
-            RenderTarget::Name(name) => name.to_owned(),
-            RenderTarget::Ast(ast) => ast.name.clone(),
-        };
+        let name = target.name();
         internal_boundary(&name, || self.render_bound_values(&name, target, &assign, options))
     }
 
@@ -358,27 +376,8 @@ impl AstProgram {
         let bind_failure = |error: BindError| TemplateError::without_position(error.code, name, error.message);
         let assign = bind_values(assign).map_err(bind_failure)?;
         let registry = bind_defines(&options.define).map_err(bind_failure)?;
-        let env = options.env.clone().unwrap_or_else(|| Env {
-            timezone: "Z".to_string(),
-            now: std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map(|d| d.as_secs() as f64)
-                .unwrap_or(0.0),
-        });
-        let target_name = match target {
-            RenderTarget::Name(name) => match registry.get(name) {
-                Some(DefineEntry::Template { template, .. }) => template.clone(),
-                _ => name.to_string(),
-            },
-            RenderTarget::Ast(ast) => ast.name.clone(),
-        };
-        let template = match target {
-            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
-            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
-                ast: ast.clone(),
-                lines: None,
-            }),
-        };
+        let env = options.environment();
+        let (target_name, template) = self.resolve_target(target, &registry)?;
         AstPreparedExecution {
             engine: self,
             root: Rc::new(assign),

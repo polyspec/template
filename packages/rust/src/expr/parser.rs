@@ -8,6 +8,14 @@ use crate::source::Source;
 /// Maximum expression nesting depth (RT-33).
 pub const EXPRESSION_DEPTH_LIMIT: usize = 64;
 
+fn or_op(kind: TokenType) -> Option<BinaryOp> {
+    (kind == TokenType::Or).then_some(BinaryOp::Or)
+}
+
+fn and_op(kind: TokenType) -> Option<BinaryOp> {
+    (kind == TokenType::And).then_some(BinaryOp::And)
+}
+
 fn equality_op(kind: TokenType) -> Option<BinaryOp> {
     match kind {
         TokenType::Eq => Some(BinaryOp::Equal),
@@ -271,106 +279,43 @@ impl<'a> ExpressionParser<'a> {
     }
 
     fn parse_or(&mut self) -> Result<Expr, TemplateError> {
-        let start = self.peek()?.start;
-        let mut left = self.parse_and()?;
-        while self.peek()?.kind == TokenType::Or {
-            self.next_token()?;
-            let right = self.parse_and()?;
-            let end = self.end();
-            left = Expr::Binary {
-                op: BinaryOp::Or,
-                left: Box::new(left),
-                right: Box::new(right),
-                span: self.span(start, end),
-            };
-        }
-        Ok(left)
+        self.parse_binary_level(Self::parse_and, or_op, true)
     }
 
     fn parse_and(&mut self) -> Result<Expr, TemplateError> {
-        let start = self.peek()?.start;
-        let mut left = self.parse_equality()?;
-        while self.peek()?.kind == TokenType::And {
-            self.next_token()?;
-            let right = self.parse_equality()?;
-            let end = self.end();
-            left = Expr::Binary {
-                op: BinaryOp::And,
-                left: Box::new(left),
-                right: Box::new(right),
-                span: self.span(start, end),
-            };
-        }
-        Ok(left)
+        self.parse_binary_level(Self::parse_equality, and_op, true)
     }
 
     fn parse_equality(&mut self) -> Result<Expr, TemplateError> {
-        let start = self.peek()?.start;
-        let left = self.parse_comparison()?;
-        let Some(op) = equality_op(self.peek()?.kind) else {
-            return Ok(left);
-        };
-        self.next_token()?;
-        let right = self.parse_comparison()?;
-        let end = self.end();
-        let node = Expr::Binary {
-            op,
-            left: Box::new(left),
-            right: Box::new(right),
-            span: self.span(start, end),
-        };
-        let next = self.peek()?;
-        if equality_op(next.kind).is_some() {
-            return Err(self.unexpected(&next));
-        }
-        Ok(node)
+        self.parse_binary_level(Self::parse_comparison, equality_op, false)
     }
 
     fn parse_comparison(&mut self) -> Result<Expr, TemplateError> {
-        let start = self.peek()?.start;
-        let left = self.parse_additive()?;
-        let Some(op) = comparison_op(self.peek()?.kind) else {
-            return Ok(left);
-        };
-        self.next_token()?;
-        let right = self.parse_additive()?;
-        let end = self.end();
-        let node = Expr::Binary {
-            op,
-            left: Box::new(left),
-            right: Box::new(right),
-            span: self.span(start, end),
-        };
-        let next = self.peek()?;
-        if comparison_op(next.kind).is_some() {
-            return Err(self.unexpected(&next));
-        }
-        Ok(node)
+        self.parse_binary_level(Self::parse_additive, comparison_op, false)
     }
 
     fn parse_additive(&mut self) -> Result<Expr, TemplateError> {
-        let start = self.peek()?.start;
-        let mut left = self.parse_multiplicative()?;
-        while let Some(op) = additive_op(self.peek()?.kind) {
-            self.next_token()?;
-            let right = self.parse_multiplicative()?;
-            let end = self.end();
-            left = Expr::Binary {
-                op,
-                left: Box::new(left),
-                right: Box::new(right),
-                span: self.span(start, end),
-            };
-        }
-        Ok(left)
+        self.parse_binary_level(Self::parse_multiplicative, additive_op, true)
     }
 
     fn parse_multiplicative(&mut self) -> Result<Expr, TemplateError> {
+        self.parse_binary_level(Self::parse_unary, multiplicative_op, true)
+    }
+
+    /// One precedence level of the binary operators: operands of the next level joined by the operators that `operator`
+    /// names. The operators of a level that chains join from the left; an operator of a level that does not chain
+    /// (associativity none, EXP-10) is unexpected after the second operand.
+    fn parse_binary_level(
+        &mut self,
+        next: fn(&mut Self) -> Result<Expr, TemplateError>,
+        operator: fn(TokenType) -> Option<BinaryOp>,
+        chains: bool,
+    ) -> Result<Expr, TemplateError> {
         let start = self.peek()?.start;
-        let mut left = self.parse_unary()?;
-        while let Some(op) = multiplicative_op(self.peek()?.kind) {
+        let mut left = next(self)?;
+        while let Some(op) = operator(self.peek()?.kind) {
             self.next_token()?;
-            let right = self.parse_unary()?;
+            let right = next(self)?;
             let end = self.end();
             left = Expr::Binary {
                 op,
@@ -378,6 +323,13 @@ impl<'a> ExpressionParser<'a> {
                 right: Box::new(right),
                 span: self.span(start, end),
             };
+            if !chains {
+                let following = self.peek()?;
+                if operator(following.kind).is_some() {
+                    return Err(self.unexpected(&following));
+                }
+                break;
+            }
         }
         Ok(left)
     }

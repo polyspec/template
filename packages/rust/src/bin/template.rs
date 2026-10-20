@@ -169,6 +169,19 @@ fn locate(file: &str, root: Option<&str>) -> (PathBuf, PathBuf, String) {
     (root, file_path, name)
 }
 
+/// The source, the template name and the parse options of the input of a `parse` or `tokens` call.
+fn read_input(input: Input) -> (Vec<u8>, String, ParseOptions) {
+    let (_, file_path, name) = locate(&input.file, input.root.as_deref());
+    let source = read_source(&file_path, &input.file);
+    (
+        source,
+        name,
+        ParseOptions {
+            delimiters: input.delimiters,
+        },
+    )
+}
+
 fn read_source(file_path: &Path, file: &str) -> Vec<u8> {
     std::fs::read(file_path).unwrap_or_else(|error| usage(&format!("cannot read {file}: {error}")))
 }
@@ -195,12 +208,7 @@ fn main() {
             }
         }
         Command::Tokens { input } => {
-            let file = &input.file;
-            let (_, file_path, name) = locate(file, input.root.as_deref());
-            let source = read_source(&file_path, file);
-            let parse_options = ParseOptions {
-                delimiters: input.delimiters,
-            };
+            let (source, name, parse_options) = read_input(input);
             match analyze(&source, &name, &parse_options) {
                 Ok(analysis) => {
                     let tokens: Vec<_> = analysis.tokens.iter().map(|token| (token.start, token.end, token.kind)).collect();
@@ -211,12 +219,7 @@ fn main() {
             }
         }
         Command::Parse { input } => {
-            let file = &input.file;
-            let (_, file_path, name) = locate(file, input.root.as_deref());
-            let source = read_source(&file_path, file);
-            let parse_options = ParseOptions {
-                delimiters: input.delimiters,
-            };
+            let (source, name, parse_options) = read_input(input);
             match parse(&source, &name, &parse_options) {
                 Ok(ast) => write_stdout(&json(&ast)),
                 Err(RequestError::Template(error)) => fail(error),

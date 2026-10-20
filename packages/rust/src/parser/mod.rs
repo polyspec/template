@@ -455,13 +455,7 @@ impl<'a> TemplateParser<'a> {
                     r#else: None,
                     span,
                 };
-                self.frames.push(Frame {
-                    node,
-                    bodies: vec![Vec::new()],
-                    current: 0,
-                    has_else: false,
-                    open_start: context.start,
-                });
+                self.open_frame(node, context.start);
                 end
             }
             Some("?#") => {
@@ -475,13 +469,7 @@ impl<'a> TemplateParser<'a> {
                     r#else: None,
                     span: [context.start, end],
                 };
-                self.frames.push(Frame {
-                    node,
-                    bodies: vec![Vec::new()],
-                    current: 0,
-                    has_else: false,
-                    open_start: context.start,
-                });
+                self.open_frame(node, context.start);
                 end
             }
             Some(":?") => {
@@ -756,14 +744,19 @@ impl<'a> TemplateParser<'a> {
             empty: None,
             span: [context.start, end],
         };
+        self.open_frame(node, context.start);
+        Ok(end)
+    }
+
+    /// Opens a block: its tag node, with an empty body and no else yet.
+    fn open_frame(&mut self, node: Node, open_start: usize) {
         self.frames.push(Frame {
             node,
             bodies: vec![Vec::new()],
             current: 0,
             has_else: false,
-            open_start: context.start,
+            open_start,
         });
-        Ok(end)
     }
 
     fn parse_assignment(&mut self, context: &TagContext, body_start: usize) -> Result<usize, TemplateError> {

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2e20ea9c0e1b90794f5e56b51fe295e3c2f39194bf57ed897d00ef56a22bad8c -->
+<!-- source-sha256: 331602c67f8402c714684497d42d99f7c32dfef8cd4f1d9c82eb0f637f54d077 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-13: `packages/rust`는 같은 코드를 한 곳에만 둔다. expression parser의 binary 단계는 `parse_binary_level` 하나이고(`or_op`, `and_op`는 다른 연산자 table 옆에 둔다), parser는 `open_frame`으로 block을 열며, `template` 명령은 `parse`와 `tokens`의 입력을 `read_input`에서 읽고, engine은 target의 이름을 `RenderTarget::name`에서, 기본 환경을 `RenderOptions::environment`에서, target의 template를 `resolve_target`에서 얻는다. Red: `make duplication-check`가 `packages/rust`에서 clone 8개를 찾았고, green: 0개이며 cargo test `parser`, `cli`, `bound`, `decode`, `functions`, `expr_fixtures`, `object_calls`, `host_values`, `analyze`, `format`, `value`, `exports`가 통과한다(T26.7-13).
 
 - T26.7-12: `packages/go`는 같은 코드를 한 곳에만 둔다. AST decoder는 첫 실패를 보관하는 `fieldReader` 하나로 node의 field를 읽고(node와 expression decoder가 약 280줄 짧아졌다), expression parser는 chain하는 단계와 chain하지 않는 단계를 `parseBinaryLevel` 하나로, 호출 인자를 `parseCallArguments` 하나로 처리하며, `first`와 `last`는 `endOf`를, `number`와 `round`는 `decimalCount`를 공유하고, if와 else-if tag는 `parseTest`를 공유하며, evaluator는 호출 인자를 `evaluateAll`에서 평가한다. Red: `make duplication-check`가 `packages/go`에서 clone 11개를 찾았고, green: 0개이며 `ast`, `expr`, `functions`, `parser`, `render`, `format`의 `go test`가 통과한다(T26.7-12).
 
