@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8e97f5d2107b35a71754557fd1a949563533fc32367a84750f29eb7a00901d5e -->
+<!-- source-sha256: bb32e136872dde204509968bf96ff5a2227bf04559f848a8a9adac1981b69d44 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,8 @@
 ## Unreleased
 
 - T26.7-51-5-1: PHP 확장의 internal test `AstProgramTest`는 map이 아닌 functions에 대해 예전 `TypeError`가 아니라 T26.7-51이 정하고 T26.7-51-5가 확장에 준 options의 argument error(`InvalidArgumentException` "functions is not an object")를 기대한다. test는 `testFunctionsThatAreNotAMapAreAnArgumentError`다. Red: 확장을 켠 `AstProgramTest`에서 1개 실패(TypeError를 기대한 자리에 InvalidArgumentException); green: 8개 통과 (T26.7-51-5-1).
+- T26.7-41-2: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (HostBindingTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-41-2).
+
 - T26.7-4-1: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (LoadFailureTest, LoaderTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-4-1).
 
 - T26.7-2-2-2-1: `packages/php` 밖에서 `MapValue::entries()`를 부르는 모든 PHP 코드는 T26.7-2-2-2가 `entries()`가 돌려주게 한 `[key, value]` 쌍을 읽는다(확장은 generator를 돌려줄 수 없다). compiler의 PHP backend(`packages/compiler/src/backends/php.mts`, 생성 runtime의 루프 세 개), showcase의 PHP adapter(Adapter.php, Inputs.php, Output.php), `scripts/check-package-installs.mts`, `scripts/check-typed-generator.mts`, `tests/runner/conformance-generated-php.mts`의 PHP probe다. Red: `make generated-typed-values-check`가 PHP에서 실패했고(생성 runtime의 "assign.tags.key is not a string"), `typed-generator-compile-check`와 `package-installs-check`는 "Call to a member function entries() on array"로 실패했다; green: 세 check가 다섯 언어 모두에서 통과한다 (T26.7-2-2-2-1).
