@@ -37,6 +37,16 @@ final class ProgramEngineTest extends TestCase
         ], $program->calls);
     }
 
+    public function testLiteralEmptyArraysReachTheProgram(): void
+    {
+        $program = new RecordingProgram();
+        $engine = new Engine($program);
+
+        $this->assertSame('rendered', $engine->render([], [], []));
+        $this->assertSame('prepared', $engine->prepare([], [], [])->render());
+        $this->assertSame([['render', [], [], []], ['prepare', [], [], []]], $program->calls);
+    }
+
     public function testAnExceptionOfTheProgramPassesUnchanged(): void
     {
         $failure = new \RuntimeException('program');

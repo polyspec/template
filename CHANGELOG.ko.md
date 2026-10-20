@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e333ea7fc3553e2736e1792debc83cfb5ad972a2e889d37ace0aca06a60dad7e -->
+<!-- source-sha256: 4fb7f43038b8d79152f4c14d9dd25edca5c4e71b44bf59ba5707c19ac4ba4085 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-1-5-1: PHP 확장의 `Engine`은 target이나 option으로 받은 literal 빈 배열을 fault 없이 program에 넘긴다. 이전에는 인자를 zval을 counted로 표시하는 `ZVAL_ARR`로 다시 만들었으므로, literal `[]`의 immutable 빈 배열이 읽기 전용 메모리에서 count가 올라가 process가 SIGBUS로 끝났다. 이제 호출자의 인자를 그대로 넘긴다. Red: `ProgramEngineTest::testLiteralEmptyArraysReachTheProgram`이 끝나지 않았고, 확장을 load한 `ConformanceTest`가 `block/anonymous-path-block`에서 멈췄다(510 통과, 1 실패). T26.7-2-1-5는 이 test를 실행하지 않았다; green: 확장을 load하고 `ProgramEngineTest` 4와 `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-1-5-1).
 
 - T26.7-2-2-1: PHP 확장은 `Polyspec\Template\Value\SafeString`(readonly `text`)과 `Polyspec\Template\Value\BindError`(readonly `errorCode`를 가진 `RuntimeException`)를 library와 같은 signature의 internal final class로 등록하고, data로 주어진 `SafeString`을 객체로 두지 않고 library와 같이(`Bind::text`) echo 태그가 이스케이프하는 그 텍스트로 bind한다. Red: 새 `packages/php-ext/tests/ValueClassesTest.php`가 4개 중 2개 실패했고(`SafeString is not registered by the extension`, 그리고 assign의 safe string에 대한 `a list or map cannot be converted to text`), library만으로는 4개 중 3개(등록을 뺀 모두)가 통과한다; green: 확장을 load하고 `ValueClassesTest` 4와 `Value/HostBindingTest` 14가 통과하며, `Value/ValueTest`, `Functions/FunctionsTest`, `LoadFailureTest`가 통과하고 `make lint-php-ext`가 통과한다 (T26.7-2-2-1).
 

@@ -1369,8 +1369,9 @@ ZEND_METHOD(Polyspec_Template_Engine, __construct)
     zend_update_property(pt_program_engine_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("program"), program);
 }
 
-/* Calls the method `method` of the program of the engine with the arguments of the request, unchanged; what the program
- * returns or throws is the result of the engine. */
+/* Calls the method `method` of the program of the engine with the arguments of the caller, passed as they are, so an
+ * immutable array (such as a literal `[]`) keeps its type; what the program returns or throws is the result of the
+ * engine. */
 static void pt_program_engine_delegate(zend_execute_data *execute_data, zval *return_value, const char *method, size_t length)
 {
     HashTable *target_array;
@@ -1384,19 +1385,16 @@ static void pt_program_engine_delegate(zend_execute_data *execute_data, zval *re
         Z_PARAM_ARRAY_HT(options)
     ZEND_PARSE_PARAMETERS_END();
 
+    uint32_t given = ZEND_NUM_ARGS();
     zval params[3];
-    if (target_array != NULL) {
-        ZVAL_ARR(&params[0], target_array);
-    } else {
-        ZVAL_STR(&params[0], target_name);
-    }
-    if (assign != NULL) {
-        ZVAL_COPY_VALUE(&params[1], assign);
+    ZVAL_COPY_VALUE(&params[0], ZEND_CALL_ARG(execute_data, 1));
+    if (given >= 2) {
+        ZVAL_COPY_VALUE(&params[1], ZEND_CALL_ARG(execute_data, 2));
     } else {
         ZVAL_EMPTY_ARRAY(&params[1]);
     }
-    if (options != NULL) {
-        ZVAL_ARR(&params[2], options);
+    if (given >= 3) {
+        ZVAL_COPY_VALUE(&params[2], ZEND_CALL_ARG(execute_data, 3));
     } else {
         ZVAL_EMPTY_ARRAY(&params[2]);
     }
