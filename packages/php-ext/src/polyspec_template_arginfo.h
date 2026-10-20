@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 37169a99e759cde89f54f5b5c1adcb5292f42269 */
+ * Stub hash: 7f084965a57a529c615ce1c3a6a50e0d13cc329b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -674,6 +674,69 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Function
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Token___construct, 0, 0, 4)
+	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, decoded, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer___construct, 0, 0, 6)
+	ZEND_ARG_OBJ_INFO(0, source, Polyspec\\Template\\Source, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, close, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, closeCount, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, openIndex, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_error, 0, 4, Polyspec\\Template\\TemplateError, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_peek, 0, 0, Polyspec\\Template\\Expr\\Token, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Expr_Lexer_next arginfo_class_Polyspec_Template_Expr_Lexer_peek
+
+#define arginfo_class_Polyspec_Template_Expr_Lexer_consumed arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+#define arginfo_class_Polyspec_Template_Expr_Lexer_consumedEnd arginfo_class_Polyspec_Template_Source_length
+
+#define arginfo_class_Polyspec_Template_Expr_Lexer_text arginfo_class_Polyspec_Template_Render_Context_output
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_stringLiteral, 0, 3, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, source, Polyspec\\Template\\Source, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Expr_Parser___construct arginfo_class_Polyspec_Template_Expr_Lexer___construct
+
+#define arginfo_class_Polyspec_Template_Expr_Parser_peek arginfo_class_Polyspec_Template_Expr_Lexer_peek
+
+#define arginfo_class_Polyspec_Template_Expr_Parser_next arginfo_class_Polyspec_Template_Expr_Lexer_peek
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Parser_unexpected, 0, 1, Polyspec\\Template\\TemplateError, 0)
+	ZEND_ARG_OBJ_INFO(0, token, Polyspec\\Template\\Expr\\Token, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Parser_expect, 0, 1, Polyspec\\Template\\Expr\\Token, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Expr_Parser_expectClose arginfo_class_Polyspec_Template_Source_length
+
+#define arginfo_class_Polyspec_Template_Expr_Parser_parseExpression arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Expr_Parser_parsePostfix, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, adjacentOnly, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, __construct);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, set);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, load);
@@ -828,6 +891,23 @@ ZEND_METHOD(Polyspec_Template_Functions_Dates, format);
 ZEND_METHOD(Polyspec_Template_Functions_Dates, table);
 ZEND_METHOD(Polyspec_Template_Functions_Registry, builtins);
 ZEND_METHOD(Polyspec_Template_Functions_Registry, isBuiltin);
+ZEND_METHOD(Polyspec_Template_Expr_Token, __construct);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, error);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, peek);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, next);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, consumed);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, consumedEnd);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, text);
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, stringLiteral);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, __construct);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, peek);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, next);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, unexpected);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, expect);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, expectClose);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, parseExpression);
+ZEND_METHOD(Polyspec_Template_Expr_Parser, parsePostfix);
 
 static const zend_function_entry class_Polyspec_Template_Loader_LoaderInterface_methods[] = {
 #if (PHP_VERSION_ID >= 80400)
@@ -1184,6 +1264,35 @@ static const zend_function_entry class_Polyspec_Template_Functions_Dates_methods
 static const zend_function_entry class_Polyspec_Template_Functions_Registry_methods[] = {
 	ZEND_ME(Polyspec_Template_Functions_Registry, builtins, arginfo_class_Polyspec_Template_Functions_Registry_builtins, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Functions_Registry, isBuiltin, arginfo_class_Polyspec_Template_Functions_Registry_isBuiltin, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Expr_Token_methods[] = {
+	ZEND_ME(Polyspec_Template_Expr_Token, __construct, arginfo_class_Polyspec_Template_Expr_Token___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Expr_Lexer_methods[] = {
+	ZEND_ME(Polyspec_Template_Expr_Lexer, __construct, arginfo_class_Polyspec_Template_Expr_Lexer___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, error, arginfo_class_Polyspec_Template_Expr_Lexer_error, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, peek, arginfo_class_Polyspec_Template_Expr_Lexer_peek, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, next, arginfo_class_Polyspec_Template_Expr_Lexer_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, consumed, arginfo_class_Polyspec_Template_Expr_Lexer_consumed, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, consumedEnd, arginfo_class_Polyspec_Template_Expr_Lexer_consumedEnd, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, text, arginfo_class_Polyspec_Template_Expr_Lexer_text, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Lexer, stringLiteral, arginfo_class_Polyspec_Template_Expr_Lexer_stringLiteral, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Expr_Parser_methods[] = {
+	ZEND_ME(Polyspec_Template_Expr_Parser, __construct, arginfo_class_Polyspec_Template_Expr_Parser___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, peek, arginfo_class_Polyspec_Template_Expr_Parser_peek, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, next, arginfo_class_Polyspec_Template_Expr_Parser_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, unexpected, arginfo_class_Polyspec_Template_Expr_Parser_unexpected, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, expect, arginfo_class_Polyspec_Template_Expr_Parser_expect, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, expectClose, arginfo_class_Polyspec_Template_Expr_Parser_expectClose, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, parseExpression, arginfo_class_Polyspec_Template_Expr_Parser_parseExpression, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Expr_Parser, parsePostfix, arginfo_class_Polyspec_Template_Expr_Parser_parsePostfix, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -2540,6 +2649,116 @@ static zend_class_entry *register_class_Polyspec_Template_Functions_Registry(voi
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Expr_Token(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Expr", "Token", class_Polyspec_Template_Expr_Token_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_type_default_value;
+	ZVAL_UNDEF(&property_type_default_value);
+	zend_string *property_type_name = zend_string_init("type", sizeof("type") - 1, 1);
+	zend_declare_typed_property(class_entry, property_type_name, &property_type_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_type_name);
+
+	zval property_value_default_value;
+	ZVAL_UNDEF(&property_value_default_value);
+	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
+	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_value_name);
+
+	zval property_start_default_value;
+	ZVAL_UNDEF(&property_start_default_value);
+	zend_string *property_start_name = zend_string_init("start", sizeof("start") - 1, 1);
+	zend_declare_typed_property(class_entry, property_start_name, &property_start_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_start_name);
+
+	zval property_end_default_value;
+	ZVAL_UNDEF(&property_end_default_value);
+	zend_string *property_end_name = zend_string_init("end", sizeof("end") - 1, 1);
+	zend_declare_typed_property(class_entry, property_end_name, &property_end_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_end_name);
+
+	zval property_decoded_default_value;
+	ZVAL_UNDEF(&property_decoded_default_value);
+	zend_string *property_decoded_name = zend_string_init("decoded", sizeof("decoded") - 1, 1);
+	zend_declare_typed_property(class_entry, property_decoded_name, &property_decoded_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_decoded_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Expr_Lexer(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Expr", "Lexer", class_Polyspec_Template_Expr_Lexer_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_close_default_value;
+	ZVAL_UNDEF(&property_close_default_value);
+	zend_string *property_close_name = zend_string_init("close", sizeof("close") - 1, 1);
+	zend_declare_typed_property(class_entry, property_close_name, &property_close_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_string_release(property_close_name);
+
+	zval property_closeCount_default_value;
+	ZVAL_UNDEF(&property_closeCount_default_value);
+	zend_string *property_closeCount_name = zend_string_init("closeCount", sizeof("closeCount") - 1, 1);
+	zend_declare_typed_property(class_entry, property_closeCount_name, &property_closeCount_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_closeCount_name);
+
+	zval property_openIndex_default_value;
+	ZVAL_UNDEF(&property_openIndex_default_value);
+	zend_string *property_openIndex_name = zend_string_init("openIndex", sizeof("openIndex") - 1, 1);
+	zend_declare_typed_property(class_entry, property_openIndex_name, &property_openIndex_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_string_release(property_openIndex_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Expr_Parser(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Expr", "Parser", class_Polyspec_Template_Expr_Parser_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval const_DEPTH_LIMIT_value;
+	ZVAL_LONG(&const_DEPTH_LIMIT_value, 64);
+	zend_string *const_DEPTH_LIMIT_name = zend_string_init_interned("DEPTH_LIMIT", sizeof("DEPTH_LIMIT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_DEPTH_LIMIT_name, &const_DEPTH_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#else
+	zend_declare_class_constant_ex(class_entry, const_DEPTH_LIMIT_name, &const_DEPTH_LIMIT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_DEPTH_LIMIT_name);
+
+	zval property_lexer_default_value;
+	ZVAL_UNDEF(&property_lexer_default_value);
+	zend_string *property_lexer_name = zend_string_init("lexer", sizeof("lexer") - 1, 1);
+	zend_string *property_lexer_class_Polyspec_Template_Expr_Lexer = zend_string_init("Polyspec\\Template\\Expr\\Lexer", sizeof("Polyspec\\Template\\Expr\\Lexer")-1, 1);
+	zend_declare_typed_property(class_entry, property_lexer_name, &property_lexer_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_lexer_class_Polyspec_Template_Expr_Lexer, 0, 0));
+	zend_string_release(property_lexer_name);
 
 	return class_entry;
 }

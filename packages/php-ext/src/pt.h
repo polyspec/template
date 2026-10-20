@@ -101,6 +101,11 @@ ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, cons
 ZEND_NORETURN void pt_fail_bare(pt_run *run, const char *code, pt_s template, zend_string *message);
 void pt_error_clear(pt_error *error);
 
+/* The work of one run and its input, which a failure leaves through longjmp. Runs `work` with `input` as one run
+ * and ends it: a failure throws its error and the result is false. */
+typedef void (*pt_work)(pt_run *run, void *input);
+bool pt_run_work(pt_work work, void *input);
+
 /* JSON text of a string for a message, as json_encode writes it. */
 zend_string *pt_json_quote(const char *bytes, size_t length);
 
@@ -356,6 +361,12 @@ bool pt_parse_delimiters(const char *value, size_t length, char *open, char *clo
 
 /* The AST as nested PHP arrays (RT-2). */
 void pt_ast_to_zval(const pt_template *template, zval *result);
+
+/* One expression node as the nested PHP array of the AST (EXP-7 to EXP-16, AST-4). */
+void pt_expr_zval(const pt_expr *expr, zval *result);
+
+/* The classes Token, Lexer and Parser of Polyspec\Template\Expr (pt_parse.c). */
+void pt_expr_register(zend_class_entry *token, zend_class_entry *lexer, zend_class_entry *parser);
 
 /* The template of an AST given as nested PHP arrays, with no source and no line index; an array that is not an AST is
  * an internal failure. */

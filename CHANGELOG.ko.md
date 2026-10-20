@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8ad8fa774cb60f610beb5f6584a83356967bb9a3e73aceafcf940af2306a387d -->
+<!-- source-sha256: c8981e59164a3c72229876edea8f22849dad0aa5e4c7efcbbc75f086f50f763d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-12: PHP 확장은 라이브러리의 `Polyspec\Template\Expr`의 `Token`, `Lexer`, `Parser`를 확장의 class로 등록한다 (S10). 이 class들의 뒤에서 C lexer와 expression parser가 동작하며, Parser는 자기 Lexer object의 state(`$parser->lexer`) 위에서 실행된다. Red: 위 ExprClassesTest 명령이 exit 1, "Polyspec\Template\Expr\Token is not registered by the extension", Failures: 1; green: 같은 명령 OK (4 tests, 15 assertions) (T26.7-2-12).
 
 - T26.7-5: Makefile의 언어 목록이 모든 구현을 명명한다 (R9): `SHOWCASE_LANGS`가 `ts,go,rust,php,php-ext,python`이므로 `make showcase`와 `make showcase-build-check`가 라이브러리의 command line을 확장으로 실행하는 `tests/runner/drivers.mts`의 driver를 통해 PHP 확장으로도 예제 사이트를 만들고 검사한다. Red: `make parity-declarations-check RULES=R9` exit 2, `R9 language-set-drift Makefile:58: the list differs from the implementations: missing php-ext`. Green: 그 검사가 통과하고, `make showcase-build-check`가 여섯 언어로 통과한다 (T26.7-5).
 

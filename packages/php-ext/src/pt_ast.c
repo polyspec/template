@@ -19,7 +19,7 @@ static void pt_add_span(zval *array, size_t start, size_t end)
     add_assoc_zval_ex(array, "span", 4, &span);
 }
 
-static void pt_expr_zval(const pt_expr *expr, zval *result);
+void pt_expr_zval(const pt_expr *expr, zval *result);
 
 static void pt_exprs_zval(pt_expr *const *items, uint32_t count, zval *result)
 {
@@ -49,7 +49,7 @@ static void pt_add_exprs(zval *array, const char *key, pt_expr *const *items, ui
     add_assoc_zval_ex(array, key, strlen(key), &value);
 }
 
-static void pt_expr_zval(const pt_expr *expr, zval *result)
+void pt_expr_zval(const pt_expr *expr, zval *result)
 {
     array_init(result);
     switch (expr->type) {

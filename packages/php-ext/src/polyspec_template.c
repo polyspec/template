@@ -1148,13 +1148,10 @@ static void pt_run_init(pt_run *run)
  * succeeded. */
 static bool pt_run_finish(pt_run *run);
 
-/* The work of one run and its input, which a failure leaves through longjmp. */
-typedef void (*pt_work)(pt_run *run, void *input);
-
 /* Runs `work` with `input` as one run and ends it with pt_run_finish(). The inputs of the work are in the structure
  * that `input` points to, in memory, so no local of the frame that calls setjmp holds a value that a longjmp could
  * clobber (-Wclobbered). */
-static bool pt_run_work(pt_work work, void *input)
+bool pt_run_work(pt_work work, void *input)
 {
     pt_run run;
     pt_run_init(&run);
@@ -3118,6 +3115,8 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     register_class_Polyspec_Template_Utf8();
     register_class_Polyspec_Template_Escape();
     register_class_Polyspec_Template_InternalBoundary();
+    pt_expr_register(register_class_Polyspec_Template_Expr_Token(), register_class_Polyspec_Template_Expr_Lexer(),
+        register_class_Polyspec_Template_Expr_Parser());
     register_class_Polyspec_Template_Loader_Path();
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);

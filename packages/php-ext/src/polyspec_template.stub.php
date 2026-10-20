@@ -1281,3 +1281,120 @@ final class Registry
 
     public static function isBuiltin(string $name): bool {}
 }
+
+namespace Polyspec\Template\Expr;
+
+/**
+ * Expression token (EXP-1, CNF-13). Offsets are byte indexes into the source.
+ */
+final class Token
+{
+    public readonly string $type;
+
+    public readonly string $value;
+
+    public readonly int $start;
+
+    public readonly int $end;
+
+    public readonly ?string $decoded;
+
+    public function __construct(string $type, string $value, int $start, int $end, ?string $decoded = null) {}
+}
+
+/**
+ * Expression tokens as defined in EXP-1 to EXP-6 and CNF-13.
+ */
+final class Lexer
+{
+    /** @var string|null close delimiter character, or null for a bare expression */
+    public readonly ?string $close;
+
+    public readonly int $closeCount;
+
+    /** @var int|null byte index of the tag start, or null for a bare expression */
+    public readonly ?int $openIndex;
+
+    /**
+     * @param string|null $close close delimiter character, or null for a bare expression
+     * @param int|null $openIndex byte index of the tag start, or null for a bare expression
+     */
+    public function __construct(
+        \Polyspec\Template\Source $source,
+        int $start,
+        ?string $close,
+        int $closeCount,
+        ?int $openIndex,
+        string $template,
+    ) {}
+
+    public function error(string $code, int $start, int $end, string $message): \Polyspec\Template\TemplateError {}
+
+    public function peek(): Token {}
+
+    public function next(): Token {}
+
+    /**
+     * Tokens consumed by the parser, including the closing delimiter.
+     *
+     * @return list<Token>
+     */
+    public function consumed(): array {}
+
+    /**
+     * Byte index after the last consumed token.
+     */
+    public function consumedEnd(): int {}
+
+    public function text(): string {}
+
+    /**
+     * Reads a string literal starting at the quote at $start (EXP-3).
+     *
+     * @return array{0: string, 1: int} decoded text and the index after the closing quote
+     */
+    public static function stringLiteral(\Polyspec\Template\Source $source, int $start, string $template): array {}
+}
+
+/**
+ * Expression parser as defined in EXP-7 to EXP-16 and AST-4, AST-5.
+ * Nodes are nested arrays with the fields of docs/spec/ast.md.
+ */
+final class Parser
+{
+    public const int DEPTH_LIMIT = 64;
+
+    public readonly Lexer $lexer;
+
+    public function __construct(
+        \Polyspec\Template\Source $source,
+        int $start,
+        ?string $close,
+        int $closeCount,
+        ?int $openIndex,
+        string $template,
+    ) {}
+
+    public function peek(): Token {}
+
+    public function next(): Token {}
+
+    public function unexpected(Token $token): \Polyspec\Template\TemplateError {}
+
+    public function expect(string $type): Token {}
+
+    /**
+     * Consumes the close delimiter of a tag (LEX-11) and returns the index after it.
+     */
+    public function expectClose(): int {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function parseExpression(): array {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function parsePostfix(bool $adjacentOnly): array {}
+}

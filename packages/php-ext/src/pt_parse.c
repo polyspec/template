@@ -4,6 +4,7 @@
  * (AST-*).
  */
 #include "pt.h"
+#include "Zend/zend_exceptions.h"
 #include "Zend/zend_strtod.h"
 
 /* Source */
@@ -449,20 +450,44 @@ static pt_s pt_token_text(const pt_eparser *parser, pt_token token)
     return (pt_s){parser->lexer.source->text + token.start, token.end - token.start};
 }
 
+/* An error of the expression parser: a code, the bytes of the error and its message (the owner releases the message). */
+typedef struct pt_failure {
+    const char *code;
+    size_t start, end;
+    zend_string *message;
+} pt_failure;
+
+/* The error of an unexpected token (EXP-16): the tag that is not terminated, the end of the input or the token whose
+ * value is the given text. */
+static pt_failure pt_unexpected_failure(const pt_lexer *lexer, bool at_end, size_t start, size_t end, const char *text, size_t length)
+{
+    pt_failure failure;
+    if (lexer->has_open && lexer->close != 0 && !pt_contains_from(lexer->source, lexer->close, start)) {
+        failure.code = PT_E_PARSE_UNTERMINATED_TAG;
+        failure.start = lexer->open_index;
+        failure.end = lexer->open_index + 1;
+        failure.message = zend_string_init("tag is not terminated", 21, 0);
+    } else if (at_end) {
+        failure.code = PT_E_PARSE_UNEXPECTED_TOKEN;
+        failure.start = start;
+        failure.end = start;
+        failure.message = zend_string_init("unexpected end of input", 23, 0);
+    } else {
+        zend_string *quoted = pt_json_quote(text, length);
+        failure.code = PT_E_PARSE_UNEXPECTED_TOKEN;
+        failure.start = start;
+        failure.end = end;
+        failure.message = zend_strpprintf(0, "unexpected token %s", ZSTR_VAL(quoted));
+        zend_string_release(quoted);
+    }
+    return failure;
+}
+
 ZEND_NORETURN static void pt_unexpected(pt_eparser *parser, pt_token token)
 {
-    pt_lexer *lexer = &parser->lexer;
-    pt_source *source = lexer->source;
-    if (lexer->has_open && lexer->close != 0 && !pt_contains_from(source, lexer->close, token.start)) {
-        pt_parse_fail(source, PT_E_PARSE_UNTERMINATED_TAG, lexer->open_index, lexer->open_index + 1, zend_string_init("tag is not terminated", 21, 0));
-    }
-    if (token.type == T_EOF) {
-        pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, token.start, token.start, zend_string_init("unexpected end of input", 23, 0));
-    }
-    zend_string *quoted = pt_quote_range(source, token.start, token.end);
-    zend_string *message = zend_strpprintf(0, "unexpected token %s", ZSTR_VAL(quoted));
-    zend_string_release(quoted);
-    pt_parse_fail(source, PT_E_PARSE_UNEXPECTED_TOKEN, token.start, token.end, message);
+    pt_source *source = parser->lexer.source;
+    pt_failure failure = pt_unexpected_failure(&parser->lexer, token.type == T_EOF, token.start, token.end, source->text + token.start, token.end - token.start);
+    pt_parse_fail(source, failure.code, failure.start, failure.end, failure.message);
 }
 
 static pt_token pt_expect(pt_eparser *parser, pt_token_type type)
@@ -2329,4 +2354,603 @@ const char *pt_operator_text(pt_operator op)
         "!", "-", "+", "-", "*", "/", "%", "==", "!=", "===", "!==", "<", ">", "<=", ">=", "in", "&&", "||", "??",
     };
     return texts[op];
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* The expression classes of the library (EXP-1 to EXP-16): Token, Lexer and Parser                  */
+/*                                                                                                  */
+/* A Lexer object owns the lexer state of an expression and the arena of its tokens and nodes. A   */
+/* Parser object holds its Lexer object in the property `lexer` and runs its expression parser on   */
+/* that state, so $parser->lexer and the parser see one state. Each call that reads the text runs   */
+/* in one run, so a C parse failure leaves through the boundary of the run as a TemplateError.      */
+/* ----------------------------------------------------------------------------------------------- */
+
+zend_class_entry *pt_token_ce;
+static zend_class_entry *pt_lexer_ce, *pt_parser_ce;
+static zend_object_handlers pt_lexer_handlers, pt_parser_handlers;
+
+typedef struct pt_lexer_object {
+    pt_arena arena;        /* lives as long as the object: the consumed tokens, the decoded strings and the nodes */
+    pt_source source;
+    pt_lexer lexer;
+    pt_record record;      /* the tokens consumed so far, kept for Lexer::consumed */
+    zval source_object;    /* the Source object whose text the lexer reads; NULL until the constructor runs */
+    zend_string *template; /* the template name of the errors */
+    zend_object std;
+} pt_lexer_object;
+
+typedef struct pt_parser_object {
+    pt_lexer_object *lexer; /* the Lexer object of the property `lexer`, which keeps it alive; NULL until the constructor */
+    int depth;
+    zend_object std;
+} pt_parser_object;
+
+static inline pt_lexer_object *pt_lexer_of(zend_object *object)
+{
+    return (pt_lexer_object *)((char *)object - XtOffsetOf(pt_lexer_object, std));
+}
+
+static inline pt_parser_object *pt_parser_of(zend_object *object)
+{
+    return (pt_parser_object *)((char *)object - XtOffsetOf(pt_parser_object, std));
+}
+
+/* The names of the token types, in the order of pt_token_type: the type names of the library's Lexer. */
+static const char *const pt_token_names[] = {
+    "EOF", "CLOSE", "IDENT", "NULL", "TRUE", "FALSE", "IN", "NUMBER", "STRING", "DOT_IDENT", "DOT_INDEX", "SPREAD",
+    "SEQ", "SNE", "EQ", "NE", "LE", "GE", "AND", "OR", "COALESCE", "ELVIS", "DOUBLE_COLON", "ARROW",
+    "LPAREN", "RPAREN", "LBRACKET", "RBRACKET", "COMMA", "PIPE", "QUESTION", "COLON",
+    "PLUS", "MINUS", "STAR", "SLASH", "PERCENT", "BANG", "LT", "GT",
+};
+_Static_assert(sizeof(pt_token_names) / sizeof(pt_token_names[0]) == T_GT + 1, "a name for every token type");
+
+/* The token type of a type name, or -1 for a name that no token has. */
+static int pt_token_type_named(zend_string *name)
+{
+    for (size_t i = 0; i < sizeof(pt_token_names) / sizeof(pt_token_names[0]); i++) {
+        if (strlen(pt_token_names[i]) == ZSTR_LEN(name) && memcmp(pt_token_names[i], ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+            return (int)i;
+        }
+    }
+    return -1;
+}
+
+/* The Token object of a token: its type name, its value (the source bytes of the token), its offsets and, for a
+ * string, its decoded text. */
+static void pt_token_zval(const pt_source *source, pt_token token, zval *result)
+{
+    object_init_ex(result, pt_token_ce);
+    zend_object *object = Z_OBJ_P(result);
+    zend_update_property_string(pt_token_ce, object, ZEND_STRL("type"), pt_token_names[token.type]);
+    zend_update_property_stringl(pt_token_ce, object, ZEND_STRL("value"), source->text + token.start, token.end - token.start);
+    zend_update_property_long(pt_token_ce, object, ZEND_STRL("start"), (zend_long)token.start);
+    zend_update_property_long(pt_token_ce, object, ZEND_STRL("end"), (zend_long)token.end);
+    if (token.type == T_STRING) {
+        zend_update_property_stringl(pt_token_ce, object, ZEND_STRL("decoded"), token.decoded.s ? token.decoded.s : "", token.decoded.n);
+    } else {
+        zend_update_property_null(pt_token_ce, object, ZEND_STRL("decoded"));
+    }
+}
+
+/* The TemplateError of a code, a template and a span of a source (TemplateError::at): the position is the line and
+ * the column of the start. The message is borrowed. */
+static zend_object *pt_at_error_object(const char *code, zend_string *template, const pt_lines *lines, size_t start, size_t end, zend_string *message)
+{
+    zend_long line = 0, col = 0;
+    pt_position(lines, start, &line, &col);
+    return pt_error_object(code, template, line, col, (zend_long)start, (zend_long)end, message);
+}
+
+/* The text of a Source object. */
+static zend_string *pt_source_text(zend_object *source)
+{
+    zval rv;
+    return Z_STR_P(zend_read_property(pt_source_ce, source, ZEND_STRL("text"), false, &rv));
+}
+
+/* The delimiter of a Lexer or a Parser: one character, or 0 for a bare expression. */
+static bool pt_expr_close_char(zend_string *close, char *value)
+{
+    if (close == NULL) {
+        *value = 0;
+        return true;
+    }
+    if (ZSTR_LEN(close) != 1) {
+        zend_argument_value_error(3, "must be a single character or null");
+        return false;
+    }
+    *value = ZSTR_VAL(close)[0];
+    return true;
+}
+
+/* Sets the state of a Lexer object from the arguments of its constructor and writes its public properties. */
+static void pt_lexer_construct(zend_object *object, zend_object *source, zend_long start, char close, zend_long close_count, bool has_open, zend_long open_index, zend_string *template, zend_string *close_text)
+{
+    pt_lexer_object *lo = pt_lexer_of(object);
+    zend_string *text = pt_source_text(source);
+    zval previous;
+    ZVAL_COPY_VALUE(&previous, &lo->source_object);
+    ZVAL_OBJ_COPY(&lo->source_object, source);
+    zval_ptr_dtor(&previous);
+    if (lo->template != NULL) {
+        zend_string_release(lo->template);
+    }
+    lo->template = zend_string_copy(template);
+    pt_arena_free(&lo->arena);
+    pt_arena_init(&lo->arena);
+    lo->record.arena = &lo->arena;
+    lo->record.v = NULL;
+    lo->record.count = lo->record.capacity = 0;
+    lo->source.run = NULL;
+    lo->source.arena = &lo->arena;
+    lo->source.text = ZSTR_VAL(text);
+    lo->source.length = ZSTR_LEN(text);
+    pt_lines_build(&lo->arena, &lo->source.lines, lo->source.text, lo->source.length);
+    lo->source.name = (pt_s){ZSTR_VAL(lo->template), ZSTR_LEN(lo->template)};
+    pt_lexer_init(&lo->lexer, &lo->source, (size_t)start, close, (int)close_count, has_open, (size_t)open_index);
+    lo->lexer.record = &lo->record;
+
+    if (close_text != NULL) {
+        zend_update_property_str(pt_lexer_ce, object, ZEND_STRL("close"), close_text);
+    } else {
+        zend_update_property_null(pt_lexer_ce, object, ZEND_STRL("close"));
+    }
+    zend_update_property_long(pt_lexer_ce, object, ZEND_STRL("closeCount"), close_count);
+    if (has_open) {
+        zend_update_property_long(pt_lexer_ce, object, ZEND_STRL("openIndex"), open_index);
+    } else {
+        zend_update_property_null(pt_lexer_ce, object, ZEND_STRL("openIndex"));
+    }
+}
+
+/* A call of a Lexer method that reads the next token. */
+typedef struct pt_lexer_call {
+    pt_lexer_object *lo;
+    zval *result;
+} pt_lexer_call;
+
+static void pt_lexer_peek_work(pt_run *run, void *context)
+{
+    pt_lexer_call *call = context;
+    call->lo->source.run = run;
+    pt_token_zval(&call->lo->source, pt_peek(&call->lo->lexer), call->result);
+}
+
+static void pt_lexer_next_work(pt_run *run, void *context)
+{
+    pt_lexer_call *call = context;
+    call->lo->source.run = run;
+    pt_token_zval(&call->lo->source, pt_next(&call->lo->lexer), call->result);
+}
+
+/* The input of Lexer::stringLiteral. */
+typedef struct pt_literal_call {
+    zend_object *source;
+    zend_string *template;
+    zend_long start;
+    zval *result;
+} pt_literal_call;
+
+static void pt_literal_work(pt_run *run, void *context)
+{
+    pt_literal_call *call = context;
+    pt_source source;
+    source.run = run;
+    source.arena = &run->arena;
+    source.name = (pt_s){ZSTR_VAL(call->template), ZSTR_LEN(call->template)};
+    zend_string *text = pt_source_text(call->source);
+    source.text = ZSTR_VAL(text);
+    source.length = ZSTR_LEN(text);
+    pt_lines_build(&run->arena, &source.lines, source.text, source.length);
+    size_t start = (size_t)call->start;
+    if (start >= source.length) {
+        /* The quote is past the end of the text: the literal is not terminated (EXP-3). */
+        pt_fail_at(run, PT_E_PARSE_UNTERMINATED_STRING, source.name, &source.lines, start, start + 1, zend_string_init("string literal is not terminated", 32, 0));
+    }
+    size_t after;
+    pt_s decoded = pt_string_literal(&source, start, &after);
+    array_init(call->result);
+    add_next_index_stringl(call->result, decoded.s ? decoded.s : "", decoded.n);
+    add_next_index_long(call->result, (zend_long)after);
+}
+
+/* The operations of the expression parser that run on the state of a Lexer object. */
+typedef enum pt_parser_op {
+    PT_OP_EXPECT,
+    PT_OP_EXPECT_CLOSE,
+    PT_OP_EXPRESSION,
+    PT_OP_POSTFIX,
+} pt_parser_op;
+
+typedef struct pt_parser_call {
+    pt_parser_object *po;
+    pt_parser_op op;
+    zend_string *type;  /* PT_OP_EXPECT: the type name */
+    bool adjacent;      /* PT_OP_POSTFIX: whether accessors and calls must touch the previous token */
+    zval *result;
+} pt_parser_call;
+
+/* Runs an operation of the expression parser on the state of the Lexer object of the parser, and keeps the state. */
+static void pt_parser_work(pt_run *run, void *context)
+{
+    pt_parser_call *call = context;
+    pt_lexer_object *lo = call->po->lexer;
+    lo->source.run = run;
+    pt_eparser parser;
+    parser.lexer = lo->lexer;
+    parser.depth = call->po->depth;
+    switch (call->op) {
+        case PT_OP_EXPECT: {
+            int type = pt_token_type_named(call->type);
+            pt_token token = pt_peek(&parser.lexer);
+            if (type < 0 || token.type != (pt_token_type)type) {
+                pt_unexpected(&parser, token);
+            }
+            pt_token_zval(&lo->source, pt_next(&parser.lexer), call->result);
+            break;
+        }
+        case PT_OP_EXPECT_CLOSE:
+            ZVAL_LONG(call->result, (zend_long)pt_expect_close(&parser));
+            break;
+        case PT_OP_EXPRESSION:
+            pt_expr_zval(pt_parse_expression(&parser), call->result);
+            break;
+        case PT_OP_POSTFIX:
+            pt_expr_zval(pt_parse_postfix(&parser, call->adjacent), call->result);
+            break;
+    }
+    lo->lexer = parser.lexer;
+    call->po->depth = parser.depth;
+}
+
+/* Whether the object of a Lexer or a Parser has its state; an object that its constructor did not initialize throws. */
+static bool pt_expr_initialized(bool initialized, zend_class_entry *ce)
+{
+    if (!initialized) {
+        zend_throw_error(NULL, "%s is not initialized: its constructor did not run", ZSTR_VAL(ce->name));
+        return false;
+    }
+    return true;
+}
+
+static zend_object *pt_lexer_create(zend_class_entry *class_type)
+{
+    pt_lexer_object *lo = zend_object_alloc(sizeof(pt_lexer_object), class_type);
+    zend_object_std_init(&lo->std, class_type);
+    object_properties_init(&lo->std, class_type);
+    pt_arena_init(&lo->arena);
+    ZVAL_NULL(&lo->source_object);
+    lo->template = NULL;
+    lo->std.handlers = &pt_lexer_handlers;
+    return &lo->std;
+}
+
+static void pt_lexer_free(zend_object *object)
+{
+    pt_lexer_object *lo = pt_lexer_of(object);
+    zval_ptr_dtor(&lo->source_object);
+    if (lo->template != NULL) {
+        zend_string_release(lo->template);
+    }
+    pt_arena_free(&lo->arena);
+    zend_object_std_dtor(object);
+}
+
+static HashTable *pt_lexer_get_gc(zend_object *object, zval **table, int *count)
+{
+    zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
+    zend_get_gc_buffer_add_zval(buffer, &pt_lexer_of(object)->source_object);
+    zend_get_gc_buffer_use(buffer, table, count);
+    return zend_std_get_properties(object);
+}
+
+static zend_object *pt_parser_create(zend_class_entry *class_type)
+{
+    pt_parser_object *po = zend_object_alloc(sizeof(pt_parser_object), class_type);
+    zend_object_std_init(&po->std, class_type);
+    object_properties_init(&po->std, class_type);
+    po->lexer = NULL;
+    po->depth = 0;
+    po->std.handlers = &pt_parser_handlers;
+    return &po->std;
+}
+
+void pt_expr_register(zend_class_entry *token, zend_class_entry *lexer, zend_class_entry *parser)
+{
+    pt_token_ce = token;
+    pt_lexer_ce = lexer;
+    pt_parser_ce = parser;
+    lexer->create_object = pt_lexer_create;
+    memcpy(&pt_lexer_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    pt_lexer_handlers.offset = XtOffsetOf(pt_lexer_object, std);
+    pt_lexer_handlers.free_obj = pt_lexer_free;
+    pt_lexer_handlers.clone_obj = NULL;
+    pt_lexer_handlers.get_gc = pt_lexer_get_gc;
+    parser->create_object = pt_parser_create;
+    memcpy(&pt_parser_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    pt_parser_handlers.offset = XtOffsetOf(pt_parser_object, std);
+}
+
+/* ---- Token ---- */
+
+ZEND_METHOD(Polyspec_Template_Expr_Token, __construct)
+{
+    zend_string *type, *value, *decoded = NULL;
+    zend_long start, end;
+    ZEND_PARSE_PARAMETERS_START(4, 5)
+        Z_PARAM_STR(type)
+        Z_PARAM_STR(value)
+        Z_PARAM_LONG(start)
+        Z_PARAM_LONG(end)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_STR_OR_NULL(decoded)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_object *object = Z_OBJ_P(ZEND_THIS);
+    zend_update_property_str(pt_token_ce, object, ZEND_STRL("type"), type);
+    zend_update_property_str(pt_token_ce, object, ZEND_STRL("value"), value);
+    zend_update_property_long(pt_token_ce, object, ZEND_STRL("start"), start);
+    zend_update_property_long(pt_token_ce, object, ZEND_STRL("end"), end);
+    if (decoded != NULL) {
+        zend_update_property_str(pt_token_ce, object, ZEND_STRL("decoded"), decoded);
+    } else {
+        zend_update_property_null(pt_token_ce, object, ZEND_STRL("decoded"));
+    }
+}
+
+/* ---- Lexer ---- */
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct)
+{
+    zval *source;
+    zend_string *close = NULL, *template;
+    zend_long start, close_count, open_index = 0;
+    bool open_is_null = true;
+    ZEND_PARSE_PARAMETERS_START(6, 6)
+        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
+        Z_PARAM_LONG(start)
+        Z_PARAM_STR_OR_NULL(close)
+        Z_PARAM_LONG(close_count)
+        Z_PARAM_LONG_OR_NULL(open_index, open_is_null)
+        Z_PARAM_STR(template)
+    ZEND_PARSE_PARAMETERS_END();
+    char close_char;
+    if (!pt_expr_close_char(close, &close_char)) {
+        RETURN_THROWS();
+    }
+    pt_lexer_construct(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(source), start, close_char, close_count, !open_is_null, open_index, template, close);
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, error)
+{
+    zend_string *code, *message;
+    zend_long start, end;
+    ZEND_PARSE_PARAMETERS_START(4, 4)
+        Z_PARAM_STR(code)
+        Z_PARAM_LONG(start)
+        Z_PARAM_LONG(end)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
+        RETURN_THROWS();
+    }
+    RETURN_OBJ(pt_at_error_object(ZSTR_VAL(code), lo->template, &lo->source.lines, (size_t)start, (size_t)end, message));
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, peek)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
+        RETURN_THROWS();
+    }
+    pt_lexer_call call = {lo, return_value};
+    if (!pt_run_work(pt_lexer_peek_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, next)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
+        RETURN_THROWS();
+    }
+    pt_lexer_call call = {lo, return_value};
+    if (!pt_run_work(pt_lexer_next_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, consumed)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
+        RETURN_THROWS();
+    }
+    array_init(return_value);
+    for (uint32_t i = 0; i < lo->record.count; i++) {
+        zval token;
+        pt_token_zval(&lo->source, lo->record.v[i], &token);
+        add_next_index_zval(return_value, &token);
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, consumedEnd)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
+        RETURN_THROWS();
+    }
+    RETURN_LONG((zend_long)pt_consumed_end(&lo->lexer));
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, text)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
+        RETURN_THROWS();
+    }
+    RETURN_STRINGL(lo->source.text, lo->source.length);
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Lexer, stringLiteral)
+{
+    zval *source;
+    zend_long start;
+    zend_string *template;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
+        Z_PARAM_LONG(start)
+        Z_PARAM_STR(template)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_literal_call call = {Z_OBJ_P(source), template, start, return_value};
+    if (!pt_run_work(pt_literal_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+/* ---- Parser ---- */
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, __construct)
+{
+    zval *source;
+    zend_string *close = NULL, *template;
+    zend_long start, close_count, open_index = 0;
+    bool open_is_null = true;
+    ZEND_PARSE_PARAMETERS_START(6, 6)
+        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
+        Z_PARAM_LONG(start)
+        Z_PARAM_STR_OR_NULL(close)
+        Z_PARAM_LONG(close_count)
+        Z_PARAM_LONG_OR_NULL(open_index, open_is_null)
+        Z_PARAM_STR(template)
+    ZEND_PARSE_PARAMETERS_END();
+    char close_char;
+    if (!pt_expr_close_char(close, &close_char)) {
+        RETURN_THROWS();
+    }
+    zval lexer;
+    object_init_ex(&lexer, pt_lexer_ce);
+    zend_object *lexer_object = Z_OBJ(lexer);
+    pt_lexer_construct(lexer_object, Z_OBJ_P(source), start, close_char, close_count, !open_is_null, open_index, template, close);
+    zend_object *object = Z_OBJ_P(ZEND_THIS);
+    zend_update_property(pt_parser_ce, object, ZEND_STRL("lexer"), &lexer);
+    zval_ptr_dtor(&lexer);
+    if (EG(exception)) {
+        RETURN_THROWS();
+    }
+    pt_parser_of(object)->lexer = pt_lexer_of(lexer_object);
+    pt_parser_of(object)->depth = 0;
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, peek)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    pt_lexer_call call = {po->lexer, return_value};
+    if (!pt_run_work(pt_lexer_peek_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, next)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    pt_lexer_call call = {po->lexer, return_value};
+    if (!pt_run_work(pt_lexer_next_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, unexpected)
+{
+    zval *token;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_OBJECT_OF_CLASS(token, pt_token_ce)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    zval rv_type, rv_value, rv_start, rv_end;
+    zend_string *type = Z_STR_P(zend_read_property(pt_token_ce, Z_OBJ_P(token), ZEND_STRL("type"), false, &rv_type));
+    zend_string *value = Z_STR_P(zend_read_property(pt_token_ce, Z_OBJ_P(token), ZEND_STRL("value"), false, &rv_value));
+    zend_long start = Z_LVAL_P(zend_read_property(pt_token_ce, Z_OBJ_P(token), ZEND_STRL("start"), false, &rv_start));
+    zend_long end = Z_LVAL_P(zend_read_property(pt_token_ce, Z_OBJ_P(token), ZEND_STRL("end"), false, &rv_end));
+    pt_lexer_object *lo = po->lexer;
+    bool at_end = zend_string_equals_literal(type, "EOF");
+    pt_failure failure = pt_unexpected_failure(&lo->lexer, at_end, (size_t)start, (size_t)end, ZSTR_VAL(value), ZSTR_LEN(value));
+    zend_object *error = pt_at_error_object(failure.code, lo->template, &lo->source.lines, failure.start, failure.end, failure.message);
+    zend_string_release(failure.message);
+    RETURN_OBJ(error);
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, expect)
+{
+    zend_string *type;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(type)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    pt_parser_call call = {po, PT_OP_EXPECT, type, false, return_value};
+    if (!pt_run_work(pt_parser_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, expectClose)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    pt_parser_call call = {po, PT_OP_EXPECT_CLOSE, NULL, false, return_value};
+    if (!pt_run_work(pt_parser_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, parseExpression)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    pt_parser_call call = {po, PT_OP_EXPRESSION, NULL, false, return_value};
+    if (!pt_run_work(pt_parser_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Expr_Parser, parsePostfix)
+{
+    bool adjacent;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_BOOL(adjacent)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
+    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
+        RETURN_THROWS();
+    }
+    pt_parser_call call = {po, PT_OP_POSTFIX, NULL, adjacent, return_value};
+    if (!pt_run_work(pt_parser_work, &call)) {
+        RETURN_THROWS();
+    }
 }
