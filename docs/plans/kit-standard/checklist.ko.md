@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 79be87b4b183099727fe37b6c36e8b6cbd5778aed379b1a502f018d39d3067ea -->
+<!-- source-sha256: 74538c3cf8e602ccfa9790edabda003e0f7cc00031fe96187b43edf9375f5214 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -45,4 +45,4 @@
 | T26.7-32 | docs/spec의 모든 requirement는 이를 인용하는 unit의 모든 구현 test가 이름으로 적는다(R13). test와 unit 묶음별로 진행한다 | The tests of every implementation and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-33 | conformance CLI의 test는 unit cli-parse와 cli-format이 아니라 각 구현의 internal test다(P32, K313) | The internal globs of config/parity.json and the removal of the units cli-parse and cli-format | `make parity-declarations-check` | [o] |
 | T26.7-34 | 중립 규칙 하나: 각 package는 자기 생태계의 manifest로 공개 진입점을 노출하며 각 구현이 자기 native test를 bind한다(export-list, package-entries) | docs/spec rule and its Korean twin, the tests of the six implementations, the units export-list and package-entries | `make parity-declarations-check` | [ ] |
-| T26.7-35 | template-fmt 명령의 test는 TypeScript language package의 internal test다(P32) | The internal glob of ts in config/parity.json and the removal of the unit template-fmt | `make parity-declarations-check` | [ ] |
+| T26.7-35 | template-fmt 명령의 test는 TypeScript language package의 internal test다(P32) | The internal glob of ts in config/parity.json and the removal of the unit template-fmt | `make parity-declarations-check` | [o] |

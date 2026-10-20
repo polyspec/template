@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4eb47e67b4cd1a58f2eba3b0ab8b19920a426156f37ff68511e88c9a254d0c2b -->
+<!-- source-sha256: ba324f143091b0190010b07eedc88ae877edc6060aa77fba27d3fb05f658a7ca -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-35: npm 명령 `template-fmt`의 test(`packages/language/tests/cli.test.ts`)는 TypeScript language package의 internal test이며 `internal` glob(`ecosystem:`)으로 선언하고, unit `template-fmt`는 제거했다(P32). 이 명령은 TypeScript 생태계에서 formatter의 packaging 형태이고, 포맷 동작은 모든 구현의 FMT requirement unit이 가진다. Red: `make parity-declarations-check`가 R2 56건(`template-fmt` 5건)을 보고했고, green: R2 51건이다(T26.7-35).
 
 - T26.7-33: conformance 명령줄의 test는 각 구현의 internal test이며 `config/parity.json`의 `internal` glob(`harness:`)으로 선언하고, unit `cli-parse`와 `cli-format`은 제거했다(P32, K313). CNF-4 계약은 이제 `docs/operations/conformance.md`에 있고 test는 더 이상 이를 requirement로 적지 않는다. Python 명령줄 test는 `test_api.py`에서 `test_cli.py`로 옮겼다(9개 test, `test_api.py`는 39개를 유지하며 통과한다). Red: `make parity-declarations-check`가 R15 9746건, R2 56건을 보고했고, green: R15 9512건, R2 56건이다(T26.7-35가 `template-fmt`도 제거하면 R2는 51건). R16 한 건이 남는데 `packages/ts/tests/cli.test.ts`의 `UTF-8`이며 requirement가 아니다(kit 결함: 검사가 정의된 id가 아니라 pattern에 일치한다)(T26.7-33).
 
