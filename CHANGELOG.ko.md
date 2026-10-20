@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1aee8fc0c6df2d99b04e853e007f5ab4632ecaafeb448373d4bccac41e2bfd2a -->
+<!-- source-sha256: 30d41c5a549c8977a43778698ddf058560d1c33f9098398327f993b482ea06ac -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-1: Verification이 T26.7-2-8-2가 제거된 PHP 확장 test 대신 둔 라이브러리 test를 명명한다 (ExtConformanceTest을 ConformanceTest로). Red: 예전 이름의 `make test-php-ext`는 제거된 test를 하나도 선택하지 않았으므로 행이 말하는 것보다 적게 검사했다. Green: 새 이름으로 확장과 함께 ConformanceTest, HostValuesTest를 실행하고 모든 test가 통과한다. 그 test가 라이브러리의 `packages/php/src/Format`을 load하고 확장은 그것을 T26.7-2-7과 T26.7-2-16에서 등록하므로 실행은 여전히 exit 2이고, 행은 진행 중으로 남는다 (T26.7-32-1).
 
 - T26.7-4-2: Verification이 T26.7-2-8-2가 제거된 PHP 확장 test 대신 둔 라이브러리 test를 명명한다 (FormatTest을 FormatterTest로, ExtConformanceTest을 ConformanceTest로). Red: 예전 이름의 `make test-php-ext`는 제거된 test를 하나도 선택하지 않았으므로 행이 말하는 것보다 적게 검사했다. Green: 새 이름으로 확장과 함께 BoundMapTest, HostBindingTest, HostValuesTest, LoadFailureTest, FormatterTest, ConformanceTest, AnalyzeTest를 실행하고 모든 test가 통과한다. 그 test가 라이브러리의 `packages/php/src/Format`을 load하고 확장은 그것을 T26.7-2-7과 T26.7-2-16에서 등록하므로 실행은 여전히 exit 2이고, 행은 진행 중으로 남는다 (T26.7-4-2).
 
