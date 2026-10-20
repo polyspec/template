@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-15: every child row is done (T26.7-2-15-1 to T26.7-2-15-4), so the row is done. Its Verification runs the owner tests of its children and the parity check of the units it owns (functions-date function-arity), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-15).
+
 - T26.7-2-6: every child row is done (T26.7-2-6-1 to T26.7-2-6-4), so the row is done. Its Verification runs the owner tests of its children and the parity check of the units it owns (api-runtime-services api-runtime-environment api-runtime-bindings api-render-frame api-render-scope api-render-context), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-6).
 
 - T26.7-2-3: every child row is done (T26.7-2-3-1 to T26.7-2-3-3), so the row is done. Its Verification runs the owner tests of its children, with `EngineRefreshTest.php` and `Parser/ParserTest.php` of the library in place of the removed `packages/php-ext/tests/EngineTest.php`, and the parity check of the units it owns (api-template-error), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-3).

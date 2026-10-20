@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 48301436cbe720d8927cf156f02b19581cd78220c8e9960f1a8702fa9371da10 -->
+<!-- source-sha256: 3ec47f559e286d24e0dd295bcea1f655493394617b61141f7867eb59921e946e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-15: 모든 하위 행이 끝났으므로(T26.7-2-15-1부터 T26.7-2-15-4) 행은 끝났다. Verification은 하위 행의 owner test를 실행하고, 범위 없는 `make parity-declarations-check` 대신 행이 소유하는 unit(functions-date function-arity)의 parity 검사를 실행한다. 명령은 통과한다 (T26.7-2-15).
 
 - T26.7-2-6: 모든 하위 행이 끝났으므로(T26.7-2-6-1부터 T26.7-2-6-4) 행은 끝났다. Verification은 하위 행의 owner test를 실행하고, 범위 없는 `make parity-declarations-check` 대신 행이 소유하는 unit(api-runtime-services api-runtime-environment api-runtime-bindings api-render-frame api-render-scope api-render-context)의 parity 검사를 실행한다. 명령은 통과한다 (T26.7-2-6).
 
