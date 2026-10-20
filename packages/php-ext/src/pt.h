@@ -482,6 +482,11 @@ pt_bound *pt_bound_of(zval *value);
 bool pt_bind_value(pt_arena *arena, zval *input, pt_value *result, pt_bind_error *error);
 /* RT-4: null and the empty array give the empty map; a bound map of the extension gives its map. */
 bool pt_bind_map(pt_arena *arena, zval *input, pt_map **result, pt_bind_error *error);
+/* The PHP value of a library value (VAL-17), and the exceptions that a failure throws: each one takes the code and
+ * the message of the failure and releases the message (polyspec_template.c). */
+void pt_library_value(pt_value value, zval *result);
+void pt_throw_bind_error(const char *code, zend_string *message);
+void pt_throw_function_error(const char *code, zend_string *message);
 /* VAL-21: the host form of a value. */
 void pt_host_value(pt_value value, zval *result);
 /* VAL-19: the public properties of an object, by name. */
@@ -513,6 +518,12 @@ bool pt_number_round(double value, zend_long decimals, zval *result);
 bool pt_number_format(double value, zend_long decimals, zend_string *dec, zend_string *thousands, zval *result);
 void pt_host_argument(zval *value, zval *result);
 void pt_host_argument_list(HashTable *args, zval *result);
+
+/* The function groups Functions\Strings and Functions\Numbers (pt_groups.c): MINIT registers them with the
+ * classes of the group interface, and their table() methods give the library tables. */
+void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers);
+void pt_strings_table(INTERNAL_FUNCTION_PARAMETERS);
+void pt_numbers_table(INTERNAL_FUNCTION_PARAMETERS);
 
 /* ---------------------------------------------------------------------------------------------------
  * Rendering (RT-*).

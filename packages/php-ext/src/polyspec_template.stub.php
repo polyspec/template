@@ -1139,3 +1139,19 @@ final class Helpers
 
     public static function safe(string $text): \Polyspec\Template\Value\SafeString {}
 }
+
+/**
+ * upper, lower, trim, replace, split, truncate, contains, starts_with, ends_with, length (FUN-12, FUN-13).
+ */
+final class Strings implements FunctionGroup
+{
+    public static function table(): array {}
+}
+
+/**
+ * number, round, floor, ceil, abs, min, max, num (FUN-16, FUN-17, FUN-20 to FUN-25).
+ */
+final class Numbers implements FunctionGroup
+{
+    public static function table(): array {}
+}
