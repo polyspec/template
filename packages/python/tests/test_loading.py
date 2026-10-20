@@ -95,19 +95,38 @@ class Loading(unittest.TestCase):
             "E_LOAD_FAILED",
         )
 
-    def test_a_loader_result_without_a_source_an_ast_or_a_version_is_a_load_failure(self):
+    def test_a_loader_result_without_a_source_an_ast_or_a_version_is_a_load_failure(
+        self,
+    ):
         # RT-9: a result that holds neither a source text nor an AST, or no version, fails to load; the
         # attributes are read in the handling of the result, so a missing one is the failure too.
         cases = [
-            ("template a.tpl cannot be loaded: the loader returned no source text and no AST", SimpleNamespace(version="1")),
-            ("template a.tpl cannot be loaded: the loader returned no version", SimpleNamespace(source="a")),
-            ("template a.tpl cannot be loaded: the loader returned no version", SimpleNamespace(source="a", version="")),
+            (
+                "template a.tpl cannot be loaded: the loader returned no source text and no AST",
+                SimpleNamespace(version="1"),
+            ),
+            (
+                "template a.tpl cannot be loaded: the loader returned no version",
+                SimpleNamespace(source="a"),
+            ),
+            (
+                "template a.tpl cannot be loaded: the loader returned no version",
+                SimpleNamespace(source="a", version=""),
+            ),
         ]
         for message, result in cases:
             with self.assertRaises(TemplateError) as caught:
                 engine_of(ResultLoader(result)).render("a.tpl", {})
-            self.assertEqual((caught.exception.code, caught.exception.message), ("E_LOAD_FAILED", message))
-        self.assertEqual(engine_of(ResultLoader(SimpleNamespace(source="", version="1"))).render("a.tpl", {}), "")
+            self.assertEqual(
+                (caught.exception.code, caught.exception.message),
+                ("E_LOAD_FAILED", message),
+            )
+        self.assertEqual(
+            engine_of(ResultLoader(SimpleNamespace(source="", version="1"))).render(
+                "a.tpl", {}
+            ),
+            "",
+        )
 
     def test_the_filesystem_loader_separates_missing_and_unreadable_files(self):
         with tempfile.TemporaryDirectory() as directory:

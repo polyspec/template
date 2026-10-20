@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 41b067127262959a916e3062f71cc6567140d33734e7356955847ef7e516d96f -->
+<!-- source-sha256: 8e53d69a9803af976e4f756e1cd75b196b59ccae483d4870c618c4b29648673f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-52-2: main은 다시 `make lint-ts`와 `make lint-python`을 통과한다. T26.7-52의 TypeScript test는 loader를 `as unknown as Loader`로 만들었고, oxlint는 이를 거부한다(`packages/ts/tests/render/host-binding.test.ts:218`의 no-unsafe-type-assertion). 이제 JavaScript 호출자의 loader를 그 `load` 함수를 검사하는 type guard로 좁힌다. `ruff format`이 `packages/python/src/polyspec/template/engine.py`와 `packages/python/tests/test_loading.py`(T26.7-52), `packages/python/tests/test_object_calls.py`(T26.7-41)를 정리한다. Red: bda64c04에서 `make lint-ts`와 `make lint-python` exit 2; green: 둘 다 통과하며 vitest `host-binding.test.ts` 17과 Python `test_loading.py`, `test_object_calls.py` 18이 통과한다 (T26.7-52-2).
 
 - T26.7-52-1: main은 다시 `make lint-php`와 `make error-codes-check`를 통과한다. T26.7-52와 T26.7-54가 120열을 넘는 줄(`packages/php/src/AstProgram.php:197`, `packages/php/tests/LoadFailureTest.php:70`과 `:84`, `packages/php/tests/AstDecodeTest.php:69`)을 더했으며 이제 감싼다. T26.7-52는 error code 목록을 다시 쓰지 않고 `docs/spec/errors.md`의 E_LOAD_FAILED 행을 바꿨으며, `make error-codes`가 이를 쓴다(`packages/php/src/ErrorCode.php`, `packages/rust/src/error.rs`, 각각 doc comment 하나). 그 landing은 commits-check와 docs-check만 실행했다. 이제 각 landing은 바꾼 것의 static gate를 실행한다. Red: a12f510f에서 `make lint-php` exit 2(phpcs, 4줄)이고 `make error-codes-check`가 실패했다; green: 둘 다 통과하며 `LoadFailureTest` 5와 `AstDecodeTest` 6이 통과한다 (T26.7-52-1).
 

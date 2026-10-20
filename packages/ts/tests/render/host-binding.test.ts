@@ -214,9 +214,15 @@ describe('loader failures', () => {
   });
 
   it('reports a loader result without a source text and an AST, or without a version, as E_LOAD_FAILED (RT-9)', () => {
-    const withResult = (result: unknown) => new AstProgram({
-      loader: { load: () => result } as unknown as Loader,
-    });
+    // The loader of a JavaScript caller, which the types do not check: its result is whatever it returns.
+    const isLoader = (value: unknown): value is Loader =>
+      typeof value === 'object' && value !== null && 'load' in value && typeof value.load === 'function';
+    const untyped = (result: unknown): Loader => {
+      const loader: unknown = { load: () => result };
+      if (!isLoader(loader)) throw new Error('the test loader has no load function');
+      return loader;
+    };
+    const withResult = (result: unknown) => new AstProgram({ loader: untyped(result) });
     const reported = (result: unknown) => failure(() => withResult(result).render('page.tpl', {}));
     const none = reported({ version: '1' });
     expect([none.code, none.template, none.message]).toEqual([

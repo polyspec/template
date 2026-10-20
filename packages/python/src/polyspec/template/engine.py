@@ -219,7 +219,10 @@ class _AstProgramCore(Program):
             )
         version = getattr(loaded, "version", None)
         if not isinstance(version, str) or version == "":
-            raise fail("E_LOAD_FAILED", f"template {name} cannot be loaded: the loader returned no version")
+            raise fail(
+                "E_LOAD_FAILED",
+                f"template {name} cannot be loaded: the loader returned no version",
+            )
         with self._cache_lock:
             cached = self._cache.get(name)
             if self.artifact_refresh == "false" and cached is not None:

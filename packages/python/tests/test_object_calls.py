@@ -122,7 +122,9 @@ class ObjectCalls(unittest.TestCase):
             raise RuntimeError("no")
 
         program = AstProgram(
-            EngineOptions(loader=MapLoader({"a.tpl": "x\n{= boom()}"}), functions={"boom": boom})
+            EngineOptions(
+                loader=MapLoader({"a.tpl": "x\n{= boom()}"}), functions={"boom": boom}
+            )
         )
         with self.assertRaises(TemplateError) as caught:
             Engine(program).render("a.tpl", {})
