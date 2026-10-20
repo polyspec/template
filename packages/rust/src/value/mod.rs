@@ -252,10 +252,7 @@ impl Value {
     /// Returns the original native object of a native object value when it has the type
     /// `T` (VAL-18). A host function receives a native object argument as `Value::Object` and
     /// recovers its own type with this method.
-    #[allow(
-        clippy::disallowed_methods,
-        reason = "a native object of another type is no T, so the lookup is absent (VAL-18); the error only says which type it is"
-    )]
+    #[allow(clippy::disallowed_methods, reason = "a native object of another type is absent")]
     pub fn downcast_object<T: TemplateObject>(&self) -> Option<Rc<T>> {
         match self {
             Value::Object(object) => (Rc::clone(object) as Rc<dyn Any>).downcast::<T>().ok(),

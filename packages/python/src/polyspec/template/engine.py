@@ -202,7 +202,7 @@ class _AstProgramCore(Program):
 
         try:
             loaded = self.loader.load(name)
-        except Exception as error:  # noqa: BLE001  RT-9: every exception of the loader is a load failure
+        except Exception as error:  # noqa: BLE001 - RT-9: every exception of the loader is a load failure
             raise fail(
                 "E_LOAD_FAILED", f"template {name} cannot be loaded: {error}"
             ) from None

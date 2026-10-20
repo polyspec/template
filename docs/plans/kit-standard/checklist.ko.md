@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: d2061343bbf26a57101307e6c2fe7e3e6cc9bdab5d84029bcf60b5ededfe7742 -->
+<!-- source-sha256: 29d91d02eb8c80d13910f8bb1f4a0d2f076b89b5431e232bd97a28f5f78d11fc -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -146,3 +146,4 @@
 | T26.7-56 | packages/go와 showcase의 Go는 kit K334의 규칙으로 make lint-go를 통과한다. 오류를 그럴듯한 값으로 바꾸지 않고, 필요한 사용은 그 이유와 함께 밝힌다 | packages/go, examples/showcase/adapters/go and the Go backend of packages/compiler where it writes the generated Go | `make lint-go` | [o] |
 | T26.7-57 | packages/rust와 compiler가 showcase를 위해 만드는 Rust는 kit K334의 clippy 규칙으로 make lint-rust를 통과한다(오류를 버리는 unwrap_or, unwrap_or_else, ok, 타입 없는 let _ 없음; 필요한 사용은 이유를 가진다) | packages/rust, examples/showcase/adapters/rust and the Rust backend of packages/compiler | `make lint-rust` | [o] |
 | T26.7-58 | template은 f7c1f10c의 kit 복사본을 받는다: changelog와 checklist의 merge=union과 한국어 twin driver, make land, worktree-setup의 dev kit, agent 명령의 대기 거부, link mode dependency-review의 composer 범위(K354 K394 K386 K348-1 K360-2 K349-2 K390-1 K392-1 K393과 f9eb43dd부터 f7c1f10c까지의 다른 kit 행) | The copies that make kit-sync writes and the hooks of make hooks | `make kit-check` | [o] |
+| T26.7-59 | template은 edcb9579의 kit 복사본을 받는다: commit identity, 이유를 적는 suppression check, PHP의 숨긴 오류 금지, TypeScript에서 다시 던지는 오류의 cause, prepare-commit-msg hook, changelog와 checklist의 merge driver(K354-3, K334, f7c1f10c부터 edcb9579까지의 다른 kit 행) | The copies that make kit-sync writes, the hooks of make hooks, the Makefile, and the code that the new lint rules find | `make kit-check`, `make suppression-check`, `make lint-php`, `make lint-ts`, `make hooks-check` | [o] |

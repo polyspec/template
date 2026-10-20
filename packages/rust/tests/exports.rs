@@ -2,10 +2,7 @@
 
 // A use declaration resolves a public item; it fails to compile for a name the crate does not export.
 use polyspec_template::ParseOptions;
-#[allow(
-    unused_imports,
-    reason = "a use declaration resolves the public item, which is what the test checks"
-)]
+#[allow(unused_imports, reason = "the use declarations check the public items")]
 use polyspec_template::{
     AstProgram, BoundMap, Engine, Loader, PreparedRender, Program, RuntimeEnvironment, TemplateError, bind, decode_template, merge, parse,
     parse_json,

@@ -5,10 +5,7 @@ use std::fmt;
 
 /// Error codes of the specification.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[expect(
-    non_camel_case_types,
-    reason = "the variants are the error codes of the specification by their exact names"
-)]
+#[expect(non_camel_case_types, reason = "variants are the error codes by their exact names")]
 pub enum ErrorCode {
     // BEGIN GENERATED ERROR CODES
     /// The source is not valid UTF-8.

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5e2437c08c967efe2b9380663dc1d08a5e04615bd7011f47c698a5d303563f58 -->
+<!-- source-sha256: c57bd7a1589b3c996a55701978f6e16cca851a9bc4a03967e49d160f6a6f70f6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-59: template은 edcb9579의 kit 복사본을 받는다: commit identity, 모든 suppression이 이유를 적는 suppression check (Python `# noqa: <codes> - <reason>`, Rust `#[allow(<lint>, reason = "...")]` 또는 한 줄의 `#[expect(...)]`), PHP의 숨긴 오류 없음 (`packages/php/tests/LoadFailureTest.php`에서 `@file_get_contents` 대신 `is_readable`), `scripts/json-document.mts`에서 다시 던지는 오류의 cause, prepare-commit-msg hook과 merge driver; `config/owner-checks.json`은 새 복사본 둘을 소유한다 (`.githooks/prepare-commit-msg`는 `hooks-check`, `config/commit-identity.json`은 `kit-check`). Red: `make suppression-check` 이유 없는 suppression 10개 (P8); `make lint-php` 4단계 중 1개 실패: phpcs (LoadFailureTest.php:121 Generic.PHP.NoSilencedErrors); `make lint-ts` 12단계 중 1개 실패: oxlint (scripts/json-document.mts:35의 preserve-caught-error); green: `make suppression-check` 모든 lint 지적의 suppression이 이유를 적는다; `make lint-php` phpcs 통과, 4단계 모두 통과; `make lint-ts` 12단계 모두 통과; `make kit-check`, `make hooks-check`, `make lint-python`, `make lint-rust`, `make docs-check` 통과; phpunit LoadFailureTest 5 passed (25 assertions); cargo exports 2, expr_fixtures 73, load_failures 4, object_calls 6, value 9 passed; python test_loading 8, test_object_calls 13 passed (T26.7-59).
 
 - T26.7-2-11-1: PHP 확장은 라이브러리의 `Ast`, `Parser\Scanner`, `Parser\Standalone`을 확장의 class로 등록한다 (S10). 이름, final static 메서드, 상수를 그대로 가지며(배열 상수는 모듈 시작 때 선언한다), tag scanner와 standalone 줄은 C parser가 쓰는 함수(`pt_parse.c`)이고, `Ast::toJson`은 canonical JSON 작성기다(`pt_scanner.c`). Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/ScannerClassesTest.php` exit 1, "Polyspec\Template\Ast is not registered by the extension", Failures: 1; green: 같은 명령 OK (4 tests, 14 assertions); `ParserTest` OK (7 tests, 19 assertions), `AnalyzeTest` OK (15 tests, 18 assertions), `ConformanceTest` OK (771 tests, 1028 assertions) (T26.7-2-11-1).
 

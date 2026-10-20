@@ -299,10 +299,7 @@ impl RuntimeBindings {
             }
             Value::List(list) => {
                 // An index that does not fit i64 names no element, so it reads as absent like any missing index.
-                #[allow(
-                    clippy::disallowed_methods,
-                    reason = "a text index that does not parse as i64 is beyond every list: absent, which the match below reads as null"
-                )]
+                #[allow(clippy::disallowed_methods, reason = "text beyond i64 is absent")]
                 let position: Option<i64> = match key {
                     Value::Number(number) if number.fract() == 0.0 => Some(*number as i64),
                     other => other

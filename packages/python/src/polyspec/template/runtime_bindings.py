@@ -254,7 +254,7 @@ class RuntimeBindings:
                 return None
             try:
                 field = getattr(container.target, name, None)
-            except Exception as error:  # noqa: BLE001  the host object decides
+            except Exception as error:  # noqa: BLE001 - the host object decides
                 raise self.error(
                     frame, span, "E_RUNTIME_HOST_FUNCTION", f"{name} failed: {error}"
                 ) from None
@@ -365,7 +365,7 @@ class RuntimeBindings:
             result = run()
         except TemplateError:
             raise
-        except Exception as error:  # noqa: BLE001  the host function decides
+        except Exception as error:  # noqa: BLE001 - the host function decides
             raise self.error(
                 frame, span, "E_RUNTIME_HOST_FUNCTION", f"{name} failed: {error}"
             ) from None

@@ -234,7 +234,7 @@ def main(argv: list[str]) -> None:
                 request.env,
             )
         )
-    except Exception:  # noqa: BLE001  any failure of the invalid target is the observed failure
+    except Exception:  # noqa: BLE001 - any failure of the invalid target is the observed failure
         failure_observed = True
     after_failure = json.dumps(plain(request))
     first = digest(repeated.first)

@@ -839,6 +839,7 @@
         "config/api-extractor.kit.json",
         "config/*.schema.json",
         "config/php-lint/**",
+        "config/commit-identity.json",
         "package.json",
         "package-lock.json"
       ],
@@ -1015,6 +1016,7 @@
       "paths": [
         ".githooks/pre-commit",
         ".githooks/commit-msg",
+        ".githooks/prepare-commit-msg",
         "config/generated.json"
       ],
       "targets": [

@@ -32,7 +32,7 @@ export function parseJson(text: string, source: string): unknown {
     const value: unknown = JSON.parse(text);
     return value;
   } catch (error) {
-    throw new Error(`${source} is no JSON text: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`${source} is no JSON text: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
   }
 }
 

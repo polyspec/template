@@ -118,7 +118,7 @@ final class LoadFailureTest extends TestCase
         try {
             // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly
             // when the process cannot read it, and the process cannot read it exactly when it does not run as root.
-            $readable = @file_get_contents($root . '/locked.tpl') !== false;
+            $readable = is_readable($root . '/locked.tpl');
             $asRoot = posix_geteuid() === 0;
             try {
                 $locked = (new AstProgram(new FilesystemLoader($root)))->render('locked.tpl', []);

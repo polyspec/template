@@ -3,10 +3,7 @@ mod render_adapter;
 // A generated module declares the complete API of its program: the typed records, the artifact
 // manifest and the value helpers. This adapter calls only `GeneratedProgram::render`, so the
 // declarations that it does not use are expected; the allowance covers the generated modules only.
-#[expect(
-    dead_code,
-    reason = "the generated modules declare the complete API of their programs, and the adapter calls only render"
-)]
+#[expect(dead_code, reason = "the generated modules declare their whole API")]
 mod generated {
     pub mod compiler_coverage {
         include!(concat!(
