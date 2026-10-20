@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T22.6-17-1: the Python showcase adapter has the benchmark mode of the PHP adapter (`SHOWCASE_BENCH_ITERATIONS`, `SHOWCASE_BENCH_WARMUP`); a value that is not a non-negative integer fails and names its variable. Red: `make item-red ID=T22.6-17-1` (after `make typed-generator`) fails 7 of 8 tests of `tests/scripts/python-benchmark.test.mts` with no benchmark mode; green: `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/python-benchmark.test.mts` passes 8 of 8, and `make lint-python` and `make lint-ts` pass (T22.6-17-1).
+
 - T26.7-32-8: the Verification also runs `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-7 RT-11 RT-23"` (kit K414-1), which reports the 6 R15 findings of the three ids on 3b5cdb5f, before they moved to the conformance suite, and none after; `make item-red BEFORE=3b5cdb5f` recorded that red, and with the other checks of its Verification the row is done (T26.7-32-8).
 
 - T26.7-52-4: gofmt aligns the values of the table in the test of the load results without a source or a version that T26.7-52 added to `packages/go/load_failure_test.go`. Red: `make template-lint-go-format` exit 2, `gofmt -l` lists `packages/go/load_failure_test.go`; green: it passes, and TestLoadResultWithoutSourceOrVersionIsALoadFailure passes (T26.7-52-4).

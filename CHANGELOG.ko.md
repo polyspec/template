@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 14f94f1c047861551303714156d73d2058c8848b8d17605d0a06cdff0d556157 -->
+<!-- source-sha256: 1e575c7b4f7a4a40c6f230afa5c87710b3510ff61bf62cd663ba40225b779b5f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-17-1: showcase의 Python adapter는 PHP adapter의 benchmark mode(`SHOWCASE_BENCH_ITERATIONS`, `SHOWCASE_BENCH_WARMUP`)를 가지며, 음이 아닌 정수가 아닌 값은 실패하고 그 변수 이름을 밝힌다. Red: `make item-red ID=T22.6-17-1`(`make typed-generator` 뒤)가 `tests/scripts/python-benchmark.test.mts`의 test 8개 중 7개를 benchmark mode가 없어 실패시킨다; green: `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/python-benchmark.test.mts`가 8개 모두 통과하고, `make lint-python`과 `make lint-ts`가 통과한다 (T22.6-17-1).
 
 - T26.7-32-8: Verification이 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-7 RT-11 RT-23"`(kit K414-1)도 실행한다. 이 검사는 세 id가 conformance suite로 옮기기 전인 3b5cdb5f에서 그 R15 6건을 보고하고 옮긴 뒤에는 보고하지 않는다; `make item-red BEFORE=3b5cdb5f`가 그 red를 기록했고, Verification의 다른 검사와 함께 행은 끝났다 (T26.7-32-8).
 

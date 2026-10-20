@@ -6,6 +6,11 @@ into var/python/venv, and the directory of this script, the first entry of the i
 modules generated.render_adapter and generated.typed.<scenario>, the generated program of each scenario with `_` for
 `-` in its name (examples/showcase/python-module.mts), which it imports with import statements. Without SHOWCASE_EXECUTION_MODE=generated it interprets the compiled AST artifacts of the scenario; with it, the adapter renders
 through the generated program of the scenario. Both modes call Engine.render.
+
+With SHOWCASE_BENCH_ITERATIONS set to a positive integer the adapter prints one JSON line with the measurements of its
+renders instead, as examples/showcase/adapters/php.php does: SHOWCASE_BENCH_WARMUP renders run first, then the
+measured renders, one repeat render and the prepared render of the request repeated as many times. A value that is not
+a non-negative integer fails and names its variable.
 """
 
 from __future__ import annotations
@@ -13,7 +18,9 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sys
+import time
 from pathlib import Path
 
 from polyspec.template import (
@@ -21,6 +28,7 @@ from polyspec.template import (
     Engine,
     EngineOptions,
     MapLoader,
+    PreparedRender,
     RenderOptions,
     decode_template,
     parse_json_bytes,
@@ -152,6 +160,12 @@ def engine_env(env: Environment | None) -> dict:
     return result
 
 
+def render_options(request: RenderRequest) -> RenderOptions:
+    return RenderOptions(
+        define=engine_defines(request.define), env=engine_env(request.env)
+    )
+
+
 class Adapter(RenderAdapter):
     def __init__(self, root: str):
         self.root = root
@@ -184,11 +198,13 @@ class Adapter(RenderAdapter):
 
     def render(self, request: RenderRequest) -> str:
         return self.engine.render(
-            request.target,
-            request.assign,
-            RenderOptions(
-                define=engine_defines(request.define), env=engine_env(request.env)
-            ),
+            request.target, request.assign, render_options(request)
+        )
+
+    def prepare(self, request: RenderRequest) -> PreparedRender:
+        # The prepared render of a request; the benchmark mode renders it repeatedly.
+        return self.engine.prepare(
+            request.target, request.assign, render_options(request)
         )
 
     def render_twice(self, request: RenderRequest) -> RepeatResult:
@@ -217,11 +233,56 @@ def digest(value: str) -> dict:
     return {"bytes": len(encoded), "sha256": hashlib.sha256(encoded).hexdigest()}
 
 
+def benchmark_count(name: str) -> int:
+    """The value of an environment variable that counts renders; unset is 0, otherwise a non-negative integer."""
+    value = os.environ.get(name)
+    if value is None:
+        return 0
+    if re.fullmatch(r"[0-9]+", value) is None:
+        raise RuntimeError(f"{name} must be a non-negative integer, got {value!r}")
+    return int(value)
+
+
+def benchmark(
+    adapter: Adapter, request: RenderRequest, iterations: int, warmup: int
+) -> dict:
+    for _ in range(warmup):
+        adapter.render(request)
+    measured = ""
+    started = time.perf_counter_ns()
+    for _ in range(iterations):
+        measured = adapter.render(request)
+    render_seconds = (time.perf_counter_ns() - started) / 1e9
+    output = digest(measured)
+    repeat = digest(adapter.render(request))
+    prepared = adapter.prepare(request)
+    prepared_output = ""
+    prepared_started = time.perf_counter_ns()
+    for _ in range(iterations):
+        prepared_output = prepared.render()
+    prepared_render_seconds = (time.perf_counter_ns() - prepared_started) / 1e9
+    return {
+        "language": "python",
+        "iterations": iterations,
+        "renderSeconds": render_seconds,
+        "preparedRenderSeconds": prepared_render_seconds,
+        "bytes": output["bytes"],
+        "outputSha256": output["sha256"],
+        "repeatSha256": repeat["sha256"],
+        "preparedSha256": digest(prepared_output)["sha256"],
+    }
+
+
 def main(argv: list[str]) -> None:
     if len(argv) < 2:
         raise RuntimeError("usage: python python.py SCENARIO_DIR")
+    iterations = benchmark_count("SHOWCASE_BENCH_ITERATIONS")
+    warmup = benchmark_count("SHOWCASE_BENCH_WARMUP")
     adapter = Adapter(argv[1])
     request = adapter.build_request(adapter.load_scenario())
+    if iterations > 0:
+        print(json.dumps(benchmark(adapter, request, iterations, warmup)))
+        return
     repeated = adapter.render_twice(request)
     before_failure = json.dumps(plain(request))
     failure_observed = False
