@@ -4,6 +4,7 @@
 // --dry-run.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -25,6 +26,11 @@ test('a case runs in every mode and a removed case has nothing to run', () => {
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout, /text\/removed-case: the case directory does not exist; the case was removed and has nothing to run/);
   assert.deepEqual(result.stdout.match(/would run node .*/g), RUNNERS.map(runner => `would run node ${runner} --case text/crlf-input`));
+});
+
+test('every implementation of config/parity.json has its generated runner (S6)', () => {
+  const declared = (JSON.parse(readFileSync(path.join(ROOT, 'config/parity.json'), 'utf8')) as { implementations: { name: string }[] }).implementations.map(item => item.name);
+  assert.deepEqual(RUNNERS.slice(1), declared.map(name => `tests/runner/conformance-generated-${name}.mts`));
 });
 
 test('a path outside a case directory fails with its name', () => {

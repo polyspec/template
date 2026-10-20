@@ -11,15 +11,14 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { profileImplementations } from './parity-config.mts';
+import { readParityConfig } from './parity-config.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-// The AST runner over every implementation, and the generated runner of each implementation of the profile manifest of
-// config/parity.json, the implementations with the generated-compiler level of packages/compiler/interface.json (the PHP
-// extension renders and generates nothing).
+// The AST runner over every implementation, and the generated runner of every implementation of config/parity.json:
+// every unit holds in every implementation (kit S6).
 export const RUNNERS = [
   'tests/runner/conformance.mts',
-  ...profileImplementations('manifest').map(name => `tests/runner/conformance-generated-${name}.mts`),
+  ...readParityConfig().implementations.map(({ name }) => `tests/runner/conformance-generated-${name}.mts`),
 ];
 
 /** The case ids of the paths, in order and without repetition; a path outside a case directory is an error. */
