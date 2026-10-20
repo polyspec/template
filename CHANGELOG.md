@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-17: `composerPlatforms` of `config/dependency-policy.json` declares PHP 8.4.1, the one platform of the repository (the minor of `.php-version` with the patch 1 that PHPUnit 13 needs), as the manifests and locks already resolve it. Red: `make dependency-policy-check` reported 9 findings, 6 of the platform; green: 3 remain, the locks that changed after the review of 2026-10-15, which `make dependency-review RECORD=1` records with the registries (T26.7-17).
+
 - T26.7-16: every rule of `AGENTS.md` and its Korean twin begins with `Own:` or `Refines <id>:`, and the 16 rules that restated a principle without naming a term of this repository are removed (documents, behavior change, test evidence, accepted conditions, existing code, messages, the dependency pins, the language of records, the branch rule and the use of `[!]`). Red: `make rules-check` reported 47 findings; green: it passes (T26.7-16).
 
 - T26.7-15: `.claude/settings.json` (a copy of kit) is owned by `kit-check`, and `.githooks/pre-commit` and `config/generated.json` by `hooks-check`. Red: `make owner-validate` found 3 paths without an owner; green: it passes (T26.7-15).

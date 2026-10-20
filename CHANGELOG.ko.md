@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a89fad397fb9337ed2e06f5e0c661eebe5c59bd54f62f96c93c3839170f64e8a -->
+<!-- source-sha256: 5334082ddddf8b6319250bd6c2ad77de3008c27b1c6d46b80e9df7d9de0aa798 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-17: `config/dependency-policy.json`의 `composerPlatforms`는 manifest와 lock이 이미 따르는 repository의 단일 platform인 PHP 8.4.1(`.php-version`의 minor와 PHPUnit 13이 요구하는 patch 1)을 선언한다. Red: `make dependency-policy-check`가 9건(platform 6건)을 보고했고, green: 3건이 남으며 이는 2026-10-15 review 뒤에 바뀐 lock이고 `make dependency-review RECORD=1`이 registry와 함께 기록한다(T26.7-17).
 
 - T26.7-16: `AGENTS.md`와 한국어 쌍의 모든 규칙은 `Own:` 또는 `Refines <id>:`로 시작하고, 이 repository의 용어를 이름으로 적지 않고 principle을 되풀이하던 규칙 16개(문서, 동작 변경, test 근거, 승인된 조건, 기존 code, 메시지, 의존성 pin, 기록의 언어, branch 규칙, `[!]`의 사용)를 제거했다. Red: `make rules-check`가 47건을 보고했고, green: 통과한다(T26.7-16).
 

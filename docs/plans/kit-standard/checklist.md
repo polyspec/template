@@ -26,3 +26,4 @@
 | T26.7-14 | The TypeScript, Python and C sources hold each piece of code once | packages/ts, packages/lsp, packages/python and packages/php-ext/src without the clones that make duplication-check finds | `make duplication-check` | [ ] |
 | T26.7-15 | Every tracked path has an owner in config/owner-checks.json | The owners of .claude/settings.json, .githooks/pre-commit and config/generated.json | `make owner-validate` | [o] |
 | T26.7-16 | Every rule of AGENTS.md is Own or refines a principle by its id | AGENTS.md and AGENTS.ko.md | `make rules-check` | [o] |
+| T26.7-17 | The dependency policy declares the one PHP platform of the repository, 8.4.1 | composerPlatforms of config/dependency-policy.json | `make dependency-policy-check` | [o] |
