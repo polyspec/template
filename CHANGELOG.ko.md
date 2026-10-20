@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d532e870ddcfc69ade4cce5eea1bc92325f656082547c04ab4ef13978a557d8a -->
+<!-- source-sha256: d0738918dab748d792105b643cc1ff656ba4a540c5c670cf6f1992206f3c6c44 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-45: `docs-check`는 예제 사이트 링크를 생성 산출물 `examples/site/index.html`이 아니라 공개 URL `https://polyspec.github.io/template/examples/site/index.html`로 확인한다. 이 파일은 `make showcase`가 만들며 추적하지 않는다. Makefile은 바꾸지 않았다. Red: `make docs-check`가 `README.md:48`, `README.ko.md:49`, `docs/operations/showcase.md:6`, `docs/operations/showcase.ko.md:7`에서 없는 `examples/site/index.html`을 가리키는 링크 때문에 `4 findings in 49 document pairs`를 보고했고 종료 코드 2; green: `make docs-check`가 `49 document pairs, 2 checklists, 1 status tables and 1 changelogs passed`를 보고하고 종료 코드 0이다 (T26.7-45).
 
 - T26.7-44: knip은 `packages/compiler/src/backend-support.mts`에서 쓰이지 않는 export를 찾지 않는다. `firstGroup`, `splitGroup`, `groupToSplit`은 그 파일만 쓰므로 더 이상 export하지 않으며, knip이 낡았다고 알리는 `packages/ts/src/ast-validator.mjs`의 ignore를 `config/knip-entries.json`에서 지웠다. Red: HEAD 7a048f1e에서 `make lint-ts`가 exit 2로 끝나며 knip이 unused export 3개와 `packages/ts/src/ast-validator.mjs ... Remove from ignore`를 보고; green: `make lint-ts`가 통과한다 (T26.7-44).
 

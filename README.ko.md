@@ -1,5 +1,5 @@
 <!-- doc-id: readme -->
-<!-- source-sha256: cd0f9c1f3fa4814e1b56dec1d04dd7491e991916e418eae522e6e13f61b32802 -->
+<!-- source-sha256: 54a20877c75cb5b99cf8aaa1d7d76b94b67003ff51a3e9698ee86bc0f467d2cc -->
 # Template
 
 [English](README.md).
@@ -46,7 +46,7 @@ make showcase
 - [사용법](docs/operations/guide.ko.md)은 템플릿 작성 방법과 렌더 방법을 설명한다.
 - [명세](docs/spec/)는 렉시컬 규칙, 문법, 표현식 언어, 데이터 모델, 함수, 런타임, 타입 고정 컴파일러, AST, 오류, 에디터 지원을 정의한다.
 - [기능 상태](docs/features.ko.md)는 기능별 구현, 검증, 배포를 기록한다.
-- [실행 가능한 예제 사이트](examples/site/index.html)는 페이지 시나리오를 렌더하고 일치성, 반복 렌더, 처리량 결과물을 보여준다.
+- [실행 가능한 예제 사이트](https://polyspec.github.io/template/examples/site/index.html)는 페이지 시나리오를 렌더하고 일치성, 반복 렌더, 처리량 결과물을 보여준다. `make showcase`가 로컬에서 `examples/site/index.html`로 빌드한다.
 - [운영](docs/operations/)은 개발, 적합성, 릴리스 테스트, 의존성, 문서, 발행 절차를 설명한다.
 - [포매터, 언어 서버, 에디터](docs/operations/editor-tools.ko.md)는 포매터, 언어 서버, CodeMirror 6 어댑터, VS Code 확장의 빌드, 설치, 검증 방법을 설명한다.
 - [실행 계획](docs/plans/execution/plan.ko.md)은 웨이브, 그 의존 관계와 원인, 완료 기준, 완료 정의와 그 증거를 적는다.

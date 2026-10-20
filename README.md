@@ -45,7 +45,7 @@ A single language service holds every editor rule, and each editor reaches it th
 - [Usage guide](docs/operations/guide.md) shows how to write a template and how to render it.
 - [Specification](docs/spec/) defines the lexical rules, the grammar, the expression language, the data model, the functions, the runtime, the typed compiler, the AST, the errors and editor support.
 - [Feature status](docs/features.md) records implementation, verification and deployment per feature.
-- [Executable example site](examples/site/index.html) renders page scenarios and shows parity, repeatability and throughput artifacts.
+- [Executable example site](https://polyspec.github.io/template/examples/site/index.html) renders page scenarios and shows parity, repeatability and throughput artifacts. `make showcase` builds it locally at `examples/site/index.html`.
 - [Operations](docs/operations/) describes development, conformance, release testing, dependency, documentation and publication procedures.
 - [Formatter, language server and editors](docs/operations/editor-tools.md) describes how to build, install and verify the formatter, the language server, the CodeMirror 6 adapter and the VS Code extension.
 - [Execution plan](docs/plans/execution/plan.md) states the waves, their dependencies and causes, the exit criteria, the definition of done and its evidence.

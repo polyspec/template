@@ -3,7 +3,7 @@
 
 [한국어](/ko/operations/showcase).
 
-The [example site](../../examples/site/index.html) renders shared templates with mock data through TypeScript, Go, Rust, PHP, the PHP extension and Python. Each implementation loads the AST artifacts that `make showcase-compile` builds, passes variables as `assign`, registers the layout and its parts with `define`, and renders `layout`. Page complexity belongs in templates and mock data. Controllers, authentication, DI and form generation are outside this example.
+The [example site](https://polyspec.github.io/template/examples/site/index.html) renders shared templates with mock data through TypeScript, Go, Rust, PHP, the PHP extension and Python. Each implementation loads the AST artifacts that `make showcase-compile` builds, passes variables as `assign`, registers the layout and its parts with `define`, and renders `layout`. Page complexity belongs in templates and mock data. Controllers, authentication, DI and form generation are outside this example. `make showcase` builds the page locally at `examples/site/index.html`.
 
 ## Shared inputs
 
