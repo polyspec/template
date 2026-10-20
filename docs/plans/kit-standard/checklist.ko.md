@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 4a44b9635de466079754e3102d6801e8f464b1737bcb4c9dc2f45e88bb380194 -->
+<!-- source-sha256: 9d92c7b742d3cec3b3ead4d67d443d5848f6b1aa21cedb29f8ff43ce88204f39 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -33,3 +33,4 @@
 | T26.7-20 | kit 복사본은 연결된 kit을 따르고 CHECK_TARGETS는 link-state-check와 bypass-check를 실행한다 | PRINCIPLES.md, PRINCIPLES.ko.md, config/php-lint, Makefile, .github/workflows/ci.yml | `make kit-check` | [o] |
 | T26.7-21 | showcase의 compile된 AST artifact와 generated program은 make가 만들고 추적하지 않는다 | RT-57 and the showcase documents, the Makefile, .gitignore, pages.yml and the removal of scripts/check-artifact-digests.mts | `make typed-generator`, `make typed-generator-check`, `var/tools/bin/node --test tests/scripts/ignored-files.test.mts` | [o] |
 | T26.7-22 | browser 설정 test는 make template-install-browsers를 인식한다 | tests/scripts/suite-parity.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts` | [o] |
+| T26.7-23 | Go generated runner는 test를 이름으로 선택한다 | tests/runner/conformance-generated-go.mts | `var/tools/bin/node --test tests/scripts/generated-conformance.test.mts` | [o] |

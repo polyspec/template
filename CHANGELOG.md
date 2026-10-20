@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-23: the Go generated runner passes `-run ^TestGeneratedConformance$` to the test runner of kit, so it selects its test by name and kit no longer refuses it as an unselected go run outside CI. Red: `tests/scripts/generated-conformance.test.mts` failed in the Go test with "a go run without a selection runs only in CI"; green: 7 of 7 tests pass (T26.7-23).
+
 - T26.7-22: the browser setup test of `tests/scripts/suite-parity.test.mts` recognizes the step `make template-install-browsers` (it matched only `install-browsers`, which T26.2 renamed), so the jobs `scripts`, `browser` and `editor` of `ci.yml` pass it. Red: the test failed with 3 violations; green: 6 of 6 tests pass (T26.7-22).
 
 - T26.7-21: the compiled AST artifacts of `examples/site/scenarios/*/compiled/` and the generated programs of the showcase (`examples/showcase/adapters/generated/{typed,php,javascript}/` and `adapters/go/generated/`), 133 files, are built by `make showcase-compile` and `make typed-generator` and are no longer tracked (RT-57, `docs/operations/showcase.md`, `publication.md`). The targets that read them depend on those targets (`showcase-build-check`, `showcase-site-check`, `contract-check`, `generated-lint-check`, `lint-go`, and the `pages` workflow), `typed-generator-check` regenerates and compares, and `make artifact-digest-check` with its script, test, owner entries and the rebuild entries of the untracked files are removed. Red: `git ls-files` listed 133 generated files; green: with the files deleted `make typed-generator` builds all 5 graphs and 30 programs and `make typed-generator-check` checks 30 artifacts; `owner-validate`, `rebuild-check` and `layout-check` pass (T26.7-21).

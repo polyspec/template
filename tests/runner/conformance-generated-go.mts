@@ -55,7 +55,7 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
   if (runnable.length) {
     // The package of a case is named after the case: case_<case id> of the temporary module.
     const names = new Map(runnable.map(testCase => [`case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`, testCase.id]));
-    const run = await runCaseTests(['go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', './...'], { cwd: root }, names);
+    const run = await runCaseTests(['go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', '-run', '^TestGeneratedConformance$', './...'], { cwd: root }, names);
     failures.push(...caseTestFailures('Go', run));
     if (run.status === 0 || run.failed.length > 0) passed += runnable.length - run.failed.length;
   }

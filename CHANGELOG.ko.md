@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ad560a8b24aca7bdf134be00ceb22a4172f091540ea58ce75437c4e9dd4957e6 -->
+<!-- source-sha256: e8a4b81eab86e17bb4ca81229a05cfe6992051f21ec3c66e492d7a5a3d067eee -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-23: Go generated runner는 kit의 test runner에 `-run ^TestGeneratedConformance$`를 넘기므로 test를 이름으로 선택하고, kit이 이를 CI 밖의 선택 없는 go 실행으로 거부하지 않는다. Red: `tests/scripts/generated-conformance.test.mts`의 Go test가 "a go run without a selection runs only in CI"로 실패했고, green: test 7개 중 7개가 통과한다(T26.7-23).
 
 - T26.7-22: `tests/scripts/suite-parity.test.mts`의 browser 설정 test는 `make template-install-browsers` step을 인식한다(T26.2가 이름을 바꾸기 전의 `install-browsers`만 인식했다). 그래서 `ci.yml`의 `scripts`, `browser`, `editor` job이 통과한다. Red: test가 위반 3건으로 실패했고, green: test 6개 중 6개가 통과한다(T26.7-22).
 
