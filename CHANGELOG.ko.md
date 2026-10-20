@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c57bd7a1589b3c996a55701978f6e16cca851a9bc4a03967e49d160f6a6f70f6 -->
+<!-- source-sha256: d6dce66a643b09b2fc043ba92a1e05dce14940496e5c64ccb6850727b9ef3718 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T22.6-12-1: `docs/spec/data-model.ko.md`와 `docs/operations/development.ko.md`가 `config/parity.json`의 `documents` glob 안에 있고, R10이 그 문장을 finding 없이 읽는다; 행의 Verification은 존재하지 않는 test 파일과 전체 검사 대신 통과하는 `make parity-declarations-check RULES=R10`(kit K414)이다 (T22.6-12-1).
 
 - T26.7-59: template은 edcb9579의 kit 복사본을 받는다: commit identity, 모든 suppression이 이유를 적는 suppression check (Python `# noqa: <codes> - <reason>`, Rust `#[allow(<lint>, reason = "...")]` 또는 한 줄의 `#[expect(...)]`), PHP의 숨긴 오류 없음 (`packages/php/tests/LoadFailureTest.php`에서 `@file_get_contents` 대신 `is_readable`), `scripts/json-document.mts`에서 다시 던지는 오류의 cause, prepare-commit-msg hook과 merge driver; `config/owner-checks.json`은 새 복사본 둘을 소유한다 (`.githooks/prepare-commit-msg`는 `hooks-check`, `config/commit-identity.json`은 `kit-check`). Red: `make suppression-check` 이유 없는 suppression 10개 (P8); `make lint-php` 4단계 중 1개 실패: phpcs (LoadFailureTest.php:121 Generic.PHP.NoSilencedErrors); `make lint-ts` 12단계 중 1개 실패: oxlint (scripts/json-document.mts:35의 preserve-caught-error); green: `make suppression-check` 모든 lint 지적의 suppression이 이유를 적는다; `make lint-php` phpcs 통과, 4단계 모두 통과; `make lint-ts` 12단계 모두 통과; `make kit-check`, `make hooks-check`, `make lint-python`, `make lint-rust`, `make docs-check` 통과; phpunit LoadFailureTest 5 passed (25 assertions); cargo exports 2, expr_fixtures 73, load_failures 4, object_calls 6, value 9 passed; python test_loading 8, test_object_calls 13 passed (T26.7-59).
 
