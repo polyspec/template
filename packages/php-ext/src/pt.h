@@ -394,6 +394,14 @@ void pt_ast_declare_constants(zend_class_entry *ce);
 void pt_scanner_declare_constants(zend_class_entry *ce);
 /* The classes FormatError and FormatResult of the formatter (pt_format.c). */
 void pt_format_register(zend_class_entry *error, zend_class_entry *result);
+/* An expression token of the formatter: its text and its EDT-8 kind, borrowed from the caller. */
+typedef struct pt_format_token {
+    pt_s text;
+    pt_s kind;
+} pt_format_token;
+/* Expression::join (pt_format.c): the tokens joined with the separators of the formatting style, as a new string; the
+ * caller frees nothing but the array. The count is not zero. */
+zend_string *pt_format_join(const pt_format_token *tokens, uint32_t count);
 void pt_ast_is_loop_meta_field(INTERNAL_FUNCTION_PARAMETERS);
 void pt_ast_node(INTERNAL_FUNCTION_PARAMETERS);
 void pt_ast_to_json(INTERNAL_FUNCTION_PARAMETERS);

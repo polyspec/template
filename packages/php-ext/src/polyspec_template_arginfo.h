@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 214e1cf1d0cbeb1ccb4ac1921a7aa71d44e81dde */
+ * Stub hash: 85ada26f6c408d5eeffa97ae84a95a162f0a1198 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -745,6 +745,26 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_I
 	ZEND_ARG_TYPE_INFO(0, range, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_Analyzer_analyze, 0, 3, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Format_Analyzer_parse arginfo_class_Polyspec_Template_Format_Analyzer_analyze
+
+#define arginfo_class_Polyspec_Template_Format_PackageAnalyzer_analyze arginfo_class_Polyspec_Template_Format_Analyzer_analyze
+
+#define arginfo_class_Polyspec_Template_Format_PackageAnalyzer_parse arginfo_class_Polyspec_Template_Format_Analyzer_analyze
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_Body_format, 0, 5, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, kind, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, bodyStart, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, bodyEnd, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, tokens, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Token___construct, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
@@ -1055,6 +1075,9 @@ ZEND_METHOD(Polyspec_Template_Format_Invariant, withoutLineIndentation);
 ZEND_METHOD(Polyspec_Template_Format_Invariant, sameTree);
 ZEND_METHOD(Polyspec_Template_Format_Indent, __construct);
 ZEND_METHOD(Polyspec_Template_Format_Indent, edits);
+ZEND_METHOD(Polyspec_Template_Format_PackageAnalyzer, analyze);
+ZEND_METHOD(Polyspec_Template_Format_PackageAnalyzer, parse);
+ZEND_METHOD(Polyspec_Template_Format_Body, format);
 ZEND_METHOD(Polyspec_Template_Expr_Token, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, error);
@@ -1488,6 +1511,31 @@ static const zend_function_entry class_Polyspec_Template_Format_Invariant_method
 static const zend_function_entry class_Polyspec_Template_Format_Indent_methods[] = {
 	ZEND_ME(Polyspec_Template_Format_Indent, __construct, arginfo_class_Polyspec_Template_Format_Indent___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(Polyspec_Template_Format_Indent, edits, arginfo_class_Polyspec_Template_Format_Indent_edits, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_Analyzer_methods[] = {
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("analyze", NULL, arginfo_class_Polyspec_Template_Format_Analyzer_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+#else
+	ZEND_RAW_FENTRY("analyze", NULL, arginfo_class_Polyspec_Template_Format_Analyzer_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+#endif
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("parse", NULL, arginfo_class_Polyspec_Template_Format_Analyzer_parse, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+#else
+	ZEND_RAW_FENTRY("parse", NULL, arginfo_class_Polyspec_Template_Format_Analyzer_parse, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+#endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_PackageAnalyzer_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_PackageAnalyzer, analyze, arginfo_class_Polyspec_Template_Format_PackageAnalyzer_analyze, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Format_PackageAnalyzer, parse, arginfo_class_Polyspec_Template_Format_PackageAnalyzer_parse, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_Body_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_Body, format, arginfo_class_Polyspec_Template_Format_Body_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -3065,6 +3113,47 @@ static zend_class_entry *register_class_Polyspec_Template_Format_Indent(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Indent", class_Polyspec_Template_Format_Indent_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_Analyzer(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Analyzer", class_Polyspec_Template_Format_Analyzer_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_PackageAnalyzer(zend_class_entry *class_entry_Polyspec_Template_Format_Analyzer)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "PackageAnalyzer", class_Polyspec_Template_Format_PackageAnalyzer_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Format_Analyzer);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_Body(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Body", class_Polyspec_Template_Format_Body_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else

@@ -1421,6 +1421,62 @@ final class Indent
     public static function edits(string $text, array $tags, string $unit, string $templateBlocks, ?array $range): array {}
 }
 
+/**
+ * The parser that the formatter reads: one implementation of the specification, such as the parser of this package
+ * or the native parser of the PHP extension.
+ */
+interface Analyzer
+{
+    /**
+     * Parses a template source and returns its AST, the accepted tags and the EDT-8 tokens of their parts, with UTF-8
+     * byte offsets after a leading byte order mark.
+     *
+     * @param array $options
+     * @return array
+     * @phpstan-param array{delimiters?: string} $options
+     * @phpstan-return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
+     * @throws TemplateError when the source does not parse
+     * @throws \InvalidArgumentException when the delimiters option is not a delimiter pair
+     */
+    public function analyze(string $source, string $name, array $options): array;
+
+    /**
+     * Parses a template source and returns its AST.
+     *
+     * @param array $options
+     * @return array
+     * @phpstan-param array{delimiters?: string} $options
+     * @phpstan-return array<string, mixed>
+     * @throws TemplateError when the source does not parse
+     */
+    public function parse(string $source, string $name, array $options): array;
+}
+
+/**
+ * The parser of this package as the analyzer of the formatter.
+ */
+final class PackageAnalyzer implements Analyzer
+{
+    public function analyze(string $source, string $name, array $options): array {}
+
+    public function parse(string $source, string $name, array $options): array {}
+}
+
+/**
+ * Tag body formatting: writes the body of each tag kind in the formatting style (GRM-2).
+ */
+final class Body
+{
+    /**
+     * Returns the formatted body of a tag, or null when the tag is kept as written: comments, directives, bodies that
+     * contain a line terminator and bodies whose expression tokens do not cover every non-whitespace character.
+     *
+     * @param array $tokens the tokens inside the body, its sigil first
+     * @phpstan-param list<array{start: int, end: int, kind: string}> $tokens
+     */
+    public static function format(string $kind, string $source, int $bodyStart, int $bodyEnd, array $tokens): ?string {}
+}
+
 namespace Polyspec\Template\Expr;
 
 /**

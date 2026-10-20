@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: db0629f6b89ef0163cd8f5b50329833735f4c55cdf3ce885f2b5b31b6a4f6d3f -->
+<!-- source-sha256: db5c88df40d60db4c5fd0da3930deac549d1937636280df2a4d7c279da9a9431 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-16: 확장은 `Format\Analyzer`(interface), `Format\PackageAnalyzer`, `Format\Body`를 library와 같은 이름과 signature의 class로 등록한다. `Body::format`은 tag body를 `packages/php-ext/src/pt_format.c`의 C로 쓰며, `Expression::join`과 Body가 C 함수 `pt_format_join`을 함께 쓴다. `PackageAnalyzer`는 `AstProgram::analyze`와 `parse`에 위임한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatBodyTest.php`가 `Polyspec\Template\Format\Body is not registered by the extension`으로 실패한다(1 failure); green: 같은 명령이 `OK (4 tests, 15 assertions)`로 통과한다 (T26.7-2-16).
 
 - T26.7-2-14: 확장이 라이브러리의 Render\Evaluator와 Render\Renderer를 라이브러리와 같은 이름과 시그니처의 final class로 등록하며, 상태는 객체 안에 있고 모든 값 연산은 라이브러리가 호출하는 RuntimeBindings 메서드다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/RenderClassesTest.php` 4 passed, 1 failed (Evaluator is not registered by the extension); green: 같은 명령 OK (5 tests, 20 assertions) (T26.7-2-14).
 

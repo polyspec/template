@@ -3141,6 +3141,10 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_format_register(format_error, register_class_Polyspec_Template_Format_FormatResult());
     register_class_Polyspec_Template_Format_Expression();
     register_class_Polyspec_Template_Format_Invariant();
+    /* PackageAnalyzer implements Analyzer, so the interface is registered first. */
+    zend_class_entry *analyzer = register_class_Polyspec_Template_Format_Analyzer();
+    register_class_Polyspec_Template_Format_PackageAnalyzer(analyzer);
+    register_class_Polyspec_Template_Format_Body();
 
     /* The runtime services come first: AstProgram and RuntimeEnvironment implement the interface. */
     zend_class_entry *runtime_services = register_class_Polyspec_Template_Render_RuntimeServices();
