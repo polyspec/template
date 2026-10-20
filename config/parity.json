@@ -497,6 +497,19 @@
       ]
     },
     {
+      "id": "parse-reuse",
+      "requirements": ["RT-40"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › reuses the parse of a template while the loader reports the same version (RT-40)" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestTheParseIsReusedWhileTheVersionStaysTheSame" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "the_parse_is_reused_while_the_version_stays_the_same" },
+        { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testTheParseIsReusedWhileTheVersionStaysTheSame" },
+        { "implementation": "php-ext", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testTheParseIsReusedWhileTheVersionStaysTheSame" },
+        { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_the_parse_is_reused_while_the_version_stays_the_same" }
+      ]
+    },
+    {
       "id": "page-cache",
       "requirements": ["RT-65"],
       "kind": "feature",
@@ -734,7 +747,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-33", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-19", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-33", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-19", "VAL-22", "VAL-23"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },

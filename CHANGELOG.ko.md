@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1e575c7b4f7a4a40c6f230afa5c87710b3510ff61bf62cd663ba40225b779b5f -->
+<!-- source-sha256: e5fd917b8bd9856bb4713848fdfcac06baacffe945cefb16208fa5117758a05f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-10: RT-40은 그것이 기대는 기본값을 말한다: 옵션이 산출물 갱신 정책을 정하지 않은 엔진은 `true`(RT-76)를 쓰므로 템플릿을 `name@version`마다 한 번 파싱한다. 전에는 RT-40이 모든 엔진에 대해 그렇게 말했고, `dev` 정책이 그것과 모순된다. 새 unit `parse-reuse`가 RT-40을 인용하고, 모든 구현의 그 test는 기본 정책으로, 버전이 그대로인 채 소스가 바뀌는 로더의 템플릿을 렌더해 첫 파싱을 렌더하고, 버전이 바뀌면 새 소스를 렌더한다; 모든 구현이 이미 그렇게 동작하고 기본값이 `true`다. PHP 확장은 PHP test를 binding한다. concurrent-bound-map은 RT-40을 더 이상 인용하지 않는다. Red: 새 test가 있는 상태에서 `make item-red`가 `make parity-declarations-check UNITS="parse-reuse"` exit 2(그런 unit 없음)와 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-40"` exit 2(go와 python의 RT-40 R15)를 기록했다. Green: 둘 다 통과하고, test가 통과하며(vitest `engine.test.ts` 13, `go test` 2, `cargo test --test functions` 15, PHPUnit과 PHP 확장의 EngineRefreshTest 9, Python `test_loading.py` 9), `make parity-declarations-check`는 2건 줄고 새 finding이 없다 (T26.7-32-10).
 
 - T22.6-17-1: showcase의 Python adapter는 PHP adapter의 benchmark mode(`SHOWCASE_BENCH_ITERATIONS`, `SHOWCASE_BENCH_WARMUP`)를 가지며, 음이 아닌 정수가 아닌 값은 실패하고 그 변수 이름을 밝힌다. Red: `make item-red ID=T22.6-17-1`(`make typed-generator` 뒤)가 `tests/scripts/python-benchmark.test.mts`의 test 8개 중 7개를 benchmark mode가 없어 실패시킨다; green: `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/python-benchmark.test.mts`가 8개 모두 통과하고, `make lint-python`과 `make lint-ts`가 통과한다 (T22.6-17-1).
 

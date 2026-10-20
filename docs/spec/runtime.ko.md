@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 8a4eb9aa5af446a24c7d9aded27c8f2314ea7563e694bb52b224e2a362d66d04 -->
+<!-- source-sha256: d3dfa2f0dd73a7881c7293fa29d75fbce158eec6dbb6597b3a6aecf086877b9f -->
 # 런타임
 
 [English](/spec/runtime).
@@ -297,7 +297,7 @@ TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 k
 
 ## 캐싱
 
-- **RT-40** 엔진은 템플릿을 `name@version`마다 한 번 파싱하고 로더가 같은 버전을 보고하는 동안 파싱된 템플릿을 재사용한다.
+- **RT-40** 옵션이 산출물 갱신 정책을 정하지 않은 엔진은 `true`(RT-76)를 쓴다: 템플릿을 `name@version`마다 한 번 파싱하고 로더가 같은 버전을 보고하는 동안 파싱된 템플릿을 재사용한다.
 - **RT-41** 파싱된 템플릿은 AST JSON으로 저장하고 다시 로드할 수 있다. AST 렌더는 소스 렌더와 같은 출력을 만든다.
 - **RT-71** Build compiler는 `--refresh dev|true|false`를 받는다. `dev`는 항상 쓰고, `true`는 source, type, contract digest가 일치하는 artifact를 재사용하며, `false`는 source를 읽거나 parse하지 않고 artifact도 쓰지 않는다.
 

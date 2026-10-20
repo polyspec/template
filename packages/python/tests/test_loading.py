@@ -68,6 +68,29 @@ class Loading(unittest.TestCase):
         immutable_loader.set("a.tpl", "2")
         self.assertEqual(immutable.render("a.tpl", {}), "1")
 
+    def test_the_parse_is_reused_while_the_version_stays_the_same(self):
+        # RT-40: under the default artifact refresh policy `true` (RT-76) an engine parses a template once per
+        # name@version and reuses the parse while the loader reports the same version.
+        class VersionedLoader:
+            def __init__(self, source: str, version: str):
+                self.source = source
+                self.version = version
+
+            def load(self, name: str):
+                if name != "a.tpl":
+                    return None
+                return SimpleNamespace(
+                    source=self.source, ast=None, version=self.version
+                )
+
+        loader = VersionedLoader("1", "v1")
+        engine = engine_of(loader)
+        self.assertEqual(engine.render("a.tpl", {}), "1")
+        loader.source = "2"
+        self.assertEqual(engine.render("a.tpl", {}), "1")
+        loader.version = "v2"
+        self.assertEqual(engine.render("a.tpl", {}), "2")
+
     def test_the_map_loader_returns_a_held_source_with_a_version(self):
         # RT-9, RT-10: a map loader returns a held source with its version, and nothing
         # for another name.

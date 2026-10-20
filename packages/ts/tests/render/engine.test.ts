@@ -1,6 +1,6 @@
 // Engine API: loaders, host functions, limits and AST rendering (RT-1 to RT-6, RT-40, RT-41).
 import { describe, expect, it } from 'vitest';
-import { AstProgram, Engine, MapLoader, parse, TemplateError } from '../../src/index.js';
+import { AstProgram, Engine, MapLoader, parse, TemplateError, type Loader } from '../../src/index.js';
 import { AstProgram as RenderAstProgram, Engine as RenderEngine } from '../../src/render.js';
 
 describe('Engine', () => {
@@ -161,6 +161,22 @@ describe('Engine', () => {
     expect(immutable.render('a.tpl', {})).toBe('1');
     immutableLoader.set('a.tpl', '2');
     expect(immutable.render('a.tpl', {})).toBe('1');
+  });
+
+  // RT-40: under the default artifact refresh policy `true` (RT-76) an engine parses a template once per name@version
+  // and reuses the parse while the loader reports the same version.
+  it('reuses the parse of a template while the loader reports the same version (RT-40)', () => {
+    let source = '1';
+    let version = 'v1';
+    const loader: Loader = {
+      load: (name) => (name === 'a.tpl' ? { source, version } : null),
+    };
+    const engine = new Engine(new AstProgram({ loader }));
+    expect(engine.render('a.tpl', {})).toBe('1');
+    source = '2';
+    expect(engine.render('a.tpl', {})).toBe('1');
+    version = 'v2';
+    expect(engine.render('a.tpl', {})).toBe('2');
   });
 
   // RT-4: a define or an env given as request data that is not an object fails the render (E_DATA_UNSUPPORTED_TYPE).

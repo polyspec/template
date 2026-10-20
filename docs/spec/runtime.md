@@ -296,7 +296,7 @@ TypeScript, PHP, the PHP extension and Python name each limit by its key in the 
 
 ## Caching
 
-- **RT-40** An engine parses a template once per `name@version` and reuses the parsed template while the loader reports the same version.
+- **RT-40** An engine whose options name no artifact refresh policy uses `true` (RT-76): it parses a template once per `name@version` and reuses the parsed template while the loader reports the same version.
 - **RT-41** A parsed template may be stored and reloaded as its AST JSON. Rendering an AST produces the same output as rendering its source.
 - **RT-71** The build compiler accepts `--refresh dev|true|false`. `dev` always writes, `true` reuses artifacts whose source, type and contract digests match, and `false` never reads or parses source and never writes an artifact.
 

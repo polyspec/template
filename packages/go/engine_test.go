@@ -98,6 +98,56 @@ func TestArtifactRefreshPolicies(t *testing.T) {
 	}
 }
 
+// sourceVersionLoader returns a source and a version that the test sets independently.
+type sourceVersionLoader struct {
+	source  string
+	version string
+}
+
+// Load implements Loader.
+func (l *sourceVersionLoader) Load(name string) (template.LoadResult, bool, error) {
+	if name != "a.tpl" {
+		return template.LoadResult{}, false, nil
+	}
+	return template.LoadResult{Source: []byte(l.source), Version: l.version}, true, nil
+}
+
+// RT-40: under the default artifact refresh policy `true` (RT-76) an engine parses a template once per name@version
+// and reuses the parse while the loader reports the same version.
+func TestTheParseIsReusedWhileTheVersionStaysTheSame(t *testing.T) {
+	loader := &sourceVersionLoader{source: "1", version: "v1"}
+	program, err := template.NewAstProgram(template.Options{Loader: loader})
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := template.NewEngine(program)
+	out, err := engine.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "1" {
+		t.Fatalf("initial render: got %q, want %q", out, "1")
+	}
+
+	loader.source = "2"
+	out, err = engine.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "1" {
+		t.Fatalf("same version %q re-parsed the source: got %q, want %q", "v1", out, "1")
+	}
+
+	loader.version = "v2"
+	out, err = engine.Render("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "2" {
+		t.Fatalf("new version %q not parsed: got %q, want %q", "v2", out, "2")
+	}
+}
+
 // FUN-46: an error that a host function reports fails the render with E_RUNTIME_HOST_FUNCTION at the position of its call.
 func TestHostFunctions(t *testing.T) {
 	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "x\n{= twice(2)}"})})

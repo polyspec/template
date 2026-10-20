@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\ArrayLoader;
+use Polyspec\Template\Loader\LoaderInterface;
 use Polyspec\Template\Render\RuntimeEnvironment;
 use Polyspec\Template\TemplateError;
 
@@ -23,6 +24,30 @@ final class EngineRefreshTest extends TestCase
 
         self::assertSame('1', $engine->render('a.tpl'));
         $loader->set('a.tpl', '2');
+        self::assertSame('2', $engine->render('a.tpl'));
+    }
+
+    /**
+     * RT-40: under the default artifact refresh policy `true` (RT-76) an engine parses a template once per
+     * name@version and reuses the parse while the loader reports the same version.
+     */
+    public function testTheParseIsReusedWhileTheVersionStaysTheSame(): void
+    {
+        $loader = new class () implements LoaderInterface {
+            public string $source = '1';
+            public string $version = 'v1';
+
+            public function load(string $name): ?array
+            {
+                return $name === 'a.tpl' ? ['source' => $this->source, 'version' => $this->version] : null;
+            }
+        };
+        $engine = new Engine(new AstProgram($loader));
+
+        self::assertSame('1', $engine->render('a.tpl'));
+        $loader->source = '2';
+        self::assertSame('1', $engine->render('a.tpl'));
+        $loader->version = 'v2';
         self::assertSame('2', $engine->render('a.tpl'));
     }
 

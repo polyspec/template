@@ -343,6 +343,50 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
     }
 }
 
+/// A loader whose source and version the test changes independently after the program took it.
+struct VersionedLoader {
+    source: Rc<RefCell<String>>,
+    version: Rc<RefCell<String>>,
+}
+
+impl Loader for VersionedLoader {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+        if name != "a.tpl" {
+            return Ok(None);
+        }
+        Ok(Some(Loaded::Source {
+            bytes: self.source.borrow().as_bytes().to_vec(),
+            version: self.version.borrow().clone(),
+        }))
+    }
+}
+
+// RT-40: under the default artifact refresh policy `true` (RT-76) an engine parses a template once per name@version
+// and reuses the parse while the loader reports the same version.
+#[test]
+fn the_parse_is_reused_while_the_version_stays_the_same() {
+    let source = Rc::new(RefCell::new("1".to_string()));
+    let version = Rc::new(RefCell::new("v1".to_string()));
+    let program = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(VersionedLoader {
+            source: Rc::clone(&source),
+            version: Rc::clone(&version),
+        })),
+        ..Default::default()
+    })
+    .expect("valid engine options");
+    let render = || {
+        program
+            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .unwrap()
+    };
+    assert_eq!(render(), "1");
+    source.borrow_mut().replace_range(.., "2");
+    assert_eq!(render(), "1", "the same version keeps the parse");
+    version.borrow_mut().replace_range(.., "v2");
+    assert_eq!(render(), "2", "a new version reparses");
+}
+
 #[test]
 fn date_text_with_a_multibyte_character_in_the_time_is_not_a_date() {
     // The time field ends inside the two-byte character; the parser rejects the text instead of panicking.
