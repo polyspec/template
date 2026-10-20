@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: d59612d2cff1e4eaf619cc8568e72984c2b7f5d6e656893ec6743fc4e3b8e569 -->
+<!-- source-sha256: 5beacb2e861fe0956a7ea3282c2417040b4d172f47f3642bbb2a46245fe112b5 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -30,3 +30,4 @@
 | T26.7-17 | 의존성 policy는 repository의 단일 PHP platform 8.4.1을 선언한다 | composerPlatforms of config/dependency-policy.json | `make dependency-policy-check` | [o] |
 | T26.7-18 | assign으로 준 문자열 key의 host Map은 일반 객체와 같이 렌더된다 (hyper: assign is not a map) | packages/ts/tests/value/bound.test.ts | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/value/bound.test.ts` | [-] 원인: 실패가 재현되지 않는다. 2026-10-20 11:57에 build한 template main의 dist로 hyper http test가 48개 중 48개 통과한다 |
 | T26.7-19 | packages/ts의 AST validator는 make가 만들고 추적하지 않는다 | scripts/generate-ast-validator.mts, the Makefile, .gitignore and the owner and knip declarations | `make build-ts`, `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/decode.test.ts` | [o] |
+| T26.7-20 | kit 복사본은 연결된 kit을 따르고 CHECK_TARGETS는 link-state-check와 bypass-check를 실행한다 | PRINCIPLES.md, PRINCIPLES.ko.md, config/php-lint, Makefile, .github/workflows/ci.yml | `make kit-check` | [o] |

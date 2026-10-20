@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2ccc892a0602135faacf28e6e5ca05effbb8738fc790b9b2348bc767ab48eef0 -->
+<!-- source-sha256: 05640d7eceaa0f56d785f0615cf186a9e050b6dddebb2c5bce924d35d362f3c9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-20: kit 복사본은 연결된 kit을 따르고(`make kit-sync`가 PRINCIPLES 두 파일과 `config/php-lint/composer.json`, `composer.lock`을 썼다), `CHECK_TARGETS`와 `.github/workflows/ci.yml`의 첫 job은 새 gate `link-state-check`와 `bypass-check`를 실행한다. Red: `make kit-check`가 5건을 보고했고, green: 통과한다. `link-state-check`는 통과하고, `bypass-check`는 `scripts/check-package-installs.mts:116`의 `cargo package --no-verify`를 찾는데 이는 cargo의 검증 build이지 Git hook이 아니다(kit 결함, 보고함)(T26.7-20).
 
 - T26.7-19: AST validator `packages/ts/src/ast-validator.mjs`는 생성 산출물이므로 더 이상 추적하지 않는다. `make build-ts`가 build 전에 만든다(`make ast-validator`, schema와 generator에 대한 file target이며 rename으로 쓴다). `make ast-validator-check`와 commit된 사본은 제거하고, 이 파일의 중복 제외도 뺐다. Red: 파일이 추적되었고(`git ls-files`에 나옴) 경로가 다른 checkout에서 `ast-validator-check`가 실패했다. green: 파일을 지운 뒤 `make build-ts`가 쓰고 `packages/ts/tests/decode.test.ts`가 통과한다(30개)(T26.7-19).
 
