@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-32-8: the Verification also runs `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-7 RT-11 RT-23"` (kit K414-1), which reports the 6 R15 findings of the three ids on 3b5cdb5f, before they moved to the conformance suite, and none after; `make item-red BEFORE=3b5cdb5f` recorded that red, and with the other checks of its Verification the row is done (T26.7-32-8).
+
 - T26.7-52-4: gofmt aligns the values of the table in the test of the load results without a source or a version that T26.7-52 added to `packages/go/load_failure_test.go`. Red: `make template-lint-go-format` exit 2, `gofmt -l` lists `packages/go/load_failure_test.go`; green: it passes, and TestLoadResultWithoutSourceOrVersionIsALoadFailure passes (T26.7-52-4).
 
 - T26.7-51-8: rustfmt formats the test of the program options that T26.7-51-7 added to `packages/rust/tests/functions.rs` (the assert of the default limits wraps) and the import list of the file. Red: `make template-lint-rust-format` exit 2, diffs at `functions.rs` lines 5 and 231; green: it passes, and `cargo test --test functions` passes (T26.7-51-8).

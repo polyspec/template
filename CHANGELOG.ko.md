@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: faaaf15407eef4280be6b794ae307cf6bb9cb9d5cea1c349a5325bb47ee4c4f9 -->
+<!-- source-sha256: 14f94f1c047861551303714156d73d2058c8848b8d17605d0a06cdff0d556157 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-8: Verification이 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-7 RT-11 RT-23"`(kit K414-1)도 실행한다. 이 검사는 세 id가 conformance suite로 옮기기 전인 3b5cdb5f에서 그 R15 6건을 보고하고 옮긴 뒤에는 보고하지 않는다; `make item-red BEFORE=3b5cdb5f`가 그 red를 기록했고, Verification의 다른 검사와 함께 행은 끝났다 (T26.7-32-8).
 
 - T26.7-52-4: gofmt가 T26.7-52가 `packages/go/load_failure_test.go`에 추가한, source나 version이 없는 load 결과 test의 표 값을 정렬한다. Red: `make template-lint-go-format` exit 2, `gofmt -l`이 `packages/go/load_failure_test.go`를 나열한다; green: 통과하고 TestLoadResultWithoutSourceOrVersionIsALoadFailure가 통과한다 (T26.7-52-4).
 
