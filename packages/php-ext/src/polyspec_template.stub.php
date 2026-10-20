@@ -231,3 +231,44 @@ final class TemplateError extends \RuntimeException
      */
     public function toArray(): array {}
 }
+
+/**
+ * A complete AST or generated template program.
+ *
+ * @phpstan-type RenderOptions array{
+ *     define?: array<string, string|array{template?: string, data?: mixed, html?: string}>,
+ *     env?: array{timezone?: string, now?: float|int},
+ * }
+ */
+interface Program
+{
+    /**
+     * @param string|array $target
+     * @phpstan-param string|array<string, mixed> $target
+     * @param array $options
+     * @phpstan-param RenderOptions $options
+     */
+    public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender;
+
+    /**
+     * @param string|array $target
+     * @phpstan-param string|array<string, mixed> $target
+     * @param array $options
+     * @phpstan-param RenderOptions $options
+     */
+    public function render(string|array $target, mixed $assign = [], array $options = []): string;
+}
+
+/** A normalized request prepared for repeatable rendering. */
+final class PreparedRender
+{
+    private readonly string $name;
+
+    private readonly PreparedExecution $execution;
+
+    /** Creates a prepared request for the entry template `$name` from one program execution. */
+    public function __construct(string $name, PreparedExecution $execution) {}
+
+    /** Renders the prepared request. An error of the PHP `Error` hierarchy is E_INTERNAL (ERR-13). */
+    public function render(): string {}
+}

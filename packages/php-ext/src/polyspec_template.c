@@ -1274,6 +1274,52 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* PreparedRender (ERR-13)                                                                          */
+/* ----------------------------------------------------------------------------------------------- */
+
+static zend_class_entry *pt_prepared_render_ce;
+
+ZEND_METHOD(Polyspec_Template_PreparedRender, __construct)
+{
+    zend_string *name;
+    zval *execution;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(name)
+        Z_PARAM_OBJECT(execution)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_update_property_str(pt_prepared_render_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("name"), name);
+    zend_update_property(pt_prepared_render_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("execution"), execution);
+}
+
+/* Renders the execution; an error of the PHP Error hierarchy is E_INTERNAL of the entry template, and a template
+ * error and every exception pass unchanged. */
+ZEND_METHOD(Polyspec_Template_PreparedRender, render)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval rv_name, rv_execution;
+    zval *name = zend_read_property(pt_prepared_render_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("name"), 1, &rv_name);
+    zval *execution = zend_read_property(pt_prepared_render_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("execution"), 1, &rv_execution);
+    zend_function *render = zend_hash_str_find_ptr(&Z_OBJCE_P(execution)->function_table, ZEND_STRL("render"));
+    zend_call_known_instance_method_with_0_params(render, Z_OBJ_P(execution), return_value);
+    if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
+        zend_object *failure = EG(exception);
+        zval text;
+        GC_ADDREF(failure);
+        zend_clear_exception();
+        zend_string *reason = zval_get_string(zend_read_property_ex(zend_ce_error, failure, ZSTR_KNOWN(ZEND_STR_MESSAGE), 1, &text));
+        zend_string *message = zend_strpprintf(0, "internal failure: %s", ZSTR_VAL(reason));
+        zend_string_release(reason);
+        OBJ_RELEASE(failure);
+        zval_ptr_dtor(return_value);
+        RETVAL_NULL();
+        zval exception;
+        ZVAL_OBJ(&exception, pt_error_object(PT_E_INTERNAL, Z_STR_P(name), 0, 0, 0, 0, message));
+        zend_throw_exception_object(&exception);
+        zend_string_release(message);
+    }
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* Module                                                                                           */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -1296,6 +1342,9 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_bound_handlers.free_obj = pt_bound_free;
     pt_bound_handlers.clone_obj = NULL;
     pt_bound_handlers.get_constructor = pt_bound_get_constructor;
+
+    register_class_Polyspec_Template_Program();
+    pt_prepared_render_ce = register_class_Polyspec_Template_PreparedRender();
 
     zend_class_entry *loader_interface = register_class_Polyspec_Template_Loader_LoaderInterface();
     register_class_Polyspec_Template_Loader_ArrayLoader(loader_interface);
