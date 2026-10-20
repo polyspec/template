@@ -4,6 +4,7 @@
 
 use polyspec_template::{AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, RenderOptions, RenderTarget, resolve_path};
 
+/// RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
 #[test]
 fn a_map_loader_returns_a_held_source_with_a_version_and_nothing_for_another_name() {
     let mut loader = MapLoader::new();

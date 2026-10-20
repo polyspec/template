@@ -192,6 +192,7 @@ describe('loader failures', () => {
     expect(error.message).toContain('cannot read part.tpl');
   });
 
+  // RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist, E_LOAD_NOT_FOUND.
   it('reports an unreadable regular file as E_LOAD_FAILED and a directory as E_LOAD_NOT_FOUND (RT-10)', () => {
     const root = mkdtempSync(join(tmpdir(), 'template-loader-'));
     try {

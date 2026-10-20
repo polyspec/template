@@ -44,6 +44,7 @@ func TestResolvePath(t *testing.T) {
 
 // TestMapLoader: a map loader returns the source of a name that it holds with a version, and no
 // template for another name (RT-10).
+// RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
 func TestMapLoader(t *testing.T) {
 	m := loader.NewMapLoader(map[string]string{"a.tpl": "x"})
 	if r, ok, err := m.Load("a.tpl"); !ok || err != nil || string(r.Source) != "x" || r.Version == "" {

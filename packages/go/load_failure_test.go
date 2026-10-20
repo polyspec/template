@@ -44,6 +44,7 @@ func renderWith(t *testing.T, loader template.Loader, target string) (string, er
 	return program.Render(target, nil, template.RenderOptions{})
 }
 
+// RT-9, ERR-6: a loader that fails is E_LOAD_FAILED for the entry template, with that template, line 0 and col 0.
 func TestLoaderErrorsAreLoadFailures(t *testing.T) {
 	_, err := renderWith(t, failingLoader{failing: "page.tpl"}, "page.tpl")
 	if got := templateError(t, err); got.Code != errs.LoadFailed || got.Template != "page.tpl" || got.Line != 0 || got.Col != 0 || !strings.Contains(got.Message, "cannot read page.tpl") {
@@ -76,6 +77,7 @@ func TestLoadResultWithoutSourceOrVersionIsALoadFailure(t *testing.T) {
 	}
 }
 
+// RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist, E_LOAD_NOT_FOUND.
 func TestFilesystemLoaderFailures(t *testing.T) {
 	root := t.TempDir()
 	locked := filepath.Join(root, "locked.tpl")

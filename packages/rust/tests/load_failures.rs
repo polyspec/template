@@ -46,6 +46,7 @@ fn render(loader: Box<dyn Loader>, target: &str) -> Result<String, TemplateError
     .render_values(RenderTarget::Name(target), OrderedMap::new(), &RenderOptions::default())
 }
 
+/// RT-9, ERR-6: a loader that fails is E_LOAD_FAILED for the entry template, with that template, line 0 and col 0.
 #[test]
 fn a_loader_error_is_a_load_failure() {
     let entry = render(Box::new(FailingLoader { failing: "page.tpl" }), "page.tpl").unwrap_err();
@@ -91,6 +92,7 @@ fn a_loader_result_without_a_version_is_a_load_failure() {
     assert_eq!(empty, Ok(String::new()));
 }
 
+/// RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist, E_LOAD_NOT_FOUND.
 #[test]
 fn the_filesystem_loader_separates_missing_and_unreadable_files() {
     let root = std::env::temp_dir().join(format!("template-loader-{}", std::process::id()));

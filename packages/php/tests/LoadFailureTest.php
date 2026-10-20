@@ -45,6 +45,9 @@ final class LoadFailureTest extends TestCase
         throw new \LogicException("{$target} did not fail");
     }
 
+    /**
+     * RT-9, ERR-6: a loader that fails is E_LOAD_FAILED for the entry template, with that template, line 0 and col 0.
+     */
     public function testALoaderExceptionIsALoadFailureAtTheEntryTemplate(): void
     {
         $error = self::failure(self::throwing('page.tpl'), 'page.tpl');
@@ -102,6 +105,10 @@ final class LoadFailureTest extends TestCase
         };
     }
 
+    /**
+     * RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist,
+     * E_LOAD_NOT_FOUND.
+     */
     public function testTheFilesystemLoaderSeparatesMissingAndUnreadableFiles(): void
     {
         $root = sys_get_temp_dir() . '/template-loader-' . getmypid();

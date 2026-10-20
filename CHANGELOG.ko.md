@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4d2b6394eff566f8ae6706e4ac38d8ee376c7476e0654d1438cb33111a706769 -->
+<!-- source-sha256: c8247c8e27b3c59516db2aba73427e5d1663f70a6ca4c1701af776a0b0f73840 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -15,6 +15,7 @@
 - T26.7-2-10: PHP 확장은 library의 `Source`, `Utf8`, `Escape`, `InternalBoundary`(`Polyspec\Template`)와 `Loader\Path`(`Polyspec\Template\Loader`)를 library와 같은 속성, 생성자, 메서드, 결과의 final class로 등록한다. `Utf8::isValid`는 임의의 바이트 문자열 300000개에서 `mb_check_encoding`과 일치한다(불일치 0). Red: `SupportClassesTest.php`의 `run-tests.mjs phpunit` 실패 1개("Polyspec\Template\Source is not registered by the extension", 6 passed); green: `SupportClassesTest.php` OK (7 tests, 24 assertions), `Utf8Test.php` OK (21 tests, 203010 assertions), `LoaderTest.php` OK (3 tests, 78 assertions), `ConformanceTest.php` OK (765 tests, 1020 assertions), `make parity-declarations-check | grep -c "SupportClassesTest"` 0 (T26.7-2-10).
 
 - T26.7-46-1: `config/owner-checks.json`이 T26.7-46이 추가한 루트 `vitest.config.ts`를 소유한다. 그 변경은 `lint-ts`와 `tests/scripts/vitest-collection.test.mts`를 실행한다. Red: 98097fa3에서 `make owner-validate` exit 2, `vitest.config.ts: the path matches no owner in config/owner-checks.json`; green: `make owner-validate` exit 0, `config/owner-checks.json owns every tracked path` (T26.7-46-1).
+- T26.7-4-1: -2-8-2 묶음의 loader unit은 그 test가 검사하는 것만 인용한다. `filesystem-loader-failures`와 `map-loader`는 RT-9와 RT-10을, `loader-errors`는 RT-9와 ERR-6을 인용하고, ts, go, rust, php, php-ext, python의 각 binding test가 그것을 명명한다. loader 오류의 Python test는 이제 다른 언어처럼 코드뿐 아니라 RT-9의 template, line, col도 검사한다. Red: `make parity-declarations-check UNITS="filesystem-loader-failures loader-errors map-loader"` exit 2, 1217 findings (R15 479, 397, 339). Green: 2 findings, `loader-errors`와 `map-loader`의 php-ext R2 `missing-binding`이며 T26.7-2-8-2가 binding한다; owner test는 통과한다 (ts 20, go 3, rust 6, php 8, python 8). `make test-php-ext`는 T26.7-2-8을 기다리므로(확장이 아직 `Native\Engine`을 등록한다) 행은 진행 중으로 남는다 (T26.7-4-1).
 
 - T26.7-2-19: 자기 unit의 parity check로 닫는다. Verification은 php-ext symbol을 적은 API unit 16개에 대한 `make parity-declarations-check UNITS="..."`(kit K400)이며 통과한다 (T26.7-2-19).
 

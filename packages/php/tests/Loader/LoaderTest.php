@@ -19,6 +19,9 @@ use Polyspec\Template\TemplateError;
  */
 final class LoaderTest extends TestCase
 {
+    /**
+     * RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
+     */
     public function testTheArrayLoaderReturnsAHeldSourceWithAVersionAndNothingForAnotherName(): void
     {
         $loader = new ArrayLoader(['a.tpl' => 'x']);

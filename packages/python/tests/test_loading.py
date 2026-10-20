@@ -69,6 +69,8 @@ class Loading(unittest.TestCase):
         self.assertEqual(immutable.render("a.tpl", {}), "1")
 
     def test_the_map_loader_returns_a_held_source_with_a_version(self):
+        # RT-9, RT-10: a map loader returns a held source with its version, and nothing
+        # for another name.
         loader = MapLoader({"a.tpl": "x"})
         loaded = loader.load("a.tpl")
         self.assertIsNotNone(loaded)
@@ -92,9 +94,14 @@ class Loading(unittest.TestCase):
             self.assertLessEqual(len(os.listdir("/dev/fd")), before)
 
     def test_a_loader_error_is_a_load_failure(self):
+        # RT-9, ERR-6: a loader that fails is E_LOAD_FAILED for the entry template, with
+        # that template, line 0 and col 0.
+        with self.assertRaises(TemplateError) as caught:
+            engine_of(FailingLoader()).render("a.tpl", {})
+        error = caught.exception.to_object()
         self.assertEqual(
-            code_of(lambda: engine_of(FailingLoader()).render("a.tpl", {})),
-            "E_LOAD_FAILED",
+            (error["code"], error["template"], error["line"], error["col"]),
+            ("E_LOAD_FAILED", "a.tpl", 0, 0),
         )
 
     def test_a_loader_result_without_a_source_an_ast_or_a_version_is_a_load_failure(
@@ -131,6 +138,8 @@ class Loading(unittest.TestCase):
         )
 
     def test_the_filesystem_loader_separates_missing_and_unreadable_files(self):
+        # RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a
+        # missing name do not exist, E_LOAD_NOT_FOUND.
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             locked = root / "locked.tpl"

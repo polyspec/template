@@ -9,6 +9,7 @@ import { AstProgram, Engine, MapLoader, PathError, resolvePath, TemplateError } 
 import { FsLoader } from '../src/node/index.js';
 
 describe('MapLoader', () => {
+  // RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
   it('returns the source of a name that it holds with a version, and nothing for another name (RT-10)', () => {
     const loaded = new MapLoader({ 'a.tpl': 'x' }).load('a.tpl');
     expect(loaded).toMatchObject({ source: 'x' });

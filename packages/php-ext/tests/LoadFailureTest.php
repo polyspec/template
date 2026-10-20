@@ -26,6 +26,10 @@ final class LoadFailureTest extends TestCase
         return 'OK';
     }
 
+    /**
+     * RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist,
+     * E_LOAD_NOT_FOUND.
+     */
     public function testTheFilesystemLoaderSeparatesMissingAndUnreadableFiles(): void
     {
         $root = sys_get_temp_dir() . '/template-ext-loader-' . getmypid();
