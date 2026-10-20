@@ -5,8 +5,8 @@ use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seco
 use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
 use polyspec_template::{
-    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Limits, Loaded, Loader, MapLoader, RenderOptions,
-    RenderTarget, RuntimeEnvironment,
+    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Limits, Loaded, Loader, MapLoader, RenderOptions, RenderTarget,
+    RuntimeEnvironment,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -231,7 +231,10 @@ fn the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec() {
         output_bytes,
         expression_depth,
     } = Limits::default();
-    assert_eq!((iterations, depth, output_bytes, expression_depth), (1_000_000, 32, 16 * 1024 * 1024, 64));
+    assert_eq!(
+        (iterations, depth, output_bytes, expression_depth),
+        (1_000_000, 32, 16 * 1024 * 1024, 64)
+    );
     fn no_op() -> HostFunction {
         Box::new(|_, _| Ok(Value::Null))
     }

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3854786f824cc9323256285a516df58a0212ca842395b3bf1674afe8f95d105c -->
+<!-- source-sha256: 869244b49383dd679bb8016c2863011f34cf0900cd6e07e9c9216e1a9b985d15 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-51-8: rustfmt가 T26.7-51-7이 `packages/rust/tests/functions.rs`에 추가한 program option test(기본 제한의 assert가 줄바꿈된다)와 그 파일의 import 목록을 포맷한다. Red: `make template-lint-rust-format` exit 2, `functions.rs` 5행과 231행의 diff; green: 통과하고 `cargo test --test functions`가 통과한다 (T26.7-51-8).
 
 - T26.7-32-9: RT-66을 새 unit `page-cache-get-or-set`이 인용하고, 모든 구현의 그 test가 규칙 전체를 검사한다: miss는 render를 한 번 호출해 그 HTML을 반환하고, hit는 render를 호출하지 않고 캐시 HTML을 반환하며, 항목은 저장되고(`get`이 반환한다), 10초가 지나면 다음 `getOrSet`이 render를 다시 호출하므로 TTL과 함께 저장된다. TypeScript, Go, Rust, PHP의 hit test가 이 test로 커지고, 없는 key를 채우기만 하던 Python은 이 test를 새로 얻으며, PHP 확장은 PHP test를 binding한다. concurrent-bound-map은 RT-66을 더 이상 인용하지 않는다. Red: 새 test가 있는 상태에서 unit이 생기기 전에 `make item-red`가 `make parity-declarations-check UNITS="page-cache-get-or-set"` exit 2를 기록했다. Green: unit의 검사가 통과하고, test가 통과하며(vitest `page-cache.test.ts` 2, TestPageCache의 `go test` 3, `cargo test --test page_cache` 2, PHPUnit과 PHP 확장의 PageCacheTest 2, Python `test_api.py` 45), `make parity-declarations-check`는 go와 python의 concurrent-bound-map에 대한 RT-66의 R15 2건이 줄고 새 finding은 없다 (T26.7-32-9).
 
