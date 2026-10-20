@@ -49,16 +49,20 @@ final class TemplateError extends \Exception
 final class Engine
 {
     /**
-     * @param string|null $root Loader root directory; without it no template name resolves.
-     * @param array<string, mixed> $options The key delimiters holds a two-character string; the key limits holds an
-     *        array with the integer keys iterations, depth, outputBytes and expressionDepth.
+     * The root is the loader root directory; without it no template name resolves. The option delimiters holds a
+     * two-character string; the option limits holds an array with the integer keys iterations, depth, outputBytes and
+     * expressionDepth.
+     *
+     * @param array $options
+     * @phpstan-param array<string, mixed> $options
      */
     public function __construct(?string $root = null, array $options = []) {}
 
     /**
      * Parses one template source and returns the AST as nested arrays.
      *
-     * @param array{delimiters?: string} $options
+     * @param array $options
+     * @phpstan-param array{delimiters?: string} $options
      * @return array<string, mixed>
      */
     public static function parse(string $source, string $name, array $options = []): array {}
@@ -67,7 +71,8 @@ final class Engine
      * Parses one template source once and returns its AST, the accepted tags and the EDT-8 tokens of every part of a
      * tag. Offsets are UTF-8 byte offsets after a leading byte order mark.
      *
-     * @param array{delimiters?: string} $options
+     * @param array $options
+     * @phpstan-param array{delimiters?: string} $options
      * @return array{ast: array<string, mixed>, tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>, tokens: list<array{start: int, end: int, kind: string}>}
      */
     public static function analyze(string $source, string $name, array $options = []): array {}
@@ -75,7 +80,8 @@ final class Engine
     /**
      * Parses one template source and returns the AST as JSON text.
      *
-     * @param array{delimiters?: string} $options
+     * @param array $options
+     * @phpstan-param array{delimiters?: string} $options
      */
     public static function parseToJson(string $source, string $name, array $options = []): string {}
 
@@ -93,9 +99,11 @@ final class Engine
      * Renders a template with assign data given as a PHP value or as a BoundMap, which is not bound
      * again (VAL-22).
      *
-     * @param array<string, mixed> $options The key define maps a definition id to a template path or to an array with
-     *        the keys template, data and html; the key env holds an array with the keys timezone (a string) and now
-     *        (a number).
+     * The option define maps a definition id to a template path or to an array with the keys template, data and html;
+     * the option env holds an array with the keys timezone (a string) and now (a number).
+     *
+     * @param array $options
+     * @phpstan-param array<string, mixed> $options
      */
     public function render(string $name, mixed $assign = [], array $options = []): string {}
 
@@ -125,4 +133,80 @@ final class BoundMap
      * entry of $first with the same key in its position (RT-26).
      */
     public static function merge(mixed $first, mixed $second): BoundMap {}
+}
+
+namespace Polyspec\Template\Loader;
+
+/**
+ * Template loader (RT-9, RT-10).
+ */
+interface LoaderInterface
+{
+    /**
+     * Returns `['source' => bytes, 'version' => string]` or `['ast' => array, 'version' => string]`, or null when the
+     * name does not exist. An exception reports a failure, which the engine reports as E_LOAD_FAILED (RT-9).
+     *
+     * @return array|null
+     * @phpstan-return array{source?: string, ast?: array<string, mixed>, version: string}|null
+     */
+    public function load(string $name): ?array;
+}
+
+/**
+ * In-memory loader keyed by template name.
+ */
+final class ArrayLoader implements LoaderInterface
+{
+    /** @var array<string, array{source?: string, ast?: array<string, mixed>, version: string}> */
+    private array $entries = [];
+
+    /**
+     * @param array $sources template sources or parsed templates by name
+     * @phpstan-param array<string, string|array<string, mixed>> $sources
+     */
+    public function __construct(array $sources = []) {}
+
+    /**
+     * @param string|array $value
+     * @phpstan-param string|array<string, mixed> $value
+     */
+    public function set(string $name, string|array $value): void {}
+
+    /**
+     * Returns the template for a name, or null when the name does not exist.
+     *
+     * @return array|null
+     * @phpstan-return array{source?: string, ast?: array<string, mixed>, version: string}|null
+     */
+    public function load(string $name): ?array {}
+}
+
+/**
+ * Filesystem loader (RT-10): reads root/name and reports modification time and size as the version.
+ */
+final class FilesystemLoader implements LoaderInterface
+{
+    public readonly string $root;
+
+    /**
+     * The name of each file that the loader read, by device and inode number.
+     *
+     * @var array<string, string>
+     */
+    private array $files = [];
+
+    /**
+     * Creates a loader for a directory. Every template name resolves inside it.
+     */
+    public function __construct(string $root) {}
+
+    /**
+     * Returns the file of a name, or null when no regular file exists for the name. A symbolic link at any component
+     * of the name, a regular file that cannot be read and a file that the loader read under another name are failures
+     * (RT-10).
+     *
+     * @return array|null
+     * @phpstan-return array{source: string, version: string}|null
+     */
+    public function load(string $name): ?array {}
 }

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ebf83aaec9af589a34acb6e612c66793fc2cb0b9f9e998d76aba41c22ae55f57 -->
+<!-- source-sha256: a68b29022ba4f797bd4a1478cec37408e48533e1c6a05f5ab9167af054042503 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-1-1: PHP 확장은 `Polyspec\Template\Loader\LoaderInterface`, `ArrayLoader`, `FilesystemLoader`를 내부 class로 등록한다. signature, version(source 또는 parse된 template의 JSON에 대한 `crc32b`, file은 수정 시각과 크기), 실패(symbolic link, 한 file의 두 번째 이름, 읽을 수 없는 file)는 library와 같고 Native class 옆에 C로 썼다. PHP 8.4의 `gen_stub.php`는 거기서 generic type을 읽지 못하므로 stub은 generic `@param` type을 `@phpstan-param`으로 옮겼다. Red: 세 loader class는 library의 사용자 class였으므로 새 `packages/php-ext/tests/LoaderClassesTest.php`의 `ReflectionClass::isInternal()`이 false였고, green: test 7개가 통과하며, 확장을 load하고 loader를 확장이 제공하는 상태에서 `packages/php`의 PHPUnit 파일 24개와 `packages/php-ext`의 14개가 통과한다. 단 확장이 load되지 않았음을 확인하는 `testNativeCommandWithoutTheExtensionNamesPie`는 예외이며 T26.7-2-8이 Native class와 함께 제거한다(T26.7-2-1-1).
 
 - T26.7-42: PHP package는 T26.7-11의 재구성 뒤에도 `make lint-php`를 통과한다. 긴 `Ast::node` 호출과 긴 주석은 120열에서 줄을 바꾸고, union `FunctionError | BindError`는 phpcs가 요구하는 대로 공백을 두며, `CommandLine`의 낡은 `CNF-4` 참조를 지우고, 새 `ExportsTest` 두 파일도 줄을 바꿨다. Red: `make lint-php`가 phpcs에서 오류 2개와 경고 20개로 실패했고(phpstan은 root, `packages/php`, `packages/php-ext` 모두 통과해 `@phpstan-type` 별칭이 성립한다), green: 통과한다. PHPUnit 파일 ConformanceTest, ExprFixturesTest, ParserTest, ExportsTest가 통과한다(T26.7-42).
 

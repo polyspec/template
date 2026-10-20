@@ -13,6 +13,7 @@
 #include "ext/standard/info.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_smart_str.h"
+#include "main/php_streams.h"
 #include "php_polyspec_template.h"
 #include "pt.h"
 #include "polyspec_template_arginfo.h"
@@ -961,6 +962,231 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, render)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* Loaders (RT-9, RT-10)                                                                            */
+/* ----------------------------------------------------------------------------------------------- */
+
+static zend_class_entry *pt_filesystem_loader_ce;
+
+/* The crc32b of a text as eight lower case hexadecimal digits, as hash('crc32b', $text) gives it. */
+static zend_string *pt_crc32b(const char *text, size_t length)
+{
+    static uint32_t table[256];
+    static bool ready = false;
+    if (!ready) {
+        for (uint32_t n = 0; n < 256; n++) {
+            uint32_t c = n;
+            for (int k = 0; k < 8; k++) {
+                c = (c & 1) ? 0xEDB88320U ^ (c >> 1) : c >> 1;
+            }
+            table[n] = c;
+        }
+        ready = true;
+    }
+    uint32_t crc = 0xFFFFFFFFU;
+    for (size_t i = 0; i < length; i++) {
+        crc = table[(crc ^ (unsigned char)text[i]) & 0xFF] ^ (crc >> 8);
+    }
+    return zend_strpprintf(0, "%08x", crc ^ 0xFFFFFFFFU);
+}
+
+/* Builds the entry of the array loader for a source or a parsed template; false after an exception. */
+static bool pt_array_loader_entry(zval *entry, zval *value, int argument)
+{
+    zend_string *version;
+    if (Z_TYPE_P(value) != IS_STRING && Z_TYPE_P(value) != IS_ARRAY) {
+        zend_argument_type_error(argument, "must be of type array|string, %s given", zend_zval_type_name(value));
+        return false;
+    }
+    array_init(entry);
+    if (Z_TYPE_P(value) == IS_STRING) {
+        version = pt_crc32b(Z_STRVAL_P(value), Z_STRLEN_P(value));
+        Z_ADDREF_P(value);
+        add_assoc_zval(entry, "source", value);
+    } else {
+        smart_str json = {0};
+        if (php_json_encode(&json, value, 0) == FAILURE) {
+            smart_str_free(&json);
+        }
+        smart_str_0(&json);
+        version = pt_crc32b(json.s ? ZSTR_VAL(json.s) : "", json.s ? ZSTR_LEN(json.s) : 0);
+        smart_str_free(&json);
+        Z_ADDREF_P(value);
+        add_assoc_zval(entry, "ast", value);
+    }
+    add_assoc_str(entry, "version", version);
+    return true;
+}
+
+static bool pt_array_loader_set(zend_object *object, zend_string *name, zval *value, int argument)
+{
+    zval entry;
+    if (!pt_array_loader_entry(&entry, value, argument)) {
+        return false;
+    }
+    zval *entries = OBJ_PROP_NUM(object, 0);
+    SEPARATE_ARRAY(entries);
+    zend_hash_update(Z_ARRVAL_P(entries), name, &entry);
+    return true;
+}
+
+ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, __construct)
+{
+    HashTable *sources = NULL;
+    ZEND_PARSE_PARAMETERS_START(0, 1)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ARRAY_HT(sources)
+    ZEND_PARSE_PARAMETERS_END();
+    if (sources == NULL) {
+        return;
+    }
+    zend_ulong index;
+    zend_string *key;
+    zval *value;
+    ZEND_HASH_FOREACH_KEY_VAL(sources, index, key, value) {
+        zend_string *name = key != NULL ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
+        bool stored = pt_array_loader_set(Z_OBJ_P(ZEND_THIS), name, value, 2);
+        zend_string_release(name);
+        if (!stored) {
+            RETURN_THROWS();
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, set)
+{
+    zend_string *name;
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(name)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+    if (!pt_array_loader_set(Z_OBJ_P(ZEND_THIS), name, value, 2)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, load)
+{
+    zend_string *name;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(name)
+    ZEND_PARSE_PARAMETERS_END();
+    zval *entry = zend_hash_find(Z_ARRVAL_P(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0)), name);
+    if (entry == NULL) {
+        RETURN_NULL();
+    }
+    RETURN_COPY(entry);
+}
+
+ZEND_METHOD(Polyspec_Template_Loader_FilesystemLoader, __construct)
+{
+    zend_string *root;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(root)
+    ZEND_PARSE_PARAMETERS_END();
+    char resolved[MAXPATHLEN];
+    zend_string *value;
+    if (!zend_str_has_nul_byte(root) && VCWD_REALPATH(ZSTR_VAL(root), resolved) != NULL) {
+        value = zend_string_init(resolved, strlen(resolved), 0);
+    } else {
+        size_t length = ZSTR_LEN(root);
+        while (length > 0 && ZSTR_VAL(root)[length - 1] == '/') {
+            length--;
+        }
+        value = zend_string_init(ZSTR_VAL(root), length, 0);
+    }
+    zend_update_property_str(pt_filesystem_loader_ce, Z_OBJ_P(ZEND_THIS), "root", sizeof("root") - 1, value);
+    zend_string_release(value);
+}
+
+/* Throws the RuntimeException of a failed load. */
+static void pt_loader_failure(const char *format, ...)
+{
+    va_list arguments;
+    va_start(arguments, format);
+    zend_string *message = zend_vstrpprintf(0, format, arguments);
+    va_end(arguments);
+    zend_throw_exception(spl_ce_RuntimeException, ZSTR_VAL(message), 0);
+    zend_string_release(message);
+}
+
+ZEND_METHOD(Polyspec_Template_Loader_FilesystemLoader, load)
+{
+    zend_string *name;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(name)
+    ZEND_PARSE_PARAMETERS_END();
+    zval rv;
+    zend_string *root = Z_STR_P(zend_read_property(pt_filesystem_loader_ce, Z_OBJ_P(ZEND_THIS), "root", sizeof("root") - 1, 0, &rv));
+    zend_string *path = zend_string_concat3(ZSTR_VAL(root), ZSTR_LEN(root), "/", 1, ZSTR_VAL(name), ZSTR_LEN(name));
+    if (zend_str_has_nul_byte(path)) {
+        zend_string_release(path);
+        zend_value_error("%s(): Argument #1 ($name) must not contain any null bytes", "Polyspec\\Template\\Loader\\FilesystemLoader::load");
+        RETURN_THROWS();
+    }
+    /* Each component below the root is examined without following a symbolic link (RT-10). */
+    zend_stat_t info;
+    size_t component = ZSTR_LEN(root) + 1;
+    for (;;) {
+        const char *slash = memchr(ZSTR_VAL(path) + component, '/', ZSTR_LEN(path) - component);
+        size_t until = slash != NULL ? (size_t)(slash - ZSTR_VAL(path)) : ZSTR_LEN(path);
+        char *prefix = estrndup(ZSTR_VAL(path), until);
+        int missing = VCWD_LSTAT(prefix, &info) != 0;
+        efree(prefix);
+        if (missing) {
+            zend_string_release(path);
+            RETURN_NULL();
+        }
+        if (S_ISLNK(info.st_mode)) {
+            pt_loader_failure("%.*s is a symbolic link", (int)(until - ZSTR_LEN(root) - 1), ZSTR_VAL(path) + ZSTR_LEN(root) + 1);
+            zend_string_release(path);
+            RETURN_THROWS();
+        }
+        if (slash == NULL) {
+            break;
+        }
+        if (!S_ISDIR(info.st_mode)) {
+            zend_string_release(path);
+            RETURN_NULL();
+        }
+        component = until + 1;
+    }
+    if (!S_ISREG(info.st_mode)) {
+        zend_string_release(path);
+        RETURN_NULL();
+    }
+    /* One file has one name: the device and inode number identify the file. */
+    zend_string *identity = zend_strpprintf(0, "%llu:%llu", (unsigned long long)info.st_dev, (unsigned long long)info.st_ino);
+    zval *files = OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 1);
+    SEPARATE_ARRAY(files);
+    zval *owner = zend_hash_find(Z_ARRVAL_P(files), identity);
+    if (owner == NULL) {
+        zval named;
+        ZVAL_STR_COPY(&named, name);
+        zend_hash_add_new(Z_ARRVAL_P(files), identity, &named);
+    } else if (!zend_string_equals(Z_STR_P(owner), name)) {
+        pt_loader_failure("%s is the file of %s", ZSTR_VAL(name), Z_STRVAL_P(owner));
+        zend_string_release(identity);
+        zend_string_release(path);
+        RETURN_THROWS();
+    }
+    zend_string_release(identity);
+    php_stream *stream = VCWD_ACCESS(ZSTR_VAL(path), R_OK) == 0 ? php_stream_open_wrapper_ex(ZSTR_VAL(path), "rb", 0, NULL, NULL) : NULL;
+    zend_string *bytes = stream ? php_stream_copy_to_mem(stream, PHP_STREAM_COPY_ALL, 0) : NULL;
+    if (stream) {
+        php_stream_close(stream);
+    }
+    zend_string_release(path);
+    if (stream == NULL) {
+        pt_loader_failure("%s cannot be read", ZSTR_VAL(name));
+        RETURN_THROWS();
+    }
+    array_init(return_value);
+    add_assoc_str(return_value, "source", bytes ? bytes : ZSTR_EMPTY_ALLOC());
+    add_assoc_str(return_value, "version", zend_strpprintf(0, "%lld:%lld", (long long)info.st_mtime, (long long)info.st_size));
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* BoundMap (VAL-22, ERR-14, RT-26)                                                                 */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -1106,6 +1332,10 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_bound_handlers.free_obj = pt_bound_free;
     pt_bound_handlers.clone_obj = NULL;
     pt_bound_handlers.get_constructor = pt_bound_get_constructor;
+
+    zend_class_entry *loader_interface = register_class_Polyspec_Template_Loader_LoaderInterface();
+    register_class_Polyspec_Template_Loader_ArrayLoader(loader_interface);
+    pt_filesystem_loader_ce = register_class_Polyspec_Template_Loader_FilesystemLoader(loader_interface);
     return SUCCESS;
 }
 

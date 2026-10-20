@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 52699823e3961acfb380914840177981974af64ddff3893dca97dd34c0986e3a -->
+<!-- source-sha256: 03333e96377c674c365358bc1844641c0a4853e813da18bc682a7cfe5cb3a79d -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -15,6 +15,7 @@
 | T26.7-3 | 모든 문서는 config/parity.json의 구현을 있는 그대로 세고 나열한다(R10) | The prose of README*.md, docs/spec, docs/operations and packages/*/README*.md that counts or lists implementations, and the prose name of the PHP extension in config/parity.json | `make parity-declarations-check` | [o] |
 | T26.7-2 | config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol 또는 binding을 가진다(R1, R2) | The PHP extension registers the classes and functions of packages/php under the same names (S10), and the missing bindings of the units, spec first | `make parity-declarations-check` | [ ] |
 | T26.7-2-1 | PHP 확장은 Program, AstProgram, Engine, PreparedRender와 loader(ArrayLoader, FilesystemLoader, LoaderInterface)를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=EngineRefreshTest` | [ ] |
+| T26.7-2-1-1 | PHP 확장은 LoaderInterface, ArrayLoader, FilesystemLoader를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C) and its stub | `make parity-declarations-check`, `make test-php-ext CASES=LoaderTest` | [o] |
 | T26.7-2-2 | PHP 확장은 BoundMap, Bind, Json, MapValue, SafeString, BindError를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=BoundMapTest` | [ ] |
 | T26.7-2-3 | PHP 확장은 TemplateError, ErrorCode, FunctionError와 함수 registry(Registry)를 library와 같은 이름과 signature로 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=FunctionsTest` | [ ] |
 | T26.7-2-4 | PHP 확장은 library의 PageCache와 artifact refresh를 등록한다 | packages/php-ext/src (C), its stub, and the tests of packages/php that run with the extension | `make parity-declarations-check`, `make test-php-ext CASES=PageCacheTest` | [ ] |
