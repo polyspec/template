@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: a89fbce803613ed41bd190403f907dff1b5d3dbe467d0839f78e25bf1a7cfee0 -->
+<!-- source-sha256: 57960a56795ae14bdab4dfe5d10044a52b9fecb39e9214dc12841e79af41770d -->
 # 런타임
 
 [English](/spec/runtime).
