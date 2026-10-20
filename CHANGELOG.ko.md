@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0f523bb615289153487300bca1bc9bbb66ca94cbbb5c0ecba7f35a1a100ef275 -->
+<!-- source-sha256: 26a921da8fd29dc4935fcb3d00ab5ca2502b60db407c8f6678a50f9d28911e99 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-38: parser unit의 owner test로 닫는다. Verification은 c5dd1562 이후 Go filter를 따옴표로 감싼다. vitest `parser.test.ts`, TestSpansAreBytes, TestDelimiters, TestAnalyzeClassifies의 `go test`, `cargo test --test parser`, `--test delimiters`, `--test analyze`, PHPUnit `ParserTest`, Python `test_api`가 통과한다. 이 항목의 red는 7827e038의 red다. 그 parent에서 `make parity-declarations-check`는 R15 9092, 그 뒤에는 8182를 보고했다 (T26.7-38).
 
 - T26.7-2-2-4: PHP 확장은 `Polyspec\Template\Value\Json`을 library와 같은 public signature의 internal final class로 등록한다. `parse`는 library의 값을 문서 순서대로 주고(객체는 `MapValue`, 중복 key는 첫 자리에 마지막 값을 두며, number는 float) library의 `BindError`와 그 message로 실패한다. 확장의 JSON parser의 범위 message는 이제 literal 텍스트가 아니라 library처럼 PHP가 float를 쓰는 대로 number를 쓴다(`number 1.2345678901235E+19 is outside the safe range`). `packages/php-ext/tests/JsonTest.php`는 확장의 internal test이다. Red: 새 `JsonTest`가 확장을 load하고 4개 중 1개 실패했고(`Json is not registered by the extension`), 동작의 test 3개는 library만으로 통과하며, 등록 후에는 범위 message가 달랐다(`number 12345678901234567890`); green: 확장을 load하고 `JsonTest` 4, `Value/ValueTest` 7, `LoadFailureTest` 4, `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-4).
 
