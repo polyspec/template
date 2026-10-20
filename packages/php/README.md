@@ -74,7 +74,7 @@ vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 
 The command is a Symfony Console application (`Polyspec\Template\Cli\CommandLine`, the runtime dependency `symfony/console`), so the options come before FILE, an option takes its value as `--name value` or `--name=value`, and a usage error prints the usage of the command and exits with status 1.
 
-The same `vendor/bin/template.php` runs on the PHP extension `polyspec_template` when PHP loads it, with `-d extension=var/build/polyspec_template.so` or as installed by PIE from the package `polyspec/template-php-ext` (`pie install polyspec/template-php-ext`): the classes of the library are then the classes of the extension, registered under their names. Without the extension the same command runs the PHP implementation of the library; no other command line exists for the extension.
+The same `vendor/bin/template.php` runs on the PHP extension `polyspec_template` when PHP loads it, with `-d extension=var/php-ext/polyspec_template.so` or as installed by PIE from the package `polyspec/template-php-ext` (`pie install polyspec/template-php-ext`): the classes of the library are then the classes of the extension, registered under their names. Without the extension the same command runs the PHP implementation of the library; no other command line exists for the extension.
 
 ## Development
 

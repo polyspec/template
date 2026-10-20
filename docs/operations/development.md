@@ -22,7 +22,7 @@ The shared tools come from the npm package `@polyspec/kit`. `make install-tools 
 
 PHP is pinned by its minor version: setup-php, which installs PHP in CI, installs the latest patch of a minor version and cannot pin a patch. Each run of `make ci-targets` records the versions it ran on, the PHP patch included, in `record.json` and `summary.md` of its report, which every CI job uploads. Composer is pinned exactly in `mise.toml`, and setup-php installs no tools (`tools: none` in the workflows). make is not pinned: the Makefile uses no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1 printed the same commands for every target (T17.1-4). The CI jobs run on `ubuntu-24.04`, pin every action by its commit and install with `make install-tools TOOLS=npm`, `make install-packages` and `make install`; no job sets up a Go or a Python of its own.
 
-The PHP extension `packages/php-ext` is an implementation in C. `make ext` builds it with phpize, configure and make of the php-config on `PATH`, which must belong to the php on `PATH` that runs the tests, for every PHP version of `config/toolchain.json`; CI installs both with setup-php. `make ext-arginfo` generates its arginfo header from the stub with gen_stub.php of the PHP build.
+The PHP extension `packages/php-ext` is an implementation in C. kit's `make build-php-ext` builds it with phpize, configure and make of the php-config on `PATH`, which must belong to the php on `PATH` that runs the tests, for every PHP version of `config/toolchain.json`; CI installs both with setup-php. `make php-ext-arginfo` generates its arginfo header from the stub with gen_stub.php of the PHP build.
 
 ## Commands
 

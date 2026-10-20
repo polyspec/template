@@ -98,10 +98,6 @@
       "kind": "ecosystem",
       "tool": "esbuild and tsc build a package of packages/; the script orders them and publishes the build by a rename"
     },
-    "scripts/build-php-extension.mts": {
-      "kind": "ecosystem",
-      "tool": "phpize, configure and make of the php-config of PATH build the extension; kit S10 builds it the same way (make build-php-ext, T26.7-2 moves the build to it)"
-    },
     "scripts/check-ast-artifact.mts": {
       "kind": "policy",
       "reason": "polyspec rule RT-57, RT-71: the refresh, integrity and failed-build preservation of the canonical AST artifact of our compiler"

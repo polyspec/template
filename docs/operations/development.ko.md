@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: cffe3c6c446cd100a04a7cd4d46d5dd665a7d6e54908412726ced34b538b0099 -->
+<!-- source-sha256: ff19be4d16927e55e71e72762f2baab858854cb4bda14468ecbd3f78e62a8612 -->
 # 개발
 
 [English](/operations/development).
@@ -23,7 +23,7 @@
 
 PHP는 minor version으로 고정한다. CI에서 PHP를 설치하는 setup-php는 minor version의 최신 patch를 설치하고 patch를 고정할 수 없다. `make ci-targets`의 각 실행은 자기가 실행된 version을 PHP patch까지 report의 `record.json`과 `summary.md`에 기록하고 모든 CI job이 그 report를 upload한다. Composer는 `mise.toml`에서 정확히 고정하고, setup-php는 도구를 설치하지 않는다(workflow의 `tools: none`). make는 고정하지 않는다. Makefile은 GNU Make 3.81보다 새로운 구문을 쓰지 않고, make 3.81과 GNU Make 4.4.1은 모든 target에 같은 명령을 출력했다(T17.1-4). CI job은 `ubuntu-24.04`에서 실행되고, 모든 action을 commit으로 고정하며, `make install-tools TOOLS=npm`, `make install-packages`, `make install`로 설치한다. 어떤 job도 자기 Go나 Python을 설정하지 않는다.
 
-PHP 확장 `packages/php-ext`는 C 구현이다. `make ext`는 `config/toolchain.json`의 모든 PHP version에서 `PATH`의 php-config로 phpize, configure, make를 실행해 빌드한다. 이 php-config는 test를 실행하는 `PATH`의 php와 같은 PHP여야 하며, CI는 둘 다 setup-php로 설치한다. `make ext-arginfo`는 PHP build의 gen_stub.php로 stub에서 arginfo header를 만든다.
+PHP 확장 `packages/php-ext`는 C 구현이다. kit의 `make build-php-ext`는 `config/toolchain.json`의 모든 PHP version에서 `PATH`의 php-config로 phpize, configure, make를 실행해 빌드한다. 이 php-config는 test를 실행하는 `PATH`의 php와 같은 PHP여야 하며, CI는 둘 다 setup-php로 설치한다. `make php-ext-arginfo`는 PHP build의 gen_stub.php로 stub에서 arginfo header를 만든다.
 
 ## 명령
 

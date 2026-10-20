@@ -312,17 +312,6 @@
     },
     {
       "paths": [
-        "scripts/build-php-extension.mts"
-      ],
-      "targets": [
-        "template-test-ext"
-      ],
-      "tests": [
-        "tests/scripts/build-php-extension.test.mts"
-      ]
-    },
-    {
-      "paths": [
         "scripts/conformance-cases.mts"
       ],
       "tests": [
@@ -741,12 +730,11 @@
       ],
       "targets": [
         "template-test-ext",
+        "test-php-ext",
         "lint-php",
         "parity-check"
       ],
-      "tests": [
-        "tests/scripts/build-php-extension.test.mts"
-      ]
+      "tests": []
     },
     {
       "paths": [
@@ -1483,15 +1471,13 @@
       "check": "make template-test-ext-conformance",
       "paths": [
         "packages/php-ext/**",
-        "scripts/build-php-extension.mts",
         "tests/runner/{conformance,cases,drivers}.mts"
       ]
     },
     {
-      "check": "make template-test-ext-unit",
+      "check": "make test-php-ext",
       "paths": [
-        "packages/php-ext/**",
-        "scripts/build-php-extension.mts"
+        "packages/php-ext/**"
       ]
     },
     {

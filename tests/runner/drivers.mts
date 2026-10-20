@@ -31,12 +31,12 @@ export function build(name: string, command: string, args: readonly string[], cw
 
 // The runs execute the builds published to var/build, which changes only when the bytes of a build change: cargo
 // links target/release again on every build, and macOS checks a new executable file on its first run, which outlived
-// the 10 s limit of a call on a loaded machine (T19.6-1). `make build-go`, `make build-rust` and `make ext` publish to
-// the same files.
+// the 10 s limit of a call on a loaded machine (T19.6-1). `make build-go`, `make build-rust` publish to var/build and
+// `make build-php-ext` (kit, S10) publishes the PHP extension to var/php-ext.
 const published = {
   go: join(root, 'var', 'build', 'template-go'),
   rust: join(root, 'var', 'build', 'template-rust'),
-  'php-ext': join(root, 'var', 'build', 'polyspec_template.so'),
+  'php-ext': join(root, 'var', 'php-ext', 'polyspec_template.so'),
 };
 
 /** A language driver: its package directory, the build of its CLI and the command line of a CLI call. */
@@ -111,8 +111,8 @@ export const drivers: Record<Language, Driver> = {
     build() {
       // The proxy of vendor/bin/template.php of the development root composer.json runs the library's command line on the classes of the extension.
       build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
-      // The C extension builds with phpize, configure and make and publishes its library itself (T21.4).
-      build('php-ext', process.execPath, [join(root, 'scripts/build-php-extension.mts'), join(packages, 'php-ext', 'src'), published['php-ext']], root);
+      // The C extension is built by kit's make build-php-ext (S10): phpize, configure and make, publishing its library itself.
+      build('php-ext', 'make', ['build-php-ext'], root);
     },
     command(args) {
       return ['php', [`-dextension=${published['php-ext']}`, join(root, 'vendor', 'bin', 'template.php'), ...args]];
@@ -134,8 +134,7 @@ function driverOf(name: string): Driver {
 /**
  * Builds the CLI of the language `name` before a run. The build runs every time, because a present binary may be
  * built from older sources (T19.6); each build does nothing when its inputs are unchanged: make build-ts and
- * scripts/build-package.mts, go build, cargo build, composer install, scripts/build-php-extension.mts and make
- * python-package.
+ * scripts/build-package.mts, go build, cargo build, composer install, make build-php-ext and make python-package.
  */
 export function prepare(name: string): void {
   const driver = driverOf(name);

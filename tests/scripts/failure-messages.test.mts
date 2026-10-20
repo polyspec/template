@@ -3,8 +3,7 @@
 // - the run-tests of @polyspec/kit names a tool that cannot start, with its command and the install fix, instead of an unhandled
 //   `error` event;
 // - a CLI call of the conformance drivers that outlives its limit names the limit and the command;
-// - the Go and PHP install projects print the expected and the actual output;
-// - the PHP extension tests run through the run-tests of @polyspec/kit, which prints each test with its elapsed time.
+// - the Go and PHP install projects print the expected and the actual output.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
@@ -68,11 +67,4 @@ test('the Go and PHP install projects print the expected and the actual output',
   assert.match(source, /"Go %s output differs\\\\nexpected: %q\\\\nactual: {3}%q\\\\n"/);
   assert.match(source, /\['AST program'=>\$ast,'generated program'=>\$direct\]/);
   assert.match(source, /"PHP \$name output differs\\\\nexpected: "\.json_encode\(\$expected\)\."\\\\nactual: {3}"\.json_encode\(\$actual\)/);
-});
-
-test('the PHP extension tests run through the run-tests tool of @polyspec/kit', () => {
-  const run = spawnSync('make', ['--no-print-directory', '-n', 'template-test-ext-unit'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
-  assert.equal(run.status, 0, run.stderr);
-  assert.ok(run.stdout.split('\n').includes(`COMPOSER_VENDOR_DIR=${path.join(ROOT, 'vendor')} ${path.join(ROOT, 'var/tools/bin/node')} node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so --cwd packages/php-ext`), run.stdout);
-  assert.doesNotMatch(run.stdout, /run-tests\.sh/);
 });

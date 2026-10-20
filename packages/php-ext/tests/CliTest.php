@@ -40,8 +40,8 @@ final class CliTest extends TestCase
      */
     private function invoke(array $arguments): array
     {
-        // The library that make ext publishes (T21.4).
-        $library = Support::repositoryRoot() . '/var/build/polyspec_template.so';
+        // The library that kit's make build-php-ext publishes (S10).
+        $library = Support::repositoryRoot() . '/var/php-ext/polyspec_template.so';
         $command = array_merge(
             [PHP_BINARY, '-d', 'extension=' . $library, self::command()],
             $arguments,

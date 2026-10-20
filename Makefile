@@ -48,7 +48,7 @@ MAKEFLAGS += -k
 include scripts/kit/kit-bootstrap.mk
 
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-build-ts template-build-go template-build-rust template-build-php template-test-php template-test-python template-rules-check template-test-scripts compiler-interface-generate compiler-interface-check \
-	conformance delimiter-matrix template-test-browser ext ext-arginfo template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
+	conformance delimiter-matrix template-test-browser template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check template-install-check showcase showcase-check showcase-compile \
 	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
@@ -67,8 +67,8 @@ PHP_DIR  := packages/php
 EXT_DIR  := packages/php-ext
 # The builds that the checks run, published by scripts/publish-build.mts only when their bytes change: cargo links
 # target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1). The C PHP
-# extension is built by phpize as polyspec_template.so on every platform (T21.4).
-EXT_LIBRARY := var/build/polyspec_template.so
+# extension is built by phpize as polyspec_template.so on every platform (T21.4); kit's `make build-php-ext` builds it (S10).
+EXT_LIBRARY := var/php-ext/polyspec_template.so
 SHOWCASE_RUST := examples/showcase/adapters/rust
 LANGUAGE_DIR := packages/language
 LSP_DIR      := packages/lsp
@@ -104,8 +104,7 @@ help: ## List targets
 	@echo "  typecheck              Type check of the TypeScript infrastructure (tsconfig.json, S9)"
 	@echo "  conformance            Cross-language conformance suite (tests/runner/conformance.mts)"
 	@echo "  template-test-browser           Browser rendering test (Playwright)"
-	@echo "  ext / template-test-ext         Build and test the PHP extension"
-	@echo "  ext-arginfo            Generate the arginfo header of the C extension from its stub with gen_stub.php"
+	@echo "  template-test-ext      Test the PHP extension"
 	@echo "  rules-check            Check case.json rule identifiers against docs/spec"
 	@echo "  editor-boundary-check  Check the editor layer boundaries (EDT-2, EDT-3)"
 	@echo "  doc-coverage           Check that public symbols carry documentation comments"
@@ -375,7 +374,7 @@ vscode-package: template-build-vscode ## Build the .vsix
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
-conformance: cargo-downloads-check build-ts build-go build-rust build-php ext ## Cross-language conformance suite (builds every implementation first)
+conformance: cargo-downloads-check build-ts build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
 	$(NODE) tests/runner/conformance.mts
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
@@ -446,7 +445,7 @@ conformance-generated-python: build-ts python-package ## Python generated compil
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
 
-conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php ext ## AST and generated conformance in every language for the cases of CASES only
+conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
 	$(NODE) scripts/conformance-cases.mts $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
@@ -464,7 +463,7 @@ package-installs-check: cargo-downloads-check typed-generator
 # implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
 # The ts symbol extractor reads the declarations that the build of the TypeScript package emits (packages/ts/dist/index.d.ts),
 # which both checks need to exist (symbols of config/parity.json, T22.6-14).
-parity-check: cargo-downloads-check build-php ext python-package
+parity-check: cargo-downloads-check build-php build-php-ext python-package
 parity-check parity-declarations-check: build-ts
 
 # R7 of the parity checks compares the error-code list of each implementation with the code tables of docs/spec/errors.md
@@ -480,24 +479,11 @@ parity-check parity-declarations-check: error-codes-check
 template-test-browser: build-ts ## Browser rendering test
 	$(NODE) tests/browser/run.mts
 
-# The PHP extension is a C implementation in $(EXT_DIR)/src: scripts/build-php-extension.mts builds it with phpize,
-# configure and make of the php-config of PATH in a temporary directory, with every compiler warning as an error, and
-# publishes the library by rename when its bytes change; it does nothing for unchanged inputs (T21.1, T21.4).
-ext: ## Build the PHP extension
-	$(NODE) scripts/build-php-extension.mts $(EXT_DIR)/src $(EXT_LIBRARY)
+template-test-ext: template-test-ext-conformance ## Test the PHP extension
 
-template-test-ext: template-test-ext-conformance template-test-ext-unit ## Test the PHP extension
-
-# The C extension in $(EXT_DIR)/src declares its PHP classes in polyspec_template.stub.php; gen_stub.php of the PHP
-# build generates polyspec_template_arginfo.h from it, which is committed for builds from the package (T21.1).
-ext-arginfo: ## Generate the arginfo header of the C extension from its stub with gen_stub.php
-	$(NODE) scripts/build-php-extension.mts --arginfo $(EXT_DIR)/src
-
-.PHONY: template-test-ext-conformance template-test-ext-unit
-template-test-ext-conformance: cargo-downloads-check ext build-php
+.PHONY: template-test-ext-conformance
+template-test-ext-conformance: cargo-downloads-check build-php-ext build-php
 	$(NODE) tests/runner/conformance.mts --langs php-ext
-template-test-ext-unit: ext build-php
-	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --php-extension $(EXT_LIBRARY) --cwd $(EXT_DIR)
 
 rules-check: template-rules-check ## Check the stage of every case.json
 

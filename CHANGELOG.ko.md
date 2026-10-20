@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4c3d25b31d98708c3d0321895ed72aa57138d9da521a1b791514ac7bd5c30c2a -->
+<!-- source-sha256: 43bd5acc028ce024a4157b8ed6968bc0ce6b00b011e1c2fde24fd7f9d00943e3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-9: PHP 확장은 kit의 target(`make build-php-ext`, `make php-ext-arginfo`, `make test-php-ext`)으로 build하고 arginfo를 쓰고 test하며, `scripts/build-php-extension.mts`와 그 test는 제거한다. 확장은 `var/php-ext/polyspec_template.so`이고, `conformance`, `conformance-cases`, `parity-check`, `template-test-ext-conformance`는 제거된 `ext` target 대신 `build-php-ext`를 명명한다(S10). Red: `make -n ext`가 `node scripts/build-php-extension.mts packages/php-ext/src var/build/polyspec_template.so`를 출력; green: `make build-php-ext` exit 0(var/php-ext/polyspec_template.so 빌드), `make test-php-ext CASES='ExtensionClassesTest|ExportsTest'` exit 0(packages/php 19 OK, packages/php-ext 2 OK), php-ext test 파일 전부 OK, `make owner-validate` exit 0, `make rebuild-check` exit 0, `make lint-ts` exit 0 (T26.7-2-9).
 
 - T26.7-2-7-3: 확장은 `Format\Formatter`를 라이브러리와 같은 이름과 signature의 final class로 등록한다: `format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer()): FormatResult`이며, C `packages/php-ext/src/pt_format.c`로 쓴다. BOM, option 검사, analyzer 호출(사용자 Analyzer도 동작), tag와 line edit, edit의 안정적 정렬, invariant를 라이브러리와 같게 하며, 기본 analyzer는 C가 만든다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatterClassTest.php` 1 failure, `Polyspec\Template\Format\Formatter is not registered by the extension` (main의 확장으로 실행, Formatter 없음); green: 같은 명령 5 passed, 0 failed; 라이브러리 test는 확장과 함께 FormatterTest 20 passed, IndentTest 17 passed, ConformanceTest 771 passed (T26.7-2-7-3).
 
