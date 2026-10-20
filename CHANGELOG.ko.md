@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2e0d2d5d4ae048bc38ebcf764d66d98744aef790ee68eabac82c9cabd581dd3e -->
+<!-- source-sha256: 8384b6dedfa3e398182a09a16c22f3a2caded7d173b0cdfd47524275c8fc75c4 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-8-1: PHP 확장의 AstProgram C 메서드 `parse`, `analyze`, `register`, `registerClass`는 이후 행이 지울 `Native\Engine`의 메서드를 호출하지 않고 공유 C 함수(`pt_method_parse`, `pt_method_analyze`, `pt_method_register`, `pt_method_register_class`)로 일한다. 동작은 바뀌지 않는다. owner test는 확장을 load하고 전후 모두 통과한다: `AstProgramTest` 8, `Parser/ParserTest` 6, `Parser/AnalyzeTest` 15, `Value/HostBindingTest` 14, `ConformanceTest` 765, 확장의 `EngineTest` 27, `make lint-php-ext` (T26.7-2-8-1).
 
 - T26.7-40-1: AST program의 runtime refresh는 `packages/compiler/interface.json`이 밝히는 대로 `docs/spec/runtime.md`의 RT-76이다. `dev`에서는 호출마다 템플릿을 다시 로드하고 parse하며, `true`에서는 템플릿의 버전이 바뀔 때까지 parse를 재사용하고, `false`에서는 첫 parse를 유지한다. RT-59는 이제 compiled artifact를 다룬다고 밝힌다. `artifact-refresh`는 RT-1부터 RT-70까지가 아니라 RT-76을 인용하고, 구현들의 test가 그 이름을 적으며, PHP extension은 PHP test에 binding된다. Rust test는 이제 test와 소스를 공유하는 로더로 program이 로더를 받은 뒤에 소스를 바꾸고, `dev`는 새 소스를, `false`는 첫 소스를 render함을 확인한다. 모든 구현이 이미 이렇게 갱신하므로 나머지 다섯과 같이 바로 통과했다. Red: c188f312에서 `make parity-declarations-check`는 R15 5212(artifact-refresh에 337), R2 40(artifact-refresh에 PHP extension binding이 없었다); green: R15 4875(unit에는 없음), R2 39. owner test는 통과한다: vitest `engine.test.ts`(9), TestArtifactRefreshPolicies의 `go test`(1), `cargo test --test functions`(9), PHPUnit `EngineRefreshTest`(5), Python `test_loading`(7). 확인하지 않음: T26.7-2-8까지 S10 선언 검사(AstProgram과 `Native\Engine`)에서 멈추는 PHP extension 실행. 이 항목은 그때까지 진행 중으로 남는다 (T26.7-40-1).
 

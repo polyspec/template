@@ -836,7 +836,8 @@ static bool pt_parse_source(zend_string *source, zend_string *name, HashTable *o
     return pt_run_work(pt_parse_into, &input);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, parse)
+/* Engine::parse and AstProgram::parse: the template source into its AST. */
+static void pt_method_parse(INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *source, *name;
     HashTable *options = NULL;
@@ -852,6 +853,11 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, parse)
         ZVAL_NULL(return_value);
         RETURN_THROWS();
     }
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, parse)
+{
+    pt_method_parse(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 typedef struct pt_analyze_input {
@@ -897,7 +903,8 @@ static void pt_analyze_into(pt_run *run, void *context)
     add_assoc_zval_ex(input->result, "tokens", 6, &tokens);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, analyze)
+/* Engine::analyze and AstProgram::analyze: the AST, tags and tokens of a template source. */
+static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *source, *name;
     HashTable *options = NULL;
@@ -917,6 +924,11 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, analyze)
         ZVAL_NULL(return_value);
         RETURN_THROWS();
     }
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, analyze)
+{
+    pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Polyspec_Template_Native_Engine, parseToJson)
@@ -1168,7 +1180,8 @@ static bool pt_register_function(pt_engine *engine, zend_string *name, zval *cal
     return true;
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, register)
+/* Engine::register and AstProgram::register: a global function callable under a name. */
+static void pt_method_register(INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *name;
     zend_fcall_info fci;
@@ -1181,7 +1194,13 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, register)
     pt_register_function(pt_engine_of(Z_OBJ_P(ZEND_THIS)), name, &fci.function_name);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
+ZEND_METHOD(Polyspec_Template_Native_Engine, register)
+{
+    pt_method_register(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Engine::registerClass and AstProgram::registerClass: a class method callable under Class::method. */
+static void pt_method_register_class(INTERNAL_FUNCTION_PARAMETERS)
 {
     zend_string *class_name, *method;
     zend_fcall_info fci;
@@ -1201,6 +1220,11 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
     ZVAL_COPY(&function, &fci.function_name);
     zend_hash_update(&pt_engine_of(Z_OBJ_P(ZEND_THIS))->classes, key, &function);
     zend_string_release(key);
+}
+
+ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass)
+{
+    pt_method_register_class(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -1913,12 +1937,12 @@ ZEND_METHOD(Polyspec_Template_AstProgram, __construct)
 
 ZEND_METHOD(Polyspec_Template_AstProgram, parse)
 {
-    ZEND_MN(Polyspec_Template_Native_Engine_parse)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_parse(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Polyspec_Template_AstProgram, analyze)
 {
-    ZEND_MN(Polyspec_Template_Native_Engine_analyze)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* AST-10: the decode of AstProgram is that of the class AstDecoder, as in the library. */
@@ -1945,12 +1969,12 @@ ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate)
 
 ZEND_METHOD(Polyspec_Template_AstProgram, register)
 {
-    ZEND_MN(Polyspec_Template_Native_Engine_register)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_register(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_METHOD(Polyspec_Template_AstProgram, registerClass)
 {
-    ZEND_MN(Polyspec_Template_Native_Engine_registerClass)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_register_class(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* The callable that a table holds under a key, or null. */
