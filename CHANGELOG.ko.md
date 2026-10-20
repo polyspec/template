@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 553a229db7952b405bc0521b60330f17bc98a3455388c8e92d39069127605d84 -->
+<!-- source-sha256: 174db874df707ff4542be9dfaa0416fc9a5412383448d97ae50231da82fa4c74 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-18: 확장이 library를 위해 등록하는 class를 검사하는 `packages/php-ext`의 test(`AstProgramTest`, `ProgramEngineTest`, `ValueClassesTest`, `MapValueTest`)는 `PreparedRenderTest`처럼 각자의 이유와 함께 `config/parity.json`에서 확장의 internal test이다. T26.7-2-1-4, T26.7-2-1-5, T26.7-2-2-1, T26.7-2-2-2가 선언 없이 이를 더했다. Red: `make parity-declarations-check`가 네 파일에 R5 `undeclared-test`를 보고했다(6997 finding); green: php-ext의 R5 finding이 없고(6993 finding, 나머지는 다른 항목의 것), 네 파일이 확장을 load하고 통과한다 (T26.7-2-18).
 
 - T26.7-39: value와 function unit은 test가 보이는 requirement만 인용한다. `expressions`는 vector가 시험하는 EXP requirement와 RT-34(nesting limit; `depth-limit-*`와 `error-depth-*` 네 vector가 이제 이를 적는다)를 인용하고, `tests/fixtures/expr/cases.json`의 모든 vector는 자기 requirement를 적는다(`packages/rust/tests/expr_fixtures.rs`의 strict vector가 이 field를 읽는다). `truthiness`는 EXP-33, `number-to-string`은 VAL-9와 VAL-10, `function-arity`는 FUN-3, `functions-date`는 FUN-39와 FUN-40을 인용하며, 전에는 각각 23개에서 62개를 인용했다. 각 구현의 test가 그 이름을 적는다. Go, Rust, PHP의 truthiness test는 이제 -0도 확인하고(Rust는 null, false, 0, 빈 map, 공백 문자열도), arity test는 모든 구현에서 evaluation 시점의 E_RUNTIME_ARITY를 확인하며, PHP extension은 `number-to-string`, `truthiness`, `function-arity`의 PHP test에 binding된다. Red: 425c5959에서 `make parity-declarations-check`는 R1 15, R13 1, R15 8182(그중 다섯 unit에 1243), R2 43, R5 3; green: R1 15, R13 1(이 unit 밖의 RT-71), R15 6936(다섯 unit에는 없음), R2 40, R5 3. owner test는 통과한다: TS 네 파일의 vitest, 다섯 test의 `go test`(78), `cargo test --test value --test functions --test expr_fixtures`(91), PHPUnit `FunctionsTest|NumberTest|ValueTest|ExprFixturesTest`(89), Python `test_api`, `test_function_contract`, `test_expr_fixtures`(116). 확인하지 않음: 이 test의 PHP extension 실행. 425c5959에서 `make test-php-ext`가 선언 검사에서 멈추기 때문이다(extension은 library가 선언하지 않는 `Polyspec\Template\Native\Engine`과 `Polyspec\Template\Native\BoundMap`을 등록한다). 이 항목은 T26.7-2-2-5와 T26.7-2-8까지 진행 중으로 남는다 (T26.7-39).
 
