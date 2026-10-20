@@ -109,13 +109,13 @@ export const drivers: Record<Language, Driver> = {
   'php-ext': {
     dir: join(packages, 'php-ext'),
     build() {
-      // The proxy of vendor/bin/template-ext.php of the development root composer.json runs the native engine.
+      // The proxy of vendor/bin/template.php of the development root composer.json runs the library's command line on the classes of the extension.
       build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
       // The C extension builds with phpize, configure and make and publishes its library itself (T21.4).
       build('php-ext', process.execPath, [join(root, 'scripts/build-php-extension.mts'), join(packages, 'php-ext', 'src'), published['php-ext']], root);
     },
     command(args) {
-      return ['php', [`-dextension=${published['php-ext']}`, join(root, 'vendor', 'bin', 'template-ext.php'), ...args]];
+      return ['php', [`-dextension=${published['php-ext']}`, join(root, 'vendor', 'bin', 'template.php'), ...args]];
     },
   },
 };

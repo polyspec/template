@@ -94,7 +94,7 @@ The runner passes each option as one argument, `--name=value`, so that a value t
 | go | `packages/go/template` |
 | rust | `packages/rust/target/release/template` |
 | php | `php vendor/bin/template.php` |
-| php-ext | `php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php` |
+| php-ext | `php -d extension=var/build/polyspec_template.so vendor/bin/template.php` |
 | python | `var/python/venv/bin/python -m polyspec.template.cli` (`make python-package` installs `packages/python` into `var/python/venv`) |
 
 The formatter of TypeScript is the package `@polyspec/template-language`, which depends on `@polyspec/template`, so its command `template-language` provides `format` and the command `template` the other subcommands.

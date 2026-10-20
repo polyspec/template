@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: 999e9e4f4bed9bc166db781e0536a29493f53619a30d4301f40e8205fd9d771c -->
+<!-- source-sha256: 8a0dfe6e61baae2f36e67e700f16a9e1cb0ababa44a669e51ae5ef9d71deeda3 -->
 # polyspec/template
 
 [English](README.md).
@@ -75,7 +75,7 @@ vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 
 명령은 Symfony Console 애플리케이션(`Polyspec\Template\Cli\CommandLine`, 런타임 의존성 `symfony/console`)이므로 옵션은 FILE 앞에 오고, 옵션 값은 `--name value` 또는 `--name=value`로 주며, 사용법 오류는 명령의 사용법을 출력하고 상태 1로 종료한다.
 
-`vendor/bin/template-ext.php`는 PIE가 패키지 `polyspec/template-php-ext`에서 빌드하는 PHP 확장 `polyspec_template`의 네이티브 엔진 위에서 같은 명령을 실행한다(`pie install polyspec/template-php-ext`). `Polyspec\Template\Native\NativeRuntime`이 그 런타임이고 `Polyspec\Template\Native\NativeAnalyzer`가 그 포매터의 분석이다. 확장이 없으면 이 class들은 `Polyspec\Template\Native\ExtensionNotLoaded`를 던지고, 명령은 PIE를 적은 그 메시지를 stderr에 출력하고 상태 1로 종료한다. 다른 엔진이 대신 실행되지 않는다.
+PHP가 PHP 확장 `polyspec_template`을 로드하면 같은 `vendor/bin/template.php`가 그 확장 위에서 같은 명령을 실행한다. 로드는 `-d extension=var/build/polyspec_template.so`로 하거나, 패키지 `polyspec/template-php-ext`에서 PIE가 빌드해 설치한 것으로 한다(`pie install polyspec/template-php-ext`). 그때 라이브러리의 class들은 같은 이름으로 등록된 확장의 class다. 확장이 없으면 같은 명령은 라이브러리의 PHP 구현으로 실행된다. 확장을 위한 다른 명령줄은 없다.
 
 ## 개발
 

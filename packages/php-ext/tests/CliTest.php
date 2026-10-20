@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 final class CliTest extends TestCase
 {
     /**
-     * The proxy of bin/template-ext.php of polyspec/template in the vendor/bin of the Composer project that runs
+     * The proxy of bin/template.php of polyspec/template in the vendor/bin of the Composer project that runs
      * PHPUnit, which Composer names in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of
      * that project.
      */
@@ -21,7 +21,17 @@ final class CliTest extends TestCase
         $binDir = $GLOBALS['_composer_bin_dir'] ?? null;
         self::assertIsString($binDir, 'PHPUnit runs without the proxy of vendor/bin/phpunit');
 
-        return $binDir . '/template-ext.php';
+        return $binDir . '/template.php';
+    }
+
+    public function testTheCommandLineIsTheLibrarysOnTheClassesOfTheExtension(): void
+    {
+        $result = $this->invoke(['parse', __DIR__ . '/templates/echo.tpl']);
+        self::assertSame(0, $result['status'], $result['stderr']);
+        foreach (['NativeRuntime', 'NativeAnalyzer', 'ExtensionNotLoaded'] as $name) {
+            self::assertFalse(class_exists('Polyspec\\Template\\Native\\' . $name), $name . ' still exists');
+        }
+        self::assertFileDoesNotExist(Support::repositoryRoot() . '/packages/php/bin/template-ext.php');
     }
 
     /**

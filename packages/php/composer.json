@@ -24,7 +24,7 @@
             "Polyspec\\Template\\Tests\\": "tests/"
         }
     },
-    "bin": ["bin/template.php", "bin/template-ext.php"],
+    "bin": ["bin/template.php"],
     "config": {
         "platform": {
             "php": "8.4.1"

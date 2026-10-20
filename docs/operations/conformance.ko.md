@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: 42759b3541048c3238acb18dfd70d85e8c75259a6764f0705da870b699d41177 -->
+<!-- source-sha256: 8dcd65063dc33bef9f0cc2387273293f974bf8bcbf4268a3589bcac2e1c09b3c -->
 # 적합성
 
 [English](/operations/conformance).
@@ -95,7 +95,7 @@ node scripts/check-rules.mts
 | go | `packages/go/template` |
 | rust | `packages/rust/target/release/template` |
 | php | `php vendor/bin/template.php` |
-| php-ext | `php -d extension=var/build/polyspec_template.so vendor/bin/template-ext.php` |
+| php-ext | `php -d extension=var/build/polyspec_template.so vendor/bin/template.php` |
 | python | `var/python/venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/python`을 `var/python/venv`에 설치한다) |
 
 TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.

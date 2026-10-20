@@ -78,10 +78,6 @@
       "kind": "ecosystem",
       "tool": "node runs the built vscode-languageserver entry of the language server (EDT-14)"
     },
-    "packages/php/bin/template-ext.php": {
-      "kind": "ecosystem",
-      "tool": "symfony/console parses the conformance command line (CNF-4) on the engine of the extension"
-    },
     "packages/php/bin/template.php": {
       "kind": "ecosystem",
       "tool": "symfony/console parses the conformance command line (CNF-4) on the PHP package"

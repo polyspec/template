@@ -44,19 +44,6 @@ final class CliTest extends TestCase
         return ['status' => $status, 'stdout' => $stdout, 'stderr' => $stderr];
     }
 
-    /**
-     * The command of the native engine needs the extension, which PIE installs; without it the command names PIE and
-     * runs no other engine.
-     */
-    public function testNativeCommandWithoutTheExtensionNamesPie(): void
-    {
-        self::assertFalse(extension_loaded('polyspec_template'), 'the PHP of the test loads the extension');
-        $result = self::runCli(['parse', Support::casesDir() . '/text/plain/input.tpl'], 'template-ext.php');
-        self::assertSame(1, $result['status']);
-        self::assertSame('', $result['stdout']);
-        self::assertStringContainsString('pie install polyspec/template-php-ext', $result['stderr']);
-    }
-
     public function testParsePrintsAstJson(): void
     {
         $result = self::runCli(['parse', Support::casesDir() . '/text/plain/input.tpl']);
