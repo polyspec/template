@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3a2c79f9e13c86af7c64e74d6f5b833e832802c49ba180f2277465b7789ab1a0 -->
+<!-- source-sha256: 75b761716405d1a44299cc7fb2c82dab647e78ce52a5380c5d0ca226b82e4227 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-55: kit 복사본은 f9eb43dd의 연결된 kit을 따른다(K348, K385, K384, K360-1, K383, K380, K382, K375). `make kit-sync`가 `scripts/kit/kit-bootstrap.mk`와 `config/layout.kit.yml`을 썼고, `make hooks`가 commit-msg hook `.githooks/commit-msg`를 썼으며, 이 hook은 kit의 다른 hook 옆에서 추적되고 `config/owner-checks.json`이 소유한다. Red: `make kit-check`가 2개 finding을 보고했다(두 복사본이 다르다); green: 통과하며, `make link-check`는 `@polyspec/kit`을 linked로, repository의 package를 own으로 보이고, `make link-state-check`가 통과하고(link 사이에 복사된 install이 없다, K375) `make hooks-check`가 통과한다 (T26.7-55).
 
 - T26.7-2-2-5: PHP 확장은 `Native\BoundMap` 대신 `Polyspec\Template\BoundMap`을 library와 같은 signature로 등록한다. `bind`, `merge`, `__unserialize`(`LogicException`을 던진다), private 생성자와 private clone이므로 library처럼 instance를 만들 수 없고 복제할 수 없으며 `unserialize(serialize($bound))`가 실패한다. `merge`는 library의 message(`merge takes two bound maps`)로 실패한다. 확장의 binding은 이를 유일한 bound map class로 받고, `Bind::map`과 `Bind::data`는 그 entry를 다시 bind하지 않고 C map에서 읽는다. library의 `Bind`는 더 이상 `Native\BoundMap`을 이름 붙이지 않고, 그 `BoundMapTest`는 bound map의 key를 `Bind::map`으로 읽는다(PHP는 internal class의 scope에 묶인 closure를 거부한다). 확장의 `BoundMapTest`와 `ExportsTest`는 library class를 쓰며, 하나의 class가 둘 모두를 담당하므로(S10) 두 구현이 서로의 bound map을 거부하는 test는 지운다. Red: 확장을 load하고 `Value/BoundMapTest`가 14개 중 5개, `ExportsTest`가 18개 중 1개 실패했다(library의 bound map을 확장에 준다); green: 확장을 load하고 `Value/BoundMapTest` 14, `ExportsTest` 18, 확장의 `BoundMapTest` 13과 `ExportsTest` 1, `BindTest` 7, `ConformanceTest` 765가 통과하고, library만으로 `Value/BoundMapTest`와 `ExportsTest`가 통과하며 `make lint-php-ext`가 통과한다. `CompilerInterfaceTest`는 `AstProgram::$runtime`(T26.7-2-6)에서만 red로 남는다 (T26.7-2-2-5).
 

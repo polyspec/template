@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 105a88befdeae4cc257c42ddc5f01dae6ac86b509b03d8d54a1674d6b089210d -->
+<!-- source-sha256: 47b9ebf565ad05887914a3e710928cd665387d40c851f96b2392a4e2a26a6085 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -97,3 +97,4 @@
 | T26.7-52 | source 텍스트와 AST가 모두 없거나 version이 없는 loader 결과는 모든 구현에서 loader의 실패(E_LOAD_FAILED)이다(docs/spec 규칙 먼저, RT-9). PHP library는 그 자리에 빈 source를 렌더하지 않는다 | docs/spec/runtime.md and its Korean twin, the loader result checks and their tests in every implementation | `make parity-declarations-check` | [ ] |
 | T26.7-53 | PHP package의 command line은 polyspec/template을 require하는 자기 Composer package로 옮긴다(spec과 docs 먼저). CLI는 Symfony Console 위의 application이며 S10이 확장에게 구현하게 하는 library API가 아니고, 두 구현 어느 쪽 위에서도 실행된다 | docs/spec and docs/operations with their Korean twins, the new package with the bin and the commands of packages/php/src/Cli, its tests, composer.json and the layout | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/CliTest.php` | [ ] |
 | T26.7-54 | PHP package의 AST decoder는 AST의 잘못된 property만 보고한다. collect-all mode의 upstream 2.6은 올바른 property를 additionalProperties 아래에 보고하므로, package는 orm이 고정한 opis/json-schema의 fork pin 2.6.0-p1에 의존한다(S4, 모든 repository에 같은 pin) | packages/php/composer.json and composer.lock, the root composer.json and composer.lock where they resolve opis/json-schema, the dependency review, and a test in packages/php/tests/AstDecodeTest.php | `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/AstDecodeTest.php` | [o] |
+| T26.7-55 | template은 f9eb43dd의 kit 복사본을 받는다: worktree-setup, worktree link, platform 요구, 설치 순서, link-check sibling, commit-msg hook, 오래된 twin 거부, install-dir link 검사(K348 K385 K384 K360-1 K383 K380 K382 K375) | The copies that make kit-sync writes and the hooks of make hooks | `make kit-check` | [o] |
