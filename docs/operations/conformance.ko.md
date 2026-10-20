@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: e24c2663a2e9b363767b150eaee37ad7049ef2ede92e94ee5717bdbacf4477b3 -->
+<!-- source-sha256: 42759b3541048c3238acb18dfd70d85e8c75259a6764f0705da870b699d41177 -->
 # 적합성
 
 [English](/operations/conformance).
