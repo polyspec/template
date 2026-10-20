@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 185299560a59746737af26c1986fb102bc29e35399f21b38e7b1ba9d8805cc8a -->
+<!-- source-sha256: 43c7c87a3b996d60b64562d9163faa7f1e79c67b209832809d9443dd79f0752f -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -75,3 +75,5 @@
 | T26.7-48 | oxlint가 tests/scripts에서 통과한다: conformance-cases.test.mts:32와 pre-commit-hook.test.mts:14가 any로부터의 unsafe assertion을 가진다 | tests/scripts/conformance-cases.test.mts and tests/scripts/pre-commit-hook.test.mts | `make lint-ts` | [ ] |
 | T26.7-49 | ruff format이 packages/python/src/polyspec/template/__init__.py에서 통과한다: T26.7-14의 재구성 뒤 163행에 빈 줄이 둘 더 있다 | packages/python/src/polyspec/template/__init__.py | `make lint-python` | [ ] |
 | T26.7-50 | kit 복사본은 15aeb680의 연결된 kit을 따른다 | PRINCIPLES.md, PRINCIPLES.ko.md, ruff.toml, .golangci.yml, clippy.toml and scripts/kit/kit-bootstrap.mk, written by make kit-sync | `make kit-check` | [o] |
+| T26.7-51 | program의 option은 모든 구현에서 같게 실패한다. 정수가 아니거나 RT-33의 limit이 아닌 limit, callable의 map이 아닌 functions, map이 아닌 env이다(docs/spec 규칙 먼저, RT-6). PHP library는 확장과 같이 이를 검사한다 | docs/spec/runtime.md and its Korean twin, the option checks and their tests in every implementation | `make parity-declarations-check` | [ ] |
+| T26.7-52 | source 텍스트와 AST가 모두 없거나 version이 없는 loader 결과는 모든 구현에서 loader의 실패(E_LOAD_FAILED)이다(docs/spec 규칙 먼저, RT-9). PHP library는 그 자리에 빈 source를 렌더하지 않는다 | docs/spec/runtime.md and its Korean twin, the loader result checks and their tests in every implementation | `make parity-declarations-check` | [ ] |
