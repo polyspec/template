@@ -194,7 +194,10 @@ final class AstProgram implements Program, RuntimeServices
         $ast = $loaded['ast'] ?? null;
         $text = $loaded['source'] ?? null;
         if ($ast === null && !is_string($text)) {
-            throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: the loader returned no source text and no AST");
+            throw $fail(
+                ErrorCode::E_LOAD_FAILED,
+                "template {$name} cannot be loaded: the loader returned no source text and no AST",
+            );
         }
         if (!is_string($loaded['version'] ?? null) || $loaded['version'] === '') {
             throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: the loader returned no version");

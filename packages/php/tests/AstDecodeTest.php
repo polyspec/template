@@ -66,8 +66,8 @@ final class AstDecodeTest extends TestCase
     }
 
     /**
-     * A literal with an invalid value and an extra field names the deepest invalid node, the value (AST-10), as the other
-     * runtimes do, and not the literal that holds the extra field.
+     * A literal with an invalid value and an extra field names the deepest invalid node, the value (AST-10), as the
+     * other runtimes do, and not the literal that holds the extra field.
      */
     public function testDecodeNamesTheDeepestInvalidValueOfALiteralWithAnExtraField(): void
     {

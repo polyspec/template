@@ -67,7 +67,8 @@ final class LoadFailureTest extends TestCase
 
     public function testALoaderResultWithoutASourceTextOrAnAstOrAVersionIsALoadFailure(): void
     {
-        // RT-9: a result that holds neither a source text nor an AST, or no version, fails to load; an empty source is a template.
+        // RT-9: a result that holds neither a source text nor an AST, or no version, fails to load; an empty source
+        // is a template.
         $cases = [
             [['version' => ''], 'the loader returned no source text and no AST'],
             [['version' => '1'], 'the loader returned no source text and no AST'],
@@ -81,7 +82,8 @@ final class LoadFailureTest extends TestCase
                 [$error->errorCode, $error->template, $error->getMessage()],
             );
         }
-        $this->assertSame('', (new AstProgram(self::loaderResult(['source' => '', 'version' => '1'])))->render('x.tpl', []));
+        $program = new AstProgram(self::loaderResult(['source' => '', 'version' => '1']));
+        $this->assertSame('', $program->render('x.tpl', []));
     }
 
     /** @param array<string, mixed> $result */

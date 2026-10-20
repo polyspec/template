@@ -53,7 +53,7 @@ pub enum ErrorCode {
     E_LOAD_CYCLE,
     /// A resolved path leaves the loader root.
     E_LOAD_OUTSIDE_ROOT,
-    /// The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10).
+    /// The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10), or a loader result lacks a source text and an AST, or a version (RT-9).
     E_LOAD_FAILED,
     /// A finite number has a magnitude greater than 2^53 − 1 (VAL-2).
     E_DATA_NUMBER_RANGE,

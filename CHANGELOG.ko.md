@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1dcf9070727796161b4504e55bad034b870f1dca9358d72648d2a416cbd1b342 -->
+<!-- source-sha256: 41b067127262959a916e3062f71cc6567140d33734e7356955847ef7e516d96f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-52-1: main은 다시 `make lint-php`와 `make error-codes-check`를 통과한다. T26.7-52와 T26.7-54가 120열을 넘는 줄(`packages/php/src/AstProgram.php:197`, `packages/php/tests/LoadFailureTest.php:70`과 `:84`, `packages/php/tests/AstDecodeTest.php:69`)을 더했으며 이제 감싼다. T26.7-52는 error code 목록을 다시 쓰지 않고 `docs/spec/errors.md`의 E_LOAD_FAILED 행을 바꿨으며, `make error-codes`가 이를 쓴다(`packages/php/src/ErrorCode.php`, `packages/rust/src/error.rs`, 각각 doc comment 하나). 그 landing은 commits-check와 docs-check만 실행했다. 이제 각 landing은 바꾼 것의 static gate를 실행한다. Red: a12f510f에서 `make lint-php` exit 2(phpcs, 4줄)이고 `make error-codes-check`가 실패했다; green: 둘 다 통과하며 `LoadFailureTest` 5와 `AstDecodeTest` 6이 통과한다 (T26.7-52-1).
 
 - T26.7-41: host unit은 각각 37개에서 72개가 아니라 test가 보이는 requirement만 인용한다. `invalid-text`는 VAL-17(유효한 Unicode 텍스트가 아닌 map key는 E_DATA_INVALID_UTF8; PHP와 PHP extension binding은 `testMapKeysThatAreNotUtf8AreRejected`로 옮기고 Python은 `test_map_keys_that_are_not_valid_unicode_are_rejected`를 얻는다), `object-calls`는 RT-60(assign한 native instance는 identity를 유지하며 public field lookup과 method 호출을 제공한다), `host-function-failures`는 FUN-46(PHP test는 이제 실패하는 등록 함수의 code와 line도 확인하고 Python은 `test_a_failing_host_function_fails_at_its_call`을 얻는다), `compiler-interface`는 RT-67(TS test는 이제 AST program이 Program 계약의 모든 operation을 가지는지도 확인한다)을 인용한다. PHP extension은 이 unit들의 PHP test에 binding된다. `Utf8Test.php`는 PHP 구현의 helper를 확인하므로 internal test로 선언하고 requirement를 인용하지 않는다. 범위를 좁히자 FUN-1, FUN-2, FUN-4부터 FUN-38, FUN-41부터 FUN-45, FUN-47부터 FUN-49를 이름으로 적는 test가 없음이 드러났다. R13은 1에서 46으로 늘고, T26.7-41-1이 그 unit을 쓴다. Red: 7a048f1e에서 `make parity-declarations-check`는 R15 5212(네 unit에 1354), R13 1, R2 40; green(90ad372a): R15 3854(네 unit에는 없음), R13 46(FUN 45개와 RT-71), R2 40, R5 0. owner test는 통과한다: TS 네 파일의 vitest(31), test 네 개의 `go test`(4), `object_calls`, `value`, `functions`, `compiler_interface`의 `cargo test`(26), PHPUnit `ObjectCallsTest|HostBindingTest|CompilerInterfaceTest|Utf8Test`(39), Python `test_object_calls`, `test_api`, `test_compiler_interface`(57). 확인하지 않음: T26.7-2-2-5와 T26.7-2-8을 기다리는 PHP extension 실행. 이 항목은 그때까지, 그리고 T26.7-41-1까지 진행 중으로 남는다 (T26.7-41).
 
