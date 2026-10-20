@@ -468,6 +468,27 @@ ZEND_METHOD(Polyspec_Template_Value_Bind, data)
     }
 }
 
+/* Value\Json (VAL-2, VAL-12): parses JSON bytes into the values of the library. */
+ZEND_METHOD(Polyspec_Template_Value_Json, parse)
+{
+    zend_string *bytes;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(bytes)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_arena arena;
+    pt_arena_init(&arena);
+    pt_value value = {0};
+    pt_bind_error error = {NULL, NULL};
+    if (!pt_json_parse(&arena, ZSTR_VAL(bytes), ZSTR_LEN(bytes), &value, &error)) {
+        pt_throw_bind_error(error.code, error.message);
+        pt_arena_free(&arena);
+        RETURN_THROWS();
+    }
+    pt_library_value(value, return_value);
+    pt_arena_free(&arena);
+}
+
 /* Returns the 1-based line and column of a byte offset in a line index (the offsets at which the lines start). */
 static void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend_long *col)
 {
@@ -2184,6 +2205,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();
+    register_class_Polyspec_Template_Value_Json();
 
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;

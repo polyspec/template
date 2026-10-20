@@ -189,7 +189,11 @@ static bool pt_json_number(pt_json *json, pt_value *result)
     }
     if (fabs(value) > PT_MAX_SAFE) {
         json->error->code = PT_E_DATA_NUMBER_RANGE;
-        json->error->message = zend_strpprintf(0, "number %s is outside the safe range", literal.s);
+        zval number;
+        ZVAL_DOUBLE(&number, value);
+        zend_string *text = zval_get_string(&number);
+        json->error->message = zend_strpprintf(0, "number %s is outside the safe range", ZSTR_VAL(text));
+        zend_string_release(text);
         return false;
     }
     *result = pt_number(value);

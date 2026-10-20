@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 14f8b26e0bf727cd768c7def98d6b85a10b7eb3483918a29db6c0ed0d4cc0e64 -->
+<!-- source-sha256: 0f523bb615289153487300bca1bc9bbb66ca94cbbb5c0ecba7f35a1a100ef275 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-2-4: PHP 확장은 `Polyspec\Template\Value\Json`을 library와 같은 public signature의 internal final class로 등록한다. `parse`는 library의 값을 문서 순서대로 주고(객체는 `MapValue`, 중복 key는 첫 자리에 마지막 값을 두며, number는 float) library의 `BindError`와 그 message로 실패한다. 확장의 JSON parser의 범위 message는 이제 literal 텍스트가 아니라 library처럼 PHP가 float를 쓰는 대로 number를 쓴다(`number 1.2345678901235E+19 is outside the safe range`). `packages/php-ext/tests/JsonTest.php`는 확장의 internal test이다. Red: 새 `JsonTest`가 확장을 load하고 4개 중 1개 실패했고(`Json is not registered by the extension`), 동작의 test 3개는 library만으로 통과하며, 등록 후에는 범위 message가 달랐다(`number 12345678901234567890`); green: 확장을 load하고 `JsonTest` 4, `Value/ValueTest` 7, `LoadFailureTest` 4, `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-4).
 
 - T26.7-54: root가 opis fork `2.6.0-p1`(vcs `https://github.com/min-0-max/json-schema`, orm의 pin)을 고정하여, PHP AST decoder가 다른 runtime처럼 가장 깊은 잘못된 값을 가리킨다. Upstream opis 2.6.0은 collect-all mode에서 실패한 `properties` keyword가 검사한 property를 기록하기 전에 돌아가므로, `AstDecoder`는 값 `"1"`인 number `Literal`에 extra field가 있을 때 TypeScript가 `/body/0/expr/value`라고 하는 자리에 `/body/0/expr`를 보고했다(AST-10). Red: `AstDecodeTest::testDecodeNamesTheDeepestInvalidValueOfALiteralWithAnExtraField`가 `-'/body/0/expr/value'`와 `+'/body/0/expr'`로 실패했다(6 tests, 1 failure); green: fork에서 같은 test가 통과하고, `AstDecodeTest`는 library만으로, 그리고 확장과 함께 6개 중 6개 통과한다. 의존성 review는 fork를 기록하고, `make dependency-policy-check`는 T26.7-43의 newer-release 항목 여섯 개를 그대로 둔다 (T26.7-54).
 

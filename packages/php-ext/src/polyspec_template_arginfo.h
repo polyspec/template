@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b5e9a9f8dac81cd54461650dd98055a212aa8614 */
+ * Stub hash: 02e9f94fe669f477effe85777c57e8fb39ac24ab */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -238,6 +238,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Value_Bind_data arginfo_class_Polyspec_Template_Value_Bind_value
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Json_parse, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, bytes, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -292,6 +296,7 @@ ZEND_METHOD(Polyspec_Template_Value_Bind, depthWithin);
 ZEND_METHOD(Polyspec_Template_Value_Bind, publicProperties);
 ZEND_METHOD(Polyspec_Template_Value_Bind, map);
 ZEND_METHOD(Polyspec_Template_Value_Bind, data);
+ZEND_METHOD(Polyspec_Template_Value_Json, parse);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -428,6 +433,11 @@ static const zend_function_entry class_Polyspec_Template_Value_Bind_methods[] = 
 	ZEND_ME(Polyspec_Template_Value_Bind, publicProperties, arginfo_class_Polyspec_Template_Value_Bind_publicProperties, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Value_Bind, map, arginfo_class_Polyspec_Template_Value_Bind_map, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Value_Bind, data, arginfo_class_Polyspec_Template_Value_Bind_data, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Value_Json_methods[] = {
+	ZEND_ME(Polyspec_Template_Value_Json, parse, arginfo_class_Polyspec_Template_Value_Json_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -774,6 +784,21 @@ static zend_class_entry *register_class_Polyspec_Template_Value_Bind(void)
 	zend_string *const_MAX_DEPTH_name = zend_string_init_interned("MAX_DEPTH", sizeof("MAX_DEPTH") - 1, 1);
 	zend_declare_class_constant_ex(class_entry, const_MAX_DEPTH_name, &const_MAX_DEPTH_value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(const_MAX_DEPTH_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Value_Json(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Value", "Json", class_Polyspec_Template_Value_Json_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 
 	return class_entry;
 }

@@ -526,3 +526,14 @@ final class Bind
      */
     public static function data(mixed $input): mixed {}
 }
+
+/**
+ * JSON text parser that preserves document order and applies the number rules of VAL-12.
+ */
+final class Json
+{
+    /**
+     * Parses JSON bytes into a template value.
+     */
+    public static function parse(string $bytes): mixed {}
+}
