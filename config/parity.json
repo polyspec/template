@@ -18,11 +18,11 @@
   "documents": { "globs": ["README*.md", "docs/*.md", "docs/spec/*.md", "docs/operations/!(benchmark|benchmark.ko).md", "packages/*/README*.md"], "nouns": ["languages", "language", "implementations", "implementation", "runtimes", "runtime", "언어", "구현", "런타임"] },
   "comparators": ["tests/runner", "tests/browser", "examples/showcase"],
   "tools": [
-    { "root": "packages/lsp", "reason": "The language server is a TypeScript tool of the editors." },
-    { "root": "packages/codemirror", "reason": "The CodeMirror adapter is a TypeScript tool of the editors." },
-    { "root": "packages/vscode", "reason": "The VS Code extension is a TypeScript tool of the editors." },
-    { "root": "packages/compiler", "reason": "The compiler generates the programs of every language from one TypeScript implementation." },
-    { "root": "tests/scripts", "reason": "The tests of the build, check and release scripts of the repository." }
+    { "root": "packages/lsp", "reason": "ecosystem: The language server is a TypeScript tool of the editors." },
+    { "root": "packages/codemirror", "reason": "ecosystem: The CodeMirror adapter is a TypeScript tool of the editors." },
+    { "root": "packages/vscode", "reason": "ecosystem: The VS Code extension is a TypeScript tool of the editors." },
+    { "root": "packages/compiler", "reason": "harness: The compiler generates the programs of every language from one TypeScript implementation." },
+    { "root": "tests/scripts", "reason": "test: The tests of the build, check and release scripts of the repository." }
   ],
   "testPatterns": [
     { "runner": "vitest", "globs": ["**/*.test.ts"] },

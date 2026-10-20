@@ -3,19 +3,15 @@
   "exclude": [
     {
       "glob": "packages/*/tests/**",
-      "reason": "a test states its case in full; the rule separates the concerns of components, not the cases of a test"
+      "reason": "test: a test states its case in full; the rule separates the concerns of components, not the cases of a test"
     },
     {
       "glob": "tests/scripts/**",
-      "reason": "a test states its case in full; the rule separates the concerns of components, not the cases of a test"
+      "reason": "test: a test states its case in full; the rule separates the concerns of components, not the cases of a test"
     },
     {
       "glob": "**/*_test.go",
-      "reason": "a test states its case in full; the rule separates the concerns of components, not the cases of a test"
-    },
-    {
-      "glob": "examples/**/generated/**",
-      "reason": "the showcase fixtures are generated programs and declarations, committed so that make showcase-check compares them; the repeats of one program shape across scenarios are the output of the generators"
+      "reason": "test: a test states its case in full; the rule separates the concerns of components, not the cases of a test"
     }
   ]
 }

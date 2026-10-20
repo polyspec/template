@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f84c6ca896709688ced69a23805c932721a6f86804ba420910be1c23b42f84b7 -->
+<!-- source-sha256: b8ec372f8a007d9c5e411279374ea2cc81ae71f08630b810a1cce124225f2d8f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-30: `config/duplication.json`의 예외와 `config/parity.json`의 tool root는 이유를 kit이 정의한 종류(`test:`, `ecosystem:`, `harness:`)로 시작하고, 더 이상 추적하지 않는 `examples/**/generated/**` 예외는 뺐으며, `make kit-sync`가 kit 복사본을 가져왔고, `CHECK_TARGETS`와 `ci.yml`의 첫 job이 `divergence-check`를 실행한다. Red: `make divergence-check`가 12건을 찾았고, green: 3건이 남는다. `packages/php-ext/tests/EngineTest.php:27`, `packages/php/src/Native/ExtensionNotLoaded.php:18`, `packages/php/tests/CliTest.php:53`의 `extension_loaded` 분기이며 PHP 확장이 library를 미러링하면(T26.7-2) 사라진다. `kit-check`는 통과한다(T26.7-30).
 
 - T26.7-28: `examples/site/index.html`, `data/scenarios.json`, `data/results.json`은 생성 산출물이므로 더 이상 추적하지 않는다. `build.mts`가 실행마다 data를 쓰고(`--write`는 golden `expected.html`도 바꾼다), `build-site.mts`가 페이지를 쓰며, `showcase-site-check`와 `showcase-html-check`가 먼저 이들을 build하고, `ci.yml`의 `showcase` job이 `examples/site`를 artifact `example-site`로 올리며, `pages` workflow는 `main`의 CI run이 성공한 뒤 추적하는 site를 복사하는 대신 같은 commit의 artifact를 게시한다. 측정값 `benchmark.json`과 `mode-benchmark.json`은 추적하는 기록으로, `expected.html`은 golden file로 남는다. Red: `git ls-files`가 생성 파일 3개를 나열했고, green: `make showcase-site-check`가 구현 6개로 data와 페이지를 쓰고 `make showcase-html-check`가 시나리오 5개에서 통과한다(첫 실행은 새 binary의 첫 실행 지연만 겪었다)(T26.7-28).
 

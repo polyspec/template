@@ -167,7 +167,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="push-gate-commit docs-check rules-check kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check layout-check typecheck template-test-compiler-types"
+      - run: make ci-targets TARGETS="push-gate-commit docs-check rules-check kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check divergence-check layout-check typecheck template-test-compiler-types"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
