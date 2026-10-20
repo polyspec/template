@@ -383,7 +383,7 @@ static int pt_ordered_tag_compare(const void *left, const void *right)
     return a->order < b->order ? -1 : (a->order > b->order ? 1 : 0);
 }
 
-static bool pt_tag_int(HashTable *tag, const char *key, zend_long *value)
+bool pt_tag_int(HashTable *tag, const char *key, zend_long *value)
 {
     zval *field = zend_hash_str_find(tag, key, strlen(key));
     if (field == NULL) {

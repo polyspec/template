@@ -3114,6 +3114,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     register_class_Polyspec_Template_Parser_Parser();
     pt_block_tag_register(register_class_Polyspec_Template_Parser_BlockTag());
     register_class_Polyspec_Template_Value_HostArgument();
+    register_class_Polyspec_Template_Format_Indent();
 
     /* The formatter classes: FormatResult returns FormatError, and the helpers have no state. */
     zend_class_entry *format_error = register_class_Polyspec_Template_Format_FormatError();

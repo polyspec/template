@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 089372011747610fd0cea399a2e336b8bc8f65aff65eca8a30aad8da22180a22 -->
+<!-- source-sha256: d1fc19ea1071f0df6b70b61e36fdb481d762c99b10331dc5631b547d1a32fee5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-7-2: 확장이 `Format\Indent`를 라이브러리와 같은 이름과 signature의 final class로 등록한다: private 생성자와 static `edits`(C, `packages/php-ext/src/pt_indent.c`)이며, `config/parity.json`은 `IndentClassTest.php`를 그 test로 든다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/IndentClassTest.php` 1 failure, `Polyspec\Template\Format\Indent is not registered by the extension`; green: 같은 명령 3 passed (9 assertions), 확장을 로드한 상태에서 `packages/php/tests/Format/IndentTest.php` 17 passed와 `packages/php/tests/Format/FormatterTest.php` 20 passed (T26.7-2-7-2).
 
 - T26.7-2-11-2: PHP 확장이 `Parser\Parser`와 `Parser\BlockTag`를 확장의 class로 등록한다 (parse, analyze, block tag의 path와 body 읽기는 C parser에서 실행된다). 한 byte가 아닌 delimiter는 라이브러리와 확장 모두에서 `ValueError`다 (P8). Red: `phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/ParserClassesTest.php` "Polyspec\Template\Parser\Parser is not registered by the extension" (실패 1); 확장 없이 `phpunit -- packages/php/tests/Parser/ParserTest.php`를 라이브러리 검사 전에 실행하면 `testADelimiterThatIsNotOneByteIsAValueError`가 실패한다 (`Parser::parse`가 `'{{'`를 받아들임); green: `ParserClassesTest` 5 passed; `ParserTest` 확장 있을 때와 없을 때 모두 8 passed; `AnalyzeTest` 15 passed; `ConformanceTest` 확장 있을 때와 없을 때 모두 771 passed; php-ext test 파일 각각이 단독으로 통과 (T26.7-2-11-2).
 

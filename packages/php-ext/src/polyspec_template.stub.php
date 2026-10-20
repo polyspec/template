@@ -1378,6 +1378,29 @@ final class Invariant
     public static function sameTree(mixed $left, mixed $right): bool {}
 }
 
+/**
+ * Indentation: the spaces and tabs at the start of each line, set by the nesting of HTML elements and template blocks.
+ *
+ * Offsets are byte offsets into the text.
+ */
+final class Indent
+{
+    private function __construct(string $text, array $tags, bool $counted) {}
+
+    /**
+     * Returns the edits that set the indentation of every line, or the reason why the HTML structure cannot be
+     * indented: the byte offset of the tag where the structure fails and a message.
+     *
+     * @param array $tags
+     * @phpstan-param list<array{kind: string, start: int, end: int}> $tags
+     * @param array|null $range only lines that start inside it are indented
+     * @phpstan-param array{start: int, end: int}|null $range
+     * @return array
+     * @phpstan-return array{edits: list<array{start: int, end: int, text: string}>}|array{error: array{index: int, message: string}}
+     */
+    public static function edits(string $text, array $tags, string $unit, string $templateBlocks, ?array $range): array {}
+}
+
 namespace Polyspec\Template\Expr;
 
 /**

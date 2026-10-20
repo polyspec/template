@@ -501,6 +501,7 @@ const pt_builtin *pt_builtin_find(const char *name, size_t length);
 
 /* The date operations of pt_functions.c, which Functions\Dates (pt_groups.c) and the date built-in function share. */
 bool pt_parse_offset(pt_s text, zend_long *offset);
+bool pt_tag_int(HashTable *tag, const char *key, zend_long *value);
 zend_long pt_days_from_civil(zend_long year, zend_long month, zend_long day);
 void pt_civil_from_days(zend_long days, zend_long *year, zend_long *month, zend_long *day);
 bool pt_unix_seconds(pt_value value, zend_long env_offset, zend_long *seconds, pt_function_error *error);

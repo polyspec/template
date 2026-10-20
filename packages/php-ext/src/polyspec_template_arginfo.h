@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 601620928a0cdd9c6e69fd605f59277369cb4d4e */
+ * Stub hash: c3a10cedcddf662bead71ebe83ad395e06c6883a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -712,6 +712,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_I
 	ZEND_ARG_TYPE_INFO(0, right, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Format_Indent___construct, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, tags, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, counted, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Format_Indent_edits, 0, 5, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, tags, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, unit, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, templateBlocks, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, range, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Token___construct, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
@@ -1016,6 +1030,8 @@ ZEND_METHOD(Polyspec_Template_Format_Expression, join);
 ZEND_METHOD(Polyspec_Template_Format_Invariant, withoutSpans);
 ZEND_METHOD(Polyspec_Template_Format_Invariant, withoutLineIndentation);
 ZEND_METHOD(Polyspec_Template_Format_Invariant, sameTree);
+ZEND_METHOD(Polyspec_Template_Format_Indent, __construct);
+ZEND_METHOD(Polyspec_Template_Format_Indent, edits);
 ZEND_METHOD(Polyspec_Template_Expr_Token, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct);
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, error);
@@ -1431,6 +1447,12 @@ static const zend_function_entry class_Polyspec_Template_Format_Invariant_method
 	ZEND_ME(Polyspec_Template_Format_Invariant, withoutSpans, arginfo_class_Polyspec_Template_Format_Invariant_withoutSpans, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Format_Invariant, withoutLineIndentation, arginfo_class_Polyspec_Template_Format_Invariant_withoutLineIndentation, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Format_Invariant, sameTree, arginfo_class_Polyspec_Template_Format_Invariant_sameTree, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Format_Indent_methods[] = {
+	ZEND_ME(Polyspec_Template_Format_Indent, __construct, arginfo_class_Polyspec_Template_Format_Indent___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Polyspec_Template_Format_Indent, edits, arginfo_class_Polyspec_Template_Format_Indent_edits, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -2956,6 +2978,21 @@ static zend_class_entry *register_class_Polyspec_Template_Format_Invariant(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Invariant", class_Polyspec_Template_Format_Invariant_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Format_Indent(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Format", "Indent", class_Polyspec_Template_Format_Indent_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
