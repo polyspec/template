@@ -6,6 +6,9 @@ namespace Polyspec\Template\Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
+use Polyspec\Template\Parser\BlockTag;
+use Polyspec\Template\Parser\Parser;
+use Polyspec\Template\Source;
 use Polyspec\Template\TemplateError;
 
 /**
@@ -110,6 +113,38 @@ final class ParserTest extends TestCase
             self::assertSame(['code', 'template', 'line', 'col', 'offset', 'end', 'message'], array_keys($object));
             self::assertSame(['E_PARSE_UNCLOSED_BLOCK', 'x.tpl', 2, 1, 2, 3], array_slice(array_values($object), 0, 6));
             self::assertNotSame('', $object['message']);
+        }
+    }
+
+    /** A delimiter that is not exactly one byte is a ValueError of the entry or the constructor that receives it. */
+    public function testADelimiterThatIsNotOneByteIsAValueError(): void
+    {
+        $source = Source::fromBytes('t.tpl', 'a');
+        $cases = [
+            [
+                'Polyspec\Template\Parser\Parser::parse(): Argument #2 ($open) must be a single character',
+                static fn () => Parser::parse($source, '{{', '}'),
+            ],
+            [
+                'Polyspec\Template\Parser\Parser::analyze(): Argument #3 ($close) must be a single character',
+                static fn () => Parser::analyze($source, '{', ''),
+            ],
+            [
+                'Polyspec\Template\Parser\Parser::__construct(): Argument #3 ($close) must be a single character',
+                static fn () => new Parser($source, '[', ']]'),
+            ],
+            [
+                'Polyspec\Template\Parser\BlockTag::__construct(): Argument #3 ($close) must be a single character',
+                static fn () => new BlockTag($source, 't.tpl', '}}', 1),
+            ],
+        ];
+        foreach ($cases as [$message, $call]) {
+            try {
+                $call();
+                $this->fail($message . ' expected');
+            } catch (\ValueError $error) {
+                self::assertSame($message, $error->getMessage());
+            }
         }
     }
 }

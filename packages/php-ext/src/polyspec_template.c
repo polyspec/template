@@ -1438,36 +1438,8 @@ static void pt_analyze_into(pt_run *run, void *context)
     pt_analyze_input *input = context;
     pt_analysis analysis;
     pt_template *template = pt_analyze(run, ZSTR_VAL(input->name), ZSTR_LEN(input->name), ZSTR_VAL(input->source), ZSTR_LEN(input->source), input->open, input->close, &analysis);
-    zval ast, tags, tokens;
-    pt_ast_to_zval(template, &ast);
-    array_init_size(&tags, analysis.tag_count);
-    for (uint32_t t = 0; t < analysis.tag_count; t++) {
-        const pt_syntax_tag *tag = &analysis.tags[t];
-        zval entry;
-        array_init_size(&entry, 6);
-        add_assoc_long_ex(&entry, "start", 5, (zend_long)tag->start);
-        add_assoc_long_ex(&entry, "end", 3, (zend_long)tag->end);
-        add_assoc_bool_ex(&entry, "echo", 4, tag->echo);
-        add_assoc_string_ex(&entry, "kind", 4, tag->kind);
-        add_assoc_long_ex(&entry, "bodyStart", 9, (zend_long)tag->body_start);
-        add_assoc_long_ex(&entry, "bodyEnd", 7, (zend_long)tag->body_end);
-        add_next_index_zval(&tags, &entry);
-    }
-    array_init_size(&tokens, analysis.token_count);
-    for (uint32_t t = 0; t < analysis.token_count; t++) {
-        const pt_syntax_token *token = &analysis.tokens[t];
-        zval entry;
-        array_init_size(&entry, 3);
-        add_assoc_long_ex(&entry, "start", 5, (zend_long)token->start);
-        add_assoc_long_ex(&entry, "end", 3, (zend_long)token->end);
-        add_assoc_string_ex(&entry, "kind", 4, token->kind);
-        add_next_index_zval(&tokens, &entry);
-    }
+    pt_analysis_to_zval(template, &analysis, input->result);
     pt_template_release(template);
-    array_init_size(input->result, 3);
-    add_assoc_zval_ex(input->result, "ast", 3, &ast);
-    add_assoc_zval_ex(input->result, "tags", 4, &tags);
-    add_assoc_zval_ex(input->result, "tokens", 6, &tokens);
 }
 
 /* AstProgram::analyze: the AST, tags and tokens of a template source. */
@@ -3139,6 +3111,8 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_ast_declare_constants(register_class_Polyspec_Template_Ast());
     pt_scanner_declare_constants(register_class_Polyspec_Template_Parser_Scanner());
     register_class_Polyspec_Template_Parser_Standalone();
+    register_class_Polyspec_Template_Parser_Parser();
+    pt_block_tag_register(register_class_Polyspec_Template_Parser_BlockTag());
     register_class_Polyspec_Template_Value_HostArgument();
 
     /* The formatter classes: FormatResult returns FormatError, and the helpers have no state. */

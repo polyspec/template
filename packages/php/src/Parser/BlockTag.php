@@ -25,6 +25,9 @@ final class BlockTag
         private readonly string $close,
         private readonly int $closeCount,
     ) {
+        if (strlen($close) !== 1) {
+            throw new \ValueError(self::class . '::__construct(): Argument #3 ($close) must be a single character');
+        }
     }
 
     private function fail(string $code, int $start, int $end, string $message): TemplateError

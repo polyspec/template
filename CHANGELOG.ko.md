@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a5689581b33f4107ba69f636ee0c08aa930cb19b7236cd628fc0ab22ef9ebd4a -->
+<!-- source-sha256: 089372011747610fd0cea399a2e336b8bc8f65aff65eca8a30aad8da22180a22 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-11-2: PHP 확장이 `Parser\Parser`와 `Parser\BlockTag`를 확장의 class로 등록한다 (parse, analyze, block tag의 path와 body 읽기는 C parser에서 실행된다). 한 byte가 아닌 delimiter는 라이브러리와 확장 모두에서 `ValueError`다 (P8). Red: `phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/ParserClassesTest.php` "Polyspec\Template\Parser\Parser is not registered by the extension" (실패 1); 확장 없이 `phpunit -- packages/php/tests/Parser/ParserTest.php`를 라이브러리 검사 전에 실행하면 `testADelimiterThatIsNotOneByteIsAValueError`가 실패한다 (`Parser::parse`가 `'{{'`를 받아들임); green: `ParserClassesTest` 5 passed; `ParserTest` 확장 있을 때와 없을 때 모두 8 passed; `AnalyzeTest` 15 passed; `ConformanceTest` 확장 있을 때와 없을 때 모두 771 passed; php-ext test 파일 각각이 단독으로 통과 (T26.7-2-11-2).
 
 - T26.7-2-7-1: 확장은 `Format\FormatError`, `Format\FormatResult`, `Format\Expression`, `Format\Invariant`를 library와 같은 이름과 signature의 class로 등록한다(`packages/php-ext/src/pt_format.c`). `FormatResult::text`와 `FormatResult::error`는 library가 선언한 대로 `FormatResult`를 반환한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatClassesTest.php`가 `Polyspec\Template\Format\FormatError is not registered by the extension`으로 실패한다(1 failure); green: 같은 명령이 `OK (4 tests, 19 assertions)`로 통과한다 (T26.7-2-7-1).
 

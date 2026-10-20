@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: faaa01914bd8b7c8459273a788175d04c7794c34 */
+ * Stub hash: 601620928a0cdd9c6e69fd605f59277369cb4d4e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -826,6 +826,33 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Parser_S
 	ZEND_ARG_TYPE_INFO(0, tags, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Parser_Parser___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, source, Polyspec\\Template\\Source, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, open, IS_STRING, 0, "\'{\'")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, close, IS_STRING, 0, "\'}\'")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Parser_Parser_parse, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_OBJ_INFO(0, source, Polyspec\\Template\\Source, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, open, IS_STRING, 0, "\'{\'")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, close, IS_STRING, 0, "\'}\'")
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Parser_Parser_analyze arginfo_class_Polyspec_Template_Parser_Parser_parse
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Parser_BlockTag___construct, 0, 0, 4)
+	ZEND_ARG_OBJ_INFO(0, source, Polyspec\\Template\\Source, 0)
+	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, close, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, closeCount, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Parser_BlockTag_readIncludePath, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Parser_BlockTag_readBlockBody arginfo_class_Polyspec_Template_Parser_BlockTag_readIncludePath
+
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, __construct);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, set);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, load);
@@ -1017,6 +1044,12 @@ ZEND_METHOD(Polyspec_Template_Parser_Scanner, wrappedTagAt);
 ZEND_METHOD(Polyspec_Template_Parser_Scanner, isDelimiterChar);
 ZEND_METHOD(Polyspec_Template_Parser_Scanner, parseDelimiters);
 ZEND_METHOD(Polyspec_Template_Parser_Standalone, ranges);
+ZEND_METHOD(Polyspec_Template_Parser_Parser, __construct);
+ZEND_METHOD(Polyspec_Template_Parser_Parser, parse);
+ZEND_METHOD(Polyspec_Template_Parser_Parser, analyze);
+ZEND_METHOD(Polyspec_Template_Parser_BlockTag, __construct);
+ZEND_METHOD(Polyspec_Template_Parser_BlockTag, readIncludePath);
+ZEND_METHOD(Polyspec_Template_Parser_BlockTag, readBlockBody);
 
 static const zend_function_entry class_Polyspec_Template_Loader_LoaderInterface_methods[] = {
 #if (PHP_VERSION_ID >= 80400)
@@ -1450,6 +1483,20 @@ static const zend_function_entry class_Polyspec_Template_Parser_Scanner_methods[
 
 static const zend_function_entry class_Polyspec_Template_Parser_Standalone_methods[] = {
 	ZEND_ME(Polyspec_Template_Parser_Standalone, ranges, arginfo_class_Polyspec_Template_Parser_Standalone_ranges, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Parser_Parser_methods[] = {
+	ZEND_ME(Polyspec_Template_Parser_Parser, __construct, arginfo_class_Polyspec_Template_Parser_Parser___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Parser_Parser, parse, arginfo_class_Polyspec_Template_Parser_Parser_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Parser_Parser, analyze, arginfo_class_Polyspec_Template_Parser_Parser_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Parser_BlockTag_methods[] = {
+	ZEND_ME(Polyspec_Template_Parser_BlockTag, __construct, arginfo_class_Polyspec_Template_Parser_BlockTag___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Parser_BlockTag, readIncludePath, arginfo_class_Polyspec_Template_Parser_BlockTag_readIncludePath, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Parser_BlockTag, readBlockBody, arginfo_class_Polyspec_Template_Parser_BlockTag_readBlockBody, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -3064,6 +3111,36 @@ static zend_class_entry *register_class_Polyspec_Template_Parser_Standalone(void
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Parser", "Standalone", class_Polyspec_Template_Parser_Standalone_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Parser_Parser(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Parser", "Parser", class_Polyspec_Template_Parser_Parser_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Parser_BlockTag(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Parser", "BlockTag", class_Polyspec_Template_Parser_BlockTag_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else

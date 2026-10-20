@@ -66,6 +66,7 @@ final class Parser
 
     public function __construct(private readonly Source $source, string $open = '{', string $close = '}')
     {
+        self::requireOneByteDelimiters('__construct', $open, $close);
         $this->open = $open;
         $this->close = $close;
         $this->text = $source->text;
@@ -76,7 +77,23 @@ final class Parser
      */
     public static function parse(Source $source, string $open = '{', string $close = '}'): array
     {
+        self::requireOneByteDelimiters('parse', $open, $close);
+
         return (new self($source, $open, $close))->run();
+    }
+
+    /**
+     * A delimiter is exactly one byte; any other string is a ValueError of the method that received it (P8).
+     */
+    private static function requireOneByteDelimiters(string $method, string $open, string $close): void
+    {
+        $prefix = self::class . '::' . $method . '(): Argument #';
+        if (strlen($open) !== 1) {
+            throw new \ValueError($prefix . '2 ($open) must be a single character');
+        }
+        if (strlen($close) !== 1) {
+            throw new \ValueError($prefix . '3 ($close) must be a single character');
+        }
     }
 
     /**
@@ -89,6 +106,7 @@ final class Parser
      */
     public static function analyze(Source $source, string $open = '{', string $close = '}'): array
     {
+        self::requireOneByteDelimiters('analyze', $open, $close);
         $parser = new self($source, $open, $close);
         $ast = $parser->run();
 

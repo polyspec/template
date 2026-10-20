@@ -356,6 +356,12 @@ typedef struct pt_analysis {
  * leading byte order mark. */
 pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const char *source, size_t length, char open, char close, pt_analysis *analysis);
 
+/* The analysis of a template as the array of Parser::analyze: `ast`, `tags` and `tokens` (EDT-8). */
+void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysis, zval *result);
+
+/* The class BlockTag of Polyspec\Template\Parser: its create_object and handlers (pt_parse.c). */
+void pt_block_tag_register(zend_class_entry *ce);
+
 /* The tables of the tag scanner: the sigils (LEX-5) and the wrappers [opener, closer] (LEX-17, LEX-18). */
 #define PT_SIGIL_COUNT 11
 #define PT_WRAPPER_COUNT 4

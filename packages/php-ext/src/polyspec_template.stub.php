@@ -1571,3 +1571,61 @@ final class Standalone
      */
     public static function ranges(string $text, array $tags): array {}
 }
+
+/**
+ * The template parser (EDT-8, GRM-*): the AST of a template, and the AST with the accepted tags and their tokens.
+ */
+final class Parser
+{
+    /**
+     * A delimiter is exactly one byte; any other string is a ValueError.
+     */
+    public function __construct(\Polyspec\Template\Source $source, string $open = '{', string $close = '}') {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function parse(\Polyspec\Template\Source $source, string $open = '{', string $close = '}'): array {}
+
+    /**
+     * Parses a template once and returns its AST with the accepted tags and the EDT-8 tokens of their parts.
+     *
+     * @return array
+     * @phpstan-return array{
+     *     ast: array<string, mixed>,
+     *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
+     *     tokens: list<array{start: int, end: int, kind: string}>,
+     * }
+     */
+    public static function analyze(\Polyspec\Template\Source $source, string $open = '{', string $close = '}'): array {}
+}
+
+/**
+ * Path tokens (GRM-3) and block tag bodies (GRM-13 to GRM-15).
+ */
+final class BlockTag
+{
+    public function __construct(\Polyspec\Template\Source $source, string $template, string $close, int $closeCount) {}
+
+    /**
+     * GRM-12: `+ path`.
+     *
+     * @return array
+     * @phpstan-return array{path: string, start: int, end: int, quoted: bool}
+     */
+    public function readIncludePath(int $index): array {}
+
+    /**
+     * GRM-13 to GRM-15: `# [id] [path] {scope_item}`.
+     *
+     * @return array
+     * @phpstan-return array{
+     *     id: string|null,
+     *     path: string|null,
+     *     scope: list<array{name: string, expr: array<string, mixed>}>,
+     *     words: list<array{start: int, end: int, quoted: bool}>,
+     *     end: int,
+     * }
+     */
+    public function readBlockBody(int $index): array {}
+}

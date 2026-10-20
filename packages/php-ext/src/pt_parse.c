@@ -2295,7 +2295,8 @@ static pt_body pt_finalize(pt_tparser *parser, pt_items *items, const pt_ranges 
 /* Entry                                                                                            */
 /* ----------------------------------------------------------------------------------------------- */
 
-static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close, pt_analysis *analysis)
+/* strip_bom: whether a leading byte order mark of the bytes is removed (LEX-2); a Source has removed its own already. */
+static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close, pt_analysis *analysis, bool strip_bom)
 {
     size_t invalid = pt_utf8_first_invalid(bytes, length);
     if (invalid < length) {
@@ -2315,7 +2316,7 @@ static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_len
     source.arena = arena;
     source.name = pt_strdup(arena, name, name_length);
     template->name = source.name;
-    if (length >= 3 && memcmp(bytes, "\xEF\xBB\xBF", 3) == 0) {
+    if (strip_bom && length >= 3 && memcmp(bytes, "\xEF\xBB\xBF", 3) == 0) {
         bytes += 3;
         length -= 3;
     }
@@ -2360,12 +2361,45 @@ static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_len
 
 pt_template *pt_parse(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close)
 {
-    return pt_parse_with(run, name, name_length, bytes, length, open, close, NULL);
+    return pt_parse_with(run, name, name_length, bytes, length, open, close, NULL, true);
 }
 
 pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close, pt_analysis *analysis)
 {
-    return pt_parse_with(run, name, name_length, bytes, length, open, close, analysis);
+    return pt_parse_with(run, name, name_length, bytes, length, open, close, analysis, true);
+}
+
+void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysis, zval *result)
+{
+    zval ast, tags, tokens;
+    pt_ast_to_zval(template, &ast);
+    array_init_size(&tags, analysis->tag_count);
+    for (uint32_t t = 0; t < analysis->tag_count; t++) {
+        const pt_syntax_tag *tag = &analysis->tags[t];
+        zval entry;
+        array_init_size(&entry, 6);
+        add_assoc_long_ex(&entry, "start", 5, (zend_long)tag->start);
+        add_assoc_long_ex(&entry, "end", 3, (zend_long)tag->end);
+        add_assoc_bool_ex(&entry, "echo", 4, tag->echo);
+        add_assoc_string_ex(&entry, "kind", 4, tag->kind);
+        add_assoc_long_ex(&entry, "bodyStart", 9, (zend_long)tag->body_start);
+        add_assoc_long_ex(&entry, "bodyEnd", 7, (zend_long)tag->body_end);
+        add_next_index_zval(&tags, &entry);
+    }
+    array_init_size(&tokens, analysis->token_count);
+    for (uint32_t t = 0; t < analysis->token_count; t++) {
+        const pt_syntax_token *token = &analysis->tokens[t];
+        zval entry;
+        array_init_size(&entry, 3);
+        add_assoc_long_ex(&entry, "start", 5, (zend_long)token->start);
+        add_assoc_long_ex(&entry, "end", 3, (zend_long)token->end);
+        add_assoc_string_ex(&entry, "kind", 4, token->kind);
+        add_next_index_zval(&tokens, &entry);
+    }
+    array_init_size(result, 3);
+    add_assoc_zval_ex(result, "ast", 3, &ast);
+    add_assoc_zval_ex(result, "tags", 4, &tags);
+    add_assoc_zval_ex(result, "tokens", 6, &tokens);
 }
 
 void pt_template_release(pt_template *template)
@@ -2988,6 +3022,322 @@ ZEND_METHOD(Polyspec_Template_Expr_Parser, parsePostfix)
     }
     pt_parser_call call = {po, PT_OP_POSTFIX, NULL, adjacent, return_value};
     if (!pt_run_work(pt_parser_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+/* ----------------------------------------------------------------------------------------------- */
+/* The classes Parser and BlockTag of Polyspec\Template\Parser (EDT-8, GRM-12 to GRM-15)             */
+/*                                                                                                  */
+/* Parser holds no state: its entries parse a Source and return the AST, or the AST with the tags   */
+/* and tokens of the analysis. BlockTag holds its Source, its template name and its close delimiter */
+/* in its object, and reads a path or a block tag body on the same reader as the template parser;  */
+/* the words of a body are the marks that the reader records for the analysis.                      */
+/* ----------------------------------------------------------------------------------------------- */
+
+/* A delimiter argument is exactly one byte; any other length is an argument error (P8). */
+static bool pt_one_byte_argument(uint32_t position, zend_string *value)
+{
+    if (ZSTR_LEN(value) == 1) {
+        return true;
+    }
+    zend_argument_value_error(position, "must be a single character");
+    return false;
+}
+
+/* The open and close delimiters of Parser, with the defaults `{` and `}` for an argument that is not given. */
+static bool pt_parser_delimiters(zend_string *open, zend_string *close, char *open_byte, char *close_byte)
+{
+    *open_byte = '{';
+    *close_byte = '}';
+    if (open != NULL) {
+        if (!pt_one_byte_argument(2, open)) {
+            return false;
+        }
+        *open_byte = ZSTR_VAL(open)[0];
+    }
+    if (close != NULL) {
+        if (!pt_one_byte_argument(3, close)) {
+            return false;
+        }
+        *close_byte = ZSTR_VAL(close)[0];
+    }
+    return true;
+}
+
+static zend_string *pt_source_name(zend_object *source)
+{
+    zval rv;
+    return Z_STR_P(zend_read_property(pt_source_ce, source, ZEND_STRL("name"), false, &rv));
+}
+
+/* The input of Parser::parse and Parser::analyze: the text and the name of a Source and the delimiters. */
+typedef struct pt_parser_input {
+    zend_string *text, *name;
+    char open, close;
+    bool analyze;
+    zval *result;
+} pt_parser_input;
+
+static void pt_parser_into(pt_run *run, void *context)
+{
+    pt_parser_input *input = context;
+    pt_analysis analysis;
+    /* The Source has removed its byte order mark (LEX-2), so the text is parsed as it is. */
+    pt_template *template = pt_parse_with(run, ZSTR_VAL(input->name), ZSTR_LEN(input->name), ZSTR_VAL(input->text), ZSTR_LEN(input->text), input->open, input->close, input->analyze ? &analysis : NULL, false);
+    if (input->analyze) {
+        pt_analysis_to_zval(template, &analysis, input->result);
+    } else {
+        pt_ast_to_zval(template, input->result);
+    }
+    pt_template_release(template);
+}
+
+/* Parser::parse and Parser::analyze: the source is the Source object; the name is its name. */
+static void pt_parser_entry(INTERNAL_FUNCTION_PARAMETERS, bool analyze)
+{
+    zval *source;
+    zend_string *open = NULL, *close = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_STR(open)
+        Z_PARAM_STR(close)
+    ZEND_PARSE_PARAMETERS_END();
+    char open_byte, close_byte;
+    if (!pt_parser_delimiters(open, close, &open_byte, &close_byte)) {
+        RETURN_THROWS();
+    }
+    pt_parser_input input = {pt_source_text(Z_OBJ_P(source)), pt_source_name(Z_OBJ_P(source)), open_byte, close_byte, analyze, return_value};
+    if (!pt_run_work(pt_parser_into, &input)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Parser_Parser, __construct)
+{
+    zval *source;
+    zend_string *open = NULL, *close = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_STR(open)
+        Z_PARAM_STR(close)
+    ZEND_PARSE_PARAMETERS_END();
+    (void)source;
+    char open_byte, close_byte;
+    if (!pt_parser_delimiters(open, close, &open_byte, &close_byte)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Parser_Parser, parse)
+{
+    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+
+ZEND_METHOD(Polyspec_Template_Parser_Parser, analyze)
+{
+    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+/* ---- BlockTag ---- */
+
+typedef struct pt_block_tag_object {
+    zval source_object;     /* the Source object whose text the reader reads */
+    zend_string *template;  /* the template name of the errors */
+    char close;
+    zend_long close_count;
+    zend_object std;
+} pt_block_tag_object;
+
+static zend_object_handlers pt_block_tag_handlers;
+
+static inline pt_block_tag_object *pt_block_tag_of(zend_object *object)
+{
+    return (pt_block_tag_object *)((char *)object - XtOffsetOf(pt_block_tag_object, std));
+}
+
+static zend_object *pt_block_tag_create(zend_class_entry *class_type)
+{
+    pt_block_tag_object *bo = zend_object_alloc(sizeof(pt_block_tag_object), class_type);
+    zend_object_std_init(&bo->std, class_type);
+    object_properties_init(&bo->std, class_type);
+    ZVAL_NULL(&bo->source_object);
+    bo->template = NULL;
+    bo->close = 0;
+    bo->close_count = 0;
+    bo->std.handlers = &pt_block_tag_handlers;
+    return &bo->std;
+}
+
+static void pt_block_tag_free(zend_object *object)
+{
+    pt_block_tag_object *bo = pt_block_tag_of(object);
+    zval_ptr_dtor(&bo->source_object);
+    if (bo->template != NULL) {
+        zend_string_release(bo->template);
+    }
+    zend_object_std_dtor(object);
+}
+
+static HashTable *pt_block_tag_get_gc(zend_object *object, zval **table, int *count)
+{
+    zend_get_gc_buffer *buffer = zend_get_gc_buffer_create();
+    zend_get_gc_buffer_add_zval(buffer, &pt_block_tag_of(object)->source_object);
+    zend_get_gc_buffer_use(buffer, table, count);
+    return zend_std_get_properties(object);
+}
+
+void pt_block_tag_register(zend_class_entry *ce)
+{
+    ce->create_object = pt_block_tag_create;
+    memcpy(&pt_block_tag_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+    pt_block_tag_handlers.offset = XtOffsetOf(pt_block_tag_object, std);
+    pt_block_tag_handlers.free_obj = pt_block_tag_free;
+    pt_block_tag_handlers.clone_obj = NULL;
+    pt_block_tag_handlers.get_gc = pt_block_tag_get_gc;
+}
+
+ZEND_METHOD(Polyspec_Template_Parser_BlockTag, __construct)
+{
+    zval *source;
+    zend_string *template, *close;
+    zend_long close_count;
+    ZEND_PARSE_PARAMETERS_START(4, 4)
+        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
+        Z_PARAM_STR(template)
+        Z_PARAM_STR(close)
+        Z_PARAM_LONG(close_count)
+    ZEND_PARSE_PARAMETERS_END();
+    if (!pt_one_byte_argument(3, close)) {
+        RETURN_THROWS();
+    }
+    pt_block_tag_object *bo = pt_block_tag_of(Z_OBJ_P(ZEND_THIS));
+    zval previous;
+    ZVAL_COPY_VALUE(&previous, &bo->source_object);
+    ZVAL_OBJ_COPY(&bo->source_object, Z_OBJ_P(source));
+    zval_ptr_dtor(&previous);
+    if (bo->template != NULL) {
+        zend_string_release(bo->template);
+    }
+    bo->template = zend_string_copy(template);
+    bo->close = ZSTR_VAL(close)[0];
+    bo->close_count = close_count;
+}
+
+/* The call of readIncludePath (body false) or readBlockBody (body true) at an index of the text. */
+typedef struct pt_block_read_call {
+    pt_block_tag_object *bo;
+    zend_long index;
+    bool body;
+    zval *result;
+} pt_block_read_call;
+
+/* Builds the array of readIncludePath: the path, its start and end, and whether it is quoted. */
+static void pt_block_read_path_zval(pt_s path, const pt_syntax_token *word, zval *result)
+{
+    array_init(result);
+    add_assoc_stringl_ex(result, "path", 4, path.s, path.n);
+    add_assoc_long_ex(result, "start", 5, (zend_long)word->start);
+    add_assoc_long_ex(result, "end", 3, (zend_long)word->end);
+    add_assoc_bool_ex(result, "quoted", 6, strcmp(word->kind, "string") == 0);
+}
+
+/* Builds the array of readBlockBody: the id, the path, the scope items, the words and the end. */
+static void pt_block_read_body_zval(const pt_node *node, const pt_tokens *words, size_t end, zval *result)
+{
+    array_init(result);
+    if (node->has_id) {
+        add_assoc_stringl_ex(result, "id", 2, node->text.s, node->text.n);
+    } else {
+        add_assoc_null_ex(result, "id", 2);
+    }
+    if (node->has_path) {
+        add_assoc_stringl_ex(result, "path", 4, node->path.s, node->path.n);
+    } else {
+        add_assoc_null_ex(result, "path", 4);
+    }
+    zval scope;
+    array_init_size(&scope, node->scope_count);
+    for (uint32_t i = 0; i < node->scope_count; i++) {
+        zval item, expr;
+        array_init(&item);
+        add_assoc_stringl_ex(&item, "name", 4, node->scope[i].name.s, node->scope[i].name.n);
+        pt_expr_zval(node->scope[i].expr, &expr);
+        add_assoc_zval_ex(&item, "expr", 4, &expr);
+        add_next_index_zval(&scope, &item);
+    }
+    add_assoc_zval_ex(result, "scope", 5, &scope);
+    zval list;
+    array_init_size(&list, words->count);
+    for (uint32_t i = 0; i < words->count; i++) {
+        zval word;
+        array_init(&word);
+        add_assoc_long_ex(&word, "start", 5, (zend_long)words->v[i].start);
+        add_assoc_long_ex(&word, "end", 3, (zend_long)words->v[i].end);
+        add_assoc_bool_ex(&word, "quoted", 6, strcmp(words->v[i].kind, "string") == 0);
+        add_next_index_zval(&list, &word);
+    }
+    add_assoc_zval_ex(result, "words", 5, &list);
+    add_assoc_long_ex(result, "end", 3, (zend_long)end);
+}
+
+static void pt_block_read_work(pt_run *run, void *context)
+{
+    pt_block_read_call *call = context;
+    pt_block_tag_object *bo = call->bo;
+    pt_source source;
+    memset(&source, 0, sizeof(source));
+    source.run = run;
+    source.arena = &run->arena;
+    source.name = (pt_s){ZSTR_VAL(bo->template), ZSTR_LEN(bo->template)};
+    zend_string *text = pt_source_text(Z_OBJ(bo->source_object));
+    source.text = ZSTR_VAL(text);
+    source.length = ZSTR_LEN(text);
+    pt_lines_build(&run->arena, &source.lines, source.text, source.length);
+
+    /* The reader records its words as marks of the analysis, which is what readIncludePath and readBlockBody return. */
+    pt_tparser parser;
+    memset(&parser, 0, sizeof(parser));
+    parser.source = &source;
+    parser.close = bo->close;
+    parser.analyze = true;
+    parser.record.arena = &run->arena;
+    size_t index = (size_t)call->index;
+    int close_count = (int)bo->close_count;
+    if (!call->body) {
+        size_t after;
+        pt_s path = pt_read_include_path(&parser, index, close_count, &after);
+        pt_block_read_path_zval(path, &parser.marks.v[0], call->result);
+        return;
+    }
+    pt_node node;
+    memset(&node, 0, sizeof(node));
+    size_t end = pt_read_block_body(&parser, index, close_count, &node);
+    pt_block_read_body_zval(&node, &parser.marks, end, call->result);
+}
+
+ZEND_METHOD(Polyspec_Template_Parser_BlockTag, readIncludePath)
+{
+    zend_long index;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_LONG(index)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_block_read_call call = {pt_block_tag_of(Z_OBJ_P(ZEND_THIS)), index, false, return_value};
+    if (!pt_run_work(pt_block_read_work, &call)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Parser_BlockTag, readBlockBody)
+{
+    zend_long index;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_LONG(index)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_block_read_call call = {pt_block_tag_of(Z_OBJ_P(ZEND_THIS)), index, true, return_value};
+    if (!pt_run_work(pt_block_read_work, &call)) {
         RETURN_THROWS();
     }
 }
