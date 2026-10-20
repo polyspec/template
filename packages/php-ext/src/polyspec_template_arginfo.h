@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3516c471da9009a0ff8fb6959da27eaeeeeaf47d */
+ * Stub hash: 7ea1b0e591b602d6a01d72be2baebce2c33d5b7f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -381,6 +381,88 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Js
 	ZEND_ARG_TYPE_INFO(0, bytes, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_typeOf, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_isString, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_textOf, 0, 1, IS_STRING, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, value, Polyspec\\Template\\Value\\SafeString, MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Value_Value_isNumber arginfo_class_Polyspec_Template_Value_Value_isString
+
+#define arginfo_class_Polyspec_Template_Value_Value_isTruthy arginfo_class_Polyspec_Template_Value_Value_isString
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_stringify, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_parseNumericString, 0, 1, IS_DOUBLE, 1)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_compareCodePoints, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, a, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, b, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_looseEquals, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, b, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Value_Value_strictEquals arginfo_class_Polyspec_Template_Value_Value_looseEquals
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Value_compare, 0, 2, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, a, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, b, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Value_Value_isCollection arginfo_class_Polyspec_Template_Value_Value_isString
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_toText, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_shortestDigits, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Value_Number_positional arginfo_class_Polyspec_Template_Value_Number_shortestDigits
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_roundDecimal, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_format, 0, 4, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, dec, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, thousands, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_round, 0, 2, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Number_isInteger, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_HostArgument_of, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_HostArgument_list, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -470,6 +552,27 @@ ZEND_METHOD(Polyspec_Template_Value_Bind, publicProperties);
 ZEND_METHOD(Polyspec_Template_Value_Bind, map);
 ZEND_METHOD(Polyspec_Template_Value_Bind, data);
 ZEND_METHOD(Polyspec_Template_Value_Json, parse);
+ZEND_METHOD(Polyspec_Template_Value_Value, typeOf);
+ZEND_METHOD(Polyspec_Template_Value_Value, isString);
+ZEND_METHOD(Polyspec_Template_Value_Value, textOf);
+ZEND_METHOD(Polyspec_Template_Value_Value, isNumber);
+ZEND_METHOD(Polyspec_Template_Value_Value, isTruthy);
+ZEND_METHOD(Polyspec_Template_Value_Value, stringify);
+ZEND_METHOD(Polyspec_Template_Value_Value, parseNumericString);
+ZEND_METHOD(Polyspec_Template_Value_Value, compareCodePoints);
+ZEND_METHOD(Polyspec_Template_Value_Value, looseEquals);
+ZEND_METHOD(Polyspec_Template_Value_Value, strictEquals);
+ZEND_METHOD(Polyspec_Template_Value_Value, compare);
+ZEND_METHOD(Polyspec_Template_Value_Value, isCollection);
+ZEND_METHOD(Polyspec_Template_Value_Number, toText);
+ZEND_METHOD(Polyspec_Template_Value_Number, shortestDigits);
+ZEND_METHOD(Polyspec_Template_Value_Number, positional);
+ZEND_METHOD(Polyspec_Template_Value_Number, roundDecimal);
+ZEND_METHOD(Polyspec_Template_Value_Number, format);
+ZEND_METHOD(Polyspec_Template_Value_Number, round);
+ZEND_METHOD(Polyspec_Template_Value_Number, isInteger);
+ZEND_METHOD(Polyspec_Template_Value_HostArgument, of);
+ZEND_METHOD(Polyspec_Template_Value_HostArgument, list);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -704,6 +807,39 @@ static const zend_function_entry class_Polyspec_Template_Value_Bind_methods[] = 
 
 static const zend_function_entry class_Polyspec_Template_Value_Json_methods[] = {
 	ZEND_ME(Polyspec_Template_Value_Json, parse, arginfo_class_Polyspec_Template_Value_Json_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Value_Value_methods[] = {
+	ZEND_ME(Polyspec_Template_Value_Value, typeOf, arginfo_class_Polyspec_Template_Value_Value_typeOf, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, isString, arginfo_class_Polyspec_Template_Value_Value_isString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, textOf, arginfo_class_Polyspec_Template_Value_Value_textOf, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, isNumber, arginfo_class_Polyspec_Template_Value_Value_isNumber, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, isTruthy, arginfo_class_Polyspec_Template_Value_Value_isTruthy, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, stringify, arginfo_class_Polyspec_Template_Value_Value_stringify, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, parseNumericString, arginfo_class_Polyspec_Template_Value_Value_parseNumericString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, compareCodePoints, arginfo_class_Polyspec_Template_Value_Value_compareCodePoints, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, looseEquals, arginfo_class_Polyspec_Template_Value_Value_looseEquals, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, strictEquals, arginfo_class_Polyspec_Template_Value_Value_strictEquals, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, compare, arginfo_class_Polyspec_Template_Value_Value_compare, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Value, isCollection, arginfo_class_Polyspec_Template_Value_Value_isCollection, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Value_Number_methods[] = {
+	ZEND_ME(Polyspec_Template_Value_Number, toText, arginfo_class_Polyspec_Template_Value_Number_toText, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Number, shortestDigits, arginfo_class_Polyspec_Template_Value_Number_shortestDigits, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Number, positional, arginfo_class_Polyspec_Template_Value_Number_positional, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Number, roundDecimal, arginfo_class_Polyspec_Template_Value_Number_roundDecimal, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Number, format, arginfo_class_Polyspec_Template_Value_Number_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Number, round, arginfo_class_Polyspec_Template_Value_Number_round, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Number, isInteger, arginfo_class_Polyspec_Template_Value_Number_isInteger, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Value_HostArgument_methods[] = {
+	ZEND_ME(Polyspec_Template_Value_HostArgument, of, arginfo_class_Polyspec_Template_Value_HostArgument_of, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_HostArgument, list, arginfo_class_Polyspec_Template_Value_HostArgument_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -1371,6 +1507,57 @@ static zend_class_entry *register_class_Polyspec_Template_Value_Json(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Value", "Json", class_Polyspec_Template_Value_Json_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Value_Value(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Value", "Value", class_Polyspec_Template_Value_Value_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Value_Number(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Value", "Number", class_Polyspec_Template_Value_Number_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval const_MAX_SAFE_value;
+	ZVAL_LONG(&const_MAX_SAFE_value, 9007199254740991);
+	zend_string *const_MAX_SAFE_name = zend_string_init_interned("MAX_SAFE", sizeof("MAX_SAFE") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MAX_SAFE_name, &const_MAX_SAFE_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MAX_SAFE_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Value_HostArgument(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Value", "HostArgument", class_Polyspec_Template_Value_HostArgument_methods);
 #if (PHP_VERSION_ID >= 80400)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else

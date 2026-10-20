@@ -835,3 +835,121 @@ final class Json
      */
     public static function parse(string $bytes): mixed {}
 }
+
+/**
+ * Value types, stringification, truthiness, equality and ordering
+ * (docs/spec/data-model.md, docs/spec/expressions.md).
+ *
+ * A value is null, bool, float, string, SafeString, a PHP list or a MapValue.
+ */
+final class Value
+{
+    public static function typeOf(mixed $value): string {}
+
+    public static function isString(mixed $value): bool {}
+
+    public static function textOf(string|SafeString $value): string {}
+
+    public static function isNumber(mixed $value): bool {}
+
+    /**
+     * EXP-33: falsy values.
+     */
+    public static function isTruthy(mixed $value): bool {}
+
+    /**
+     * VAL-8: conversion to text. Returns null for a list or map.
+     */
+    public static function stringify(mixed $value): ?string {}
+
+    /**
+     * Returns the numeric value of a string under EXP-23, or null.
+     */
+    public static function parseNumericString(string $text): ?float {}
+
+    /**
+     * Compares two strings by code point sequence.
+     */
+    public static function compareCodePoints(string $a, string $b): int {}
+
+    /**
+     * EXP-34, EXP-35.
+     */
+    public static function looseEquals(mixed $a, mixed $b): bool {}
+
+    /**
+     * EXP-37.
+     */
+    public static function strictEquals(mixed $a, mixed $b): bool {}
+
+    /**
+     * EXP-38: returns -1, 0 or 1, or null when the pair has no order.
+     */
+    public static function compare(mixed $a, mixed $b): ?int {}
+
+    public static function isCollection(mixed $value): bool {}
+}
+
+/**
+ * Number conversion and formatting (VAL-9, VAL-10, FUN-20 to FUN-25).
+ */
+final class Number
+{
+    /** @var int */
+    public const MAX_SAFE = 9007199254740991;
+
+    /**
+     * VAL-9: ECMAScript Number::toString.
+     */
+    public static function toText(float $value): string {}
+
+    /**
+     * Shortest round-trip digits and the exponent n such that value = 0.digits × 10^n.
+     *
+     * @return array{0: bool, 1: string, 2: int}
+     */
+    public static function shortestDigits(float $value): array {}
+
+    /**
+     * Positional decimal expansion without exponent.
+     *
+     * @return array{0: bool, 1: string, 2: string} negative, integer digits, fraction digits
+     */
+    public static function positional(float $value): array {}
+
+    /**
+     * FUN-22: rounds the positional digits half away from zero.
+     *
+     * @return array{0: bool, 1: string, 2: string}
+     */
+    public static function roundDecimal(float $value, int $decimals): array {}
+
+    /**
+     * FUN-20 to FUN-24.
+     */
+    public static function format(float $value, int $decimals, string $dec, string $thousands): string {}
+
+    /**
+     * FUN-25: the rounded value as a number.
+     */
+    public static function round(float $value, int $decimals): float {}
+
+    public static function isInteger(float $value): bool {}
+}
+
+/**
+ * The host form of a template value that a template passes to host code (VAL-18, VAL-21).
+ */
+final class HostArgument
+{
+    /**
+     * A number becomes a float, a safe string its text, a list a list array and a map an array with
+     * its entries in entry order, at every depth; a native object stays the original object.
+     */
+    public static function of(mixed $value): mixed {}
+
+    /**
+     * The host form of each element of a list, with the keys of the list kept.
+     */
+    public static function list(array $args): array {}
+}

@@ -492,6 +492,26 @@ bool pt_object_property(pt_arena *arena, zend_object *object, pt_s name, pt_valu
 zend_string *pt_take_exception(zend_object **passthrough);
 
 /* ---------------------------------------------------------------------------------------------------
+ * Value, Number and HostArgument on PHP values (pt_values.c): EXP-33 to EXP-38, VAL-8, VAL-9, VAL-21, FUN-20 to FUN-25.
+ * A function that returns false has set an exception.
+ * ------------------------------------------------------------------------------------------------- */
+
+bool pt_host_loose_equals(zval *a, zval *b);
+bool pt_host_strict_equals(zval *a, zval *b);
+bool pt_host_compare(zval *a, zval *b, zend_long *order);
+const char *pt_host_type_name(zval *value);
+bool pt_host_truthy(zval *value);
+bool pt_host_stringify(zval *value, zval *result);
+bool pt_number_host_text(double value, zval *result);
+bool pt_number_shortest_digits(double value, zval *result);
+bool pt_number_positional(double value, zval *result);
+bool pt_number_round_decimal(double value, zend_long decimals, zval *result);
+bool pt_number_round(double value, zend_long decimals, zval *result);
+bool pt_number_format(double value, zend_long decimals, zend_string *dec, zend_string *thousands, zval *result);
+void pt_host_argument(zval *value, zval *result);
+void pt_host_argument_list(HashTable *args, zval *result);
+
+/* ---------------------------------------------------------------------------------------------------
  * Rendering (RT-*).
  * ------------------------------------------------------------------------------------------------- */
 

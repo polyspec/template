@@ -487,6 +487,268 @@ ZEND_METHOD(Polyspec_Template_Value_Bind, data)
     }
 }
 
+/* ----------------------------------------------------------------------------------------------- */
+/* Value\Value, Value\Number, Value\HostArgument (EXP-33 to EXP-38, VAL-8, VAL-9, VAL-21, FUN-20..25) */
+/* ----------------------------------------------------------------------------------------------- */
+
+ZEND_METHOD(Polyspec_Template_Value_Value, typeOf)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_STRING(pt_host_type_name(value));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, isString)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(value);
+    RETURN_BOOL(Z_TYPE_P(value) == IS_STRING
+        || (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == pt_safe_string_ce));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, textOf)
+{
+    zend_object *object = NULL;
+    zend_string *text = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_OBJ_OF_CLASS_OR_STR(object, pt_safe_string_ce, text)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (text != NULL) {
+        RETURN_STR_COPY(text);
+    }
+    zval rv;
+    zval *safe = zend_read_property(pt_safe_string_ce, object, ZEND_STRL("text"), 1, &rv);
+    RETURN_STR_COPY(Z_STR_P(safe));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, isNumber)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(value);
+    RETURN_BOOL(Z_TYPE_P(value) == IS_LONG || Z_TYPE_P(value) == IS_DOUBLE);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, isTruthy)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_BOOL(pt_host_truthy(value));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, stringify)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_host_stringify(value, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, parseNumericString)
+{
+    zend_string *text;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(text)
+    ZEND_PARSE_PARAMETERS_END();
+
+    double number;
+    if (pt_numeric_string(ZSTR_VAL(text), ZSTR_LEN(text), &number)) {
+        RETURN_DOUBLE(number);
+    }
+    RETURN_NULL();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, compareCodePoints)
+{
+    zend_string *a, *b;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(a)
+        Z_PARAM_STR(b)
+    ZEND_PARSE_PARAMETERS_END();
+
+    int order = 0;
+    pt_compare(pt_string((pt_s){ZSTR_VAL(a), ZSTR_LEN(a)}), pt_string((pt_s){ZSTR_VAL(b), ZSTR_LEN(b)}), &order);
+    RETURN_LONG(order);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, looseEquals)
+{
+    zval *a, *b;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(a)
+        Z_PARAM_ZVAL(b)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_BOOL(pt_host_loose_equals(a, b));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, strictEquals)
+{
+    zval *a, *b;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(a)
+        Z_PARAM_ZVAL(b)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_BOOL(pt_host_strict_equals(a, b));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, compare)
+{
+    zval *a, *b;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(a)
+        Z_PARAM_ZVAL(b)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zend_long order;
+    if (pt_host_compare(a, b, &order)) {
+        RETURN_LONG(order);
+    }
+    RETURN_NULL();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Value, isCollection)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(value);
+    RETURN_BOOL(Z_TYPE_P(value) == IS_ARRAY
+        || (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == pt_map_value_ce));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, toText)
+{
+    double value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_DOUBLE(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_number_host_text(value, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, shortestDigits)
+{
+    double value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_DOUBLE(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_number_shortest_digits(value, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, positional)
+{
+    double value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_DOUBLE(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_number_positional(value, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, roundDecimal)
+{
+    double value;
+    zend_long decimals;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_DOUBLE(value)
+        Z_PARAM_LONG(decimals)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_number_round_decimal(value, decimals, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, format)
+{
+    double value;
+    zend_long decimals;
+    zend_string *dec, *thousands;
+    ZEND_PARSE_PARAMETERS_START(4, 4)
+        Z_PARAM_DOUBLE(value)
+        Z_PARAM_LONG(decimals)
+        Z_PARAM_STR(dec)
+        Z_PARAM_STR(thousands)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_number_format(value, decimals, dec, thousands, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, round)
+{
+    double value;
+    zend_long decimals;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_DOUBLE(value)
+        Z_PARAM_LONG(decimals)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_number_round(value, decimals, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Number, isInteger)
+{
+    double value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_DOUBLE(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_BOOL(pt_is_integer(value));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_HostArgument, of)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_host_argument(value, return_value);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_HostArgument, list)
+{
+    zval *args;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ARRAY(args)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_host_argument_list(Z_ARRVAL_P(args), return_value);
+}
+
 /* Value\Json (VAL-2, VAL-12): parses JSON bytes into the values of the library. */
 ZEND_METHOD(Polyspec_Template_Value_Json, parse)
 {
@@ -2462,6 +2724,9 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();
     register_class_Polyspec_Template_Value_Json();
+    register_class_Polyspec_Template_Value_Value();
+    register_class_Polyspec_Template_Value_Number();
+    register_class_Polyspec_Template_Value_HostArgument();
 
     /* The runtime services come first: AstProgram and RuntimeEnvironment implement the interface. */
     zend_class_entry *runtime_services = register_class_Polyspec_Template_Render_RuntimeServices();

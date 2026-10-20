@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b983d7d39dc0faee34a18f1134d81bc79b4846ae882082688a698f093d505586 -->
+<!-- source-sha256: ec242e2140b4622777aaf237c8422d9cc804b467df56fbc2492a0634f8321bd3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-13: PHP 확장은 library의 `Value`, `Number`, `HostArgument`를 `Polyspec\Template\Value`의 final class로 같은 상수, 정적 메서드, 시그니처와 함께 등록하며, 이 함수들은 PHP 값에 대해 library 코드를 따른다(PHP 배열은 키로 비교하고, 유한하지 않은 수는 십진 텍스트가 없어 library의 RuntimeException을 던진다). Red: `run-tests.mjs phpunit`의 `ValueHelpersTest.php` 실패 1개("Polyspec\Template\Value\Value is not registered by the extension", 2 passed); green: `ValueHelpersTest.php` 3 passed, `ValueTest.php` 7 passed, `NumberTest.php` 4 passed, `ConformanceTest.php` 765 passed, 그리고 280개 호출의 차이 점검 결과가 library와 같다 (T26.7-2-13).
 
 - T26.7-2-17: PHP 확장은 library의 `AstDecodeError`를 `Polyspec\Template`의 final class로 등록한다. `InvalidArgumentException`을 상속하며, public readonly `path`와 메시지 "invalid template AST at <path, 비어 있으면 the root>: <reason>"(AST-10)을 가진다. Red: `DecodeErrorTest.php`의 `run-tests.mjs phpunit` 실패 1개("AstDecodeError is not registered by the extension", 1 passed); green: `DecodeErrorTest.php` OK (2 tests, 6 assertions), `AstDecodeTest.php` OK (6 tests, 286 assertions), `PackageDataTest.php` OK (1 test, 3 assertions), `ExprFixturesTest.php` OK (73 tests, 239 assertions), `ExportsTest.php` OK (18 tests, 27 assertions), `CompilerInterfaceTest.php` OK (2 tests, 56 assertions), `RenderStateTest.php` OK (8 tests, 26 assertions); `make lint-php-ext`와 `make lint-php`가 통과한다; `make parity-declarations-check | grep -c DecodeErrorTest`는 0을 출력한다 (T26.7-2-17).
 
