@@ -2,42 +2,6 @@
   "schema": 1,
   "comment": "The class of each tool of the repository (S1): ecosystem names the tool it uses, replaced the library and its item, record the rebuild record, policy the reason no ecosystem tool applies (S8). kit finds the tool sources by the layout (K286).",
   "tools": {
-    "examples/showcase/adapters/generated/php-adapter/DefineEntry.php": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/php-adapter/Environment.php": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/php-adapter/RenderAdapter.php": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/php-adapter/RenderRequest.php": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/php-adapter/RepeatResult.php": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/php-adapter/Scenario.php": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/render_adapter.mjs": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/render_adapter.py": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
-    "examples/showcase/adapters/generated/render_adapter.ts": {
-      "kind": "policy",
-      "reason": "a committed fixture of the showcase, the output of scripts/generate-showcase-contract.mts and of the typed generator of packages/compiler, checked by make showcase-check; it is generated code, no tool"
-    },
     "examples/showcase/adapters/javascript.mjs": {
       "kind": "policy",
       "reason": "the showcase adapter of JavaScript implements the adapter contract of packages/compiler/interface.json (RT-52)"

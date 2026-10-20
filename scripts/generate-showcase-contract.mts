@@ -7,7 +7,6 @@ import { compilerManifestDocument, manifestPath, type ExecutionMode, type Field,
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'examples', 'showcase', 'adapters');
-const check = process.argv.includes('--check');
 
 function fail(message: string): never {
   throw new Error('[contract] ' + message);
@@ -605,20 +604,12 @@ const outputs = new Map([
   ['generated/execution-modes.mmd', executionModesDiagram()],
 ]);
 
+// A file is written only when its bytes change, so the builds that read it see no new modification time.
 for (const [relativePath, content] of outputs) {
   const path = join(adapterRoot, relativePath);
-  if (check) {
-    if (!existsSync(path)) fail('generated file is missing: ' + relativePath);
-    const current = readFileSync(path, 'utf8');
-    if (current !== content) fail('generated file is stale: ' + relativePath);
-  } else {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, content);
-  }
+  if (existsSync(path) && readFileSync(path, 'utf8') === content) continue;
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, content);
 }
 
-if (check) {
-  process.stdout.write('[contract] generated declarations and Mermaid diagrams are current\n');
-} else {
-  process.stdout.write('[contract] generated declarations and Mermaid diagrams\n');
-}
+process.stdout.write('[contract] generated declarations and Mermaid diagrams\n');

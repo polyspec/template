@@ -160,7 +160,9 @@ lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format tem
 # golangci-lint and deadcode, clippy, phpcs and PHPStan, and ruff and vulture with the configuration that kit copies (T24.6).
 # They read the installed Composer packages and the crates, which these prerequisites provide. The format checks are
 # template's.
-lint-php: build-php
+lint-php: build-php typed-generator
+lint-ts: typed-generator
+lint-python: typed-generator
 lint-rust: cargo-downloads-check
 lint-go: typed-generator
 
@@ -169,9 +171,9 @@ template-lint-go-format:
 	@out=$$(gofmt -l $(GO_DIR) $(GO_BACKEND_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) $(GO_BACKEND_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
 template-lint-rust-format:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
-template-lint-showcase-format:
+template-lint-showcase-format: typed-generator
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
-template-lint-showcase-warnings: cargo-downloads-check
+template-lint-showcase-warnings: cargo-downloads-check typed-generator
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 template-lint-php-format: build-php
 	vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
@@ -526,13 +528,11 @@ schema-fixtures-check:
 schema-mutations-check:
 	$(NODE) scripts/check-schema-mutations.mts
 
-docs-check: compiler-interface-diagrams-check showcase-contract-diagrams-check schema-check doc-coverage benchmark-docs-check ## Document checks
+docs-check: compiler-interface-diagrams-check schema-check doc-coverage benchmark-docs-check ## Document checks
 
-.PHONY: compiler-interface-diagrams-check showcase-contract-diagrams-check benchmark-docs-check
+.PHONY: compiler-interface-diagrams-check benchmark-docs-check
 compiler-interface-diagrams-check:
 	$(NODE) scripts/generate-compiler-interface.mts --check
-showcase-contract-diagrams-check:
-	$(NODE) scripts/generate-showcase-contract.mts --check
 benchmark-docs-check:
 	$(NODE) scripts/update-benchmark-docs.mts --check
 
@@ -558,7 +558,7 @@ docs-verify-idempotent: docs ## Build the documentation site twice and compare
 docs-static-check: docs ## Build the documentation site as static files
 	$(NODE) scripts/check-docs-static.mts
 
-contract-generate: ## Generate showcase declarations and Mermaid diagrams
+contract-generate: ## Generate the declarations and Mermaid diagrams of the showcase adapters (not tracked)
 	$(NODE) scripts/generate-showcase-contract.mts
 
 contract-check: cargo-downloads-check build-ts build-php python-package typed-generator ## Verify generated declarations, implementations and runtime state recovery
@@ -610,7 +610,7 @@ showcase-check: typed-generator-compile-check showcase-build-check contract-chec
 # The compiled AST artifacts and the generated programs are built by showcase-compile and typed-generator and are not tracked
 # (RT-57): each manifest records the digests of its source, types, contract and compiler, and the build reuses an artifact
 # whose digests match.
-showcase-build-check: cargo-downloads-check showcase-compile build-php
+showcase-build-check: cargo-downloads-check typed-generator build-php
 	$(NODE) examples/showcase/build.mts --check --langs $(SHOWCASE_LANGS)
 showcase-site-check: showcase-compile
 	$(NODE) examples/showcase/build-site.mts --check
@@ -634,7 +634,7 @@ generated-arguments-check: cargo-downloads-check build-ts build-php python-packa
 generated-bound-data-check: cargo-downloads-check build-ts build-php python-package
 	$(NODE) scripts/check-generated-bound-data.mts
 
-typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
+typed-generator: showcase-compile contract-generate ## Generate type-fixed host source from canonical AST and the contract declarations of the adapters
 	$(NODE) examples/showcase/compile-generated.mts --refresh true
 
 typed-generator-check: typed-generator ## Verify type-fixed generated source is reproducible

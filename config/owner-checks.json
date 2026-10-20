@@ -1021,12 +1021,6 @@
       ]
     },
     {
-      "check": "make showcase-contract-diagrams-check",
-      "paths": [
-        "scripts/generate-showcase-contract.mts"
-      ]
-    },
-    {
       "check": "make schema-fixtures-check",
       "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",

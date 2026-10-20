@@ -48,3 +48,9 @@ examples/showcase/adapters/generated/typed/
 examples/showcase/adapters/generated/php/
 examples/showcase/adapters/generated/javascript/
 examples/showcase/adapters/go/generated/
+
+# The declarations and diagrams that make contract-generate writes from the showcase interface manifest (T26.7-26)
+examples/showcase/adapters/generated/
+examples/showcase/adapters/go/render_adapter.go
+examples/showcase/adapters/rust/src/render_adapter.rs
+packages/python/build/

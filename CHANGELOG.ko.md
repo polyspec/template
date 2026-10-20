@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9e9a686faa260f05e3421092c511d0edd540533fee2fa6a8b2c00f73db890b57 -->
+<!-- source-sha256: 2041a6dce010592cb6fdfd9b8b7f425871b1d80b40adfa1313bd4d8a176c2d9e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-26: `scripts/generate-showcase-contract.mts`가 showcase interface manifest에서 쓰는 선언과 도표(15개 파일: `examples/showcase/adapters/generated/*.mmd`, `render_adapter.{ts,mjs,py}`, `php-adapter/`, `go/render_adapter.go`, `rust/src/render_adapter.rs`)는 `make contract-generate`가 만들고 더 이상 추적하지 않는다. `make typed-generator`가 generated program과 함께 만들고, 이를 읽는 target(`lint-ts`, `lint-python`, `lint-php`, `showcase-build-check`, showcase Rust lint)은 이에 의존하며, generator는 byte가 바뀔 때만 파일을 쓰고, 추적하지 않는 파일을 자기 자신과 비교하던 `showcase-contract-diagrams-check`와 산출물의 rebuild 항목은 제거했다. `packages/python/build/`는 무시한다. Red: `git ls-files`가 생성 파일 15개를 나열했고, green: 지운 뒤 `make typed-generator`가 다시 쓰고 Rust adapter가 `cargo check --offline --locked`를 통과하며 `owner-validate`, `rebuild-check`, `kit-check`가 통과한다(T26.7-26).
 
 - T26.7-25: install 검사는 `cargo package`를 `--no-verify` 없이 실행하므로 cargo가 package된 crate를 build해 검증한다(30 s). Red: `make bypass-check`가 우회 1건(`scripts/check-package-installs.mts:116`)을 찾았고, green: 찾지 않으며 `packages/rust`의 `cargo package --locked --allow-dirty --offline`이 package를 build하고 검증한다. showcase의 Rust adapter는 `cargo check --offline --locked`를 통과한다(T26.7-25).
 
