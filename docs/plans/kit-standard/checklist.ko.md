@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: f06e5d9ea909538fe4023aa47da5d6f1f7e9c3e3a6f90dd9ebcac4f9ea6777e5 -->
+<!-- source-sha256: d59612d2cff1e4eaf619cc8568e72984c2b7f5d6e656893ec6743fc4e3b8e569 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -29,3 +29,4 @@
 | T26.7-16 | AGENTS.md의 모든 규칙은 Own이거나 principle을 id로 구체화한다 | AGENTS.md and AGENTS.ko.md | `make rules-check` | [o] |
 | T26.7-17 | 의존성 policy는 repository의 단일 PHP platform 8.4.1을 선언한다 | composerPlatforms of config/dependency-policy.json | `make dependency-policy-check` | [o] |
 | T26.7-18 | assign으로 준 문자열 key의 host Map은 일반 객체와 같이 렌더된다 (hyper: assign is not a map) | packages/ts/tests/value/bound.test.ts | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/value/bound.test.ts` | [-] 원인: 실패가 재현되지 않는다. 2026-10-20 11:57에 build한 template main의 dist로 hyper http test가 48개 중 48개 통과한다 |
+| T26.7-19 | packages/ts의 AST validator는 make가 만들고 추적하지 않는다 | scripts/generate-ast-validator.mts, the Makefile, .gitignore and the owner and knip declarations | `make build-ts`, `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/decode.test.ts` | [o] |

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 89ec9c262a58639d7a047dc34ecd251992eef1068cd10ea04f3d69643d6722da -->
+<!-- source-sha256: 2ccc892a0602135faacf28e6e5ca05effbb8738fc790b9b2348bc767ab48eef0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-19: AST validator `packages/ts/src/ast-validator.mjs`는 생성 산출물이므로 더 이상 추적하지 않는다. `make build-ts`가 build 전에 만든다(`make ast-validator`, schema와 generator에 대한 file target이며 rename으로 쓴다). `make ast-validator-check`와 commit된 사본은 제거하고, 이 파일의 중복 제외도 뺐다. Red: 파일이 추적되었고(`git ls-files`에 나옴) 경로가 다른 checkout에서 `ast-validator-check`가 실패했다. green: 파일을 지운 뒤 `make build-ts`가 쓰고 `packages/ts/tests/decode.test.ts`가 통과한다(30개)(T26.7-19).
 
 - T26.7-10: `packages/compiler`의 backend는 loop local의 code(`FunctionLocals.loopNames`, `enterLoop`, `refreshed`), PHP와 Python backend의 line layout(`layoutLine`, `groupToSplit`, `flatText`), definition descriptor(`definitionDescriptors`)를 공유한다. 생성된 program은 byte 단위로 같고 commit된 manifest는 compiler의 새 digest를 기록한다. Red: `make duplication-check`가 `packages/compiler`에서 clone 7개를 찾았고, green: 0개다(이 item 전 repository의 clone 68개, 후 61개)(T26.7-10).
 

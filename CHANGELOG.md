@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-19: the AST validator `packages/ts/src/ast-validator.mjs` is generated output and is no longer tracked: `make build-ts` makes it (`make ast-validator`, a file target of the schema and the generator, written through a rename) before the build, `make ast-validator-check` and the committed copy are removed, and the duplication exclusion of the file is dropped. Red: the file was tracked (`git ls-files` listed it) and `ast-validator-check` failed in a checkout whose paths differ; green: with the file deleted `make build-ts` writes it and `packages/ts/tests/decode.test.ts` passes (30 tests) (T26.7-19).
+
 - T26.7-10: the backends of `packages/compiler` share the code of the loop locals (`FunctionLocals.loopNames`, `enterLoop`, `refreshed`), the line layout of the PHP and Python backends (`layoutLine`, `groupToSplit`, `flatText`) and the descriptors of the definitions (`definitionDescriptors`); the generated programs are byte for byte the same, and the committed manifests record the new digest of the compiler. Red: `make duplication-check` found 7 clones in `packages/compiler`; green: none (68 clones remain in the repository before this item, 61 after) (T26.7-10).
 
 - T26.7-17: `composerPlatforms` of `config/dependency-policy.json` declares PHP 8.4.1, the one platform of the repository (the minor of `.php-version` with the patch 1 that PHPUnit 13 needs), as the manifests and locks already resolve it. Red: `make dependency-policy-check` reported 9 findings, 6 of the platform; green: 3 remain, the locks that changed after the review of 2026-10-15, which `make dependency-review RECORD=1` records with the registries (T26.7-17).

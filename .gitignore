@@ -37,3 +37,7 @@ dist.old/
 .phpunit.cache/
 .phpunit.result.cache
 coverage/
+
+# The AST validator that make ast-validator generates (T26.7-19)
+packages/ts/src/ast-validator.mjs
+packages/ts/src/ast-validator.mjs.next-*

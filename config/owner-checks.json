@@ -1055,14 +1055,6 @@
       ]
     },
     {
-      "check": "make ast-validator-check",
-      "paths": [
-        "contracts/schema/ast.schema.json",
-        "scripts/generate-ast-validator.mts",
-        "packages/ts/src/ast-validator.mjs"
-      ]
-    },
-    {
       "check": "make doc-coverage",
       "paths": [
         "scripts/check-doc-coverage.mts"
