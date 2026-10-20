@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ecb6c0ea572381471d0a876993f0b32434183cbbbfffa590a6fa3fbc88e432c9 -->
+<!-- source-sha256: 8ad8fa774cb60f610beb5f6584a83356967bb9a3e73aceafcf940af2306a387d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-5: Makefile의 언어 목록이 모든 구현을 명명한다 (R9): `SHOWCASE_LANGS`가 `ts,go,rust,php,php-ext,python`이므로 `make showcase`와 `make showcase-build-check`가 라이브러리의 command line을 확장으로 실행하는 `tests/runner/drivers.mts`의 driver를 통해 PHP 확장으로도 예제 사이트를 만들고 검사한다. Red: `make parity-declarations-check RULES=R9` exit 2, `R9 language-set-drift Makefile:58: the list differs from the implementations: missing php-ext`. Green: 그 검사가 통과하고, `make showcase-build-check`가 여섯 언어로 통과한다 (T26.7-5).
 
 - T26.7-51-7: program의 options와 request options가 각각 자신의 unit, program-options(RT-5, RT-6)와 request-options(RT-4)를 가지며, 그 test는 옵션이 어떻게 실패하는지, Go와 Rust에서는 그 타입이 spec의 옵션만 받는지 검사한다. Red: main에서는 concurrent-bound-map만 RT-4, RT-5, RT-6을 인용했고(main517.txt에서 이 id들의 R15 줄 4개, RT-5와 RT-6이 go와 python에서), Go와 Rust에는 이 규칙의 test가 없었다. Green: Go test TestTheOptionsOfAProgramAreChecked와 TestTheRequestOptionsAreTyped가 통과(2), Rust test the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec와 the_request_options_that_are_no_object_fail이 통과(functions 14), unit의 TS, PHP, PHP 확장, Python test가 통과한다(engine.test.ts 12, EngineRefreshTest 8, test_api.py 44). parity-declarations-check는 새 finding이 없고(main 223, branch 219, 새 것 없음) 두 unit이 성립한다 (T26.7-51-7).
 

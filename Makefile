@@ -55,7 +55,7 @@ include scripts/kit/kit-bootstrap.mk
 	install template-install template-build-language template-test-language template-build-lsp template-test-lsp template-build-codemirror template-test-codemirror template-build-compiler template-test-compiler-types format-check format-external-check template-install-cli template-build-vscode template-test-vscode template-test-vscode-integration vscode-package vscode-install template-install-vscode template-install-browsers uninstall-cli \
 	conformance-cases function-inventory-check typecheck
 
-SHOWCASE_LANGS  ?= ts,go,rust,php,python
+SHOWCASE_LANGS  ?= ts,go,rust,php,php-ext,python
 
 TS_DIR   := packages/ts
 GO_DIR   := packages/go
