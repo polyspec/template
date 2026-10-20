@@ -124,6 +124,7 @@ func TestBoundMapRendersTheBytesOfTheHostMap(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// RT-62: a prepared render renders the same bytes each time.
 	for range 2 {
 		if output, err := prepared.Render(); err != nil || output != cases.Outputs["page"] {
 			t.Fatalf("prepared: %q %v", output, err)
@@ -244,7 +245,7 @@ func TestBindErrors(t *testing.T) {
 func TestConcurrentRendersReadOneBoundMap(t *testing.T) {
 	cases := readBoundCases(t)
 	bound := mustBind(t, fixtureValue(t, cases.Assign))
-	// The goroutines share one program and one bound map (RT-62a, VAL-22).
+	// The goroutines share one program and one bound map (RT-70, VAL-22).
 	program := boundProgram(t, nil)
 	var wait sync.WaitGroup
 	failures := make(chan string, 8)
