@@ -1155,3 +1155,31 @@ final class Numbers implements FunctionGroup
 {
     public static function table(): array {}
 }
+
+/**
+ * escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
+ */
+final class Encoding implements FunctionGroup
+{
+    /**
+     * FUN-26 to FUN-28.
+     */
+    public static function toJson(mixed $value): string {}
+
+    /**
+     * FUN-29.
+     */
+    public static function percentEncode(string $text): string {}
+
+    public static function table(): array {}
+}
+
+/**
+ * keys, values, first, last, reverse, slice, sort, join, range, default (FUN-14, FUN-15, FUN-31 to FUN-36).
+ */
+final class Collection implements FunctionGroup
+{
+    public const int RANGE_LIMIT = 1000000;
+
+    public static function table(): array {}
+}

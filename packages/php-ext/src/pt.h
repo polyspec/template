@@ -519,11 +519,17 @@ bool pt_number_format(double value, zend_long decimals, zend_string *dec, zend_s
 void pt_host_argument(zval *value, zval *result);
 void pt_host_argument_list(HashTable *args, zval *result);
 
-/* The function groups Functions\Strings and Functions\Numbers (pt_groups.c): MINIT registers them with the
- * classes of the group interface, and their table() methods give the library tables. */
-void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers);
+/* The function groups Functions\Strings, Functions\Numbers, Functions\Encoding and Functions\Collection (pt_groups.c):
+ * MINIT registers them with the classes of the group interface, and their table() methods give the library tables;
+ * Encoding::toJson and Encoding::percentEncode are the methods of the encoding group. */
+void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers, zend_class_entry *encoding,
+                        zend_class_entry *collection);
 void pt_strings_table(INTERNAL_FUNCTION_PARAMETERS);
 void pt_numbers_table(INTERNAL_FUNCTION_PARAMETERS);
+void pt_encoding_table(INTERNAL_FUNCTION_PARAMETERS);
+void pt_collection_table(INTERNAL_FUNCTION_PARAMETERS);
+void pt_encoding_to_json(INTERNAL_FUNCTION_PARAMETERS);
+void pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAMETERS);
 
 /* ---------------------------------------------------------------------------------------------------
  * Rendering (RT-*).

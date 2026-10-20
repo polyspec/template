@@ -1,7 +1,8 @@
 /*
- * The function groups Functions\Strings and Functions\Numbers of the library as classes of the extension (FUN-12 to
- * FUN-25). table() gives the library's table: each name maps to its argument counts and a Closure of a persistent
- * internal function, whose dispatcher runs the built-in function of pt_functions.c with the arguments of the call.
+ * The function groups Functions\Strings, Functions\Numbers, Functions\Encoding and Functions\Collection of the library
+ * as classes of the extension (FUN-10 to FUN-36). table() gives the library's table: each name maps to its argument
+ * counts and a Closure of a persistent internal function, whose dispatcher runs the built-in function of
+ * pt_functions.c with the arguments of the call.
  */
 #include "pt.h"
 #include "Zend/zend_closures.h"
@@ -14,6 +15,12 @@ static const char *const pt_strings_names[] = {
 static const char *const pt_numbers_names[] = {
     "number", "round", "floor", "ceil", "abs", "min", "max", "num",
 };
+static const char *const pt_encoding_names[] = {
+    "escape", "raw", "json", "url", "nl2br", "str", "type",
+};
+static const char *const pt_collection_names[] = {
+    "keys", "values", "first", "last", "reverse", "slice", "sort", "join", "range", "default",
+};
 
 typedef struct pt_group {
     const char *const *names;
@@ -24,6 +31,8 @@ typedef struct pt_group {
 
 static pt_group pt_strings_group = {pt_strings_names, sizeof(pt_strings_names) / sizeof(pt_strings_names[0]), NULL, NULL};
 static pt_group pt_numbers_group = {pt_numbers_names, sizeof(pt_numbers_names) / sizeof(pt_numbers_names[0]), NULL, NULL};
+static pt_group pt_encoding_group = {pt_encoding_names, sizeof(pt_encoding_names) / sizeof(pt_encoding_names[0]), NULL, NULL};
+static pt_group pt_collection_group = {pt_collection_names, sizeof(pt_collection_names) / sizeof(pt_collection_names[0]), NULL, NULL};
 
 /* The signature of each function: one required parameter `array $a`. */
 static const zend_internal_arg_info pt_group_arginfo[] = {
@@ -123,10 +132,13 @@ static void pt_group_table(zval *return_value, const pt_group *group)
     }
 }
 
-void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers)
+void pt_groups_register(zend_class_entry *strings, zend_class_entry *numbers, zend_class_entry *encoding,
+                        zend_class_entry *collection)
 {
     pt_group_init(&pt_strings_group, strings);
     pt_group_init(&pt_numbers_group, numbers);
+    pt_group_init(&pt_encoding_group, encoding);
+    pt_group_init(&pt_collection_group, collection);
 }
 
 void pt_strings_table(INTERNAL_FUNCTION_PARAMETERS)
@@ -139,4 +151,165 @@ void pt_numbers_table(INTERNAL_FUNCTION_PARAMETERS)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     pt_group_table(return_value, &pt_numbers_group);
+}
+
+void pt_encoding_table(INTERNAL_FUNCTION_PARAMETERS)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_group_table(return_value, &pt_encoding_group);
+}
+
+void pt_collection_table(INTERNAL_FUNCTION_PARAMETERS)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    pt_group_table(return_value, &pt_collection_group);
+}
+
+/* Runs the built-in function of a name on one argument, as a method of a group runs it: a FunctionError is thrown the
+ * way the dispatcher throws it, and false then. */
+static bool pt_group_call_one(pt_arena *arena, pt_value input, const char *name, zval *return_value)
+{
+    const pt_builtin *builtin = pt_builtin_find(name, strlen(name));
+    pt_value *args = pt_alloc(arena, sizeof(pt_value));
+    args[0] = input;
+    pt_env env = {{NULL, 0}, 0.0};
+    pt_value result = {0};
+    pt_function_error error = {NULL, NULL};
+    if (!builtin->call(arena, &env, args, 1, &result, &error)) {
+        pt_throw_function_error(error.code, error.message);
+        return false;
+    }
+    pt_library_value(result, return_value);
+    return true;
+}
+
+/* A PHP value given to a method of the encoding group, read as the library reads it (FUN-26): a number of any size is
+ * kept, a list and a MapValue keep their members, a SafeString keeps its text, and another object is opaque (VAL-19).
+ * False for a value that has no JSON text at all, a resource. */
+static bool pt_host_json_value(pt_arena *arena, zval *input, pt_value *result)
+{
+    ZVAL_DEREF(input);
+    switch (Z_TYPE_P(input)) {
+        case IS_NULL:
+            *result = pt_null();
+            return true;
+        case IS_FALSE:
+            *result = pt_bool(false);
+            return true;
+        case IS_TRUE:
+            *result = pt_bool(true);
+            return true;
+        case IS_LONG:
+            *result = pt_number((double)Z_LVAL_P(input));
+            return true;
+        case IS_DOUBLE:
+            *result = pt_number(Z_DVAL_P(input));
+            return true;
+        case IS_STRING: {
+            pt_s text = {Z_STRVAL_P(input), Z_STRLEN_P(input)};
+            *result = pt_string(text);
+            return true;
+        }
+        case IS_ARRAY: {
+            pt_list *list = pt_list_new(arena, zend_hash_num_elements(Z_ARRVAL_P(input)));
+            uint32_t index = 0;
+            bool ok = true;
+            zval *item;
+            ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), item) {
+                if (!pt_host_json_value(arena, item, &list->items[index++])) {
+                    ok = false;
+                    break;
+                }
+            } ZEND_HASH_FOREACH_END();
+            if (ok) {
+                *result = pt_list_value(list);
+            }
+            return ok;
+        }
+        case IS_OBJECT: {
+            zend_object *object = Z_OBJ_P(input);
+            if (object->ce == pt_safe_string_ce) {
+                zval rv;
+                zval *text = zend_read_property(pt_safe_string_ce, object, ZEND_STRL("text"), 1, &rv);
+                pt_s value = {Z_STRVAL_P(text), Z_STRLEN_P(text)};
+                *result = pt_safe(value);
+                return true;
+            }
+            if (object->ce == pt_map_value_ce) {
+                /* The items of a MapValue are its array, keyed as the PHP array keys them (a numeric key is an index). */
+                zval *items = OBJ_PROP_NUM(object, 0);
+                pt_map *map = pt_map_new(arena, zend_hash_num_elements(Z_ARRVAL_P(items)));
+                zend_string *key;
+                zend_ulong index;
+                zval *item;
+                bool ok = true;
+                ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(items), index, key, item) {
+                    pt_s name;
+                    if (key != NULL) {
+                        name = pt_strdup(arena, ZSTR_VAL(key), ZSTR_LEN(key));
+                    } else {
+                        zend_string *text = zend_long_to_str((zend_long)index);
+                        name = pt_strdup(arena, ZSTR_VAL(text), ZSTR_LEN(text));
+                        zend_string_release(text);
+                    }
+                    pt_value value;
+                    if (!pt_host_json_value(arena, item, &value)) {
+                        ok = false;
+                        break;
+                    }
+                    pt_map_set(map, name, value);
+                } ZEND_HASH_FOREACH_END();
+                if (ok) {
+                    *result = pt_map_value(map);
+                }
+                return ok;
+            }
+            /* Every other object is opaque: the json built-in function refuses it. */
+            pt_arena_keep(arena, input);
+            result->type = PT_OBJECT;
+            result->u.object = object;
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
+/* Functions\Encoding::toJson (FUN-26 to FUN-28): the JSON text of a value, the json built-in function. */
+void pt_encoding_to_json(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_arena arena;
+    pt_arena_init(&arena);
+    pt_value input = pt_null();
+    if (!pt_host_json_value(&arena, value, &input)) {
+        pt_throw_function_error(PT_E_RUNTIME_TYPE, zend_string_init(ZEND_STRL("json does not accept a native object"), 0));
+        pt_arena_free(&arena);
+        RETURN_THROWS();
+    }
+    bool done = pt_group_call_one(&arena, input, "json", return_value);
+    pt_arena_free(&arena);
+    if (!done) {
+        RETURN_THROWS();
+    }
+}
+
+/* Functions\Encoding::percentEncode (FUN-29): the rawurlencode of a text, the url built-in function. */
+void pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAMETERS)
+{
+    zend_string *text;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(text)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_arena arena;
+    pt_arena_init(&arena);
+    pt_s bytes = {ZSTR_VAL(text), ZSTR_LEN(text)};
+    bool done = pt_group_call_one(&arena, pt_string(bytes), "url", return_value);
+    pt_arena_free(&arena);
+    if (!done) {
+        RETURN_THROWS();
+    }
 }

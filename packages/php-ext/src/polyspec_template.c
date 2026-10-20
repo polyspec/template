@@ -103,7 +103,7 @@ ZEND_METHOD(Polyspec_Template_Functions_FunctionError, __construct)
     zend_update_property_str(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("message"), message);
 }
 
-/* Functions\Strings::table and Functions\Numbers::table (pt_groups.c). */
+/* The table() methods of the function groups (pt_groups.c). */
 ZEND_METHOD(Polyspec_Template_Functions_Strings, table)
 {
     pt_strings_table(INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -112,6 +112,27 @@ ZEND_METHOD(Polyspec_Template_Functions_Strings, table)
 ZEND_METHOD(Polyspec_Template_Functions_Numbers, table)
 {
     pt_numbers_table(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Encoding, table)
+{
+    pt_encoding_table(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Collection, table)
+{
+    pt_collection_table(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+/* Functions\Encoding::toJson and Functions\Encoding::percentEncode (pt_groups.c). */
+ZEND_METHOD(Polyspec_Template_Functions_Encoding, toJson)
+{
+    pt_encoding_to_json(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Encoding, percentEncode)
+{
+    pt_encoding_percent_encode(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -130,7 +151,7 @@ static zend_object *pt_function_error_object(const char *code, zend_string *mess
 }
 
 /* Throws a FunctionError; the message is released here. */
-static void pt_throw_function_error(const char *code, zend_string *message)
+void pt_throw_function_error(const char *code, zend_string *message)
 {
     zval exception;
     ZVAL_OBJ(&exception, pt_function_error_object(code, message));
@@ -442,15 +463,19 @@ ZEND_METHOD(Polyspec_Template_Value_MapValue, copy)
 
 #define PT_BIND_MAX_DEPTH 64
 
-/* The PHP value of a bound value: a map is a MapValue, a list a PHP list, a number a float (VAL-17). */
+/* The PHP value of a bound value: a map is a MapValue, a list a PHP list, a number a float (VAL-17), a safe string a
+ * SafeString (the built-in functions return the safe text of escape and raw as the library does). */
 void pt_library_value(pt_value value, zval *result)
 {
     switch (value.type) {
         case PT_NULL: ZVAL_NULL(result); return;
         case PT_BOOL: ZVAL_BOOL(result, value.u.b); return;
         case PT_NUMBER: ZVAL_DOUBLE(result, value.u.number); return;
-        case PT_STRING:
-        case PT_SAFE: ZVAL_STRINGL(result, value.u.str.s, value.u.str.n); return;
+        case PT_STRING: ZVAL_STRINGL(result, value.u.str.s, value.u.str.n); return;
+        case PT_SAFE:
+            object_init_ex(result, pt_safe_string_ce);
+            zend_update_property_stringl(pt_safe_string_ce, Z_OBJ_P(result), ZEND_STRL("text"), value.u.str.s, value.u.str.n);
+            return;
         case PT_LIST:
             array_init_size(result, value.u.list->count);
             for (uint32_t i = 0; i < value.u.list->count; i++) {
@@ -486,17 +511,6 @@ void pt_throw_bind_error(const char *code, zend_string *message)
     zval exception;
     object_init_ex(&exception, pt_bind_error_ce);
     zend_update_property_string(pt_bind_error_ce, Z_OBJ(exception), ZEND_STRL("errorCode"), code);
-    zend_update_property_str(zend_ce_exception, Z_OBJ(exception), ZEND_STRL("message"), message);
-    zend_string_release(message);
-    zend_throw_exception_object(&exception);
-}
-
-/* Throws a Functions\FunctionError with the code and the message of a built-in function; the message is released. */
-void pt_throw_function_error(const char *code, zend_string *message)
-{
-    zval exception;
-    object_init_ex(&exception, pt_function_error_ce);
-    zend_update_property_string(pt_function_error_ce, Z_OBJ(exception), ZEND_STRL("errorCode"), code);
     zend_update_property_str(zend_ce_exception, Z_OBJ(exception), ZEND_STRL("message"), message);
     zend_string_release(message);
     zend_throw_exception_object(&exception);
@@ -2941,7 +2955,9 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     zend_class_entry *function_group = register_class_Polyspec_Template_Functions_FunctionGroup();
     register_class_Polyspec_Template_Functions_Helpers();
     pt_groups_register(register_class_Polyspec_Template_Functions_Strings(function_group),
-        register_class_Polyspec_Template_Functions_Numbers(function_group));
+        register_class_Polyspec_Template_Functions_Numbers(function_group),
+        register_class_Polyspec_Template_Functions_Encoding(function_group),
+        register_class_Polyspec_Template_Functions_Collection(function_group));
     register_class_Polyspec_Template_ErrorCode();
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();

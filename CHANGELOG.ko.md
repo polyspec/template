@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 451e2bc3713e249a5a90c92fd6351210c50663000516498ca12fe92153636212 -->
+<!-- source-sha256: ca3c7d7da47347debe972ded4e4d91241086fb62ea46b148f87fe7b469f9d335 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-15-3: 확장은 library의 Functions\Encoding(toJson, percentEncode, table)과 Functions\Collection(RANGE_LIMIT, table)을 class로 등록하고, table의 callable은 확장의 built-in 함수를 실행한다. built-in escape와 raw는 library와 같이 SafeString을 반환한다. 또한 T26.7-2-15-1과 T26.7-2-15-2의 merge가 두 번 정의한 pt_throw_function_error를 하나만 남겨 확장이 다시 빌드된다. Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/EncodingCollectionGroupsTest.php` 1 failed, "Polyspec\Template\Functions\Encoding is not registered by the extension" (4 passed, 1 failed); green: 같은 명령 5 passed, 0 failed; Verification의 FunctionsTest, ExprFixturesTest, ConformanceTest가 통과하고(5, 73, 768 passed), ExportsTest, CompilerInterfaceTest, RenderStateTest도 통과한다(18, 2, 8 passed); `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 EncodingCollectionGroupsTest에 대한 finding을 0개 출력한다 (T26.7-2-15-3).
 
 - T26.7-32-5: FMT-6을 formatting suite가 인용한다. 새 case `block/body-whitespace-runs`는 `{#   card.tpl   title:t    no:n  }`를 렌더하고(RT-29, RT-30) 들여쓰기가 있을 때와 없을 때 모두 `{# card.tpl title:t no:n}`으로 포맷하므로, 모든 구현의 conformance, token, format test가 block 태그 본문이 단어를 유지하고 각 공백 덩어리를 공백 하나로 바꾸는지 검사한다. 표현식 token을 잇는 test의 `format-expression`은 더 이상 FMT-6을 인용하지 않는다. Red: main에서 `make parity-declarations-check` 326 findings, 그중 `format-expression`의 FMT-6 R15; block 태그 본문에 공백 덩어리가 있는 case가 없었다. Green: 321 findings, 새 finding 없음; `make parity-declarations-check UNITS="formatting"`, schema-check, rules-check 통과; conformance, token, format suite가 새 case와 함께 통과한다 (ts 768, go 771, rust 768, php 768, python 768). `make test-php-ext`는 T26.7-2-8과 main의 확장 빌드를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-5).
 

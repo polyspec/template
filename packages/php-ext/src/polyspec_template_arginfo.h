@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 91fd6fa00b4e072107dd0315e9d160e7b5144e99 */
+ * Stub hash: 43095d2aea9838335d80533101775af0d289a713 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -501,6 +501,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Functions_Numbers_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
 
+#define arginfo_class_Polyspec_Template_Functions_Encoding_toJson arginfo_class_Polyspec_Template_Value_Value_typeOf
+
+#define arginfo_class_Polyspec_Template_Functions_Encoding_percentEncode arginfo_class_Polyspec_Template_Escape_html
+
+#define arginfo_class_Polyspec_Template_Functions_Encoding_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+#define arginfo_class_Polyspec_Template_Functions_Collection_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -622,6 +630,10 @@ ZEND_METHOD(Polyspec_Template_Functions_Helpers, stringify);
 ZEND_METHOD(Polyspec_Template_Functions_Helpers, safe);
 ZEND_METHOD(Polyspec_Template_Functions_Strings, table);
 ZEND_METHOD(Polyspec_Template_Functions_Numbers, table);
+ZEND_METHOD(Polyspec_Template_Functions_Encoding, toJson);
+ZEND_METHOD(Polyspec_Template_Functions_Encoding, percentEncode);
+ZEND_METHOD(Polyspec_Template_Functions_Encoding, table);
+ZEND_METHOD(Polyspec_Template_Functions_Collection, table);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -925,6 +937,18 @@ static const zend_function_entry class_Polyspec_Template_Functions_Strings_metho
 
 static const zend_function_entry class_Polyspec_Template_Functions_Numbers_methods[] = {
 	ZEND_ME(Polyspec_Template_Functions_Numbers, table, arginfo_class_Polyspec_Template_Functions_Numbers_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_Encoding_methods[] = {
+	ZEND_ME(Polyspec_Template_Functions_Encoding, toJson, arginfo_class_Polyspec_Template_Functions_Encoding_toJson, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Encoding, percentEncode, arginfo_class_Polyspec_Template_Functions_Encoding_percentEncode, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Encoding, table, arginfo_class_Polyspec_Template_Functions_Encoding_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_Collection_methods[] = {
+	ZEND_ME(Polyspec_Template_Functions_Collection, table, arginfo_class_Polyspec_Template_Functions_Collection_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -2193,6 +2217,48 @@ static zend_class_entry *register_class_Polyspec_Template_Functions_Numbers(zend
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Functions_FunctionGroup);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_Encoding(zend_class_entry *class_entry_Polyspec_Template_Functions_FunctionGroup)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "Encoding", class_Polyspec_Template_Functions_Encoding_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Functions_FunctionGroup);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_Collection(zend_class_entry *class_entry_Polyspec_Template_Functions_FunctionGroup)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "Collection", class_Polyspec_Template_Functions_Collection_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Functions_FunctionGroup);
+
+	zval const_RANGE_LIMIT_value;
+	ZVAL_LONG(&const_RANGE_LIMIT_value, 1000000);
+	zend_string *const_RANGE_LIMIT_name = zend_string_init_interned("RANGE_LIMIT", sizeof("RANGE_LIMIT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_RANGE_LIMIT_name, &const_RANGE_LIMIT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#else
+	zend_declare_class_constant_ex(class_entry, const_RANGE_LIMIT_name, &const_RANGE_LIMIT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_RANGE_LIMIT_name);
 
 	return class_entry;
 }
