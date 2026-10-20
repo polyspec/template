@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 803bf5d44a9f1e1d16d8e719711847d53abf219338a02c944f8ab1669f23cfd0 -->
+<!-- source-sha256: 33a36e1f1323c0f0352610e30fa79eea70ee8795f1edc1ad3c8fed93c1213771 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.5: kit 복사본은 연결된 @polyspec/kit을 따르고(`make kit-sync`가 PRINCIPLES.md와 PRINCIPLES.ko.md를 썼다), `CHECK_TARGETS`는 `kit-gates`의 모든 gate(`toolchain-check`, `owner-validate`, `rebuild-check`, `language-check`, `test-markers-check`, `duplication-check`, `commits-check`, `lint-php-ext`, `test-php-ext`)를 실행하며 각각 `.github/workflows/ci.yml`에서 같은 종류의 검사를 실행하는 job에 둔다. Red: `make kit-check`가 11건(다른 복사본 2, CHECK_TARGETS에 없는 gate 9)을 보고했고, green: 통과한다(T26.5).
 
 - T26.7-9: `tests/runner`의 generated runner는 `generated-cases.mts`(case의 type manifest, compile과 render 판정, compile 단계, process별 case 실행, 실행 종료)를 공유하고, `scripts/`의 generated 검사는 `runChecked`, `runPythonCheck`, `compileFixtureGraph`를 공유한다. 호출 inventory의 `::`와 `->` 분기는 하나이고, Rust showcase adapter의 render option은 한 번만 만들며, PHP showcase adapter는 map을 `array_map`으로 바꾸고, 에디터 fixture는 사본 대신 `@polyspec/template-lsp`의 file host를 쓴다. Red: `make duplication-check`가 clone 82개를 찾았고, green: 68개이며 `scripts/`, `tests/runner/`, `examples/`에는 없다(T26.7-9).
 
