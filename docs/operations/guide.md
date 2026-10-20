@@ -346,7 +346,7 @@ html = engine.render(
 )
 ```
 
-The package documents give the full API: [TypeScript](https://github.com/polyspec/template/tree/main/packages/ts), [Go](https://github.com/polyspec/template/tree/main/packages/go), [Rust](https://github.com/polyspec/template/tree/main/packages/rust), [PHP](https://github.com/polyspec/template/tree/main/packages/php), [Python](https://github.com/polyspec/template/tree/main/packages/python).
+The package documents give the full API: [TypeScript](https://github.com/polyspec/template/tree/main/packages/ts), [Go](https://github.com/polyspec/template/tree/main/packages/go), [Rust](https://github.com/polyspec/template/tree/main/packages/rust), [PHP](https://github.com/polyspec/template/tree/main/packages/php), [PHP extension](https://github.com/polyspec/template/tree/main/packages/php-ext), [Python](https://github.com/polyspec/template/tree/main/packages/python).
 
 ## Render the same data several times
 

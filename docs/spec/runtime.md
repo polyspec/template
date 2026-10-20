@@ -46,7 +46,7 @@ engine.
 - **RT-65** A page cache stores final HTML separately from compiled artifacts. A positive TTL expires after that many seconds; `0` and `null` mean forever. A cache hit bypasses business logic and template rendering. Its key must include every value that can change the output.
 - **RT-66** `getOrSet` returns the cached HTML on a hit without calling `render`; on a miss it calls `render` once, stores the returned HTML with the TTL, and returns it.
 - **RT-67** The prepared render contract is declared in the single product manifest, [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json). Interface checks fail when any required language mapping, support level or operation is missing.
-- **RT-69** `Engine` owns exactly one `Program`. Generated execution never creates or retains an AST placeholder, parser or AST renderer, and AST execution never retains generated code. The five runtimes must fail the interface gate if mode selection returns to the engine.
+- **RT-69** `Engine` owns exactly one `Program`. Generated execution never creates or retains an AST placeholder, parser or AST renderer, and AST execution never retains generated code. Every implementation must fail the interface gate if mode selection returns to the engine.
 
 The program diagrams are generated from the single product manifest:
 
@@ -176,7 +176,7 @@ The logical request has this JSON shape:
 
 - **RT-54** The interface manifest declares one compiler with two peer modes. `ast` returns an `AstArtifact`; `gen` returns host-language source and an artifact manifest. Both produce a `Program` with the same prepared render contract.
 - **RT-55** An implementation declares its supported levels in the manifest. Implementations declaring the same level expose the same logical types and operations, with language-specific spelling recorded only in the mapping. An unsupported operation is absent from that level; it is not an empty method or a runtime fallback.
-- **RT-56** TypeScript, Go, Rust, PHP and Python provide `core-runtime`, `artifact-runtime` and both `Program` variants. The build compiler provides `source-compiler` and the five generated target backends. JavaScript ESM is emitted by the TypeScript backend and is not counted as another semantic implementation.
+- **RT-56** Every implementation (TypeScript, Go, Rust, PHP, the PHP extension and Python) provides `core-runtime`, `artifact-runtime` and both `Program` variants. The build compiler provides `source-compiler` and the generated target backends. JavaScript ESM is emitted by the TypeScript backend and is not counted as another semantic implementation.
 - **RT-57** An artifact manifest contains its contract format, mode, target language, entry, source digest, type digest, contract digest and output paths. The artifact is generated before service startup and is loaded or statically linked once into the process.
 - **RT-58** Artifact refresh is a build policy. `dev` regenerates on every compiler invocation, `true` regenerates when a source, type or contract digest changes, and `false` reads no source and uses only the deployed artifact. A development watcher rebuilds and restarts statically linked Go and Rust processes after regeneration.
 - **RT-59** Parsing, source discovery, artifact generation and host compilation never occur in the render request path. Rendering the same program with the same assign, define and environment produces identical output bytes and leaves the request unchanged.
@@ -185,9 +185,9 @@ The logical request has this JSON shape:
 The interface declares two execution modes:
 
 - **AST mode** loads the canonical AST artifact once, binds `assign` and `define` for each request, and interprets the AST. This is the complete cross-language mode.
-- **Generated mode** lowers each canonical AST node into a TypeScript, Go, Rust, PHP or Python renderer before startup, loads or links that renderer once, and calls it for each request. All five core runtimes pass the generated conformance suite of every canonical case. Generated execution does not parse or interpret template AST during a request.
+- **Generated mode** lowers each canonical AST node into a renderer of the language of the implementation before startup, loads or links that renderer once, and calls it for each request. Every implementation passes the generated conformance suite of every canonical case. Generated execution does not parse or interpret template AST during a request.
 
-Native object calls are implemented in the AST and generated runtimes. The complete mode matrix and the package install check exercise the same assigned object field, instance method and class function behavior in TypeScript, Go, Rust, PHP and Python.
+Native object calls are implemented in the AST and generated runtimes. The complete mode matrix and the package install check exercise the same assigned object field, instance method and class function behavior in every implementation.
 
 ```mermaid
 flowchart LR

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-documentation -->
-<!-- source-sha256: 2c495a17d1afc21a3bdb8728004de30a9735691bcbb931a576fc0345cec36492 -->
+<!-- source-sha256: fe7dbffabf00a656e05d151eaa55183276264cf20603a2efea2f4e15bad53ae5 -->
 # 문서
 
 [English](/operations/documentation).
@@ -32,7 +32,7 @@
 make docs-check
 ```
 
-검사기는 문서에 번역 쌍이 없거나, 상대 링크가 해석되지 않거나, 링크가 절대 경로이거나, 두 언어의 코드 블록이 다르거나, 기능 행의 상태가 유효하지 않거나 근거 링크가 없거나, checklist `docs/plans/execution/checklist.md`의 작업 행 상태가 유효하지 않거나 두 언어 사이에 다르거나, checklist에 heading(제목 포함)이나 작업 표 행이 아닌 줄이 있거나, 상태 표시나 task list 표시가 작업 행 마지막 칸의 시작이 아닌 곳에 있으면 실패하고, 그런 줄과 표시는 file, 줄, 열과 함께 보고한다. `make docs-check`가 검사기를 실행한다.
+검사기는 문서에 번역 쌍이 없거나, 상대 링크가 해석되지 않거나, 링크가 절대 경로이거나, 문서와 번역의 코드 블록이 다르거나, 기능 행의 상태가 유효하지 않거나 근거 링크가 없거나, checklist `docs/plans/execution/checklist.md`의 작업 행 상태가 유효하지 않거나 문서와 번역 사이에 다르거나, checklist에 heading(제목 포함)이나 작업 표 행이 아닌 줄이 있거나, 상태 표시나 task list 표시가 작업 행 마지막 칸의 시작이 아닌 곳에 있으면 실패하고, 그런 줄과 표시는 file, 줄, 열과 함께 보고한다. `make docs-check`가 검사기를 실행한다.
 
 ## 소스 주석
 

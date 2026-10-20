@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-functions -->
-<!-- source-sha256: d6e8b5dfb155afd1fc5488cabe61f9f6857ef5446eef0a1cfc8ad8a1a6ad7c6a -->
+<!-- source-sha256: 87c47675dba7821a2e77a294f36d9afbed17f3ab57810f99cbc8f1552c3efebb -->
 # 함수
 
 [English](/spec/functions).
@@ -8,7 +8,7 @@
 
 ## 정본 계약
 
-함수 계약의 기계 판독 가능한 원본은 [`packages/compiler/functions.json`](https://github.com/polyspec/template/blob/main/packages/compiler/functions.json)이다. 이 파일은 이식 가능한 호출 표면을 `identifier(args...)`로 제한하고, 최소·최대 인자 수와 TypeScript·Go·Rust·PHP·Python의 AST·생성 프로그램 지원 여부를 정의한다. 다섯 언어의 레지스트리는 `make function-contract-check`로 이 manifest와 대조한다.
+함수 계약의 기계 판독 가능한 원본은 [`packages/compiler/functions.json`](https://github.com/polyspec/template/blob/main/packages/compiler/functions.json)이다. 이 파일은 이식 가능한 호출 표면을 `identifier(args...)`로 제한하고, 최소·최대 인자 수와 모든 구현의 AST·생성 프로그램 지원 여부를 정의한다. 구현마다 레지스트리를 `make function-contract-check`로 이 manifest와 대조한다.
 
 `make template-function-inventory`는 템플릿 트리의 함수 형태 호출을 나열하며 런타임 API를 더하지 않는다. 등록한 함수는 선언된 함수 계약으로 노출하고, assign 인스턴스는 선언된 `object.method(args...)` 표면을 제공하며, 선언된 논리 클래스는 `Class::function(args...)`을 제공한다. native 클래스를 복제하지 않고 템플릿에 보이는 멤버만 검사한다. namespace 직접 호출과 생성자는 계속 허용하지 않는다.
 

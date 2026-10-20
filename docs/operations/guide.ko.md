@@ -1,5 +1,5 @@
 <!-- doc-id: docs-guide -->
-<!-- source-sha256: d74ec936fff1901e0ff1dfa1459596ae54f0bc9ebad005ce2a488d2b56aeaa16 -->
+<!-- source-sha256: 9c43eab28dc45e99e6445acea15dc7a1e750dba25fd288ff5fb3360f0491b437 -->
 # 사용법
 
 [English](/operations/guide).
@@ -351,7 +351,7 @@ html = engine.render(
 )
 ```
 
-전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/ts), [Go](https://github.com/polyspec/template/tree/main/packages/go), [Rust](https://github.com/polyspec/template/tree/main/packages/rust), [PHP](https://github.com/polyspec/template/tree/main/packages/php), [Python](https://github.com/polyspec/template/tree/main/packages/python).
+전체 API는 각 패키지 문서에 있다: [TypeScript](https://github.com/polyspec/template/tree/main/packages/ts), [Go](https://github.com/polyspec/template/tree/main/packages/go), [Rust](https://github.com/polyspec/template/tree/main/packages/rust), [PHP](https://github.com/polyspec/template/tree/main/packages/php), [PHP 확장](https://github.com/polyspec/template/tree/main/packages/php-ext), [Python](https://github.com/polyspec/template/tree/main/packages/python).
 
 ## 같은 데이터로 여러 번 렌더
 

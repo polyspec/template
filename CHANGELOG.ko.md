@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 597421c72807bf7daed92a4a0cd7ad4f747a31dae96196c4ca3522d67fec2544 -->
+<!-- source-sha256: 0cc4439f228754c00fa19b1b2980c6f36569ba70549e62eb1db4426d47b8673a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-3: 문서는 `config/parity.json`의 구현을 있는 그대로 세고 나열한다. README, 안내서, showcase, 명세의 목록은 PHP 확장을 다른 다섯 구현과 함께 적고, 구현을 뜻한 언어 수는 모든 구현이라고 쓰며, compiler backend 목록은 선택한 언어의 backend라고 쓰고, 확장의 한국어 표기 `PHP 확장`을 선언한다. Red: `make parity-declarations-check`가 R10 60건을 보고했고, green: R10은 0건이다(R1 15, R2 56, R9 1, R13 1, R15 10222건은 남으며 T26.7-2, T26.7-4, T26.7-5에 등록한다)(T26.7-3).
 
 - T26.7-1: `tests/cases`의 모든 `case.json`과 `tests/fixtures/filesystem/cases.json`의 모든 케이스는 명세 requirement를 kit이 읽는 필드 `requirements`에 나열한다(이전: `rules`)(K277). `scripts/check-rules.mts`는 kit에 없는 검사인 각 `case.json`의 `stage`(CNF-3)만 유지한다. 나열된 id와 `docs/spec`의 비교, 다루지 않는 규칙의 보고, `tests/rule-evidence.json`은 `make parity-declarations-check`의 R13, R14, R15가 하므로 제거했다(S1). Red: 이름 변경 전 `make parity-declarations-check`는 10879건(R15 10491, R10 60, R2 56, R1 15, R9 1, R13 1, case.json 255건)을 보고했고, green: 이후 10355건(R15 10222, case.json 0건)을 보고한다. `make rules-check`는 `255 cases, 0 findings`로 통과한다. 남은 R15는 test가 이름으로 적지 않은 requirement를 인용하는 unit이다(T26.7-4)(T26.7-1).
 

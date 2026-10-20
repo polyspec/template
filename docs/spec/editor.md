@@ -3,7 +3,7 @@
 
 [한국어](/ko/spec/editor).
 
-This document defines how editors support templates. One language service holds every editor rule, and each editor reaches it through a thin adapter. The formatting style and the indentation rule are in [formatting](formatting.md); this document refers to them.
+This document defines how editors support templates. A single language service holds every editor rule, and each editor reaches it through a thin adapter. The formatting style and the indentation rule are in [formatting](formatting.md); this document refers to them.
 
 ## Layers
 

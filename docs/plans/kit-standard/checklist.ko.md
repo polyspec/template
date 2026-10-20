@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: dd447384c42a1d3b5ce9f8bccbb63097289f20fc45a5a981f8d4079f3de5b441 -->
+<!-- source-sha256: 59594d52abdc8a1a91b4f8c628d8c86788cf7ff879d6960066b9c3498a057e4b -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -12,3 +12,7 @@
 | T26.6 | docs/spec의 모든 requirement는 ID를 가진 bullet이며, config/parity.json의 각 unit은 자신이 시험하는 requirement를 인용한다(K273) | The spec bullets of docs/spec/*.md and their Korean twins, config/parity.json with requirements.pattern and the requirements of every unit, and the kit copies of make kit-sync | `make kit-check` | [!] 원인: unit이 모든 requirement를 인용하고(R15), config/parity.json에 아직 profile, exclusions, admit이 남아 kit-check가 73건을 낸다; RT-60은 RT-60과 RT-71로 나뉘었다(완료); 재시도: 각 test가 requirement를 적고 profile 필드를 뺀 뒤 |
 | T26.7 | config/parity.json의 모든 unit은 모든 구현에서 성립하고, test가 이름으로 적은 spec requirement를 인용한다 (kit K273, K275, K276) | config/parity.json, docs/spec, the tests of every implementation | `make parity-declarations-check` | [~] |
 | T26.7-1 | 모든 case.json이 명세 규칙을 requirements로 나열하고(kit K277), check-rules는 kit에 없는 검사만 유지한다 | The requirements field of the case.json files of tests/cases, tests/runner/cases.mts, scripts/check-rules.mts, the CNF table of docs/spec/conformance.md, docs/operations/testing.md, docs/operations/conformance.md and their Korean twins | `make parity-declarations-check`, `make rules-check` | [o] |
+| T26.7-3 | 모든 문서는 config/parity.json의 구현을 있는 그대로 세고 나열한다(R10) | The prose of README*.md, docs/spec, docs/operations and packages/*/README*.md that counts or lists implementations, and the prose name of the PHP extension in config/parity.json | `make parity-declarations-check` | [o] |
+| T26.7-2 | config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol 또는 binding을 가진다(R1, R2) | The PHP extension registers the classes and functions of packages/php under the same names (S10), and the missing bindings of the units, spec first | `make parity-declarations-check` | [ ] |
+| T26.7-4 | 모든 unit은 각 binding의 test가 이름으로 적은 requirement만 인용하고, 모든 requirement는 인용된다(R13, R15) | The requirements of the units of config/parity.json and the names of the requirements in the tests of every implementation | `make parity-declarations-check` | [ ] |
+| T26.7-5 | Makefile의 언어 목록은 모든 구현을 적는다(R9) | SHOWCASE_LANGS of the Makefile and the showcase adapter of the PHP extension | `make parity-declarations-check` | [ ] |

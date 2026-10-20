@@ -9,7 +9,7 @@ Build-time compiler of template sources ([typed compiler](../../docs/spec/compil
 | --- | --- |
 | `@polyspec/template-compiler/ast-artifact.mjs` | `compileAst({ root, output, entry, refresh, typeManifest, delimiters })` compiles a source directory into a canonical AST graph with its `manifest.json` |
 | `@polyspec/template-compiler/type-manifest.mjs` | `deriveTypeManifest(templates, define)` derives the input type manifest of parsed templates |
-| `@polyspec/template-compiler/compiler.mjs` | `compileSource(graph, manifest, language, options)` compiles an AST graph and a type manifest into a TypeScript, Go, Rust, PHP or Python program |
+| `@polyspec/template-compiler/compiler.mjs` | `compileSource(graph, manifest, language, options)` compiles an AST graph and a type manifest into a program of the target language |
 | `@polyspec/template-compiler/functions.json` | the machine-readable function contract ([functions](../../docs/spec/functions.md)) |
 
 ```sh
