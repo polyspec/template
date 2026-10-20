@@ -7,6 +7,7 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 from polyspec.template import (
     AstProgram,
@@ -261,6 +262,27 @@ class ObjectCalls(unittest.TestCase):
         Engine(program).render("m.tpl", {})
         self.assertEqual(seen, ["r"])
         self.assertNotIsInstance(seen[0], SafeString)
+
+    def test_a_language_runtime_error_is_reported_as_an_internal_error(self):
+        # ERR-12, ERR-13: a language runtime error inside the render is E_INTERNAL for the
+        # template; an argument error that the API raises before the render passes unchanged.
+        class BrokenLoader:
+            def load(self, name):
+                return SimpleNamespace(
+                    ast={"type": "Template", "name": name, "body": "not a node list"},
+                    version="1",
+                )
+
+        broken = AstProgram(EngineOptions(loader=BrokenLoader()))
+        with self.assertRaises(TemplateError) as caught:
+            Engine(broken).render("page.tpl", {})
+        error = caught.exception.to_object()
+        self.assertEqual(
+            (error["code"], error["template"], error["line"]),
+            ("E_INTERNAL", "page.tpl", 0),
+        )
+        with self.assertRaises(ValueError):
+            AstProgram(EngineOptions(delimiters="[[["))
 
 
 def _Map(files):

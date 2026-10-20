@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Polyspec\Template\Native\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polyspec\Template\AstProgram;
+use Polyspec\Template\Loader\LoaderInterface;
 use Polyspec\Template\Native\Engine;
 use Polyspec\Template\TemplateError;
 
@@ -193,6 +195,36 @@ final class HostBindingTest extends TestCase
             "<p>-9007199254740991</p>\n",
             $this->engine->render('echo.tpl', ['title' => -9007199254740991.0]),
         );
+    }
+
+    public function testALanguageRuntimeErrorIsReportedAsAnInternalError(): void
+    {
+        // ERR-12, ERR-13: a PHP Error raised inside the engine becomes E_INTERNAL for the template;
+        // an exception of the host passes unchanged.
+        $broken = new AstProgram(new class () implements LoaderInterface {
+            public function load(string $name): ?array
+            {
+                return ['ast' => [
+                    'type' => 'Template',
+                    'name' => $name,
+                    'body' => 'not a node list',
+                ], 'version' => '1'];
+            }
+        });
+        try {
+            $broken->render('page.tpl');
+            $this->fail('the broken template rendered');
+        } catch (TemplateError $error) {
+            $this->assertSame(['E_INTERNAL', 'page.tpl', 0], [$error->errorCode, $error->template, $error->errorLine]);
+        }
+        $failing = new AstProgram(new class () implements LoaderInterface {
+            public function load(string $name): ?array
+            {
+                throw new \RuntimeException('loader failed');
+            }
+        });
+        $this->expectExceptionMessage('loader failed');
+        $failing->render('page.tpl');
     }
 
     /**

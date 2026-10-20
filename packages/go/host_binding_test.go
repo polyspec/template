@@ -154,7 +154,6 @@ func TestNativeObjectMembersAndArguments(t *testing.T) {
 		"fail.tpl":    `x{= o.fail()}`,
 		"same.tpl":    `{= same(o, [o], ["k" => o])}|{= o.same(o)}|{= Order::same(o)}`,
 		"made.tpl":    `{= make().name}`,
-		"panic.tpl":   `{= boom()}`,
 	})
 	assign := map[string]any{"o": order}
 	if out, err := program.Render("fields.tpl", assign, template.RenderOptions{}); err != nil || out != "n|n|" {
@@ -199,10 +198,19 @@ func TestNativeObjectMembersAndArguments(t *testing.T) {
 	if out, err := program.Render("made.tpl", nil, template.RenderOptions{}); err != nil || out != "n" {
 		t.Fatalf("made = %q %v", out, err)
 	}
+}
+
+// TestAPanicIsReportedAsAnInternalError checks ERR-12 and ERR-13: a panic inside
+// the render is reported as E_INTERNAL for the template, both through Render and
+// through a prepared template.
+func TestAPanicIsReportedAsAnInternalError(t *testing.T) {
+	program := hostProgram(t, map[string]string{
+		"panic.tpl": `{= boom()}`,
+	})
 	if err := program.Register("boom", func([]value.Value, functions.Context) (any, error) { panic("host defect") }); err != nil {
 		t.Fatal(err)
 	}
-	_, err = program.Render("panic.tpl", nil, template.RenderOptions{})
+	_, err := program.Render("panic.tpl", nil, template.RenderOptions{})
 	if got := templateError(t, err); got.Code != errs.Internal || got.Template != "panic.tpl" || got.Line != 0 || !strings.Contains(got.Message, "host defect") {
 		t.Errorf("panic = %v", got)
 	}

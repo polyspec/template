@@ -64,7 +64,8 @@ final class HostBindingTest extends TestCase
 
     public function testALanguageRuntimeErrorIsReportedAsAnInternalError(): void
     {
-        // ERR-13: a PHP Error raised inside the engine becomes E_INTERNAL; an exception of the host passes unchanged.
+        // ERR-12, ERR-13: a PHP Error raised inside the engine becomes E_INTERNAL for the template;
+        // an exception of the host passes unchanged.
         $broken = new AstProgram(new class () implements LoaderInterface {
             public function load(string $name): ?array
             {

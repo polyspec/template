@@ -160,6 +160,7 @@ describe('native objects', () => {
 });
 
 describe('internal boundary', () => {
+  // ERR-12, ERR-13: a language runtime error inside the render is E_INTERNAL for the template.
   it('reports a language runtime error as E_INTERNAL and lets other exceptions pass (ERR-13)', () => {
     // An AST whose body fails with a TypeError when the runtime reads it, as a malformed AST does.
     const ast: Template = { type: 'Template', name: 'page.tpl', comments: [], get body(): Template['body'] { throw new TypeError('the AST has no body'); } };
