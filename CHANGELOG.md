@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-40: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (EngineRefreshTest, LoaderTest, PageCacheTest), now that the extension registers the classes that these tests load (T26.7-2-8-7, and PageCache in T26.7-2-4); with the other checks of its Verification the row is done (T26.7-40).
+
 - T26.7-40-1: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (EngineRefreshTest), now that the extension registers the classes that these tests load (T26.7-2-8-7); with the other checks of its Verification the row is done (T26.7-40-1).
 
 - T22.6-12-1: `docs/spec/data-model.ko.md` and `docs/operations/development.ko.md` are inside the `documents` globs of `config/parity.json`, and R10 reads their sentences without a finding; the Verification of the row is `make parity-declarations-check RULES=R10` (kit K414), which passes, in place of a test file that does not exist and the whole check (T22.6-12-1).

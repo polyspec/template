@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ea1ab483eae8073c0d760f96109cf729506fa78a73fdaf6f03e485193227e380 -->
+<!-- source-sha256: 66d787a5aaf85e094795a6a683d2a03e97d58eb26963422266dd6c4c6027fd1a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-40: 확장이 이 test가 load하는 class를 등록하므로(T26.7-2-8-7, PageCache는 T26.7-2-4) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (EngineRefreshTest, LoaderTest, PageCacheTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-40).
 
 - T26.7-40-1: 확장이 이 test가 load하는 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (EngineRefreshTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-40-1).
 
