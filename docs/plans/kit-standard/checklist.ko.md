@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 7e20fc946f66b735db58706bf86b8eb54c9432f629656a5fef92315b487783cc -->
+<!-- source-sha256: 492db3be1eae81fba2972f33f89554dae5b62a748a1701f91609251c10f06a79 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -61,3 +61,4 @@
 | T26.7-39 | 값과 함수 유닛 묶음(expressions, truthiness, number-to-string, function-arity, functions-date)은 test가 이름으로 적은 EXP, FUN, VAL requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-40 | runtime 유닛 묶음(limits, artifact-refresh, page-cache, include-resolution, filesystem-loader-files, concurrent-renders)은 test가 이름으로 적은 RT requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
 | T26.7-41 | host 유닛 묶음(invalid-text, object-calls, host-function-failures, compiler-interface)은 test가 이름으로 적은 VAL, ERR, RT requirement를 인용하고 빠진 test는 모든 구현에 쓴다 | The tests of every implementation, the requirements in docs/spec and the units of config/parity.json | `make parity-declarations-check` | [ ] |
+| T26.7-42 | T26.7-11의 재구성 뒤에도 PHP package가 phpcs를 통과한다(PSR-12 줄 길이와 union type 공백) | packages/php/src | `make lint-php` | [o] |

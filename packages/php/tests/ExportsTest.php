@@ -41,7 +41,10 @@ final class ExportsTest extends TestCase
     #[DataProvider('entryPoints')]
     public function testTheEntryPointResolvesThroughTheAutoload(string $name): void
     {
-        $this->assertTrue(class_exists($name) || interface_exists($name), $name . ' is neither a class nor an interface');
+        $this->assertTrue(
+            class_exists($name) || interface_exists($name),
+            $name . ' is neither a class nor an interface',
+        );
     }
 
     public function testTheStaticEntryPointsExist(): void

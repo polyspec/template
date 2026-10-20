@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: fdfa511b713693ffea53431564ef01d3037b82b2435954d58107212e9e1d27c1 -->
+<!-- source-sha256: ebf83aaec9af589a34acb6e612c66793fc2cb0b9f9e998d76aba41c22ae55f57 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-42: PHP package는 T26.7-11의 재구성 뒤에도 `make lint-php`를 통과한다. 긴 `Ast::node` 호출과 긴 주석은 120열에서 줄을 바꾸고, union `FunctionError | BindError`는 phpcs가 요구하는 대로 공백을 두며, `CommandLine`의 낡은 `CNF-4` 참조를 지우고, 새 `ExportsTest` 두 파일도 줄을 바꿨다. Red: `make lint-php`가 phpcs에서 오류 2개와 경고 20개로 실패했고(phpstan은 root, `packages/php`, `packages/php-ext` 모두 통과해 `@phpstan-type` 별칭이 성립한다), green: 통과한다. PHPUnit 파일 ConformanceTest, ExprFixturesTest, ParserTest, ExportsTest가 통과한다(T26.7-42).
 
 - T26.7-14: TypeScript, Python, C source는 같은 코드를 한 곳에만 둔다. TypeScript package entry는 render 전용 entry의 목록을 되풀이하지 않고 `export * from './render.js'`로 내보내며(build된 `dist/index.mjs`는 같은 이름 30개를 내보낸다), Python은 줄 정보와 함께 parse하는 코드를 `engine.py`의 `parse_with_lines`에만 두고, PHP 확장은 실패한 실행의 오류를 `pt_begin_failure`에서 시작하고, render의 출력을 `pt_return_output`에서 돌려주며, identifier를 `pt_identifier_end`에서 찾고, 반복되던 banner 없이 파일을 연다. Red: `make duplication-check`가 이 source에서 clone 7개를 찾았고, green: 0개이다(repository에 남은 clone 1개는 T26.7-2-8이 제거하는 Native class 쌍이다). `packages/ts`의 vitest 파일, unittest 파일 `test_api`, `test_analysis`, `test_exports`, `test_cli`, 다시 build한 확장으로 실행한 `packages/php-ext`의 PHPUnit 파일 13개가 통과한다(T26.7-14).
 

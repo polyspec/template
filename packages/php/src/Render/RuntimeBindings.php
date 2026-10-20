@@ -166,7 +166,8 @@ final class RuntimeBindings
     }
 
     /**
-     * Runs an operation of the value semantics; the error of the function or of the binding becomes the error of the node.
+     * Runs an operation of the value semantics; the error of the function or of the binding becomes the error of the
+     * node.
      *
      * @param callable(): mixed $operation
      * @param Span $span
@@ -175,7 +176,7 @@ final class RuntimeBindings
     {
         try {
             return $operation();
-        } catch (FunctionError|BindError $error) {
+        } catch (FunctionError | BindError $error) {
             throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
         }
     }

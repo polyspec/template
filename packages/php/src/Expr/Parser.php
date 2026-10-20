@@ -183,13 +183,23 @@ final class Parser
             $this->expect('COLON');
             $else = $this->parseTernary();
 
-            return Ast::node('Ternary', ['test' => $test, 'then' => $then, 'else' => $else], $start, $this->lexer->consumedEnd());
+            return Ast::node(
+                'Ternary',
+                ['test' => $test, 'then' => $then, 'else' => $else],
+                $start,
+                $this->lexer->consumedEnd(),
+            );
         }
         if ($token->type === 'ELVIS') {
             $this->next();
             $else = $this->parseTernary();
 
-            return Ast::node('Ternary', ['test' => $test, 'then' => null, 'else' => $else], $start, $this->lexer->consumedEnd());
+            return Ast::node(
+                'Ternary',
+                ['test' => $test, 'then' => null, 'else' => $else],
+                $start,
+                $this->lexer->consumedEnd(),
+            );
         }
 
         return $test;
@@ -215,14 +225,19 @@ final class Parser
         }
         $right = $this->parseCoalesce();
 
-        return Ast::node('Binary', ['op' => '??', 'left' => $left, 'right' => $right], $start, $this->lexer->consumedEnd());
+        return Ast::node(
+            'Binary',
+            ['op' => '??', 'left' => $left, 'right' => $right],
+            $start,
+            $this->lexer->consumedEnd(),
+        );
     }
 
     /**
-     * A precedence level of the binary operators, from the loosest (index 0) to the tightest, which is joined by unary
-     * expressions: operands of the next level joined by the operators of the level. The operators of a level that chains
-     * join from the left; an operator of a level that does not chain (associativity none, EXP-10) is unexpected after the
-     * second operand.
+     * A precedence level of the binary operators, from the loosest (index 0) to the tightest, which is joined by
+     * unary expressions: operands of the next level joined by the operators of the level. The operators of a level
+     * that chains join from the left; an operator of a level that does not chain (associativity none, EXP-10) is
+     * unexpected after the second operand.
      *
      * @return array<string, mixed>
      */
@@ -237,7 +252,12 @@ final class Parser
         while (($op = $operators[$this->peek()->type] ?? null) !== null) {
             $this->next();
             $right = $this->parseLevel($level + 1);
-            $left = Ast::node('Binary', ['op' => $op, 'left' => $left, 'right' => $right], $start, $this->lexer->consumedEnd());
+            $left = Ast::node(
+                'Binary',
+                ['op' => $op, 'left' => $left, 'right' => $right],
+                $start,
+                $this->lexer->consumedEnd(),
+            );
             if (!$chains && isset($operators[$this->peek()->type])) {
                 throw $this->unexpected($this->peek());
             }
@@ -263,7 +283,12 @@ final class Parser
             $operand = $this->parseUnary();
             $this->leave();
 
-            return Ast::node('Unary', ['op' => $token->type === 'BANG' ? '!' : '-', 'operand' => $operand], $token->start, $this->lexer->consumedEnd());
+            return Ast::node(
+                'Unary',
+                ['op' => $token->type === 'BANG' ? '!' : '-', 'operand' => $operand],
+                $token->start,
+                $this->lexer->consumedEnd(),
+            );
         }
 
         return $this->parsePostfix(false);
@@ -289,7 +314,12 @@ final class Parser
                 $args = [];
                 $this->parseArguments($args);
                 $close = $this->expect('RPAREN');
-                $node = Ast::node('ClassCall', ['className' => $first->value, 'method' => $method->value, 'args' => $args], $start, $close->end);
+                $node = Ast::node(
+                    'ClassCall',
+                    ['className' => $first->value, 'method' => $method->value, 'args' => $args],
+                    $start,
+                    $close->end,
+                );
             } elseif ($after->type === 'LPAREN' && (!$adjacentOnly || $after->start === $first->end)) {
                 $this->next();
                 $args = [];
@@ -298,7 +328,12 @@ final class Parser
                 $node = Ast::node('Call', ['name' => $first->value, 'args' => $args], $start, $close->end);
             } elseif ($after->type === 'DOT_IDENT' && Ast::isLoopMetaField(substr($after->value, 1))) {
                 $this->next();
-                $node = Ast::node('LoopMeta', ['loop' => $first->value, 'field' => substr($after->value, 1)], $start, $after->end);
+                $node = Ast::node(
+                    'LoopMeta',
+                    ['loop' => $first->value, 'field' => substr($after->value, 1)],
+                    $start,
+                    $after->end,
+                );
             } else {
                 $node = Ast::node('Var', ['name' => $first->value], $start, $first->end);
             }
@@ -319,7 +354,12 @@ final class Parser
                     $args = [];
                     $this->parseArguments($args);
                     $close = $this->expect('RPAREN');
-                    $node = Ast::node('MemberCall', ['object' => $node, 'method' => $method, 'args' => $args], $start, $close->end);
+                    $node = Ast::node(
+                        'MemberCall',
+                        ['object' => $node, 'method' => $method, 'args' => $args],
+                        $start,
+                        $close->end,
+                    );
                 } else {
                     $node = Ast::node('Member', ['object' => $node, 'key' => $method], $start, $token->end);
                 }
@@ -356,15 +396,30 @@ final class Parser
             case 'FALSE':
                 $this->next();
 
-                return Ast::node('Literal', ['kind' => 'bool', 'value' => $token->type === 'TRUE'], $token->start, $token->end);
+                return Ast::node(
+                    'Literal',
+                    ['kind' => 'bool', 'value' => $token->type === 'TRUE'],
+                    $token->start,
+                    $token->end,
+                );
             case 'NUMBER':
                 $this->next();
 
-                return Ast::node('Literal', ['kind' => 'number', 'value' => (float) $token->value], $token->start, $token->end);
+                return Ast::node(
+                    'Literal',
+                    ['kind' => 'number', 'value' => (float) $token->value],
+                    $token->start,
+                    $token->end,
+                );
             case 'STRING':
                 $this->next();
 
-                return Ast::node('Literal', ['kind' => 'string', 'value' => $token->decoded ?? ''], $token->start, $token->end);
+                return Ast::node(
+                    'Literal',
+                    ['kind' => 'string', 'value' => $token->decoded ?? ''],
+                    $token->start,
+                    $token->end,
+                );
             case 'LPAREN':
                 $this->next();
                 $inner = $this->parseExpression();

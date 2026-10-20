@@ -14,7 +14,10 @@ final class ExportsTest extends TestCase
     public function testTheExtensionRegistersItsEntryPoints(): void
     {
         foreach (['Engine', 'BoundMap', 'TemplateError'] as $name) {
-            $this->assertTrue(class_exists('Polyspec\Template\Native\\' . $name), $name . ' is not registered by the extension');
+            $this->assertTrue(
+                class_exists('Polyspec\Template\Native\\' . $name),
+                $name . ' is not registered by the extension',
+            );
         }
         $this->assertTrue(method_exists('Polyspec\Template\Native\Engine', 'parse'));
         $this->assertTrue(method_exists('Polyspec\Template\Native\BoundMap', 'bind'));

@@ -7,7 +7,8 @@ namespace Polyspec\Template\Render;
 /**
  * Runtime state required by both AST and generated programs.
  *
- * @phpstan-type Limits array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} the limits of a render (RT-33)
+ * @phpstan-type Limits array{iterations: int, depth: int, outputBytes: int, expressionDepth: int} the limits of a
+ *     render (RT-33)
  */
 interface RuntimeServices
 {

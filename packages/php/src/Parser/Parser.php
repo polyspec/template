@@ -350,7 +350,12 @@ final class Parser
                     $this->mark($word['start'], $word['end'], $word['quoted'] ? 'string' : 'path');
                 }
                 $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $body['end']));
-                $this->push(Ast::node('Block', ['id' => $body['id'], 'path' => $body['path'], 'scope' => $body['scope']], $start, $end));
+                $this->push(Ast::node(
+                    'Block',
+                    ['id' => $body['id'], 'path' => $body['path'], 'scope' => $body['scope']],
+                    $start,
+                    $end,
+                ));
                 break;
             case '%':
                 $end = $this->parseDirective($start, $open, $closeCount, $wrapper, $bodyStart, $firstTag);
@@ -571,7 +576,12 @@ final class Parser
         $end = $this->finishTag($start, $wrapper, $at + strlen($terminator));
         // The value starts after the sigil `*` (AST-9).
         $valueStart = Scanner::skipHorizontalSpace($this->text, $open + 1) + 1;
-        $this->comments[] = Ast::node('Comment', ['value' => substr($this->text, $valueStart, $at - $valueStart)], $start, $end);
+        $this->comments[] = Ast::node(
+            'Comment',
+            ['value' => substr($this->text, $valueStart, $at - $valueStart)],
+            $start,
+            $end,
+        );
 
         return $end;
     }
@@ -629,12 +639,22 @@ final class Parser
         if ($operator === '++' || $operator === '--') {
             $end = $this->finishTag($start, $wrapper, $this->expectCloseRaw($open, $closeCount, $afterOperator));
             $one = Ast::node('Literal', ['kind' => 'number', 'value' => 1.0], $afterOperator - 2, $afterOperator);
-            $expr = Ast::node('Binary', ['op' => $operator === '++' ? '+' : '-', 'left' => $variable, 'right' => $one], $bodyStart, $afterOperator);
+            $expr = Ast::node(
+                'Binary',
+                ['op' => $operator === '++' ? '+' : '-', 'left' => $variable, 'right' => $one],
+                $bodyStart,
+                $afterOperator,
+            );
         } else {
             $parser = $this->expressionParser($open, $closeCount, $afterOperator);
             $value = $parser->parseExpression();
             $end = $this->finishTag($start, $wrapper, $parser->expectClose());
-            $expr = $operator === '=' ? $value : Ast::node('Binary', ['op' => $operator[0], 'left' => $variable, 'right' => $value], $bodyStart, $parser->lexer->consumedEnd());
+            $expr = $operator === '=' ? $value : Ast::node(
+                'Binary',
+                ['op' => $operator[0], 'left' => $variable, 'right' => $value],
+                $bodyStart,
+                $parser->lexer->consumedEnd(),
+            );
         }
         $this->push(Ast::node('Set', ['name' => $name, 'expr' => $expr], $start, $end));
 
@@ -709,7 +729,12 @@ final class Parser
             }
             $value = implode('', array_column($pending, 'value'));
             if ($value !== '') {
-                $nodes[] = Ast::node('Text', ['value' => $value], $pending[0]['start'], $pending[count($pending) - 1]['end']);
+                $nodes[] = Ast::node(
+                    'Text',
+                    ['value' => $value],
+                    $pending[0]['start'],
+                    $pending[count($pending) - 1]['end'],
+                );
             }
             $pending = [];
         };
