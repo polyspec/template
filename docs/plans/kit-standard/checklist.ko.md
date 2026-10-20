@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: b50d9ff5aa320cfc8aa7a69cd3f4b60cb3febd38a36bcdf1bea768fc410e27c6 -->
+<!-- source-sha256: c0bc72c4d16a19a4c661394324b32b50533a6ed17bf81a13fcad0600bdab37d4 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -84,7 +84,7 @@
 | T26.7-44 | knip이 packages/compiler/src/backend-support.mts에서 쓰이지 않는 export(firstGroup, splitGroup, groupToSplit)와 packages/ts/src/ast-validator.mjs의 낡은 ignore를 찾지 못한다 | packages/compiler/src/backend-support.mts and config/knip-entries.json | `make lint-ts` | [ ] |
 | T26.7-45 | docs-check가 examples/site/index.html 링크를 통과시킨다: 문서는 추적되는 파일이 아니라 make showcase가 만드는 산출물을 가리킨다(T26.7-28의 회귀) | README.md, README.ko.md, docs/operations/showcase.md, docs/operations/showcase.ko.md and the Makefile prerequisites of docs-check | `make docs-check` | [ ] |
 | T26.7-46 | vitest가 각 test 파일을 한 번만 실행한다: include와 exclude가 var/를 제외하여 var/tools/mise 아래의 사본이 실행되지 않는다 | the vitest configuration of packages/ts and the root | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/smoke.test.ts` | [ ] |
-| T26.7-47 | worktree의 link가 examples/showcase/adapters/go/go.work를 Git이 무시하는 곳에만 쓰거나 repository가 이를 무시한다 | .gitignore and the tracked go.work of the root | `node ../kit/dist/link.mjs link` | [ ] |
+| T26.7-47 | worktree의 link가 examples/showcase/adapters/go/go.work를 Git이 무시하는 곳에만 쓰거나 repository가 이를 무시한다 | .gitignore and the tracked go.work of the root | `var/tools/bin/node --test tests/scripts/ignored-files.test.mts`, `node ../kit/dist/link.mjs link --siblings` | [o] |
 | T26.7-48 | oxlint가 tests/scripts에서 통과한다: conformance-cases.test.mts:32와 pre-commit-hook.test.mts:14가 any로부터의 unsafe assertion을 가진다 | tests/scripts/conformance-cases.test.mts and tests/scripts/pre-commit-hook.test.mts | `make lint-ts` | [ ] |
 | T26.7-49 | ruff format이 packages/python/src/polyspec/template/__init__.py에서 통과한다: T26.7-14의 재구성 뒤 163행에 빈 줄이 둘 더 있다 | packages/python/src/polyspec/template/__init__.py | `make lint-python` | [ ] |
 | T26.7-50 | kit 복사본은 15aeb680의 연결된 kit을 따른다 | PRINCIPLES.md, PRINCIPLES.ko.md, ruff.toml, .golangci.yml, clippy.toml and scripts/kit/kit-bootstrap.mk, written by make kit-sync | `make kit-check` | [o] |

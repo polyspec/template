@@ -1,5 +1,5 @@
 // Tests `.gitignore` (T13.1-4): it ignores no tracked file, and it ignores every output that the builds, the test
-// runs and the full-run guard write into the checkout.
+// runs, the full-run guard and the link write into the checkout.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const git = (...args: string[]) => spawnSync('git', args, { cwd: ROOT, encoding: 'utf8' });
 
-// One path inside each output that a build, a test run or the guard writes.
+// One path inside each output that a build, a test run, the guard or the link writes.
 const OUTPUTS = [
   'node_modules/tsup/package.json',
   'packages/ts/dist/index.mjs',
@@ -24,6 +24,11 @@ const OUTPUTS = [
   'packages/rust/target/debug/template',
   'examples/showcase/adapters/rust/target/release/showcase-adapter-rust',
   'packages/go/template',
+  // The go.work files that the link of kit writes beside each Go module (K205); the root go.work is the tracked workspace.
+  'examples/showcase/adapters/go/go.work',
+  'examples/showcase/adapters/go/go.work.sum',
+  'packages/go/go.work',
+  'packages/go/go.work.sum',
   'vendor/autoload.php',
   'docs/.vitepress/dist/index.html',
   'docs/.vitepress/cache/deps/_metadata.json',

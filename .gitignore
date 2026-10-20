@@ -62,3 +62,9 @@ packages/compiler/generated/
 examples/site/index.html
 examples/site/data/scenarios.json
 examples/site/data/results.json
+
+# The go.work and go.work.sum that the link of kit writes beside each Go module of the consumer, never tracked (K205, T26.7-47)
+examples/showcase/adapters/go/go.work
+examples/showcase/adapters/go/go.work.sum
+packages/go/go.work
+packages/go/go.work.sum
