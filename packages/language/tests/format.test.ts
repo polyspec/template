@@ -31,6 +31,7 @@ describe('fixtures', () => {
 });
 
 describe('format', () => {
+  // FMT-14: when nothing changes, the text is the source.
   it('reports an unchanged source', () => {
     expect(format('<p>{= a}</p>')).toEqual({ ok: true, text: '<p>{= a}</p>', changed: false });
   });
@@ -45,6 +46,8 @@ describe('format', () => {
     expect(text(format(source, { range: { start: 4, end: 8 } }))).toBe('{=a}{= b}{=c}');
   });
 
+  // FMT-8, LEX-22, LEX-20: the formatter reads the tags with the delimiter option []; LEX-11, LEX-21: the ] of a[0]
+  // stays in the expression; FMT-4, FMT-5: the echo tag and its operators take the spacing of the style.
   it('formats with the delimiter option', () => {
     expect(text(format('[= a[0]+1]\n[= [1,2][1]]', { delimiters: '[]' }))).toBe('[= a[0] + 1]\n[= [1, 2][1]]');
   });

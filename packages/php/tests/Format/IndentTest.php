@@ -58,6 +58,10 @@ final class IndentTest extends TestCase
         return $error;
     }
 
+    /**
+     * FMT-9, FMT-10: each line is indented by two spaces for each open element and template block, and a line that
+     * starts with {:}, {/} or an end tag one level less; FMT-15: formatting the result again changes nothing.
+     */
     public function testIndentsHtmlElementsAndTemplateBlocksByTwoSpaces(): void
     {
         self::assertSame(self::lines(

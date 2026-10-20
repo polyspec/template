@@ -3,6 +3,7 @@ import type { SyntaxToken } from '@polyspec/template';
 import { describe, expect, it } from 'vitest';
 import { joinTokens } from '../src/expression.js';
 
+// FMT-5: the tokens are joined with one space around a binary operator.
 describe('joinTokens', () => {
   const cases: [[string, SyntaxToken['kind']][], string][] = [
     [[["a", 'variable'], ["+", 'operator'], ["b", 'variable']], 'a + b'],

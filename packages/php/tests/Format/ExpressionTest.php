@@ -160,6 +160,8 @@ final class ExpressionTest extends TestCase
     }
 
     /**
+     * FMT-5: the tokens are joined with one space around a binary operator.
+     *
      * @param list<array{0: string, 1: string}> $tokens
      */
     #[DataProvider('cases')]

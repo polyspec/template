@@ -66,6 +66,10 @@ class SafetyInvariant(unittest.TestCase):
     not UTF-8 is the parse error E_LEX_INVALID_UTF8 of its bytes."""
 
     def test_holds_the_invariant_and_idempotence_over_every_case_template(self):
+        # FMT-13: the result is returned only when the ASTs without their spans are
+        # equal; FMT-3, FMT-7: the text outside the tags is kept; FMT-12: with indent
+        # null the structure is not read; FMT-14: a source that does not parse fails
+        # with the reason parse; FMT-15: formatting the result again changes nothing.
         files = sorted(CASES.rglob("*.tpl"))
         self.assertTrue(files, f"{CASES} holds no template")
         for path in files:

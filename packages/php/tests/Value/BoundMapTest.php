@@ -99,6 +99,7 @@ final class BoundMapTest extends TestCase
         self::assertSame($cases['outputs']['page'], self::program()->render('page.tpl', $bound));
     }
 
+    /** RT-26, VAL-22: merge takes an entry of the second map over the first and keeps the position of the first. */
     public function testMergeFollowsThePrecedenceOfRt26(): void
     {
         $cases = self::cases();

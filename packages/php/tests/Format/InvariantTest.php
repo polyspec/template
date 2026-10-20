@@ -47,6 +47,10 @@ final class InvariantTest extends TestCase
     }
 
     /**
+     * FMT-13: the result is returned only when the ASTs without their spans are equal; FMT-3, FMT-7: the text outside
+     * the tags is kept; FMT-12: with indent null the structure is not read; FMT-14: a source that does not parse fails
+     * with the reason parse; FMT-15: formatting the result again changes nothing.
+     *
      * @param array{delimiters?: string} $parseOptions
      */
     #[DataProvider('inputs')]

@@ -64,6 +64,7 @@ fn formats_the_fixtures_and_is_idempotent_on_them() {
     }
 }
 
+/// FMT-5: the tokens are joined with one space around a binary operator.
 #[test]
 fn applies_the_expression_spacing_of_the_style() {
     let cases = [
@@ -95,6 +96,7 @@ fn applies_the_expression_spacing_of_the_style() {
     }
 }
 
+/// FMT-14: when nothing changes, the text is the source.
 #[test]
 fn reports_an_unchanged_source_and_never_changes_a_comment() {
     for source in ["<p>{= a}</p>", "{*   a   *}{**}"] {
@@ -141,6 +143,8 @@ fn formats_only_the_tags_and_lines_inside_a_range() {
     assert_eq!(text(&source, &options), lines(&["<ul>", "<li>a</li>", "  <li>{= b}</li>", "</ul>"]));
 }
 
+/// FMT-8, LEX-22, LEX-20: the formatter reads the tags with the delimiter option []; LEX-11, LEX-21: the ] of a[0]
+/// stays in the expression; FMT-4, FMT-5: the echo tag and its operators take the spacing of the style.
 #[test]
 fn formats_with_the_delimiter_option() {
     let brackets = FormatOptions {
@@ -192,6 +196,8 @@ const BOARD: &[&str] = &[
     "",
 ];
 
+/// FMT-9, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
+/// with {:}, {/} or an end tag one level less; FMT-15: formatting the result again changes nothing.
 #[test]
 fn indents_html_elements_and_template_blocks() {
     assert_eq!(
@@ -434,6 +440,9 @@ fn ast(source: &str, delimiters: &Option<String>) -> serde_json::Value {
 /// The invariant and idempotence over every case that parses, in both indentation modes: the formatted text parses to
 /// the same AST without spans (and, when lines are indented, without line indentation), and formatting it again
 /// changes nothing. A source whose HTML structure cannot be indented is kept with an html error.
+/// FMT-13: the result is returned only when the ASTs without their spans are equal; FMT-3, FMT-7: the text outside the
+/// tags is kept; FMT-12: with indent null the structure is not read; FMT-14: a source that does not parse fails with
+/// the reason parse; FMT-15: formatting the result again changes nothing.
 #[test]
 fn holds_the_invariant_and_idempotence_over_every_case() {
     let mut checked = 0;

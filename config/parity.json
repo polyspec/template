@@ -35,7 +35,7 @@
   "units": [
     {
       "id": "conformance",
-      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24", "FUN-1", "FUN-2", "FUN-3", "FUN-4", "FUN-5", "FUN-6", "FUN-7", "FUN-8", "FUN-10", "FUN-11", "FUN-12", "FUN-13", "FUN-14", "FUN-15", "FUN-16", "FUN-17", "FUN-18", "FUN-19", "FUN-20", "FUN-21", "FUN-22", "FUN-23", "FUN-24", "FUN-25", "FUN-26", "FUN-27", "FUN-28", "FUN-29", "FUN-30", "FUN-31", "FUN-32", "FUN-33", "FUN-34", "FUN-35", "FUN-36", "FUN-37", "FUN-38", "FUN-39", "FUN-40", "FUN-41", "FUN-42", "FUN-49"],
+      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24", "FUN-1", "FUN-2", "FUN-3", "FUN-4", "FUN-5", "FUN-6", "FUN-7", "FUN-8", "FUN-10", "FUN-11", "FUN-12", "FUN-13", "FUN-14", "FUN-15", "FUN-16", "FUN-17", "FUN-18", "FUN-19", "FUN-20", "FUN-21", "FUN-22", "FUN-23", "FUN-24", "FUN-25", "FUN-26", "FUN-27", "FUN-28", "FUN-29", "FUN-30", "FUN-31", "FUN-32", "FUN-33", "FUN-34", "FUN-35", "FUN-36", "FUN-37", "FUN-38", "FUN-39", "FUN-40", "FUN-41", "FUN-42", "FUN-49", "LEX-8", "AST-1", "AST-3", "AST-4", "AST-5", "AST-6", "AST-7", "AST-9", "ERR-2", "ERR-5", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "EXP-20", "EXP-21", "EXP-22", "EXP-29"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -50,7 +50,7 @@
     },
     {
       "id": "tokens",
-      "requirements": ["LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23", "FMT-1", "FMT-2"],
+      "requirements": ["LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23", "FMT-1", "FMT-2"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -147,7 +147,7 @@
     },
     {
       "id": "bound-data",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-22", "RT-61"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/value/bound.test.ts", "id": "bound data (VAL-22) › renders a bound map with the same bytes as the host map (RT-61)" },
@@ -160,7 +160,7 @@
     },
     {
       "id": "bound-data-merge",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-22", "RT-26"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/value/bound.test.ts", "id": "bound data (VAL-22) › merges by the precedence of RT-26 and keeps the position of the first map" },
@@ -173,7 +173,7 @@
     },
     {
       "id": "host-binding-numbers",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-2"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "numbers › checks the value, not the host type or the JSON spelling (VAL-2)" },
@@ -199,7 +199,7 @@
     },
     {
       "id": "invalid-json",
-      "requirements": ["ERR-1", "ERR-2", "ERR-3", "ERR-4", "ERR-5", "ERR-6", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "ERR-12", "ERR-13", "ERR-14", "VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-12", "ERR-1", "ERR-3", "ERR-4", "ERR-12", "ERR-13", "ERR-14"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "JSON text › reports text that is not one JSON document as E_DATA_INVALID_JSON (VAL-12)" },
@@ -212,7 +212,7 @@
     },
     {
       "id": "host-values",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-21"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/host-values.test.ts", "id": "host arguments and native object equality › renders arguments.tpl (VAL-21, EXP-39)" },
@@ -316,7 +316,7 @@
     },
     {
       "id": "format-delimiters",
-      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15", "LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23"],
+      "requirements": ["FMT-4", "FMT-5", "FMT-8", "LEX-11", "LEX-20", "LEX-21", "LEX-22"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/format.test.ts", "id": "format › formats with the delimiter option" },
@@ -353,7 +353,7 @@
     },
     {
       "id": "parsed-ast",
-      "requirements": ["AST-1", "AST-2", "AST-3", "AST-4", "AST-5", "AST-6", "AST-7", "AST-8", "AST-9", "AST-10"],
+      "requirements": ["AST-10", "RT-41", "AST-8"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/decode.test.ts", "id": "decodeTemplate › renders a decoded template without its source through the render-only entry (RT-41)" },
@@ -365,7 +365,7 @@
     },
     {
       "id": "ast-decode-errors",
-      "requirements": ["AST-1", "AST-2", "AST-3", "AST-4", "AST-5", "AST-6", "AST-7", "AST-8", "AST-9", "AST-10", "ERR-1", "ERR-2", "ERR-3", "ERR-4", "ERR-5", "ERR-6", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "ERR-12", "ERR-13", "ERR-14"],
+      "requirements": ["AST-10"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/decode.test.ts", "id": "decodeTemplate › fails on every invalid AST of the shared fixture with the JSON Pointer of its invalid node" },
@@ -467,7 +467,7 @@
     },
     {
       "id": "format-unchanged",
-      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "requirements": ["FMT-14"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/format.test.ts", "id": "format › reports an unchanged source" },
@@ -479,7 +479,7 @@
     },
     {
       "id": "format-indentation",
-      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "requirements": ["FMT-9", "FMT-10", "FMT-15"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/indent.test.ts", "id": "indentation › indents HTML elements and template blocks by two spaces" },
@@ -504,7 +504,7 @@
     },
     {
       "id": "format-expression",
-      "requirements": ["EXP-1", "EXP-2", "EXP-3", "EXP-4", "EXP-5", "EXP-6", "EXP-7", "EXP-8", "EXP-9", "EXP-10", "EXP-11", "EXP-12", "EXP-13", "EXP-14", "EXP-15", "EXP-16", "EXP-17", "EXP-18", "EXP-19", "EXP-20", "EXP-21", "EXP-22", "EXP-23", "EXP-24", "EXP-25", "EXP-26", "EXP-27", "EXP-28", "EXP-29", "EXP-30", "EXP-31", "EXP-32", "EXP-33", "EXP-34", "EXP-35", "EXP-36", "EXP-37", "EXP-38", "EXP-39", "FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "requirements": ["FMT-5", "EXP-39", "FMT-6"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/expression.test.ts", "id": "joinTokens › joins [[\"a\",\"variable\"],[\"+\",\"operator\"],[\"b\",\"variable\"]]" },
@@ -516,7 +516,7 @@
     },
     {
       "id": "format-invariant",
-      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "requirements": ["FMT-3", "FMT-7", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/invariant.test.ts", "id": "safety invariant › tests/cases/block/anonymous-path-block/input.tpl" },
@@ -540,7 +540,7 @@
     },
     {
       "id": "bound-map-interface",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-22", "RT-67"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/compiler-interface.test.ts", "id": "compiler interface › bound map" },

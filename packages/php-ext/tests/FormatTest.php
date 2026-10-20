@@ -39,6 +39,10 @@ final class FormatTest extends TestCase
         );
     }
 
+    /**
+     * FMT-8, LEX-22, LEX-20: the formatter reads the tags with the delimiter option []; LEX-11, LEX-21: the ] of a[0]
+     * stays in the expression; FMT-4, FMT-5: the echo tag and its operators take the spacing of the style.
+     */
     public function testFormatsWithTheDelimiterOption(): void
     {
         $this->assertSame(

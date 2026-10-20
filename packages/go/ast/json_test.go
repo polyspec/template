@@ -53,12 +53,19 @@ func TestDecodeTemplateReadsTheCanonicalAST(t *testing.T) {
 	}
 }
 
-// TestADecodedTemplateRendersWithoutItsSource: a program renders the AST that a loader holds, read from its canonical
-// JSON, without parsing a source (RT-40).
+// TestADecodedTemplateRendersWithoutItsSource: the decode of the canonical JSON is the AST that Parse returns (AST-10),
+// and a program renders that AST, held by a loader, without parsing a source (RT-41).
 func TestADecodedTemplateRendersWithoutItsSource(t *testing.T) {
 	decoded, err := ast.DecodeTemplate([]byte(`{"type":"Template","name":"x.tpl","body":[{"type":"Echo","expr":{"type":"Binary","op":"+","left":{"type":"Var","name":"a","span":[3,4]},"right":{"type":"Literal","kind":"number","value":1,"span":[7,8]},"span":[3,8]},"span":[0,9]}],"comments":[]}`))
 	if err != nil {
 		t.Fatal(err)
+	}
+	parsed, err := template.Parse([]byte("{= a + 1}"), "x.tpl", template.ParseOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(decoded, parsed) {
+		t.Fatalf("decode: %#v, parse: %#v", decoded, parsed)
 	}
 	asts := loader.NewMapLoader(nil)
 	asts.SetAST("x.tpl", decoded)

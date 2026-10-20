@@ -36,6 +36,7 @@ class Case(unittest.TestCase):
 
 class JoinTokens(Case):
     def test_joins_tokens_with_the_separators_of_the_style(self):
+        # FMT-5: the tokens are joined with one space around a binary operator.
         cases = [
             ([("a", "variable"), ("+", "operator"), ("b", "variable")], "a + b"),
             (
@@ -272,6 +273,7 @@ class Format(Case):
         )
 
     def test_reports_an_unchanged_source(self):
+        # FMT-14: when nothing changes, the text is the source.
         self.assertEqual(
             format_template("<p>{= a}</p>"),
             FormatResult(ok=True, text="<p>{= a}</p>", changed=False),
@@ -298,6 +300,9 @@ class Format(Case):
         )
 
     def test_formats_with_the_delimiter_option(self):
+        # FMT-8, LEX-22, LEX-20: the formatter reads the tags with the delimiter option
+        # []; LEX-11, LEX-21: the ] of a[0] stays in the expression; FMT-4, FMT-5: the
+        # echo tag and its operators take the spacing of the style.
         self.assertEqual(
             self.text(
                 format_template(
@@ -389,6 +394,9 @@ BOARD = lines(
 
 class Indentation(Case):
     def test_indents_html_elements_and_template_blocks_by_two_spaces(self):
+        # FMT-9, FMT-10: each line is indented by two spaces for each open element and
+        # template block, and a line that starts with {:}, {/} or an end tag one level
+        # less; FMT-15: formatting the result again changes nothing.
         self.assertEqual(
             self.formatted(BOARD),
             lines(

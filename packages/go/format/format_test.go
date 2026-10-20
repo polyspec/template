@@ -42,6 +42,7 @@ func formatError(t *testing.T, source string, options Options) *Error {
 
 func lines(items ...string) string { return strings.Join(items, "\n") }
 
+// FMT-5: the tokens are joined with one space around a binary operator.
 func TestJoinTokens(t *testing.T) {
 	type tk = [2]string
 	cases := []struct {
@@ -99,6 +100,9 @@ func TestFixtures(t *testing.T) {
 	}
 }
 
+// FMT-8, LEX-22, LEX-20: the formatter reads the tags with the delimiter option []; LEX-11, LEX-21: the ] of a[0] stays
+// in the expression; FMT-4, FMT-5: the echo tag and its operators take the spacing of the style. FMT-14: when nothing
+// changes, the text is the source.
 func TestFormat(t *testing.T) {
 	if result, err := Format("<p>{= a}</p>", Options{}); err != nil || result.Changed || result.Text != "<p>{= a}</p>" {
 		t.Errorf("unchanged source: %+v %v", result, err)
@@ -140,6 +144,8 @@ func TestOptionErrors(t *testing.T) {
 
 const board = "<div class=\"board-list\">\n<h2>{= t[\"list.heading\"]}</h2>\n{? length(p.props.posts) == 0}\n<p>{= t[\"list.empty\"]}</p>\n{:}\n<ul>\n{@ post = p.props.posts}\n<li><a href=\"{= post.href}\">{= post.title}</a></li>\n{/}\n</ul>\n{/}\n</div>\n"
 
+// FMT-9, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
+// with {:}, {/} or an end tag one level less; FMT-15: formatting the result again changes nothing.
 func TestIndentation(t *testing.T) {
 	cases := []struct {
 		source, expected string
@@ -216,6 +222,9 @@ func TestSameTree(t *testing.T) {
 
 // The safety invariant over every conformance input: the formatted AST equals the source AST, the text outside tags
 // is unchanged (without line indentation for indent mode), and formatting is idempotent.
+// FMT-13: the result is returned only when the ASTs without their spans are equal; FMT-3, FMT-7: the text outside the
+// tags is kept; FMT-12: with indent null the structure is not read; FMT-14: a source that does not parse fails with the
+// reason parse; FMT-15: formatting the result again changes nothing.
 func TestInvariantOverConformanceInputs(t *testing.T) {
 	var files []string
 	err := filepath.WalkDir(casetest.Dir(t), func(path string, entry os.DirEntry, err error) error {

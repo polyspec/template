@@ -34,6 +34,8 @@ const BOARD = lines(
 );
 
 describe('indentation', () => {
+  // FMT-9, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
+  // with {:}, {/} or an end tag one level less; FMT-15: formatting the result again changes nothing.
   it('indents HTML elements and template blocks by two spaces', () => {
     expect(formatted(BOARD)).toBe(lines(
       '<div class="board-list">',

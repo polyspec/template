@@ -10,6 +10,8 @@ import (
 
 // The entries of bound maps (VAL-22) with the shared fixture of tests/fixtures/bound-data/cases.json.
 
+// TestMergeKeepsThePositionOfTheFirstMap: merge takes an entry of the second map over the first by the precedence of
+// RT-26 and keeps the position of the first (VAL-22).
 func TestMergeKeepsThePositionOfTheFirstMap(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join("..", "..", "..", "tests", "fixtures", "bound-data", "cases.json"))
 	if err != nil {

@@ -50,6 +50,9 @@ final class FormatterTest extends TestCase
         self::assertEquals(new FormatResult($once, false, null), Formatter::format($once));
     }
 
+    /**
+     * FMT-14: when nothing changes, the text is the source.
+     */
     public function testReportsAnUnchangedSource(): void
     {
         self::assertEquals(new FormatResult('<p>{= a}</p>', false, null), Formatter::format('<p>{= a}</p>'));
@@ -72,6 +75,10 @@ final class FormatterTest extends TestCase
         );
     }
 
+    /**
+     * FMT-8, LEX-22, LEX-20: the formatter reads the tags with the delimiter option []; LEX-11, LEX-21: the ] of a[0]
+     * stays in the expression; FMT-4, FMT-5: the echo tag and its operators take the spacing of the style.
+     */
     public function testFormatsWithTheDelimiterOption(): void
     {
         self::assertSame(
