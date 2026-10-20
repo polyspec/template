@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 54157af4cc481a3ede33e71a9608ab5fdae38ad5 */
+ * Stub hash: 60c1ca6247ff5d0469b8fc58da28777ea5115c75 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -122,6 +122,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_PreparedRender_render, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Engine___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, program, Polyspec\\Template\\Program, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Engine_prepare arginfo_class_Polyspec_Template_Program_prepare
+
+#define arginfo_class_Polyspec_Template_Engine_render arginfo_class_Polyspec_Template_Program_render
+
 #define arginfo_class_Polyspec_Template_PreparedExecution_render arginfo_class_Polyspec_Template_PreparedRender_render
 
 #define arginfo_class_Polyspec_Template_AstPreparedExecution_render arginfo_class_Polyspec_Template_PreparedRender_render
@@ -186,6 +194,9 @@ ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition);
 ZEND_METHOD(Polyspec_Template_TemplateError, toArray);
 ZEND_METHOD(Polyspec_Template_PreparedRender, __construct);
 ZEND_METHOD(Polyspec_Template_PreparedRender, render);
+ZEND_METHOD(Polyspec_Template_Engine, __construct);
+ZEND_METHOD(Polyspec_Template_Engine, prepare);
+ZEND_METHOD(Polyspec_Template_Engine, render);
 ZEND_METHOD(Polyspec_Template_AstPreparedExecution, render);
 ZEND_METHOD(Polyspec_Template_AstProgram, __construct);
 ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate);
@@ -264,6 +275,13 @@ static const zend_function_entry class_Polyspec_Template_Program_methods[] = {
 static const zend_function_entry class_Polyspec_Template_PreparedRender_methods[] = {
 	ZEND_ME(Polyspec_Template_PreparedRender, __construct, arginfo_class_Polyspec_Template_PreparedRender___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_PreparedRender, render, arginfo_class_Polyspec_Template_PreparedRender_render, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Engine_methods[] = {
+	ZEND_ME(Polyspec_Template_Engine, __construct, arginfo_class_Polyspec_Template_Engine___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Engine, prepare, arginfo_class_Polyspec_Template_Engine_prepare, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Engine, render, arginfo_class_Polyspec_Template_Engine_render, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -471,6 +489,29 @@ static zend_class_entry *register_class_Polyspec_Template_PreparedRender(void)
 	zend_string *property_execution_class_Polyspec_Template_PreparedExecution = zend_string_init("Polyspec\\Template\\PreparedExecution", sizeof("Polyspec\\Template\\PreparedExecution")-1, 1);
 	zend_declare_typed_property(class_entry, property_execution_name, &property_execution_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_execution_class_Polyspec_Template_PreparedExecution, 0, 0));
 	zend_string_release(property_execution_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Engine(zend_class_entry *class_entry_Polyspec_Template_Program)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template", "Engine", class_Polyspec_Template_Engine_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+	zend_class_implements(class_entry, 1, class_entry_Polyspec_Template_Program);
+
+	zval property_program_default_value;
+	ZVAL_UNDEF(&property_program_default_value);
+	zend_string *property_program_name = zend_string_init("program", sizeof("program") - 1, 1);
+	zend_string *property_program_class_Polyspec_Template_Program = zend_string_init("Polyspec\\Template\\Program", sizeof("Polyspec\\Template\\Program")-1, 1);
+	zend_declare_typed_property(class_entry, property_program_name, &property_program_default_value, ZEND_ACC_PRIVATE|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_program_class_Polyspec_Template_Program, 0, 0));
+	zend_string_release(property_program_name);
 
 	return class_entry;
 }

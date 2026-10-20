@@ -1333,6 +1333,68 @@ ZEND_METHOD(Polyspec_Template_PreparedRender, render)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* Engine: a Program that delegates every request to the Program it holds                          */
+/* ----------------------------------------------------------------------------------------------- */
+
+static zend_class_entry *pt_program_ce, *pt_program_engine_ce;
+
+ZEND_METHOD(Polyspec_Template_Engine, __construct)
+{
+    zval *program;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_OBJECT_OF_CLASS(program, pt_program_ce)
+    ZEND_PARSE_PARAMETERS_END();
+    zend_update_property(pt_program_engine_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("program"), program);
+}
+
+/* Calls the method `method` of the program of the engine with the arguments of the request, unchanged; what the program
+ * returns or throws is the result of the engine. */
+static void pt_program_engine_delegate(zend_execute_data *execute_data, zval *return_value, const char *method, size_t length)
+{
+    HashTable *target_array;
+    zend_string *target_name;
+    zval *assign = NULL;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(1, 3)
+        Z_PARAM_ARRAY_HT_OR_STR(target_array, target_name)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ZVAL(assign)
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zval params[3];
+    if (target_array != NULL) {
+        ZVAL_ARR(&params[0], target_array);
+    } else {
+        ZVAL_STR(&params[0], target_name);
+    }
+    if (assign != NULL) {
+        ZVAL_COPY_VALUE(&params[1], assign);
+    } else {
+        ZVAL_EMPTY_ARRAY(&params[1]);
+    }
+    if (options != NULL) {
+        ZVAL_ARR(&params[2], options);
+    } else {
+        ZVAL_EMPTY_ARRAY(&params[2]);
+    }
+    zval rv;
+    zval *program = zend_read_property(pt_program_engine_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("program"), 1, &rv);
+    zend_function *function = zend_hash_str_find_ptr(&Z_OBJCE_P(program)->function_table, method, length);
+    zend_call_known_instance_method(function, Z_OBJ_P(program), return_value, 3, params);
+}
+
+ZEND_METHOD(Polyspec_Template_Engine, prepare)
+{
+    pt_program_engine_delegate(execute_data, return_value, ZEND_STRL("prepare"));
+}
+
+ZEND_METHOD(Polyspec_Template_Engine, render)
+{
+    pt_program_engine_delegate(execute_data, return_value, ZEND_STRL("render"));
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* AstProgram (RT-1 to RT-9, RT-40, RT-41, RT-61)                                                   */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -1738,6 +1800,8 @@ static PHP_MINIT_FUNCTION(polyspec_template)
 
     zend_class_entry *program = register_class_Polyspec_Template_Program();
     pt_prepared_render_ce = register_class_Polyspec_Template_PreparedRender();
+    pt_program_ce = program;
+    pt_program_engine_ce = register_class_Polyspec_Template_Engine(program);
     zend_class_entry *execution = register_class_Polyspec_Template_PreparedExecution();
     pt_ast_execution_ce = register_class_Polyspec_Template_AstPreparedExecution(execution);
     pt_ast_execution_ce->create_object = pt_execution_create;

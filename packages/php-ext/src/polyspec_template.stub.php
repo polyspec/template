@@ -273,6 +273,21 @@ final class PreparedRender
     public function render(): string {}
 }
 
+/** Delegates requests to one complete AST or generated program. */
+final class Engine implements Program
+{
+    private readonly Program $program;
+
+    /** Creates an engine from one program. */
+    public function __construct(Program $program) {}
+
+    /** Delegates request preparation to the program. */
+    public function prepare(string|array $target, mixed $assign = [], array $options = []): PreparedRender {}
+
+    /** Delegates rendering to the program. */
+    public function render(string|array $target, mixed $assign = [], array $options = []): string {}
+}
+
 /** One reusable prepared render operation. */
 interface PreparedExecution
 {

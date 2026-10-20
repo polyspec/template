@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2b05f21007259dba54f1a3f6b20e81bf142f5ddbffc4c37d882cf3168d2bc872 -->
+<!-- source-sha256: c12ce04b212ee330205ed05c3f480d12c3bc05b662b041496711e1b7793dbfad -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-1-5: PHP 확장은 `Polyspec\Template\Engine`을 library와 같은 signature의 internal final class로 등록한다. private readonly `program`에 `Program`을 가지고 `prepare`와 `render`를 target, assign, option을 바꾸지 않고(생략하면 기본값 `[]`과 `[]`) 그 Program에 넘기며, 그것이 돌려주는 것을 돌려주고 던지는 것을 그대로 전달하는 `Program`이다. Red: 기록용 program `RecordingProgram.php`를 쓰는 새 `packages/php-ext/tests/ProgramEngineTest.php`가 3개 중 1개 실패했다(`Engine is not registered by the extension`); green: 확장을 load하고 `ProgramEngineTest` 3과 `EngineRefreshTest` 4가 통과하며 `make lint-php-ext`가 통과한다. `CompilerInterfaceTest`는 이제 `Engine`의 assertion을 통과하고 `AstProgram::$runtime`(T26.7-2-6)에서 멈춘다 (T26.7-2-1-5).
 
 - T26.7-2-1-4: PHP 확장은 `Polyspec\Template\AstProgram`, `PreparedExecution`, `AstPreparedExecution`을 library와 같은 signature의 internal class로 등록한다. loader 객체와 option `functions`, `limits`, `delimiters`, `artifact_refresh`를 받는 생성자, readonly `loader`, `delimiters`, `artifactRefresh`, `parse`, `analyze`, `decodeTemplate`(library와 같이 class `AstDecoder`의 decode), `register`, `registerClass`, `hostFunction`, `classFunction`, `limits`, `prepare`, `render`이다. loader 객체가 source나 AST로 주는 template을 refresh 정책에 따라 version으로 cache하여 렌더하고(RT-9, RT-40), AST 배열로 주어진 template을 렌더하며(RT-41), library의 `Value\MapValue`를 map으로 bind하며, 그 key와 value를 읽을 수 없으면 `E_INTERNAL`로 실패한다. 확장의 AST 배열의 number literal은 library의 parser가 만드는 것처럼 float이고(AST-10), JSON 텍스트는 여전히 `1e3`을 `1000`으로 쓴다. 확장은 AST 배열과 loader 결과를 주어진 그대로만 읽는다. kind에 맞지 않는 literal 값, 없는 name, 음수 span은 `E_INTERNAL`, version이 없거나 source와 AST가 모두 없는 loader 결과는 `E_LOAD_FAILED`, 배열이 아닌 `functions`는 `TypeError`이다. Red: commit된 source로 build한 확장에서 새 `packages/php-ext/tests/AstProgramTest.php`가 6개 중 4개 실패했고(`AstProgram is not registered by the extension`), float 변경 전의 확장 AstProgram에서 `AstDecodeTest::testADecodedTemplateIsTheAstThatParseReturnsAndRenders`가 실패했다(`1`과 `1.0`); green: 확장을 load하고 `AstProgramTest` 6, 확장의 `BoundMapTest` 14(이제 그 program이 확장의 bound map을 렌더한다, RT-74), `EngineTest` 27, `AstDecodeTest` 5, `EngineRefreshTest` 4, `ConformanceTest` 765가 통과하고 `make lint-php-ext`가 통과한다. 확장을 load하면 다음은 각 항목까지 red로 남는다. `ExprFixturesTest` 56과 `CompilerInterfaceTest` 1(`Render\Context`와 `AstProgram::$runtime`에 RuntimeServices가 필요하다, T26.7-2-6), `Value/BoundMapTest` 5와 `ExportsTest` 1(library의 bound map을 확장에 준다, T26.7-2-2). `make duplication-check`는 stub의 선언을 library의 clone으로 보고한다. S10에 따라 이는 library의 선언이며 kit K366이 stub을 검사에서 뺀다 (T26.7-2-1-4).
 
