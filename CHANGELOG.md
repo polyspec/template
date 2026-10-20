@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-2-2: every child row is done (T26.7-2-2-1 to T26.7-2-2-5), so the row is done. Its Verification runs the owner tests of its children, with `Value/BoundMapTest.php` and `ExportsTest.php` of the library in place of the removed `packages/php-ext/tests/BoundMapTest.php` and `ExportsTest.php`, and the parity check of the units it owns (api-bound-map api-bind api-merge api-parse-json api-bind-map api-bind-data), in place of the unscoped `make parity-declarations-check`; the commands pass (T26.7-2-2).
+
 - T26.7-32-5: the Verification names the library tests that T26.7-2-8-2 put in place of the removed tests of the PHP extension (ExtConformanceTest by ConformanceTest, FormatTest by FormatterTest). Red: `make test-php-ext` with the old names selected none of the removed tests, so the run checked less than the row states. Green: with the new names it runs ConformanceTest, AnalyzeTest, FormatterTest with the extension, and every test passes; the run still exits 2 because those tests load `packages/php/src/Format` of the library, which the extension registers in T26.7-2-7 and T26.7-2-16, so the row stays active (T26.7-32-5).
 
 - T26.7-32-1: the Verification names the library tests that T26.7-2-8-2 put in place of the removed tests of the PHP extension (ExtConformanceTest by ConformanceTest). Red: `make test-php-ext` with the old names selected none of the removed tests, so the run checked less than the row states. Green: with the new names it runs ConformanceTest, HostValuesTest with the extension, and every test passes; the run still exits 2 because those tests load `packages/php/src/Format` of the library, which the extension registers in T26.7-2-7 and T26.7-2-16, so the row stays active (T26.7-32-1).
