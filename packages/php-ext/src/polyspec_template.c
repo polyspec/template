@@ -211,6 +211,263 @@ ZEND_METHOD(Polyspec_Template_Value_MapValue, copy)
     ZVAL_COPY(target, items);
 }
 
+/* ----------------------------------------------------------------------------------------------- */
+/* Value\Bind (VAL-2, VAL-14, VAL-17, VAL-19, VAL-20, VAL-22, RT-4, RT-24)                         */
+/* ----------------------------------------------------------------------------------------------- */
+
+#define PT_BIND_MAX_DEPTH 64
+
+/* The PHP value of a bound value: a map is a MapValue, a list a PHP list, a number a float (VAL-17). */
+static void pt_library_value(pt_value value, zval *result)
+{
+    switch (value.type) {
+        case PT_NULL: ZVAL_NULL(result); return;
+        case PT_BOOL: ZVAL_BOOL(result, value.u.b); return;
+        case PT_NUMBER: ZVAL_DOUBLE(result, value.u.number); return;
+        case PT_STRING:
+        case PT_SAFE: ZVAL_STRINGL(result, value.u.str.s, value.u.str.n); return;
+        case PT_LIST:
+            array_init_size(result, value.u.list->count);
+            for (uint32_t i = 0; i < value.u.list->count; i++) {
+                zval item;
+                pt_library_value(value.u.list->items[i], &item);
+                add_next_index_zval(result, &item);
+            }
+            return;
+        case PT_MAP: {
+            const pt_map *map = value.u.map;
+            object_init_ex(result, pt_map_value_ce);
+            zval *items = OBJ_PROP_NUM(Z_OBJ_P(result), 0);
+            SEPARATE_ARRAY(items);
+            for (uint32_t i = 0; i < map->used; i++) {
+                if (!map->entries[i].live) {
+                    continue;
+                }
+                zval item;
+                pt_library_value(map->entries[i].value, &item);
+                zend_symtable_str_update(Z_ARRVAL_P(items), map->entries[i].key.s, map->entries[i].key.n, &item);
+            }
+            return;
+        }
+        default:
+            ZVAL_OBJ_COPY(result, value.u.object);
+            return;
+    }
+}
+
+/* Throws a BindError with its code and message; the message is released. */
+static void pt_throw_bind_error(const char *code, zend_string *message)
+{
+    zval exception;
+    object_init_ex(&exception, pt_bind_error_ce);
+    zend_update_property_string(pt_bind_error_ce, Z_OBJ(exception), ZEND_STRL("errorCode"), code);
+    zend_update_property_str(zend_ce_exception, Z_OBJ(exception), ZEND_STRL("message"), message);
+    zend_string_release(message);
+    zend_throw_exception_object(&exception);
+}
+
+/* Binds a host value into the PHP value of the library; false after a BindError is thrown. */
+static bool pt_bind_library(zval *input, zval *result)
+{
+    pt_arena arena;
+    pt_arena_init(&arena);
+    pt_value value = {0};
+    pt_bind_error error = {NULL, NULL};
+    if (!pt_bind_value(&arena, input, &value, &error)) {
+        pt_throw_bind_error(error.code, error.message);
+        pt_arena_free(&arena);
+        return false;
+    }
+    pt_library_value(value, result);
+    pt_arena_free(&arena);
+    return true;
+}
+
+/* The entries of a library BoundMap, read in the scope of its class (VAL-22); NULL for any other value. */
+static zval *pt_bound_entries(zval *input, zval *rv)
+{
+    if (Z_TYPE_P(input) != IS_OBJECT
+        || !zend_string_equals_literal(Z_OBJCE_P(input)->name, "Polyspec\\Template\\BoundMap")) {
+        return NULL;
+    }
+    return zend_read_property(Z_OBJCE_P(input), Z_OBJ_P(input), ZEND_STRL("entries"), 1, rv);
+}
+
+/* VAL-20: whether the depth of a template value is at most `limit`; the walk stops below the limit. */
+static bool pt_zval_depth_within(zval *value, zend_long limit)
+{
+    ZVAL_DEREF(value);
+    HashTable *items;
+    if (Z_TYPE_P(value) == IS_ARRAY) {
+        items = Z_ARRVAL_P(value);
+    } else if (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == pt_map_value_ce) {
+        items = Z_ARRVAL_P(OBJ_PROP_NUM(Z_OBJ_P(value), 0));
+    } else {
+        return true;
+    }
+    if (limit == 0) {
+        return false;
+    }
+    zval *item;
+    ZEND_HASH_FOREACH_VAL(items, item) {
+        if (!pt_zval_depth_within(item, limit - 1)) {
+            return false;
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    return true;
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, value)
+{
+    zval *input;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(input)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!pt_bind_library(input, return_value)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, checkFloat)
+{
+    double value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_DOUBLE(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (!zend_finite(value)) {
+        pt_throw_bind_error(PT_E_DATA_NUMBER_NOT_FINITE, zend_string_init(ZEND_STRL("number is not finite"), 0));
+        RETURN_THROWS();
+    }
+    if (fabs(value) > 9007199254740991.0) {
+        zval number;
+        ZVAL_DOUBLE(&number, value);
+        zend_string *text = zval_get_string(&number);
+        zend_string *message = zend_strpprintf(0, "number %s is outside the safe range", ZSTR_VAL(text));
+        zend_string_release(text);
+        pt_throw_bind_error(PT_E_DATA_NUMBER_RANGE, message);
+        RETURN_THROWS();
+    }
+    RETURN_DOUBLE(value);
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, checkLevel)
+{
+    zend_long level;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_LONG(level)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (level > PT_BIND_MAX_DEPTH) {
+        pt_throw_bind_error(PT_E_DATA_DEPTH, zend_string_init(ZEND_STRL("lists and maps nest deeper than 64 levels"), 0));
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, depthWithin)
+{
+    zval *value;
+    zend_long limit;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(value)
+        Z_PARAM_LONG(limit)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_BOOL(pt_zval_depth_within(value, limit));
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, publicProperties)
+{
+    zval *object;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_OBJECT(object)
+    ZEND_PARSE_PARAMETERS_END();
+
+    array_init(return_value);
+    HashTable *properties = Z_OBJ_HT_P(object)->get_properties(Z_OBJ_P(object));
+    if (properties == NULL) {
+        return;
+    }
+    zend_ulong index;
+    zend_string *name;
+    zval *value;
+    ZEND_HASH_FOREACH_KEY_VAL_IND(properties, index, name, value) {
+        if (Z_TYPE_P(value) == IS_UNDEF) {
+            continue;
+        }
+        if (name != NULL && ZSTR_LEN(name) > 0 && ZSTR_VAL(name)[0] == '\0') {
+            continue;
+        }
+        ZVAL_DEREF(value);
+        Z_TRY_ADDREF_P(value);
+        if (name != NULL) {
+            zend_symtable_update(Z_ARRVAL_P(return_value), name, value);
+        } else {
+            zend_hash_index_update(Z_ARRVAL_P(return_value), index, value);
+        }
+    } ZEND_HASH_FOREACH_END();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, map)
+{
+    zval *input;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(input)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(input);
+    if (Z_TYPE_P(input) == IS_NULL) {
+        object_init_ex(return_value, pt_map_value_ce);
+        return;
+    }
+    zval rv;
+    zval *entries = pt_bound_entries(input, &rv);
+    if (entries != NULL) {
+        ZVAL_COPY(return_value, entries);
+        return;
+    }
+    zval result;
+    if (!pt_bind_library(input, &result)) {
+        RETURN_THROWS();
+    }
+    if (Z_TYPE(result) == IS_OBJECT && Z_OBJCE(result) == pt_map_value_ce) {
+        ZVAL_COPY_VALUE(return_value, &result);
+        return;
+    }
+    zval_ptr_dtor(&result);
+    if (Z_TYPE(result) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(result)) == 0) {
+        object_init_ex(return_value, pt_map_value_ce);
+        return;
+    }
+    pt_throw_bind_error(PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init(ZEND_STRL("assign is not a map"), 0));
+    RETURN_THROWS();
+}
+
+ZEND_METHOD(Polyspec_Template_Value_Bind, data)
+{
+    zval *input;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(input)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(input);
+    zval rv;
+    zval *entries = pt_bound_entries(input, &rv);
+    if (entries != NULL) {
+        ZVAL_COPY(return_value, entries);
+        return;
+    }
+    if (!pt_bind_library(input, return_value)) {
+        RETURN_THROWS();
+    }
+    if (Z_TYPE_P(return_value) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(return_value)) == 0) {
+        zval_ptr_dtor(return_value);
+        object_init_ex(return_value, pt_map_value_ce);
+    }
+}
+
 /* Returns the 1-based line and column of a byte offset in a line index (the offsets at which the lines start). */
 static void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend_long *col)
 {
@@ -1926,6 +2183,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_safe_string_ce = register_class_Polyspec_Template_Value_SafeString();
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
+    register_class_Polyspec_Template_Value_Bind();
 
     pt_engine_ce = register_class_Polyspec_Template_Native_Engine();
     pt_engine_ce->create_object = pt_engine_create;

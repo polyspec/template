@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 990c696af270a392182d3f2dc12284de4491ade6868dc4c8dceff9a29537d430 -->
+<!-- source-sha256: 1c78e8c4cfc8e2e338280a6f89d0c26a9c1cb33d6610307d54dba360a578ffdf -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-2-3: PHP 확장은 `Polyspec\Template\Value\Bind`를 library와 같은 public signature의 internal final class로 등록한다. `MAX_DEPTH` 64, `value`, `checkFloat`, `checkLevel`, `depthWithin`, `publicProperties`, `map`, `data`이다. 이들은 library의 값(map은 string key의 `MapValue`, number는 float, host 객체는 그 instance)을 주고 library의 `BindError`와 그 message로 실패하며, `map`과 `data`는 library bound map의 entry를 다시 bind하지 않고 읽는다. `packages/php-ext/tests/BindTest.php`는 확장의 internal test이다. Red: 새 `BindTest`가 확장을 load하고 7개 중 1개 실패했고(`Bind is not registered by the extension`), 동작의 test 6개는 library만으로 통과한다; green: 확장을 load하고 `BindTest` 7, `Value/ValueTest` 7, `Value/HostBindingTest` 14, `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-3).
 
 - T26.7-49: Python 패키지 항목(`packages/python/src/polyspec/template/__init__.py`)은 마지막 줄 뒤에 빈 줄이 없고 쓰이지 않는 noqa directive도 없다. Red: `make lint-python`이 `ruff format --check`(마지막 줄 162 뒤의 빈 줄 두 개가 많음)와 `ruff check`(RUF100, 112행의 쓰이지 않는 `# noqa: E402`)에서 실패했다; green: `make lint-python`이 통과한다(ruff check, ruff format --check, vulture) (T26.7-49).
 

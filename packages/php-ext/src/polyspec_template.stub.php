@@ -474,3 +474,55 @@ final class MapValue
 
     public function copy(): MapValue {}
 }
+
+/**
+ * Host binding of PHP values (VAL-2, VAL-14, VAL-17, VAL-20).
+ */
+final class Bind
+{
+    /**
+     * The nesting depth limit of lists and maps (VAL-20).
+     *
+     * @var int
+     */
+    public const MAX_DEPTH = 64;
+
+    public static function value(mixed $input): mixed {}
+
+    /**
+     * VAL-2, VAL-3: a float is accepted when it is finite and its magnitude is at most 2^53 - 1.
+     */
+    public static function checkFloat(float $value): float {}
+
+    /**
+     * VAL-20: fails when a list or map would be entered at a level greater than the limit; the level
+     * counts the enclosing lists and maps, including the one being entered.
+     */
+    public static function checkLevel(int $level): void {}
+
+    /**
+     * VAL-20: whether the depth of a template value is at most `$limit`; the walk stops below the limit.
+     */
+    public static function depthWithin(mixed $value, int $limit): bool {}
+
+    /**
+     * The public properties of an object: the entries of get_mangled_object_vars() whose names are
+     * not mangled. The function ignores the class scope of the caller (VAL-14, VAL-19).
+     *
+     * @return array<int|string, mixed>
+     */
+    public static function publicProperties(object $object): array {}
+
+    /**
+     * Binds assign data (RT-4): null and the empty array are the empty map, a bound map gives its
+     * entries without binding them again (VAL-22), and every other value must bind to a map.
+     */
+    public static function map(mixed $input): MapValue {}
+
+    /**
+     * Binds the data of a template definition (RT-24): a bound map gives its entries without binding
+     * them again (VAL-22); every other value is bound like any host value, and the empty array is the
+     * empty map.
+     */
+    public static function data(mixed $input): mixed {}
+}

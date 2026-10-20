@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e0b7b8c9d8ed3ad588f5c815556b022fd33f58d2 */
+ * Stub hash: b5e9a9f8dac81cd54461650dd98055a212aa8614 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -211,6 +211,33 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Value_MapValue_copy, 0, 0, Polyspec\\Template\\Value\\MapValue, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Bind_value, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Bind_checkFloat, 0, 1, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Bind_checkLevel, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Bind_depthWithin, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, limit, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Bind_publicProperties, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Value_Bind_map, 0, 1, Polyspec\\Template\\Value\\MapValue, 0)
+	ZEND_ARG_TYPE_INFO(0, input, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Value_Bind_data arginfo_class_Polyspec_Template_Value_Bind_value
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -258,6 +285,13 @@ ZEND_METHOD(Polyspec_Template_Value_MapValue, keys);
 ZEND_METHOD(Polyspec_Template_Value_MapValue, values);
 ZEND_METHOD(Polyspec_Template_Value_MapValue, entries);
 ZEND_METHOD(Polyspec_Template_Value_MapValue, copy);
+ZEND_METHOD(Polyspec_Template_Value_Bind, value);
+ZEND_METHOD(Polyspec_Template_Value_Bind, checkFloat);
+ZEND_METHOD(Polyspec_Template_Value_Bind, checkLevel);
+ZEND_METHOD(Polyspec_Template_Value_Bind, depthWithin);
+ZEND_METHOD(Polyspec_Template_Value_Bind, publicProperties);
+ZEND_METHOD(Polyspec_Template_Value_Bind, map);
+ZEND_METHOD(Polyspec_Template_Value_Bind, data);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -383,6 +417,17 @@ static const zend_function_entry class_Polyspec_Template_Value_MapValue_methods[
 	ZEND_ME(Polyspec_Template_Value_MapValue, values, arginfo_class_Polyspec_Template_Value_MapValue_values, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Value_MapValue, entries, arginfo_class_Polyspec_Template_Value_MapValue_entries, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Value_MapValue, copy, arginfo_class_Polyspec_Template_Value_MapValue_copy, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Value_Bind_methods[] = {
+	ZEND_ME(Polyspec_Template_Value_Bind, value, arginfo_class_Polyspec_Template_Value_Bind_value, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Bind, checkFloat, arginfo_class_Polyspec_Template_Value_Bind_checkFloat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Bind, checkLevel, arginfo_class_Polyspec_Template_Value_Bind_checkLevel, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Bind, depthWithin, arginfo_class_Polyspec_Template_Value_Bind_depthWithin, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Bind, publicProperties, arginfo_class_Polyspec_Template_Value_Bind_publicProperties, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Bind, map, arginfo_class_Polyspec_Template_Value_Bind_map, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Value_Bind, data, arginfo_class_Polyspec_Template_Value_Bind_data, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -708,6 +753,27 @@ static zend_class_entry *register_class_Polyspec_Template_Value_MapValue(void)
 	zend_string *property_items_name = zend_string_init("items", sizeof("items") - 1, 1);
 	zend_declare_typed_property(class_entry, property_items_name, &property_items_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY));
 	zend_string_release(property_items_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Value_Bind(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Value", "Bind", class_Polyspec_Template_Value_Bind_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval const_MAX_DEPTH_value;
+	ZVAL_LONG(&const_MAX_DEPTH_value, 64);
+	zend_string *const_MAX_DEPTH_name = zend_string_init_interned("MAX_DEPTH", sizeof("MAX_DEPTH") - 1, 1);
+	zend_declare_class_constant_ex(class_entry, const_MAX_DEPTH_name, &const_MAX_DEPTH_value, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(const_MAX_DEPTH_name);
 
 	return class_entry;
 }
