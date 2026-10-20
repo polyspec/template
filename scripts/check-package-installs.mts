@@ -113,7 +113,7 @@ func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(da
 
 function checkRust() {
   const target = join(temporary, 'cargo-target');
-  run(CARGO, ['package', '--locked', '--allow-dirty', '--no-verify', '--manifest-path', join(root, 'packages/rust/Cargo.toml')], { env: { CARGO_TARGET_DIR: target } });
+  run(CARGO, ['package', '--locked', '--allow-dirty', '--manifest-path', join(root, 'packages/rust/Cargo.toml')], { env: { CARGO_TARGET_DIR: target } });
   const cargoManifest = readToml(join(root, 'packages/rust/Cargo.toml'));
   const crate = `polyspec-template-${tomlString(tomlTable(cargoManifest.package, 'the [package] of packages/rust/Cargo.toml').version, 'the version of packages/rust/Cargo.toml')}`;
   const archive = join(target, `package/${crate}.crate`);

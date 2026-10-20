@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e788958876780a29a0add9426f291278f9ebda0e9975cfbe314c6a89136e8e19 -->
+<!-- source-sha256: 9e9a686faa260f05e3421092c511d0edd540533fee2fa6a8b2c00f73db890b57 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-25: install 검사는 `cargo package`를 `--no-verify` 없이 실행하므로 cargo가 package된 crate를 build해 검증한다(30 s). Red: `make bypass-check`가 우회 1건(`scripts/check-package-installs.mts:116`)을 찾았고, green: 찾지 않으며 `packages/rust`의 `cargo package --locked --allow-dirty --offline`이 package를 build하고 검증한다. showcase의 Rust adapter는 `cargo check --offline --locked`를 통과한다(T26.7-25).
 
 - T26.7-24: `tests/scripts/failure-messages.test.mts`의 "a tool that cannot start fails with its command and the install fix" test는 go test를 `-run`으로 선택하므로, kit의 run-tests가 선택 없는 go 실행을 거부하지 않고 도구 시작까지 간다. Red: test가 거부 때문에 실패했고, green: test 5개 중 5개가 통과한다(T26.7-24).
 

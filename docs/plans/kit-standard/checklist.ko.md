@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: a6545be9c233d632e7d77053420084c0e1c8735ae726a974af2eda84c5c89710 -->
+<!-- source-sha256: 135b35ed52fcbb0a2c8eb7bcb2fc4ceb96252fe57aecae0e38fb50b9b29d7db1 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -35,3 +35,4 @@
 | T26.7-22 | browser 설정 test는 make template-install-browsers를 인식한다 | tests/scripts/suite-parity.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T26.7-23 | Go generated runner는 test를 이름으로 선택한다 | tests/runner/conformance-generated-go.mts | `var/tools/bin/node --test tests/scripts/generated-conformance.test.mts` | [o] |
 | T26.7-24 | 시작할 수 없는 도구의 test는 go test를 이름으로 선택한다 | tests/scripts/failure-messages.test.mts | `var/tools/bin/node --test tests/scripts/failure-messages.test.mts` | [o] |
+| T26.7-25 | install 검사에서 cargo package가 package build를 검증한다 | scripts/check-package-installs.mts without --no-verify | `make bypass-check` | [o] |

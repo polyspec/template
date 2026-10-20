@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-25: the install check runs `cargo package` without `--no-verify`, so cargo builds the packaged crate as its own verification (30 s). Red: `make bypass-check` found 1 bypass (`scripts/check-package-installs.mts:116`); green: it finds none, and `cargo package --locked --allow-dirty --offline` of `packages/rust` builds and verifies the package. The Rust adapter of the showcase passes `cargo check --offline --locked` (T26.7-25).
+
 - T26.7-24: the test "a tool that cannot start fails with its command and the install fix" of `tests/scripts/failure-messages.test.mts` selects its go test with `-run`, so the run-tests of kit reaches the start of the tool instead of refusing an unselected go run. Red: the test failed on the refusal; green: 5 of 5 tests pass (T26.7-24).
 
 - T26.7-23: the Go generated runner passes `-run ^TestGeneratedConformance$` to the test runner of kit, so it selects its test by name and kit no longer refuses it as an unselected go run outside CI. Red: `tests/scripts/generated-conformance.test.mts` failed in the Go test with "a go run without a selection runs only in CI"; green: 7 of 7 tests pass (T26.7-23).
