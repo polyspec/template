@@ -17,7 +17,10 @@ use serde::Deserialize;
 struct Vector {
     name: String,
     expr: String,
-    #[expect(dead_code, reason = "the parity check of kit reads the requirements that a vector tests; the test runs its expression")]
+    #[expect(
+        dead_code,
+        reason = "the parity check of kit reads the requirements that a vector tests; the test runs its expression"
+    )]
     requirements: Vec<String>,
     error: Option<String>,
     tokens: Option<Vec<FixtureToken>>,

@@ -44,7 +44,13 @@ fn format_number_rounds_half_away_from_zero_on_decimal_digits() {
 /// EXP-33: only null, false, 0, -0, the empty string, the empty list and the empty map are falsy.
 #[test]
 fn truthiness_equality_and_ordering() {
-    for falsy in [Value::Null, Value::Bool(false), Value::Number(0.0), Value::Number(-0.0), Value::map(OrderedMap::new())] {
+    for falsy in [
+        Value::Null,
+        Value::Bool(false),
+        Value::Number(0.0),
+        Value::Number(-0.0),
+        Value::map(OrderedMap::new()),
+    ] {
         assert!(!falsy.is_truthy(), "{falsy:?} is truthy");
     }
     assert!(!Value::text("".to_string()).is_truthy());
