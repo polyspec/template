@@ -65,6 +65,16 @@ final class BindTest extends TestCase
                 'number 9.007199254741E+15 is outside the safe range',
             ],
             [
+                static fn () => Bind::value(['n' => -9007199254740992.0]),
+                'E_DATA_NUMBER_RANGE',
+                'number -9.007199254741E+15 is outside the safe range',
+            ],
+            [
+                static fn () => Bind::value(['n' => 2.5e300]),
+                'E_DATA_NUMBER_RANGE',
+                'number 2.5E+300 is outside the safe range',
+            ],
+            [
                 static fn () => Bind::value(2 ** 53),
                 'E_DATA_NUMBER_RANGE',
                 'integer 9007199254740992 is outside the safe range',
@@ -108,7 +118,7 @@ final class BindTest extends TestCase
 
     public function testPublicPropertiesLeaveOutTheOthers(): void
     {
-        $object = new class {
+        $object = new #[\AllowDynamicProperties] class {
             public int $a = 1;
             protected int $b = 2;
             private int $c = 3;

@@ -170,7 +170,12 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
                 return pt_bind_fail(error, PT_E_DATA_NUMBER_NOT_FINITE, zend_string_init("number is not finite", 20, 0));
             }
             if (fabs(number) > PT_MAX_SAFE) {
-                return pt_bind_fail(error, PT_E_DATA_NUMBER_RANGE, zend_strpprintf(0, "number %.17G is outside the safe range", number));
+                zval number_value;
+                ZVAL_DOUBLE(&number_value, number);
+                zend_string *text = zval_get_string(&number_value);
+                zend_string *message = zend_strpprintf(0, "number %s is outside the safe range", ZSTR_VAL(text));
+                zend_string_release(text);
+                return pt_bind_fail(error, PT_E_DATA_NUMBER_RANGE, message);
             }
             *result = pt_number(number);
             return true;
