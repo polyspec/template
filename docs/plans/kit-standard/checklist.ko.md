@@ -72,3 +72,4 @@
 | T26.7-46 | vitest가 각 test 파일을 한 번만 실행한다: include와 exclude가 var/를 제외하여 var/tools/mise 아래의 사본이 실행되지 않는다 | the vitest configuration of packages/ts and the root | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/smoke.test.ts` | [ ] |
 | T26.7-47 | worktree의 link가 examples/showcase/adapters/go/go.work를 Git이 무시하는 곳에만 쓰거나 repository가 이를 무시한다 | .gitignore and the tracked go.work of the root | `node ../kit/dist/link.mjs link` | [ ] |
 | T26.7-48 | oxlint가 tests/scripts에서 통과한다: conformance-cases.test.mts:32와 pre-commit-hook.test.mts:14가 any로부터의 unsafe assertion을 가진다 | tests/scripts/conformance-cases.test.mts and tests/scripts/pre-commit-hook.test.mts | `make lint-ts` | [ ] |
+| T26.7-49 | ruff format이 packages/python/src/polyspec/template/__init__.py에서 통과한다: T26.7-14의 재구성 뒤 163행에 빈 줄이 둘 더 있다 | packages/python/src/polyspec/template/__init__.py | `make lint-python` | [ ] |
