@@ -116,6 +116,7 @@ func TestLimits(t *testing.T) {
 	}
 }
 
+// LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
 // An invalid delimiter option is an argument error of Go, an error that is not an *errs.Error, in
 // Parse as in NewAstProgram (ERR-13, T15.3-1).
 func TestInvalidDelimiterIsArgumentError(t *testing.T) {

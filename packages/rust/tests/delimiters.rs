@@ -2,6 +2,7 @@
 
 use polyspec_template::{AstProgram, EngineOptions, ParseOptions, RequestError, parse};
 
+/// LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
 #[test]
 fn an_engine_with_an_invalid_delimiter_option_returns_an_argument_error() {
     let result = std::panic::catch_unwind(|| {

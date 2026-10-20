@@ -94,53 +94,53 @@
     },
     {
       "id": "parse-spans",
-      "requirements": ["AST-1", "AST-2", "AST-3", "AST-4", "AST-5", "AST-6", "AST-7", "AST-8", "AST-9", "AST-10", "GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": ["AST-2", "LEX-16"],
       "kind": "feature",
       "bindings": [
-        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "spans › counts bytes, not code units" },
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "spans \u203a counts bytes, not code units" },
         { "implementation": "go", "test": "packages/go/parser/parser_test.go", "id": "TestSpansAreBytes" },
         { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "spans_count_bytes" },
         { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testSpansCountBytes" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testParseCountsSpansInBytes" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testSpansCountBytes" },
         { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_spans_count_bytes" }
       ]
     },
     {
       "id": "delimiters",
-      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24", "LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23"],
+      "requirements": ["LEX-22", "LEX-23"],
       "kind": "feature",
       "bindings": [
-        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters › accepts the engine option and the directive" },
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters \u203a accepts the engine option and the directive" },
         { "implementation": "go", "test": "packages/go/parser/parser_test.go", "id": "TestDelimiters" },
         { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "delimiters_come_from_the_option_and_the_directive" },
         { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testDelimitersOptionAndDirective" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testDelimitersOptionIsUsed" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testDelimitersOptionAndDirective" },
         { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_delimiter_directive" }
       ]
     },
     {
       "id": "delimiter-argument-error",
-      "requirements": ["ERR-1", "ERR-2", "ERR-3", "ERR-4", "ERR-5", "ERR-6", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "ERR-12", "ERR-13", "ERR-14", "GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": ["LEX-21", "LEX-22"],
       "kind": "feature",
       "bindings": [
-        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters › rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)" },
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters \u203a rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)" },
         { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestInvalidDelimiterIsArgumentError" },
         { "implementation": "rust", "test": "packages/rust/tests/delimiters.rs", "id": "an_engine_with_an_invalid_delimiter_option_returns_an_argument_error" },
         { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testAnInvalidDelimiterOptionIsAnArgumentError" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testInvalidDelimitersOfAnEngineAreAnArgumentError" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testAnInvalidDelimiterOptionIsAnArgumentError" },
         { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_an_invalid_delimiter_option_is_a_value_error" }
       ]
     },
     {
       "id": "analysis",
-      "requirements": ["AST-1", "AST-2", "AST-3", "AST-4", "AST-5", "AST-6", "AST-7", "AST-8", "AST-9", "AST-10", "GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": ["FMT-1", "GRM-2"],
       "kind": "feature",
       "bindings": [
-        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "syntax analysis › classifies every part of every tag kind" },
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "syntax analysis \u203a classifies every part of every tag kind" },
         { "implementation": "go", "test": "packages/go/parser/analyze_test.go", "id": "TestAnalyzeClassifiesEveryPartOfEveryTagKind" },
         { "implementation": "rust", "test": "packages/rust/tests/analyze.rs", "id": "classifies_every_part_of_every_tag_kind" },
         { "implementation": "php", "test": "packages/php/tests/Parser/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind with data set \"echo\"" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind with data set \"echo\"" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Parser/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind with data set \"echo\"" },
         { "implementation": "python", "test": "packages/python/tests/test_analysis.py", "id": "test_classifies_every_part_of_every_tag_kind" }
       ]
     },

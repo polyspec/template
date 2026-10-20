@@ -12,6 +12,7 @@ import (
 	"github.com/polyspec/template/packages/go/parser"
 )
 
+// FMT-1, GRM-2: every part of every form of a tag body is classified.
 // EDT-8: the parser classifies every part of a tag, so no editor tool reads the tag syntax again (T23.2).
 func TestAnalyzeClassifiesEveryPartOfEveryTagKind(t *testing.T) {
 	cases := []struct {

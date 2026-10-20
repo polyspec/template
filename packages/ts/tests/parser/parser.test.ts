@@ -25,6 +25,7 @@ describe('tag start rule', () => {
 });
 
 describe('delimiters', () => {
+  // LEX-22: the engine option selects the delimiters; LEX-23: a directive selects them for the rest of the file and is valid only first.
   it('accepts the engine option and the directive', () => {
     expect(parse(';= a;', 't.tpl', { delimiters: ';;' }).body[0]?.type).toBe('Echo');
     const ast = parse('{% delimiter [] }\n[= a[0]]\n', 't.tpl');
@@ -34,6 +35,7 @@ describe('delimiters', () => {
     expect(codeOf(() => parse('{= a}{% delimiter ;;}', 't.tpl'))).toBe('E_PARSE_INVALID_DIRECTIVE');
     expect(codeOf(() => parse('{% delimiter ab}', 't.tpl'))).toBe('E_PARSE_INVALID_DIRECTIVE');
   });
+  // LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
   it('rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)', () => {
     for (const run of [() => parse('x', 't.tpl', { delimiters: '[' }), () => new AstProgram({ delimiters: '[[[' })]) {
       expect(run).toThrow(/is not a delimiter pair/);
@@ -56,6 +58,7 @@ describe('block structure', () => {
 });
 
 describe('spans', () => {
+  // AST-2, LEX-16: a span counts UTF-8 bytes.
   it('counts bytes, not code units', () => {
     const ast = parse('é{= a}', 't.tpl');
     expect(ast.body[1]?.span).toEqual([2, 7]);
@@ -83,6 +86,7 @@ describe('syntax analysis', () => {
     expect(result.tags.map(tag => source.slice(tag.bodyStart, tag.bodyEnd))).toEqual(['= title', '? ok', ':', '/']);
   });
 
+  // FMT-1, GRM-2: every part of every form of a tag body is classified.
   // EDT-8: the parser classifies every part of a tag, so no editor tool reads the tag syntax again (T23.1).
   it('classifies every part of every tag kind', () => {
     const cases: [string, string[]][] = [

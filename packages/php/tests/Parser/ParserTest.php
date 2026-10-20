@@ -37,6 +37,7 @@ final class ParserTest extends TestCase
         self::assertSame(['Echo', 'For', 'If'], array_column($ast['body'], 'type'));
     }
 
+    /** LEX-22: the option selects the delimiters; LEX-23: a directive selects them for the rest of the file, only first. */
     public function testDelimitersOptionAndDirective(): void
     {
         self::assertSame('Echo', AstProgram::parse(';= a;', 't.tpl', ['delimiters' => ';;'])['body'][0]['type']);
@@ -53,6 +54,7 @@ final class ParserTest extends TestCase
     }
 
     /**
+     * LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
      * A delimiter option that is not a delimiter pair is the argument error of PHP, not an ERR-1 error (ERR-13).
      */
     public function testAnInvalidDelimiterOptionIsAnArgumentError(): void
@@ -90,6 +92,7 @@ final class ParserTest extends TestCase
         );
     }
 
+    /** AST-2, LEX-16: a span counts UTF-8 bytes. */
     public function testSpansCountBytes(): void
     {
         $ast = AstProgram::parse('é{= a}', 't.tpl');

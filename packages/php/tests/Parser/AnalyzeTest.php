@@ -176,6 +176,7 @@ final class AnalyzeTest extends TestCase
     /**
      * @param list<string> $expected
      */
+    /** FMT-1, GRM-2: every part of every form of a tag body is classified. */
     #[DataProvider('tagKinds')]
     public function testClassifiesEveryPartOfEveryTagKind(string $source, array $expected): void
     {

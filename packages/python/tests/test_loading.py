@@ -117,5 +117,6 @@ class Loading(unittest.TestCase):
             self.assertEqual(caught.exception.code, "E_DATA_INVALID_JSON", text)
 
     def test_an_invalid_delimiter_option_is_a_value_error(self):
+        # LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
         with self.assertRaisesRegex(ValueError, "is not a delimiter pair"):
             AstProgram(EngineOptions(delimiters="[[["))

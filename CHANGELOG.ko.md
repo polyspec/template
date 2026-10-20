@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 701fc5c23d267b84d25be9f9131b782edb147133974ce662b174cc101d577143 -->
+<!-- source-sha256: 3fb22d704d13a19b3ff76500b9879a4404181d8646492b129e6071d0e0c0221e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-38: parser unit은 test가 보이는 requirement만 인용한다. `parse-spans`는 AST-2와 LEX-16(span은 UTF-8 byte를 센다), `delimiters`는 LEX-22와 LEX-23(option과 directive, 처음에만 유효), `delimiter-argument-error`는 LEX-21과 LEX-22(delimiter 문자 쌍이 아닌 option), `analysis`는 FMT-1과 GRM-2(tag body의 모든 형식의 모든 부분이 분류된다)를 인용하며, 이전에는 각각 34~47개를 인용했다. 여섯 구현의 test가 각각 이를 이름 붙이고, Python directive test는 option과 잘못된 directive도 검사하며, PHP 확장은 PHP test에 binding한다. Red: `make parity-declarations-check`는 R13 1, R15 9092, R2 43을 보고했다; green: R13 1, R15 8182(네 unit의 finding 없음), R2 43이며 owner test가 통과한다(vitest `parser.test.ts` 112, `go test` 4개, `cargo test --test parser --test delimiters --test analyze`, PHPUnit `ParserTest|AnalyzeTest` 21, Python `test_api.py` 39, `test_analysis.py` 7, `test_loading.py` 7) (T26.7-38).
 
 - T26.7-37: 공유 case가 보이는 formatting requirement를 이름 붙인다. `tests/cases`의 `case.json` 114개가 expected tokens 또는 format 결과가 규칙을 보이는 곳(바뀐 tag, 바뀐 들여쓰기, delimiter와 directive, comment, byte order mark, html 오류와 parse 오류)에 FMT-1~FMT-5, FMT-7~FMT-10, FMT-12, FMT-14를 적고, unit `formatting`과 `tokens`가 이를 인용한다(`tokens`는 FMT-1과 FMT-2를 더한다). FMT-11은 unit `format-raw-elements`를 모든 구현의 test와 함께 가진다(Go는 `TestIndentation`에서 `TestKeepsTheIndentationInsideRawElements`를 떼어 내고, 나머지는 기존 test에 FMT-11을 적으며, PHP 확장은 PHP test에 binding한다). Red: `make parity-declarations-check`는 R13 1, R15 9198(`formatting` 90), R2 43을 보고했다; green: R13 1, R15 9092(`formatting` 0, `format-raw-elements` 0, `tokens`는 이전과 같이 LEX-8과 LEX-12의 12), R2 43이며, format test가 통과하고(vitest `indent.test.ts` 144, `go test ./format`, `cargo test --test format`, PHPUnit `IndentTest` 17, Python `test_format.py` 35) `make schema-check`가 통과한다 (T26.7-37).
 

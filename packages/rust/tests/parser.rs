@@ -34,6 +34,7 @@ fn javascript_and_css_braces_stay_text() {
     assert_eq!(kinds("{= a}{@ i = xs}{/}{? a}{:}{/}"), vec!["Echo", "For", "If"]);
 }
 
+/// LEX-22: the option selects the delimiters; LEX-23: a directive selects them for the rest of the file and is valid only first.
 #[test]
 fn delimiters_come_from_the_option_and_the_directive() {
     let options = ParseOptions {
@@ -62,6 +63,7 @@ fn block_structure_errors() {
     assert_eq!(code_of("{?# a}{:? b}{/}", &options), Some(ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF));
 }
 
+/// AST-2, LEX-16: a span counts UTF-8 bytes.
 #[test]
 fn spans_count_bytes() {
     let ast = parse("é{= a}".as_bytes(), "t.tpl", &ParseOptions::default()).expect("parse");

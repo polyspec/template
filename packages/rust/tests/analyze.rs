@@ -14,6 +14,7 @@ fn tokens(source: &str, delimiters: Option<&str>) -> Vec<String> {
         .collect()
 }
 
+/// FMT-1, GRM-2: every part of every form of a tag body is classified.
 #[test]
 fn classifies_every_part_of_every_tag_kind() {
     let cases: &[(&str, &[&str])] = &[

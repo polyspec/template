@@ -13,6 +13,7 @@ from polyspec.template import (
     EngineOptions,
     MapLoader,
     PageCache,
+    ParseOptions,
     RenderOptions,
     SafeString,
     analyze,
@@ -102,7 +103,17 @@ class Parsing(unittest.TestCase):
         )
 
     def test_delimiter_directive(self):
+        # LEX-22: the option selects the delimiters; LEX-23: a directive selects them for the rest of the file and is
+        # valid only first.
         self.assertEqual(render("{% delimiter %%}%= 1 + 2 %"), "3")
+        self.assertEqual(
+            parse(";= a;", "t.tpl", ParseOptions(delimiters=";;"))["body"][0]["type"],
+            "Echo",
+        )
+        for source in ("{= a}{% delimiter ;;}", "{% delimiter ab}"):
+            with self.assertRaises(TE) as caught:
+                parse(source, "t.tpl")
+            self.assertEqual(caught.exception.code, "E_PARSE_INVALID_DIRECTIVE", source)
 
     def test_wrapped_tags(self):
         self.assertEqual(render('"{{= v }}"', {"v": "x"}), "x")
@@ -381,7 +392,7 @@ class ValuesAndErrors(unittest.TestCase):
         self.assertEqual(engine.render("x.tpl", {"a": 2}), "3")
 
     def test_spans_count_bytes(self):
-        # é is two bytes, so the echo after it starts at byte 2 (LEX-2).
+        # AST-2, LEX-16: é is two bytes, so the echo after it starts at byte 2.
         ast = parse("é{= a}", "t.tpl")
         self.assertEqual(ast["body"][1]["span"], (2, 7))
 

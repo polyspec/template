@@ -91,6 +91,7 @@ func TestAssignmentHeadDecidesAsTypeScript(t *testing.T) {
 	}
 }
 
+// LEX-22: the option selects the delimiters; LEX-23: a directive selects them for the rest of the file and is valid only first.
 func TestDelimiters(t *testing.T) {
 	tree, err := parser.Parse(lexer.FromString("t.tpl", ";= a;"), parser.Delimiters{Open: ";", Close: ";"})
 	if err != nil || len(tree.Body) != 1 {
@@ -128,6 +129,7 @@ func TestBlockStructureErrors(t *testing.T) {
 	}
 }
 
+// AST-2, LEX-16: a span counts UTF-8 bytes.
 func TestSpansAreBytes(t *testing.T) {
 	tree := parse(t, "é{= a}")
 	echo := tree.Body[1].(*ast.Echo)

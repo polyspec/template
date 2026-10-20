@@ -15,6 +15,7 @@ def classes(source: str, tokens) -> list[str]:
 
 
 class TokenClasses(unittest.TestCase):
+    # FMT-1, GRM-2: every part of every form of a tag body is classified.
     # EDT-8: the parser classifies every part of a tag, so no editor tool reads
     # the tag syntax again.
     def test_classifies_every_part_of_every_tag_kind(self):
