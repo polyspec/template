@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\Engine;
 use Polyspec\Template\Loader\ArrayLoader;
+use Polyspec\Template\Render\RuntimeEnvironment;
 use Polyspec\Template\TemplateError;
 
 final class EngineRefreshTest extends TestCase
@@ -95,6 +96,24 @@ final class EngineRefreshTest extends TestCase
 
         $program = new AstProgram($loader, ['limits' => ['iterations' => 10], 'functions' => ['f' => fn () => 1]]);
         self::assertSame(10, $program->limits()['iterations']);
+    }
+
+    /** RT-5, RT-6: a RuntimeEnvironment checks the limits and the functions that it is created with. */
+    public function testTheRuntimeEnvironmentChecksItsLimitsAndFunctions(): void
+    {
+        $cases = [
+            [['loops' => 1], [], 'limits.loops is not a limit'],
+            [['iterations' => 1.5], [], 'limits.iterations is not an integer'],
+            [[], ['f' => 1], 'functions.f is not a function'],
+        ];
+        foreach ($cases as [$limits, $functions, $message]) {
+            try {
+                new RuntimeEnvironment($limits, $functions);
+                self::fail("the environment should fail with: {$message}");
+            } catch (\InvalidArgumentException $error) {
+                self::assertSame($message, $error->getMessage());
+            }
+        }
     }
 
     /** RT-4: a define or an env that is not a map fails the render with E_DATA_UNSUPPORTED_TYPE. */

@@ -1221,23 +1221,44 @@ static bool pt_option_delimiters(HashTable *options, char *open, char *close)
     return false;
 }
 
-/* Applies the integer entries of a limits array to the limits (RT-6); false after an exception. */
+/* Applies the entries of a limits array to the limits (RT-6), in their order: a key that RT-33 does not list and a value
+ * that is not an integer fail with the InvalidArgumentException of the library; false after an exception. */
 static bool pt_apply_limits(HashTable *values, pt_limits *limits)
 {
     static const char *const names[] = {"iterations", "depth", "outputBytes", "expressionDepth"};
     zend_long *slots[] = {&limits->iterations, &limits->depth, &limits->output_bytes, &limits->expression_depth};
-    for (int i = 0; i < 4; i++) {
-        zval *limit = zend_hash_str_find_deref(values, names[i], strlen(names[i]));
-        if (limit == NULL) {
-            continue;
+    zend_ulong index;
+    zend_string *key;
+    zval *limit;
+    ZEND_HASH_FOREACH_KEY_VAL(values, index, key, limit) {
+        zend_string *name = key ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
+        int found = -1;
+        for (int i = 0; i < 4; i++) {
+            if (key != NULL && zend_string_equals_cstr(name, names[i], strlen(names[i]))) {
+                found = i;
+            }
         }
-        if (Z_TYPE_P(limit) != IS_LONG) {
-            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "limits.%s is not an integer", names[i]);
+        if (found < 0) {
+            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "limits.%s is not a limit", ZSTR_VAL(name));
+            zend_string_release(name);
             return false;
         }
-        *slots[i] = Z_LVAL_P(limit);
-    }
+        ZVAL_DEREF(limit);
+        if (Z_TYPE_P(limit) != IS_LONG) {
+            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "limits.%s is not an integer", ZSTR_VAL(name));
+            zend_string_release(name);
+            return false;
+        }
+        zend_string_release(name);
+        *slots[found] = Z_LVAL_P(limit);
+    } ZEND_HASH_FOREACH_END();
     return true;
+}
+
+/* Whether a PHP array is a map of the library: empty or not a list (RT-4, RT-5, RT-6). */
+static bool pt_is_map(HashTable *values)
+{
+    return zend_hash_num_elements(values) == 0 || !zend_array_is_list(values);
 }
 
 /* The limits before any option: RuntimeEnvironment::DEFAULT_LIMITS (RT-33). */
@@ -1609,7 +1630,7 @@ static pt_map *pt_define_data(pt_run *run, pt_s name, pt_s id, zval *input)
 static HashTable *pt_defines_from_php(pt_run *run, pt_s name, zval *input)
 {
     ZVAL_DEREF(input);
-    if (Z_TYPE_P(input) != IS_ARRAY) {
+    if (Z_TYPE_P(input) != IS_ARRAY || !pt_is_map(Z_ARRVAL_P(input))) {
         pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("define is not an object", 23, 0));
     }
     HashTable *defines = pt_defines_new(run);
@@ -1669,7 +1690,7 @@ static void pt_env_from_php(pt_run *run, pt_s name, zval *input, pt_env *env)
     if (Z_TYPE_P(input) == IS_NULL) {
         return;
     }
-    if (Z_TYPE_P(input) != IS_ARRAY) {
+    if (Z_TYPE_P(input) != IS_ARRAY || !pt_is_map(Z_ARRVAL_P(input))) {
         pt_request_fail(run, name, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("env is not an object", 20, 0));
     }
     zval *timezone = zend_hash_str_find_deref(Z_ARRVAL_P(input), "timezone", 8);
@@ -2207,13 +2228,21 @@ ZEND_METHOD(Polyspec_Template_AstProgram, __construct)
     } else {
         object_init_ex(&engine->loader, pt_array_loader_ce);
     }
-    /* The runtime is a RuntimeEnvironment built from the options "limits" and "functions": its constructor checks them,
-     * so a wrong option gives the TypeError of the library (empty arrays for the absent or null options). */
+    /* The runtime is a RuntimeEnvironment built from the options "limits" and "functions" (empty arrays for the absent or
+     * null options): a limits or functions that is not a map fails as in the library, and its constructor checks the rest. */
     zval empty, arguments[2], retval;
     ZVAL_EMPTY_ARRAY(&empty);
     ZVAL_NULL(&retval);
     zval *limits = options ? zend_hash_str_find_deref(options, "limits", sizeof("limits") - 1) : NULL;
     zval *functions = options ? zend_hash_str_find_deref(options, "functions", sizeof("functions") - 1) : NULL;
+    if (limits != NULL && Z_TYPE_P(limits) != IS_NULL && (Z_TYPE_P(limits) != IS_ARRAY || !pt_is_map(Z_ARRVAL_P(limits)))) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "limits is not an object");
+        RETURN_THROWS();
+    }
+    if (functions != NULL && Z_TYPE_P(functions) != IS_NULL && (Z_TYPE_P(functions) != IS_ARRAY || !pt_is_map(Z_ARRVAL_P(functions)))) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "functions is not an object");
+        RETURN_THROWS();
+    }
     ZVAL_COPY_VALUE(&arguments[0], limits != NULL && Z_TYPE_P(limits) != IS_NULL ? limits : &empty);
     ZVAL_COPY_VALUE(&arguments[1], functions != NULL && Z_TYPE_P(functions) != IS_NULL ? functions : &empty);
     zend_call_known_instance_method_with_2_params(pt_runtime_ce->constructor, Z_OBJ(engine->runtime), &retval, &arguments[0], &arguments[1]);
@@ -2384,11 +2413,12 @@ ZEND_METHOD(Polyspec_Template_Render_RuntimeEnvironment, __construct)
     zend_string *key;
     zval *callable;
     ZEND_HASH_FOREACH_KEY_VAL(functions, index, key, callable) {
+        zend_string *name = key ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
         if (!zend_is_callable(callable, 0, NULL)) {
-            zend_type_error("Polyspec\\Template\\Render\\RuntimeEnvironment::register(): Argument #2 ($function) must be of type callable, %s given", zend_zval_value_name(callable));
+            zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "functions.%s is not a function", ZSTR_VAL(name));
+            zend_string_release(name);
             RETURN_THROWS();
         }
-        zend_string *name = key ? zend_string_copy(key) : zend_long_to_str((zend_long)index);
         bool registered = pt_register_function(runtime, name, callable);
         zend_string_release(name);
         if (!registered) {
@@ -2662,9 +2692,10 @@ static void pt_prepared_options(HashTable *options, zval *result)
     zval fresh;
     if (env == NULL || Z_TYPE_P(env) == IS_NULL) {
         array_init(&fresh);
-    } else if (Z_TYPE_P(env) == IS_ARRAY) {
+    } else if (Z_TYPE_P(env) == IS_ARRAY && pt_is_map(Z_ARRVAL_P(env))) {
         ZVAL_ARR(&fresh, zend_array_dup(Z_ARRVAL_P(env)));
     } else {
+        /* An env that is not a map stays as it is, so the request fails with env is not an object (RT-4). */
         return;
     }
     zval *now = zend_hash_str_find_deref(Z_ARRVAL(fresh), "now", 3);
