@@ -80,7 +80,7 @@ final class FormatterClassTest extends TestCase
 
     public function testAResultThatParsesToAnotherTemplateIsRefused(): void
     {
-        $empty = new class implements Analyzer {
+        $empty = new class () implements Analyzer {
             public function analyze(string $source, string $name, array $options): array
             {
                 return (new PackageAnalyzer())->analyze($source, $name, $options);
@@ -97,7 +97,7 @@ final class FormatterClassTest extends TestCase
             self::fields(Formatter::format("<p>\n{=a}\n</p>", [], $empty)),
         );
 
-        $failing = new class implements Analyzer {
+        $failing = new class () implements Analyzer {
             public function analyze(string $source, string $name, array $options): array
             {
                 return (new PackageAnalyzer())->analyze($source, $name, $options);

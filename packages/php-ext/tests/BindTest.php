@@ -48,7 +48,7 @@ final class BindTest extends TestCase
 
     public function testAHostObjectKeepsItsInstance(): void
     {
-        $host = new class {
+        $host = new class () {
             public int $a = 1;
         };
 
@@ -118,7 +118,7 @@ final class BindTest extends TestCase
 
     public function testPublicPropertiesLeaveOutTheOthers(): void
     {
-        $object = new #[\AllowDynamicProperties] class {
+        $object = new #[\AllowDynamicProperties] class () {
             public int $a = 1;
             protected int $b = 2;
             private int $c = 3;

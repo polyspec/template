@@ -25,7 +25,7 @@ final class RecordingProgram implements Program
             throw $this->failure;
         }
 
-        return new PreparedRender('page.tpl', new class implements PreparedExecution {
+        return new PreparedRender('page.tpl', new class () implements PreparedExecution {
             public function render(): string
             {
                 return 'prepared';

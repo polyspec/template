@@ -24,7 +24,7 @@ final class PreparedRenderTest extends TestCase
 
     public function testRenderReturnsTheOutputOfTheExecution(): void
     {
-        $prepared = new PreparedRender('page.tpl', new class implements PreparedExecution {
+        $prepared = new PreparedRender('page.tpl', new class () implements PreparedExecution {
             public function render(): string
             {
                 return 'output';
@@ -36,7 +36,7 @@ final class PreparedRenderTest extends TestCase
 
     public function testAnErrorOfThePhpErrorHierarchyIsEInternal(): void
     {
-        $prepared = new PreparedRender('page.tpl', new class implements PreparedExecution {
+        $prepared = new PreparedRender('page.tpl', new class () implements PreparedExecution {
             public function render(): string
             {
                 throw new \TypeError('bad type');

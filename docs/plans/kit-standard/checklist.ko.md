@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 3f9c69a7270186482286bac6dd9dc83c8dfe75fcf9c3d47804c2062e3debf360 -->
+<!-- source-sha256: 9b1dbfa4339b0a06ca6cdd051b765b96e9999581f0c60e471d5a7df47f348f8e -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -158,3 +158,4 @@
 | T26.7-58 | template은 f7c1f10c의 kit 복사본을 받는다: changelog와 checklist의 merge=union과 한국어 twin driver, make land, worktree-setup의 dev kit, agent 명령의 대기 거부, link mode dependency-review의 composer 범위(K354 K394 K386 K348-1 K360-2 K349-2 K390-1 K392-1 K393과 f9eb43dd부터 f7c1f10c까지의 다른 kit 행) | The copies that make kit-sync writes and the hooks of make hooks | `make kit-check` | [o] |
 | T26.7-59 | template은 edcb9579의 kit 복사본을 받는다: commit identity, 이유를 적는 suppression check, PHP의 숨긴 오류 금지, TypeScript에서 다시 던지는 오류의 cause, prepare-commit-msg hook, changelog와 checklist의 merge driver(K354-3, K334, f7c1f10c부터 edcb9579까지의 다른 kit 행) | The copies that make kit-sync writes, the hooks of make hooks, the Makefile, and the code that the new lint rules find | `make kit-check`, `make suppression-check`, `make lint-php`, `make lint-ts`, `make hooks-check` | [o] |
 | T26.7-60 | tests/scripts/failure-messages.test.mts의 도구 없음 케이스는 kit run-tests가 PATH에서 찾는 도구인 cargo를 시작한다. go는 checkout의 mise에서 실행되기 때문이다 | tests/scripts/failure-messages.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/failure-messages.test.mts` | [o] |
+| T26.7-61 | packages/php-ext의 test는 make template-lint-php-format을 통과한다: 익명 class는 pint가 요구하는 대로 new class ()로 쓴다 | packages/php-ext/tests/FormatterClassTest.php, BindTest.php, RecordingProgram.php, PreparedRenderTest.php | `make template-lint-php-format` | [o] |
