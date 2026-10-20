@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d0738918dab748d792105b643cc1ff656ba4a540c5c670cf6f1992206f3c6c44 -->
+<!-- source-sha256: 2f3ad6decaf70e63f2a432f7f1c23cea32ff5f30bdf1af98e3341e2f5ed7a995 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-46: vitest는 worktree 자신의 test 파일만 수집한다. 루트 `vitest.config.ts`가 vitest 기본값에 더해 `var/**`를 제외하므로 var/tools/mise 아래의 복사본이 실행되지 않는다. 새 test `tests/scripts/vitest-collection.test.mts`가 목록을 검사한다. Red: config가 없으면 `vitest collects 7385 file(s) under var/`(`var/tools/mise/state/trusted-configs` 아래의 복사본)로 실패한다; green: `pass 1, fail 0`이다. Verification 명령은 `packages/ts/tests/smoke.test.ts`를 한 번 실행하며 `1 passed (1)`이다 (T26.7-46).
 
 - T26.7-45: `docs-check`는 예제 사이트 링크를 생성 산출물 `examples/site/index.html`이 아니라 공개 URL `https://polyspec.github.io/template/examples/site/index.html`로 확인한다. 이 파일은 `make showcase`가 만들며 추적하지 않는다. Makefile은 바꾸지 않았다. Red: `make docs-check`가 `README.md:48`, `README.ko.md:49`, `docs/operations/showcase.md:6`, `docs/operations/showcase.ko.md:7`에서 없는 `examples/site/index.html`을 가리키는 링크 때문에 `4 findings in 49 document pairs`를 보고했고 종료 코드 2; green: `make docs-check`가 `49 document pairs, 2 checklists, 1 status tables and 1 changelogs passed`를 보고하고 종료 코드 0이다 (T26.7-45).
 

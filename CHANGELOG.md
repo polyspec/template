@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-46: vitest collects only the test files of the worktree: the root `vitest.config.ts` excludes `var/**` on top of vitest's defaults, so no copy under var/tools/mise runs. The new test `tests/scripts/vitest-collection.test.mts` checks the listing: Red: without the config it fails with `vitest collects 7385 file(s) under var/` (the copies under `var/tools/mise/state/trusted-configs`); green: `pass 1, fail 0`. The Verification command runs `packages/ts/tests/smoke.test.ts` once: `1 passed (1)` (T26.7-46).
+
 - T26.7-45: `docs-check` checks the links to the example site at its published URL, `https://polyspec.github.io/template/examples/site/index.html`, not to the generated `examples/site/index.html` that `make showcase` builds and that is not tracked; the Makefile is unchanged. Red: `make docs-check` reported `4 findings in 49 document pairs` for `README.md:48`, `README.ko.md:49`, `docs/operations/showcase.md:6` and `docs/operations/showcase.ko.md:7`, each linking `examples/site/index.html`, which does not exist, exit 2; green: `make docs-check` reports `49 document pairs, 2 checklists, 1 status tables and 1 changelogs passed`, exit 0 (T26.7-45).
 
 - T26.7-44: knip finds no unused export in `packages/compiler/src/backend-support.mts`: `firstGroup`, `splitGroup` and `groupToSplit` are no longer exported, since only that file uses them. The stale ignore of `packages/ts/src/ast-validator.mjs` that knip reports is removed from `config/knip-entries.json`. Red: `make lint-ts` exit 2 on HEAD 7a048f1e, where knip reports the 3 unused exports and `packages/ts/src/ast-validator.mjs ... Remove from ignore`; green: `make lint-ts` passes (T26.7-44).
