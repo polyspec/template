@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 29881e6e405e5c65159e2b386ed3faa4bef304d5056d2dbdedb76acce18c9da6 -->
+<!-- source-sha256: d5342f1dc84ce53b5d1633398ea67b266c71e61270b61366b974af8816f353ed -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-4-2: 확장이 Formatter를 등록하므로(T26.7-2-7-3) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (BoundMapTest, HostBindingTest, HostValuesTest, LoadFailureTest, FormatterTest, ConformanceTest, AnalyzeTest); Verification의 다른 검사와 함께 행은 끝났다. Red: `make item-red BEFORE=7a415e9f`가 T26.7-2-7-3 이전의 main에서 Verification을 실행했고, 그때 `make test-php-ext`는 test가 라이브러리의 `packages/php/src/Format`을 load하므로 exit 2다 (T26.7-4-2).
 
 - T26.7-2-5: PHP 확장은 `AstDecoder`를 라이브러리와 같은 이름과 signature의 final class로 등록한다, `decode(string $json): array`이며, C `packages/php-ext/src/pt_ast_decode.c`로 쓴다: `contracts/schema/ast.schema.json`이 쓰는 키워드의 검증기로 사본 `pt_ast_schema.h`에 대해 JSON을 검증하며, opis/json-schema와 같은 JSON Pointer와 이유를 말한다. `AstProgram::decodeTemplate`은 그 decode를 호출하고, AST-10(두 언어)이 이를 말한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/php-ext/polyspec_template.so -- packages/php-ext/tests/AstDecoderClassTest.php` 2 failed, `Polyspec\Template\AstDecoder is not registered by the extension`; green: 같은 명령 6 passed, 0 failed, `packages/php/tests/AstDecodeTest.php` 6 passed, `ConformanceTest.php` 771 passed, 확장의 유무에 따른 seed 입력 6004개의 differential은 결과가 같다(실패 1962, 모두 같음) (T26.7-2-5).
 
