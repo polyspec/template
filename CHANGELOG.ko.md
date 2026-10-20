@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5c732bcdf69aaa0c6b995e4600d3402c9c208ec8a58cba24a51e3f77f58a9fc5 -->
+<!-- source-sha256: 2c249905b01fbc4aa20a89607f5bfb36f82a8e106b5b7c71c175568c3bbe8990 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-19: `config/parity.json`은 PHP 확장이 지금 등록하는 class의 모든 API unit에 php-ext symbol로 library의 symbol을 적는다. `api-program`, `api-ast-program`, `api-prepared-render`, `api-loader`, `api-decode-template`, `api-parse-json`, `api-bind-map`, `api-bind-data`, `api-runtime-services`, `api-runtime-environment`가 symbol을 얻고, `api-parse`, `api-engine`, `api-bound-map`, `api-bind`, `api-merge`, `api-template-error`는 `Native` class 대신 `AstProgram::parse`, `Engine`, `BoundMap`, `BoundMap::bind`, `BoundMap::merge`, `TemplateError`를 적는다. 그중 넷(`Native\BoundMap`, 그 `bind`와 `merge`, `Native\TemplateError`)은 이미 stub에 없었다. 아직 등록되지 않은 class의 unit(`api-page-cache`, `api-runtime-bindings`, `api-render-frame`, `api-render-scope`, `api-render-context`)은 그 class를 등록하는 행에서 symbol을 얻는다. Red: `make parity-declarations-check`에 php-ext의 R1 finding 15개; green: 아직 등록되지 않은 class의 5개만 남고 새 finding은 0개이며, 모든 php-ext symbol은 kit의 extractor가 `packages/php-ext/src/polyspec_template.stub.php`에서 읽는 symbol이다 (T26.7-2-19).
 
 - T26.7-58: kit 복사본은 f7c1f10c의 연결된 kit을 따른다(K354, K394, K386, K348-1, K360-2, K349-2, K390-1, K392-1, K393과 f9eb43dd 이후의 다른 kit 행). `make kit-sync`가 `scripts/kit/kit-bootstrap.mk`를 쓰며, 그 `KIT`는 저장소 옆에 kit checkout이 있으면 그 dist이고(K348-1), `make install`은 모든 설치 단계 뒤에 link한다(K360-2). `make hooks`는 `.git/info/attributes`에 `CHANGELOG.md`와 영어 checklist의 `merge=union`, 그 한국어 twin의 한국어 twin merge driver `kit-twin`을 설정한다(K354). Red: `make kit-check` finding 1개(`scripts/kit/kit-bootstrap.mk`가 kit 복사본과 다르다); green: `make kit-check`가 통과하고, `make link-check`가 kit을 linked로 나열하며, `make hooks-check`와 `make link-state-check`가 통과한다 (T26.7-58).
 

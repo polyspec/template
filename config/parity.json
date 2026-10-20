@@ -647,7 +647,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Parse" },
         { "implementation": "rust", "symbol": "polyspec_template::parse" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Native\\Engine::parse" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse" },
         { "implementation": "python", "symbol": "template.parse" }
       ]
     },
@@ -660,7 +660,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Engine" },
         { "implementation": "rust", "symbol": "polyspec_template::Engine" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Engine" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Native\\Engine" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Engine" },
         { "implementation": "python", "symbol": "template.Engine" }
       ]
     },
@@ -673,6 +673,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Program" },
         { "implementation": "rust", "symbol": "polyspec_template::Program" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Program" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Program" },
         { "implementation": "python", "symbol": "template.Program" }
       ]
     },
@@ -685,6 +686,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.AstProgram" },
         { "implementation": "rust", "symbol": "polyspec_template::AstProgram" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\AstProgram" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram" },
         { "implementation": "python", "symbol": "template.AstProgram" }
       ]
     },
@@ -697,6 +699,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Prepared" },
         { "implementation": "rust", "symbol": "polyspec_template::PreparedRender" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\PreparedRender" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\PreparedRender" },
         { "implementation": "python", "symbol": "template.PreparedRender" }
       ]
     },
@@ -709,7 +712,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.BoundMap" },
         { "implementation": "rust", "symbol": "polyspec_template::BoundMap" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\BoundMap" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Native\\BoundMap" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\BoundMap" },
         { "implementation": "python", "symbol": "template.BoundMap" }
       ]
     },
@@ -722,7 +725,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Bind" },
         { "implementation": "rust", "symbol": "polyspec_template::bind" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\BoundMap::bind" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Native\\BoundMap::bind" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\BoundMap::bind" },
         { "implementation": "python", "symbol": "template.bind" }
       ]
     },
@@ -735,7 +738,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Merge" },
         { "implementation": "rust", "symbol": "polyspec_template::merge" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\BoundMap::merge" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Native\\BoundMap::merge" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\BoundMap::merge" },
         { "implementation": "python", "symbol": "template.merge" }
       ]
     },
@@ -748,7 +751,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Error" },
         { "implementation": "rust", "symbol": "polyspec_template::TemplateError" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\TemplateError" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Native\\TemplateError" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\TemplateError" },
         { "implementation": "python", "symbol": "template.TemplateError" }
       ]
     },
@@ -773,6 +776,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Loader" },
         { "implementation": "rust", "symbol": "polyspec_template::Loader" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface" },
         { "implementation": "python", "symbol": "template.Loader" }
       ]
     },
@@ -785,6 +789,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.DecodeTemplate" },
         { "implementation": "rust", "symbol": "polyspec_template::decode_template" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate" },
         { "implementation": "python", "symbol": "template.decode_template" }
       ]
     },
@@ -797,6 +802,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseJSON" },
         { "implementation": "rust", "symbol": "polyspec_template::parse_json" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Value\\Json::parse" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Json::parse" },
         { "implementation": "python", "symbol": "template.parse_json" }
       ]
     },
@@ -809,6 +815,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/value.BindMap" },
         { "implementation": "rust", "symbol": "polyspec_template::bound_root" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Value\\Bind::map" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Bind::map" },
         { "implementation": "python", "symbol": "template.bind_map" }
       ]
     },
@@ -821,6 +828,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/value.BindData" },
         { "implementation": "rust", "symbol": "polyspec_template::bind_data" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Value\\Bind::data" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Bind::data" },
         { "implementation": "python", "symbol": "template.bind_data" }
       ]
     },
@@ -833,6 +841,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices" },
         { "implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices" },
         { "implementation": "python", "symbol": "template.RuntimeServices" }
       ]
     },
@@ -845,6 +854,7 @@
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.RuntimeEnvironment" },
         { "implementation": "rust", "symbol": "polyspec_template::RuntimeEnvironment" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment" },
+        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment" },
         { "implementation": "python", "symbol": "template.RuntimeEnvironment" }
       ]
     },
