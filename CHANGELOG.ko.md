@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4d62e12d2e87f06e4e9f425b819ad5192803f501e967d66a11815dd09cf844f0 -->
+<!-- source-sha256: ecb6c0ea572381471d0a876993f0b32434183cbbbfffa590a6fa3fbc88e432c9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-51-7: program의 options와 request options가 각각 자신의 unit, program-options(RT-5, RT-6)와 request-options(RT-4)를 가지며, 그 test는 옵션이 어떻게 실패하는지, Go와 Rust에서는 그 타입이 spec의 옵션만 받는지 검사한다. Red: main에서는 concurrent-bound-map만 RT-4, RT-5, RT-6을 인용했고(main517.txt에서 이 id들의 R15 줄 4개, RT-5와 RT-6이 go와 python에서), Go와 Rust에는 이 규칙의 test가 없었다. Green: Go test TestTheOptionsOfAProgramAreChecked와 TestTheRequestOptionsAreTyped가 통과(2), Rust test the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec와 the_request_options_that_are_no_object_fail이 통과(functions 14), unit의 TS, PHP, PHP 확장, Python test가 통과한다(engine.test.ts 12, EngineRefreshTest 8, test_api.py 44). parity-declarations-check는 새 finding이 없고(main 223, branch 219, 새 것 없음) 두 unit이 성립한다 (T26.7-51-7).
 
 - T26.7-32-7: `docs/spec/compiler.md`가 CMP-1을 정의한다: TypeScript, Go, Rust, PHP, PHP 확장, Python의 선언부는 소유 관계, field 순서, operation 위치에서 `packages/compiler/interface.json`과 일치하고, mapping은 표기와 오류 전달 방식만 바꾼다. unit `compiler-interface`가 RT-67과 함께 그것을 인용하고, 선언된 class, field, operation을 manifest와 비교하는 모든 구현의 그 test가 그것을 명명한다. manifest의 상태 전이는 그것을 검사하는 test가 없으므로 문서의 문장으로 남는다. Red: kit의 R19가 `docs/spec/compiler.md`가 요구사항을 정의하지 않는다고 보고했다. Green: compiler.md의 R19가 사라졌다; compiler interface test가 ts (3), go (1), rust (2), php (2), python (6), PHP 확장 (2)에서 통과하고, 다섯 lint와 unit 검사가 통과한다 (T26.7-32-7).
 
@@ -25,6 +27,7 @@
 - T26.7-41-2: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (HostBindingTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-41-2).
 
 - T26.7-4-1: 확장이 라이브러리의 모든 class를 등록하므로(T26.7-2-8-7) `make test-php-ext`가 그 unit의 라이브러리 test를 PHP 확장으로 실행하고 그 test가 통과한다 (LoadFailureTest, LoaderTest); Verification의 다른 검사와 함께 행은 끝났다 (T26.7-4-1).
+
 - T26.7-32-6: `docs/spec/examples.md`가 EX-1을 정의한다: 그 페이지의 파일은 모든 구현에서 그 출력으로 바이트 단위로 그대로 렌더된다. 새 conformance case `tests/cases/examples/page`가 그 파일을 담으며, `layout.tpl`을 그 `input.tpl`로, `define.json`의 `content` 항목을 쓰고, 그 `expected.html`은 문서의 출력이다; conformance suite가 EX-1을 인용한다. 이 case의 TypeScript 렌더는 문서의 출력을 그대로 냈고, 다른 구현도 같다. Red: kit의 R19가 `docs/spec/examples.md`가 요구사항을 정의하지 않는다고 보고했고, 어떤 test도 이 페이지를 렌더하지 않았다. Green: examples.md의 R19가 사라졌다 (222 findings, 새 finding 없음); conformance, token, format suite가 새 case와 함께 통과한다 (ts 771, go 774, rust 771, php 771, python 771); schema-check, rules-check, conformance unit 검사 통과. `make test-php-ext`는 확장이 아직 C로 등록하지 않은 라이브러리 class를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-6).
 
 - T26.7-2-2-2-1: `packages/php` 밖에서 `MapValue::entries()`를 부르는 모든 PHP 코드는 T26.7-2-2-2가 `entries()`가 돌려주게 한 `[key, value]` 쌍을 읽는다(확장은 generator를 돌려줄 수 없다). compiler의 PHP backend(`packages/compiler/src/backends/php.mts`, 생성 runtime의 루프 세 개), showcase의 PHP adapter(Adapter.php, Inputs.php, Output.php), `scripts/check-package-installs.mts`, `scripts/check-typed-generator.mts`, `tests/runner/conformance-generated-php.mts`의 PHP probe다. Red: `make generated-typed-values-check`가 PHP에서 실패했고(생성 runtime의 "assign.tags.key is not a string"), `typed-generator-compile-check`와 `package-installs-check`는 "Call to a member function entries() on array"로 실패했다; green: 세 check가 다섯 언어 모두에서 통과한다 (T26.7-2-2-2-1).

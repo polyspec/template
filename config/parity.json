@@ -250,6 +250,32 @@
       ]
     },
     {
+      "id": "program-options",
+      "requirements": ["RT-5", "RT-6"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › fails the creation of a program on limits or functions that the spec does not allow (RT-5, RT-6)" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestTheOptionsOfAProgramAreChecked" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec" },
+        { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testTheLimitsAndFunctionsOfAProgramAreChecked" },
+        { "implementation": "php-ext", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testTheLimitsAndFunctionsOfAProgramAreChecked" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_the_limits_and_functions_of_a_program_are_checked" }
+      ]
+    },
+    {
+      "id": "request-options",
+      "requirements": ["RT-4"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › binds define and env given as request data, and rejects them when they are no object" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestTheRequestOptionsAreTyped" },
+        { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "the_request_options_that_are_no_object_fail" },
+        { "implementation": "php", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testADefineOrAnEnvThatIsNotAMapIsUnsupported" },
+        { "implementation": "php-ext", "test": "packages/php/tests/EngineRefreshTest.php", "id": "testADefineOrAnEnvThatIsNotAMapIsUnsupported" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_a_define_or_an_env_that_is_not_a_map_is_unsupported" }
+      ]
+    },
+    {
       "id": "internal-errors",
       "requirements": ["ERR-12", "ERR-13"],
       "kind": "feature",
@@ -695,7 +721,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-5", "RT-6", "RT-7", "RT-11", "RT-23", "RT-33", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-66", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-19", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-7", "RT-11", "RT-23", "RT-33", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-66", "RT-68", "RT-69", "RT-70", "VAL-1", "VAL-7", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-19", "VAL-22", "VAL-23"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },

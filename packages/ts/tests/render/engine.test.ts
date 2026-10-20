@@ -163,6 +163,7 @@ describe('Engine', () => {
     expect(immutable.render('a.tpl', {})).toBe('1');
   });
 
+  // RT-4: a define or an env given as request data that is not an object fails the render (E_DATA_UNSUPPORTED_TYPE).
   it('binds define and env given as request data, and rejects them when they are no object', () => {
     const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': '{= date(0, "Y")}|{+ "b.tpl"}', 'b.tpl': 'B' }) }));
     expect(engine.render('a.tpl', {}, { define: null, env: null })).toBe('1970|B');

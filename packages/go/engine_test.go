@@ -3,6 +3,7 @@ package template_test
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -220,6 +221,50 @@ func TestInvalidDelimiterIsArgumentError(t *testing.T) {
 	_, err = template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{}), Delimiters: "{"})
 	if err == nil || errors.As(err, &templateError) {
 		t.Fatalf("NewAstProgram with an invalid delimiter = %v, want an argument error that is not an *errs.Error", err)
+	}
+}
+
+// RT-5, RT-6, FUN-43, FUN-44: the functions of the options are registered as Register registers them, so a name that is no
+// identifier or a built-in fails the creation; the limits are the four integers of RT-33 and no other field.
+func TestTheOptionsOfAProgramAreChecked(t *testing.T) {
+	noop := func([]template.Value, functions.Context) (any, error) { return nil, nil }
+	for _, name := range []string{"not a name", "length"} {
+		_, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{}), Functions: map[string]template.HostFunction{name: noop}})
+		var optionError *errs.Error
+		if err == nil || errors.As(err, &optionError) {
+			t.Errorf("function %q = %v, want an argument error that is not an *errs.Error", name, err)
+		}
+	}
+	want := []string{"Iterations", "Depth", "OutputBytes", "ExpressionDepth"}
+	limits := reflect.TypeOf(template.Limits{})
+	if limits.NumField() != len(want) {
+		t.Fatalf("Limits has %d fields, want %d", limits.NumField(), len(want))
+	}
+	for i, name := range want {
+		field := limits.Field(i)
+		if field.Name != name || field.Type.Kind() != reflect.Int {
+			t.Errorf("Limits field %d = %s of kind %v, want %s of kind int", i, field.Name, field.Type.Kind(), name)
+		}
+	}
+}
+
+// RT-4: the request options are typed: Define is a map of templates, and Env is the environment struct or a pointer to it.
+func TestTheRequestOptionsAreTyped(t *testing.T) {
+	options := reflect.TypeOf(template.RenderOptions{})
+	define, ok := options.FieldByName("Define")
+	if !ok || define.Type.Kind() != reflect.Map {
+		t.Fatalf("RenderOptions.Define = %v, want a map", define.Type)
+	}
+	env, ok := options.FieldByName("Env")
+	if !ok {
+		t.Fatal("RenderOptions has no Env field")
+	}
+	envType := env.Type
+	if envType.Kind() == reflect.Pointer {
+		envType = envType.Elem()
+	}
+	if envType.Kind() != reflect.Struct {
+		t.Fatalf("RenderOptions.Env = %v, want a struct or a pointer to one", env.Type)
 	}
 }
 

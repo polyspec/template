@@ -5,8 +5,8 @@ use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seco
 use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
 use polyspec_template::{
-    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Loaded, Loader, MapLoader, RenderOptions, RenderTarget,
-    RuntimeEnvironment,
+    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Limits, Loaded, Loader, MapLoader, RenderOptions,
+    RenderTarget, RuntimeEnvironment,
 };
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -219,6 +219,45 @@ fn the_functions_of_the_options_are_registered_as_register_registers_them() {
     assert_eq!(error.message, "length is a built-in function");
     assert!(RuntimeEnvironment::new(None, functions("f")).is_ok());
     assert!(AstProgram::new(options("f")).is_ok());
+}
+
+/// RT-5, RT-6: the options of a program hold the four limits of RT-33 and the functions that RT-5 lists, so a field that the
+/// spec does not list fails to compile, and a function name that is a built-in fails the creation of the program.
+#[test]
+fn the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec() {
+    let Limits {
+        iterations,
+        depth,
+        output_bytes,
+        expression_depth,
+    } = Limits::default();
+    assert_eq!((iterations, depth, output_bytes, expression_depth), (1_000_000, 32, 16 * 1024 * 1024, 64));
+    fn no_op() -> HostFunction {
+        Box::new(|_, _| Ok(Value::Null))
+    }
+    let functions = std::collections::HashMap::from([("length".to_string(), no_op())]);
+    let error = AstProgram::new(EngineOptions {
+        functions,
+        ..Default::default()
+    })
+    .err()
+    .expect("a built-in name");
+    assert_eq!(error.message, "length is a built-in function");
+}
+
+/// RT-4: a define or an env of the request that is no object fails with E_DATA_UNSUPPORTED_TYPE, named by its message.
+#[test]
+fn the_request_options_that_are_no_object_fail() {
+    let Err(error) = polyspec_template::defines_from_json(&serde_json::json!("b.tpl")) else {
+        panic!("a define that is no object");
+    };
+    assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+    assert_eq!(error.message, "define is not an object");
+    let Err(error) = polyspec_template::env_from_json(&serde_json::json!(0)) else {
+        panic!("an env that is no object");
+    };
+    assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+    assert_eq!(error.message, "env is not an object");
 }
 
 /// FUN-9: a safe string compares, concatenates and stringifies as its text.
