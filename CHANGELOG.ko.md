@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 33a36e1f1323c0f0352610e30fa79eea70ee8795f1edc1ad3c8fed93c1213771 -->
+<!-- source-sha256: 7d47c49dbae5803e7321d1b5421805ecb1ad6d7264924051ff4811cb4ce07437 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-15: `.claude/settings.json`(kit 복사본)은 `kit-check`가, `.githooks/pre-commit`과 `config/generated.json`은 `hooks-check`가 owner다. Red: `make owner-validate`가 owner 없는 경로 3개를 찾았고, green: 통과한다(T26.7-15).
 
 - T26.5: kit 복사본은 연결된 @polyspec/kit을 따르고(`make kit-sync`가 PRINCIPLES.md와 PRINCIPLES.ko.md를 썼다), `CHECK_TARGETS`는 `kit-gates`의 모든 gate(`toolchain-check`, `owner-validate`, `rebuild-check`, `language-check`, `test-markers-check`, `duplication-check`, `commits-check`, `lint-php-ext`, `test-php-ext`)를 실행하며 각각 `.github/workflows/ci.yml`에서 같은 종류의 검사를 실행하는 job에 둔다. Red: `make kit-check`가 11건(다른 복사본 2, CHECK_TARGETS에 없는 gate 9)을 보고했고, green: 통과한다(T26.5).
 

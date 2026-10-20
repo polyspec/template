@@ -996,6 +996,23 @@
         "tests/scripts/failure-messages.test.mts",
         "tests/scripts/no-silent-skips.test.mts"
       ]
+    },
+    {
+      "paths": [
+        ".claude/settings.json"
+      ],
+      "targets": [
+        "kit-check"
+      ]
+    },
+    {
+      "paths": [
+        ".githooks/pre-commit",
+        "config/generated.json"
+      ],
+      "targets": [
+        "hooks-check"
+      ]
     }
   ],
   "inputs": [

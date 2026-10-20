@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-15: `.claude/settings.json` (a copy of kit) is owned by `kit-check`, and `.githooks/pre-commit` and `config/generated.json` by `hooks-check`. Red: `make owner-validate` found 3 paths without an owner; green: it passes (T26.7-15).
+
 - T26.5: the copies of kit follow @polyspec/kit as linked (`make kit-sync` wrote PRINCIPLES.md and PRINCIPLES.ko.md), and `CHECK_TARGETS` runs every gate of `kit-gates` (`toolchain-check`, `owner-validate`, `rebuild-check`, `language-check`, `test-markers-check`, `duplication-check`, `commits-check`, `lint-php-ext`, `test-php-ext`), each in the job of `.github/workflows/ci.yml` that runs the checks of its kind. Red: `make kit-check` reported 11 findings (2 copies that differ, 9 gates missing in CHECK_TARGETS); green: it passes (T26.5).
 
 - T26.7-9: the generated runners of `tests/runner` share `generated-cases.mts` (the type manifest of a case, the verdicts on its compile and render, the compile step, the run of the cases of a process and the end of a run), the generated checks of `scripts/` share `runChecked`, `runPythonCheck` and `compileFixtureGraph`, the branches of `::` and `->` of the call inventory are one, the render options of the Rust showcase adapter are built once, the PHP showcase adapter converts a map with `array_map`, and the fixtures of the editor use the file host of `@polyspec/template-lsp` instead of a copy. Red: `make duplication-check` found 82 clones; green: 68, none of them in `scripts/`, `tests/runner/` or `examples/` (T26.7-9).

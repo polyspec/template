@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 41c3092b35192c8ded06b5cdc86308ada90b57ea89920940f04b65a05213c3f0 -->
+<!-- source-sha256: c31f8fb4a21e84e4036b782f7b9452fcfd97af3c74a03f77fc78fbf5ce171bae -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -25,3 +25,4 @@
 | T26.7-12 | Go package는 같은 코드를 한 곳에만 둔다 | packages/go without the clones that make duplication-check finds | `make duplication-check`, the go tests of the changed packages | [ ] |
 | T26.7-13 | Rust crate는 같은 코드를 한 곳에만 둔다 | packages/rust without the clones that make duplication-check finds | `make duplication-check`, the cargo tests of the changed modules | [ ] |
 | T26.7-14 | TypeScript, Python, C source는 같은 코드를 한 곳에만 둔다 | packages/ts, packages/lsp, packages/python and packages/php-ext/src without the clones that make duplication-check finds | `make duplication-check` | [ ] |
+| T26.7-15 | 추적되는 모든 경로는 config/owner-checks.json에 owner를 가진다 | The owners of .claude/settings.json, .githooks/pre-commit and config/generated.json | `make owner-validate` | [o] |
