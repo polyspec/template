@@ -11,7 +11,7 @@ use Polyspec\Template\BoundMap;
 use Polyspec\Template\Loader\FilesystemLoader;
 use Polyspec\Template\TemplateError;
 use Polyspec\Template\Tests\Support;
-use Polyspec\Template\Value\MapValue;
+use Polyspec\Template\Value\Bind;
 
 /**
  * Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.
@@ -72,9 +72,7 @@ final class BoundMapTest extends TestCase
     /** @return list<string> */
     private static function keys(BoundMap $bound): array
     {
-        $entries = (fn (): MapValue => $this->entries)->call($bound);
-
-        return $entries->keys();
+        return Bind::map($bound)->keys();
     }
 
     public function testBoundMapRendersTheBytesOfTheHostMap(): void

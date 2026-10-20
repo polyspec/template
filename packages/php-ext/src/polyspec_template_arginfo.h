@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 02e9f94fe669f477effe85777c57e8fb39ac24ab */
+ * Stub hash: 83e9ce79476fb483fa86b23837fa1c50dc753f0a */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -42,15 +42,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Native_E
 	ZEND_ARG_TYPE_INFO(0, assign, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, define, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, env, IS_STRING, 1, "null")
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Native_BoundMap_bind, 0, 1, Polyspec\\Template\\\116ative\\BoundMap, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Native_BoundMap_merge, 0, 2, Polyspec\\Template\\\116ative\\BoundMap, 0)
-	ZEND_ARG_TYPE_INFO(0, first, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, second, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
@@ -173,6 +164,25 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_AstProgram_render arginfo_class_Polyspec_Template_Program_render
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_BoundMap___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_BoundMap___clone, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_BoundMap___unserialize, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_BoundMap_bind, 0, 1, Polyspec\\Template\\BoundMap, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_BoundMap_merge, 0, 2, Polyspec\\Template\\BoundMap, 0)
+	ZEND_ARG_TYPE_INFO(0, first, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, second, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Value_SafeString___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -250,8 +260,6 @@ ZEND_METHOD(Polyspec_Template_Native_Engine, register);
 ZEND_METHOD(Polyspec_Template_Native_Engine, registerClass);
 ZEND_METHOD(Polyspec_Template_Native_Engine, render);
 ZEND_METHOD(Polyspec_Template_Native_Engine, renderJson);
-ZEND_METHOD(Polyspec_Template_Native_BoundMap, bind);
-ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, __construct);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, set);
 ZEND_METHOD(Polyspec_Template_Loader_ArrayLoader, load);
@@ -278,6 +286,11 @@ ZEND_METHOD(Polyspec_Template_AstProgram, classFunction);
 ZEND_METHOD(Polyspec_Template_AstProgram, limits);
 ZEND_METHOD(Polyspec_Template_AstProgram, prepare);
 ZEND_METHOD(Polyspec_Template_AstProgram, render);
+ZEND_METHOD(Polyspec_Template_BoundMap, __construct);
+ZEND_METHOD(Polyspec_Template_BoundMap, __clone);
+ZEND_METHOD(Polyspec_Template_BoundMap, __unserialize);
+ZEND_METHOD(Polyspec_Template_BoundMap, bind);
+ZEND_METHOD(Polyspec_Template_BoundMap, merge);
 ZEND_METHOD(Polyspec_Template_Value_SafeString, __construct);
 ZEND_METHOD(Polyspec_Template_Value_BindError, __construct);
 ZEND_METHOD(Polyspec_Template_Value_MapValue, set);
@@ -307,12 +320,6 @@ static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[]
 	ZEND_ME(Polyspec_Template_Native_Engine, registerClass, arginfo_class_Polyspec_Template_Native_Engine_registerClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, render, arginfo_class_Polyspec_Template_Native_Engine_render, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Native_Engine, renderJson, arginfo_class_Polyspec_Template_Native_Engine_renderJson, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Polyspec_Template_Native_BoundMap_methods[] = {
-	ZEND_ME(Polyspec_Template_Native_BoundMap, bind, arginfo_class_Polyspec_Template_Native_BoundMap_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(Polyspec_Template_Native_BoundMap, merge, arginfo_class_Polyspec_Template_Native_BoundMap_merge, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -402,6 +409,15 @@ static const zend_function_entry class_Polyspec_Template_AstProgram_methods[] = 
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_Polyspec_Template_BoundMap_methods[] = {
+	ZEND_ME(Polyspec_Template_BoundMap, __construct, arginfo_class_Polyspec_Template_BoundMap___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Polyspec_Template_BoundMap, __clone, arginfo_class_Polyspec_Template_BoundMap___clone, ZEND_ACC_PRIVATE)
+	ZEND_ME(Polyspec_Template_BoundMap, __unserialize, arginfo_class_Polyspec_Template_BoundMap___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_BoundMap, bind, arginfo_class_Polyspec_Template_BoundMap_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_BoundMap, merge, arginfo_class_Polyspec_Template_BoundMap_merge, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
 static const zend_function_entry class_Polyspec_Template_Value_SafeString_methods[] = {
 	ZEND_ME(Polyspec_Template_Value_SafeString, __construct, arginfo_class_Polyspec_Template_Value_SafeString___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -451,21 +467,6 @@ static zend_class_entry *register_class_Polyspec_Template_Native_Engine(void)
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
-#endif
-
-	return class_entry;
-}
-
-static zend_class_entry *register_class_Polyspec_Template_Native_BoundMap(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Native", "BoundMap", class_Polyspec_Template_Native_BoundMap_methods);
-#if (PHP_VERSION_ID >= 80400)
-	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
-#else
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
 #endif
 
 	return class_entry;
@@ -700,6 +701,21 @@ static zend_class_entry *register_class_Polyspec_Template_AstProgram(zend_class_
 	zend_string *property_artifactRefresh_name = zend_string_init("artifactRefresh", sizeof("artifactRefresh") - 1, 1);
 	zend_declare_typed_property(class_entry, property_artifactRefresh_name, &property_artifactRefresh_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_artifactRefresh_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_BoundMap(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template", "BoundMap", class_Polyspec_Template_BoundMap_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 
 	return class_entry;
 }

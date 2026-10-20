@@ -212,7 +212,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
             zend_class_entry *ce = object->ce;
             /* A bound map is accepted only as assign and as definition data, and a bound map of the PHP
              * implementation, another implementation, at no position (VAL-22). Both classes are final. */
-            if ((pt_bound_ce != NULL && ce == pt_bound_ce) || zend_string_equals_literal(ce->name, "Polyspec\\Template\\BoundMap")) {
+            if (ce == pt_bound_ce) {
                 return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("a bound map is accepted only as assign and as definition data", 61, 0));
             }
             if (ce == pt_safe_string_ce) {

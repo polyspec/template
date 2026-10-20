@@ -7,20 +7,16 @@ namespace Polyspec\Template\Native\Tests;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
-use Polyspec\Template\BoundMap as PhpBoundMap;
+use Polyspec\Template\BoundMap;
 use Polyspec\Template\Loader\FilesystemLoader;
-use Polyspec\Template\Native\BoundMap;
-use Polyspec\Template\Native\Engine;
 use Polyspec\Template\TemplateError;
-use Polyspec\Template\TemplateError as PhpTemplateError;
 
 /**
  * Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.
  *
  * The same scenarios run against the PHP AST runtime in `packages/php/tests/Value/BoundMapTest.php`.
- * The PHP package is loaded here too, so the test checks that the bound maps of the PHP package and
- * of the native engine reject each other, and that AstProgram, which the extension registers, renders
- * a bound map of the extension. The key order of a bound map of the extension is not observable
+ * The PHP package is loaded here too; since the extension registers BoundMap of the library, one class
+ * serves both (S10). The key order of a bound map of the extension is not observable
  * through its interface; the PHP and Rust tests check the precedence and position of `merge`.
  */
 final class BoundMapTest extends TestCase
@@ -38,9 +34,9 @@ final class BoundMapTest extends TestCase
         return Support::readJson(self::fixtureDirectory() . '/cases.json');
     }
 
-    private static function engine(mixed $result = null): Engine
+    private static function engine(mixed $result = null): AstProgram
     {
-        $engine = new Engine(self::fixtureDirectory());
+        $engine = new AstProgram(new FilesystemLoader(self::fixtureDirectory()));
         $engine->register('pick', static fn (): mixed => $result);
 
         return $engine;
@@ -166,39 +162,6 @@ final class BoundMapTest extends TestCase
         );
     }
 
-    public function testEachImplementationRejectsTheBoundMapsOfTheOther(): void
-    {
-        $cases = self::cases();
-        $native = BoundMap::bind($cases['assign']);
-        $php = PhpBoundMap::bind($cases['assign']);
-        self::assertSame(
-            'E_DATA_UNSUPPORTED_TYPE',
-            self::failure(static fn () => self::engine()->render('page.tpl', $php))->errorCode,
-        );
-        self::assertSame(
-            'E_DATA_UNSUPPORTED_TYPE',
-            self::failure(static fn () => BoundMap::bind($php))->errorCode,
-        );
-        self::assertBindFailure(
-            self::failure(static fn () => BoundMap::merge($native, $php)),
-            'E_DATA_UNSUPPORTED_TYPE',
-        );
-        $program = new AstProgram(new FilesystemLoader(self::fixtureDirectory()));
-        self::assertSame(self::engine()->render('page.tpl', $native), $program->render('page.tpl', $native));
-        $operations = [
-            static fn () => PhpBoundMap::bind($native),
-            static fn () => PhpBoundMap::merge($php, $native),
-        ];
-        foreach ($operations as $operation) {
-            try {
-                $operation();
-                self::fail('the bound map of the PHP package accepted a bound map of the extension');
-            } catch (PhpTemplateError $error) {
-                self::assertSame('E_DATA_UNSUPPORTED_TYPE', $error->errorCode);
-            }
-        }
-    }
-
     public function testBindFailsWithTheCodeOfTheFailedCheck(): void
     {
         foreach ([5, [1], '{"a":1}'] as $value) {
@@ -239,36 +202,19 @@ final class BoundMapTest extends TestCase
 
     public function testTheTypeCannotBeCreatedClonedOrUnserialized(): void
     {
-        // VAL-22: the class has exactly the operations of the manifest; its constructor is the hook
-        // through which `new` fails.
-        $mapping = Support::readJson(
-            Support::repositoryRoot() . '/packages/compiler/interface.json',
-        )['languages']['php-extension']['boundMap'];
-        $type = new \ReflectionClass($mapping['type']);
-        self::assertSame(BoundMap::class, $type->getName());
+        $type = new \ReflectionClass(BoundMap::class);
         self::assertTrue($type->isFinal());
+        self::assertFalse($type->isInstantiable());
+        self::assertFalse($type->isCloneable());
+        // `__unserialize` is public because PHP calls it; it fails for every bound map.
         $public = array_map(
             static fn (\ReflectionMethod $method): string => $method->getName(),
             $type->getMethods(\ReflectionMethod::IS_PUBLIC),
         );
-        $expected = array_values($mapping['operations']);
         sort($public);
-        sort($expected);
-        self::assertSame($expected, array_values(array_diff($public, ['__construct'])));
+        self::assertSame(['__unserialize', 'bind', 'merge'], $public);
         $bound = BoundMap::bind(['a' => 1]);
-        $operations = [
-            static fn () => new BoundMap(),
-            static fn () => clone $bound,
-            static fn () => serialize($bound),
-            static fn () => unserialize('O:' . strlen(BoundMap::class) . ':"' . BoundMap::class . '":0:{}'),
-        ];
-        foreach ($operations as $operation) {
-            try {
-                $operation();
-                self::fail('the operation succeeded');
-            } catch (\Throwable $error) {
-                self::assertNotInstanceOf(\PHPUnit\Framework\AssertionFailedError::class, $error);
-            }
-        }
+        $this->expectException(\LogicException::class);
+        unserialize(serialize($bound));
     }
 }

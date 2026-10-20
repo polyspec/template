@@ -82,28 +82,6 @@ final class Engine
     public function renderJson(string $name, string $assign, ?string $define = null, ?string $env = null): string {}
 }
 
-/**
- * A map that host binding checked once (VAL-22). PHP code cannot instantiate, clone or unserialize
- * the class; `bind` and `merge` create it.
- *
- * @not-serializable
- */
-final class BoundMap
-{
-    /**
-     * Applies host binding to a value and returns a bound map; null and `[]` give the empty bound map and a
-     * bound map of the extension is returned unchanged. Errors have no template and no position
-     * (ERR-14).
-     */
-    public static function bind(mixed $value): BoundMap {}
-
-    /**
-     * Returns a bound map with the entries of $first and $second: an entry of $second replaces the
-     * entry of $first with the same key in its position (RT-26).
-     */
-    public static function merge(mixed $first, mixed $second): BoundMap {}
-}
-
 namespace Polyspec\Template\Loader;
 
 /**
@@ -417,6 +395,41 @@ final class AstProgram implements Program
      * @phpstan-param RenderOptions $options
      */
     public function render(string|array $target, mixed $assign = [], array $options = []): string {}
+}
+
+/**
+ * A map that host binding checked once (VAL-22). `bind` and `merge` create it; `render` and
+ * `prepare` take it as assign and as definition data without binding it again. Its entries are
+ * private, and the class cannot be instantiated, cloned or unserialized.
+ */
+final class BoundMap
+{
+    private function __construct() {}
+
+    private function __clone(): void {}
+
+    /**
+     * PHP calls this method for `unserialize`; a bound map holds only checked values, so it cannot
+     * be restored from text.
+     *
+     * @param array $data
+     * @phpstan-param array<mixed> $data
+     */
+    public function __unserialize(array $data): void {}
+
+    /**
+     * Applies host binding to a value and returns a bound map (VAL-22). Null and the empty array give
+     * the empty bound map (RT-4); a bound map is returned unchanged. Errors have no template and no
+     * position (ERR-14).
+     */
+    public static function bind(mixed $value): BoundMap {}
+
+    /**
+     * Returns a bound map with the entries of `$first` and `$second`: an entry of `$second` replaces
+     * the entry of `$first` with the same key in its position, and the other entries of `$second`
+     * follow (RT-26). It reads no value again.
+     */
+    public static function merge(mixed $first, mixed $second): BoundMap {}
 }
 
 namespace Polyspec\Template\Value;

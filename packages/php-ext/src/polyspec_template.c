@@ -283,14 +283,15 @@ static bool pt_bind_library(zval *input, zval *result)
     return true;
 }
 
-/* The entries of a library BoundMap, read in the scope of its class (VAL-22); NULL for any other value. */
+/* The entries of a bound map as a library MapValue (VAL-22); NULL for any other value. */
 static zval *pt_bound_entries(zval *input, zval *rv)
 {
-    if (Z_TYPE_P(input) != IS_OBJECT
-        || !zend_string_equals_literal(Z_OBJCE_P(input)->name, "Polyspec\\Template\\BoundMap")) {
+    pt_bound *bound = pt_bound_of(input);
+    if (bound == NULL) {
         return NULL;
     }
-    return zend_read_property(Z_OBJCE_P(input), Z_OBJ_P(input), ZEND_STRL("entries"), 1, rv);
+    pt_library_value(pt_map_value(bound->map), rv);
+    return rv;
 }
 
 /* VAL-20: whether the depth of a template value is at most `limit`; the walk stops below the limit. */
@@ -425,7 +426,7 @@ ZEND_METHOD(Polyspec_Template_Value_Bind, map)
     zval rv;
     zval *entries = pt_bound_entries(input, &rv);
     if (entries != NULL) {
-        ZVAL_COPY(return_value, entries);
+        ZVAL_COPY_VALUE(return_value, entries);
         return;
     }
     zval result;
@@ -456,7 +457,7 @@ ZEND_METHOD(Polyspec_Template_Value_Bind, data)
     zval rv;
     zval *entries = pt_bound_entries(input, &rv);
     if (entries != NULL) {
-        ZVAL_COPY(return_value, entries);
+        ZVAL_COPY_VALUE(return_value, entries);
         return;
     }
     if (!pt_bind_library(input, return_value)) {
@@ -1628,13 +1629,6 @@ static void pt_bound_free(zend_object *object)
     zend_object_std_dtor(object);
 }
 
-/* `new` fails: only bind and merge create a bound map. */
-static zend_function *pt_bound_get_constructor(zend_object *object)
-{
-    zend_throw_error(NULL, "Instantiation of class %s is not allowed; use bind or merge", ZSTR_VAL(object->ce->name));
-    return NULL;
-}
-
 /* Throws the error of a bind or merge, which has no template and no position (ERR-14). */
 static void pt_throw_bare(const char *code, zend_string *message)
 {
@@ -1646,7 +1640,29 @@ static void pt_throw_bare(const char *code, zend_string *message)
     zend_throw_exception_object(&exception);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_BoundMap, bind)
+/* The private constructor and clone refuse outside calls; unserialize throws (VAL-22). */
+ZEND_METHOD(Polyspec_Template_BoundMap, __construct)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(Polyspec_Template_BoundMap, __clone)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+}
+
+ZEND_METHOD(Polyspec_Template_BoundMap, __unserialize)
+{
+    HashTable *data;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ARRAY_HT(data)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zend_throw_exception(spl_ce_LogicException, "a bound map cannot be unserialized", 0);
+    RETURN_THROWS();
+}
+
+ZEND_METHOD(Polyspec_Template_BoundMap, bind)
 {
     zval *value;
     ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -1679,7 +1695,7 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, bind)
     RETURN_OBJ(object);
 }
 
-ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge)
+ZEND_METHOD(Polyspec_Template_BoundMap, merge)
 {
     zval *first, *second;
     ZEND_PARSE_PARAMETERS_START(2, 2)
@@ -1689,7 +1705,7 @@ ZEND_METHOD(Polyspec_Template_Native_BoundMap, merge)
 
     pt_bound *left = pt_bound_of(first), *right = pt_bound_of(second);
     if (left == NULL || right == NULL) {
-        pt_throw_bare(PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("merge takes two bound maps of the extension", 43, 0));
+        pt_throw_bare(PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("merge takes two bound maps", 26, 0));
         RETURN_THROWS();
     }
     zend_object *object = pt_bound_create(pt_bound_ce);
@@ -2215,13 +2231,12 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_engine_handlers.clone_obj = NULL;
     pt_engine_handlers.get_gc = pt_engine_get_gc;
 
-    pt_bound_ce = register_class_Polyspec_Template_Native_BoundMap();
+    pt_bound_ce = register_class_Polyspec_Template_BoundMap();
     pt_bound_ce->create_object = pt_bound_create;
     memcpy(&pt_bound_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
     pt_bound_handlers.offset = XtOffsetOf(pt_bound, std);
     pt_bound_handlers.free_obj = pt_bound_free;
     pt_bound_handlers.clone_obj = NULL;
-    pt_bound_handlers.get_constructor = pt_bound_get_constructor;
 
     zend_class_entry *program = register_class_Polyspec_Template_Program();
     pt_prepared_render_ce = register_class_Polyspec_Template_PreparedRender();

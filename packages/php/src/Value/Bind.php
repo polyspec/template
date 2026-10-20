@@ -149,9 +149,8 @@ final class Bind
         if ($input instanceof \Closure) {
             throw new BindError(ErrorCode::E_DATA_UNSUPPORTED_TYPE, 'a closure has no binding');
         }
-        // A bound map is accepted only as assign and as definition data, and a bound map of the PHP
-        // extension, another implementation, at no position (VAL-22).
-        if ($input instanceof BoundMap || $input instanceof \Polyspec\Template\Native\BoundMap) {
+        // A bound map is accepted only as assign and as definition data (VAL-22).
+        if ($input instanceof BoundMap) {
             throw new BindError(
                 ErrorCode::E_DATA_UNSUPPORTED_TYPE,
                 'a bound map is accepted only as assign and as definition data',
