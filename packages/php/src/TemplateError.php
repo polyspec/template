@@ -36,7 +36,7 @@ final class TemplateError extends \RuntimeException
         int $start,
         int $end,
         string $message,
-    ): self {
+    ): TemplateError {
         if ($lines === null) {
             return new self($code, $template, 0, 0, $start, $end, $message);
         }
@@ -48,7 +48,7 @@ final class TemplateError extends \RuntimeException
     /**
      * Creates an error with no source position.
      */
-    public static function withoutPosition(string $code, string $template, string $message): self
+    public static function withoutPosition(string $code, string $template, string $message): TemplateError
     {
         return new self($code, $template, 0, 0, 0, 0, $message);
     }

@@ -39,7 +39,7 @@ final class BoundMap
      * the empty bound map (RT-4); a bound map is returned unchanged. Errors have no template and no
      * position (ERR-14).
      */
-    public static function bind(mixed $value): self
+    public static function bind(mixed $value): BoundMap
     {
         return InternalBoundary::run('', static function () use ($value): self {
             if ($value instanceof self) {
@@ -73,7 +73,7 @@ final class BoundMap
      * the entry of `$first` with the same key in its position, and the other entries of `$second`
      * follow (RT-26). It reads no value again.
      */
-    public static function merge(mixed $first, mixed $second): self
+    public static function merge(mixed $first, mixed $second): BoundMap
     {
         return InternalBoundary::run('', static function () use ($first, $second): self {
             if (!$first instanceof self || !$second instanceof self) {

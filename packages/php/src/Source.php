@@ -17,7 +17,7 @@ final class Source
         $this->lines = self::lineIndex($text);
     }
 
-    public static function fromBytes(string $name, string $bytes): self
+    public static function fromBytes(string $name, string $bytes): Source
     {
         $invalid = Utf8::firstInvalid($bytes);
         if ($invalid >= 0) {

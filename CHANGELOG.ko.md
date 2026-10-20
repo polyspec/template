@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 285e1eb2be7411e888913797583265509ffa9f963f8071a281b3ed0eb7d76add -->
+<!-- source-sha256: 769b4f0cc50e0200d469c8facc435f8f9edfc7bdff07e320a55c60eaa380fafb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-8-7: PHP library의 `BoundMap::bind`, `BoundMap::merge`, `Source::fromBytes`, `TemplateError::at`, `TemplateError::withoutPosition`은 반환 타입에 `self` 대신 자기 class 이름을 적는다. PHP 확장이 그렇게 선언하므로(gen_stub은 `self`를 받지 않는다) `make test-php-ext`는 확장과 library의 선언에서 차이를 찾지 않고 테스트를 실행한다. Red: 새 `ExportsTest::testTheFactoriesNameTheirClassAsTheirReturnType`가 `BoundMap::bind`에서 실패하고, `make test-php-ext CASES='ExtensionClassesTest'`는 `self` 반환 타입 다섯 개에서 멈춘다; green: ExportsTest가 확장 유무와 관계없이 통과하고, `make test-php-ext`가 ExtensionClassesTest를 실행해 2개 통과한다 (T26.7-2-8-7).
 
 - T26.7-2-8-6: PHP 확장의 AstPreparedExecution은 library의 public 생성자를 가진다. program, 바인딩된 root data, 정의, 환경, 대상 이름, 읽은 template으로 만든 execution은 그 template을 render한다. 생성자는 prepare가 prepared execution에 주는 상태를 채운다. Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/PreparedExecutionTest.php` 0 passed, 2 failed, "AstPreparedExecution has no constructor"; green: 같은 명령 2 passed(assertion 5), AstProgramTest 8, ConformanceTest 768, ExprFixturesTest 73, ExportsTest 18, CompilerInterfaceTest 2, RenderStateTest 8 passed; `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 PreparedExecutionTest를 적는 줄을 출력하지 않는다(gate는 main에서 다른 row 때문에 exit 2) (T26.7-2-8-6).
 

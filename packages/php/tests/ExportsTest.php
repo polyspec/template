@@ -64,6 +64,26 @@ final class ExportsTest extends TestCase
     }
 
     /**
+     * The static methods that create an object of their class name that class as their return type, as the declarations
+     * of the PHP extension do, so the two declare the same signatures.
+     */
+    public function testTheFactoriesNameTheirClassAsTheirReturnType(): void
+    {
+        $factories = [
+            [BoundMap::class, 'bind'],
+            [BoundMap::class, 'merge'],
+            ['Polyspec\Template\Source', 'fromBytes'],
+            ['Polyspec\Template\TemplateError', 'at'],
+            ['Polyspec\Template\TemplateError', 'withoutPosition'],
+        ];
+        foreach ($factories as [$class, $method]) {
+            $type = (new \ReflectionMethod($class, $method))->getReturnType();
+            $this->assertInstanceOf(\ReflectionNamedType::class, $type);
+            $this->assertSame($class, $type->getName(), $class . '::' . $method);
+        }
+    }
+
+    /**
      * RT-74: the classes of the package share one runtime. A bound map that BoundMap creates is read by Bind without
      * being bound again (VAL-22), and a program renders it.
      */
