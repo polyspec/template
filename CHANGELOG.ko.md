@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e8a4b81eab86e17bb4ca81229a05cfe6992051f21ec3c66e492d7a5a3d067eee -->
+<!-- source-sha256: e788958876780a29a0add9426f291278f9ebda0e9975cfbe314c6a89136e8e19 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-24: `tests/scripts/failure-messages.test.mts`의 "a tool that cannot start fails with its command and the install fix" test는 go test를 `-run`으로 선택하므로, kit의 run-tests가 선택 없는 go 실행을 거부하지 않고 도구 시작까지 간다. Red: test가 거부 때문에 실패했고, green: test 5개 중 5개가 통과한다(T26.7-24).
 
 - T26.7-23: Go generated runner는 kit의 test runner에 `-run ^TestGeneratedConformance$`를 넘기므로 test를 이름으로 선택하고, kit이 이를 CI 밖의 선택 없는 go 실행으로 거부하지 않는다. Red: `tests/scripts/generated-conformance.test.mts`의 Go test가 "a go run without a selection runs only in CI"로 실패했고, green: test 7개 중 7개가 통과한다(T26.7-23).
 

@@ -45,7 +45,7 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
   const gitCore = spawnSync('git', ['--exec-path'], { encoding: 'utf8' });
   assert.equal(gitCore.status, 0, gitCore.stderr);
   symlinkSync(path.join(gitCore.stdout.trim(), 'git'), path.join(bin, 'git'));
-  const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'go', '--cwd', bin, '--', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
+  const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'go', '--cwd', bin, '--', '-run', '^TestAny$', './...'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
   assert.match(run.stdout, /✖ go .*: cannot start go: spawn go ENOENT; declare go in mise.toml and run make install-tools, which installs it into var\/tools\/mise/);

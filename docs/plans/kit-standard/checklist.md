@@ -33,3 +33,4 @@
 | T26.7-21 | The compiled AST artifacts and the generated programs of the showcase are built by make and never tracked | RT-57 and the showcase documents, the Makefile, .gitignore, pages.yml and the removal of scripts/check-artifact-digests.mts | `make typed-generator`, `make typed-generator-check`, `var/tools/bin/node --test tests/scripts/ignored-files.test.mts` | [o] |
 | T26.7-22 | The browser setup test recognizes make template-install-browsers | tests/scripts/suite-parity.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T26.7-23 | The Go generated runner selects its test by name | tests/runner/conformance-generated-go.mts | `var/tools/bin/node --test tests/scripts/generated-conformance.test.mts` | [o] |
+| T26.7-24 | The test of a tool that cannot start selects its go test by name | tests/scripts/failure-messages.test.mts | `var/tools/bin/node --test tests/scripts/failure-messages.test.mts` | [o] |

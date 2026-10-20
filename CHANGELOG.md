@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-24: the test "a tool that cannot start fails with its command and the install fix" of `tests/scripts/failure-messages.test.mts` selects its go test with `-run`, so the run-tests of kit reaches the start of the tool instead of refusing an unselected go run. Red: the test failed on the refusal; green: 5 of 5 tests pass (T26.7-24).
+
 - T26.7-23: the Go generated runner passes `-run ^TestGeneratedConformance$` to the test runner of kit, so it selects its test by name and kit no longer refuses it as an unselected go run outside CI. Red: `tests/scripts/generated-conformance.test.mts` failed in the Go test with "a go run without a selection runs only in CI"; green: 7 of 7 tests pass (T26.7-23).
 
 - T26.7-22: the browser setup test of `tests/scripts/suite-parity.test.mts` recognizes the step `make template-install-browsers` (it matched only `install-browsers`, which T26.2 renamed), so the jobs `scripts`, `browser` and `editor` of `ci.yml` pass it. Red: the test failed with 3 violations; green: 6 of 6 tests pass (T26.7-22).
