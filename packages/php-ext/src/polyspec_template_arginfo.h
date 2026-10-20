@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e8d4df23aafb9b280b94c8ab943d58e26a3c4c7b */
+ * Stub hash: 3516c471da9009a0ff8fb6959da27eaeeeeaf47d */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -175,6 +175,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_TemplateE
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_TemplateError_toArray arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_AstDecodeError___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, reason, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Program_prepare, 0, 1, Polyspec\\Template\\PreparedRender, 0)
 	ZEND_ARG_TYPE_MASK(0, target, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
@@ -411,6 +416,7 @@ ZEND_METHOD(Polyspec_Template_TemplateError, __construct);
 ZEND_METHOD(Polyspec_Template_TemplateError, at);
 ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition);
 ZEND_METHOD(Polyspec_Template_TemplateError, toArray);
+ZEND_METHOD(Polyspec_Template_AstDecodeError, __construct);
 ZEND_METHOD(Polyspec_Template_PreparedRender, __construct);
 ZEND_METHOD(Polyspec_Template_PreparedRender, render);
 ZEND_METHOD(Polyspec_Template_Engine, __construct);
@@ -561,6 +567,11 @@ static const zend_function_entry class_Polyspec_Template_TemplateError_methods[]
 	ZEND_ME(Polyspec_Template_TemplateError, at, arginfo_class_Polyspec_Template_TemplateError_at, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_TemplateError, withoutPosition, arginfo_class_Polyspec_Template_TemplateError_withoutPosition, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_TemplateError, toArray, arginfo_class_Polyspec_Template_TemplateError_toArray, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_AstDecodeError_methods[] = {
+	ZEND_ME(Polyspec_Template_AstDecodeError, __construct, arginfo_class_Polyspec_Template_AstDecodeError___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1024,6 +1035,27 @@ static zend_class_entry *register_class_Polyspec_Template_TemplateError(zend_cla
 	zend_string *property_end_name = zend_string_init("end", sizeof("end") - 1, 1);
 	zend_declare_typed_property(class_entry, property_end_name, &property_end_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_end_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_AstDecodeError(zend_class_entry *class_entry_InvalidArgumentException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template", "AstDecodeError", class_Polyspec_Template_AstDecodeError_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_InvalidArgumentException, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_InvalidArgumentException);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
+
+	zval property_path_default_value;
+	ZVAL_UNDEF(&property_path_default_value);
+	zend_string *property_path_name = zend_string_init("path", sizeof("path") - 1, 1);
+	zend_declare_typed_property(class_entry, property_path_name, &property_path_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_path_name);
 
 	return class_entry;
 }

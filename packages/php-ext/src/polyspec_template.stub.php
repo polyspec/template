@@ -382,6 +382,23 @@ final class TemplateError extends \RuntimeException
 }
 
 /**
+ * The failure of AstProgram::decodeTemplate: the JSON is not a template AST of contracts/schema/ast.schema.json.
+ */
+final class AstDecodeError extends \InvalidArgumentException
+{
+    /**
+     * The JSON Pointer (RFC 6901) of the invalid node, empty for the root (AST-10).
+     */
+    public readonly string $path;
+
+    /**
+     * @param string $path The JSON Pointer (RFC 6901) of the invalid node, empty for the root (AST-10).
+     * @param string $reason The rule of the schema that the node breaks.
+     */
+    public function __construct(string $path, string $reason) {}
+}
+
+/**
  * A complete AST or generated template program.
  *
  * @phpstan-type RenderOptions array{
