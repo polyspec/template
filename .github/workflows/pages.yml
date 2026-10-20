@@ -49,6 +49,7 @@ jobs:
           name: report-pages
           path: var/report/ci-targets/
           if-no-files-found: error
+      - run: make showcase-compile
       - run: |
           mkdir -p docs/.vitepress/dist/examples
           cp -R examples/site docs/.vitepress/dist/examples/site

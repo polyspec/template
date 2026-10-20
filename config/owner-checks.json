@@ -39,7 +39,6 @@
         "packages/*/composer.json"
       ],
       "targets": [
-        "artifact-digest-check",
         "dependency-policy-check",
         "dependency-policy-mutation-check"
       ]
@@ -310,17 +309,6 @@
         "tests/scripts/build-package.test.mts"
       ],
       "targets": []
-    },
-    {
-      "paths": [
-        "scripts/check-artifact-digests.mts"
-      ],
-      "targets": [
-        "artifact-digest-check"
-      ],
-      "tests": [
-        "tests/scripts/artifact-digests.test.mts"
-      ]
     },
     {
       "paths": [
@@ -602,7 +590,6 @@
         "packages/compiler/**"
       ],
       "targets": [
-        "artifact-digest-check",
         "compiler-interface-check",
         "compiler-ir-check",
         "generated-lint-check",
@@ -625,7 +612,6 @@
         "packages/ts/**"
       ],
       "targets": [
-        "artifact-digest-check",
         "test-ts",
         "lint-ts",
         "conformance",
@@ -995,7 +981,8 @@
         "tests/scripts/drivers.test.mts",
         "tests/scripts/failure-messages.test.mts",
         "tests/scripts/no-silent-skips.test.mts"
-      ]
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -1584,17 +1571,6 @@
       "paths": [
         "examples/showcase/build-site.mts",
         "examples/site/**"
-      ]
-    },
-    {
-      "check": "make artifact-digest-check",
-      "paths": [
-        "scripts/check-artifact-digests.mts",
-        "packages/compiler/**",
-        "packages/ts/**",
-        "package-lock.json",
-        "examples/site/**",
-        "examples/showcase/**"
       ]
     },
     {

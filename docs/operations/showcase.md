@@ -3,7 +3,7 @@
 
 [한국어](/ko/operations/showcase).
 
-The [example site](../../examples/site/index.html) renders shared templates with mock data through TypeScript, Go, Rust, PHP, the PHP extension and Python. Each implementation loads the committed AST artifacts, passes variables as `assign`, registers the layout and its parts with `define`, and renders `layout`. Page complexity belongs in templates and mock data. Controllers, authentication, DI and form generation are outside this example.
+The [example site](../../examples/site/index.html) renders shared templates with mock data through TypeScript, Go, Rust, PHP, the PHP extension and Python. Each implementation loads the AST artifacts that `make showcase-compile` builds, passes variables as `assign`, registers the layout and its parts with `define`, and renders `layout`. Page complexity belongs in templates and mock data. Controllers, authentication, DI and form generation are outside this example.
 
 ## Shared inputs
 
@@ -194,7 +194,7 @@ print(html, end="")
 make showcase SHOWCASE_ITERS=3000 SHOWCASE_WARMUP=300
 ```
 
-This writes one committed canonical AST graph for each scenario, `expected.html`, the site's shared inputs in `examples/site/data/scenarios.json`, the comparison results in `examples/site/data/results.json`, and measurements in `examples/site/data/benchmark.json`. Every language loads that same AST graph and renders twice; the TypeScript API also renders twice through one engine instance. Every implementation must produce the same raw UTF-8 bytes without output filters.
+This builds one canonical AST graph for each scenario (not tracked), `expected.html`, the site's shared inputs in `examples/site/data/scenarios.json`, the comparison results in `examples/site/data/results.json`, and measurements in `examples/site/data/benchmark.json`. Every language loads that same AST graph and renders twice; the TypeScript API also renders twice through one engine instance. Every implementation must produce the same raw UTF-8 bytes without output filters.
 
 The benchmark drivers keep one engine instance for warmup and measurement, then render once more and compare its hash. Five independent samples are recorded per implementation and scenario. The site reports median throughput and the P95 of the sample mean render times. These are warm renders after parsing and cache population, not individual request latency measurements. Absolute times depend on the machine and toolchain; compare measurements within one run.
 
@@ -204,7 +204,7 @@ The benchmark drivers keep one engine instance for warmup and measurement, then 
 make showcase-check
 ```
 
-This compares the committed HTML, JSON and AST artifacts with fresh artifact-only renders, then validates the generated page with an HTML structure parser. The page exposes the mock assign data, define registry, templates, artifacts and HTML output. It contains no runtime parser, renderer or browser verification step.
+This compares the committed HTML and JSON, and the AST artifacts that the build made, with fresh artifact-only renders, then validates the generated page with an HTML structure parser. The page exposes the mock assign data, define registry, templates, artifacts and HTML output. It contains no runtime parser, renderer or browser verification step.
 
 Type-fixed source generation runs with `make typed-generator`. One compiler entry builds the shared typed IR and passes it to an independent backend module of TypeScript, Go, Rust, PHP or Python; the PHP extension runs the generated PHP program. It reads the complete compiled source-graph manifest and an explicit type manifest. Before a language backend runs, the shared compiler IR validates every template, resolves include and block paths, and types root variables, template inputs, locals, loop items, record members and function calls. An include declares the values required by its target and the compiler binds each value from caller scope; generated template functions therefore do not pretend that include-local values belong to root assign data. Each definition also declares its generated template target and whether HTML is accepted. The compiler rejects block scope fields that its target template did not declare. The compiler emits one static function per graph template plus a closed template dispatch in each backend language, with manifest-derived assign, definition, template-input and record declarations. A generated block consumes the typed definition registry and invokes its generated child function itself; callers never pre-render a string slot. Definition data records preserve field presence. Input precedence is root assign, then supplied definition data fields, then explicit block scope. Nullable fields become `?T`, `*T`, `Option<T>` and optional properties respectively. Lists and insertion-ordered maps retain their element types recursively. `make compiler-ir-check` covers every canonical node and expression variant and verifies rejection of undeclared symbols. `make typed-generator-check` verifies reproducibility. `make typed-generator-compile-check` compiles and executes all five scenario graphs in each of the five generated languages and requires byte-identical output. A manifest is required because arbitrary JSON does not contain enough information to infer static types safely.
 

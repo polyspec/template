@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 05640d7eceaa0f56d785f0615cf186a9e050b6dddebb2c5bce924d35d362f3c9 -->
+<!-- source-sha256: c6c4be1f098c825a5be9edfbe281fa163255b777b4d5317bb73c95feda8a19a4 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-21: `examples/site/scenarios/*/compiled/`의 compile된 AST artifact와 showcase의 generated program(`examples/showcase/adapters/generated/{typed,php,javascript}/`, `adapters/go/generated/`) 133개 파일은 `make showcase-compile`과 `make typed-generator`가 만들며 더 이상 추적하지 않는다(RT-57, `docs/operations/showcase.md`, `publication.md`). 이를 읽는 target(`showcase-build-check`, `showcase-site-check`, `contract-check`, `generated-lint-check`, `lint-go`, `pages` workflow)은 그 target에 의존하고, `typed-generator-check`는 다시 생성해 비교하며, `make artifact-digest-check`와 그 script, test, owner 항목, 추적을 끊은 파일의 rebuild 항목은 제거했다. Red: `git ls-files`가 생성 파일 133개를 나열했고, green: 파일을 지운 뒤 `make typed-generator`가 graph 5개와 program 30개를 만들고 `make typed-generator-check`가 artifact 30개를 검사한다. `owner-validate`, `rebuild-check`, `layout-check`는 통과한다(T26.7-21).
 
 - T26.7-20: kit 복사본은 연결된 kit을 따르고(`make kit-sync`가 PRINCIPLES 두 파일과 `config/php-lint/composer.json`, `composer.lock`을 썼다), `CHECK_TARGETS`와 `.github/workflows/ci.yml`의 첫 job은 새 gate `link-state-check`와 `bypass-check`를 실행한다. Red: `make kit-check`가 5건을 보고했고, green: 통과한다. `link-state-check`는 통과하고, `bypass-check`는 `scripts/check-package-installs.mts:116`의 `cargo package --no-verify`를 찾는데 이는 cargo의 검증 build이지 Git hook이 아니다(kit 결함, 보고함)(T26.7-20).
 

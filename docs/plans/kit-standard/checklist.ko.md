@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 5beacb2e861fe0956a7ea3282c2417040b4d172f47f3642bbb2a46245fe112b5 -->
+<!-- source-sha256: 129bd790f1e906763308a21d6d275d544f59e6a6dbff4598c80a1cc1f35b75b7 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -31,3 +31,4 @@
 | T26.7-18 | assign으로 준 문자열 key의 host Map은 일반 객체와 같이 렌더된다 (hyper: assign is not a map) | packages/ts/tests/value/bound.test.ts | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/value/bound.test.ts` | [-] 원인: 실패가 재현되지 않는다. 2026-10-20 11:57에 build한 template main의 dist로 hyper http test가 48개 중 48개 통과한다 |
 | T26.7-19 | packages/ts의 AST validator는 make가 만들고 추적하지 않는다 | scripts/generate-ast-validator.mts, the Makefile, .gitignore and the owner and knip declarations | `make build-ts`, `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/decode.test.ts` | [o] |
 | T26.7-20 | kit 복사본은 연결된 kit을 따르고 CHECK_TARGETS는 link-state-check와 bypass-check를 실행한다 | PRINCIPLES.md, PRINCIPLES.ko.md, config/php-lint, Makefile, .github/workflows/ci.yml | `make kit-check` | [o] |
+| T26.7-21 | showcase의 compile된 AST artifact와 generated program은 make가 만들고 추적하지 않는다 | RT-57 and the showcase documents, the Makefile, .gitignore, pages.yml and the removal of scripts/check-artifact-digests.mts | `make typed-generator`, `make typed-generator-check`, `var/tools/bin/node --test tests/scripts/ignored-files.test.mts` | [o] |

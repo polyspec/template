@@ -116,7 +116,7 @@ help: ## List targets
 	@echo "  docs-verify-idempotent Build the documentation site twice and compare"
 	@echo "  docs-static-check      Build the static site and verify its entry page"
 	@echo "  showcase               Build the example site, parity proof and benchmark artifact"
-	@echo "  showcase-compile       Generate committed canonical AST artifacts"
+	@echo "  showcase-compile       Build the canonical AST artifacts of the showcase"
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
 	@echo "  template-install-check         Install package artifacts and compare AST/generated output"
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
@@ -162,6 +162,7 @@ lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format tem
 # template's.
 lint-php: build-php
 lint-rust: cargo-downloads-check
+lint-go: typed-generator
 
 .PHONY: template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format
 template-lint-go-format:
@@ -560,7 +561,7 @@ docs-static-check: docs ## Build the documentation site as static files
 contract-generate: ## Generate showcase declarations and Mermaid diagrams
 	$(NODE) scripts/generate-showcase-contract.mts
 
-contract-check: cargo-downloads-check build-ts build-php python-package ## Verify generated declarations, implementations and runtime state recovery
+contract-check: cargo-downloads-check build-ts build-php python-package typed-generator ## Verify generated declarations, implementations and runtime state recovery
 	$(NODE) scripts/check-showcase-contract.mts
 
 showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
@@ -603,23 +604,20 @@ release-test-matrix: ## The full suite of make check through the same guard: eve
 release-check: ## Install and run the release matrix in an isolated clean worktree
 	$(NODE) scripts/check-clean-release.mts
 
-showcase-check: artifact-digest-check typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
+showcase-check: typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
 
-.PHONY: artifact-digest-check showcase-ast-check showcase-build-check showcase-site-check showcase-html-check
-# The committed artifacts record the digest of the compiler that built them; the check reads only tracked sources, so the
-# job push-gate runs it (T17.1-6).
-artifact-digest-check: ## Fail when a committed compiled artifact records the digest of another compiler; names make showcase
-	$(NODE) scripts/check-artifact-digests.mts
-showcase-ast-check: build-ts
-	$(NODE) examples/showcase/compile.mts --refresh false
-showcase-build-check: cargo-downloads-check showcase-ast-check build-php
+.PHONY: showcase-build-check showcase-site-check showcase-html-check
+# The compiled AST artifacts and the generated programs are built by showcase-compile and typed-generator and are not tracked
+# (RT-57): each manifest records the digests of its source, types, contract and compiler, and the build reuses an artifact
+# whose digests match.
+showcase-build-check: cargo-downloads-check showcase-compile build-php
 	$(NODE) examples/showcase/build.mts --check --langs $(SHOWCASE_LANGS)
-showcase-site-check: build-ts
+showcase-site-check: showcase-compile
 	$(NODE) examples/showcase/build-site.mts --check
 showcase-html-check: build-ts
 	$(NODE) scripts/check-showcase-html.mts
 
-showcase-compile: build-ts ## Generate committed canonical AST artifacts
+showcase-compile: build-ts ## Build the canonical AST artifacts of the showcase
 	$(NODE) examples/showcase/compile.mts --refresh true
 
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, typed locals that decode once, and typed request argument errors, in every core language
@@ -639,7 +637,7 @@ generated-bound-data-check: cargo-downloads-check build-ts build-php python-pack
 typed-generator: showcase-compile ## Generate type-fixed host source from canonical AST
 	$(NODE) examples/showcase/compile-generated.mts --refresh true
 
-typed-generator-check: showcase-ast-check ## Verify type-fixed generated source is reproducible
+typed-generator-check: typed-generator ## Verify type-fixed generated source is reproducible
 	$(NODE) examples/showcase/compile-generated.mts --refresh dev --check
 
 compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
@@ -658,7 +656,7 @@ typed-generator-compile-check: cargo-downloads-check build-php python-package co
 	$(NODE) scripts/check-typed-generator.mts
 
 .PHONY: generated-lint-check
-generated-lint-check: cargo-downloads-check build-php ## Lint the generated Go, Rust, TypeScript and PHP programs as code of a consumer: formatter and unused code
+generated-lint-check: cargo-downloads-check build-php typed-generator ## Lint the generated Go, Rust, TypeScript and PHP programs as code of a consumer: formatter and unused code
 	$(NODE) scripts/check-generated-lint.mts
 
 clean: ## Remove build outputs

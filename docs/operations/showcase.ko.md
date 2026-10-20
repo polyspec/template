@@ -1,10 +1,10 @@
 <!-- doc-id: docs-operations-showcase -->
-<!-- source-sha256: 6d9c3795f505138d651f9f38a2f5c682d73838c2b98c7551f4a855546a071d04 -->
+<!-- source-sha256: c187c273ae43bf9e3f204d40245fc523fff3966b226283b0c3e446f0f0fe5963 -->
 # 예제 사이트
 
 [English](/operations/showcase).
 
-[예제 사이트](../../examples/site/index.html)는 TypeScript, Go, Rust, PHP, PHP 확장, Python으로 커밋된 AST artifact를 사용해 공통 템플릿을 렌더한다. 각 구현은 artifact를 로드하고 변수를 `assign`으로 전달하고 레이아웃과 구성 요소를 `define`으로 등록한 뒤 `layout`을 렌더한다. 화면의 복잡성은 템플릿과 목업 데이터에 둔다. 컨트롤러, 인증, DI, 폼 생성은 이 예제의 범위 밖이다.
+[예제 사이트](../../examples/site/index.html)는 TypeScript, Go, Rust, PHP, PHP 확장, Python으로 `make showcase-compile`이 만든 AST artifact를 사용해 공통 템플릿을 렌더한다. 각 구현은 artifact를 로드하고 변수를 `assign`으로 전달하고 레이아웃과 구성 요소를 `define`으로 등록한 뒤 `layout`을 렌더한다. 화면의 복잡성은 템플릿과 목업 데이터에 둔다. 컨트롤러, 인증, DI, 폼 생성은 이 예제의 범위 밖이다.
 
 ## 공통 입력
 
@@ -193,7 +193,7 @@ print(html, end="")
 make showcase SHOWCASE_ITERS=3000 SHOWCASE_WARMUP=300
 ```
 
-이 명령은 각 시나리오의 canonical AST graph 하나, `expected.html`, 사이트의 공통 입력인 `examples/site/data/scenarios.json`, 비교 결과인 `examples/site/data/results.json`, 측정값인 `examples/site/data/benchmark.json`을 쓴다. 모든 언어가 같은 AST graph를 읽어 두 번 렌더하며 TypeScript API도 같은 엔진 인스턴스로 두 번 렌더한다. 모든 구현은 출력 필터 없이 동일한 원시 UTF-8 바이트를 출력해야 한다.
+이 명령은 각 시나리오의 canonical AST graph 하나(추적하지 않는다), `expected.html`, 사이트의 공통 입력인 `examples/site/data/scenarios.json`, 비교 결과인 `examples/site/data/results.json`, 측정값인 `examples/site/data/benchmark.json`을 쓴다. 모든 언어가 같은 AST graph를 읽어 두 번 렌더하며 TypeScript API도 같은 엔진 인스턴스로 두 번 렌더한다. 모든 구현은 출력 필터 없이 동일한 원시 UTF-8 바이트를 출력해야 한다.
 
 벤치마크 드라이버는 워밍업과 측정에 같은 엔진 인스턴스를 사용한 뒤 한 번 더 렌더하고 해시를 비교한다. 구현·시나리오마다 독립 측정 5회를 기록한다. 사이트는 중앙 처리량과 표본별 평균 렌더 시간의 P95를 표시한다. 파싱과 캐시 구성이 끝난 뒤의 렌더 측정이며 개별 요청 지연 시간 측정은 아니다. 절대 시간은 기계와 툴체인에 따라 달라지므로 한 실행 안의 측정값을 비교한다.
 
@@ -203,7 +203,7 @@ make showcase SHOWCASE_ITERS=3000 SHOWCASE_WARMUP=300
 make showcase-check
 ```
 
-이 명령은 커밋된 HTML·JSON·AST artifact를 새 artifact-only 렌더 결과와 비교하고 HTML 구조 parser로 페이지를 검사한다. 페이지에는 목업 assign 데이터, define 레지스트리, 템플릿, artifact와 HTML 출력이 표시된다. runtime parser, renderer와 브라우저 검증 단계는 실행하지 않는다.
+이 명령은 commit된 HTML·JSON과 build가 만든 AST artifact를 새 artifact-only 렌더 결과와 비교하고 HTML 구조 parser로 페이지를 검사한다. 페이지에는 목업 assign 데이터, define 레지스트리, 템플릿, artifact와 HTML 출력이 표시된다. runtime parser, renderer와 브라우저 검증 단계는 실행하지 않는다.
 
 타입 고정 소스 생성은 `make typed-generator`로 실행한다. 하나의 compiler 진입점이 공통 typed IR을 만들고 TypeScript·Go·Rust·PHP·Python backend 모듈 중 하나에 전달하며, PHP 확장은 생성된 PHP 프로그램을 실행한다. 전체 compiled source graph manifest와 명시적 타입 manifest를 읽는다. 언어 backend를 실행하기 전에 공통 compiler IR이 모든 템플릿을 검증하고 include와 block 경로를 해석하며 root 변수, template input, local, loop item, record member, 함수 호출의 타입을 결정한다. include 대상은 필요한 값을 선언하고 compiler는 각 값을 호출자 scope에서 결합한다. 따라서 include에서만 전달되는 값을 root assign 필드인 것처럼 가장하지 않는다. 각 definition은 generated template target과 HTML 허용 여부도 선언한다. compiler는 대상 template이 선언하지 않은 block scope 필드를 거부한다. 그 뒤 graph의 템플릿마다 정적 함수 하나와 닫힌 template dispatch를 생성하고, manifest에서 도출한 assign·definition·template input·record 선언을 각 backend 언어의 소스에 넣는다. 생성된 block은 타입이 고정된 definition registry를 받아 자식 함수를 직접 호출하며, 호출자가 문자열 slot을 미리 렌더하지 않는다. Definition data record는 필드 전달 여부를 보존한다. 입력 우선순위는 root assign, 전달된 definition data 필드, 명시적인 block scope 순서다. nullable 필드는 각각 `?T`, `*T`, `Option<T>`, 선택 속성으로 변환하고 list와 삽입 순서 map은 원소 타입을 재귀적으로 유지한다. `make compiler-ir-check`는 canonical node와 expression의 모든 종류 및 선언되지 않은 symbol 거부를 검사한다. `make typed-generator-check`는 산출물 재현성을 확인한다. `make typed-generator-compile-check`는 다섯 시나리오 graph를 생성된 backend 언어마다 컴파일·실행하고 출력 바이트가 같은지 검사한다. 임의의 JSON만으로는 정적 타입을 안전하게 추론할 수 없으므로 manifest가 필요하다.
 

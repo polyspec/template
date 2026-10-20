@@ -41,3 +41,10 @@ coverage/
 # The AST validator that make ast-validator generates (T26.7-19)
 packages/ts/src/ast-validator.mjs
 packages/ts/src/ast-validator.mjs.next-*
+
+# The compiled AST artifacts and the generated programs of the showcase that make showcase-compile and make typed-generator write (T26.7-21)
+examples/site/scenarios/*/compiled/
+examples/showcase/adapters/generated/typed/
+examples/showcase/adapters/generated/php/
+examples/showcase/adapters/generated/javascript/
+examples/showcase/adapters/go/generated/
