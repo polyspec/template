@@ -51,7 +51,7 @@ final class AstProgramTest extends TestCase
 
     public function testALoaderResultWithAnEmptyVersionIsALoadFailure(): void
     {
-        // RT-9: the empty string is no version.
+        // The empty string is no version.
         $program = new AstProgram($this->loader(['source' => 'a', 'version' => '']));
 
         $this->assertFailure(ErrorCode::E_LOAD_FAILED, 'x.tpl', static fn (): string => $program->render('x.tpl'));
@@ -59,7 +59,7 @@ final class AstProgramTest extends TestCase
 
     public function testALoaderResultWithoutASourceOrAnAstAndAnEmptyVersionFailsForTheSourceFirst(): void
     {
-        // RT-9: the source text or the AST is checked before the version, in every implementation.
+        // The source text or the AST is checked before the version, in every implementation.
         $program = new AstProgram($this->loader(['version' => '']));
 
         try {

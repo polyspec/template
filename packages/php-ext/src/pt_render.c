@@ -198,6 +198,7 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         pt_template *template;
         if (has_ast) {
             template = pt_ast_from_zval(run, ast);
+            ZVAL_COPY(&template->ast, ast);
         } else {
             template = pt_parse(run, name.s, name.n, Z_STRVAL_P(source), Z_STRLEN_P(source), engine->open, engine->close);
         }
@@ -294,6 +295,19 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
     pt_hold(run, template);
     return template;
 #undef PT_LOAD_FAIL
+}
+
+pt_template *pt_load_named(pt_run *run, pt_engine *engine, pt_s name, bool located, pt_s frame_name, const pt_lines *frame_lines, size_t start, size_t end)
+{
+    /* The context of a load holds the run, the engine and the arena that keeps the loader results of the run. */
+    pt_ctx ctx;
+    memset(&ctx, 0, sizeof(ctx));
+    ctx.run = run;
+    ctx.arena = &run->arena;
+    ctx.engine = engine;
+    ctx.entry = name;
+    pt_frame frame = {frame_name, frame_lines, NULL};
+    return pt_load_template(&ctx, name, located ? &frame : NULL, start, end);
 }
 
 /* ----------------------------------------------------------------------------------------------- */

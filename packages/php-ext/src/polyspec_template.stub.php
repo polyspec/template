@@ -630,6 +630,16 @@ final class AstProgram implements Program, \Polyspec\Template\Render\RuntimeServ
     public function limits(): array {}
 
     /**
+     * RT-9, RT-40: loads a template by name and caches it by version.
+     *
+     * @param array|null $span
+     * @phpstan-param array{0: int, 1: int}|null $span
+     * @return array
+     * @phpstan-return array{ast: array<string, mixed>, lines: list<int>|null}
+     */
+    public function loadTemplate(string $name, ?\Polyspec\Template\Render\Frame $from, ?array $span): array {}
+
+    /**
      * Prepares a template name or a parsed template: binds the assign, the definitions and the environment once, for
      * any number of renders (RT-61).
      *

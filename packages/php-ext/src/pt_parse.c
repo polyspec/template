@@ -2315,6 +2315,9 @@ void pt_template_release(pt_template *template)
         if (template->version) {
             zend_string_release(template->version);
         }
+        if (Z_TYPE(template->ast) != IS_UNDEF) {
+            zval_ptr_dtor(&template->ast);
+        }
         pt_arena_free(&template->arena);
         efree(template);
     }

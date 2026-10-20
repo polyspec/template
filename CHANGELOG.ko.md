@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6f941f645a0bc9ac898ad6af547f1d6b635099c0245fdb53f30a0c5668975086 -->
+<!-- source-sha256: 0fe3abb2627bf123a7ed894c80c37899d767cf852f5bc10398844e7df81d6ab1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-8-5: PHP 확장의 AstProgram은 library의 public `loadTemplate`을 가진다. loader가 주는 template의 AST와 line index를 돌려주고(loader가 AST를 주면 그 배열을 그대로 돌려준다), artifact refresh 정책 아래 version으로 캐시하며, 각 loader 실패는 읽는 frame이나 이름에 위치한다. `AstProgramTest.php`의 주석은 더 이상 RT-9를 적지 않는다(R16, internal test가 가졌던 것과 같은 finding). Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/LoadTemplateTest.php` 4 error, "Call to undefined method Polyspec\Template\AstProgram::loadTemplate()"; green: 같은 명령 4 passed(assertion 7), LoadFailureTest 5, EngineRefreshTest 5, ConformanceTest 768, ExprFixturesTest 73, ExportsTest 18, CompilerInterfaceTest 2, RenderStateTest 8 passed; `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 LoadTemplateTest나 AstProgramTest를 적는 줄을 출력하지 않는다(gate는 main에서 다른 row 때문에 exit 2) (T26.7-2-8-5).
 
 - T26.7-2-8-4: PHP 확장은 `Native\Engine`을 등록하지 않는다. stub과 C에는 Native class가 없고, 확장의 모든 class는 library의 class다(S10). Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/ExtensionClassesTest.php` 실패 2, `Polyspec\Template\Native\Engine`; green: 같은 명령 통과 2개 test, `make lint-php-ext` exit 0 (T26.7-2-8-4).
 

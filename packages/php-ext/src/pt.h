@@ -317,6 +317,7 @@ struct pt_template {
     pt_comment *comments;
     uint32_t comment_count;
     zend_string *version;
+    zval ast; /* the AST array that a loader gave, kept as it is (RT-40); UNDEF (zeroed) for a source */
 };
 
 /* Parses a source into a new template (LEX-*, GRM-*, AST-*). A failure jumps to the boundary of the
@@ -563,6 +564,11 @@ typedef struct pt_request {
 /* Resolves the entry template of a request like pt_render does, loads it, and keeps it beyond the run (RT-61). The
  * template of `ast` is the entry when `ast` is not UNDEF. */
 pt_template *pt_prepare_root(pt_run *run, pt_engine *engine, const pt_request *request, zval *ast);
+
+/* AstProgram::loadTemplate (RT-9, RT-40): loads `name` with the loader and the cache of the engine, as a render does. A
+ * failure is located at the frame `frame_name` and `frame_lines` and the span `start` to `end` when `located`, else
+ * named after `name`. The template is held by the run. */
+pt_template *pt_load_named(pt_run *run, pt_engine *engine, pt_s name, bool located, pt_s frame_name, const pt_lines *frame_lines, size_t start, size_t end);
 
 /* Renders the template `name`; the output is appended to `output`. */
 void pt_render(pt_run *run, pt_engine *engine, const pt_request *request, smart_str *output);

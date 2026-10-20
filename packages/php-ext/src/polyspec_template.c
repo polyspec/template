@@ -2696,6 +2696,135 @@ ZEND_METHOD(Polyspec_Template_AstProgram, render)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* Loading (RT-9, RT-40): AstProgram::loadTemplate                                                  */
+/* ----------------------------------------------------------------------------------------------- */
+
+static zend_class_entry *pt_frame_class;
+
+typedef struct pt_load_input {
+    pt_engine *engine;
+    zend_string *name;
+    bool located;
+    zval *frame_name, *frame_lines;
+    zend_long start, end;
+    zval *result;
+} pt_load_input;
+
+/* The integer of a value, dereferenced; false when the value is not an int. */
+static bool pt_long_of(zval *value, zend_long *result)
+{
+    ZVAL_DEREF(value);
+    if (Z_TYPE_P(value) != IS_LONG) {
+        return false;
+    }
+    *result = Z_LVAL_P(value);
+    return true;
+}
+
+/* The line index of a frame, read into the arena of the run; NULL when the frame has no lines. */
+static const pt_lines *pt_frame_lines_into(pt_run *run, zval *lines)
+{
+    if (Z_TYPE_P(lines) != IS_ARRAY || zend_hash_num_elements(Z_ARRVAL_P(lines)) == 0) {
+        return NULL;
+    }
+    pt_lines *line_index = pt_alloc(&run->arena, sizeof(pt_lines));
+    line_index->count = zend_hash_num_elements(Z_ARRVAL_P(lines));
+    line_index->starts = pt_alloc(&run->arena, sizeof(size_t) * line_index->count);
+    size_t i = 0;
+    zval *value;
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(lines), value) {
+        zend_long start = 0;
+        pt_long_of(value, &start);
+        line_index->starts[i++] = (size_t)start;
+    } ZEND_HASH_FOREACH_END();
+    return line_index;
+}
+
+/* The work of AstProgram::loadTemplate: loads the template, then builds ['ast' => ..., 'lines' => ...] (RT-40). */
+static void pt_load_into(pt_run *run, void *context)
+{
+    pt_load_input *input = context;
+    pt_s name = {ZSTR_VAL(input->name), ZSTR_LEN(input->name)};
+    pt_s frame_name = {NULL, 0};
+    const pt_lines *frame_lines = NULL;
+    if (input->located) {
+        frame_name = (pt_s){Z_STRVAL_P(input->frame_name), Z_STRLEN_P(input->frame_name)};
+        frame_lines = pt_frame_lines_into(run, input->frame_lines);
+    }
+    pt_template *template = pt_load_named(run, input->engine, name, input->located, frame_name, frame_lines, (size_t)input->start, (size_t)input->end);
+    zval ast, lines;
+    if (Z_TYPE(template->ast) != IS_UNDEF) {
+        /* A loader that gives an AST: the array of the loader is returned as it is, with no line index. */
+        ZVAL_COPY(&ast, &template->ast);
+        ZVAL_NULL(&lines);
+    } else {
+        pt_ast_to_zval(template, &ast);
+        const pt_lines *line_index = pt_template_lines(template);
+        array_init_size(&lines, line_index != NULL ? line_index->count : 0);
+        for (size_t i = 0; line_index != NULL && i < line_index->count; i++) {
+            add_next_index_long(&lines, (zend_long)line_index->starts[i]);
+        }
+    }
+    array_init_size(input->result, 2);
+    add_assoc_zval_ex(input->result, "ast", 3, &ast);
+    add_assoc_zval_ex(input->result, "lines", 5, &lines);
+}
+
+/* AstProgram::loadTemplate(string $name, ?Frame $from, ?array $span): array (RT-9, RT-40). */
+ZEND_METHOD(Polyspec_Template_AstProgram, loadTemplate)
+{
+    zend_string *name;
+    zval *from = NULL;
+    HashTable *span = NULL;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_STR(name)
+        Z_PARAM_OBJECT_OF_CLASS_OR_NULL(from, pt_frame_class)
+        Z_PARAM_ARRAY_HT_OR_NULL(span)
+    ZEND_PARSE_PARAMETERS_END();
+
+    /* The failure is located at the frame and the span when both are given (RT-9); a span that is not two offsets fails
+     * as Context::fail does. */
+    zend_long start = 0, end = 0;
+    zval rv;
+    zval *frame_name = NULL, *frame_lines = NULL;
+    bool located = from != NULL && span != NULL;
+    if (located) {
+        zval *first = zend_hash_index_find(span, 0);
+        zval *last = zend_hash_index_find(span, 1);
+        if (first == NULL || last == NULL || !pt_long_of(first, &start) || !pt_long_of(last, &end)) {
+            zend_throw_error(NULL, "a span holds the start and the end byte offset");
+            RETURN_THROWS();
+        }
+        frame_name = zend_read_property(pt_frame_class, Z_OBJ_P(from), ZEND_STRL("name"), 1, &rv);
+        frame_lines = zend_read_property(pt_frame_class, Z_OBJ_P(from), ZEND_STRL("lines"), 1, &rv);
+        ZVAL_DEREF(frame_lines);
+        if (Z_TYPE_P(frame_lines) == IS_ARRAY) {
+            zval *value;
+            ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(frame_lines), value) {
+                zend_long line;
+                if (!pt_long_of(value, &line)) {
+                    zend_throw_error(NULL, "a frame holds its line starts as integers");
+                    RETURN_THROWS();
+                }
+            } ZEND_HASH_FOREACH_END();
+        }
+    }
+
+    pt_load_input input = {0};
+    input.engine = pt_engine_of(Z_OBJ_P(ZEND_THIS));
+    input.name = name;
+    input.located = located;
+    input.frame_name = frame_name;
+    input.frame_lines = frame_lines;
+    input.start = start;
+    input.end = end;
+    input.result = return_value;
+    if (!pt_run_work(pt_load_into, &input)) {
+        RETURN_THROWS();
+    }
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* Module                                                                                           */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -2741,6 +2870,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     zend_class_entry *frame = register_class_Polyspec_Template_Render_Frame();
     zend_class_entry *scope = register_class_Polyspec_Template_Render_Scope();
     zend_class_entry *context = register_class_Polyspec_Template_Render_Context();
+    pt_frame_class = frame;
     pt_render_state_register(runtime_services, frame, scope, context);
 
     memcpy(&pt_engine_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));

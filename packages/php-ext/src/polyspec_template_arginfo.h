@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 48c858e14d4b9079ba7e0ee53e1f849f5169e7b9 */
+ * Stub hash: 7b45363209a9a5dcebeac96fceabd7d1115fd7d5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -209,6 +209,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Polyspec_Template_AstProgram_classFunction arginfo_class_Polyspec_Template_Render_RuntimeServices_classFunction
 
 #define arginfo_class_Polyspec_Template_AstProgram_limits arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_AstProgram_loadTemplate, 0, 3, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, from, Polyspec\\Template\\Render\\Frame, 1)
+	ZEND_ARG_TYPE_INFO(0, span, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_AstProgram_prepare arginfo_class_Polyspec_Template_Program_prepare
 
@@ -553,6 +559,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, registerClass);
 ZEND_METHOD(Polyspec_Template_AstProgram, hostFunction);
 ZEND_METHOD(Polyspec_Template_AstProgram, classFunction);
 ZEND_METHOD(Polyspec_Template_AstProgram, limits);
+ZEND_METHOD(Polyspec_Template_AstProgram, loadTemplate);
 ZEND_METHOD(Polyspec_Template_AstProgram, prepare);
 ZEND_METHOD(Polyspec_Template_AstProgram, render);
 ZEND_METHOD(Polyspec_Template_BoundMap, __construct);
@@ -779,6 +786,7 @@ static const zend_function_entry class_Polyspec_Template_AstProgram_methods[] = 
 	ZEND_ME(Polyspec_Template_AstProgram, hostFunction, arginfo_class_Polyspec_Template_AstProgram_hostFunction, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstProgram, classFunction, arginfo_class_Polyspec_Template_AstProgram_classFunction, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstProgram, limits, arginfo_class_Polyspec_Template_AstProgram_limits, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_AstProgram, loadTemplate, arginfo_class_Polyspec_Template_AstProgram_loadTemplate, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstProgram, prepare, arginfo_class_Polyspec_Template_AstProgram_prepare, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstProgram, render, arginfo_class_Polyspec_Template_AstProgram_render, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
