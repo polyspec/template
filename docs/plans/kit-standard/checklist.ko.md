@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: c31f8fb4a21e84e4036b782f7b9452fcfd97af3c74a03f77fc78fbf5ce171bae -->
+<!-- source-sha256: 151cf48eba4cabacda87a1588dca9d50c074315af771561a316a4cc775c575b8 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -26,3 +26,4 @@
 | T26.7-13 | Rust crate는 같은 코드를 한 곳에만 둔다 | packages/rust without the clones that make duplication-check finds | `make duplication-check`, the cargo tests of the changed modules | [ ] |
 | T26.7-14 | TypeScript, Python, C source는 같은 코드를 한 곳에만 둔다 | packages/ts, packages/lsp, packages/python and packages/php-ext/src without the clones that make duplication-check finds | `make duplication-check` | [ ] |
 | T26.7-15 | 추적되는 모든 경로는 config/owner-checks.json에 owner를 가진다 | The owners of .claude/settings.json, .githooks/pre-commit and config/generated.json | `make owner-validate` | [o] |
+| T26.7-16 | AGENTS.md의 모든 규칙은 Own이거나 principle을 id로 구체화한다 | AGENTS.md and AGENTS.ko.md | `make rules-check` | [o] |

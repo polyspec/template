@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7d47c49dbae5803e7321d1b5421805ecb1ad6d7264924051ff4811cb4ce07437 -->
+<!-- source-sha256: a89fad397fb9337ed2e06f5e0c661eebe5c59bd54f62f96c93c3839170f64e8a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-16: `AGENTS.md`와 한국어 쌍의 모든 규칙은 `Own:` 또는 `Refines <id>:`로 시작하고, 이 repository의 용어를 이름으로 적지 않고 principle을 되풀이하던 규칙 16개(문서, 동작 변경, test 근거, 승인된 조건, 기존 code, 메시지, 의존성 pin, 기록의 언어, branch 규칙, `[!]`의 사용)를 제거했다. Red: `make rules-check`가 47건을 보고했고, green: 통과한다(T26.7-16).
 
 - T26.7-15: `.claude/settings.json`(kit 복사본)은 `kit-check`가, `.githooks/pre-commit`과 `config/generated.json`은 `hooks-check`가 owner다. Red: `make owner-validate`가 owner 없는 경로 3개를 찾았고, green: 통과한다(T26.7-15).
 

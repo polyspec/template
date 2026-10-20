@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-16: every rule of `AGENTS.md` and its Korean twin begins with `Own:` or `Refines <id>:`, and the 16 rules that restated a principle without naming a term of this repository are removed (documents, behavior change, test evidence, accepted conditions, existing code, messages, the dependency pins, the language of records, the branch rule and the use of `[!]`). Red: `make rules-check` reported 47 findings; green: it passes (T26.7-16).
+
 - T26.7-15: `.claude/settings.json` (a copy of kit) is owned by `kit-check`, and `.githooks/pre-commit` and `config/generated.json` by `hooks-check`. Red: `make owner-validate` found 3 paths without an owner; green: it passes (T26.7-15).
 
 - T26.5: the copies of kit follow @polyspec/kit as linked (`make kit-sync` wrote PRINCIPLES.md and PRINCIPLES.ko.md), and `CHECK_TARGETS` runs every gate of `kit-gates` (`toolchain-check`, `owner-validate`, `rebuild-check`, `language-check`, `test-markers-check`, `duplication-check`, `commits-check`, `lint-php-ext`, `test-php-ext`), each in the job of `.github/workflows/ci.yml` that runs the checks of its kind. Red: `make kit-check` reported 11 findings (2 copies that differ, 9 gates missing in CHECK_TARGETS); green: it passes (T26.5).
