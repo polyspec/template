@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: c0ad29147f0ae0f12f64b6f2df9854cafaa700f77270683c74faedff3d92c155 -->
+<!-- source-sha256: 6685b5905238dd5bcd7a7be2d6e994d211ea06414cb7b2dbbbbb4be4c21c2434 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -39,5 +39,5 @@
 | T26.7-26 | showcase contract 선언은 make contract-generate가 만들고 추적하지 않는다 | adapters/generated/*.mmd, render_adapter.*, php-adapter, go/render_adapter.go and rust/src/render_adapter.rs untracked; the targets that read them depend on contract-generate | `make contract-generate`, `make typed-generator-check` | [o] |
 | T26.7-27 | packages/compiler/generated의 Mermaid 도표는 make compiler-interface-generate가 만들고 추적하지 않는다 | packages/compiler/generated/*.mmd untracked; docs-check, docs-static-check and the pages workflow generate them first | `make compiler-interface-generate`, `make docs-check` | [o] |
 | T26.7-28 | 생성되는 예제 사이트(index.html, data/scenarios.json, data/results.json)는 make showcase가 만들고 추적하지 않으며 측정값과 expected.html은 기록으로 남는다 | examples/site generated files untracked; showcase-site-check and showcase-html-check build first; the pages workflow runs make showcase | `make showcase-site-check` | [o] |
-| T26.7-29 | conformance suite 자체의 규칙(CNF-*)을 docs/spec에서 docs/operations로 옮겨 추적 대상 requirement에서 뺀다 | docs/spec/conformance.md and docs/operations/conformance.md with their Korean twins, config/parity.json, the cases that list CNF ids | `make parity-declarations-check` | [ ] |
+| T26.7-29 | conformance suite 자체의 규칙(CNF-*)을 docs/spec에서 docs/operations로 옮겨 추적 대상 requirement에서 뺀다 | docs/spec/conformance.md and docs/operations/conformance.md with their Korean twins, config/parity.json, the cases that list CNF ids | `make parity-declarations-check` | [o] |
 | T26.7-30 | 선언된 예외는 kit이 정의한 종류의 이유를 적고 CHECK_TARGETS는 divergence-check를 실행한다 | config/duplication.json, config/parity.json tools, Makefile, .github/workflows/ci.yml and the kit copies | `make divergence-check` | [o] |

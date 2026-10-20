@@ -1,4 +1,4 @@
-// Command template implements the command line contract of docs/spec/conformance.md (CNF-4).
+// Command template implements the command line contract of docs/operations/conformance.md (CNF-4).
 package main
 
 import (

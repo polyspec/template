@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-python-readme -->
-<!-- source-sha256: f0315056780a2f7c800b8359427c399da3b4f7ba9ae0617d5a75530b1ece46d2 -->
+<!-- source-sha256: 1fd390b31c30adf8a3e49cb865e6ec2b904b3c1726fff92ea16293e103e9aedd -->
 # polyspec-template
 
 [English](README.md)
@@ -81,4 +81,4 @@ python -m polyspec.template.cli format [--indent none|tab|N] [--delimiters OC] F
 | `TemplateError` | 파싱과 렌더링의 오류. `to_object()`가 필드를 돌려줍니다. |
 | `PageCache()` | 렌더링된 페이지를 보관합니다. |
 
-[언어 문서](https://github.com/polyspec/template/blob/main/docs/spec/lexical.md)가 공유 동작을 정의하고 [conformance 문서](https://github.com/polyspec/template/blob/main/docs/spec/conformance.md)가 명령줄을 정의합니다. source는 이 저장소가 제공하며 registry 게시는 검증하지 않습니다.
+[언어 문서](https://github.com/polyspec/template/blob/main/docs/spec/lexical.md)가 공유 동작을 정의하고 [conformance 문서](https://github.com/polyspec/template/blob/main/docs/operations/conformance.md)가 명령줄을 정의합니다. source는 이 저장소가 제공하며 registry 게시는 검증하지 않습니다.

@@ -18,7 +18,6 @@
 | [`spec/compiler.md`](spec/compiler.md) | Typed compiler, manifest and generated programs |
 | [`spec/ast.md`](spec/ast.md) | AST nodes and JSON serialization |
 | [`spec/errors.md`](spec/errors.md) | Error object and error codes |
-| [`spec/conformance.md`](spec/conformance.md) | Fixture layout, CLI contract, comparison rules |
 | [`spec/examples.md`](spec/examples.md) | Complete page example |
 | [`spec/editor.md`](spec/editor.md) | Language service, LSP server and editor adapters |
 | [`spec/formatting.md`](spec/formatting.md) | Tokens, formatting style, indentation and the safety invariant of the formatter |

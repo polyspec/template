@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b8ec372f8a007d9c5e411279374ea2cc81ae71f08630b810a1cce124225f2d8f -->
+<!-- source-sha256: f2d1d3e3a1ebde365f1d8c4eb08d322729755074221c089ec1ff4ec8593bed2b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-29: conformance suite 자체의 규칙(CNF-1부터 CNF-18까지: case의 구조, 모든 구현이 suite에 제공하는 명령줄, 비교, runner)을 `docs/spec/conformance.md`에서 `docs/operations/conformance.md`로 옮기고 더 이상 `config/parity.json`이 추적하는 requirement로 두지 않는다. unit에서 CNF id 인용 90개와 `case.json`에서 4개를 제거했고, 명세 페이지와 그 navigation, index, 기능 링크는 제거하거나 operations 페이지를 가리키며, 명세 파일 이름을 적던 주석과 manifest는 operations 파일을 적는다. Red: `make parity-declarations-check`가 CNF requirement 18개를 추적하며 R15 10222건을 보고했고, green: R15 9746건이다(R1 15, R2 56, R9 1, R13 1은 그대로이고) `docs-check`, `rules-check`, `layout-check`, `owner-validate`가 통과한다(T26.7-29).
 
 - T26.7-30: `config/duplication.json`의 예외와 `config/parity.json`의 tool root는 이유를 kit이 정의한 종류(`test:`, `ecosystem:`, `harness:`)로 시작하고, 더 이상 추적하지 않는 `examples/**/generated/**` 예외는 뺐으며, `make kit-sync`가 kit 복사본을 가져왔고, `CHECK_TARGETS`와 `ci.yml`의 첫 job이 `divergence-check`를 실행한다. Red: `make divergence-check`가 12건을 찾았고, green: 3건이 남는다. `packages/php-ext/tests/EngineTest.php:27`, `packages/php/src/Native/ExtensionNotLoaded.php:18`, `packages/php/tests/CliTest.php:53`의 `extension_loaded` 분기이며 PHP 확장이 library를 미러링하면(T26.7-2) 사라진다. `kit-check`는 통과한다(T26.7-30).
 

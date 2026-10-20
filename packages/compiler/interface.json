@@ -12,7 +12,7 @@
       "docs/spec/functions.md",
       "docs/spec/runtime.md",
       "docs/spec/errors.md",
-      "docs/spec/conformance.md"
+      "docs/operations/conformance.md"
     ],
     "fixtures": "tests/cases",
     "examples": [

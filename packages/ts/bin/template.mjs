@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Command line interface as defined in docs/spec/conformance.md (CNF-4), parsed with node:util parseArgs.
+// Command line interface as defined in docs/operations/conformance.md (CNF-4), parsed with node:util parseArgs.
 //   parse [--root DIR] [--delimiters OC] FILE
 //   render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
 //   tokens [--root DIR] [--delimiters OC] FILE

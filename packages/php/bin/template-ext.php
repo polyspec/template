@@ -3,7 +3,7 @@
 
 declare(strict_types=1);
 
-// The conformance command line of docs/spec/conformance.md (CNF-4) on the native engine of the extension
+// The conformance command line of docs/operations/conformance.md (CNF-4) on the native engine of the extension
 // polyspec_template, with the commands of this package:
 //   parse [--root DIR] [--delimiters OC] FILE
 //   render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE

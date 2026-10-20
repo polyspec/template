@@ -1,5 +1,5 @@
 <!-- doc-id: docs-index -->
-<!-- source-sha256: 479f379037c6184b2c08174132f4cf0d6487ceaddb0525607cdfa5c0db113ed9 -->
+<!-- source-sha256: 70c23baf7880ed2aa72d9c28e78b798f4ca091564b669e1dceb331e0d73bca5e -->
 # 문서
 
 [English](/).
@@ -19,7 +19,6 @@
 | [`spec/compiler.md`](/ko/spec/compiler) | 타입 고정 컴파일러, manifest, generated 프로그램 |
 | [`spec/ast.md`](/ko/spec/ast) | AST 노드와 JSON 직렬화 |
 | [`spec/errors.md`](/ko/spec/errors) | 오류 객체와 오류 코드 |
-| [`spec/conformance.md`](/ko/spec/conformance) | 픽스처 구조, CLI 계약, 비교 규칙 |
 | [`spec/examples.md`](/ko/spec/examples) | 완전한 페이지 예제 |
 | [`spec/editor.md`](/ko/spec/editor) | 언어 서비스, LSP 서버, 에디터 어댑터 |
 | [`spec/formatting.md`](/ko/spec/formatting) | 토큰, 포맷 스타일, 들여쓰기, 포매터의 안전 불변식 |

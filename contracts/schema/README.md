@@ -7,7 +7,7 @@
 
 Definitions: `Span`, `Template`, `NodeList`, `Node`, `Text`, `Echo`, `IfBranch`, `If`, `For`, `Set`, `Include`, `ScopeItem`, `Block`, `IfBlock`, `Identifier`, `Expr`, `Literal`, `Var`, `LoopMeta`, `Member`, `Index`, `Call`, `Unary`, `Binary`, `Ternary`, `Spread`, `List`, `MapEntry`, `Map`.
 
-`tokens.schema.json` is the shape of the `expected.tokens.json` files of CNF-2 in [`docs/spec/conformance.md`](../../docs/spec/conformance.md): an array of `[start, end, type]` with byte offsets and the token types of EDT-8. `format.schema.json` is the shape of the `expected.format.json` files: the results `indent` and `keep`, each `{"text"}` or `{"error": {"reason", "code", "line", "col"}}`.
+`tokens.schema.json` is the shape of the `expected.tokens.json` files of CNF-2 in [`docs/operations/conformance.md`](../../docs/operations/conformance.md): an array of `[start, end, type]` with byte offsets and the token types of EDT-8. `format.schema.json` is the shape of the `expected.format.json` files: the results `indent` and `keep`, each `{"text"}` or `{"error": {"reason", "code", "line", "col"}}`.
 
 Validation:
 

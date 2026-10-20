@@ -80,4 +80,4 @@ The options come before FILE. `parse` writes the AST as JSON and `tokens` the ED
 | `TemplateError` | The error of parsing and rendering; `to_object()` returns its fields. |
 | `PageCache()` | Caches rendered pages. |
 
-The [language documentation](https://github.com/polyspec/template/blob/main/docs/spec/lexical.md) defines the shared behavior; the [conformance document](https://github.com/polyspec/template/blob/main/docs/spec/conformance.md) defines the command line. Source is provided by this repository; registry publication is not verified.
+The [language documentation](https://github.com/polyspec/template/blob/main/docs/spec/lexical.md) defines the shared behavior; the [conformance document](https://github.com/polyspec/template/blob/main/docs/operations/conformance.md) defines the command line. Source is provided by this repository; registry publication is not verified.

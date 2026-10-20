@@ -1,5 +1,5 @@
 // Command line interface template-language, the command of the TypeScript formatter in the conformance contract
-// (docs/spec/conformance.md, CNF-4):
+// (docs/operations/conformance.md, CNF-4):
 //   format [--indent none|tab|N] [--delimiters OC] FILE
 // It prints the formatted text without adding a newline and exits with status 0, prints a format error as the JSON
 // {"reason","code","line","col","message"} on standard error and exits with status 2, and exits with status 1 on a

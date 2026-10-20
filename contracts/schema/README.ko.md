@@ -1,5 +1,5 @@
 <!-- doc-id: schema-readme -->
-<!-- source-sha256: 3056e8e630e1433e32913f21217fba5388964ec6ae50f583036f8bd99847bc96 -->
+<!-- source-sha256: 083fb144b0f1b34fd1fef859da9ed7ca7650e91cc01b2bd24b8108ef2b9dceb9 -->
 # 스키마
 
 [English](README.md).
@@ -8,7 +8,7 @@
 
 정의: `Span`, `Template`, `NodeList`, `Node`, `Text`, `Echo`, `IfBranch`, `If`, `For`, `Set`, `Include`, `ScopeItem`, `Block`, `IfBlock`, `Identifier`, `Expr`, `Literal`, `Var`, `LoopMeta`, `Member`, `Index`, `Call`, `Unary`, `Binary`, `Ternary`, `Spread`, `List`, `MapEntry`, `Map`.
 
-`tokens.schema.json`은 [`docs/spec/conformance.md`](../../docs/spec/conformance.ko.md) CNF-2의 `expected.tokens.json` 파일의 형태다: 바이트 오프셋과 EDT-8의 토큰 종류로 된 `[start, end, type]`의 배열이다. `format.schema.json`은 `expected.format.json` 파일의 형태다: 결과 `indent`와 `keep`이고 각각 `{"text"}` 또는 `{"error": {"reason", "code", "line", "col"}}`이다.
+`tokens.schema.json`은 [`docs/operations/conformance.md`](../../docs/operations/conformance.ko.md) CNF-2의 `expected.tokens.json` 파일의 형태다: 바이트 오프셋과 EDT-8의 토큰 종류로 된 `[start, end, type]`의 배열이다. `format.schema.json`은 `expected.format.json` 파일의 형태다: 결과 `indent`와 `keep`이고 각각 `{"text"}` 또는 `{"error": {"reason", "code", "line", "col"}}`이다.
 
 검증:
 

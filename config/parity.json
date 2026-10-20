@@ -34,7 +34,7 @@
   "units": [
     {
       "id": "conformance",
-      "requirements": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-15", "CNF-16", "CNF-17", "CNF-18", "GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -94,7 +94,7 @@
     },
     {
       "id": "cli-parse",
-      "requirements": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-15", "CNF-16", "CNF-17", "CNF-18", "GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": ["GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/cli.test.ts", "id": "template CLI › parses a file to AST JSON" },
@@ -107,7 +107,7 @@
     },
     {
       "id": "cli-format",
-      "requirements": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-15", "CNF-16", "CNF-17", "CNF-18", "FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
+      "requirements": ["FMT-1", "FMT-2", "FMT-3", "FMT-4", "FMT-5", "FMT-6", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-11", "FMT-12", "FMT-13", "FMT-14", "FMT-15"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/command.test.ts", "id": "template-language format › prints the formatted text without a trailing newline" },
@@ -402,7 +402,7 @@
     },
     {
       "id": "artifact-refresh",
-      "requirements": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-15", "CNF-16", "CNF-17", "CNF-18", "RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › supports development and immutable artifact refresh policies" },
@@ -510,7 +510,7 @@
     },
     {
       "id": "compiler-interface",
-      "requirements": ["CNF-1", "CNF-2", "CNF-3", "CNF-4", "CNF-5", "CNF-6", "CNF-7", "CNF-8", "CNF-9", "CNF-10", "CNF-11", "CNF-12", "CNF-13", "CNF-14", "CNF-15", "CNF-16", "CNF-17", "CNF-18", "RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/compiler-interface.test.ts", "id": "compiler interface › program and engine" },

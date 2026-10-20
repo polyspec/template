@@ -1,4 +1,4 @@
-"""Command line interface as defined in docs/spec/conformance.md (CNF-4).
+"""Command line interface as defined in docs/operations/conformance.md (CNF-4).
 
 template parse [--root DIR] [--delimiters OC] FILE
 template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
