@@ -37,9 +37,17 @@ describe('Engine', () => {
     expect(caught?.line).toBe(2);
   });
 
+  // RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
   it('applies the iteration limit', () => {
     const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': '{@ i = range(1, 10)}{= i}{/}' }), limits: { iterations: 5 } }));
-    expect(() => engine.render('a.tpl', {})).toThrow(TemplateError);
+    let caught: TemplateError | null = null;
+    try {
+      engine.render('a.tpl', {});
+    } catch (error: unknown) {
+      if (!(error instanceof TemplateError)) throw error;
+      caught = error;
+    }
+    expect(caught?.code).toBe('E_RUNTIME_LIMIT');
   });
 
   it('applies the configured expression-depth limit', () => {

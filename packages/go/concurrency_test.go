@@ -9,6 +9,7 @@ import (
 
 // Concurrent renders may share one program after its functions are registered (RT-62a, T16.1):
 // the template cache of the program is the only state that renders share and write.
+// RT-70: renders of one program run at the same time and share only the templates that the program loaded.
 func TestConcurrentRendersShareOneProgram(t *testing.T) {
 	loader := template.NewMapLoader(map[string]string{
 		"page.tpl": "<p>{= title}</p>{+ /part.tpl}",

@@ -5,7 +5,7 @@ import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { MapLoader, PathError, resolvePath } from '../src/index.js';
+import { AstProgram, Engine, MapLoader, PathError, resolvePath, TemplateError } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
 
 describe('MapLoader', () => {
@@ -24,10 +24,20 @@ describe('resolvePath', () => {
     expect(resolvePath('a/b.tpl', '/x/y.tpl')).toBe('x/y.tpl');
     expect(resolvePath('b.tpl', './c.tpl')).toBe('c.tpl');
     expect(() => resolvePath('a.tpl', '../x.tpl')).toThrow(PathError);
+    const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'o.tpl': '{+ ../z.tpl}' }) }));
+    let caught: TemplateError | null = null;
+    try {
+      engine.render('o.tpl', {});
+    } catch (error: unknown) {
+      if (!(error instanceof TemplateError)) throw error;
+      caught = error;
+    }
+    expect(caught?.code).toBe('E_LOAD_OUTSIDE_ROOT');
   });
 });
 
 describe('FsLoader', () => {
+  // RT-75: the filesystem loader closes each file that it reads before load returns, so no file stays open.
   it('keeps no file open after it loaded many templates (T23.5)', () => {
     const root = mkdtempSync(join(tmpdir(), 'template-ts-loader-'));
     try {

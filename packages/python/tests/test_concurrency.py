@@ -60,6 +60,8 @@ def renders_of(engine: Engine, assign, threads: int = 8, rounds: int = 50) -> se
 
 class Concurrency(unittest.TestCase):
     def test_concurrent_renders_share_one_program(self):
+        # RT-70: renders of one program run at the same time and share only the
+        # templates that the program loaded.
         engine = Engine(AstProgram(EngineOptions(loader=MapLoader(PAGE))))
         self.assertEqual(renders_of(engine, {"title": "T", "count": 2}), {EXPECTED})
 

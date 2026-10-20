@@ -9,6 +9,7 @@ use Polyspec\Template\PageCache;
 
 final class PageCacheTest extends TestCase
 {
+    /** RT-65: a positive TTL expires after that many seconds; 0 and null mean forever. */
     public function testPositiveTtlExpiresAndZeroOrNullArePermanent(): void
     {
         $now = 100.0;

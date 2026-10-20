@@ -361,6 +361,18 @@ class ValuesAndErrors(unittest.TestCase):
             render("{= length(1) }")
         self.assertEqual(caught.exception.code, "E_RUNTIME_TYPE")
 
+    def test_the_iteration_limit_is_applied(self):
+        # RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
+        program = AstProgram(
+            EngineOptions(
+                loader=MapLoader({"a.tpl": "{@ i = range(1, 10)}{= i}{/}"}),
+                limits={"iterations": 5},
+            )
+        )
+        with self.assertRaises(TE) as caught:
+            Engine(program).render("a.tpl", {})
+        self.assertEqual(caught.exception.code, "E_RUNTIME_LIMIT")
+
     def test_output_limit_is_a_positioned_template_error(self):
         program = AstProgram(
             EngineOptions(
@@ -415,19 +427,30 @@ class ValuesAndErrors(unittest.TestCase):
             merge({"a": 1}, bind({}))
 
     def test_resolve_path(self):
+        # RT-8: a path resolves against the directory of the current template, a leading / against the root, and a
+        # path that leaves the root fails with E_LOAD_OUTSIDE_ROOT.
         self.assertEqual(resolve_path("a/b/c.tpl", "d.tpl"), "a/b/d.tpl")
         self.assertEqual(resolve_path("a/b/c.tpl", "/d.tpl"), "d.tpl")
         with self.assertRaises(Exception):
             resolve_path("a.tpl", "../x.tpl")
+        program = AstProgram(EngineOptions(loader=MapLoader({"o.tpl": "{+ ../z.tpl}"})))
+        with self.assertRaises(TE) as caught:
+            Engine(program).render("o.tpl", {})
+        self.assertEqual(caught.exception.code, "E_LOAD_OUTSIDE_ROOT")
 
     def test_page_cache(self):
+        # RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.
         clock = {"now": 100.0}
         cache = PageCache(now=lambda: clock["now"])
         cache.set("k", "v", 10)
+        cache.set("zero", "z", 0)
+        cache.set("null", "n", None)
         self.assertEqual(cache.get("k"), "v")
         self.assertEqual(cache.get_or_set("n", 0, lambda: "new"), "new")
         clock["now"] = 200.0
         self.assertIsNone(cache.get("k"))
+        self.assertEqual(cache.get("zero"), "z")
+        self.assertEqual(cache.get("null"), "n")
 
 
 def _shout(program):

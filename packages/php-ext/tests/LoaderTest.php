@@ -34,6 +34,10 @@ final class LoaderTest extends TestCase
         rmdir($this->root);
     }
 
+    /**
+     * RT-8: an include path resolves against the directory of the current template, and a path that leaves the root
+     * fails with E_LOAD_OUTSIDE_ROOT.
+     */
     public function testAnIncludePathResolvesAgainstTheCurrentTemplateAndFailsOutsideTheRoot(): void
     {
         file_put_contents($this->root . '/a/b.tpl', '{+ c.tpl}|{+ ../d.tpl}|{+ /x/y.tpl}|{+ ./c.tpl}');
@@ -52,6 +56,7 @@ final class LoaderTest extends TestCase
         self::assertSame('E_LOAD_OUTSIDE_ROOT', $code);
     }
 
+    /** RT-75: the filesystem loader closes each file that it reads before load returns, so no file stays open. */
     public function testTheFilesystemLoaderKeepsNoFileOpen(): void
     {
         $templates = 64;

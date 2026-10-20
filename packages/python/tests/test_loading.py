@@ -64,6 +64,8 @@ class Loading(unittest.TestCase):
         self.assertIsNone(loader.load("b.tpl"))
 
     def test_the_filesystem_loader_keeps_no_file_open(self):
+        # RT-75: the filesystem loader closes each file that it reads before load
+        # returns, so no file stays open.
         # A loader that read many templates holds no descriptor of them, as
         # the open descriptors of the process in /dev/fd show (T23.5).
         with tempfile.TemporaryDirectory() as directory:

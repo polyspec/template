@@ -46,6 +46,20 @@ final class EngineRefreshTest extends TestCase
         }
     }
 
+    /** RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT. */
+    public function testTheIterationLimitIsApplied(): void
+    {
+        $loader = new ArrayLoader(['a.tpl' => '{@ i = range(1, 10)}{= i}{/}']);
+        $engine = new Engine(new AstProgram($loader, ['limits' => ['iterations' => 5]]));
+
+        try {
+            $engine->render('a.tpl');
+            self::fail('render should exceed the configured iteration limit');
+        } catch (TemplateError $error) {
+            self::assertSame('E_RUNTIME_LIMIT', $error->errorCode);
+        }
+    }
+
     /** A program renders the AST that its loader holds without parsing a source (RT-40). */
     public function testRendersAParsedAst(): void
     {

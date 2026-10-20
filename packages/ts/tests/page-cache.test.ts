@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { PageCache } from '../src/index.js';
 
 describe('PageCache', () => {
+  // RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.
   it('expires positive TTLs and keeps zero and null forever', () => {
     let now = 100;
     const cache = new PageCache(() => now);

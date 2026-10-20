@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.
 func TestPageCacheTTL(t *testing.T) {
 	now := time.Unix(100, 0)
 	cache := NewPageCache(func() time.Time { return now })

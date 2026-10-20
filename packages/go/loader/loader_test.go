@@ -8,9 +8,13 @@ import (
 	"testing"
 	"testing/fstest"
 
+	template "github.com/polyspec/template/packages/go"
+	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/loader"
 )
 
+// RT-8: a path resolves against the directory of the current template, a leading / against the root, and a path that
+// leaves the root fails with E_LOAD_OUTSIDE_ROOT.
 func TestResolvePath(t *testing.T) {
 	cases := []struct{ current, path, want string }{
 		{"a/b.tpl", "c.tpl", "a/c.tpl"},
@@ -26,6 +30,15 @@ func TestResolvePath(t *testing.T) {
 	}
 	if _, err := loader.ResolvePath("a.tpl", "../x.tpl"); !errors.Is(err, loader.ErrOutsideRoot) {
 		t.Errorf("outside root: %v", err)
+	}
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"o.tpl": "{+ ../z.tpl}"})})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = template.NewEngine(program).Render("o.tpl", nil, template.RenderOptions{})
+	var failure *errs.Error
+	if !errors.As(err, &failure) || failure.Code != errs.LoadOutsideRoot {
+		t.Errorf("include outside the root: %v", err)
 	}
 }
 
@@ -58,6 +71,7 @@ func TestFSLoader(t *testing.T) {
 
 // TestFSLoaderKeepsNoFileOpen: a filesystem loader that read many templates holds no descriptor of
 // them, which the open descriptors of the process in /dev/fd show (T23.5).
+// RT-75: the filesystem loader closes each file that it reads before load returns, so no file stays open.
 func TestFSLoaderKeepsNoFileOpen(t *testing.T) {
 	root := t.TempDir()
 	const templates = 64

@@ -102,6 +102,7 @@ func TestHostFunctions(t *testing.T) {
 	}
 }
 
+// RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
 func TestLimits(t *testing.T) {
 	limits := template.Limits{Iterations: 5, Depth: 32, OutputBytes: 1 << 20, ExpressionDepth: 64}
 	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "{@ i = range(1, 10)}{= i}{/}"}), Limits: &limits})

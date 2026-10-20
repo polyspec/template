@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 797eb6a2fbe1c03d06be561d9ab99d96a3145626d4f950942d07f4b7f810af62 -->
+<!-- source-sha256: f708ed4806fb0a4317bad2b016fc39734861074aa464cf50b6149107aa0c4027 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-40: runtime unit 다섯 개는 각각 RT-1부터 RT-70까지가 아니라 test가 보이는 requirement만 인용한다. `limits`는 RT-20(iteration limit; PHP와 Python binding은 이를 시험하는 새 test `testTheIterationLimitIsApplied`와 `test_the_iteration_limit_is_applied`로 옮기고, TS test는 이제 code E_RUNTIME_LIMIT를 확인한다), `page-cache`는 RT-65(Python test는 이제 TTL 0과 null이 항목을 유지함도 확인한다), `include-resolution`은 RT-8(모든 test가 이제 root를 벗어나는 include도 render하여, 전에는 PHP extension만 확인하던 E_LOAD_OUTSIDE_ROOT를 확인한다), `filesystem-loader-files`는 RT-75, `concurrent-renders`는 RT-70을 인용한다. RT-75는 `docs/spec/runtime.md`에 새로 쓴 것이다. 파일시스템 로더는 `load`가 반환하기 전에 읽은 파일을 닫는데, unit의 test 여섯 개가 이를 확인하고 spec에는 없었다. 각 구현의 test가 자기 requirement의 이름을 적는다. `artifact-refresh`는 T26.7-40-1로 옮긴다. 그 runtime reload가 RT-59에 어긋나기 때문이다. Red: c5dd1562에서 `make parity-declarations-check`는 R15 6936(그중 여섯 unit에 2066), R2 40, R13 1; green: R15 5212(다섯 unit에는 없음, artifact-refresh에 338), R2 40(전과 같이 page-cache의 php-ext와 concurrent-renders의 ts, rust, php, php-ext), R13 1(RT-71). owner test는 통과한다: TS 세 파일의 vitest(168), 다섯 test의 `go test`(5), `functions`, `loaders`, `loader_files`, `page_cache`의 `cargo test`(14), PHPUnit `EngineRefreshTest|LoaderTest|PageCacheTest`(10), Python `test_api`, `test_loading`, `test_concurrency`(50). 확인하지 않음: PHP extension 실행. T26.7-2-2-5와 T26.7-2-8까지 `make test-php-ext`가 S10 선언 검사에서 멈추기 때문이다. 이 항목은 그때까지, 그리고 T26.7-40-1까지 진행 중으로 남는다 (T26.7-40).
 
 - T26.7-48: `tests/scripts`의 두 test는 JSON 파일을 `any`에서 cast한 `JSON.parse` 대신 `scripts/json-document.mts`의 타입 있는 document(JSON Schema를 가진 `jsonDocument`)로 읽어, 다른 모양의 파일은 이름과 함께 실패하고 test는 같은 field를 검사한다. Red: `node_modules/.bin/oxlint --type-aware --deny-warnings -c .oxlintrc.json tests/scripts/conformance-cases.test.mts tests/scripts/pre-commit-hook.test.mts`가 `conformance-cases.test.mts:32:21`과 `pre-commit-hook.test.mts:14:18`에 `Unsafe assertion from \`any\` detected`를 보고하고 2 problems와 함께 1로 끝난다; green: 같은 oxlint가 0으로 끝나고 두 파일의 `node --test`가 8개 중 8개 통과한다 (T26.7-48).
 

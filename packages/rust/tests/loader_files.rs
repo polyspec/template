@@ -12,6 +12,7 @@ fn open_descriptors() -> usize {
     std::fs::read_dir("/dev/fd").expect("/dev/fd").count()
 }
 
+/// RT-75: the filesystem loader closes each file that it reads before load returns, so no file stays open.
 #[test]
 fn the_filesystem_loader_keeps_no_file_open() {
     let root = std::env::temp_dir().join(format!("template-loader-files-{}", std::process::id()));

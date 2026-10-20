@@ -274,6 +274,7 @@ final class EngineTest extends TestCase
         }
     }
 
+    /** RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT. */
     public function testLimitsAreApplied(): void
     {
         $engine = new Engine($this->root, ['limits' => ['iterations' => 1]]);

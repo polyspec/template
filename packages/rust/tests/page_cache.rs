@@ -1,5 +1,6 @@
 use polyspec_template::page_cache::PageCache;
 
+/// RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.
 #[test]
 fn ttl_zero_and_null_are_permanent() {
     let mut cache = PageCache::new();
