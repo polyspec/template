@@ -12,6 +12,9 @@ use Polyspec\Template\TemplateError;
 
 final class EngineRefreshTest extends TestCase
 {
+    /**
+     * RT-76: under dev a program renders the changed source of a template, and under false it keeps its first parse.
+     */
     public function testDevelopmentRefreshesOnEveryRender(): void
     {
         $loader = new ArrayLoader(['a.tpl' => '1']);

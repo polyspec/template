@@ -44,6 +44,7 @@ func TestEnginePrepare(t *testing.T) {
 	}
 }
 
+// RT-76: under dev a program renders the changed source of a template, and under false it keeps its first parse.
 func TestArtifactRefreshPolicies(t *testing.T) {
 	devLoader := template.NewMapLoader(map[string]string{"a.tpl": "1"})
 	devProgram, err := template.NewAstProgram(template.Options{Loader: devLoader, ArtifactRefresh: render.ArtifactRefreshDev})

@@ -74,6 +74,7 @@ describe('Engine', () => {
     expect(engine.render('a.tpl', {})).toBe('2');
   });
 
+  // RT-76: under dev a program renders the changed source of a template, and under false it keeps its first parse.
   it('supports development and immutable artifact refresh policies', () => {
     const devLoader = new MapLoader({ 'a.tpl': '1' });
     const dev = new Engine(new AstProgram({ loader: devLoader, artifactRefresh: 'dev' }));

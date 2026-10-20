@@ -4,7 +4,9 @@ use polyspec_template::functions::builtins;
 use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seconds};
 use polyspec_template::functions::encoding::{percent_encode, to_json};
 use polyspec_template::value::{OrderedMap, Value};
-use polyspec_template::{ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, MapLoader, RenderOptions, RenderTarget};
+use polyspec_template::{ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, RenderOptions, RenderTarget};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens.
 #[test]
@@ -165,36 +167,37 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     );
 }
 
+/// A loader whose sources the test changes after the program took it: the program holds a clone, and the sources live in
+/// the cell that both share.
+struct SharedLoader(Rc<RefCell<MapLoader>>);
+
+impl Loader for SharedLoader {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+        self.0.borrow().load(name)
+    }
+}
+
+/// RT-76: under dev a program renders the changed source of a template, and under false it keeps its first parse.
 #[test]
 fn artifact_refresh_policies_are_independent_of_rendering() {
-    let mut dev_loader = MapLoader::new();
-    dev_loader.set("a.tpl", "1");
-    let dev = AstProgram::new(EngineOptions {
-        loader: Some(Box::new(dev_loader)),
-        artifact_refresh: ArtifactRefresh::Dev,
-        ..Default::default()
-    })
-    .expect("valid engine options");
-    assert_eq!(
-        dev.render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
-            .unwrap(),
-        "1"
-    );
-
-    let mut immutable_loader = MapLoader::new();
-    immutable_loader.set("a.tpl", "1");
-    let immutable = AstProgram::new(EngineOptions {
-        loader: Some(Box::new(immutable_loader)),
-        artifact_refresh: ArtifactRefresh::False,
-        ..Default::default()
-    })
-    .expect("valid engine options");
-    assert_eq!(
-        immutable
-            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
-            .unwrap(),
-        "1"
-    );
+    for (policy, expected) in [(ArtifactRefresh::Dev, "2"), (ArtifactRefresh::False, "1")] {
+        let sources = Rc::new(RefCell::new(MapLoader::new()));
+        sources.borrow_mut().set("a.tpl", "1");
+        let program = AstProgram::new(EngineOptions {
+            loader: Some(Box::new(SharedLoader(Rc::clone(&sources)))),
+            artifact_refresh: policy,
+            ..Default::default()
+        })
+        .expect("valid engine options");
+        let render = || {
+            program
+                .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+                .unwrap()
+        };
+        assert_eq!(render(), "1");
+        sources.borrow_mut().set("a.tpl", "2");
+        assert_eq!(render(), expected, "the render after the source changed");
+    }
 }
 
 #[test]

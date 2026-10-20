@@ -54,6 +54,8 @@ class ResultLoader:
 
 class Loading(unittest.TestCase):
     def test_artifact_refresh_policies(self):
+        # RT-76: under dev a program renders the changed source of a template, and under
+        # false it keeps its first parse.
         dev_loader = MapLoader({"a.tpl": "1"})
         dev = engine_of(dev_loader, "dev")
         self.assertEqual(dev.render("a.tpl", {}), "1")

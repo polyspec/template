@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 8add8c31ba931489a9e398f20e29a6ee65d8364d90e31458db3a05805665b6ba -->
+<!-- source-sha256: bf999609f1b382675211715102ace366cd37b569a20925818f4a1d2291ace09d -->
 # 런타임
 
 [English](/spec/runtime).
@@ -179,7 +179,8 @@ sequenceDiagram
 - **RT-56** 모든 구현(TypeScript, Go, Rust, PHP, PHP 확장, Python)은 `core-runtime`, `artifact-runtime`과 두 `Program` variant를 제공한다. Build compiler는 `source-compiler`와 generated target backend를 제공한다. JavaScript ESM은 TypeScript backend가 생성하며 별도 의미 구현으로 세지 않는다.
 - **RT-57** Artifact manifest는 contract format, mode, target language, entry, source digest, type digest, contract digest, output path를 포함한다. Artifact는 service 시작 전에 생성하고 process에 한 번 load하거나 정적으로 연결한다. Repository는 artifact를 build로 만들고 추적하지 않는다. manifest가 digest를 기록하고 build는 digest가 같은 artifact를 다시 쓴다(RT-71).
 - **RT-58** Artifact 갱신은 build 정책이다. `dev`는 compiler를 호출할 때마다 재생성하고, `true`는 source, type, contract digest가 달라지면 재생성하며, `false`는 source를 읽지 않고 배포 artifact만 사용한다. Development watcher는 재생성 뒤 정적으로 연결한 Go와 Rust process를 rebuild하고 restart한다.
-- **RT-59** Render request 경로에서는 parsing, source 탐색, artifact 생성, host compilation을 하지 않는다. 같은 program을 같은 assign, define, environment로 render하면 같은 output byte를 만들고 request를 변경하지 않는다.
+- **RT-59** Render request 경로에서는 parsing, source 탐색, artifact 생성, host compilation을 하지 않는다. 같은 program을 같은 assign, define, environment로 render하면 같은 output byte를 만들고 request를 변경하지 않는다. RT-59는 이 절의 주제인 compiled artifact를 다룬다. AST program은 runtime에 로드하는 템플릿을 RT-76에 따라 갱신한다.
+- **RT-76** AST program은 자기 artifact refresh 정책(`artifactRefresh`, `packages/compiler/interface.json`의 `ArtifactRefresh`)을 runtime에 로드하는 템플릿에 적용한다. `dev`에서는 호출마다 템플릿을 다시 로드하고 parse하며, `true`에서는 로더가 그 템플릿에 대해 보고하는 버전이 바뀔 때까지(RT-10) parse를 재사용하고, `false`에서는 첫 parse를 유지하며 runtime에 갱신하지 않는다.
 - **RT-68** 타입 고정 generated artifact는 assign, 필드 전달 여부를 보존하는 definition data, definitions와 template input을 선언한다. 생성된 block은 root assign, 전달된 definition data 필드, block scope 순서로 입력을 적용한 뒤 대상 template 함수를 직접 호출한다. 미리 렌더한 문자열 slot은 generated template target이 아니다.
 
 인터페이스는 두 실행 모드를 선언한다.
