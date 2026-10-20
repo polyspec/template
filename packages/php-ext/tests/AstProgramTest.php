@@ -78,9 +78,10 @@ final class AstProgramTest extends TestCase
         $this->assertFailure(ErrorCode::E_LOAD_FAILED, 'x.tpl', static fn (): string => $program->render('x.tpl'));
     }
 
-    public function testFunctionsThatAreNotAnArrayAreATypeError(): void
+    public function testFunctionsThatAreNotAMapAreAnArgumentError(): void
     {
-        $this->expectException(\TypeError::class);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('functions is not an object');
         new AstProgram(null, ['functions' => 'upper']);
     }
 
