@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ad828d73532ecfa56794543c43fad6bb68ffd0f0de269cca36bc12d8aee3d1d5 -->
+<!-- source-sha256: f011875fcaa3855221378bb24fe1d35b6a0616dff439b801a2e5169be050dc8c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-4: ERR-1을 새 unit `error-object`가 인용한다. 그 test는 모든 구현에서 `a\n{? x}`를 `x.tpl`로 파싱하고, 오류가 `code`, `template`, `line`, `col`, `offset`, `end`, `message` 필드를 그 순서로 가지는지 검사한다 (`E_PARSE_UNCLOSED_BLOCK`, `x.tpl`, 2, 1, 2, 3과 message): ts, Go, Rust, PHP, Python의 새 test와, 이제 ERR-1을 명명하는 기존 php-ext test다. code만 비교하는 `invalid-json`은 더 이상 ERR-1을 인용하지 않는다. Red: main에서 `make parity-declarations-check` 342 findings, 그중 `invalid-json`의 ERR-1 R15. Green: 336 findings, 새 finding 없음; `make parity-declarations-check UNITS="error-object"` 통과; 새 test는 ts, Go, Rust, PHP, Python에서 통과하고 여섯 lint도 통과한다. `make test-php-ext`는 T26.7-2-8과 main의 확장 빌드를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-4).
 
 - T26.7-32-2: ERR-14를 그것을 검사하는 test의 unit `bind-merge-errors`가 인용하므로 `invalid-json`은 더 이상 그것을 인용하지 않는다. 이 unit은 모든 구현에서 실패한 bind의 code, 빈 template, 0 위치를 검사한다. Python test `test_bind_fails_with_the_code_of_the_failed_check_without_a_position`는 map이 아닌 값, 유한하지 않은 수, 범위를 넘는 수, UTF-8이 아닌 텍스트, 65단계로 중첩된 list를 bind하는 경우와 bound map이 아닌 값을 merge하는 경우를 검사하며, 각각 E_DATA_UNSUPPORTED_TYPE, E_DATA_NUMBER_NOT_FINITE, E_DATA_NUMBER_RANGE, E_DATA_INVALID_UTF8, E_DATA_DEPTH를 기대한다. Red: 그 Python test가 없었고, main의 unit `invalid-json`은 여섯 구현에서 ERR-14의 R15를 가졌다; main에서 `make parity-declarations-check`는 348 findings였다. Green: 342 findings, 새 finding 없음; `make parity-declarations-check UNITS="bind-merge-errors"` 통과; `make ast-validator` 통과; bound test 통과 (ts 22, go 1, rust 7, php 14, python 3). `make test-php-ext`는 T26.7-2-8과 main의 확장 빌드를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-2).
 - T26.7-32-1: AST-8, ERR-3, ERR-4, EXP-39를 그것을 검사하는 test의 unit이 인용하므로 `parsed-ast`, `invalid-json`, `format-expression`은 더 이상 그것을 인용하지 않는다. 모든 구현의 conformance test는 각 case를 `make schema-check`가 schema로 검증하는 `expected.ast.json`과, `expected.error.json`과는 code, template, line, col로 그리고 출력 없음으로 비교한다; 그래서 conformance suite가 AST-8, ERR-3, ERR-4를 인용하고, `expected.ast.json`이 있는 231개 case가 AST-8을, `expected.error.json`이 있는 72개 case가 ERR-3과 ERR-4를 명명한다. 새 unit `native-object-equality`는 EXP-39를 명명하는 모든 구현의 `equality.tpl` test를 binding한다. Red: main에서 `make parity-declarations-check` 369 findings, 세 unit의 이 네 id의 R15. Green: 348 findings, 새 finding 없음; `make parity-declarations-check UNITS="conformance native-object-equality"` 통과; rules-check와 schema-check 통과; conformance와 host value test 통과 (ts 260, go 257, rust 256, php 770, python 267). `make test-php-ext`는 T26.7-2-8과 main의 확장 빌드를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-1).

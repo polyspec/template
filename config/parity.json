@@ -212,7 +212,7 @@
     },
     {
       "id": "invalid-json",
-      "requirements": ["VAL-12", "ERR-1", "ERR-12", "ERR-13"],
+      "requirements": ["VAL-12", "ERR-12", "ERR-13"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "JSON text › reports text that is not one JSON document as E_DATA_INVALID_JSON (VAL-12)" },
@@ -221,6 +221,19 @@
         { "implementation": "php", "test": "packages/php/tests/LoadFailureTest.php", "id": "testTextThatIsNotOneJsonDocumentIsInvalidJson" },
         { "implementation": "php-ext", "test": "packages/php-ext/tests/LoadFailureTest.php", "id": "testJsonTextThatIsNotOneDocumentIsInvalidJson" },
         { "implementation": "python", "test": "packages/python/tests/test_loading.py", "id": "test_text_that_is_not_one_json_document_is_invalid_json" }
+      ]
+    },
+    {
+      "id": "error-object",
+      "requirements": ["ERR-1"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "error object › reports a parse error as an object with the fields of ERR-1" },
+        { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestAParseErrorIsTheErrorObject" },
+        { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "a_parse_error_is_the_error_object" },
+        { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testAParseErrorIsTheErrorObject" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testParseReportsAnErrorWithAPosition" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_a_parse_error_is_the_error_object" }
       ]
     },
     {

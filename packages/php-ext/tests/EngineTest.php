@@ -54,6 +54,7 @@ final class EngineTest extends TestCase
         $this->assertSame([2, 7], $ast['body'][1]['span']);
     }
 
+    /** ERR-1: a parse error is a TemplateError with the fields code, template, line, col, offset, end and message, in that order. */
     public function testParseReportsAnErrorWithAPosition(): void
     {
         try {

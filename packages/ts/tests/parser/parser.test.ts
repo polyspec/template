@@ -150,3 +150,20 @@ describe('prefix analysis', () => {
     expect(kinds(source, analyzePrefix(source, 't.tpl', { delimiters: '[]' }))).toEqual(['if [? a]']);
   });
 });
+
+describe('error object', () => {
+  // ERR-1: an error is an object with the fields code, template, line, col, offset, end and message, in that order.
+  it('reports a parse error as an object with the fields of ERR-1', () => {
+    let caught: unknown;
+    try {
+      parse('a\n{? x}', 'x.tpl');
+    } catch (error) {
+      caught = error;
+    }
+    if (!(caught instanceof TemplateError)) throw new Error('the parse did not fail with a TemplateError');
+    const object = caught.toObject();
+    expect(Object.keys(object)).toEqual(['code', 'template', 'line', 'col', 'offset', 'end', 'message']);
+    expect(object).toMatchObject({ code: 'E_PARSE_UNCLOSED_BLOCK', template: 'x.tpl', line: 2, col: 1, offset: 2, end: 3 });
+    expect(object.message).not.toBe('');
+  });
+});

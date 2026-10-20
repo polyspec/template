@@ -78,3 +78,22 @@ fn number_literals_serialize_as_json_numbers() {
     assert!(text.contains("\"value\":1.5,"), "{text}");
     assert!(!text.contains("1000.0"), "{text}");
 }
+
+/// ERR-1: a parse error is a TemplateError with the fields code, template, line, col, offset, end and message, which its
+/// JSON writes in that order.
+#[test]
+fn a_parse_error_is_the_error_object() {
+    let Err(RequestError::Template(error)) = parse("a\n{? x}".as_bytes(), "x.tpl", &ParseOptions::default()) else {
+        panic!("the parse did not fail with a template error");
+    };
+    assert_eq!(
+        (error.code, error.template.as_str(), error.line, error.col, error.offset, error.end),
+        (ErrorCode::E_PARSE_UNCLOSED_BLOCK, "x.tpl", 2, 1, 2, 3)
+    );
+    assert!(!error.message.is_empty());
+    let json = serde_json::to_string(&error).expect("the error serializes");
+    assert!(
+        json.starts_with(r#"{"code":"E_PARSE_UNCLOSED_BLOCK","template":"x.tpl","line":2,"col":1,"offset":2,"end":3,"message":"#),
+        "{json}"
+    );
+}

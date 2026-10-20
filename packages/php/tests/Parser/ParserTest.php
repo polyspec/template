@@ -98,4 +98,18 @@ final class ParserTest extends TestCase
         $ast = AstProgram::parse('é{= a}', 't.tpl');
         self::assertSame([2, 7], $ast['body'][1]['span']);
     }
+
+    /** ERR-1: a parse error is a TemplateError with the fields code, template, line, col, offset, end and message, in that order. */
+    public function testAParseErrorIsTheErrorObject(): void
+    {
+        try {
+            AstProgram::parse("a\n{? x}", 'x.tpl');
+            self::fail('the parse did not fail');
+        } catch (TemplateError $error) {
+            $object = $error->toArray();
+            self::assertSame(['code', 'template', 'line', 'col', 'offset', 'end', 'message'], array_keys($object));
+            self::assertSame(['E_PARSE_UNCLOSED_BLOCK', 'x.tpl', 2, 1, 2, 3], array_slice(array_values($object), 0, 6));
+            self::assertNotSame('', $object['message']);
+        }
+    }
 }

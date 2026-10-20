@@ -135,6 +135,25 @@ class Parsing(unittest.TestCase):
         self.assertIsNotNone(analysis.error)
         self.assertEqual(analysis.tags[0]["kind"], "echo")
 
+    def test_a_parse_error_is_the_error_object(self):
+        # ERR-1: a parse error is a TemplateError with the fields code, template, line,
+        # col, offset, end and message, in that order.
+        with self.assertRaises(TE) as caught:
+            parse("a\n{? x}", "x.tpl")
+        error = caught.exception.to_object()
+        self.assertEqual(
+            list(error),
+            ["code", "template", "line", "col", "offset", "end", "message"],
+        )
+        self.assertEqual(
+            [
+                error[key]
+                for key in ("code", "template", "line", "col", "offset", "end")
+            ],
+            ["E_PARSE_UNCLOSED_BLOCK", "x.tpl", 2, 1, 2, 3],
+        )
+        self.assertNotEqual(error["message"], "")
+
 
 class Expressions(unittest.TestCase):
     def test_operators(self):
