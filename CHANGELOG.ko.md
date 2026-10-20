@@ -1,10 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3fb22d704d13a19b3ff76500b9879a4404181d8646492b129e6071d0e0c0221e -->
+<!-- source-sha256: 11e76225ba67a5ed678ef9c059e011e17678fb9f5dfd2db93c00d23b840fe3d6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-37, T26.7-38: 두 항목은 각 항목이 바꾸고 실행한 vitest, Go, Rust, PHPUnit, Python test를 Verification 칸에 적은 owner test로 검증하고 K353(`make item-edit`) 이후에 닫는다 (T26.7-37).
+
+- T26.7-38: parser unit의 owner test로 닫는다 (T26.7-38).
 
 - T26.7-38: parser unit은 test가 보이는 requirement만 인용한다. `parse-spans`는 AST-2와 LEX-16(span은 UTF-8 byte를 센다), `delimiters`는 LEX-22와 LEX-23(option과 directive, 처음에만 유효), `delimiter-argument-error`는 LEX-21과 LEX-22(delimiter 문자 쌍이 아닌 option), `analysis`는 FMT-1과 GRM-2(tag body의 모든 형식의 모든 부분이 분류된다)를 인용하며, 이전에는 각각 34~47개를 인용했다. 여섯 구현의 test가 각각 이를 이름 붙이고, Python directive test는 option과 잘못된 directive도 검사하며, PHP 확장은 PHP test에 binding한다. Red: `make parity-declarations-check`는 R13 1, R15 9092, R2 43을 보고했다; green: R13 1, R15 8182(네 unit의 finding 없음), R2 43이며 owner test가 통과한다(vitest `parser.test.ts` 112, `go test` 4개, `cargo test --test parser --test delimiters --test analyze`, PHPUnit `ParserTest|AnalyzeTest` 21, Python `test_api.py` 39, `test_analysis.py` 7, `test_loading.py` 7) (T26.7-38).
 
