@@ -6,6 +6,8 @@
 ## Unreleased
 
 - T26.7-51-5-1: the internal test `AstProgramTest` of the PHP extension expects, for functions that are not a map, the argument error of the options that T26.7-51 specified and T26.7-51-5 gave the extension (`InvalidArgumentException` "functions is not an object"), not the former `TypeError`; the test is `testFunctionsThatAreNotAMapAreAnArgumentError`. Red: `AstProgramTest` with the extension, 1 failure (InvalidArgumentException where TypeError was expected); green: 8 passed (T26.7-51-5-1).
+- T26.7-32-4: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (ParserTest), now that the extension registers every class of the library (T26.7-2-8-7); with the other checks of its Verification the row is done (T26.7-32-4).
+
 - T26.7-41: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (ObjectCallsTest, HostBindingTest, CompilerInterfaceTest), now that the extension registers every class of the library (T26.7-2-8-7); with the other checks of its Verification the row is done (T26.7-41).
 
 - T26.7-32-2: `make test-php-ext` runs the library tests of its units with the PHP extension and they pass (BoundMapTest), now that the extension registers every class of the library (T26.7-2-8-7); with the other checks of its Verification the row is done (T26.7-32-2).
