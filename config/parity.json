@@ -65,7 +65,7 @@
     },
     {
       "id": "formatting",
-      "requirements": ["FMT-3", "FMT-4", "FMT-5", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-12", "FMT-14"],
+      "requirements": ["FMT-3", "FMT-4", "FMT-5", "FMT-7", "FMT-8", "FMT-9", "FMT-10", "FMT-12", "FMT-14", "FMT-6"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -556,7 +556,7 @@
     },
     {
       "id": "format-expression",
-      "requirements": ["FMT-5", "FMT-6"],
+      "requirements": ["FMT-5"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/expression.test.ts", "id": "joinTokens › joins [[\"a\",\"variable\"],[\"+\",\"operator\"],[\"b\",\"variable\"]]" },

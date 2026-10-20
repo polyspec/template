@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d6c3f4afef24c329187650d0cb65bc9f21459ec5c9e2dcb93e77be139e6faad5 -->
+<!-- source-sha256: 451e2bc3713e249a5a90c92fd6351210c50663000516498ca12fe92153636212 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-5: FMT-6을 formatting suite가 인용한다. 새 case `block/body-whitespace-runs`는 `{#   card.tpl   title:t    no:n  }`를 렌더하고(RT-29, RT-30) 들여쓰기가 있을 때와 없을 때 모두 `{# card.tpl title:t no:n}`으로 포맷하므로, 모든 구현의 conformance, token, format test가 block 태그 본문이 단어를 유지하고 각 공백 덩어리를 공백 하나로 바꾸는지 검사한다. 표현식 token을 잇는 test의 `format-expression`은 더 이상 FMT-6을 인용하지 않는다. Red: main에서 `make parity-declarations-check` 326 findings, 그중 `format-expression`의 FMT-6 R15; block 태그 본문에 공백 덩어리가 있는 case가 없었다. Green: 321 findings, 새 finding 없음; `make parity-declarations-check UNITS="formatting"`, schema-check, rules-check 통과; conformance, token, format suite가 새 case와 함께 통과한다 (ts 768, go 771, rust 768, php 768, python 768). `make test-php-ext`는 T26.7-2-8과 main의 확장 빌드를 기다리므로 행은 진행 중으로 남는다 (T26.7-32-5).
 
 - T26.7-32-3: ERR-12와 ERR-13은 모든 구현에서 render 안의 panic이나 언어 runtime 오류를 그 template의 `E_INTERNAL`로 바꾸는 test를 가진 unit `internal-errors`가 인용하므로, `invalid-json`은 더 이상 그것들을 인용하지 않는다. Go의 검사는 독립된 test `TestAPanicIsReportedAsAnInternalError`가 되어 `TestNativeObjectMembersAndArguments`에서 옮겨졌고; Python에는 `test_a_language_runtime_error_is_reported_as_an_internal_error`가 생겼으며; php-ext `HostBindingTest`에는 `testALanguageRuntimeErrorIsReportedAsAnInternalError`가 생겼는데, 이는 library test의 복사본이고 실행하지 않았다. `test-php-ext`가 확장 빌드 수정과 T26.7-2-8 전까지 main에서 거부하기 때문이다. Red: main에서 `make parity-declarations-check` 348 findings, 그중 10개가 `invalid-json`의 ERR-12와 ERR-13 R15; Python에는 그런 test가 없었고 Go의 검사는 다른 test 안에 있었다. Green: 338 findings, 새 finding 없음; `make parity-declarations-check UNITS="internal-errors"` 통과; test 통과 (go 2, ts 17, rust `object_calls` 6, phpunit `HostBindingTest` 16, python `test_object_calls.py` 13). `make test-php-ext`는 T26.7-2-8을 기다리므로 행은 진행 중으로 남는다 (T26.7-32-3).
 
