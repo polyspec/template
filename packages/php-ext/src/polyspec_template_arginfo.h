@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3e2517eac37e8863566e36517a9221d6f2a91287 */
+ * Stub hash: ebee6a0c235a40e9c6d24531428324a0816c7002 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Native_Engine___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, root, IS_STRING, 1, "null")
@@ -465,6 +465,38 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Functions_FunctionError___construct arginfo_class_Polyspec_Template_Value_BindError___construct
 
+#define arginfo_class_Polyspec_Template_Functions_FunctionGroup_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Functions_Helpers_typeError, 0, 1, Polyspec\\Template\\Functions\\FunctionError, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Helpers_string, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Helpers_list, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Helpers_toNumber, 0, 1, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Functions_Helpers_number arginfo_class_Polyspec_Template_Functions_Helpers_toNumber
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Functions_Helpers_integer, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Functions_Helpers_stringify arginfo_class_Polyspec_Template_Value_Value_typeOf
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Functions_Helpers_safe, 0, 1, Polyspec\\Template\\Value\\SafeString, 0)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Polyspec_Template_Native_Engine, __construct);
 ZEND_METHOD(Polyspec_Template_Native_Engine, parse);
 ZEND_METHOD(Polyspec_Template_Native_Engine, analyze);
@@ -576,6 +608,14 @@ ZEND_METHOD(Polyspec_Template_Value_Number, isInteger);
 ZEND_METHOD(Polyspec_Template_Value_HostArgument, of);
 ZEND_METHOD(Polyspec_Template_Value_HostArgument, list);
 ZEND_METHOD(Polyspec_Template_Functions_FunctionError, __construct);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, typeError);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, string);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, list);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, toNumber);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, number);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, integer);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, stringify);
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, safe);
 
 static const zend_function_entry class_Polyspec_Template_Native_Engine_methods[] = {
 	ZEND_ME(Polyspec_Template_Native_Engine, __construct, arginfo_class_Polyspec_Template_Native_Engine___construct, ZEND_ACC_PUBLIC)
@@ -848,6 +888,27 @@ static const zend_function_entry class_Polyspec_Template_Value_HostArgument_meth
 
 static const zend_function_entry class_Polyspec_Template_Functions_FunctionError_methods[] = {
 	ZEND_ME(Polyspec_Template_Functions_FunctionError, __construct, arginfo_class_Polyspec_Template_Functions_FunctionError___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_FunctionGroup_methods[] = {
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("table", NULL, arginfo_class_Polyspec_Template_Functions_FunctionGroup_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+#else
+	ZEND_RAW_FENTRY("table", NULL, arginfo_class_Polyspec_Template_Functions_FunctionGroup_table, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_ABSTRACT)
+#endif
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Polyspec_Template_Functions_Helpers_methods[] = {
+	ZEND_ME(Polyspec_Template_Functions_Helpers, typeError, arginfo_class_Polyspec_Template_Functions_Helpers_typeError, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, string, arginfo_class_Polyspec_Template_Functions_Helpers_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, list, arginfo_class_Polyspec_Template_Functions_Helpers_list, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, toNumber, arginfo_class_Polyspec_Template_Functions_Helpers_toNumber, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, number, arginfo_class_Polyspec_Template_Functions_Helpers_number, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, integer, arginfo_class_Polyspec_Template_Functions_Helpers_integer, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, stringify, arginfo_class_Polyspec_Template_Functions_Helpers_stringify, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Functions_Helpers, safe, arginfo_class_Polyspec_Template_Functions_Helpers_safe, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -2059,6 +2120,31 @@ static zend_class_entry *register_class_Polyspec_Template_Functions_FunctionErro
 	zend_string *property_errorCode_name = zend_string_init("errorCode", sizeof("errorCode") - 1, 1);
 	zend_declare_typed_property(class_entry, property_errorCode_name, &property_errorCode_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_errorCode_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_FunctionGroup(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "FunctionGroup", class_Polyspec_Template_Functions_FunctionGroup_methods);
+	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Functions_Helpers(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Functions", "Helpers", class_Polyspec_Template_Functions_Helpers_methods);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 
 	return class_entry;
 }

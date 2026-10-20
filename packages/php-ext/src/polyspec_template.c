@@ -104,6 +104,190 @@ ZEND_METHOD(Polyspec_Template_Functions_FunctionError, __construct)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
+/* Functions\FunctionGroup and Functions\Helpers (S10): the argument helpers of the function groups. */
+/* A FunctionError is thrown with the code of ErrorCode and the message of the library.              */
+/* ----------------------------------------------------------------------------------------------- */
+
+/* A FunctionError object with its code and message, as its constructor sets them. */
+static zend_object *pt_function_error_object(const char *code, zend_string *message)
+{
+    zval error;
+    object_init_ex(&error, pt_function_error_ce);
+    zend_update_property_string(pt_function_error_ce, Z_OBJ(error), ZEND_STRL("errorCode"), code);
+    zend_update_property_str(zend_ce_exception, Z_OBJ(error), ZEND_STRL("message"), message);
+    return Z_OBJ(error);
+}
+
+/* Throws a FunctionError; the message is released here. */
+static void pt_throw_function_error(const char *code, zend_string *message)
+{
+    zval exception;
+    ZVAL_OBJ(&exception, pt_function_error_object(code, message));
+    zend_string_release(message);
+    zend_throw_exception_object(&exception);
+}
+
+/* Helpers::toNumber (EXP-23): the number of a value, or false with the FunctionError thrown. */
+static bool pt_helper_number(zval *value, double *number)
+{
+    ZVAL_DEREF(value);
+    switch (Z_TYPE_P(value)) {
+        case IS_NULL:
+        case IS_FALSE:
+            *number = 0.0;
+            return true;
+        case IS_TRUE:
+            *number = 1.0;
+            return true;
+        case IS_LONG:
+            *number = (double) Z_LVAL_P(value);
+            return true;
+        case IS_DOUBLE:
+            *number = Z_DVAL_P(value);
+            return true;
+    }
+    if (pt_host_is_string(value)) {
+        zend_string *text = pt_host_text_of(value);
+        if (pt_numeric_string(ZSTR_VAL(text), ZSTR_LEN(text), number)) {
+            return true;
+        }
+        zend_string *quoted = pt_json_quote(ZSTR_VAL(text), ZSTR_LEN(text));
+        zend_string *message = zend_strpprintf(0, "%s is not a number", ZSTR_VAL(quoted));
+        zend_string_release(quoted);
+        pt_throw_function_error(PT_E_RUNTIME_TYPE, message);
+        return false;
+    }
+    pt_throw_function_error(PT_E_RUNTIME_TYPE, zend_strpprintf(0, "a %s is not a number", pt_host_type_name(value)));
+    return false;
+}
+
+static void pt_helper_number_result(zval *value, zval *return_value)
+{
+    double number;
+    if (!pt_helper_number(value, &number)) {
+        return;
+    }
+    ZVAL_DOUBLE(return_value, number);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, typeError)
+{
+    zend_string *message;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_OBJ(return_value, pt_function_error_object(PT_E_RUNTIME_TYPE, message));
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, string)
+{
+    zval *value;
+    zend_string *name;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(value)
+        Z_PARAM_STR(name)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(value);
+    if (!pt_host_is_string(value)) {
+        pt_throw_function_error(PT_E_RUNTIME_TYPE,
+            zend_strpprintf(0, "%s requires a string, got %s", ZSTR_VAL(name), pt_host_type_name(value)));
+        RETURN_THROWS();
+    }
+    RETURN_STR_COPY(pt_host_text_of(value));
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, list)
+{
+    zval *value;
+    zend_string *name;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_ZVAL(value)
+        Z_PARAM_STR(name)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(value);
+    if (Z_TYPE_P(value) != IS_ARRAY) {
+        pt_throw_function_error(PT_E_RUNTIME_TYPE,
+            zend_strpprintf(0, "%s requires a list, got %s", ZSTR_VAL(name), pt_host_type_name(value)));
+        RETURN_THROWS();
+    }
+    RETURN_COPY(value);
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, toNumber)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_helper_number_result(value, return_value);
+    if (EG(exception)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, number)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    pt_helper_number_result(value, return_value);
+    if (EG(exception)) {
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, integer)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    double number;
+    if (!pt_helper_number(value, &number)) {
+        RETURN_THROWS();
+    }
+    RETURN_LONG(zend_dval_to_lval(number < 0 ? ceil(number) : floor(number)));
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, stringify)
+{
+    zval *value;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_ZVAL(value)
+    ZEND_PARSE_PARAMETERS_END();
+
+    ZVAL_DEREF(value);
+    if (pt_host_is_string(value)) {
+        RETURN_STR_COPY(pt_host_text_of(value));
+    }
+    if (!pt_host_stringify(value, return_value)) {
+        RETURN_THROWS();
+    }
+    if (Z_TYPE_P(return_value) == IS_NULL) {
+        pt_throw_function_error(PT_E_RUNTIME_STRINGIFY, zend_strpprintf(0, "a list or map cannot be converted to text"));
+        RETURN_THROWS();
+    }
+}
+
+ZEND_METHOD(Polyspec_Template_Functions_Helpers, safe)
+{
+    zend_string *text;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(text)
+    ZEND_PARSE_PARAMETERS_END();
+
+    object_init_ex(return_value, pt_safe_string_ce);
+    zend_update_property_str(pt_safe_string_ce, Z_OBJ_P(return_value), ZEND_STRL("text"), text);
+}
+
+/* ----------------------------------------------------------------------------------------------- */
 /* AstDecodeError (AST-10): the message names the JSON Pointer of the node, or the root if empty.   */
 /* ----------------------------------------------------------------------------------------------- */
 
@@ -520,9 +704,7 @@ ZEND_METHOD(Polyspec_Template_Value_Value, isString)
         Z_PARAM_ZVAL(value)
     ZEND_PARSE_PARAMETERS_END();
 
-    ZVAL_DEREF(value);
-    RETURN_BOOL(Z_TYPE_P(value) == IS_STRING
-        || (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == pt_safe_string_ce));
+    RETURN_BOOL(pt_host_is_string(value));
 }
 
 ZEND_METHOD(Polyspec_Template_Value_Value, textOf)
@@ -2734,6 +2916,8 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     pt_bind_error_ce = register_class_Polyspec_Template_Value_BindError(spl_ce_RuntimeException);
     pt_ast_decode_error_ce = register_class_Polyspec_Template_AstDecodeError(spl_ce_InvalidArgumentException);
     pt_function_error_ce = register_class_Polyspec_Template_Functions_FunctionError(spl_ce_RuntimeException);
+    register_class_Polyspec_Template_Functions_FunctionGroup();
+    register_class_Polyspec_Template_Functions_Helpers();
     register_class_Polyspec_Template_ErrorCode();
     pt_map_value_ce = register_class_Polyspec_Template_Value_MapValue();
     register_class_Polyspec_Template_Value_Bind();

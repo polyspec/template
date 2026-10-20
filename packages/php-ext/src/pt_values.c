@@ -255,6 +255,25 @@ bool pt_host_stringify(zval *value, zval *result)
     }
 }
 
+/* Value::isString: a string or a SafeString. */
+bool pt_host_is_string(zval *value)
+{
+    ZVAL_DEREF(value);
+    return Z_TYPE_P(value) == IS_STRING
+        || (Z_TYPE_P(value) == IS_OBJECT && Z_OBJCE_P(value) == pt_safe_string_ce);
+}
+
+/* The text of a value that pt_host_is_string accepts; the string is owned by the value. */
+zend_string *pt_host_text_of(zval *value)
+{
+    ZVAL_DEREF(value);
+    if (Z_TYPE_P(value) == IS_STRING) {
+        return Z_STR_P(value);
+    }
+    zval rv;
+    return Z_STR_P(zend_read_property(pt_safe_string_ce, Z_OBJ_P(value), ZEND_STRL("text"), 1, &rv));
+}
+
 /* Number::shortestDigits: the sign, the shortest round-trip digits and the exponent n with value = 0.digits x 10^n. */
 static bool pt_decompose(double value, bool *negative, char *digits, size_t *count, zend_long *exponent)
 {

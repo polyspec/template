@@ -502,6 +502,9 @@ bool pt_host_compare(zval *a, zval *b, zend_long *order);
 const char *pt_host_type_name(zval *value);
 bool pt_host_truthy(zval *value);
 bool pt_host_stringify(zval *value, zval *result);
+/* Value::isString and the text of a value that it accepts (the text is borrowed from the value). */
+bool pt_host_is_string(zval *value);
+zend_string *pt_host_text_of(zval *value);
 bool pt_number_host_text(double value, zval *result);
 bool pt_number_shortest_digits(double value, zval *result);
 bool pt_number_positional(double value, zval *result);

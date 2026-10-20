@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f33bff34073e2431a7a7ba3b1c8eade2cd2cd86096998152eb1fb4547f6323f1 -->
+<!-- source-sha256: 49c11efe82c7f05131b3fdffdc13718728ffa7ed3d5a3005566ba00d0946381b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-15-1: PHP 확장은 library의 `Polyspec\Template\Functions\FunctionGroup`(`table()`을 가진 interface)과 `Polyspec\Template\Functions\Helpers`(final class: typeError, string, list, toNumber, number, integer, stringify, safe)를 library와 같은 이름과 시그니처로 등록하며, helper는 `Value`의 C 함수(`pt_host_is_string`, `pt_host_text_of`, `pt_host_type_name`, `pt_host_stringify`, `pt_numeric_string`)를 쓴다. Red: `FunctionHelpersTest.php`의 `run-tests.mjs phpunit` 실패 1개("Helpers is not registered by the extension", 2 passed); green: `FunctionHelpersTest.php` OK (3 tests, 17 assertions); `FunctionsTest.php` OK (5 tests, 91 assertions); `ConformanceTest.php` OK (765 tests, 1020 assertions) (T26.7-2-15-1).
 
 - T26.7-2-3-2: PHP 확장은 library의 `Polyspec\Template\ErrorCode`(docs/spec/errors.md의 상수를 담은 final class, `make error-codes`가 stub에 씀)와 `Polyspec\Template\Functions\FunctionError`(final, `RuntimeException`을 상속, `errorCode`와 `message`)를 library와 같은 모양으로 등록한다. `tests/scripts/error-codes.test.mts`는 확장이 발생시키는 code를 검사할 때 `packages/php-ext/src/polyspec_template_arginfo.h`를 뺀다. gen_stub이 stub에서 쓰는 ErrorCode 상수 선언이며 아무 error도 발생시키지 않기 때문이다. `pt_error_codes.h`가 이미 빠지는 것과 같다. Red: `run-tests.mjs phpunit`의 `ErrorClassesTest.php` 실패 1개("Polyspec\Template\ErrorCode is not registered by the extension", 2 passed); green: 같은 테스트 OK(3 tests, 10 assertions); `node --test tests/scripts/error-codes.test.mts` 8 passed (T26.7-2-3-2).
 

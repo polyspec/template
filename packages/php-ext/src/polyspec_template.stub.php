@@ -1096,3 +1096,46 @@ final class FunctionError extends \RuntimeException
 
     public function __construct(string $errorCode, string $message) {}
 }
+
+/**
+ * A group of built-in functions: Registry joins the tables of the groups.
+ */
+interface FunctionGroup
+{
+    /**
+     * The functions of the group by name, with their argument counts and the callable that runs them.
+     *
+     * @return array
+     * @phpstan-return array<string, array{min: int, max: int, call: callable}>
+     */
+    public static function table(): array;
+}
+
+/**
+ * Argument helpers shared by the function groups.
+ */
+final class Helpers
+{
+    public static function typeError(string $message): FunctionError {}
+
+    public static function string(mixed $value, string $name): string {}
+
+    /**
+     * @return array
+     * @phpstan-return list<mixed>
+     */
+    public static function list(mixed $value, string $name): array {}
+
+    /**
+     * EXP-23 to_number.
+     */
+    public static function toNumber(mixed $value): float {}
+
+    public static function number(mixed $value): float {}
+
+    public static function integer(mixed $value): int {}
+
+    public static function stringify(mixed $value): string {}
+
+    public static function safe(string $text): \Polyspec\Template\Value\SafeString {}
+}
