@@ -57,6 +57,7 @@ type runtimeManifest struct {
 }
 
 // TestCompilerRuntimeInterface compares Go declarations with the common manifest through go/ast.
+// RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json.
 func TestCompilerRuntimeInterface(t *testing.T) {
 	manifestPath := os.Getenv("TEMPLATE_INTERFACE_MANIFEST")
 	if manifestPath == "" {

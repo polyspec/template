@@ -24,6 +24,7 @@ describe('Engine', () => {
     expect(() => program.register('upper', () => '')).toThrow();
   });
 
+  // FUN-46: an error that a host function reports fails the render with E_RUNTIME_HOST_FUNCTION at the position of its call.
   it('reports host function failures at the call', () => {
     const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': 'x\n{= boom()}' }), functions: { boom: () => { throw new Error('no'); } } }));
     let caught: TemplateError | null = null;

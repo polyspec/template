@@ -109,6 +109,7 @@ fn engine_renders_and_registers_functions() {
     assert_eq!(html, "<b>&lt;</b> 4 [a]");
 }
 
+/// FUN-46: an error that a host function reports fails the render with E_RUNTIME_HOST_FUNCTION at the position of its call.
 /// RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
 #[test]
 fn engine_reports_host_failures_and_limits() {

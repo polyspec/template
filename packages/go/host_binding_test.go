@@ -82,6 +82,7 @@ func TestNumbersAreCheckedByValue(t *testing.T) {
 	}
 }
 
+// VAL-17: a map key is checked like a string value; a key that is not valid Unicode text is E_DATA_INVALID_UTF8.
 func TestKeysAndJSONTextAreCheckedAsUnicode(t *testing.T) {
 	for _, input := range []any{map[string]any{"\xff": 1}, []any{map[string]any{"\xff": 1}}} {
 		if code := bindCode(input); code != errs.DataInvalidUTF8 {

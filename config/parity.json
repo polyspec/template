@@ -8,7 +8,7 @@
     { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "internal": [{ "glob": "packages/ts/tests/cli.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/command.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/cli.test.ts", "reason": "ecosystem: the test of the npm command template-fmt, the packaging form of the formatter in the TypeScript ecosystem" }], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/index.d.ts" } },
     { "name": "go", "runner": "go", "prose": ["Go"], "internal": [{ "glob": "packages/go/cmd/template/main_test.go", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" }, "symbols": { "extractor": "go", "entry": "packages/go" } },
     { "name": "rust", "runner": "cargo", "prose": ["Rust"], "internal": [{ "glob": "packages/rust/tests/cli.rs", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"], "errors": { "file": "packages/rust/src/error.rs", "pattern": "^    (E_[A-Z0-9_]+),$" }, "symbols": { "extractor": "rust", "entry": "packages/rust/Cargo.toml" } },
-    { "name": "php", "runner": "php", "prose": ["PHP"], "internal": [{ "glob": "packages/php/tests/CliTest.php", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" }, "symbols": { "extractor": "php", "entry": "packages/php/src" } },
+    { "name": "php", "runner": "php", "prose": ["PHP"], "internal": [{ "glob": "packages/php/tests/CliTest.php", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/php/tests/Utf8Test.php", "reason": "test: the test of the UTF-8 helper Utf8 of this implementation, which checks that isValid agrees with firstInvalid; the contract of invalid text is the unit invalid-text" }], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" }, "symbols": { "extractor": "php", "entry": "packages/php/src" } },
     { "name": "php-ext", "runner": "php", "prose": ["PHP extension", "PHP 확장"], "internal": [{ "glob": "packages/php-ext/tests/PreparedRenderTest.php", "reason": "test: the extension registers Program and PreparedRender of the library as classes of the extension (S10); the behaviour of a render is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/LoaderClassesTest.php", "reason": "test: the extension registers the loaders of the library as classes of the extension (S10); the behaviour of a loader is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/AstProgramTest.php", "reason": "test: the extension registers AstProgram, PreparedExecution and AstPreparedExecution of the library as classes of the extension (S10) and reads an AST array and a loader result only as they are given; the behaviour of a render is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/ProgramEngineTest.php", "reason": "test: the extension registers Engine of the library as a class of the extension (S10), which hands each request to its program unchanged; the behaviour of a render is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/ValueClassesTest.php", "reason": "test: the extension registers SafeString and BindError of the library as classes of the extension (S10); the behaviour of a binding is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/MapValueTest.php", "reason": "test: the extension registers MapValue of the library as a class of the extension (S10); the behaviour of a map is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/BindTest.php", "reason": "test: the extension registers Bind of the library as a class of the extension (S10); the behaviour of a binding is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/JsonTest.php", "reason": "test: the extension registers Json of the library as a class of the extension (S10); the behaviour of a parse is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/CliTest.php", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/php-ext"], "tests": ["packages/php-ext/tests/*Test.php"], "args": ["-d", "extension=var/build/polyspec_template.so"], "errors": { "file": "packages/php-ext/src/pt_error_codes.h", "pattern": "^#define PT_(E_[A-Z0-9_]+) \"" }, "symbols": { "extractor": "php", "entry": "packages/php-ext/src/polyspec_template.stub.php" } },
     { "name": "python", "runner": "python", "prose": ["Python"], "internal": [{ "glob": "packages/python/tests/test_cli.py", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/python"], "tests": ["packages/python/tests/test_*.py"], "command": "var/python/venv/bin/python", "errors": { "file": "packages/python/src/polyspec/template/errors.py", "pattern": "^    \"(E_[A-Z0-9_]+)\",$" }, "symbols": { "extractor": "python", "entry": "packages/python/src/polyspec/template" } }
   ],
@@ -185,15 +185,15 @@
     },
     {
       "id": "invalid-text",
-      "requirements": ["ERR-1", "ERR-2", "ERR-3", "ERR-4", "ERR-5", "ERR-6", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "ERR-12", "ERR-13", "ERR-14", "LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23"],
+      "requirements": ["VAL-17"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "strings and keys › rejects text that is not well-formed UTF-16 (VAL-13, VAL-17)" },
         { "implementation": "go", "test": "packages/go/host_binding_test.go", "id": "TestKeysAndJSONTextAreCheckedAsUnicode" },
         { "implementation": "rust", "test": "packages/rust/tests/value.rs", "id": "json_bytes_that_are_not_utf8_are_invalid_utf8" },
-        { "implementation": "php", "test": "packages/php/tests/Utf8Test.php", "id": "testNamedCases with data set \"lone continuation\"" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testRenderRejectsAStringThatIsNotUtf8" },
-        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_bind_rules" }
+        { "implementation": "php", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testMapKeysThatAreNotUtf8AreRejected" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testMapKeysThatAreNotUtf8AreRejected" },
+        { "implementation": "python", "test": "packages/python/tests/test_api.py", "id": "test_map_keys_that_are_not_valid_unicode_are_rejected" }
       ]
     },
     {
@@ -224,28 +224,28 @@
     },
     {
       "id": "object-calls",
-      "requirements": ["FUN-1", "FUN-2", "FUN-3", "FUN-4", "FUN-5", "FUN-6", "FUN-7", "FUN-8", "FUN-9", "FUN-10", "FUN-11", "FUN-12", "FUN-13", "FUN-14", "FUN-15", "FUN-16", "FUN-17", "FUN-18", "FUN-19", "FUN-20", "FUN-21", "FUN-22", "FUN-23", "FUN-24", "FUN-25", "FUN-26", "FUN-27", "FUN-28", "FUN-29", "FUN-30", "FUN-31", "FUN-32", "FUN-33", "FUN-34", "FUN-35", "FUN-36", "FUN-37", "FUN-38", "FUN-39", "FUN-40", "FUN-41", "FUN-42", "FUN-43", "FUN-44", "FUN-45", "FUN-46", "FUN-47", "FUN-48", "FUN-49", "VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["RT-60"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/program.test.ts", "id": "program › binds the original instance and calls its public method" },
         { "implementation": "go", "test": "packages/go/render/object_calls_test.go", "id": "TestAssignedObjectRetainsPublicFieldsAndMethods" },
         { "implementation": "rust", "test": "packages/rust/tests/object_calls.rs", "id": "native_instance_member_and_method_are_rendered_without_copying" },
         { "implementation": "php", "test": "packages/php/tests/ObjectCallsTest.php", "id": "testAssignedObjectRetainsPublicFieldsAndMethods" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/EngineTest.php", "id": "testRenderRetainsAnObjectWithItsPublicMembers" },
+        { "implementation": "php-ext", "test": "packages/php/tests/ObjectCallsTest.php", "id": "testAssignedObjectRetainsPublicFieldsAndMethods" },
         { "implementation": "python", "test": "packages/python/tests/test_object_calls.py", "id": "test_member_call_class_call_and_public_field" }
       ]
     },
     {
       "id": "host-function-failures",
-      "requirements": ["ERR-1", "ERR-2", "ERR-3", "ERR-4", "ERR-5", "ERR-6", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "ERR-12", "ERR-13", "ERR-14", "FUN-1", "FUN-2", "FUN-3", "FUN-4", "FUN-5", "FUN-6", "FUN-7", "FUN-8", "FUN-9", "FUN-10", "FUN-11", "FUN-12", "FUN-13", "FUN-14", "FUN-15", "FUN-16", "FUN-17", "FUN-18", "FUN-19", "FUN-20", "FUN-21", "FUN-22", "FUN-23", "FUN-24", "FUN-25", "FUN-26", "FUN-27", "FUN-28", "FUN-29", "FUN-30", "FUN-31", "FUN-32", "FUN-33", "FUN-34", "FUN-35", "FUN-36", "FUN-37", "FUN-38", "FUN-39", "FUN-40", "FUN-41", "FUN-42", "FUN-43", "FUN-44", "FUN-45", "FUN-46", "FUN-47", "FUN-48", "FUN-49"],
+      "requirements": ["FUN-46"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/render/engine.test.ts", "id": "Engine › reports host function failures at the call" },
         { "implementation": "go", "test": "packages/go/engine_test.go", "id": "TestHostFunctions" },
         { "implementation": "rust", "test": "packages/rust/tests/functions.rs", "id": "engine_reports_host_failures_and_limits" },
         { "implementation": "php", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testHostExceptionsKeepTheirMessage" },
-        { "implementation": "php-ext", "test": "packages/php-ext/tests/HostBindingTest.php", "id": "testHostExceptionsKeepTheirMessage" },
-        { "implementation": "python", "test": "packages/python/tests/test_object_calls.py", "id": "test_call_errors_have_the_declared_codes" }
+        { "implementation": "php-ext", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testHostExceptionsKeepTheirMessage" },
+        { "implementation": "python", "test": "packages/python/tests/test_object_calls.py", "id": "test_a_failing_host_function_fails_at_its_call" }
       ]
     },
     {
@@ -500,7 +500,7 @@
     },
     {
       "id": "compiler-interface",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-67"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/compiler-interface.test.ts", "id": "compiler interface › program and engine" },

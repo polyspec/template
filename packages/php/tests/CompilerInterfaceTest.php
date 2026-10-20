@@ -17,7 +17,7 @@ use Polyspec\Template\Render\Scope;
 /** Verifies public runtime declarations against the common compiler manifest. */
 final class CompilerInterfaceTest extends TestCase
 {
-    /** Compares PHP declarations with the manifest through Reflection. */
+    /** RT-67: compares the PHP declarations with the prepared render contract of the manifest through Reflection. */
     public function testRuntimeDeclarationsMatchManifest(): void
     {
         $manifestPath = getenv('TEMPLATE_INTERFACE_MANIFEST') ?: __DIR__ . '/../../compiler/interface.json';

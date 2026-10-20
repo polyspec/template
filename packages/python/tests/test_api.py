@@ -337,6 +337,13 @@ class ValuesAndErrors(unittest.TestCase):
             render("{= n }", {"n": -9007199254740991.0}), "-9007199254740991"
         )
 
+    def test_map_keys_that_are_not_valid_unicode_are_rejected(self):
+        # VAL-17: a map key is checked like a string value; a key that is not valid
+        # Unicode text is E_DATA_INVALID_UTF8.
+        with self.assertRaises(TE) as caught:
+            render("{= json(m) | raw}", {"m": {"\ud800": 1}})
+        self.assertEqual(caught.exception.code, "E_DATA_INVALID_UTF8")
+
     def test_bind_rules(self):
         with self.assertRaises(BindError):
             parse_json('{"a": 1e999}')

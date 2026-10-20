@@ -68,6 +68,7 @@ fn order_root(order: &Rc<Order>) -> OrderedMap {
     root
 }
 
+/// RT-60: an assigned native instance keeps its identity; its public fields are read by member lookup and its public methods are called as object.method(args).
 #[test]
 fn native_instance_member_and_method_are_rendered_without_copying() {
     let program = program(&["{= order.total}|{= order['total']}|{= order.missing}|{= order.status_label(\"ready\")}"]);

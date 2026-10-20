@@ -74,6 +74,7 @@ func TestArtifactRefreshPolicies(t *testing.T) {
 	}
 }
 
+// FUN-46: an error that a host function reports fails the render with E_RUNTIME_HOST_FUNCTION at the position of its call.
 func TestHostFunctions(t *testing.T) {
 	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "x\n{= twice(2)}"})})
 	if err != nil {

@@ -99,6 +99,7 @@ struct Operation {
     parameters: Vec<String>,
 }
 
+/// RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json.
 #[test]
 fn runtime_declarations_match_manifest() {
     let manifest_path =

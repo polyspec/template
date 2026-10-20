@@ -14,6 +14,7 @@ from polyspec.template import (
     EngineOptions,
     BindError,
     FsLoader,
+    MapLoader,
     RenderOptions,
     SafeString,
     TemplateError,
@@ -114,7 +115,23 @@ class ObjectCalls(unittest.TestCase):
             target, assign, options or RenderOptions()
         )
 
+    def test_a_failing_host_function_fails_at_its_call(self):
+        # FUN-46: an error that a host function reports fails the render with
+        # E_RUNTIME_HOST_FUNCTION at the position of its call.
+        def boom(_args, _context):
+            raise RuntimeError("no")
+
+        program = AstProgram(
+            EngineOptions(loader=MapLoader({"a.tpl": "x\n{= boom()}"}), functions={"boom": boom})
+        )
+        with self.assertRaises(TemplateError) as caught:
+            Engine(program).render("a.tpl", {})
+        error = caught.exception.to_object()
+        self.assertEqual((error["code"], error["line"]), ("E_RUNTIME_HOST_FUNCTION", 2))
+
     def test_member_call_class_call_and_public_field(self):
+        # RT-60: an assigned native instance keeps its identity; its public fields are read
+        # by member lookup and its public methods are called as object.method(args).
         order = Order()
         html = self.render("input.tpl", order_runtime, {"order": order})
         self.assertEqual(

@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Utf8;
 
 /**
- * `Utf8::isValid` gives the same result as `Utf8::firstInvalid() < 0` (VAL-14): on every 1-byte and 2-byte
+ * `Utf8::isValid` gives the same result as `Utf8::firstInvalid() < 0`: on every 1-byte and 2-byte
  * sequence, on every 3-byte and 4-byte sequence built from the boundary bytes, and on named cases.
  */
 final class Utf8Test extends TestCase

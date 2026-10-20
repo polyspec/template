@@ -12,6 +12,7 @@ type testOrder struct{ Total float64 }
 
 func (o *testOrder) StatusLabel(prefix string) string { return prefix + ":12" }
 
+// RT-60: an assigned native instance keeps its identity; its public fields are read by member lookup and its public methods are called as object.method(args).
 func TestAssignedObjectRetainsPublicFieldsAndMethods(t *testing.T) {
 	runtime, err := NewRuntimeEnvironment(nil, nil)
 	if err != nil {

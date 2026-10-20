@@ -173,10 +173,9 @@ final class HostBindingTest extends TestCase
         $this->program->register('twice', static function (array $args): int {
             throw new \RuntimeException('function exploded');
         });
-        $this->assertStringContainsString(
-            'function exploded',
-            $this->failure('host-function.tpl', ['n' => 1])->getMessage(),
-        );
+        $error = $this->failure('host-function.tpl', ['n' => 1]);
+        $this->assertSame(['E_RUNTIME_HOST_FUNCTION', 1], [$error->errorCode, $error->errorLine]);
+        $this->assertStringContainsString('function exploded', $error->getMessage());
     }
 
     public function testNativeObjectArgumentsArriveAsTheOriginalObject(): void

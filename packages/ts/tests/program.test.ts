@@ -15,6 +15,7 @@ describe('program', () => {
     expect({ prepared, rendered }).toEqual({ prepared: 1, rendered: 1 });
   });
 
+  // RT-60: an assigned native instance keeps its identity; its public fields are read by member lookup and its public methods are called as object.method(args).
   it('binds the original instance and calls its public method', () => {
     class Order {
       readonly total = 12;

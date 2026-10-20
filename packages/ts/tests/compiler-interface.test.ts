@@ -16,6 +16,7 @@ interface Operation {
 interface Manifest {
   languages: { typescript: { error: string; runtimeEnvironmentOperations: string[]; boundMap: { operations: { bind: string; merge: string } } } };
   runtimeContract: {
+    Program: { operations: Operation[] };
     Engine: { owns: string[]; operations: string[] };
     AstProgram: { owns: string[] };
     BoundMap: { operations: Operation[] };
@@ -27,7 +28,7 @@ function isManifest(value: unknown): value is Manifest {
   const languages: unknown = Reflect.get(value, 'languages');
   const contract: unknown = Reflect.get(value, 'runtimeContract');
   return typeof languages === 'object' && languages !== null && typeof Reflect.get(languages, 'typescript') === 'object'
-    && typeof contract === 'object' && contract !== null && ['Engine', 'AstProgram', 'BoundMap'].every(name => typeof Reflect.get(contract, name) === 'object');
+    && typeof contract === 'object' && contract !== null && ['Program', 'Engine', 'AstProgram', 'BoundMap'].every(name => typeof Reflect.get(contract, name) === 'object');
 }
 
 const manifestPath = join(import.meta.dirname, '..', '..', 'compiler', 'interface.json');
@@ -41,6 +42,8 @@ const methodsOf = (type: { prototype: object }) => Object.getOwnPropertyNames(ty
 
 describe('compiler interface', () => {
   it('program and engine', () => {
+    // The AST program implements Program: it holds every operation of the Program contract.
+    for (const operation of manifest.runtimeContract.Program.operations) expect(typeof Reflect.get(AstProgram.prototype, operation.name)).toBe('function');
     expect(methodsOf(Engine)).toEqual(manifest.runtimeContract.Engine.operations);
     expect(Object.keys(new Engine(new AstProgram()))).toEqual(manifest.runtimeContract.Engine.owns);
     for (const field of manifest.runtimeContract.AstProgram.owns) expect(Object.keys(new AstProgram())).toContain(field);

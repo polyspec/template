@@ -11,6 +11,10 @@ use Polyspec\Template\Loader\ArrayLoader;
 
 final class ObjectCallsTest extends TestCase
 {
+    /**
+     * RT-60: an assigned native instance keeps its identity; its public fields are read by member lookup and its public
+     * methods are called as object.method(args).
+     */
     public function testAssignedObjectRetainsPublicFieldsAndMethods(): void
     {
         $program = new AstProgram(new ArrayLoader(['page.tpl' => '{= order.total}|{= order.status_label("ready")}']));

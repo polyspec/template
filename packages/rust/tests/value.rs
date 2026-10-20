@@ -151,6 +151,7 @@ fn binding_limits_the_nesting_depth() {
 
 /// JSON text whose bytes are not UTF-8, in a string or in a key, is E_DATA_INVALID_UTF8 (VAL-12, VAL-17): a Rust host
 /// gives text of that kind as bytes.
+/// VAL-17: a map key is checked like a string value; a key that is not valid Unicode text is E_DATA_INVALID_UTF8.
 #[test]
 fn json_bytes_that_are_not_utf8_are_invalid_utf8() {
     for bytes in [&b"[\"\xff\"]"[..], &b"{\"\xff\": 1}"[..], &b"\"a\xc3\""[..]] {
