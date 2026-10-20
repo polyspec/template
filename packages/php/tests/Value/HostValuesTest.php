@@ -17,7 +17,7 @@ use Polyspec\Template\Value\Json;
  * Host argument form (VAL-21) and native object equality (EXP-39) with the shared fixture of
  * tests/fixtures/native-object/host-values.json.
  *
- * The same scenarios run against the PHP extension in `packages/php-ext/tests/HostValuesTest.php`.
+ * The same scenarios run against the PHP extension (config/parity.json binds this file to it).
  */
 final class HostValuesTest extends TestCase
 {

@@ -16,8 +16,7 @@ use Polyspec\Template\Value\Bind;
 /**
  * Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.
  *
- * The same scenarios run against the PHP extension in `packages/php-ext/tests/BoundMapTest.php`,
- * which also checks that each implementation rejects the bound maps of the other.
+ * The same scenarios run against the PHP extension (config/parity.json binds this file to it).
  */
 final class BoundMapTest extends TestCase
 {

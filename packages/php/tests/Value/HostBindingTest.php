@@ -14,7 +14,7 @@ use Polyspec\Template\Value\Json;
 /**
  * Host binding of PHP values and native objects (VAL-2, VAL-14, VAL-17 to VAL-20, FUN-46, ERR-13).
  *
- * The same scenarios run against the PHP extension in `packages/php-ext/tests/HostBindingTest.php`.
+ * The same scenarios run against the PHP extension (config/parity.json binds this file to it).
  */
 final class HostBindingTest extends TestCase
 {

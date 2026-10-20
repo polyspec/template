@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ca3c7d7da47347debe972ded4e4d91241086fb62ea46b148f87fe7b469f9d335 -->
+<!-- source-sha256: 189221e7c718bef2725003a797e1d395dead5866a8fea38f318bd0c66d314c03 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-8-2: php binding이 있는 모든 unit은 php-ext도 library의 같은 test에 bind하며, 그 test는 확장을 켜고 실행된다(S10). 16개 unit은 `packages/php-ext/tests`의 test에서 옮기고, 11개는 없던 php-ext binding을 얻으며(loader-errors, map-loader, parsed-ast, ast-decode-errors, page-cache, format-unchanged, format-indentation, format-expression, format-invariant, compiler-interface, bound-map-interface), T26.7-32가 더한 unit 네 개(error-object, internal-errors, bind-merge-errors, native-object-equality)도 php-ext를 library test에 bind한다. `Native\Engine`으로 library를 되풀이하던 `packages/php-ext/tests`의 test 12개는 support 파일 9개, template 19개와 함께 지운다(Support.php와 templates/echo.tpl은 CliTest를 위해 남는다). main에 비해 `make parity-declarations-check`에 새 finding이 없고 php-ext의 R2 missing-binding finding 11개가 사라지며, bind한 library test와 php-ext의 internal test는 모두 확장으로 통과한다 (T26.7-2-8-2).
 
 - T26.7-2-15-3: 확장은 library의 Functions\Encoding(toJson, percentEncode, table)과 Functions\Collection(RANGE_LIMIT, table)을 class로 등록하고, table의 callable은 확장의 built-in 함수를 실행한다. built-in escape와 raw는 library와 같이 SafeString을 반환한다. 또한 T26.7-2-15-1과 T26.7-2-15-2의 merge가 두 번 정의한 pt_throw_function_error를 하나만 남겨 확장이 다시 빌드된다. Red: `run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/EncodingCollectionGroupsTest.php` 1 failed, "Polyspec\Template\Functions\Encoding is not registered by the extension" (4 passed, 1 failed); green: 같은 명령 5 passed, 0 failed; Verification의 FunctionsTest, ExprFixturesTest, ConformanceTest가 통과하고(5, 73, 768 passed), ExportsTest, CompilerInterfaceTest, RenderStateTest도 통과한다(18, 2, 8 passed); `make lint-php-ext`와 `make lint-php`가 exit 0; `make parity-declarations-check`는 EncodingCollectionGroupsTest에 대한 finding을 0개 출력한다 (T26.7-2-15-3).
 
