@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cac69a37df13f70a2cc539ef6cfa8c8c2e79e7fc18523ea35f4fc65739b83cdd -->
+<!-- source-sha256: cbda96bad10dd6cc67741b32d3eb78d48cb2ba4142d6179c8405c2354614950c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-19: 자기 unit의 parity check로 닫는다. Verification은 php-ext symbol을 적은 API unit 16개에 대한 `make parity-declarations-check UNITS="..."`(kit K400)이며 통과한다 (T26.7-2-19).
 
 - T26.7-2-6-2: PHP 확장은 library의 `Frame`, `Scope`, `Context`를 `Polyspec\Template\Render`의 final class로 같은 속성, 생성자, 메서드와 함께 등록한다. 상태는 객체의 선언된 속성이므로 library 클래스와 테스트가 같은 값을 읽고 쓴다. Red: `RenderStateTest.php`의 `run-tests.mjs phpunit` 실패 1개("Polyspec\Template\Render\Frame is not registered by the extension", 7 passed), `make parity-declarations-check | grep -c "R1 missing-implementation api-render-[a-z]* php-ext"` 3; green: `RenderStateTest.php` OK (8 tests, 26 assertions), `ExprFixturesTest.php` OK (73 tests, 239 assertions), `CompilerInterfaceTest.php` OK (2 tests, 56 assertions), `ExportsTest.php` OK (18 tests, 27 assertions), `RuntimeEnvironmentTest.php` OK (4 tests, 18 assertions), `AstProgramTest.php` OK (8 tests, 11 assertions), `ConformanceTest.php` OK (765 tests, 1020 assertions); `make lint-php-ext` exit 0; 같은 grep은 0을 출력한다 (T26.7-2-6-2).
 
