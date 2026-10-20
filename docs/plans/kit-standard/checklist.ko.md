@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 1a57d125f0575a19296d7ef56f73d466e1b9e4a91121fe3b06c89b75e1e27127 -->
+<!-- source-sha256: ad50d9ba07d9ac2247bcaa25603a181b66070ad0e33a18e85da847997ed94c3f -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -73,3 +73,4 @@
 | T26.7-47 | worktree의 link가 examples/showcase/adapters/go/go.work를 Git이 무시하는 곳에만 쓰거나 repository가 이를 무시한다 | .gitignore and the tracked go.work of the root | `node ../kit/dist/link.mjs link` | [ ] |
 | T26.7-48 | oxlint가 tests/scripts에서 통과한다: conformance-cases.test.mts:32와 pre-commit-hook.test.mts:14가 any로부터의 unsafe assertion을 가진다 | tests/scripts/conformance-cases.test.mts and tests/scripts/pre-commit-hook.test.mts | `make lint-ts` | [ ] |
 | T26.7-49 | ruff format이 packages/python/src/polyspec/template/__init__.py에서 통과한다: T26.7-14의 재구성 뒤 163행에 빈 줄이 둘 더 있다 | packages/python/src/polyspec/template/__init__.py | `make lint-python` | [ ] |
+| T26.7-50 | kit 복사본은 15aeb680의 연결된 kit을 따른다 | PRINCIPLES.md, PRINCIPLES.ko.md, ruff.toml, .golangci.yml, clippy.toml and scripts/kit/kit-bootstrap.mk, written by make kit-sync | `make kit-check` | [o] |

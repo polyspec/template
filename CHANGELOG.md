@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-50: the copies of kit follow the linked kit at 15aeb680: `make kit-sync` wrote `PRINCIPLES.md` and `PRINCIPLES.ko.md`, `ruff.toml`, `.golangci.yml`, `scripts/kit/kit-bootstrap.mk` and the new `clippy.toml`, which `make lint-rust` reads and `config/owner-checks.json` now owns (kit-check and lint-rust). Red: `make kit-check` reported 6 findings (five copies differ, `clippy.toml` missing); green: it passes. `make layout-check` reports `clippy.toml` as an undeclared root file, since `config/layout.kit.yml` of kit does not name it (kit K356, reported) (T26.7-50).
+
 - T26.7-2-3-1: closed with its owner test: `EngineTest` of `packages/php-ext`, run with the extension built from the committed sources, passes 27 tests, among them the readonly `errorCode`, `template`, `errorLine` and `errorCol` and `toArray` of the error that the extension throws (T26.7-2-3-1).
 
 - T26.7-37, T26.7-38: the rows are verified by their owner tests (the Verification cells name the vitest, Go, Rust, PHPUnit and Python tests that each row changed and ran) and closed after K353 (`make item-edit`) (T26.7-37).

@@ -833,6 +833,7 @@
         "phpcs.xml.dist",
         "phpstan.dist.neon",
         ".golangci.yml",
+        "clippy.toml",
         ".oxlintrc.json",
         "knip.json",
         ".editorconfig",
@@ -903,6 +904,14 @@
       ],
       "targets": [
         "lint-go"
+      ]
+    },
+    {
+      "paths": [
+        "clippy.toml"
+      ],
+      "targets": [
+        "lint-rust"
       ]
     },
     {
@@ -1166,7 +1175,8 @@
       "check": "make lint-rust",
       "paths": [
         "packages/rust/**",
-        "examples/showcase/adapters/rust/**"
+        "examples/showcase/adapters/rust/**",
+        "clippy.toml"
       ]
     },
     {

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cf5f138d225c5bce4e8cc1a4d38b095cdc854a66f62acf3cb2828571d8324093 -->
+<!-- source-sha256: 1ae4295c8c35d669602fbbef0240768963d624571c08b6050f8388cb20d256a0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-50: kit 복사본은 15aeb680의 연결된 kit을 따른다. `make kit-sync`가 `PRINCIPLES.md`와 `PRINCIPLES.ko.md`, `ruff.toml`, `.golangci.yml`, `scripts/kit/kit-bootstrap.mk`와 새 `clippy.toml`을 썼고, `clippy.toml`은 `make lint-rust`가 읽으며 이제 `config/owner-checks.json`이 소유한다(kit-check와 lint-rust). Red: `make kit-check`는 6개 finding을 보고했다(다섯 복사본이 다르고 `clippy.toml`이 없다); green: 통과한다. kit의 `config/layout.kit.yml`이 `clippy.toml`을 이름 붙이지 않으므로 `make layout-check`는 이를 선언되지 않은 root 파일로 보고한다(kit K356, 보고함) (T26.7-50).
 
 - T26.7-2-3-1: owner test로 닫는다. commit된 source로 build한 확장을 load하고 실행한 `packages/php-ext`의 `EngineTest`가 27개 test를 통과하며, 그중에는 확장이 던지는 error의 readonly `errorCode`, `template`, `errorLine`, `errorCol`과 `toArray`가 있다 (T26.7-2-3-1).
 
