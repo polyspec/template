@@ -6,6 +6,8 @@ namespace Polyspec\Template\Tests\Parser;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
+use Polyspec\Template\Expr\Lexer as ExprLexer;
+use Polyspec\Template\Expr\Parser as ExpressionParser;
 use Polyspec\Template\Parser\BlockTag;
 use Polyspec\Template\Parser\Parser;
 use Polyspec\Template\Source;
@@ -146,5 +148,31 @@ final class ParserTest extends TestCase
                 self::assertSame($message, $error->getMessage());
             }
         }
+    }
+
+    public function testAnExpressionCloseThatIsNotOneByteIsAValueError(): void
+    {
+        $source = Source::fromBytes('t.tpl', 'a');
+        $cases = [
+            [
+                'Polyspec\Template\Expr\Lexer::__construct(): Argument #3 ($close) must be a single character or null',
+                static fn () => new ExprLexer($source, 0, '}}', 1, null, 't.tpl'),
+            ],
+            [
+                'Polyspec\Template\Expr\Parser::__construct(): Argument #3 ($close) must be a single character or null',
+                static fn () => new ExpressionParser($source, 0, '', 1, null, 't.tpl'),
+            ],
+        ];
+        foreach ($cases as [$message, $call]) {
+            try {
+                $call();
+                $this->fail($message . ' expected');
+            } catch (\ValueError $error) {
+                self::assertSame($message, $error->getMessage());
+            }
+        }
+        self::assertInstanceOf(ExprLexer::class, new ExprLexer($source, 0, null, 0, null, 't.tpl'));
+        self::assertInstanceOf(ExprLexer::class, new ExprLexer($source, 0, '}', 1, 0, 't.tpl'));
+        self::assertInstanceOf(ExpressionParser::class, new ExpressionParser($source, 0, '}', 1, 0, 't.tpl'));
     }
 }

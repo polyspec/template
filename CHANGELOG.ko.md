@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: db5c88df40d60db4c5fd0da3930deac549d1937636280df2a4d7c279da9a9431 -->
+<!-- source-sha256: 42363b48aee663ea2e8f772b6c70156be346974c1bd29aed73e12d6c6379ee05 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-2-12-1: 라이브러리의 `Expr\Lexer`와 `Expr\Parser`는 null도 1 byte도 아닌 close delimiter를 확장과 같은 `ValueError`로 거부하며(P8), 어떤 state도 설정하기 전에 거부한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/Parser/ParserTest.php` 1 failure, `Polyspec\Template\Expr\Lexer::__construct(): Argument #3 ($close) must be a single character or null expected`; green: 같은 명령 OK (9 tests, 28 assertions), `--php-extension var/build/polyspec_template.so`를 붙인 명령도 OK (9 tests, 28 assertions) (T26.7-2-12-1).
 
 - T26.7-2-16: 확장은 `Format\Analyzer`(interface), `Format\PackageAnalyzer`, `Format\Body`를 library와 같은 이름과 signature의 class로 등록한다. `Body::format`은 tag body를 `packages/php-ext/src/pt_format.c`의 C로 쓰며, `Expression::join`과 Body가 C 함수 `pt_format_join`을 함께 쓴다. `PackageAnalyzer`는 `AstProgram::analyze`와 `parse`에 위임한다. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension var/build/polyspec_template.so -- packages/php-ext/tests/FormatBodyTest.php`가 `Polyspec\Template\Format\Body is not registered by the extension`으로 실패한다(1 failure); green: 같은 명령이 `OK (4 tests, 15 assertions)`로 통과한다 (T26.7-2-16).
 

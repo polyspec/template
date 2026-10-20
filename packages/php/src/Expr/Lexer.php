@@ -58,6 +58,11 @@ final class Lexer
         public readonly ?int $openIndex,
         private readonly string $template,
     ) {
+        if ($close !== null && strlen($close) !== 1) {
+            throw new \ValueError(
+                self::class . '::__construct(): Argument #3 ($close) must be a single character or null',
+            );
+        }
         $this->index = $start;
         $this->closeIsExpressionChar = $close !== null && str_contains(self::EXPRESSION_CHARS, $close);
     }
