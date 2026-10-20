@@ -15,8 +15,8 @@ import (
 	"github.com/polyspec/template/packages/go/value"
 )
 
-// Host argument form (VAL-21) and native object equality (EXP-39) with the shared fixture of
-// tests/fixtures/native-object/host-values.json.
+// Host argument form (VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19),
+// with the shared fixture of tests/fixtures/native-object/host-values.json.
 
 var nativeFixtureDir = filepath.Join("..", "..", "tests", "fixtures", "native-object")
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Member calls on assigned objects, logical class calls, host argument values
-(VAL-21) and native object equality (EXP-39) in the AST program, with the
-fixtures that every language shares in tests/fixtures/native-object."""
+(VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19) in
+the AST program, with the fixtures that every language shares in
+tests/fixtures/native-object."""
 
 import json
 import sys

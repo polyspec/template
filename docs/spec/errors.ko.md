@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 2ebd4f9dadac2d1321e75643c54d094c2db4bb119b42989ad486981ebc9a4b31 -->
+<!-- source-sha256: 6703a9883e5aa2577d057fd8d8a44ec9f02e8fecd1ff0f1f8042b1910fe4babb -->
 # 오류
 
 [English](/spec/errors).
@@ -79,7 +79,7 @@ ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-
 | `E_RUNTIME_TYPE` | 피연산자 또는 인자의 타입을 연산이 받지 않는다. | 실패한 표현식 노드의 시작(이항 또는 단항 표현식, 호출, spread), 또는 잘못된 타입의 반복 대상에 대한 루프 태그. |
 | `E_RUNTIME_COMPARE` | 순서 비교의 피연산자에 순서가 없다. | 비교 표현식의 시작. |
 | `E_RUNTIME_DIV_ZERO` | `/` 또는 `%`의 오른쪽 피연산자가 0이다. | 나눗셈 표현식의 시작. |
-| `E_RUNTIME_STRINGIFY` | list 또는 map을 문자열로 변환한다. | echo 표현식, 연산자 표현식 또는 호출의 시작. |
+| `E_RUNTIME_STRINGIFY` | list, map 또는 native object(VAL-19)를 문자열로 변환한다. | echo 표현식, 연산자 표현식 또는 호출의 시작. |
 | `E_RUNTIME_UNKNOWN_FUNCTION` | 호출이 내장도 등록도 되지 않은 함수를 이름으로 지정한다. | 호출. |
 | `E_RUNTIME_ARITY` | 호출의 인자 수가 함수의 범위 밖이다. | 호출. |
 | `E_RUNTIME_HOST_FUNCTION` | 엔진이 호출한 호스트 코드가 오류를 보고했다(FUN-46, VAL-14, VAL-19). 등록된 함수, 논리 class 함수, instance method, member accessor 또는 `jsonSerialize()`다. | 호출 또는 lookup 표현식. 렌더링 시작 전 바인딩 중에 실행된 호스트 코드는 ERR-5. `bind`에서 실행된 호스트 코드는 ERR-14. |

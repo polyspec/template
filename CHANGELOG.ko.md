@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1aeb90b60a8ddf48b18cd58e4749f606c8b6568db50c7e151903a25dd733fef0 -->
+<!-- source-sha256: 7b5f0da6db7aab49df41fe39e5838bd2cbefe520045925661ed8ca3482d279b5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-12: VAL-19가 금지하는 native object 사용마다 그 오류를 명명한다. 전에는 어느 규칙도 그것을 명명하지 않았다: 그것을 echo하면 `E_RUNTIME_STRINGIFY`로 실패하고, 그것에 대한 loop, 그것의 spread, 그것을 담은 값의 `json`은 `E_RUNTIME_TYPE`으로 실패한다; ERR-11은 `E_RUNTIME_STRINGIFY` 아래에 native object를 나열한다. 이 코드는 모든 구현이 이미 보고하는 코드다. `tests/fixtures/native-object`의 공유 fixture가 `truthy.tpl`(native object는 truthy다), `stringify.tpl`, `iterate.tpl`, `spread.tpl`을 얻고, 모든 구현의 fixture test와 `make generated-native-calls-check`가 그것을 실행하며, 새 unit `native-object-opaque`가 VAL-19를 인용한다; fixture test의 TypeScript 제목은 더 이상 모든 항목에 VAL-21, EXP-39, EXP-38을 적지 않는다. `errors.md`에서 생성한 Rust, PHP, PHP 확장의 오류 코드 목록과 stub의 arginfo hash가 새 문장을 따른다. concurrent-bound-map은 VAL-19를 더 이상 인용하지 않는다. Red: 새 fixture 항목이 있는 상태에서 `make item-red`가 unit의 parity 검사(`native-object-opaque` 없음)와 concurrent-bound-map의 VAL-19 검사 exit 2를 기록했다. Green: 둘 다 통과하고, fixture test가 통과하며(vitest 9, `go test` 1, `cargo test --test host_values` 1, PHPUnit과 PHP 확장의 HostValuesTest 6, Python `test_object_calls.py` 13), 다섯 언어의 generated program이 일치하고, `packages/php-ext/tests`의 test 파일 34개가 확장으로 통과하며, `make error-codes-check`와 `make lint-php-ext`가 통과하고, `make parity-declarations-check`는 2건 줄고 새 finding이 없다 (T26.7-32-12).
 
 - T26.7-32-11: RT-33, RT-35, RT-36을 새 unit `render-limits`가 인용하고, 모든 구현의 그 test가 공개 API로 기본 제한(iterations 1,000,000, depth 32, outputBytes 16 MiB, expressionDepth 64)을 읽고, 출력 제한 4바이트에서 `ab{= 'cd'}`를 렌더하며, 3바이트에서는 제한을 넘겨 쓴 echo(1:3)에서 `E_RUNTIME_LIMIT`로 실패시키고 실패한 렌더가 출력을 반환하지 않는지 검사한다. 전에는 Rust만 기본값을, Python만 출력 제한을 검사했다. PHP 확장은 PHP test를 binding한다. concurrent-bound-map은 세 id를 더 이상 인용하지 않는다. Red: 새 test가 있는 상태에서 `make item-red`가 `make parity-declarations-check UNITS="render-limits"` exit 2와 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-33 RT-35 RT-36"` exit 2를 기록했다. Green: 둘 다 통과하고, test가 통과하며(vitest `engine.test.ts` 14, `go test` 2, `cargo test --test functions` 16, PHPUnit과 PHP 확장의 EngineRefreshTest 10, Python `test_api.py` 46), `make parity-declarations-check`는 6건 줄고 새 finding이 없다 (T26.7-32-11).
 

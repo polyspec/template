@@ -70,7 +70,7 @@ pub enum ErrorCode {
     E_RUNTIME_COMPARE,
     /// The right operand of `/` or `%` is zero.
     E_RUNTIME_DIV_ZERO,
-    /// A list or map is converted to a string.
+    /// A list, a map or a native object (VAL-19) is converted to a string.
     E_RUNTIME_STRINGIFY,
     /// A call names a function that is neither built in nor registered.
     E_RUNTIME_UNKNOWN_FUNCTION,

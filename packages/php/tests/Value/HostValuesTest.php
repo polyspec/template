@@ -14,8 +14,8 @@ use Polyspec\Template\Tests\Support;
 use Polyspec\Template\Value\Json;
 
 /**
- * Host argument form (VAL-21) and native object equality (EXP-39) with the shared fixture of
- * tests/fixtures/native-object/host-values.json.
+ * Host argument form (VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19),
+ * with the shared fixture of tests/fixtures/native-object/host-values.json.
  *
  * The same scenarios run against the PHP extension (config/parity.json binds this file to it).
  */

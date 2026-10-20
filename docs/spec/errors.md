@@ -78,7 +78,7 @@ The code tables of ERR-7 to ERR-12 are the catalog of the error codes: `make err
 | `E_RUNTIME_TYPE` | An operand or argument has a type the operation does not accept. | The start of the expression node that failed (the binary or unary expression, the call, the spread), or the loop tag for an iterable of a wrong type. |
 | `E_RUNTIME_COMPARE` | An ordering comparison has operands without an order. | The start of the comparison expression. |
 | `E_RUNTIME_DIV_ZERO` | The right operand of `/` or `%` is zero. | The start of the division expression. |
-| `E_RUNTIME_STRINGIFY` | A list or map is converted to a string. | The start of the echo expression, of the operator expression or of the call. |
+| `E_RUNTIME_STRINGIFY` | A list, a map or a native object (VAL-19) is converted to a string. | The start of the echo expression, of the operator expression or of the call. |
 | `E_RUNTIME_UNKNOWN_FUNCTION` | A call names a function that is neither built in nor registered. | The call. |
 | `E_RUNTIME_ARITY` | A call has an argument count outside the function's range. | The call. |
 | `E_RUNTIME_HOST_FUNCTION` | Host code that the engine called reported an error (FUN-46, VAL-14, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. | The call or the lookup expression; ERR-5 for host code that runs while binding before rendering starts; ERR-14 for host code that runs in `bind`. |

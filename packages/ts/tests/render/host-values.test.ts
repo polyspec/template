@@ -1,5 +1,5 @@
-// Host argument form (VAL-21) and native object equality (EXP-39) with the shared fixture of
-// tests/fixtures/native-object/host-values.json.
+// Host argument form (VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19),
+// with the shared fixture of tests/fixtures/native-object/host-values.json.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -54,13 +54,13 @@ function render(target: string): string {
 
 describe('host arguments and native object equality', () => {
   for (const [target, output] of Object.entries(expected.outputs)) {
-    it(`renders ${target} (VAL-21, EXP-39)`, () => {
+    it(`renders ${target}`, () => {
       expect(render(target)).toBe(output);
     });
   }
 
   for (const [target, code] of Object.entries(expected.errors)) {
-    it(`fails ${target} with ${code} (EXP-38)`, () => {
+    it(`fails ${target} with ${code}`, () => {
       let actual = 'OK';
       try {
         render(target);

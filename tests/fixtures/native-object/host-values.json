@@ -1,12 +1,16 @@
 {
-  "description": "VAL-21 and EXP-39 expectations shared by the AST tests of every package and by scripts/check-generated-native-calls.mts. Every host renders the templates with the assign entries order, same, other and items: order and same are one host object of the order class, other is a second object of that class and items is the list [1]. Every host registers describe, mutate and pick as host functions, Order::describe as a logical class function, and describe as a public method of the order class. describe returns the description of its arguments, mutate changes its list and map arguments and returns null, and pick returns its argument. A native object has no order (compare.tpl) and no JSON text, also inside a list or a map (json.tpl, FUN-26).",
+  "description": "VAL-21, EXP-39 and VAL-19 expectations shared by the AST tests of every package and by scripts/check-generated-native-calls.mts. Every host renders the templates with the assign entries order, same, other and items: order and same are one host object of the order class, other is a second object of that class and items is the list [1]. Every host registers describe, mutate and pick as host functions, Order::describe as a logical class function, and describe as a public method of the order class. describe returns the description of its arguments, mutate changes its list and map arguments and returns null, and pick returns its argument. A native object has no order (compare.tpl) and no JSON text, also inside a list or a map (json.tpl, FUN-26). A native object is opaque (VAL-19): it is truthy (truthy.tpl), echoing it fails with E_RUNTIME_STRINGIFY (stringify.tpl), and a loop over it (iterate.tpl) and a spread of it (spread.tpl) fail with E_RUNTIME_TYPE.",
   "outputs": {
     "arguments.tpl": "null,bool(true),number(1.5),string(a),string(r),list(number(1),string(s),list(null)),map(b=number(1),2=list(bool(true)),m=list()),object(order)|null,bool(true),number(1.5),string(a),string(r),list(number(1),string(s),list(null)),map(b=number(1),2=list(bool(true)),m=list()),object(order)|null,bool(true),number(1.5),string(a),string(r),list(number(1),string(s),list(null)),map(b=number(1),2=list(bool(true)),m=list()),object(order)\n",
     "mutation.tpl": "[1,2]|{\"k\":\"v\"}|[1]\n",
-    "equality.tpl": "true|true|false|true|false|true|true|false|true|false|false|false\n"
+    "equality.tpl": "true|true|false|true|false|true|true|false|true|false|false|false\n",
+    "truthy.tpl": "truthy\n"
   },
   "errors": {
     "compare.tpl": "E_RUNTIME_COMPARE",
-    "json.tpl": "E_RUNTIME_TYPE"
+    "json.tpl": "E_RUNTIME_TYPE",
+    "stringify.tpl": "E_RUNTIME_STRINGIFY",
+    "iterate.tpl": "E_RUNTIME_TYPE",
+    "spread.tpl": "E_RUNTIME_TYPE"
   }
 }
