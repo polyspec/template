@@ -13,7 +13,7 @@ use Polyspec\Template\Value\SafeString;
 use Polyspec\Template\Value\Value;
 
 /**
- * Truthiness, equality, ordering and binding (EXP-33 to EXP-38, VAL-12, VAL-14).
+ * Truthiness, equality, ordering and binding (EXP-33 to EXP-38, VAL-12).
  */
 final class ValueTest extends TestCase
 {

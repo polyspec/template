@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: 64a1c1ea19faf1ebc659574c2aaa14d8fbd04f71affac5854bd8e80fbc8d3eb8 -->
+<!-- source-sha256: ed65492bae06ec08d270431916e86dc3b979abe052bd70567be2e62f2ba69c91 -->
 # polyspec/template
 
 [English](README.md).
@@ -53,7 +53,7 @@ $json = Ast::toJson($ast);
 | `Formatter::format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer())` | `Polyspec\Template\Format`: 태그 안의 공백과 줄 들여쓰기를 정리하고, 텍스트를 담은 `FormatResult` 또는 `FormatError`(`reason`은 `parse`, `invariant`, `html`, 그리고 `code`, `line`, `col`, `message`)를 반환한다. 옵션은 `name`, `delimiters`, `range`, `indent`(공백 묶음 또는 탭 하나, 기본은 공백 두 칸, null이면 모든 줄의 들여쓰기를 유지), `templateBlocks`(`indent` 또는 `flat`)이다. 결과는 span을 뺀 AST(줄을 들여쓸 때는 줄 들여쓰기도 뺀 AST)가 같을 때만 반환되며, 다시 포맷해도 바뀌지 않는다. `Analyzer`는 PHP 확장의 파서 같은 다른 파서를 제공한다. |
 | `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | AST program을 생성한다. 옵션: `functions`, `limits`, `delimiters`. |
 | `new Engine(Program $program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
-| `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | 템플릿 이름 또는 파싱된 템플릿을 렌더한다. `$assign`은 변수를 담고 옵션은 `define`, `env`다. 바인딩은 VAL-14를 따른다. closure와 리소스는 `E_DATA_UNSUPPORTED_TYPE`, 유효한 UTF-8이 아닌 키는 `E_DATA_INVALID_UTF8`, 64단계보다 깊게 중첩된 list와 map은 `E_DATA_DEPTH`이다. 호출자의 class scope와 무관하게 객체의 public 프로퍼티와 method만 보인다. |
+| `$engine->render(string|array $target, mixed $assign = [], array $options = [])` | 템플릿 이름 또는 파싱된 템플릿을 렌더한다. `$assign`은 변수를 담고 옵션은 `define`, `env`다. 바인딩은 VAL-13을 따른다. closure와 리소스는 `E_DATA_UNSUPPORTED_TYPE`, 유효한 UTF-8이 아닌 키는 `E_DATA_INVALID_UTF8`, 64단계보다 깊게 중첩된 list와 map은 `E_DATA_DEPTH`이다. 호출자의 class scope와 무관하게 객체의 public 프로퍼티와 method만 보인다. |
 | `BoundMap::bind(mixed $value)`, `BoundMap::merge(mixed $first, mixed $second)` | `bind`는 데이터를 한 번 검사하고 `BoundMap`을 반환한다. null과 `[]`는 빈 bound map이다. `merge`는 두 bound map을 합치며, `$second`의 항목이 같은 key를 가진 `$first`의 항목을 바꾼다. `render`와 `prepare`는 bound map을 `$assign`과 정의 `data`로 받고 다시 binding하지 않는다. 다른 위치에서, 그리고 PHP extension의 bound map은 모든 위치에서 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다(VAL-22). class는 final이고 instance로 만들거나 clone하거나 unserialize할 수 없다. 오류에는 template과 위치가 없다(ERR-14). |
 | generated PHP program | Compiler는 `--php-namespace` 또는 `compileFiles`의 `phpNamespace` 옵션이 정한 namespace에 class마다 PSR-4 파일 하나로 generated program을 쓴다. `composer.json`의 `autoload.psr-4`에서 namespace를 출력 directory에 대응시키고 `new \\Your\\Namespace\\GeneratedProgram($runtime)`로 만든다. |
 | `$astProgram->register(string $name, callable $fn)` | 호스트 함수 `fn(array $args, array $env): mixed`를 등록한다. 인자는 VAL-21 형태다. number는 `float`, safe 문자열은 `string`, list는 list 배열, map은 항목 순서의 배열, native object는 원본 PHP 객체다. |

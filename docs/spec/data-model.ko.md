@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 4a82acc33477cc90f11e0695daf5171e35ff1cdc5b99bd8d9fe932f8e4a77849 -->
+<!-- source-sha256: 65c564342936b252a3fc74ba4f1962112bcc9fcef8e375970d620bfafbbdabb1 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -81,7 +81,7 @@
 
 ## 호스트 바인딩
 
-- **VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12부터 VAL-16과 VAL-23의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 E_DATA_UNSUPPORTED_TYPE이다. VAL-17부터 VAL-21은 모든 호스트에 적용된다. bound map(VAL-22)은 바인딩을 거쳤으므로 `render`가 `assign`이나 정의 data로 받을 때 다시 binding하지 않는다(RT-61).
+- **VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12와 VAL-13의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 E_DATA_UNSUPPORTED_TYPE이다. VAL-17부터 VAL-21은 모든 호스트에 적용된다. bound map(VAL-22)은 바인딩을 거쳤으므로 `render`가 `assign`이나 정의 data로 받을 때 다시 binding하지 않는다(RT-61).
 
 - **VAL-12** JSON 텍스트는 assign 데이터의 기준 형태다. 모든 구현은 JSON 텍스트를 받아 같은 값을 생성한다. 각 구현은 문서 순서를 보존하고 VAL-2의 숫자 규칙과 VAL-20의 깊이 제한을 적용하는 파서로 JSON 텍스트를 파싱한다. TypeScript 구현은 이 파서를 패키지에 제공하며 assign 데이터에 `JSON.parse`를 사용하지 않는다.
 
@@ -98,7 +98,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 
 하나의 JSON 문서가 아닌 텍스트는 E_DATA_INVALID_JSON이다. 문법 오류, 빈 텍스트, 문서 뒤에 공백이 아닌 내용이 있는 텍스트가 이에 해당한다. 파서는 문서 순서에서 첫 위반을 보고하므로 문법 오류보다 앞에 있는 깊이 오류나 숫자 오류는 그 오류 코드로 보고된다. 이 규칙은 구현이 데이터로 받는 모든 JSON 텍스트, 즉 assign 데이터, 템플릿 정의와 환경에 적용되며 명령줄 인터페이스의 파일(CNF-4)과 PHP 확장의 JSON 메서드도 포함한다. 이유: JSON 텍스트는 데이터의 기준 형태이므로 잘못된 문서는 같은 입력의 데이터 오류다. 따라서 모든 구현은 구현마다 다른 예외가 아니라 ERR-5의 데이터 오류 객체로 이를 보고한다.
 
-- **VAL-13** TypeScript와 JavaScript.
+- **VAL-13** 각 구현은 자기 언어의 바인딩 표로 호스트 값을 템플릿 값으로 변환한다. 표는 TypeScript와 JavaScript, PHP와 PHP 확장, Go, Rust, Python에 대해 아래에 있다.
 
 | 입력 | 값 |
 | --- | --- |
@@ -114,7 +114,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 | bound map(VAL-22) | E_DATA_UNSUPPORTED_TYPE. `assign`과 정의 `data`일 때는 예외다(VAL-22). |
 | 클래스 인스턴스 | object(VAL-19). 원본 인스턴스를 유지한다 |
 
-- **VAL-14** PHP.
+- PHP.
 
 | 입력 | 값 |
 | --- | --- |
@@ -134,7 +134,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 
 행은 이 순서로 적용하므로 `JsonSerializable`을 구현한 `stdClass` 하위 클래스는 `jsonSerialize()`의 값을 바인딩한다. 객체의 public 프로퍼티는 `get_mangled_object_vars()`의 항목 중 이름이 mangle되지 않은 항목, 즉 초기화된 선언 public 프로퍼티와 동적 프로퍼티다. 결과는 호스트가 `render`를 호출한 class scope에 의존하지 않는다.
 
-- **VAL-15** Go.
+- Go.
 
 | 입력 | 값 |
 | --- | --- |
@@ -151,7 +151,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 | 그 밖의 kind를 가리키는 포인터 | 가리키는 값의 바인딩. `nil`은 null. 이런 역참조 한 번은 VAL-20의 한 단계로 세므로, 자기 자신으로 돌아오는 포인터는 E_DATA_DEPTH로 실패한다 |
 | 함수, 채널과 그 밖의 모든 kind | E_DATA_UNSUPPORTED_TYPE |
 
-- **VAL-16** Rust.
+- Rust.
 
 | 입력 | 값 |
 | --- | --- |
@@ -166,7 +166,7 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 
 bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을 수 없다. 그래서 `render`는 bound map을 `assign`과 정의 `data`로만 받는다.
 
-- **VAL-23** Python.
+- Python.
 
 | 입력 | 값 |
 | --- | --- |
@@ -220,15 +220,15 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 
 - safe 문자열은 일반 문자열로 도착한다. safe 표시는 렌더 안에서만 존재한다(VAL-6, VAL-7). 결과를 escape 없이 출력해야 하는 호스트 함수는 텍스트를 반환하고 템플릿이 `raw`를 적용한다(FUN-48).
 - list와 map은 호스트가 소유하는 새 호스트 값으로 도착한다. 호스트가 받은 list나 map을 바꿔도 어떤 템플릿 값도 바뀌지 않는다. 렌더 안에서 같은 템플릿 값을 나중에 읽으면 호출 전의 값을 반환한다. native object는 복사하지 않는다(VAL-18).
-- PHP에서 map은 배열로 도착하므로 PHP 배열의 키 변환이 적용된다. PHP 정수 범위 안의 정수를 나타내는 10진 텍스트이고 `+` 부호와 선행 0이 없으며 `-0`이 아닌 키는 정수 키가 된다. PHP 배열은 빈 map과 빈 list를 구별하지 못하고, 키가 차례대로 `"0"`부터 `"n-1"`인 map과 list도 구별하지 못한다. 그런 map은 그 배열로 도착하며 그 배열을 다시 바인딩하면(VAL-14) list가 된다. PHP AST program과 PHP 확장은 같은 배열을 만든다.
-- 이유: 모든 호스트가 자기 언어의 일반 값, 즉 자기 바인딩 표(VAL-13~VAL-16, VAL-23)가 받는 값을 받는다. 따라서 호스트 코드는 인자를 읽기 위해 구현 클래스가 필요 없고 인자를 변환 없이 반환할 수 있다. safe 문자열 wrapper나 PHP 클래스 `MapValue` 같은 내부 표현은 호스트 코드에 도달하지 않으며 두 PHP 구현은 같은 값을 넘긴다.
+- PHP에서 map은 배열로 도착하므로 PHP 배열의 키 변환이 적용된다. PHP 정수 범위 안의 정수를 나타내는 10진 텍스트이고 `+` 부호와 선행 0이 없으며 `-0`이 아닌 키는 정수 키가 된다. PHP 배열은 빈 map과 빈 list를 구별하지 못하고, 키가 차례대로 `"0"`부터 `"n-1"`인 map과 list도 구별하지 못한다. 그런 map은 그 배열로 도착하며 그 배열을 다시 바인딩하면 list가 된다. PHP AST program과 PHP 확장은 같은 배열을 만든다.
+- 이유: 모든 호스트가 자기 언어의 일반 값, 즉 자기 바인딩 표(각 구현의 호스트 바인딩 표)가 받는 값을 받는다. 따라서 호스트 코드는 인자를 읽기 위해 구현 클래스가 필요 없고 인자를 변환 없이 반환할 수 있다. safe 문자열 wrapper나 PHP 클래스 `MapValue` 같은 내부 표현은 호스트 코드에 도달하지 않으며 두 PHP 구현은 같은 값을 넘긴다.
 
 
 ## Bound data
 
 - **VAL-22** 호스트는 `bind`로 data를 한 번 binding하고, bound map으로 여러 번 렌더한다. 모든 구현은 bound map type과 연산 두 개를 제공한다. 언어별 이름은 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)에 둔다(RT-67). 구현은 package 하나다. TypeScript package는 browser entry `@polyspec/template/render`를 포함한 모든 entry point와 module format이 하나의 구현이다(`supportLevels`의 `typescript`와 `javascript-esm`). Go module, Rust crate, PHP package, PHP extension, Python package도 각각 하나의 구현이다. 구현의 모든 entry point와 module format은 서로가 만든 bound map을 받는다.
 
-- `bind(value)`는 호스트 바인딩(VAL-13~VAL-16, VAL-23)이 map으로 바꾸는 모든 호스트 값과 `render`가 빈 map으로 쓰는 값(RT-4)을 받는다. JSON text는 받지 않는다. 호스트는 JSON text를 package의 JSON parser(VAL-12)로 parse한 결과를 `bind`에 준다. `bind`는 호스트 바인딩(VAL-11~VAL-20)을 적용하고 bound map을 돌려준다. `render`가 빈 map으로 쓰는 값은 빈 bound map을 돌려준다. 같은 구현의 bound map은 바꾸지 않고 그대로 돌려준다. 바뀌지 않고 이미 검사했기 때문이다. 바인딩이 map으로 바꾸지 않는 그 밖의 값은 E_DATA_UNSUPPORTED_TYPE으로 실패한다. 실패는 ERR-14의 오류다. 각 구현이 bound map을 `render`와 `prepare`에 넘기는 연산이나 parameter type은 `packages/compiler/interface.json`에 적는다. 예를 들어 Rust의 `prepare_bound`와 `render_bound`, PHP extension의 `render`다. PHP extension의 `render_json`처럼 JSON text를 받는 연산은 bound map을 받지 않는다.
+- `bind(value)`는 호스트 바인딩(각 구현의 호스트 바인딩 표)이 map으로 바꾸는 모든 호스트 값과 `render`가 빈 map으로 쓰는 값(RT-4)을 받는다. JSON text는 받지 않는다. 호스트는 JSON text를 package의 JSON parser(VAL-12)로 parse한 결과를 `bind`에 준다. `bind`는 호스트 바인딩(VAL-11~VAL-20)을 적용하고 bound map을 돌려준다. `render`가 빈 map으로 쓰는 값은 빈 bound map을 돌려준다. 같은 구현의 bound map은 바꾸지 않고 그대로 돌려준다. 바뀌지 않고 이미 검사했기 때문이다. 바인딩이 map으로 바꾸지 않는 그 밖의 값은 E_DATA_UNSUPPORTED_TYPE으로 실패한다. 실패는 ERR-14의 오류다. 각 구현이 bound map을 `render`와 `prepare`에 넘기는 연산이나 parameter type은 `packages/compiler/interface.json`에 적는다. 예를 들어 Rust의 `prepare_bound`와 `render_bound`, PHP extension의 `render`다. PHP extension의 `render_json`처럼 JSON text를 받는 연산은 bound map을 받지 않는다.
 - `merge(first, second)`는 RT-26의 우선순위로 `first`와 `second`의 항목을 가진 bound map을 돌려준다. `second`의 항목은 같은 key의 `first` 항목을 바꾸고 `first`의 위치를 유지한다. `second`의 나머지 항목은 그 뒤에 순서대로 붙는다. 값을 다시 읽지 않는다.
 
 TypeScript, PHP, PHP extension, Python에서는 `bind`와 `merge`의 parameter가 모든 값을 받으므로 연산 안에서 검사하며 같은 구현의 bound map이 아닌 `merge`의 인자는 E_DATA_UNSUPPORTED_TYPE으로 실패하고, Go와 Rust에서는 `merge`의 parameter type이 bound map type이므로 compiler가 다른 값을 거부한다.

@@ -64,6 +64,7 @@ class BoundData(unittest.TestCase):
 
     # ERR-14: a failed bind has the code of the failed check, an empty template and zero positions.
     def test_bind_fails_with_the_code_of_the_failed_check_without_a_position(self):
+        # VAL-13: the Python table binds values through the same checks.
         for value in (5, [1], '{"a":1}'):
             expect_failure(
                 self, lambda value=value: bind(value), "E_DATA_UNSUPPORTED_TYPE"

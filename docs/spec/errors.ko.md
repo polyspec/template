@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 6703a9883e5aa2577d057fd8d8a44ec9f02e8fecd1ff0f1f8042b1910fe4babb -->
+<!-- source-sha256: 70d33e3bd5c2a1a32660dd860b20e8fb8d46cd14bbb3016e743194c9d9e353de -->
 # 오류
 
 [English](/spec/errors).
@@ -16,7 +16,7 @@
 
 - **ERR-5** 렌더링 시작 전 assign 데이터, template define 데이터 또는 환경을 바인딩하는 동안 발생한 오류는 `template`이 진입 템플릿 이름이고 `line` 0, `col` 0, `offset` 0, `end` 0이다. 렌더링 중 값을 바인딩하는 동안 발생한 오류는 그 값을 만든 표현식을 가리킨다. 호스트 함수, 논리 class 함수, instance method의 결과이면 호출을, native object의 member이면 lookup 표현식을 가리킨다(VAL-19).
 
-- **ERR-14** render 밖에서 실행되는 `bind`와 `merge`(VAL-22)가 내는 오류는 `template`이 빈 문자열이고 `line`, `col`, `offset`, `end`가 0이다. code는 실패한 검사의 E_DATA_* code이거나, 바인딩이 호출한 호스트 코드가 오류를 보고하면 E_RUNTIME_HOST_FUNCTION(VAL-14)이거나, E_INTERNAL(ERR-13)이다. 오류는 구현의 ERR-1 오류 객체이고, `render`가 내는 것과 같은 type이다. ERR-13이 호스트에 그대로 전달하는 예외는 `bind`에서도 그대로 나간다.
+- **ERR-14** render 밖에서 실행되는 `bind`와 `merge`(VAL-22)가 내는 오류는 `template`이 빈 문자열이고 `line`, `col`, `offset`, `end`가 0이다. code는 실패한 검사의 E_DATA_* code이거나, 바인딩이 호출한 호스트 코드가 오류를 보고하면 E_RUNTIME_HOST_FUNCTION(VAL-13)이거나, E_INTERNAL(ERR-13)이다. 오류는 구현의 ERR-1 오류 객체이고, `render`가 내는 것과 같은 type이다. ERR-13이 호스트에 그대로 전달하는 예외는 `bind`에서도 그대로 나간다.
 
 - **ERR-6** 로더가 제공하지 않는 진입 템플릿의 오류는 `code`가 `E_LOAD_NOT_FOUND`이고 `template`이 요청한 이름이며 `line` 0, `col` 0이다. 로딩에 실패한 진입 템플릿의 오류(`E_LOAD_FAILED`)도 `template`, `line`, `col`이 같다.
 
@@ -82,7 +82,7 @@ ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-
 | `E_RUNTIME_STRINGIFY` | list, map 또는 native object(VAL-19)를 문자열로 변환한다. | echo 표현식, 연산자 표현식 또는 호출의 시작. |
 | `E_RUNTIME_UNKNOWN_FUNCTION` | 호출이 내장도 등록도 되지 않은 함수를 이름으로 지정한다. | 호출. |
 | `E_RUNTIME_ARITY` | 호출의 인자 수가 함수의 범위 밖이다. | 호출. |
-| `E_RUNTIME_HOST_FUNCTION` | 엔진이 호출한 호스트 코드가 오류를 보고했다(FUN-46, VAL-14, VAL-19). 등록된 함수, 논리 class 함수, instance method, member accessor 또는 `jsonSerialize()`다. | 호출 또는 lookup 표현식. 렌더링 시작 전 바인딩 중에 실행된 호스트 코드는 ERR-5. `bind`에서 실행된 호스트 코드는 ERR-14. |
+| `E_RUNTIME_HOST_FUNCTION` | 엔진이 호출한 호스트 코드가 오류를 보고했다(FUN-46, VAL-19). 등록된 함수, 논리 class 함수, instance method, member accessor 또는 `jsonSerialize()`다. | 호출 또는 lookup 표현식. 렌더링 시작 전 바인딩 중에 실행된 호스트 코드는 ERR-5. `bind`에서 실행된 호스트 코드는 ERR-14. |
 | `E_RUNTIME_UNKNOWN_LOOP` | 루프 메타가 표현식을 감싸지 않는 루프를 이름으로 지정한다. | 루프 메타. |
 | `E_RUNTIME_BLOCK_UNDEFINED` | `{# id}`가 템플릿 define 레지스트리에 없는 id를 지정한다. | 태그. |
 | `E_RUNTIME_BLOCK_REDEFINED` | `{# id path}`가 다른 경로로 등록된 id를 지정한다. | 태그. |

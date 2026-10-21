@@ -498,7 +498,7 @@ ZEND_METHOD(Polyspec_Template_Value_MapValue, copy)
 }
 
 /* ----------------------------------------------------------------------------------------------- */
-/* Value\Bind (VAL-2, VAL-14, VAL-17, VAL-19, VAL-20, VAL-22, RT-4, RT-24)                         */
+/* Value\Bind (VAL-2, VAL-17, VAL-19, VAL-20, VAL-22, RT-4, RT-24)                         */
 /* ----------------------------------------------------------------------------------------------- */
 
 #define PT_BIND_MAX_DEPTH 64
@@ -1563,7 +1563,7 @@ static void pt_method_register_class(pt_runtime *runtime, INTERNAL_FUNCTION_PARA
 }
 
 /* ----------------------------------------------------------------------------------------------- */
-/* render with PHP values (RT-4, RT-24, RT-25, VAL-11, VAL-14, VAL-22)                              */
+/* render with PHP values (RT-4, RT-24, RT-25, VAL-11, VAL-22)                              */
 /* ----------------------------------------------------------------------------------------------- */
 
 ZEND_NORETURN static void pt_bind_fail_run(pt_run *run, pt_s name, pt_bind_error *error)

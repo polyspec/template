@@ -9,7 +9,7 @@ use Polyspec\Template\ErrorCode;
 use Polyspec\Template\Utf8;
 
 /**
- * Host binding of PHP values (VAL-2, VAL-14, VAL-17, VAL-20).
+ * Host binding of PHP values (VAL-2, VAL-17, VAL-20).
  */
 final class Bind
 {
@@ -71,7 +71,7 @@ final class Bind
 
     /**
      * The public properties of an object: the entries of get_mangled_object_vars() whose names are
-     * not mangled. The function ignores the class scope of the caller (VAL-14, VAL-19).
+     * not mangled. The function ignores the class scope of the caller (VAL-19).
      *
      * @return array<int|string, mixed>
      */

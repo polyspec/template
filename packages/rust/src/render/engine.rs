@@ -50,7 +50,7 @@ pub struct DefineInput {
     /// Root-relative template path.
     pub template: Option<String>,
     /// Entry data: a value that is bound like assign data, so it may hold native objects (VAL-11,
-    /// VAL-16), or a bound map that is not bound again (VAL-22).
+    /// VAL-13), or a bound map that is not bound again (VAL-22).
     pub data: Option<DefineData>,
     /// Pre-rendered HTML.
     pub html: Option<String>,
@@ -378,7 +378,7 @@ impl AstProgram {
     }
 
     /// Renders a native value map while retaining assigned native objects. The map is bound
-    /// under VAL-16: numbers, depth and safe strings are checked like every other host value.
+    /// under VAL-13: numbers, depth and safe strings are checked like every other host value.
     pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, TemplateError> {
         let name = target.name();
         internal_boundary(&name, || self.render_bound_values(&name, target, &assign, options))

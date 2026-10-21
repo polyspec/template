@@ -52,7 +52,7 @@ mod sealed {
 
 use sealed::{Sealed, Source};
 
-/// A host value that `bind` accepts (VAL-16): JSON data, a map of values that the host built, or a
+/// A host value that `bind` accepts (VAL-13): JSON data, a map of values that the host built, or a
 /// bound map.
 pub trait BindInput<'a>: Sealed<'a> {}
 

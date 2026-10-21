@@ -463,7 +463,7 @@ final class ErrorCode
     /** A call has an argument count outside the function's range. */
     public const string E_RUNTIME_ARITY = 'E_RUNTIME_ARITY';
 
-    /** Host code that the engine called reported an error (FUN-46, VAL-14, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. */
+    /** Host code that the engine called reported an error (FUN-46, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. */
     public const string E_RUNTIME_HOST_FUNCTION = 'E_RUNTIME_HOST_FUNCTION';
 
     /** A loop meta names a loop that is not enclosing the expression. */
@@ -997,7 +997,7 @@ final class MapValue
 }
 
 /**
- * Host binding of PHP values (VAL-2, VAL-14, VAL-17, VAL-20).
+ * Host binding of PHP values (VAL-2, VAL-17, VAL-20).
  */
 final class Bind
 {
@@ -1028,7 +1028,7 @@ final class Bind
 
     /**
      * The public properties of an object: the entries of get_mangled_object_vars() whose names are
-     * not mangled. The function ignores the class scope of the caller (VAL-14, VAL-19).
+     * not mangled. The function ignores the class scope of the caller (VAL-19).
      *
      * @return array<int|string, mixed>
      */

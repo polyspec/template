@@ -12,7 +12,7 @@ import (
 	"github.com/polyspec/template/packages/go/value"
 )
 
-// Host binding of Go values and native objects (VAL-2, VAL-15, VAL-17 to VAL-20, FUN-46, ERR-13).
+// Host binding of Go values and native objects (VAL-2, VAL-17 to VAL-20, FUN-46, ERR-13).
 
 type hostOrder struct {
 	Name    string
@@ -65,6 +65,7 @@ func nestedList(levels int) any {
 }
 
 func TestNumbersAreCheckedByValue(t *testing.T) {
+	// VAL-13: the Go value of each host kind is bound by its own table.
 	for _, input := range []any{1e19, float64(1 << 53), int64(1) << 53, uint64(1) << 60, -9007199254740992.0} {
 		if code := bindCode(input); code != errs.DataNumberRange {
 			t.Errorf("BindValue(%v) = %s", input, code)

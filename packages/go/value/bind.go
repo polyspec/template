@@ -13,7 +13,7 @@ import (
 // MaxDepth is the nesting depth limit of lists and maps (VAL-20).
 const MaxDepth = 64
 
-// BindError reports a value that has no binding (VAL-15).
+// BindError reports a value that has no binding (VAL-13).
 type BindError struct {
 	Code    errs.Code
 	Message string
@@ -68,7 +68,7 @@ func checkKey(key string) (string, error) {
 	return key, nil
 }
 
-// BindValue converts a Go value into a template value (VAL-15, VAL-20). A bound map fails at every
+// BindValue converts a Go value into a template value (VAL-20). A bound map fails at every
 // position, because render takes one only as assign and as definition data (VAL-22).
 func BindValue(input any) (Value, error) {
 	return bindAt(input, 0)
@@ -182,7 +182,7 @@ func bindAt(input any, level int) (Value, error) {
 			return input, nil
 		}
 		// A pointer to another kind binds the value it points to; the dereference counts as one
-		// level, so a pointer that leads back to itself stops at the depth limit (VAL-15, VAL-20).
+		// level, so a pointer that leads back to itself stops at the depth limit (VAL-20).
 		if err := CheckLevel(level + 1); err != nil {
 			return nil, err
 		}

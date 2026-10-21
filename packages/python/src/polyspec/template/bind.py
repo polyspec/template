@@ -1,4 +1,4 @@
-"""Host binding of Python values (VAL-23), the number rule (VAL-2, VAL-3) and the
+"""Host binding of Python values (VAL-13), the number rule (VAL-2, VAL-3) and the
 depth limit (VAL-20)."""
 
 from __future__ import annotations

@@ -15,7 +15,7 @@
 
 - **ERR-5** An error raised before rendering starts, while binding assign data, template definition data or the environment, has `template` equal to the entry template name, `line` 0, `col` 0, `offset` 0 and `end` 0. An error raised while binding a value during rendering points at the expression that produced the value: the call for the result of a host function, a logical class function or an instance method, and the lookup expression for a member of a native object (VAL-19).
 
-- **ERR-14** An error raised by `bind` or `merge` (VAL-22), which run outside a render, has `template` equal to the empty string and `line`, `col`, `offset` and `end` equal to 0. Its code is the E_DATA_* code of the failed check, E_RUNTIME_HOST_FUNCTION for host code that the binding called and that reported an error (VAL-14), or E_INTERNAL (ERR-13). It is the error object of ERR-1 of the implementation, the same type that `render` raises. An exception that ERR-13 passes to the host unchanged leaves `bind` unchanged.
+- **ERR-14** An error raised by `bind` or `merge` (VAL-22), which run outside a render, has `template` equal to the empty string and `line`, `col`, `offset` and `end` equal to 0. Its code is the E_DATA_* code of the failed check, E_RUNTIME_HOST_FUNCTION for host code that the binding called and that reported an error (VAL-13), or E_INTERNAL (ERR-13). It is the error object of ERR-1 of the implementation, the same type that `render` raises. An exception that ERR-13 passes to the host unchanged leaves `bind` unchanged.
 
 - **ERR-6** An error for an entry template that the loader does not provide has `code` `E_LOAD_NOT_FOUND`, `template` equal to the requested name, `line` 0 and `col` 0. An error for an entry template whose loading fails (`E_LOAD_FAILED`) has the same `template`, `line` and `col`.
 
@@ -81,7 +81,7 @@ The code tables of ERR-7 to ERR-12 are the catalog of the error codes: `make err
 | `E_RUNTIME_STRINGIFY` | A list, a map or a native object (VAL-19) is converted to a string. | The start of the echo expression, of the operator expression or of the call. |
 | `E_RUNTIME_UNKNOWN_FUNCTION` | A call names a function that is neither built in nor registered. | The call. |
 | `E_RUNTIME_ARITY` | A call has an argument count outside the function's range. | The call. |
-| `E_RUNTIME_HOST_FUNCTION` | Host code that the engine called reported an error (FUN-46, VAL-14, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. | The call or the lookup expression; ERR-5 for host code that runs while binding before rendering starts; ERR-14 for host code that runs in `bind`. |
+| `E_RUNTIME_HOST_FUNCTION` | Host code that the engine called reported an error (FUN-46, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. | The call or the lookup expression; ERR-5 for host code that runs while binding before rendering starts; ERR-14 for host code that runs in `bind`. |
 | `E_RUNTIME_UNKNOWN_LOOP` | A loop meta names a loop that is not enclosing the expression. | The loop meta. |
 | `E_RUNTIME_BLOCK_UNDEFINED` | `{# id}` names an id that the template definition registry does not contain. | The tag. |
 | `E_RUNTIME_BLOCK_REDEFINED` | `{# id path}` names an id that is registered with a different path. | The tag. |

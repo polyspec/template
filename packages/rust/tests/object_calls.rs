@@ -1,4 +1,4 @@
-//! Native objects, host function results and the internal error boundary (VAL-16, VAL-18 to VAL-20,
+//! Native objects, host function results and the internal error boundary (VAL-18 to VAL-20,
 //! FUN-45, FUN-46, ERR-13).
 
 use polyspec_template::{
@@ -140,7 +140,7 @@ fn native_object_arguments_arrive_as_the_original_object() {
 
 #[test]
 fn host_function_results_are_bound() {
-    // VAL-16: a returned native object is retained, a safe string becomes plain text and an invalid number fails at the call.
+    // VAL-13: a returned native object is retained, a safe string becomes plain text and an invalid number fails at the call.
     let mut program = program(&["{= order().total}|{= tag()}", "{= huge()}"]);
     let order = Rc::new(Order { total: 5.0 });
     let returned = Rc::clone(&order);
@@ -161,7 +161,7 @@ fn host_function_results_are_bound() {
 
 #[test]
 fn render_values_binds_the_host_built_root() {
-    // VAL-16, VAL-20: a root that the host builds is checked like JSON data.
+    // VAL-20: a root that the host builds is checked like JSON data.
     let program = program(&["{= n}", "{= 1}", "{= s}"]);
     let mut root = OrderedMap::new();
     root.insert("n".to_string(), Value::Number(f64::INFINITY));

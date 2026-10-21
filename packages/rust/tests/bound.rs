@@ -1,6 +1,6 @@
 //! Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.
 //!
-//! A bound map is a type of its own that no `Value` and no `serde_json::Value` can hold (VAL-16), so
+//! A bound map is a type of its own that no `Value` and no `serde_json::Value` can hold (VAL-13), so
 //! the rejected positions of the fixture cannot be written in Rust and have no test here. The key
 //! order of a bound map is not observable through the public interface of the crate, so the merge
 //! test checks the precedence of RT-26 through the output.
@@ -86,6 +86,7 @@ fn a_bound_map_renders_the_bytes_of_the_host_map() {
 
 #[test]
 fn bind_accepts_a_host_built_map_and_keeps_its_native_values() {
+    // VAL-13: the host-built values of Rust are bound by the Rust table.
     let cases = cases();
     let mut root = OrderedMap::new();
     root.insert("a".to_string(), Value::text("1"));

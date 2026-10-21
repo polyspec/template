@@ -237,6 +237,19 @@
       ]
     },
     {
+      "id": "host-binding-tables",
+      "requirements": ["VAL-13"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "rejects text that is not well-formed UTF-16 (VAL-13, VAL-17)" },
+        { "implementation": "go", "test": "packages/go/host_binding_test.go", "id": "TestNumbersAreCheckedByValue" },
+        { "implementation": "rust", "test": "packages/rust/tests/bound.rs", "id": "bind_accepts_a_host_built_map_and_keeps_its_native_values" },
+        { "implementation": "php", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testFunctionsAndResourcesHaveNoBinding" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testFunctionsAndResourcesHaveNoBinding" },
+        { "implementation": "python", "test": "packages/python/tests/test_bound.py", "id": "test_bind_fails_with_the_code_of_the_failed_check_without_a_position" }
+      ]
+    },
+    {
       "id": "host-values",
       "requirements": ["VAL-21"],
       "kind": "feature",
@@ -799,7 +812,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-37", "RT-44", "RT-55", "RT-56", "RT-59", "RT-62", "RT-69", "RT-70", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-37", "RT-44", "RT-55", "RT-56", "RT-59", "RT-62", "RT-69", "RT-70", "VAL-13", "VAL-22"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },
@@ -873,7 +886,7 @@
     },
     {
       "id": "api-bound-map",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!BoundMap:class" },
@@ -886,7 +899,7 @@
     },
     {
       "id": "api-bind",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!bind:function(1)" },
@@ -899,7 +912,7 @@
     },
     {
       "id": "api-merge",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!merge:function(1)" },
@@ -964,7 +977,7 @@
     },
     {
       "id": "api-parse-json",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!parseJson:function(1)" },
@@ -977,7 +990,7 @@
     },
     {
       "id": "api-bind-map",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!bindMap:function(1)" },
@@ -990,7 +1003,7 @@
     },
     {
       "id": "api-bind-data",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22", "VAL-23"],
+      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!bindData:function(1)" },

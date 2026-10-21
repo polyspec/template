@@ -1,4 +1,4 @@
-//! Host binding of `serde_json::Value` and of host-built values (VAL-2, VAL-3, VAL-16, VAL-20),
+//! Host binding of `serde_json::Value` and of host-built values (VAL-2, VAL-3, VAL-20),
 //! and the binding error.
 
 use crate::error::ErrorCode;
@@ -68,7 +68,7 @@ pub fn check_level(level: usize) -> Result<(), BindError> {
     Ok(())
 }
 
-/// Converts a `serde_json::Value` into a template value (VAL-16).
+/// Converts a `serde_json::Value` into a template value (VAL-13).
 pub fn bind_json(input: &serde_json::Value) -> Result<Value, BindError> {
     bind_json_at(input, 0)
 }
@@ -118,7 +118,7 @@ pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
     }
 }
 
-/// Binds a value that the host built directly (VAL-16): numbers are checked under VAL-2 and VAL-3,
+/// Binds a value that the host built directly (VAL-13): numbers are checked under VAL-2 and VAL-3,
 /// the depth under VAL-20, and a safe string becomes a plain string (VAL-7). A native object is
 /// retained.
 pub fn bind_value(input: &Value) -> Result<Value, BindError> {
@@ -153,7 +153,7 @@ fn bind_entries(map: &OrderedMap, level: usize) -> Result<OrderedMap, BindError>
     Ok(entries)
 }
 
-/// Binds a native root map that the host built (VAL-16) while retaining native object values.
+/// Binds a native root map that the host built (VAL-13) while retaining native object values.
 pub fn bind_values(input: &OrderedMap) -> Result<OrderedMap, BindError> {
     check_level(1)?;
     bind_entries(input, 1)

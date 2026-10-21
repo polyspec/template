@@ -114,7 +114,7 @@ final class ErrorCode
     /** A call has an argument count outside the function's range. */
     public const E_RUNTIME_ARITY = 'E_RUNTIME_ARITY';
 
-    /** Host code that the engine called reported an error (FUN-46, VAL-14, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. */
+    /** Host code that the engine called reported an error (FUN-46, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`. */
     public const E_RUNTIME_HOST_FUNCTION = 'E_RUNTIME_HOST_FUNCTION';
 
     /** A loop meta names a loop that is not enclosing the expression. */

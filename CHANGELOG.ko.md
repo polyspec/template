@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9bde1d0c8a4ba51641dde2e58dbe7c8344ff9d7f3c74c7891f0040280d9c4746 -->
+<!-- source-sha256: f56da7f3476f5a779a44cbb317ebf4b19f121aa3c08605b02c8bc296ffab7c72 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-32-19: VAL-13이 중립 규칙 하나를 말한다(각 구현은 자기 언어의 바인딩 표로 호스트 값을 변환한다). TypeScript, PHP, Go, Rust, Python의 표는 그 아래 본문이 되고, VAL-14, VAL-15, VAL-16, VAL-23은 spec, unit, 주석에서 사라졌다. 새 unit host-binding-tables가 각 구현의 표 test를 binding한다 (T26.7-32-18-1의 후속). Red: 네 id에 대해 data-model.md, data-model.ko.md, config/parity.json에 `make text-absent`를 실행하면 옛 텍스트가 남아 실패한다(15건); green: 모두 통과하고 `make parity-declarations-check UNITS="host-binding-tables"`와 `make docs-check`도 통과한다 (T26.7-32-19).
 - T26.7-64: packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 `[build-package]`로 찍으므로, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다. Red: 옛 접두사에서 `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts`가 exit 1; green: 12 passed, 0 failed (T26.7-64). Red→green 기록: 옛 접두사에서 test가 exit 1; kit 접두사에서 12개 중 12개 통과 (T26.7-64).
 - T26.7-32-18-1: RT-61은 RT-68 인용 대신 typed generated program의 변환을 직접 말하고, 픽스처 형식은 RT-46 인용 대신 docs/operations/tools.md를 가리킨다. spec 어느 파일도 옮긴 id를 인용하지 않는다. Red: runtime.md와 runtime.ko.md에 `make text-absent`를 실행하면 옛 "RT-46"과 "RT-68"이 남아 실패한다; green: 모두 통과하고 `make docs-check`도 통과한다 (T26.7-32-18-1).
 - T26.7-32-18: RT-38, RT-39, RT-43, RT-45부터 RT-53, RT-54, RT-57, RT-58, RT-63, RT-64, RT-68, RT-71은 build compiler, browser package, showcase의 도구 규칙이므로 docs/spec을 떠나 docs/operations/tools.md로 간다; RT-56은 남는다. Red: 91289159에서 각 이동 id에 `make text-absent`를 실행하면 옛 텍스트가 남아 있어 57개 중 56개가 실패한다; green: 브랜치에서 모두 통과하고 `make docs-check`도 통과한다 (T26.7-32-18).

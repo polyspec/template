@@ -534,7 +534,7 @@ bool pt_json_write(pt_buf *buf, pt_value value);
 bool pt_resolve_path(pt_arena *arena, pt_s current, pt_s path, pt_s *name);
 
 /* ---------------------------------------------------------------------------------------------------
- * Host binding (VAL-11, VAL-14, VAL-17 to VAL-22).
+ * Host binding (VAL-11, VAL-17 to VAL-22).
  * ------------------------------------------------------------------------------------------------- */
 
 /* A bound map of the extension (VAL-22); the zend_object is the last member. */

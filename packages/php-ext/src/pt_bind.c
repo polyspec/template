@@ -1,5 +1,5 @@
 /*
- * Host binding of PHP values (VAL-2, VAL-11, VAL-14, VAL-17 to VAL-22) and the host form of template
+ * Host binding of PHP values (VAL-2, VAL-11, VAL-17 to VAL-22) and the host form of template
  * values (VAL-21).
  */
 #include "pt.h"

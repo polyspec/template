@@ -12,7 +12,7 @@ use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\Json;
 
 /**
- * Host binding of PHP values and native objects (VAL-2, VAL-14, VAL-17 to VAL-20, FUN-46, ERR-13).
+ * Host binding of PHP values and native objects (VAL-2, VAL-17 to VAL-20, FUN-46, ERR-13).
  *
  * The same scenarios run against the PHP extension (config/parity.json binds this file to it).
  */
@@ -94,7 +94,7 @@ final class HostBindingTest extends TestCase
 
     public function testMapKeysThatAreNotUtf8AreRejected(): void
     {
-        // VAL-14, VAL-17: array keys and property names are checked like strings.
+        // VAL-17: array keys and property names are checked like strings.
         foreach ([['m' => ["\xff" => 1]], ['m' => [["\xff" => 1]]], ['m' => (object) ["\xff" => 1]]] as $assign) {
             $this->assertSame('E_DATA_INVALID_UTF8', $this->failure('keys.tpl', $assign)->errorCode);
         }
@@ -145,7 +145,7 @@ final class HostBindingTest extends TestCase
 
     public function testASubclassOfStdClassIsAMapOfItsPublicProperties(): void
     {
-        // VAL-14: instanceof stdClass, not the class name; JsonSerializable is tried first.
+        // VAL-13: instanceof stdClass, not the class name; JsonSerializable is tried first.
         $bag = new Bag();
         $bag->d = 2;
         $this->assertSame("{\"a\":1,\"d\":2}\n", $this->program->render('keys.tpl', ['m' => $bag]));
@@ -154,7 +154,8 @@ final class HostBindingTest extends TestCase
 
     public function testFunctionsAndResourcesHaveNoBinding(): void
     {
-        // VAL-14, VAL-18: closures, first-class callables and open or closed resources are rejected.
+        // VAL-13: the PHP table has no row for functions and resources.
+        // VAL-18: closures, first-class callables and open or closed resources are rejected.
         $closed = fopen('php://memory', 'r');
         fclose($closed);
         foreach ([static fn () => 1, strlen(...), fopen('php://memory', 'r'), $closed] as $value) {
@@ -164,7 +165,7 @@ final class HostBindingTest extends TestCase
 
     public function testHostExceptionsKeepTheirMessage(): void
     {
-        // FUN-46, VAL-14: an exception of host code is reported with its message.
+        // FUN-46: an exception of host code is reported with its message.
         $error = $this->failure('keys.tpl', ['m' => new FailingSerializable()]);
         $this->assertSame(['E_RUNTIME_HOST_FUNCTION', 0], [$error->errorCode, $error->errorLine]);
         $this->assertStringContainsString('serialize exploded', $error->getMessage());

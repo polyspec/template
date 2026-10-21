@@ -16,7 +16,7 @@ type Source interface {
 
 // Convert turns a typed Go value that generated code built from template values back into a
 // template value. It is not host binding: the value has already passed binding or comes from
-// template operations, so the number range, UTF-8 and depth checks of VAL-2, VAL-15 and VAL-20 do
+// template operations, so the number range, UTF-8 and depth checks of VAL-2 and VAL-20 do
 // not apply. A Source returns its own template value; any other struct or pointer to a struct stays
 // a native object.
 func Convert(input any) (Value, error) {
