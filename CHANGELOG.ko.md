@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c7a7652e59644962233a7bd6a80b378899952a49ae7e0600b16c9764caf272f6 -->
+<!-- source-sha256: 8b029b76e8d167e660af7c487e9cc1dbd16428aa2286784b6b94e4d7200474fb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-6: EX-1은 모든 구현에서 성립한다: case examples/page가 여섯 구현 모두의 conformance test를 통과하며, PHP 확장의 것도 그 Format class가 C이므로 통과한다. Red: `make test-php-ext CASES='ConformanceTest'`가 7a415e9f에서 exit 2를 기록했다 (확장이 library의 Format class를 로드, "A source of the PHP library was loaded"); green: `make item-test ID=T26.7-32-6`이 Verification 셀의 열 명령을 실행해 모두 통과한다 (T26.7-32-6).
 
 - T26.7-32-17: RT-3은 새 unit render-targets가 인용한다. 그 test는 모든 구현에서 loader를 통해 이름 a.tpl을 렌더링하고 같은 소스를 템플릿으로 파싱한 결과를 렌더링해, {x: 1}로 같은 전체 출력(<p>1</p>)을 얻는지 검사한다. concurrent-bound-map은 더 이상 RT-3을 인용하지 않는다. Red: 수정 전 `make item-red`가 `make parity-declarations-check UNITS="render-targets"`와 `UNITS="concurrent-bound-map" RULES=R15 IDS="RT-3"`가 exit 2로 실패함을 기록했다. Green: 두 검사 모두 통과하고, test는 통과한다 (ts 15, go 1, rust 17, php 11, python 47), `make parity-declarations-check`는 finding이 2개 줄고 새 finding은 없다고 보고한다. (T26.7-32-17).
 

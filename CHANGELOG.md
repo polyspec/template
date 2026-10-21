@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-32-6: EX-1 holds in every implementation: the case examples/page passes the conformance tests of all six, the PHP extension's since its Format classes are C. Red: `make test-php-ext CASES='ConformanceTest'` exit 2 at 7a415e9f (the extension loaded the library's Format class, "A source of the PHP library was loaded"); green: `make item-test ID=T26.7-32-6` runs the ten commands of the Verification cell, all pass (T26.7-32-6).
+
 - T26.7-32-17: RT-3 is cited by the new unit render-targets; its test in every implementation renders the name a.tpl through the loader and the same source parsed as a template, with {x: 1}, and gets the same complete output (<p>1</p>); concurrent-bound-map no longer cites RT-3. Red: `make item-red` recorded `make parity-declarations-check UNITS="render-targets"` and `UNITS="concurrent-bound-map" RULES=R15 IDS="RT-3"` exit 2 before the fix. Green: they pass, the tests pass (ts 15 in engine.test.ts, go 1, rust 17, php 11, python 47), and `make parity-declarations-check` reports 2 findings fewer and none new. (T26.7-32-17).
 
 - T26.7-32-16: VAL-18 is cited by the new unit native-object-arguments; its test in every implementation passes a native object to a host function directly, inside a list and inside a map, to an instance method and to a class function, and checks that each receives the original object; concurrent-bound-map no longer cites VAL-18. Red: `make item-red` recorded the parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-18" command exit 2. Green: they pass, the tests pass (9 commands), and `make parity-declarations-check` reports 2 findings fewer and none new (T26.7-32-16).
