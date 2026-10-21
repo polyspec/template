@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 036786cc440494d21dc15dd8ec96c44d6a080eb4c3200cc0510695b20bbc7942 -->
+<!-- source-sha256: 275fa206188862fb35338fa255a04bc20d82cd45a9843264246a1f249d2c8c15 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-32-18: RT-38, RT-39, RT-43, RT-45부터 RT-53, RT-54, RT-57, RT-58, RT-63, RT-64, RT-68, RT-71은 build compiler, browser package, showcase의 도구 규칙이므로 docs/spec을 떠나 docs/operations/tools.md로 간다; RT-56은 남는다. Red: 91289159에서 각 이동 id에 `make text-absent`를 실행하면 옛 텍스트가 남아 있어 57개 중 56개가 실패한다; green: 브랜치에서 모두 통과하고 `make docs-check`도 통과한다 (T26.7-32-18).
 - T26.7-51: 프로그램의 옵션은 모든 구현에서 같이 실패한다. 하위 행 T26.7-51-1부터 -51-8이 그 내용을 가진다. Verification은 그 하위 행의 owner test와 program-options 및 request-options의 parity다. Red: `make item-red BEFORE=ee97996b`가 Verification을 실행했고 실패한다 (`make test-php-ext CASES='EngineRefreshTest'`가 exit 2, `vitest run packages/ts/tests/render/engine.test.ts`가 exit 1, EngineRefreshTest 3 failed, `make parity-declarations-check UNITS="program-options request-options"`가 exit 2에 19 findings); green: `make item-test ID=T26.7-51`이 14개 명령을 모두 통과한다 (Go 패턴 2 passed) (T26.7-51).
 
 - T26.7-32-6: EX-1은 모든 구현에서 성립한다: case examples/page가 여섯 구현 모두의 conformance test를 통과하며, PHP 확장의 것도 그 Format class가 C이므로 통과한다. Red: `make test-php-ext CASES='ConformanceTest'`가 7a415e9f에서 exit 2를 기록했다 (확장이 library의 Format class를 로드, "A source of the PHP library was loaded"); green: `make item-test ID=T26.7-32-6`이 Verification 셀의 열 명령을 실행해 모두 통과한다 (T26.7-32-6).

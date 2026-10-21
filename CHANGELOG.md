@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-32-18: RT-38, RT-39, RT-43, RT-45 to RT-53, RT-54, RT-57, RT-58, RT-63, RT-64, RT-68 and RT-71 are tool rules of the build compiler, the browser package and the showcase, and leave docs/spec for docs/operations/tools.md; RT-56 stays. Red: `make text-absent` on each moved id at 91289159 holds the stale text (56 of 57 checks fail); green: they all pass on the branch, and `make docs-check` passes (T26.7-32-18).
 - T26.7-51: the options of a program fail alike in every implementation, as its children T26.7-51-1 to -51-8 hold; its Verification is their owner tests and the parity of program-options and request-options. Red: `make item-red BEFORE=ee97996b` ran the Verification and it fails (`make test-php-ext CASES='EngineRefreshTest'` exits 2, `vitest run packages/ts/tests/render/engine.test.ts` exits 1, EngineRefreshTest 3 failed, `make parity-declarations-check UNITS="program-options request-options"` exits 2 with 19 findings); green: `make item-test ID=T26.7-51` passes every command (14 of 14, the Go pattern 2 passed) (T26.7-51).
 
 - T26.7-32-6: EX-1 holds in every implementation: the case examples/page passes the conformance tests of all six, the PHP extension's since its Format classes are C. Red: `make test-php-ext CASES='ConformanceTest'` exit 2 at 7a415e9f (the extension loaded the library's Format class, "A source of the PHP library was loaded"); green: `make item-test ID=T26.7-32-6` runs the ten commands of the Verification cell, all pass (T26.7-32-6).
