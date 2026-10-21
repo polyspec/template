@@ -168,7 +168,7 @@ function build(hash: string): void {
   const next = `${dist}.next-${process.pid}`;
   rmSync(next, { recursive: true, force: true });
   mkdirSync(next, { recursive: true });
-  console.log(`build-package: building ${packageId} into ${next}`);
+  console.log(`[build-package] building ${packageId} into ${next}`);
   for (const [command, args] of commands(next)) run(command, args, { cwd: pkg });
   const names = publicationOrder(next, files(next).map(file => relative(next, file).split(sep).join('/')));
   if (names.length === 0) throw new Error(`${next}: the build wrote no file`);
@@ -184,7 +184,7 @@ function build(hash: string): void {
   rmSync(next, { recursive: true });
   writeFileSync(`${stamp}.${process.pid}`, `${JSON.stringify({ hash, files: [...names].sort(compareText) })}\n`);
   renameSync(`${stamp}.${process.pid}`, stamp);
-  console.log(`build-package: published ${names.length} files into ${dist}${stale.length ? `; removed ${stale.length} files of the previous build: ${stale.join(' ')}` : ''}`);
+  console.log(`[build-package] published ${names.length} files into ${dist}${stale.length ? `; removed ${stale.length} files of the previous build: ${stale.join(' ')}` : ''}`);
 }
 
 const list = inputFiles();
@@ -197,8 +197,8 @@ const recorded = existsSync(stamp) ? stampDocument.read(stamp) : null;
 const complete = recorded !== null && recorded.files.every(name => existsSync(join(dist, name)));
 const where = relative(root, dist).startsWith('..') ? dist : relative(root, dist);
 if (!values.force && complete && recorded.hash === hash) {
-  console.log(`build-package: ${where} is current for inputs ${hash.slice(0, 12)}; no build`);
+  console.log(`[build-package] ${where} is current for inputs ${hash.slice(0, 12)}; no build`);
 } else {
-  console.log(`build-package: ${packageId}: ${values.force ? 'forced build' : !recorded ? 'no recorded inputs' : !complete ? 'dist is incomplete' : `inputs changed from ${recorded.hash.slice(0, 12)} to ${hash.slice(0, 12)}`}`);
+  console.log(`[build-package] ${packageId}: ${values.force ? 'forced build' : !recorded ? 'no recorded inputs' : !complete ? 'dist is incomplete' : `inputs changed from ${recorded.hash.slice(0, 12)} to ${hash.slice(0, 12)}`}`);
   build(hash);
 }

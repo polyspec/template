@@ -1,11 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 275fa206188862fb35338fa255a04bc20d82cd45a9843264246a1f249d2c8c15 -->
+<!-- source-sha256: f3a2fcbd93dab9248ea94f297f9ec7525db66e59bee169ef678c68bd26ae0800 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-64: packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 `[build-package]`로 찍으므로, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다. Red: 옛 접두사에서 `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts`가 exit 1; green: 12 passed, 0 failed (T26.7-64).
+- T26.7-32-18-1: RT-61은 RT-68 인용 대신 typed generated program의 변환을 직접 말하고, 픽스처 형식은 RT-46 인용 대신 docs/operations/tools.md를 가리킨다. spec 어느 파일도 옮긴 id를 인용하지 않는다. Red: runtime.md와 runtime.ko.md에 `make text-absent`를 실행하면 옛 "RT-46"과 "RT-68"이 남아 실패한다; green: 모두 통과하고 `make docs-check`도 통과한다 (T26.7-32-18-1).
 - T26.7-32-18: RT-38, RT-39, RT-43, RT-45부터 RT-53, RT-54, RT-57, RT-58, RT-63, RT-64, RT-68, RT-71은 build compiler, browser package, showcase의 도구 규칙이므로 docs/spec을 떠나 docs/operations/tools.md로 간다; RT-56은 남는다. Red: 91289159에서 각 이동 id에 `make text-absent`를 실행하면 옛 텍스트가 남아 있어 57개 중 56개가 실패한다; green: 브랜치에서 모두 통과하고 `make docs-check`도 통과한다 (T26.7-32-18).
 - T26.7-51: 프로그램의 옵션은 모든 구현에서 같이 실패한다. 하위 행 T26.7-51-1부터 -51-8이 그 내용을 가진다. Verification은 그 하위 행의 owner test와 program-options 및 request-options의 parity다. Red: `make item-red BEFORE=ee97996b`가 Verification을 실행했고 실패한다 (`make test-php-ext CASES='EngineRefreshTest'`가 exit 2, `vitest run packages/ts/tests/render/engine.test.ts`가 exit 1, EngineRefreshTest 3 failed, `make parity-declarations-check UNITS="program-options request-options"`가 exit 2에 19 findings); green: `make item-test ID=T26.7-51`이 14개 명령을 모두 통과한다 (Go 패턴 2 passed) (T26.7-51).
 

@@ -133,7 +133,7 @@ for (const name of PACKAGES) {
     const built = statSync(path.join(dist, file)).mtimeMs;
     const second = build(name, dist);
     assert.equal(second.status, 0, second.stdout + second.stderr);
-    assert.match(second.stdout, /^build-package: .+ is current for inputs [0-9a-f]{12}; no build$/m);
+    assert.match(second.stdout, /^\[build-package\] .+ is current for inputs [0-9a-f]{12}; no build$/m);
     assert.equal(statSync(path.join(dist, file)).mtimeMs, built);
   });
 }
