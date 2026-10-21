@@ -159,11 +159,9 @@ The logical request has this JSON shape:
 }
 ```
 
-- **RT-43** Every implementation maps the same `RenderRequest` fields to its native API. A native map, object or JSON value is an adapter representation; it does not change the field names, nesting or value types.
 - **RT-44** A JSON value is `null`, boolean, number, string, array or object with string keys. `assign` is a root object. `define.data` is also an object when present.
 - **RT-45** A scenario stores template sources as root-relative UTF-8 `*.tpl` names, `assign` in `data.json`, definitions in `define.json`, and the optional environment in `env.json`. The scenario target is passed separately as `target`.
 - **RT-46** The cross-language fixture form represents a template definition directly as a string path. An object with `template: string` and optional `data: object`, or an object with `html: string`, is reserved for definitions that need those extra values.
-- **RT-47** An adapter may decode the shared JSON and construct the native API values, but it must not add controller data, rename fields, apply filters or otherwise reshape the request.
 - **RT-48** A successful parity check compares the complete UTF-8 output bytes and then renders the same request again to compare the repeated bytes.
 - **RT-49** The manifest is the design source for `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment` and `RepeatResult`. Its record fields and union variants keep their declared order; ownership and `from` links describe which values are transferred from `Scenario` into `RenderRequest`.
 - **RT-50** [The contract generator](../../scripts/generate-showcase-contract.mts) produces the TypeScript, JavaScript, Go and Rust declarations, the PHP declarations and the Mermaid sources. A generated file that differs from the manifest fails the contract gate.

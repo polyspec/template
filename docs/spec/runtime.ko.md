@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: d3dfa2f0dd73a7881c7293fa29d75fbce158eec6dbb6597b3a6aecf086877b9f -->
+<!-- source-sha256: d8941d31a23a12f1751ba6b36d2b790f03a78b281ee2465666cdaa044eca0b7b -->
 # 런타임
 
 [English](/spec/runtime).
@@ -159,11 +159,9 @@ sequenceDiagram
 }
 ```
 
-- **RT-43** 모든 구현은 같은 `RenderRequest` 필드를 각 언어의 native API에 매핑한다. native map, object, JSON value는 어댑터 표현일 뿐이며 필드 이름, 중첩, 값 타입을 바꾸지 않는다.
 - **RT-44** JSON 값은 `null`, boolean, number, string, array 또는 문자열 키를 가진 object다. `assign`은 루트 object다. `define.data`가 있으면 역시 object다.
 - **RT-45** 시나리오는 루트 기준 UTF-8 `*.tpl` 이름으로 템플릿 소스를 저장하고, `assign`은 `data.json`, define은 `define.json`, 선택적인 환경은 `env.json`에 저장한다. 시나리오 target은 `target`으로 따로 전달한다.
 - **RT-46** 언어 간 픽스처 형식은 템플릿 define을 문자열 경로로 직접 표현한다. 추가 값이 필요한 define만 `template: string`과 선택적인 `data: object`를 가진 객체 또는 `html: string` 객체로 표현한다.
-- **RT-47** 어댑터는 공통 JSON을 해석해 native API 값을 만들 수 있지만 컨트롤러 데이터 추가, 필드 이름 변경, 필터 적용, 그 밖의 요청 재구성을 해서는 안 된다.
 - **RT-48** 성공한 일치성 검사는 완전한 UTF-8 출력 바이트를 비교한 뒤 같은 요청을 다시 렌더해 반복 바이트도 비교한다.
 - **RT-49** manifest는 `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment`, `RepeatResult`의 설계 원본이다. record 필드와 union variant는 선언한 순서를 유지하며 소유 관계와 `from` 연결은 `Scenario`에서 `RenderRequest`로 어떤 값이 전달되는지 설명한다.
 - **RT-50** [계약 생성기](../../scripts/generate-showcase-contract.mts)는 TypeScript, JavaScript, Go, Rust 선언부, PHP 선언부와 Mermaid 원본을 생성한다. 생성 파일이 manifest와 다르면 계약 게이트가 실패한다.
