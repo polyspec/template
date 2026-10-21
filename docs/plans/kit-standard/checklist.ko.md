@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: ce5e2298a90f201d37fda404eddc41615ad0b62c684741642c95064be588fbee -->
+<!-- source-sha256: ebe9e31b6c86f192f2a7b5904c977718a08b6314b59317072730a5356232c961 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -176,3 +176,4 @@
 | T26.7-62 | docs/operations/dependencies.md는 config/dependency-policy.json의 composerPlatforms와 manifest가 선언하는 Composer platform 8.4.1과 CI가 검사하는 PHP 8.4를 적는다 (kit K322) | docs/operations/dependencies.md, docs/operations/dependencies.ko.md | `make docs-check`, `grep -Fq 8.4.1 docs/operations/dependencies.md`, `grep -Fq 8.4.1 docs/operations/dependencies.ko.md` | [o] |
 | T26.7-64 | packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 [build-package]로 찍어, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다 (K446-4의 후속) | scripts/build-package.mts, tests/scripts/build-package.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts` | [o] |
 | T26.7-65 | Composer 루트는 검토된 목표 버전 13.4.3을 phpunit/phpunit으로 요구하며, hyper와 ordered-json이 선언하는 방식대로 정확한 버전으로 선언하고 13.4.3으로 잠근다 (K435) | composer.json, composer.lock, config/dependency-review.json | `make dependency-policy-check` | [ ] |
+| T26.7-66 | 이 저장소의 잠금에는 검토 시점의 취약점 권고가 없고 모든 레지스트리 의존성은 검토 시점에 알려진 최신 안정 릴리스에 있다(kit K435): markdown-it, vite와 vitepress 아래의 vite, oxc-parser, vitest, @codemirror/view, setuptools, ruff를 올리고 config/dependency-review.json을 다시 기록한다 | package.json, package-lock.json, packages/codemirror/package.json, packages/python/pyproject.toml, mise.toml, config/dependency-review.json, docs/operations/dependencies.md and its Korean twin when they name a version | `make dependency-policy-check` | [ ] |
