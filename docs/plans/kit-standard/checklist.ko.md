@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: c520a0a5db5f9452ac8e180d530e2e0c6b42d2bed5a5fa06e57d6107cfe5d756 -->
+<!-- source-sha256: f047d739a26c3ef924250f4570179c22be495d98f0ff19cf4d7f85a3eb8f3937 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -164,3 +164,4 @@
 | T26.7-59 | template은 edcb9579의 kit 복사본을 받는다: commit identity, 이유를 적는 suppression check, PHP의 숨긴 오류 금지, TypeScript에서 다시 던지는 오류의 cause, prepare-commit-msg hook, changelog와 checklist의 merge driver(K354-3, K334, f7c1f10c부터 edcb9579까지의 다른 kit 행) | The copies that make kit-sync writes, the hooks of make hooks, the Makefile, and the code that the new lint rules find | `make kit-check`, `make suppression-check`, `make lint-php`, `make lint-ts`, `make hooks-check` | [o] |
 | T26.7-60 | tests/scripts/failure-messages.test.mts의 도구 없음 케이스는 kit run-tests가 PATH에서 찾는 도구인 cargo를 시작한다. go는 checkout의 mise에서 실행되기 때문이다 | tests/scripts/failure-messages.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/failure-messages.test.mts` | [o] |
 | T26.7-61 | packages/php-ext의 test는 make template-lint-php-format을 통과한다: 익명 class는 pint가 요구하는 대로 new class ()로 쓴다 | packages/php-ext/tests/FormatterClassTest.php, BindTest.php, RecordingProgram.php, PreparedRenderTest.php | `make template-lint-php-format` | [o] |
+| T26.7-62 | docs/operations/dependencies.md는 config/dependency-policy.json의 composerPlatforms와 manifest가 선언하는 Composer platform 8.4.1과 CI가 검사하는 PHP 8.4를 적는다 (kit K322) | docs/operations/dependencies.md, docs/operations/dependencies.ko.md | `make docs-check`, `grep -Fq 8.4.1 docs/operations/dependencies.md`, `grep -Fq 8.4.1 docs/operations/dependencies.ko.md` | [o] |

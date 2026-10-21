@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: dab3a486a997180f2050dbbedda7f8c617ff403a649f897d1871738fd42ae09d -->
+<!-- source-sha256: 4c0c8b6f11844c847b34cb4f580197b83b9e1dd2fd344a98fb97b63d746f3116 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-62: docs/operations/dependencies.md는 config/dependency-policy.json의 composerPlatforms와 manifest가 선언하는 Composer platform 8.4.1과 CI가 검사하는 PHP 8.4를 적는다. Red: `make item-red`가 main의 문서에서 `grep -Fq 8.4.1 docs/operations/dependencies.md` exit 1과 `grep -Fq 8.4.1 docs/operations/dependencies.ko.md` exit 1을 기록했다; green: `make docs-check` exit 0과 두 grep 모두 통과 (T26.7-62).
 
 - T26.7-32-15: VAL-1은 conformance 스위트가 인용하며, 그 case functions/type은 여섯 값 형식과 safe 문자열 각각의 type()을 고유한 이름으로 렌더하므로 모든 구현의 그 test가 VAL-1을 검사한다. concurrent-bound-map은 VAL-1을 더 이상 인용하지 않는다. Red: `make item-red`가 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-1"` exit 2를 기록했다. Green: 통과하고, test가 통과하며(vitest 260, go test 261, cargo 260, PHPUnit과 PHP 확장 780, Python 260), make parity-declarations-check는 2건 줄고 새 finding이 없다. (T26.7-32-15).
 
