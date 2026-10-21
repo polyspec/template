@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-51: the options of a program fail alike in every implementation, as its children T26.7-51-1 to -51-8 hold; its Verification is their owner tests and the parity of program-options and request-options. Red: `make item-red BEFORE=ee97996b` ran the Verification and it fails (`make test-php-ext CASES='EngineRefreshTest'` exits 2, `vitest run packages/ts/tests/render/engine.test.ts` exits 1, EngineRefreshTest 3 failed, `make parity-declarations-check UNITS="program-options request-options"` exits 2 with 19 findings); green: `make item-test ID=T26.7-51` passes every command (14 of 14, the Go pattern 2 passed) (T26.7-51).
+
 - T26.7-32-6: EX-1 holds in every implementation: the case examples/page passes the conformance tests of all six, the PHP extension's since its Format classes are C. Red: `make test-php-ext CASES='ConformanceTest'` exit 2 at 7a415e9f (the extension loaded the library's Format class, "A source of the PHP library was loaded"); green: `make item-test ID=T26.7-32-6` runs the ten commands of the Verification cell, all pass (T26.7-32-6).
 
 - T26.7-32-17: RT-3 is cited by the new unit render-targets; its test in every implementation renders the name a.tpl through the loader and the same source parsed as a template, with {x: 1}, and gets the same complete output (<p>1</p>); concurrent-bound-map no longer cites RT-3. Red: `make item-red` recorded `make parity-declarations-check UNITS="render-targets"` and `UNITS="concurrent-bound-map" RULES=R15 IDS="RT-3"` exit 2 before the fix. Green: they pass, the tests pass (ts 15 in engine.test.ts, go 1, rust 17, php 11, python 47), and `make parity-declarations-check` reports 2 findings fewer and none new. (T26.7-32-17).
