@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 1710f8d129b9486908e32dcd2ff09e0cfcf012a3858e95321c37ea1eefcf1759 -->
+<!-- source-sha256: 6d25d329b32ca717f29359d443de5b6ac0e032c576a37c5668ca3bd574bb7d51 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -174,4 +174,4 @@
 | T26.7-60 | tests/scripts/failure-messages.test.mts의 도구 없음 케이스는 kit run-tests가 PATH에서 찾는 도구인 cargo를 시작한다. go는 checkout의 mise에서 실행되기 때문이다 | tests/scripts/failure-messages.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/failure-messages.test.mts` | [o] |
 | T26.7-61 | packages/php-ext의 test는 make template-lint-php-format을 통과한다: 익명 class는 pint가 요구하는 대로 new class ()로 쓴다 | packages/php-ext/tests/FormatterClassTest.php, BindTest.php, RecordingProgram.php, PreparedRenderTest.php | `make template-lint-php-format` | [o] |
 | T26.7-62 | docs/operations/dependencies.md는 config/dependency-policy.json의 composerPlatforms와 manifest가 선언하는 Composer platform 8.4.1과 CI가 검사하는 PHP 8.4를 적는다 (kit K322) | docs/operations/dependencies.md, docs/operations/dependencies.ko.md | `make docs-check`, `grep -Fq 8.4.1 docs/operations/dependencies.md`, `grep -Fq 8.4.1 docs/operations/dependencies.ko.md` | [o] |
-| T26.7-64 | packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 [build-package]로 찍어, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다 (K446-4의 후속) | scripts/build-package.mts, tests/scripts/build-package.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts` | [~] |
+| T26.7-64 | packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 [build-package]로 찍어, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다 (K446-4의 후속) | scripts/build-package.mts, tests/scripts/build-package.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts` | [o] |
