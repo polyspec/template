@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-32-16: VAL-18 is cited by the new unit native-object-arguments; its test in every implementation passes a native object to a host function directly, inside a list and inside a map, to an instance method and to a class function, and checks that each receives the original object; concurrent-bound-map no longer cites VAL-18. Red: `make item-red` recorded the parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-18" command exit 2. Green: they pass, the tests pass (9 commands), and `make parity-declarations-check` reports 2 findings fewer and none new (T26.7-32-16).
+
 - T26.7-62: docs/operations/dependencies.md names the Composer platform 8.4.1 that composerPlatforms of config/dependency-policy.json and the manifests declare, and the PHP 8.4 that CI tests. Red: `make item-red` recorded `grep -Fq 8.4.1 docs/operations/dependencies.md` exit 1 and `grep -Fq 8.4.1 docs/operations/dependencies.ko.md` exit 1 on main's text; green: `make docs-check` exit 0 and both greps pass (T26.7-62).
 
 - T26.7-32-15: VAL-1 is cited by the conformance suite, whose case functions/type renders type() of each of the six value types and of a safe string, each under its own name and no other, so its test in every implementation checks VAL-1; concurrent-bound-map no longer cites VAL-1. Red: `make item-red` recorded `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-1"` exit 2. Green: they pass, the tests pass (vitest 260, go test 261, cargo 260, PHPUnit and the PHP extension 780, Python 260), and `make parity-declarations-check` reports 2 findings fewer and none new. (T26.7-32-15).

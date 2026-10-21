@@ -30,6 +30,9 @@ HOST_VALUES = json.loads((FIXTURE / "host-values.json").read_text(encoding="utf-
 class Order:
     label = "Order 12"
 
+    def same(self, other):
+        return other is self
+
     def status_label(self, prefix):
         if not isinstance(prefix, str):
             raise TypeError("invalid status_label")
@@ -173,6 +176,29 @@ class ObjectCalls(unittest.TestCase):
         html = self.render("input.tpl", order_runtime, {"order": order})
         self.assertEqual(
             html, "<article><h1>Order 12</h1><p>ready:12</p><p>done!</p></article>\n"
+        )
+
+    def test_native_object_arguments_arrive_as_the_original_object(self):
+        # VAL-18: a host function, an instance method and a class function receive the original object,
+        # also inside a list or a map argument.
+        order = Order()
+
+        def same(args, _context):
+            return args[0] is order and args[1][0] is order and args[2]["k"] is order
+
+        program = AstProgram(
+            EngineOptions(
+                loader=MapLoader(
+                    {
+                        "same.tpl": '{= same(o, [o], ["k" => o])}|{= o.same(o)}|{= Order::same(o)}'
+                    }
+                )
+            )
+        )
+        program.register("same", same)
+        program.register_class("Order", "same", lambda args, _context: args[0] is order)
+        self.assertEqual(
+            Engine(program).render("same.tpl", {"o": order}), "true|true|true"
         )
 
     def test_the_object_reaches_include_block_and_definition_unchanged(self):

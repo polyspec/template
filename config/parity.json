@@ -315,6 +315,19 @@
       ]
     },
     {
+      "id": "native-object-arguments",
+      "requirements": ["VAL-18"],
+      "kind": "feature",
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/render/host-binding.test.ts", "id": "native objects › passes the original instance to host code (VAL-18)" },
+        { "implementation": "go", "test": "packages/go/host_binding_test.go", "id": "TestNativeObjectMembersAndArguments" },
+        { "implementation": "rust", "test": "packages/rust/tests/object_calls.rs", "id": "native_object_arguments_arrive_as_the_original_object" },
+        { "implementation": "php", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testNativeObjectArgumentsArriveAsTheOriginalObject" },
+        { "implementation": "php-ext", "test": "packages/php/tests/Value/HostBindingTest.php", "id": "testNativeObjectArgumentsArriveAsTheOriginalObject" },
+        { "implementation": "python", "test": "packages/python/tests/test_object_calls.py", "id": "test_native_object_arguments_arrive_as_the_original_object" }
+      ]
+    },
+    {
       "id": "object-calls",
       "requirements": ["RT-60"],
       "kind": "feature",
@@ -773,7 +786,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-3", "RT-37", "RT-38", "RT-39", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-18", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-3", "RT-37", "RT-38", "RT-39", "RT-43", "RT-44", "RT-45", "RT-46", "RT-47", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-22", "VAL-23"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },

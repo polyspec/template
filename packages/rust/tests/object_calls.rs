@@ -95,26 +95,34 @@ fn member_and_result_binding_failures_point_at_the_expression() {
     }
 }
 
+fn is_the_object(value: Option<&Value>, expected: &Rc<Order>) -> bool {
+    value
+        .and_then(Value::downcast_object::<Order>)
+        .is_some_and(|value| Rc::ptr_eq(&value, expected))
+}
+
 #[test]
 fn native_object_arguments_arrive_as_the_original_object() {
-    // VAL-18: a host function, a class function and a method receive the same TemplateObject, also inside a list.
-    let mut program = program(&["{= is_order(order, [order])}|{= Order::total_of(order)}|{= order.same(order)}"]);
+    // VAL-18: a host function, an instance method and a class function receive the original object, also inside a list
+    // or a map argument.
+    let source = r#"{= same(order, [order], ["k" => order])}|{= order.same(order)}|{= Order::same(order)}"#;
+    let mut program = program(&[source]);
     let order = Rc::new(Order { total: 3.0 });
     let expected = Rc::clone(&order);
     program
         .register(
-            "is_order",
+            "same",
             Box::new(move |args, _| {
-                let direct = args[0]
-                    .downcast_object::<Order>()
-                    .is_some_and(|value| Rc::ptr_eq(&value, &expected));
-                let nested = match &args[1] {
-                    Value::List(items) => items[0]
-                        .downcast_object::<Order>()
-                        .is_some_and(|value| Rc::ptr_eq(&value, &expected)),
+                let direct = is_the_object(args.first(), &expected);
+                let nested = match args.get(1) {
+                    Some(Value::List(items)) => is_the_object(items.first(), &expected),
                     _ => false,
                 };
-                Ok(Value::Bool(direct && nested))
+                let mapped = match args.get(2) {
+                    Some(Value::Map(entries)) => is_the_object(entries.get("k"), &expected),
+                    _ => false,
+                };
+                Ok(Value::Bool(direct && nested && mapped))
             }),
         )
         .unwrap();
@@ -122,15 +130,12 @@ fn native_object_arguments_arrive_as_the_original_object() {
     program
         .register_class(
             "Order",
-            "total_of",
-            Box::new(move |args, _| match args[0].downcast_object::<Order>() {
-                Some(value) if Rc::ptr_eq(&value, &expected_class) => Ok(Value::Number(value.total)),
-                _ => Err("not the assigned order".into()),
-            }),
+            "same",
+            Box::new(move |args, _| Ok(Value::Bool(is_the_object(args.first(), &expected_class)))),
         )
         .unwrap();
     let result = render(&program, 0, order_root(&order));
-    assert_eq!(result.unwrap(), "true|3|true");
+    assert_eq!(result.unwrap(), "true|true|true");
 }
 
 #[test]

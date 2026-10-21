@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4c0c8b6f11844c847b34cb4f580197b83b9e1dd2fd344a98fb97b63d746f3116 -->
+<!-- source-sha256: 14377fe701432fe2cdf78a2b44d26e5d21a93818c9faa6c81c498f5d0b5f4925 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-16: VAL-18은 새 unit native-object-arguments가 인용한다. 그 test는 모든 구현에서 native object를 host 함수에 직접, list 안에, map 안에 넘기고, instance method와 class 함수에도 넘겨 각각이 원본 객체를 받는지 확인한다; concurrent-bound-map은 더 이상 VAL-18을 인용하지 않는다. Red: `make item-red`가 parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-18" 명령의 exit 2를 기록했다. Green: 둘 다 통과하고, test가 통과하며(9 commands), `make parity-declarations-check`는 2건 줄고 새 finding이 없다 (T26.7-32-16).
 
 - T26.7-62: docs/operations/dependencies.md는 config/dependency-policy.json의 composerPlatforms와 manifest가 선언하는 Composer platform 8.4.1과 CI가 검사하는 PHP 8.4를 적는다. Red: `make item-red`가 main의 문서에서 `grep -Fq 8.4.1 docs/operations/dependencies.md` exit 1과 `grep -Fq 8.4.1 docs/operations/dependencies.ko.md` exit 1을 기록했다; green: `make docs-check` exit 0과 두 grep 모두 통과 (T26.7-62).
 

@@ -144,6 +144,8 @@ func TestCyclesAndDeepValuesStopAtTheDepthLimit(t *testing.T) {
 	}
 }
 
+// VAL-18: a host function, an instance method and a class function receive the original object,
+// also inside a list or a map argument.
 func TestNativeObjectMembersAndArguments(t *testing.T) {
 	order := &hostOrder{Name: "n", Invalid: "\xff", Huge: 1e19}
 	program := hostProgram(t, map[string]string{

@@ -29,7 +29,7 @@ final class HostBindingTest extends TestCase
         'object-magic.tpl' => "{= o.magic()}\n",
         'object-name.tpl' => "x{= o.name}\n",
         'object-index.tpl' => "x{= o['name']}\n",
-        'object-same.tpl' => "{= same(o, [o])}|{= o.same(o)}|{= Order::same(o)}\n",
+        'object-same.tpl' => "{= same(o, [o], [\"k\" => o])}|{= o.same(o)}|{= Order::same(o)}\n",
         'object-returned.tpl' => "{= make().name}\n",
         'object-result.tpl' => "x{= o.bad()}\n",
         'define-object.tpl' => "[{# content}]\n",
@@ -228,11 +228,14 @@ final class HostBindingTest extends TestCase
 
     public function testNativeObjectArgumentsArriveAsTheOriginalObject(): void
     {
-        // VAL-18: a host function, a method and a class function receive the same PHP object.
+        // VAL-18: a host function, an instance method and a class function receive the original object, also inside
+        // a list or a map argument.
         $object = new Exploding();
         $this->program->register(
             'same',
-            static fn (array $args): bool => $args[0] === $object && $args[1][0] === $object,
+            static fn (array $args): bool => $args[0] === $object
+                && $args[1][0] === $object
+                && $args[2]['k'] === $object,
         );
         $this->program->registerClass('Order', 'same', static fn (array $args): bool => $args[0] === $object);
         $this->assertSame("true|true|true\n", $this->program->render('object-same.tpl', ['o' => $object]));
