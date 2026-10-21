@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T26.7-32-15: VAL-1 is cited by the conformance suite, whose case functions/type renders type() of each of the six value types and of a safe string, each under its own name and no other, so its test in every implementation checks VAL-1; concurrent-bound-map no longer cites VAL-1. Red: `make item-red` recorded `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-1"` exit 2. Green: they pass, the tests pass (vitest 260, go test 261, cargo 260, PHPUnit and the PHP extension 780, Python 260), and `make parity-declarations-check` reports 2 findings fewer and none new. (T26.7-32-15).
+
 - T22.6: the language-parity work of feat/parity-T22.6 is audited commit by commit: 6 changes are on main, 39 are superseded by main or kit, and the benchmark part (fa467fba, 2c37a634) is T22.6-17; the branch is deleted and the row waits for T22.6-17 (T22.6).
 
 - T26.7-32-14: VAL-7 is cited by `host-function-rules`, whose test in every implementation registers a host function that returns `<b>` and renders it as `&lt;b&gt;`: the result is a plain string, never a safe one. The tests name VAL-7 beside FUN-43 to FUN-48. concurrent-bound-map no longer cites VAL-7. Red: `make item-red` recorded `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-7"` exit 2. Green: it passes, the tests pass (vitest `engine.test.ts` 14, `go test` of TestHostFunctionRules 1, `cargo test --test functions` 16, PHPUnit and the PHP extension HostBindingTest 16, Python `test_object_calls.py` 13), the check of host-function-rules passes, and `make parity-declarations-check` reports 2 findings fewer and none new (T26.7-32-14).

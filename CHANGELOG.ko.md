@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d822dc313ef92b288593ba1aa7c7d0d3ed03faf280101a4694b072300f38a23e -->
+<!-- source-sha256: dab3a486a997180f2050dbbedda7f8c617ff403a649f897d1871738fd42ae09d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T26.7-32-15: VAL-1은 conformance 스위트가 인용하며, 그 case functions/type은 여섯 값 형식과 safe 문자열 각각의 type()을 고유한 이름으로 렌더하므로 모든 구현의 그 test가 VAL-1을 검사한다. concurrent-bound-map은 VAL-1을 더 이상 인용하지 않는다. Red: `make item-red`가 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="VAL-1"` exit 2를 기록했다. Green: 통과하고, test가 통과하며(vitest 260, go test 261, cargo 260, PHPUnit과 PHP 확장 780, Python 260), make parity-declarations-check는 2건 줄고 새 finding이 없다. (T26.7-32-15).
 
 - T22.6: feat/parity-T22.6의 language-parity 작업을 commit 단위로 감사했다: 6개 변경은 main에 있고, 39개는 main 또는 kit에 의해 대체되었으며, benchmark 부분(fa467fba, 2c37a634)은 T22.6-17이다; branch는 삭제되고 이 row는 T22.6-17을 기다린다 (T22.6).
 
