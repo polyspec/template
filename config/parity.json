@@ -799,7 +799,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-37", "RT-38", "RT-39", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-62", "RT-63", "RT-64", "RT-68", "RT-69", "RT-70", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-22", "VAL-23"],
+      "requirements": ["RT-1", "RT-37", "RT-44", "RT-55", "RT-56", "RT-59", "RT-62", "RT-69", "RT-70", "VAL-13", "VAL-14", "VAL-15", "VAL-16", "VAL-22", "VAL-23"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },
@@ -821,7 +821,7 @@
     },
     {
       "id": "api-engine",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Engine:class" },
@@ -834,7 +834,7 @@
     },
     {
       "id": "api-program",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Program:interface" },
@@ -860,7 +860,7 @@
     },
     {
       "id": "api-prepared-render",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!PreparedRender:interface" },
@@ -925,7 +925,7 @@
     },
     {
       "id": "api-page-cache",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!PageCache:class" },
@@ -938,7 +938,7 @@
     },
     {
       "id": "api-loader",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Loader:interface" },
@@ -1003,7 +1003,7 @@
     },
     {
       "id": "api-runtime-services",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RuntimeServices:interface" },
@@ -1016,7 +1016,7 @@
     },
     {
       "id": "api-runtime-environment",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RuntimeEnvironment:class" },
@@ -1029,7 +1029,7 @@
     },
     {
       "id": "api-runtime-bindings",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings:class" },
@@ -1042,7 +1042,7 @@
     },
     {
       "id": "api-render-frame",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Frame:class" },
@@ -1055,7 +1055,7 @@
     },
     {
       "id": "api-render-scope",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Scope:class" },
@@ -1068,7 +1068,7 @@
     },
     {
       "id": "api-render-context",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-38", "RT-39", "RT-40", "RT-41", "RT-42", "RT-44", "RT-45", "RT-46", "RT-48", "RT-49", "RT-50", "RT-51", "RT-52", "RT-53", "RT-54", "RT-55", "RT-56", "RT-57", "RT-58", "RT-59", "RT-60", "RT-61", "RT-62", "RT-63", "RT-64", "RT-65", "RT-66", "RT-67", "RT-68", "RT-69", "RT-70"],
+      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RenderContext:class" },

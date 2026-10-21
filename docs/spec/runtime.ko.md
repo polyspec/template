@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: d8941d31a23a12f1751ba6b36d2b790f03a78b281ee2465666cdaa044eca0b7b -->
+<!-- source-sha256: 42b8e63b0e8d31b911e80ddd8a10ea49d4f5307f9862fa7cfdc53e3bd6e9fbe4 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -41,8 +41,6 @@ PageCache.getOrSet(key, ttl, render)
 - **RT-61** `AstProgram`과 `GeneratedProgram` 모두 `prepare`에서 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target을 선택한다. `assign`이나 템플릿 정의의 `data`로 받은 bound map(VAL-22)은 PHP extension을 포함한 모든 구현에서 다시 binding하지 않는다. 그것을 렌더한 결과는 `bind`를 실행한 시점에 bound map의 항목을 항목으로 가진 호스트 map을 렌더한 결과와 byte가 같다. `merge`의 결과이면 합친 항목을 가진 호스트 map이다. native object의 member만은 템플릿이 읽을 때 읽는다(VAL-19). typed generated program은 bound `assign`을 root record로, bound 정의 `data`를 definition data record로 여전히 변환한다(RT-68). 반환된 program별 상태는 동일한 `PreparedRender.render` 연산을 제공한다.
 - **RT-62** `PreparedRender.render`는 렌더마다 필요한 scope, output, 실행 상태만 만든다. 입력이 바뀌지 않은 반복 호출은 같은 UTF-8 바이트를 출력한다. `render`는 `prepare(...).render()`와 같으며 단일 호출 편의 연산으로 유지한다.
 - **RT-70** 호스트 언어가 코드를 동시에 실행하는 곳에서는, 호스트가 함수와 class를 등록한 뒤 한 program의 렌더가 동시에 실행될 수 있다. 렌더는 program이 load하고 parse한 template만 공유하고, program은 그 cache를 보호한다. Go program은 동시에 실행되는 goroutine에서, Python program은 동시에 실행되는 thread에서 렌더할 수 있고, Python program은 template cache에서만 그 thread들을 직렬화한다. Rust program은 값과 template cache가 `Rc`와 `RefCell`을 쓰므로 `Send`도 `Sync`도 아니다. 그래서 compiler가 program과 그 bound map(VAL-22)을 만든 thread에 둔다. 여러 thread에서 렌더하는 Rust 호스트는 thread마다 program을 만든다. TypeScript와 PHP는 process나 worker마다 한 번에 하나의 렌더를 실행하고, PHP extension은 요청의 object를 그 요청 안에 둔다. 호스트는 렌더하기 전에 함수와 class를 등록한다. 같은 program의 렌더가 실행되는 동안의 등록은 호스트의 data race다. 동시에 실행되는 렌더가 공유하는 program의 loader는 그 렌더들이 동시에 호출한다.
-- **RT-63** 컴파일 모드는 `ast` 또는 `gen`이다. `ast`는 AST artifact를 만들고 AST renderer로 해석한다. `gen`은 호스트 언어 renderer 코드를 만들고 직접 호출한다. 생성 렌더러도 AST renderer와 동일한 정규화 요청(`target`, 호스트 바인딩을 거친 `assign`과 `define`, 해석한 `env`)을 받는다. 모드가 산출물 갱신 정책을 결정하지는 않는다.
-- **RT-64** 산출물 갱신 정책은 `dev`, `true`, `false`다. build coordinator는 `dev`에서 compiler 호출마다 생성하고, `true`에서 digest가 바뀐 뒤 생성하며, `false`에서 소스를 읽지 않는다. `false`에서 배포 산출물이 없거나 오래되거나 손상되면 오류다.
 - **RT-65** 페이지 캐시는 컴파일 산출물과 별도로 최종 HTML을 저장한다. 양수 TTL은 해당 시간이 지나면 만료되고 `0`과 `null`은 무기한이다. 캐시 hit는 비즈니스 로직과 템플릿 렌더링을 건너뛴다. 키에는 출력에 영향을 주는 모든 값이 포함되어야 한다.
 - **RT-66** `getOrSet`은 hit에서 `render`를 호출하지 않고 캐시 HTML을 반환한다. miss에서는 `render`를 한 번 호출하고 반환된 HTML을 TTL과 함께 저장한 뒤 반환한다.
 - **RT-67** 준비된 렌더 계약은 단일 제품 manifest인 [`packages/compiler/interface.json`](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json)에 선언한다. 인터페이스 검사는 필요한 언어 매핑, 지원 수준, 연산이 하나라도 없으면 실패한다.
@@ -160,26 +158,14 @@ sequenceDiagram
 ```
 
 - **RT-44** JSON 값은 `null`, boolean, number, string, array 또는 문자열 키를 가진 object다. `assign`은 루트 object다. `define.data`가 있으면 역시 object다.
-- **RT-45** 시나리오는 루트 기준 UTF-8 `*.tpl` 이름으로 템플릿 소스를 저장하고, `assign`은 `data.json`, define은 `define.json`, 선택적인 환경은 `env.json`에 저장한다. 시나리오 target은 `target`으로 따로 전달한다.
-- **RT-46** 언어 간 픽스처 형식은 템플릿 define을 문자열 경로로 직접 표현한다. 추가 값이 필요한 define만 `template: string`과 선택적인 `data: object`를 가진 객체 또는 `html: string` 객체로 표현한다.
-- **RT-48** 성공한 일치성 검사는 완전한 UTF-8 출력 바이트를 비교한 뒤 같은 요청을 다시 렌더해 반복 바이트도 비교한다.
-- **RT-49** manifest는 `Adapter`, `Scenario`, `RenderRequest`, `DefineEntry`, `Environment`, `RepeatResult`의 설계 원본이다. record 필드와 union variant는 선언한 순서를 유지하며 소유 관계와 `from` 연결은 `Scenario`에서 `RenderRequest`로 어떤 값이 전달되는지 설명한다.
-- **RT-50** [계약 생성기](../../scripts/generate-showcase-contract.mts)는 TypeScript, JavaScript, Go, Rust 선언부, PHP 선언부와 Mermaid 원본을 생성한다. 생성 파일이 manifest와 다르면 계약 게이트가 실패한다.
-- **RT-51** 언어 문법은 각 언어의 관례를 따를 수 있다(`NewAdapter`, `Adapter::new`, `__construct`는 생성자 이름이다). manifest 매핑을 통해 concrete type, 생성자 인자, 메서드 순서, 인자 타입, 반환 타입과 요청 필드는 동일하게 유지한다.
-- **RT-52** [계약 검사기](../../scripts/check-showcase-contract.mts)는 소스 선언, TypeScript 컴파일, Go 인터페이스 대입과 포맷, Rust trait 컴파일, PHP 문법과 `ReflectionClass`, 생성된 런타임 assertion, 모든 showcase 시나리오에 대한 다섯 어댑터 실행을 검사한다.
-- **RT-53** 상태 증명은 `constructor -> loadScenario -> buildRequest -> renderTwice`를 실행하고, 잘못된 target 오류를 관찰하고, 원래 요청을 다시 렌더한 뒤 첫 번째·두 번째·복구 UTF-8 해시를 비교한다. 오류와 복구 과정에서 요청은 바뀌지 않는다.
 - **RT-60** Native object instance는 `assign`에 직접 넣을 수 있다. Runtime은 원본 instance를 유지하고 member lookup으로 public field를 노출하며 `object.method(args...)`로 public instance method를 호출한다. 논리 class function은 `Class::method`로 등록하고 `Class::method(args...)`로 호출한다.
 
 ## 지원 레벨과 컴파일 artifact
 
-- **RT-54** 인터페이스 manifest는 하나의 compiler와 동등한 두 mode를 선언한다. `ast`는 `AstArtifact`, `gen`은 host language source와 artifact manifest를 반환한다. 둘 다 같은 prepared render 계약을 가진 `Program`을 만든다.
 - **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
 - **RT-56** 모든 구현(TypeScript, Go, Rust, PHP, PHP 확장, Python)은 `core-runtime`, `artifact-runtime`과 두 `Program` variant를 제공한다. Build compiler는 `source-compiler`와 generated target backend를 제공한다. JavaScript ESM은 TypeScript backend가 생성하며 별도 의미 구현으로 세지 않는다.
-- **RT-57** Artifact manifest는 contract format, mode, target language, entry, source digest, type digest, contract digest, output path를 포함한다. Artifact는 service 시작 전에 생성하고 process에 한 번 load하거나 정적으로 연결한다. Repository는 artifact를 build로 만들고 추적하지 않는다. manifest가 digest를 기록하고 build는 digest가 같은 artifact를 다시 쓴다(RT-71).
-- **RT-58** Artifact 갱신은 build 정책이다. `dev`는 compiler를 호출할 때마다 재생성하고, `true`는 source, type, contract digest가 달라지면 재생성하며, `false`는 source를 읽지 않고 배포 artifact만 사용한다. Development watcher는 재생성 뒤 정적으로 연결한 Go와 Rust process를 rebuild하고 restart한다.
 - **RT-59** Render request 경로에서는 parsing, source 탐색, artifact 생성, host compilation을 하지 않는다. 같은 program을 같은 assign, define, environment로 render하면 같은 output byte를 만들고 request를 변경하지 않는다. RT-59는 이 절의 주제인 compiled artifact를 다룬다. AST program은 runtime에 로드하는 템플릿을 RT-76에 따라 갱신한다.
 - **RT-76** AST program은 자기 artifact refresh 정책(`artifactRefresh`, `packages/compiler/interface.json`의 `ArtifactRefresh`)을 runtime에 로드하는 템플릿에 적용한다. `dev`에서는 호출마다 템플릿을 다시 로드하고 parse하며, `true`에서는 로더가 그 템플릿에 대해 보고하는 버전이 바뀔 때까지(RT-10) parse를 재사용하고, `false`에서는 첫 parse를 유지하며 runtime에 갱신하지 않는다.
-- **RT-68** 타입 고정 generated artifact는 assign, 필드 전달 여부를 보존하는 definition data, definitions와 template input을 선언한다. 생성된 block은 root assign, 전달된 definition data 필드, block scope 순서로 입력을 적용한 뒤 대상 template 함수를 직접 호출한다. 미리 렌더한 문자열 slot은 generated template target이 아니다.
 
 인터페이스는 두 실행 모드를 선언한다.
 
@@ -290,14 +276,11 @@ TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 k
 
 ## 브라우저
 
-- **RT-38** TypeScript 패키지는 템플릿 소스나 파싱된 AST를 담은 map 로더로 브라우저에서 렌더한다.
-- **RT-39** 브라우저에서 다시 렌더할 페이지를 렌더하는 서버는 assign 데이터를 `{= json(assign) | raw}`로 만든 내용의 `<script type="application/json">`으로 임베드한다. 브라우저는 데이터 모델 문서가 정의하는 대로 패키지의 파서로 그 JSON을 파싱하고, 같은 템플릿 이름을 같은 assign 데이터, define, env로 렌더해 같은 출력을 만든다.
 
 ## 캐싱
 
 - **RT-40** 옵션이 산출물 갱신 정책을 정하지 않은 엔진은 `true`(RT-76)를 쓴다: 템플릿을 `name@version`마다 한 번 파싱하고 로더가 같은 버전을 보고하는 동안 파싱된 템플릿을 재사용한다.
 - **RT-41** 파싱된 템플릿은 AST JSON으로 저장하고 다시 로드할 수 있다. AST 렌더는 소스 렌더와 같은 출력을 만든다.
-- **RT-71** Build compiler는 `--refresh dev|true|false`를 받는다. `dev`는 항상 쓰고, `true`는 source, type, contract digest가 일치하는 artifact를 재사용하며, `false`는 source를 읽거나 parse하지 않고 artifact도 쓰지 않는다.
 
 - **RT-72** package는 API의 공개 진입점(`config/parity.json`의 API unit)을 자기 생태계의 진입 방식으로 노출한다: npm package의 exports, Go package의 exported 이름, crate의 공개 항목, Composer package 또는 PHP extension의 class, Python package의 이름. build되거나 설치된 package의 test가 문서가 이름으로 적는 각 진입점을 해석한다.
 
