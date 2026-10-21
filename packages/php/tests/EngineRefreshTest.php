@@ -117,6 +117,18 @@ final class EngineRefreshTest extends TestCase
         self::assertNull($result);
     }
 
+    /**
+     * RT-3: render takes a template name, loaded through the loader, or a parsed template,
+     * and returns the whole output as one string.
+     */
+    public function testRenderTargets(): void
+    {
+        $engine = new Engine(new AstProgram(new ArrayLoader(['a.tpl' => '<p>{= x}</p>'])));
+        self::assertSame('<p>1</p>', $engine->render('a.tpl', ['x' => 1]));
+        $ast = AstProgram::parse('<p>{= x}</p>', 'a.tpl');
+        self::assertSame('<p>1</p>', $engine->render($ast, ['x' => 1]));
+    }
+
     /** A program renders the AST that its loader holds without parsing a source (RT-40). */
     public function testRendersAParsedAst(): void
     {

@@ -512,6 +512,16 @@ class ValuesAndErrors(unittest.TestCase):
         engine = Engine(AstProgram(EngineOptions(loader=MapLoader({"x.tpl": ast}))))
         self.assertEqual(engine.render("x.tpl", {"a": 2}), "3")
 
+    # RT-3: render takes a template name, loaded through the loader, or a
+    # parsed template, and returns the whole output as one string.
+    def test_render_targets(self):
+        engine = Engine(
+            AstProgram(EngineOptions(loader=MapLoader({"a.tpl": "<p>{= x}</p>"})))
+        )
+        self.assertEqual(engine.render("a.tpl", {"x": 1}), "<p>1</p>")
+        ast = parse("<p>{= x}</p>", "a.tpl")
+        self.assertEqual(engine.render(ast, {"x": 1}), "<p>1</p>")
+
     def test_spans_count_bytes(self):
         # AST-2, LEX-16: é is two bytes, so the echo after it starts at byte 2.
         ast = parse("é{= a}", "t.tpl")

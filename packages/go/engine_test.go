@@ -34,6 +34,29 @@ func TestEngineRender(t *testing.T) {
 	}
 }
 
+// RT-3: render takes a template name, loaded through the loader, or a parsed template,
+// and returns the whole output as one string.
+func TestRenderTargets(t *testing.T) {
+	loader := template.NewMapLoader(map[string]string{"a.tpl": "<p>{= x}</p>"})
+	program, err := template.NewAstProgram(template.Options{Loader: loader})
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := template.NewEngine(program)
+	out, err := engine.Render("a.tpl", map[string]any{"x": 1.0}, template.RenderOptions{})
+	if err != nil || out != "<p>1</p>" {
+		t.Fatalf("render by name: %q %v", out, err)
+	}
+	parsed, err := template.Parse([]byte("<p>{= x}</p>"), "a.tpl", template.ParseOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	out, err = engine.Render(parsed, map[string]any{"x": 1.0}, template.RenderOptions{})
+	if err != nil || out != "<p>1</p>" {
+		t.Fatalf("render parsed: %q %v", out, err)
+	}
+}
+
 // TestEnginePrepare: the prepared render of an engine renders the same bytes on every call (RT-62).
 func TestEnginePrepare(t *testing.T) {
 	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "<b>{= x}</b>"})})

@@ -347,6 +347,32 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     );
 }
 
+/// RT-3: render takes a template name, loaded through the loader, or a parsed template,
+/// and returns the whole output as one string.
+#[test]
+fn render_targets_give_the_same_output() {
+    let loader = templates(&[("a.tpl", "<p>{= x}</p>")]);
+    let engine = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(loader)),
+        ..Default::default()
+    })
+    .expect("valid engine options");
+    let assign = serde_json::json!({ "x": 1 });
+    assert_eq!(
+        engine
+            .render(RenderTarget::Name("a.tpl"), &assign, &RenderOptions::default())
+            .expect("render"),
+        "<p>1</p>"
+    );
+    let ast = polyspec_template::parse(b"<p>{= x}</p>", "a.tpl", &Default::default()).expect("parse");
+    assert_eq!(
+        engine
+            .render(RenderTarget::Ast(&ast), &assign, &RenderOptions::default())
+            .expect("render"),
+        "<p>1</p>"
+    );
+}
+
 /// A loader whose sources the test changes after the program took it: the program holds a clone, and the sources live in
 /// the cell that both share.
 struct SharedLoader(Rc<RefCell<MapLoader>>);

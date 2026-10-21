@@ -9,6 +9,14 @@ describe('Engine', () => {
     expect(engine.render('a.tpl', { x: '<' })).toBe('<b>&lt;</b>');
   });
 
+  // RT-3: render takes a template name, loaded through the loader, or a parsed template,
+  // and returns the whole output as one string.
+  it('renders a template by its name and as a parsed template (RT-3)', () => {
+    const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'a.tpl': '<p>{= x}</p>' }) }));
+    expect(engine.render('a.tpl', { x: 1 })).toBe('<p>1</p>');
+    expect(engine.render(parse('<p>{= x}</p>', 'a.tpl'), { x: 1 })).toBe('<p>1</p>');
+  });
+
   it('calls registered host functions and binds their results', () => {
     const program = new AstProgram({ loader: new MapLoader({ 'a.tpl': '{= twice(2)} {= wrap("a")}' }) });
     const engine = new Engine(program);
