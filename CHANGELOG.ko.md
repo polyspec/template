@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f56da7f3476f5a779a44cbb317ebf4b19f121aa3c08605b02c8bc296ffab7c72 -->
+<!-- source-sha256: 7a16c54cd131bf755f26d8b499dff2af0b913dad5edd833dc44115df9712c8ac -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-67: T26.7-54 항목은 fork가 아닌 validator의 collect-all 동작을 일반적인 말로 적어, changelog에 다른 project의 동작이 없다 (T26.7-67).
 - T26.7-32-19: VAL-13이 중립 규칙 하나를 말한다(각 구현은 자기 언어의 바인딩 표로 호스트 값을 변환한다). TypeScript, PHP, Go, Rust, Python의 표는 그 아래 본문이 되고, VAL-14, VAL-15, VAL-16, VAL-23은 spec, unit, 주석에서 사라졌다. 새 unit host-binding-tables가 각 구현의 표 test를 binding한다 (T26.7-32-18-1의 후속). Red: 네 id에 대해 data-model.md, data-model.ko.md, config/parity.json에 `make text-absent`를 실행하면 옛 텍스트가 남아 실패한다(15건); green: 모두 통과하고 `make parity-declarations-check UNITS="host-binding-tables"`와 `make docs-check`도 통과한다 (T26.7-32-19).
 - T26.7-64: packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 `[build-package]`로 찍으므로, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다. Red: 옛 접두사에서 `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts`가 exit 1; green: 12 passed, 0 failed (T26.7-64). Red→green 기록: 옛 접두사에서 test가 exit 1; kit 접두사에서 12개 중 12개 통과 (T26.7-64).
 - T26.7-32-18-1: RT-61은 RT-68 인용 대신 typed generated program의 변환을 직접 말하고, 픽스처 형식은 RT-46 인용 대신 docs/operations/tools.md를 가리킨다. spec 어느 파일도 옮긴 id를 인용하지 않는다. Red: runtime.md와 runtime.ko.md에 `make text-absent`를 실행하면 옛 "RT-46"과 "RT-68"이 남아 실패한다; green: 모두 통과하고 `make docs-check`도 통과한다 (T26.7-32-18-1).
@@ -246,7 +247,7 @@
 
 - T26.7-2-2-4: PHP 확장은 `Polyspec\Template\Value\Json`을 library와 같은 public signature의 internal final class로 등록한다. `parse`는 library의 값을 문서 순서대로 주고(객체는 `MapValue`, 중복 key는 첫 자리에 마지막 값을 두며, number는 float) library의 `BindError`와 그 message로 실패한다. 확장의 JSON parser의 범위 message는 이제 literal 텍스트가 아니라 library처럼 PHP가 float를 쓰는 대로 number를 쓴다(`number 1.2345678901235E+19 is outside the safe range`). `packages/php-ext/tests/JsonTest.php`는 확장의 internal test이다. Red: 새 `JsonTest`가 확장을 load하고 4개 중 1개 실패했고(`Json is not registered by the extension`), 동작의 test 3개는 library만으로 통과하며, 등록 후에는 범위 message가 달랐다(`number 12345678901234567890`); green: 확장을 load하고 `JsonTest` 4, `Value/ValueTest` 7, `LoadFailureTest` 4, `ConformanceTest` 765가 통과하며 `make lint-php-ext`가 통과한다 (T26.7-2-2-4).
 
-- T26.7-54: root가 opis fork `2.6.0-p1`(vcs `https://github.com/min-0-max/json-schema`, orm의 pin)을 고정하여, PHP AST decoder가 다른 runtime처럼 가장 깊은 잘못된 값을 가리킨다. Upstream opis 2.6.0은 collect-all mode에서 실패한 `properties` keyword가 검사한 property를 기록하기 전에 돌아가므로, `AstDecoder`는 값 `"1"`인 number `Literal`에 extra field가 있을 때 TypeScript가 `/body/0/expr/value`라고 하는 자리에 `/body/0/expr`를 보고했다(AST-10). Red: `AstDecodeTest::testDecodeNamesTheDeepestInvalidValueOfALiteralWithAnExtraField`가 `-'/body/0/expr/value'`와 `+'/body/0/expr'`로 실패했다(6 tests, 1 failure); green: fork에서 같은 test가 통과하고, `AstDecodeTest`는 library만으로, 그리고 확장과 함께 6개 중 6개 통과한다. 의존성 review는 fork를 기록하고, `make dependency-policy-check`는 T26.7-43의 newer-release 항목 여섯 개를 그대로 둔다 (T26.7-54).
+- T26.7-54: root가 opis fork `2.6.0-p1`(vcs `https://github.com/min-0-max/json-schema`, orm의 pin)을 고정하여, PHP AST decoder가 다른 runtime처럼 가장 깊은 잘못된 값을 가리킨다. fork가 아닌 validator 릴리스는 collect-all mode에서 실패한 `properties` keyword가 검사한 property를 기록하기 전에 돌아가므로, `AstDecoder`는 값 `"1"`인 number `Literal`에 extra field가 있을 때 TypeScript가 `/body/0/expr/value`라고 하는 자리에 `/body/0/expr`를 보고했다(AST-10). Red: `AstDecodeTest::testDecodeNamesTheDeepestInvalidValueOfALiteralWithAnExtraField`가 `-'/body/0/expr/value'`와 `+'/body/0/expr'`로 실패했다(6 tests, 1 failure); green: fork에서 같은 test가 통과하고, `AstDecodeTest`는 library만으로, 그리고 확장과 함께 6개 중 6개 통과한다. 의존성 review는 fork를 기록하고, `make dependency-policy-check`는 T26.7-43의 newer-release 항목 여섯 개를 그대로 둔다 (T26.7-54).
 
 - T26.7-46: vitest는 worktree 자신의 test 파일만 수집한다. 루트 `vitest.config.ts`가 vitest 기본값에 더해 `var/**`를 제외하므로 var/tools/mise 아래의 복사본이 실행되지 않는다. 새 test `tests/scripts/vitest-collection.test.mts`가 목록을 검사한다. Red: config가 없으면 `vitest collects 7385 file(s) under var/`(`var/tools/mise/state/trusted-configs` 아래의 복사본)로 실패한다; green: `pass 1, fail 0`이다. Verification 명령은 `packages/ts/tests/smoke.test.ts`를 한 번 실행하며 `1 passed (1)`이다 (T26.7-46).
 
