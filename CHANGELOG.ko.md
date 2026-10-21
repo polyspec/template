@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7a16c54cd131bf755f26d8b499dff2af0b913dad5edd833dc44115df9712c8ac -->
+<!-- source-sha256: 8be4ba28c07883ce82e03db5484d16aee3da78f897b9c9b9c404b65bea52beb4 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-67: row가 done이다. changelog와 checklist 행의 wording 수정은 70f2b5b9에 있고, 그 상태를 여기에 기록한다 (T26.7-67).
 - T26.7-67: T26.7-54 항목은 fork가 아닌 validator의 collect-all 동작을 일반적인 말로 적어, changelog에 다른 project의 동작이 없다 (T26.7-67).
 - T26.7-32-19: VAL-13이 중립 규칙 하나를 말한다(각 구현은 자기 언어의 바인딩 표로 호스트 값을 변환한다). TypeScript, PHP, Go, Rust, Python의 표는 그 아래 본문이 되고, VAL-14, VAL-15, VAL-16, VAL-23은 spec, unit, 주석에서 사라졌다. 새 unit host-binding-tables가 각 구현의 표 test를 binding한다 (T26.7-32-18-1의 후속). Red: 네 id에 대해 data-model.md, data-model.ko.md, config/parity.json에 `make text-absent`를 실행하면 옛 텍스트가 남아 실패한다(15건); green: 모두 통과하고 `make parity-declarations-check UNITS="host-binding-tables"`와 `make docs-check`도 통과한다 (T26.7-32-19).
 - T26.7-64: packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 `[build-package]`로 찍으므로, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다. Red: 옛 접두사에서 `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts`가 exit 1; green: 12 passed, 0 failed (T26.7-64). Red→green 기록: 옛 접두사에서 test가 exit 1; kit 접두사에서 12개 중 12개 통과 (T26.7-64).

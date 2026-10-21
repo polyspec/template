@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-67: the row is done; the wording fix of its changelog and checklist rows is in 70f2b5b9 and its state is recorded here (T26.7-67).
 - T26.7-67: the T26.7-54 entry names the collect-all behavior of the validator without the fork in generic words, so the changelog holds no other project's behavior (T26.7-67).
 - T26.7-32-19: VAL-13 states one neutral rule (each implementation converts host values by the binding table of its own language), the tables of TypeScript, PHP, Go, Rust and Python are text under it, and VAL-14, VAL-15, VAL-16 and VAL-23 are gone from the spec, the units and the comments; the new unit host-binding-tables binds each implementation’s table test (follows T26.7-32-18-1). Red: `make text-absent` on the four ids in data-model.md, data-model.ko.md and config/parity.json holds the stale text at be2aa831 (15 failures); green: all pass, and `make parity-declarations-check UNITS="host-binding-tables"` and `make docs-check` pass (T26.7-32-19).
 - T26.7-64: the build of packages/ts prints its progress with the bracket prefix `[build-package]`, which kit reads as progress, so a build that does nothing is no finding of the commit gate. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts` exit 1 with the old prefix; green: 12 passed, 0 failed (T26.7-64). Red→green record: the old prefix made the test exit 1; with the kit prefix it passes 12 of 12 (T26.7-64).

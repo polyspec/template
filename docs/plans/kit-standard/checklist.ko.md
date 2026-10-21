@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 4d6353495c6129296642f5b9471300b9ac6063d0301df8013889f63b878ba4ee -->
+<!-- source-sha256: c9b8703d8ab06371ac2832ffd59d03ee6793fbd829572ebd704724fdb32ba8b8 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -177,4 +177,4 @@
 | T26.7-64 | packages/ts의 build는 진행 출력을 kit이 진행으로 읽는 대괄호 접두사 [build-package]로 찍어, 아무것도 하지 않는 build가 commit gate의 지적이 되지 않는다 (K446-4의 후속) | scripts/build-package.mts, tests/scripts/build-package.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/build-package.test.mts` | [o] |
 | T26.7-65 | Composer 루트는 검토된 목표 버전 13.4.3을 phpunit/phpunit으로 요구하며, hyper와 ordered-json이 선언하는 방식대로 정확한 버전으로 선언하고 13.4.3으로 잠근다 (K435) | composer.json, composer.lock, config/dependency-review.json | `make dependency-policy-check` | [ ] |
 | T26.7-66 | 이 저장소의 잠금에는 검토 시점의 취약점 권고가 없고 모든 레지스트리 의존성은 검토 시점에 알려진 최신 안정 릴리스에 있다(kit K435): markdown-it, vite와 vitepress 아래의 vite, oxc-parser, vitest, @codemirror/view, setuptools, ruff를 올리고 config/dependency-review.json을 다시 기록한다 | package.json, package-lock.json, packages/codemirror/package.json, packages/python/pyproject.toml, mise.toml, config/dependency-review.json, docs/operations/dependencies.md and its Korean twin when they name a version | `make dependency-policy-check` | [ ] |
-| T26.7-67 | AST decoder 행의 changelog가 다른 project의 동작을 설명하지 않는다 (K431, P19). | CHANGELOG.md and CHANGELOG.ko.md: the T26.7-54 row describes the collect-all behavior of the pinned validator in generic words; the checklist rows of T26.7-54 do the same | `make text-absent FILE=CHANGELOG.md TEXT="2.6.0 in collect-all mode returns"` and `! git grep -q -E "2[.]6[.]0.{1,4}collect-all mode" -- CHANGELOG.ko.md` and `! git grep -q -E "upstream 2[.]6 in collect-all mode reports" -- docs/plans/kit-standard/checklist.md` and `! git grep -q -E "upstream 2[.]6" -- docs/plans/kit-standard/checklist.ko.md` | [~] |
+| T26.7-67 | AST decoder 행의 changelog가 다른 project의 동작을 설명하지 않는다 (K431, P19). | CHANGELOG.md and CHANGELOG.ko.md: the T26.7-54 row describes the collect-all behavior of the pinned validator in generic words; the checklist rows of T26.7-54 do the same | `make text-absent FILE=CHANGELOG.md TEXT="2.6.0 in collect-all mode returns"` and `! git grep -q -E "2[.]6[.]0.{1,4}collect-all mode" -- CHANGELOG.ko.md` and `! git grep -q -E "upstream 2[.]6 in collect-all mode reports" -- docs/plans/kit-standard/checklist.md` and `! git grep -q -E "upstream 2[.]6" -- docs/plans/kit-standard/checklist.ko.md` | [o] |
