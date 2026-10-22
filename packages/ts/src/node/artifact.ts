@@ -42,3 +42,26 @@ export function loadArtifact(directory: string): AstProgram {
   }
   return new AstProgram({ loader: new ArtifactLoader(templates) });
 }
+
+/** The refresh policy of an artifact store (RT-76, the ArtifactRefresh of packages/compiler/interface.json). */
+export type ArtifactRefreshPolicy = 'dev' | 'true' | 'false';
+
+/**
+ * ArtifactStore.loadOrRefresh (docs/spec/runtime.md): returns the program of the artifact in `directory`, building it first
+ * when the policy asks. `build` writes the AST artifact of the sources (the build compiler, passed in by the host, so the
+ * runtime does not carry the compiler). `dev` builds on every call; `true` reuses a verified artifact and rebuilds a missing
+ * or changed one; `false` loads the artifact that exists and fails when there is none.
+ */
+export function loadOrRefresh(directory: string, refresh: ArtifactRefreshPolicy, build: (directory: string) => void): AstProgram {
+  if (refresh === 'false') return loadArtifact(directory);
+  if (refresh === 'dev') {
+    build(directory);
+    return loadArtifact(directory);
+  }
+  try {
+    return loadArtifact(directory);
+  } catch {
+    build(directory);
+    return loadArtifact(directory);
+  }
+}
