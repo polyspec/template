@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0308e75d7b22514ca084530bff0ace5b859290095d0e19b0a9087be2176e8f83 -->
+<!-- source-sha256: 75c27bbcf7fe1a6b6d5c98938ea09a747d55b1c5a5a60ace03edb7559ebdc557 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-73: PHP 라이브러리는 확장처럼, 그리고 라이브러리의 다른 static factory가 자기 class 이름을 적듯 AstProgram::loadArtifact와 loadOrRefresh의 반환형을 AstProgram으로 선언하므로, make test-php-ext가 surface에서 멈추지 않고 test를 돌린다. Red: ecc8a9ba에서 make test-php-ext CASES=ArtifactStoreTest가 exit 2; green: 통과한다 (T26.7-73).
 - T26.7-72: make duplication-check가 clone을 찾지 않는다. PHP 확장은 bound value를 library와 host로 바꾸는 일을 pt_php_value 하나로, block의 target 쓰기를 pt_add_block_target 하나로, 선언된 method 호출을 pt_call_method 하나로, formatter의 analyze와 parse 호출을 pt_fmt_read_text 하나로, Lexer와 Parser의 인자 읽기를 pt_read_expr_arguments 하나로, 그 peek과 next를 pt_lexer_step 하나로 하고, and와 or를 한 분기에서 평가하며, 숫자의 decimal 부분을 pt_decimal_result 하나로 만든다. Rust는 날짜의 숫자를 digits_at 하나로 읽는다. Red: 4eb81206에서 make duplication-check가 exit 2; green: lint-php-ext, lint-rust, 확장 conformance, 확장 위의 PHP test 573개와 함께 통과한다 (T26.7-72).
 - T26.7-71: make lint-rust가 통과한다. sha256.rs는 padding된 message를 as_chunks로 나누고 남는 것이 없음을 assert하며, compiler의 Rust backend는 라이브러리가 RT-70 이후 그러하듯 bound map을 Arc<RuntimeOrderedMap>에 담아 생성된 showcase Rust가 컴파일된다. Red: cb35b539에서 make lint-rust가 exit 2; green: generated-lint-check, typed-generator-compile-check와 함께 통과한다 (T26.7-71).
 - T26.7-70: template이 K519가 들어간 kit 사본을 받는다. 링크된 worktree는 main checkout의 var/tools를 쓰고 아무것도 설치하지 않는다. Red: 325cdadb에서 make kit-check가 exit 2; green: 통과한다 (T26.7-70).

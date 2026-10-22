@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 5c2be02f152fcc8eb342d6a347dbf55aa2bcad5c191ef9b59481d568989fe035 -->
+<!-- source-sha256: 9d7599866576ad82f6df6f816e38a55906b080e1995d396f5cdd85ab2b626c66 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -198,4 +198,4 @@
 | T26.7-70 | template이 K519가 들어간 kit 사본을 받는다. 링크된 worktree는 main checkout의 var/tools를 쓰고 아무것도 설치하지 않으며, kit-check는 kit과 다른 사본을 찾지 않는다 | the copies that make kit-sync writes | `make kit-check`, `make lint-python` | [o] |
 | T26.7-71 | make lint-rust가 통과한다. packages/rust/src/sha256.rs는 상수 크기의 chunks_exact 없이 message를 block으로 나누고, compiler의 Rust backend(packages/compiler/src/backends/rust.mts)는 라이브러리가 7b36807b(RT-70) 이후 그러하듯 bound map을 Arc<RuntimeOrderedMap>에 담아 생성된 showcase Rust가 컴파일된다 | packages/rust/src/sha256.rs, packages/compiler/src/backends/rust.mts, the generated showcase Rust | `make lint-rust` | [o] |
 | T26.7-72 | make duplication-check가 통과한다. 이 검사가 보고하는 clone 15개(packages/php-ext/src에 14개, packages/rust/src/functions/date.rs에 1개)는 각각 두 곳이 함께 부르는 함수 하나로 옮겨진다 | packages/php-ext/src, packages/rust/src/functions/date.rs | `make duplication-check`, `make lint-php-ext`, `make lint-rust` | [o] |
-| T26.7-73 | PHP 라이브러리와 확장은 AstProgram의 같은 surface를 선언한다. 라이브러리의 다른 static factory가 자기 class 이름을 적듯 loadArtifact와 loadOrRefresh는 둘 다 AstProgram을 반환하므로, make test-php-ext가 test를 돌린다 | packages/php/src/AstProgram.php | `make test-php-ext CASES=ArtifactStoreTest` | [ ] |
+| T26.7-73 | PHP 라이브러리와 확장은 AstProgram의 같은 surface를 선언한다. 라이브러리의 다른 static factory가 자기 class 이름을 적듯 loadArtifact와 loadOrRefresh는 둘 다 AstProgram을 반환하므로, make test-php-ext가 test를 돌린다 | packages/php/src/AstProgram.php | `make test-php-ext CASES=ArtifactStoreTest` | [o] |

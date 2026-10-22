@@ -92,7 +92,7 @@ final class AstProgram implements Program, RuntimeServices
      *
      * @throws \RuntimeException when the artifact is missing, not an AST artifact, or a file does not match its digest
      */
-    public static function loadArtifact(string $directory): self
+    public static function loadArtifact(string $directory): AstProgram
     {
         return new self(ArtifactLoader::fromDirectory($directory));
     }
@@ -108,7 +108,7 @@ final class AstProgram implements Program, RuntimeServices
      * @throws \InvalidArgumentException when `$refresh` is not a refresh policy
      * @throws \RuntimeException when the artifact cannot be loaded
      */
-    public static function loadOrRefresh(string $directory, string $refresh, callable $build): self
+    public static function loadOrRefresh(string $directory, string $refresh, callable $build): AstProgram
     {
         if ($refresh === 'false') {
             return self::loadArtifact($directory);
