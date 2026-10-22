@@ -704,6 +704,9 @@ final class AstProgram implements Program, \Polyspec\Template\Render\RuntimeServ
     /** RT-56: loads the AST artifact that the build compiler wrote in a directory. */
     public static function loadArtifact(string $directory): AstProgram {}
 
+    /** ArtifactStore.loadOrRefresh: builds or reuses the artifact by its refresh policy (RT-76). */
+    public static function loadOrRefresh(string $directory, string $refresh, callable $build): AstProgram {}
+
     /**
      * RT-2: parses one template source without loading other templates.
      *

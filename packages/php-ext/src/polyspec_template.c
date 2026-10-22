@@ -2308,12 +2308,8 @@ static bool pt_read_artifact_file(zend_string *path, zval *contents)
 /* RT-56 artifact-runtime: AstProgram::loadArtifact loads the AST artifact that the build compiler wrote in a directory. It checks
  * the manifest and the sha256 digest of every file, decodes each file with the AST decoder of the extension, and returns the
  * program that renders its templates through an ArrayLoader. */
-ZEND_METHOD(Polyspec_Template_AstProgram, loadArtifact)
+static void pt_load_artifact(zend_string *directory, zval *return_value)
 {
-    zend_string *directory;
-    ZEND_PARSE_PARAMETERS_START(1, 1)
-        Z_PARAM_STR(directory)
-    ZEND_PARSE_PARAMETERS_END();
 
     zval contents, manifest, loader, program;
     ZVAL_UNDEF(&contents);
@@ -2420,6 +2416,65 @@ ZEND_METHOD(Polyspec_Template_AstProgram, loadArtifact)
         RETURN_THROWS();
     }
     ZVAL_COPY_VALUE(return_value, &program);
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, loadArtifact)
+{
+    zend_string *directory;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(directory)
+    ZEND_PARSE_PARAMETERS_END();
+    pt_load_artifact(directory, return_value);
+}
+
+/* ArtifactStore.loadOrRefresh (docs/spec/runtime.md): "dev" builds on every call, "true" reuses an artifact that loads and
+ * rebuilds on a RuntimeException of the load, and "false" loads the artifact that exists and never builds. The build is a
+ * callable of the host. */
+ZEND_METHOD(Polyspec_Template_AstProgram, loadOrRefresh)
+{
+    zend_string *directory, *refresh;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    ZEND_PARSE_PARAMETERS_START(3, 3)
+        Z_PARAM_STR(directory)
+        Z_PARAM_STR(refresh)
+        Z_PARAM_FUNC(fci, fcc)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (zend_string_equals_literal(refresh, "false")) {
+        pt_load_artifact(directory, return_value);
+        return;
+    }
+    bool dev = zend_string_equals_literal(refresh, "dev");
+    if (!dev && !zend_string_equals_literal(refresh, "true")) {
+        zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "%s is not an artifact refresh policy", ZSTR_VAL(refresh));
+        RETURN_THROWS();
+    }
+    if (!dev) {
+        pt_load_artifact(directory, return_value);
+        if (EG(exception) == NULL) {
+            return;
+        }
+        if (!instanceof_function(EG(exception)->ce, spl_ce_RuntimeException)) {
+            RETURN_THROWS();
+        }
+        zend_clear_exception();
+        zval_ptr_dtor(return_value);
+        ZVAL_NULL(return_value);
+    }
+    zval argument, result;
+    ZVAL_STR_COPY(&argument, directory);
+    ZVAL_NULL(&result);
+    fci.params = &argument;
+    fci.param_count = 1;
+    fci.retval = &result;
+    zend_call_function(&fci, &fcc);
+    zval_ptr_dtor(&argument);
+    zval_ptr_dtor(&result);
+    if (EG(exception)) {
+        RETURN_THROWS();
+    }
+    pt_load_artifact(directory, return_value);
 }
 
 /* The callable that a table holds under a key, or null. */
