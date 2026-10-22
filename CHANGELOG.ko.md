@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5858dbc69765d69721a3457acc76fe294afd8bdadb6cd67b613566dec80ed611 -->
+<!-- source-sha256: d9d0f19d054c017904d574e02422d3d3ce94caaebaf94dceb59b02311fbe0cb2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-76: config/dependency-policy.json은 PHP command line의 Composer manifest인 packages/cli/php/composer.json을 그것이 고정한 PHP platform 8.4.1과 함께 composerPlatforms에 적으므로 make dependency-policy-check가 통과한다. Red: T26.7-76 등록 시점에 make dependency-policy-check가 exit 2; green: 통과한다 (T26.7-76).
 - T26.7-75: config/layout.yml은 root vitest.config.ts를 layout-root-files의 vars.root_files에, packages/cli를 layout-packages의 component에 선언하므로 make layout-check가 통과한다. Red: T26.7-75 등록 시점에 make layout-check가 exit 2; green: 통과한다 (T26.7-75).
 - T26.7-73: PHP 라이브러리는 확장처럼, 그리고 라이브러리의 다른 static factory가 자기 class 이름을 적듯 AstProgram::loadArtifact와 loadOrRefresh의 반환형을 AstProgram으로 선언하므로, make test-php-ext가 surface에서 멈추지 않고 test를 돌린다. Red: ecc8a9ba에서 make test-php-ext CASES=ArtifactStoreTest가 exit 2; green: 통과한다 (T26.7-73).
 - T26.7-72: make duplication-check가 clone을 찾지 않는다. PHP 확장은 bound value를 library와 host로 바꾸는 일을 pt_php_value 하나로, block의 target 쓰기를 pt_add_block_target 하나로, 선언된 method 호출을 pt_call_method 하나로, formatter의 analyze와 parse 호출을 pt_fmt_read_text 하나로, Lexer와 Parser의 인자 읽기를 pt_read_expr_arguments 하나로, 그 peek과 next를 pt_lexer_step 하나로 하고, and와 or를 한 분기에서 평가하며, 숫자의 decimal 부분을 pt_decimal_result 하나로 만든다. Rust는 날짜의 숫자를 digits_at 하나로 읽는다. Red: 4eb81206에서 make duplication-check가 exit 2; green: lint-php-ext, lint-rust, 확장 conformance, 확장 위의 PHP test 573개와 함께 통과한다 (T26.7-72).
