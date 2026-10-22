@@ -22,10 +22,15 @@ export interface ParseOptions {
   delimiters?: string;
 }
 
+/** A delimiters option that is not a delimiter pair: an invalid argument of parse and analyze, not an error of the source. */
+export class DelimiterOptionError extends RangeError {
+  override name = 'DelimiterOptionError';
+}
+
 function delimitersOf(value: string | undefined): Delimiters {
   if (value === undefined) return DEFAULT_DELIMITERS;
   const delimiters = parseDelimiters(value);
-  if (delimiters === null) throw new Error(`${JSON.stringify(value)} is not a delimiter pair`);
+  if (delimiters === null) throw new DelimiterOptionError(`${JSON.stringify(value)} is not a delimiter pair`);
   return delimiters;
 }
 

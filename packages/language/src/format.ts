@@ -1,5 +1,5 @@
 // Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from the source AST.
-import { analyze, parse, TemplateError } from '@polyspec/template';
+import { analyze, DelimiterOptionError, parse, TemplateError } from '@polyspec/template';
 import { formatBody } from './body.js';
 import { indentEdits } from './indent.js';
 import { sameTree, withoutLineIndentation } from './invariant.js';
@@ -64,7 +64,10 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
   try {
     analysis = analyze(text, name, parseOptions);
   } catch (error) {
-    return { ok: false, error: parseError(error) };
+    // FMT-14: a source that does not parse, and an invalid delimiters option, are the parse result; any other failure is the
+    // formatter's own and is thrown, not reported as an error of the source.
+    if (error instanceof TemplateError || error instanceof DelimiterOptionError) return { ok: false, error: parseError(error) };
+    throw error;
   }
 
   const shift = bom.length;
@@ -114,11 +117,11 @@ function apply(text: string, edits: readonly Edit[]): string {
   return output + text.slice(cursor);
 }
 
-function parseError(error: unknown): FormatError {
+function parseError(error: TemplateError | DelimiterOptionError): FormatError {
   if (error instanceof TemplateError) {
     return { reason: 'parse', code: error.code, line: error.line, col: error.col, message: error.message };
   }
-  return { reason: 'parse', code: null, line: 0, col: 0, message: error instanceof Error ? error.message : String(error) };
+  return { reason: 'parse', code: null, line: 0, col: 0, message: error.message };
 }
 
 // The 1-based line and byte column of a string index, counted as the parser counts them.
