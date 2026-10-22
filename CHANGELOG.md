@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-4-5: closed after its children; the doc comment of the Go artifact loader (053c310f) keeps docs-check green (T26.7-4-5).
 - T26.7-4-5: the rules of docs/spec/editor.md that bind only the TypeScript editor tools live in docs/operations/editor-tools.md, and the Python package does not export analyze_prefix (children T26.7-4-5-1 and -2). Red: `make text-absent FILE=docs/spec/editor.md TEXT="**EDT-1**"` fails at 91289159 (the rule was still in the spec); green: the editor rules are gone from the spec, the Python export test and docs-check pass (T26.7-4-5).
 - T26.7-4-6: concurrent-bound-map cites what its tests check (RT-70, VAL-22), and every requirement it listed before is cited by a unit with real tests in every implementation: RT-1 runtime-operations, RT-37 the conformance suite, RT-55 level-absence, RT-56 runtime-tiers and artifact-store, RT-59 request-path, RT-62 prepared-render, RT-69 engine-program (children T26.7-4-6-1 to -7). Red: `make parity-declarations-check RULES=R13` exit 2 at 06bd60e5 (seven requirements cited by no unit); green: R13 and the Go and Python tests hold (T26.7-4-6).
 - T26.7-31: every unit of config/parity.json cites only the requirements that the tests of its bindings name, and every test file is declared: the full parity check holds after 9fb62722 (the unit artifact-store binds the loadOrRefresh tests, and the Rust SHA-256 test is internal). Red: `make parity-declarations-check` exit 2 at 935efcc5 (R5 on six test files); green: it passes after 9fb62722 (T26.7-31).
