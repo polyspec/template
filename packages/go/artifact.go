@@ -29,6 +29,8 @@ type artifactLoader struct {
 	templates map[string]loader.Result
 }
 
+// Load returns the decoded template of name and the digest of its file as its version; ok is false for a name the
+// artifact does not hold.
 func (l artifactLoader) Load(name string) (loader.Result, bool, error) {
 	result, ok := l.templates[name]
 	return result, ok, nil

@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 43dab5c9cd0724fd0ec573d2d3c3374495205697ae03f3925f1fc6f93a95e954 -->
+<!-- source-sha256: d0f457e67f539c8ebe9aeca9bd5766c9bd9a32699eb35c4a43ad59b1acab4a0b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4-5: TypeScript 편집기 도구에만 묶인 docs/spec/editor.md의 규칙은 docs/operations/editor-tools.md에 있고, Python package는 analyze_prefix를 export하지 않는다(자식 T26.7-4-5-1과 -2). Red: 91289159에서 `make text-absent FILE=docs/spec/editor.md TEXT="**EDT-1**"`가 실패(규칙이 명세에 남아 있었다); green: 편집기 규칙이 명세에서 빠지고 Python export test와 docs-check가 통과한다 (T26.7-4-5).
 - T26.7-4-6: concurrent-bound-map은 test가 검사하는 것(RT-70, VAL-22)만 인용하고, 이전에 나열하던 요구사항은 모든 구현의 실제 test를 가진 unit이 인용한다. RT-1 runtime-operations, RT-37 conformance suite, RT-55 level-absence, RT-56 runtime-tiers와 artifact-store, RT-59 request-path, RT-62 prepared-render, RT-69 engine-program (자식 T26.7-4-6-1부터 -7). Red: 06bd60e5에서 `make parity-declarations-check RULES=R13`이 exit 2(어느 unit도 인용하지 않는 요구사항 7개); green: R13과 Go, Python test가 통과한다 (T26.7-4-6).
 - T26.7-31: config/parity.json의 모든 unit은 binding의 test가 이름으로 적는 요구사항만 인용하고, 모든 test 파일이 선언된다. 9fb62722 이후 전체 parity 검사가 통과한다(unit artifact-store가 loadOrRefresh test를 binding하고, Rust SHA-256 test는 internal이다). Red: 935efcc5에서 `make parity-declarations-check`가 exit 2(test 파일 6개의 R5); green: 9fb62722 이후 통과한다 (T26.7-31).
 - T26.7-4-6-7: RT-69가 모든 구현에서 성립한다. interface test는 engine이 manifest가 지정한 program 하나만 가진다는 것을 검사한다(test a90f4131, unit engine-program 5ca5c4ce). Red: 5263c35d에서 `make parity-declarations-check UNITS="engine-program"`이 실패(unit 없음); green: 5ca5c4ce 이후 통과한다 (T26.7-4-6-7).
