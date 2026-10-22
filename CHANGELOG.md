@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-4-5-1: the rules of docs/spec/editor.md that bind only the TypeScript editor tools (EDT-1 to EDT-7 and EDT-10 to EDT-21) move to docs/operations/editor-tools.md as prose without requirement ids; EDT-8 and EDT-9 stay, bound by the tokens and analysis units in every implementation; the units lexical-tables, editor-fixtures, editor-template-root and editor-documents go, and their tests are declared as internal entries of ts. Red: `make text-absent` on the moved ids at the parent holds the stale text; green: all pass, `make parity-declarations-check UNITS="tokens analysis"` and `make docs-check` pass (T26.7-4-5-1).
 - T26.7-4-5-2: Python no longer exports `analyze_prefix`, which only the editor tools use; it is the private `_analyze_prefix`, out of `__all__` and the README tables, and its tests import the private name. Red: `make item-red` on the test commit: the three Python test files exit 1; green: test_exports, test_analysis and test_api pass, `make lint-python` and `make docs-check` pass (T26.7-4-5-2). Closed in the commit after ce136776 (T26.7-4-5-2).
 - T26.7-67: the row is done; the wording fix of its changelog and checklist rows is in 70f2b5b9 and its state is recorded here (T26.7-67).
 - T26.7-67: the T26.7-54 entry names the collect-all behavior of the validator without the fork in generic words, so the changelog holds no other project's behavior (T26.7-67).
