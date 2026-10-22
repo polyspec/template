@@ -14,10 +14,10 @@ rules:
     id: layout-go-module-path
     vars: { repo: template }
 
-  # S5: the runtime ports of the main spec (ts, go, rust, php, php-ext, python) and five components without ports, each
+  # S5: the runtime ports of the main spec (ts, go, rust, php, php-ext, python), five components without ports, each
   # one TypeScript or JavaScript package: the compiler of AST and generated host code (compiler), the language service
   # with the formatter (language), the language server (lsp), the CodeMirror 6 adapter (codemirror) and the VS Code
-  # extension (vscode).
+  # extension (vscode), and the command line packages (cli), whose PHP application is a package of its own (T26.7-53).
   - id: layout-packages
     paths:
       - "packages/*"
@@ -33,6 +33,12 @@ rules:
       - "!packages/lsp"
       - "!packages/codemirror"
       - "!packages/vscode"
+      - "!packages/cli"
+
+  # vitest.config.ts: the configuration of the root vitest run, which keeps var out of its collection (T26.7-46); vitest
+  # reads it from the root of the project.
+  - id: layout-root-files
+    vars: { root_files: "{vitest.config.ts}" }
 
   # S7: the cross-language runners, data and tool tests of the root tests/: browser (the comparator that renders the
   # conformance cases in Chromium with the browser build and compares them with the expected files, a Playwright run
