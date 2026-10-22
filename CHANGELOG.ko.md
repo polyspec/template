@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a9586b30c03a097678fd1c4cfc47e5a7c9eacd650c0aabd434e6696f5c3a2ec8 -->
+<!-- source-sha256: 8194c741677a684375cec5f654c36da3f08cade8a0760a61d7ece873b31bbdd6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-80: TypeScript formatter는 파싱되지 않는 source의 TemplateError와, parse와 analyze가 DelimiterOptionError로 던지는 잘못된 delimiters option만 parse 결과로 보고하고, analyzer의 내부 오류 같은 그 밖의 실패는 source의 오류로 보고하지 않고 던진다(FMT-14). Red: c4145fde에서 packages/language/tests/format-errors.test.ts가 exit 1; green: 통과한다 (T26.7-80).
 - T26.7-79: Rust generated conformance는 test를 돌리기 전에 cargo test --no-run으로 test crate를 빌드하므로, generated program의 compile이 첫 case의 30초 timeout에 더해지지 않고(kit K371-1) make conformance-generated-rust가 262/262 통과한다. Red: 74fc5c70에서 tests/scripts/rust-generated-steps.test.mts가 exit 1; green: 통과한다 (T26.7-79).
 - T26.7-78: compiler는 merge한 type의 source를 optional 표시와 맞추고, `a ?? b`를 b가 optional일 때만 optional로(EXP-31), `+`를 null이 되지 않는 값으로(EXP-24) 매기므로, local og_image = meta.og_image ?? links.assets + '/og.png'를 include의 필수 input으로 쓰는 examples/page case가 compile되고 generated conformance가 TypeScript, Go, Python, PHP에서 262/262 통과한다. Red: 8cae0c99에서 make compiler-ir-check가 exit 2; green: conformance-generated-ts와 함께 통과한다 (T26.7-78).
 - T26.7-77: compiler는 true refresh 정책에서 AST 또는 generated artifact가 없거나 오래됐을 때만(없는 manifest나 파일, 다른 compiler 형식의 manifest, 다른 digest나 identity, 불완전한 source graph) 다시 빌드하고, JSON이 아닌 manifest나 읽을 수 없는 파일은 다시 빌드하지 않고 원래 오류로 실패한다. 이 패턴을 막는 kit lint는 없다. oxlint no-empty는 주석만 있는 catch를 통과시킨다. Red: 4d28ba2f에서 packages/ts/tests/artifact-store.test.ts가 exit 1; green: compiler-ir-check, lint-ts와 함께 통과한다 (T26.7-77).
