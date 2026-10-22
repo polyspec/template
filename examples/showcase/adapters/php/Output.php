@@ -15,9 +15,13 @@ final class Output
     public static function plain(mixed $value): mixed
     {
         if ($value instanceof MapValue) {
-            $result = array_map(self::plain(...), iterator_to_array($value->entries()));
+            // entries() lists [key, value] pairs (T26.7-2-2-2); an object keeps a map a JSON object, also for keys such as "0".
+            $result = new \stdClass();
+            foreach ($value->entries() as [$key, $item]) {
+                $result->{$key} = self::plain($item);
+            }
 
-            return $result === [] ? (object) [] : $result;
+            return $result;
         }
         if (is_array($value)) {
             return array_map(self::plain(...), $value);
