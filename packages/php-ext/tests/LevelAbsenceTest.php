@@ -7,8 +7,9 @@ namespace Polyspec\Template\Tests;
 use PHPUnit\Framework\TestCase;
 
 /**
- * RT-55: the extension declares the extension level, which compiles in ast mode only, so it exposes no generated-program
- * class, function or source-compiler operation: an unsupported operation is absent, not an empty method.
+ * RT-55: the extension declares the extension level, which compiles in ast mode only, so it exposes no
+ * generated-program class, function or source-compiler operation: an unsupported operation is absent, not an empty
+ * method.
  */
 final class LevelAbsenceTest extends TestCase
 {

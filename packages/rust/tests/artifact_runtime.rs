@@ -7,7 +7,11 @@ use polyspec_template::{OrderedMap, RenderOptions, RenderTarget, Value, artifact
 
 #[test]
 fn load_artifact_renders_the_source_bytes() {
-    let directory = common::repo_root().join("tests").join("fixtures").join("artifact-runtime").join("artifact");
+    let directory = common::repo_root()
+        .join("tests")
+        .join("fixtures")
+        .join("artifact-runtime")
+        .join("artifact");
     let program = load_artifact(&directory).expect("load the artifact");
     let mut root = OrderedMap::new();
     root.insert("x".to_string(), Value::text("a<b"));

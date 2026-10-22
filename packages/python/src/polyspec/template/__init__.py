@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .artifact import load_artifact, load_or_refresh
+from .artifact import ArtifactStaleError, load_artifact, load_or_refresh
 from .bind import BindError, bind_data, bind_map, bind_value, check_text
 from .bind import BoundMap
 from .bind_operations import bind, merge
@@ -47,6 +47,7 @@ from .statements import Evaluator, Renderer
 from .values import NativeObject, SafeString
 
 __all__ = [
+    "ArtifactStaleError",
     "load_artifact",
     "load_or_refresh",
     "MAX_SAFE",

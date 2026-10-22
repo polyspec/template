@@ -8,8 +8,8 @@ use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 
 /**
- * RT-62: a prepared render renders identical bytes on every call, and render is prepare(...)->render(). The PHP extension
- * runs this file too.
+ * RT-62: a prepared render renders identical bytes on every call, and render is prepare(...)->render(). The PHP
+ * extension runs this file too.
  */
 final class PreparedRenderCallTest extends TestCase
 {

@@ -10,8 +10,8 @@ use Polyspec\Template\Loader\ArrayLoader;
 
 /**
  * RT-70: renders of one program may run at the same time and share only the templates that the program loaded. PHP has
- * no concurrent host code, so the renders are interleaved: eight renders of one program, each with its own data, produce
- * the output of their own data. The PHP extension runs this file too (config/parity.json).
+ * no concurrent host code, so the renders are interleaved: eight renders of one program, each with its own data,
+ * produce the output of their own data. The PHP extension runs this file too (config/parity.json).
  */
 final class ConcurrentRendersTest extends TestCase
 {

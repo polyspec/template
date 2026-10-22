@@ -2177,7 +2177,7 @@ ZEND_METHOD(Polyspec_Template_Engine, render)
 /* AstProgram (RT-1 to RT-9, RT-40, RT-41, RT-61)                                                   */
 /* ----------------------------------------------------------------------------------------------- */
 
-static zend_class_entry *pt_ast_program_ce, *pt_ast_execution_ce, *pt_loader_interface_ce, *pt_array_loader_ce;
+static zend_class_entry *pt_ast_program_ce, *pt_ast_execution_ce, *pt_loader_interface_ce, *pt_array_loader_ce, *pt_artifact_stale_ce;
 
 static const char *const pt_refresh_names[] = {"true", "dev", "false"};
 
@@ -2295,19 +2295,68 @@ static bool pt_call_php_function(const char *name, uint32_t argc, zval *args, zv
     return EG(exception) == NULL;
 }
 
-/* Reads a file of an artifact through file_get_contents; false when it cannot be read. */
-static bool pt_read_artifact_file(zend_string *path, zval *contents)
+/* Whether the PHP function `function` (is_file, is_readable) answers true for `path`. */
+static bool pt_path_test(const char *function, zend_string *path)
 {
+    zval args[1], answer;
+    ZVAL_STR_COPY(&args[0], path);
+    bool called = pt_call_php_function(function, 1, args, &answer);
+    zval_ptr_dtor(&args[0]);
+    bool yes = called && Z_TYPE(answer) == IS_TRUE;
+    zval_ptr_dtor(&answer);
+    return yes;
+}
+
+/* Reads a file of an artifact named `what`. An absent file throws ArtifactStaleException; a file that exists but cannot be
+ * read throws a RuntimeException with the message of the read. Returns false after throwing. */
+static bool pt_read_artifact_file(zend_string *path, const char *what, zval *contents)
+{
+    ZVAL_UNDEF(contents);
+    if (!pt_path_test("is_file", path)) {
+        if (EG(exception) == NULL) {
+            zend_throw_exception_ex(pt_artifact_stale_ce, 0, "%s is missing: %s", what, ZSTR_VAL(path));
+        }
+        return false;
+    }
+    if (!pt_path_test("is_readable", path)) {
+        if (EG(exception) == NULL) {
+            zend_throw_exception_ex(spl_ce_RuntimeException, 0, "%s cannot be read: %s", what, ZSTR_VAL(path));
+        }
+        return false;
+    }
     zval args[1];
     ZVAL_STR_COPY(&args[0], path);
-    bool ok = pt_call_php_function("file_get_contents", 1, args, contents);
+    bool called = pt_call_php_function("file_get_contents", 1, args, contents);
     zval_ptr_dtor(&args[0]);
-    return ok && Z_TYPE_P(contents) == IS_STRING;
+    if (!called) {
+        zval_ptr_dtor(contents);
+        ZVAL_UNDEF(contents);
+        return false;
+    }
+    if (Z_TYPE_P(contents) != IS_STRING) {
+        zval_ptr_dtor(contents);
+        ZVAL_UNDEF(contents);
+        zval last;
+        bool got = pt_call_php_function("error_get_last", 0, NULL, &last);
+        zval *message = got && Z_TYPE(last) == IS_ARRAY ? zend_hash_str_find(Z_ARRVAL(last), ZEND_STRL("message")) : NULL;
+        if (EG(exception) == NULL) {
+            if (message != NULL && Z_TYPE_P(message) == IS_STRING) {
+                zend_throw_exception_ex(spl_ce_RuntimeException, 0, "%s cannot be read: %s: %s", what, ZSTR_VAL(path), Z_STRVAL_P(message));
+            } else {
+                zend_throw_exception_ex(spl_ce_RuntimeException, 0, "%s cannot be read: %s", what, ZSTR_VAL(path));
+            }
+        }
+        zval_ptr_dtor(&last);
+        return false;
+    }
+    return true;
 }
 
 /* RT-56 artifact-runtime: AstProgram::loadArtifact loads the AST artifact that the build compiler wrote in a directory. It checks
  * the manifest and the sha256 digest of every file, decodes each file with the AST decoder of the extension, and returns the
- * program that renders its templates through an ArrayLoader. */
+ * program that renders its templates through an ArrayLoader. A missing or stale artifact throws ArtifactStaleException; any
+ * other failure throws its own exception (a RuntimeException for a file that cannot be read, a JsonException for a manifest
+ * that is not JSON, the decoder's exception for an AST that does not decode). */
 static void pt_load_artifact(zend_string *directory, zval *return_value)
 {
 
@@ -2318,22 +2367,27 @@ static void pt_load_artifact(zend_string *directory, zval *return_value)
     ZVAL_UNDEF(&program);
 
     zend_string *manifest_path = zend_strpprintf(0, "%s/manifest.json", ZSTR_VAL(directory));
-    bool read = pt_read_artifact_file(manifest_path, &contents);
+    bool read = pt_read_artifact_file(manifest_path, "AST artifact manifest", &contents);
     zend_string_release(manifest_path);
     if (!read) {
-        pt_loader_failure("AST artifact manifest is missing in %s", ZSTR_VAL(directory));
         RETURN_THROWS();
     }
 
-    zval decode_args[2];
+    zval decode_args[4];
     ZVAL_COPY(&decode_args[0], &contents);
     ZVAL_TRUE(&decode_args[1]);
-    bool decoded = pt_call_php_function("json_decode", 2, decode_args, &manifest);
+    ZVAL_LONG(&decode_args[2], 512);
+    ZVAL_LONG(&decode_args[3], PHP_JSON_THROW_ON_ERROR);
+    bool decoded = pt_call_php_function("json_decode", 4, decode_args, &manifest);
     zval_ptr_dtor(&decode_args[0]);
     zval_ptr_dtor(&contents);
-    if (!decoded || Z_TYPE(manifest) != IS_ARRAY) {
+    if (!decoded) {
         zval_ptr_dtor(&manifest);
-        pt_loader_failure("AST artifact manifest is not JSON in %s", ZSTR_VAL(directory));
+        RETURN_THROWS();
+    }
+    if (Z_TYPE(manifest) != IS_ARRAY) {
+        zval_ptr_dtor(&manifest);
+        pt_loader_failure("the artifact in %s is not an AST artifact: its manifest is not an object", ZSTR_VAL(directory));
         RETURN_THROWS();
     }
 
@@ -2366,12 +2420,13 @@ static void pt_load_artifact(zend_string *directory, zval *return_value)
         }
         zend_string *file_path = zend_strpprintf(0, "%s/%s", ZSTR_VAL(directory), Z_STRVAL_P(path));
         zval bytes;
-        bool found = pt_read_artifact_file(file_path, &bytes);
+        zend_string *what = zend_strpprintf(0, "AST artifact file of %s", ZSTR_VAL(name));
+        bool found = pt_read_artifact_file(file_path, ZSTR_VAL(what), &bytes);
+        zend_string_release(what);
         zend_string_release(file_path);
         if (!found) {
             zval_ptr_dtor(&loader);
             zval_ptr_dtor(&manifest);
-            pt_loader_failure("AST artifact is missing or corrupt: %s", ZSTR_VAL(name));
             RETURN_THROWS();
         }
         zval hash_args[2], sum;
@@ -2380,13 +2435,23 @@ static void pt_load_artifact(zend_string *directory, zval *return_value)
         bool hashed = pt_call_php_function("hash", 2, hash_args, &sum);
         zval_ptr_dtor(&hash_args[0]);
         zval_ptr_dtor(&hash_args[1]);
-        bool same = hashed && Z_TYPE(sum) == IS_STRING && zend_string_equals(Z_STR(sum), Z_STR_P(digest));
+        if (!hashed || Z_TYPE(sum) != IS_STRING) {
+            zval_ptr_dtor(&sum);
+            zval_ptr_dtor(&bytes);
+            zval_ptr_dtor(&loader);
+            zval_ptr_dtor(&manifest);
+            if (EG(exception) == NULL) {
+                pt_loader_failure("the sha256 digest of the AST artifact file of %s cannot be computed", ZSTR_VAL(name));
+            }
+            RETURN_THROWS();
+        }
+        bool same = zend_string_equals(Z_STR(sum), Z_STR_P(digest));
         zval_ptr_dtor(&sum);
         if (!same) {
             zval_ptr_dtor(&bytes);
             zval_ptr_dtor(&loader);
             zval_ptr_dtor(&manifest);
-            pt_loader_failure("AST artifact is missing or corrupt: %s", ZSTR_VAL(name));
+            zend_throw_exception_ex(pt_artifact_stale_ce, 0, "AST artifact file of %s does not match its digest", ZSTR_VAL(name));
             RETURN_THROWS();
         }
         zval ast;
@@ -2428,7 +2493,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, loadArtifact)
 }
 
 /* ArtifactStore.loadOrRefresh (docs/spec/runtime.md): "dev" builds on every call, "true" reuses an artifact that loads and
- * rebuilds on a RuntimeException of the load, and "false" loads the artifact that exists and never builds. The build is a
+ * rebuilds only a missing or stale one (ArtifactStaleException), letting every other exception through, and "false" loads the artifact that exists and never builds. The build is a
  * callable of the host. */
 ZEND_METHOD(Polyspec_Template_AstProgram, loadOrRefresh)
 {
@@ -2455,7 +2520,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, loadOrRefresh)
         if (EG(exception) == NULL) {
             return;
         }
-        if (!instanceof_function(EG(exception)->ce, spl_ce_RuntimeException)) {
+        if (!instanceof_function(EG(exception)->ce, pt_artifact_stale_ce)) {
             RETURN_THROWS();
         }
         zend_clear_exception();
@@ -3397,6 +3462,7 @@ static PHP_MINIT_FUNCTION(polyspec_template)
     zend_class_entry *loader_interface = register_class_Polyspec_Template_Loader_LoaderInterface();
     pt_loader_interface_ce = loader_interface;
     pt_array_loader_ce = register_class_Polyspec_Template_Loader_ArrayLoader(loader_interface);
+    pt_artifact_stale_ce = register_class_Polyspec_Template_Loader_ArtifactStaleException(spl_ce_RuntimeException);
     pt_filesystem_loader_ce = register_class_Polyspec_Template_Loader_FilesystemLoader(loader_interface);
     return SUCCESS;
 }

@@ -13,9 +13,9 @@ use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
 use crate::value::{OrderedMap, Value};
-use std::sync::{Mutex, PoisonError};
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::{Mutex, PoisonError};
 
 /// Controls when compiled template artifacts are refreshed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -292,7 +292,9 @@ impl AstProgram {
                 format!("template {name} cannot be loaded: the loader returned no version"),
             ));
         }
-        if let Some((version, template)) = self.cache.lock().unwrap_or_else(PoisonError::into_inner).get(name)
+        // A cache that a panic of another render poisoned fails the load as E_INTERNAL instead of serving what it holds.
+        let poisoned = |error: PoisonError<_>| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be read: {error}"));
+        if let Some((version, template)) = self.cache.lock().map_err(poisoned)?.get(name)
             && (self.artifact_refresh == ArtifactRefresh::False
                 || (self.artifact_refresh == ArtifactRefresh::True && version == loaded.version()))
         {
@@ -311,7 +313,10 @@ impl AstProgram {
             }
         };
         let template = Arc::new(template);
-        self.cache.lock().unwrap_or_else(PoisonError::into_inner).insert(name.to_string(), (version, Arc::clone(&template)));
+        self.cache
+            .lock()
+            .map_err(|error| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be written: {error}")))?
+            .insert(name.to_string(), (version, Arc::clone(&template)));
         Ok(template)
     }
 

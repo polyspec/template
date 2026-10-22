@@ -8,7 +8,11 @@ use std::cell::Cell;
 
 #[test]
 fn load_or_refresh_follows_its_policy() {
-    let directory = common::repo_root().join("tests").join("fixtures").join("artifact-runtime").join("artifact");
+    let directory = common::repo_root()
+        .join("tests")
+        .join("fixtures")
+        .join("artifact-runtime")
+        .join("artifact");
     let builds = Cell::new(0);
     let build = |_: &std::path::Path| {
         builds.set(builds.get() + 1);
@@ -21,7 +25,10 @@ fn load_or_refresh_follows_its_policy() {
     load_or_refresh(&directory, ArtifactRefresh::False, build).expect("false loads");
     assert_eq!(builds.get(), 1, "false never builds");
     let missing = directory.with_file_name("none");
-    assert!(load_or_refresh(&missing, ArtifactRefresh::False, build).is_err(), "false loaded a missing artifact");
+    assert!(
+        load_or_refresh(&missing, ArtifactRefresh::False, build).is_err(),
+        "false loaded a missing artifact"
+    );
 }
 
 #[test]

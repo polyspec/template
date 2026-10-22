@@ -8,8 +8,9 @@ use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 
 /**
- * RT-59: rendering a loaded artifact parses nothing and discovers no source (the artifact directory holds no .tpl file), and
- * two renders with the same assign give identical bytes and leave the assign unchanged. The PHP extension runs this file too.
+ * RT-59: rendering a loaded artifact parses nothing and discovers no source (the artifact directory holds no .tpl
+ * file), and two renders with the same assign give identical bytes and leave the assign unchanged. The PHP extension
+ * runs this file too.
  */
 final class RequestPathTest extends TestCase
 {

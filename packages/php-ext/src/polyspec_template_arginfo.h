@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 596b2b801d5e275b5d18be862cd8e5960fd37a23 */
+ * Stub hash: 5d0a0526e405c8502952f2f552bb20119e738e64 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -1645,6 +1645,21 @@ static zend_class_entry *register_class_Polyspec_Template_Loader_LoaderInterface
 
 	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Loader", "LoaderInterface", class_Polyspec_Template_Loader_LoaderInterface_methods);
 	class_entry = zend_register_internal_interface(&ce);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Polyspec_Template_Loader_ArtifactStaleException(zend_class_entry *class_entry_RuntimeException)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Polyspec\\Template\\Loader", "ArtifactStaleException", NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, ZEND_ACC_FINAL);
+#else
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+#endif
 
 	return class_entry;
 }

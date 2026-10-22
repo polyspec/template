@@ -6,6 +6,7 @@ namespace Polyspec\Template;
 
 use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\Loader\ArtifactLoader;
+use Polyspec\Template\Loader\ArtifactStaleException;
 use Polyspec\Template\Loader\LoaderInterface;
 use Polyspec\Template\Loader\Path;
 use Polyspec\Template\Parser\Parser;
@@ -86,7 +87,8 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
-     * Loads the AST artifact that the build compiler wrote in `$directory` and returns the program that renders it (RT-56).
+     * Loads the AST artifact that the build compiler wrote in `$directory` and returns the program that renders it
+     * (RT-56).
      *
      * @throws \RuntimeException when the artifact is missing, not an AST artifact, or a file does not match its digest
      */
@@ -96,10 +98,11 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
-     * ArtifactStore.loadOrRefresh (docs/spec/runtime.md): returns the program of the artifact in `$directory`, building it
-     * first when the policy asks. `$build` writes the AST artifact of the sources; the build compiler is passed in by the
-     * host. "dev" builds on every call, "true" reuses an artifact that loads and rebuilds a missing or changed one, and
-     * "false" loads the artifact that exists and never builds.
+     * ArtifactStore.loadOrRefresh (docs/spec/runtime.md): returns the program of the artifact in `$directory`, building
+     * it first when the policy asks. `$build` writes the AST artifact of the sources; the build compiler is passed in
+     * by the host. "dev" builds on every call, "true" reuses an artifact that loads and rebuilds only a missing or
+     * stale one (ArtifactStaleException), letting every other exception through, and "false" loads the artifact that
+     * exists and never builds.
      *
      * @param callable(string): void $build
      * @throws \InvalidArgumentException when `$refresh` is not a refresh policy
@@ -119,7 +122,7 @@ final class AstProgram implements Program, RuntimeServices
         }
         try {
             return self::loadArtifact($directory);
-        } catch (\RuntimeException) {
+        } catch (ArtifactStaleException) {
             $build($directory);
             return self::loadArtifact($directory);
         }

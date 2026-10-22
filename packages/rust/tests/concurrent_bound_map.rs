@@ -32,7 +32,13 @@ fn concurrent_renders_read_one_bound_map() {
     let options = RenderOptions::default();
     std::thread::scope(|scope| {
         let handles: Vec<_> = (0..8)
-            .map(|_| scope.spawn(|| program.render_bound(RenderTarget::Name("page.tpl"), &bound, &options).expect("render")))
+            .map(|_| {
+                scope.spawn(|| {
+                    program
+                        .render_bound(RenderTarget::Name("page.tpl"), &bound, &options)
+                        .expect("render")
+                })
+            })
             .collect();
         for handle in handles {
             assert_eq!(handle.join().expect("thread"), expected);

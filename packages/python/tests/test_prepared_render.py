@@ -5,7 +5,13 @@ from pathlib import Path
 
 from polyspec.template import load_artifact
 
-ARTIFACT = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "artifact-runtime" / "artifact"
+ARTIFACT = (
+    Path(__file__).resolve().parents[3]
+    / "tests"
+    / "fixtures"
+    / "artifact-runtime"
+    / "artifact"
+)
 
 
 class PreparedRender(unittest.TestCase):

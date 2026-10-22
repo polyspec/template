@@ -83,7 +83,9 @@ pub fn merge(first: &BoundMap, second: &BoundMap) -> BoundMap {
     for (key, value) in second.entries.iter() {
         entries.insert(key.clone(), value.clone());
     }
-    BoundMap { entries: Arc::new(entries) }
+    BoundMap {
+        entries: Arc::new(entries),
+    }
 }
 
 /// The data of a template definition (RT-24): a value that is bound like assign data, or a bound

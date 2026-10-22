@@ -9,7 +9,9 @@ from pathlib import Path
 
 from polyspec.template import load_or_refresh
 
-FIXTURE = Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "artifact-runtime"
+FIXTURE = (
+    Path(__file__).resolve().parents[3] / "tests" / "fixtures" / "artifact-runtime"
+)
 
 
 class ArtifactStore(unittest.TestCase):

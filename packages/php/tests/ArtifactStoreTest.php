@@ -9,8 +9,8 @@ use Polyspec\Template\AstProgram;
 use Polyspec\Template\Loader\ArtifactStaleException;
 
 /**
- * RT-56 ArtifactStore.loadOrRefresh: "dev" builds on every call, "true" reuses an artifact that loads, and "false" never
- * builds. The PHP extension runs this file too (config/parity.json).
+ * RT-56 ArtifactStore.loadOrRefresh: "dev" builds on every call, "true" reuses an artifact that loads, and "false"
+ * never builds. The PHP extension runs this file too (config/parity.json).
  */
 final class ArtifactStoreTest extends TestCase
 {
@@ -65,7 +65,8 @@ final class ArtifactStoreTest extends TestCase
         self::assertSame(0, $builds);
         AstProgram::loadOrRefresh($directory, 'dev', $build);
         self::assertSame(1, $builds);
-        self::assertSame('<p>b</p>', AstProgram::loadOrRefresh($directory, 'false', $build)->render('page.tpl', ['x' => 'b']));
+        $program = AstProgram::loadOrRefresh($directory, 'false', $build);
+        self::assertSame('<p>b</p>', $program->render('page.tpl', ['x' => 'b']));
         self::assertSame(1, $builds);
         $this->expectException(\RuntimeException::class);
         AstProgram::loadOrRefresh(Support::repoRoot() . '/tests/fixtures/artifact-runtime/none', 'false', $build);

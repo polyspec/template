@@ -1,7 +1,7 @@
 //! RT-70: renders of one program may run at the same time and share only the templates that the program loaded. Eight
 //! threads render one program, each with its own data, and each render produces the output of its own data.
 
-use polyspec_template::{AstProgram, EngineOptions, MapLoader, RenderOptions, RenderTarget, Value, OrderedMap};
+use polyspec_template::{AstProgram, EngineOptions, MapLoader, OrderedMap, RenderOptions, RenderTarget, Value};
 
 #[test]
 fn concurrent_renders_share_one_program_and_keep_their_own_data() {
@@ -22,9 +22,7 @@ fn concurrent_renders_share_one_program_and_keep_their_own_data() {
                     let x = format!("v{index}");
                     let mut root = OrderedMap::new();
                     root.insert("x".to_string(), Value::text(x.as_str()));
-                    let output = program
-                        .render_values(RenderTarget::Name("a.tpl"), root, options)
-                        .expect("render");
+                    let output = program.render_values(RenderTarget::Name("a.tpl"), root, options).expect("render");
                     (x, output)
                 })
             })
