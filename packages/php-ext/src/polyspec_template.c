@@ -11,6 +11,7 @@
 #include "ext/spl/spl_exceptions.h"
 #include "ext/standard/info.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces.h"
 #include "Zend/zend_smart_str.h"
 #include "main/php_streams.h"
 #include "php_polyspec_template.h"
@@ -2271,6 +2272,154 @@ ZEND_METHOD(Polyspec_Template_AstProgram, decodeTemplate)
     ZEND_PARSE_PARAMETERS_END();
 
     pt_ast_decode(json, return_value);
+}
+
+/* RT-56 artifact-runtime: calls a PHP function by name with argc arguments and stores its result in result; false when it throws.
+ * The arguments stay owned by the caller. */
+static bool pt_call_php_function(const char *name, uint32_t argc, zval *args, zval *result)
+{
+    zval function;
+    zend_fcall_info fci;
+    zend_fcall_info_cache fcc;
+    ZVAL_STRING(&function, name);
+    bool ok = zend_fcall_info_init(&function, 0, &fci, &fcc, NULL, NULL) == SUCCESS;
+    zval_ptr_dtor(&function);
+    if (!ok) {
+        return false;
+    }
+    ZVAL_NULL(result);
+    fci.param_count = argc;
+    fci.params = args;
+    fci.retval = result;
+    zend_call_function(&fci, &fcc);
+    return EG(exception) == NULL;
+}
+
+/* Reads a file of an artifact through file_get_contents; false when it cannot be read. */
+static bool pt_read_artifact_file(zend_string *path, zval *contents)
+{
+    zval args[1];
+    ZVAL_STR_COPY(&args[0], path);
+    bool ok = pt_call_php_function("file_get_contents", 1, args, contents);
+    zval_ptr_dtor(&args[0]);
+    return ok && Z_TYPE_P(contents) == IS_STRING;
+}
+
+/* RT-56 artifact-runtime: AstProgram::loadArtifact loads the AST artifact that the build compiler wrote in a directory. It checks
+ * the manifest and the sha256 digest of every file, decodes each file with the AST decoder of the extension, and returns the
+ * program that renders its templates through an ArrayLoader. */
+ZEND_METHOD(Polyspec_Template_AstProgram, loadArtifact)
+{
+    zend_string *directory;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_STR(directory)
+    ZEND_PARSE_PARAMETERS_END();
+
+    zval contents, manifest, loader, program;
+    ZVAL_UNDEF(&contents);
+    ZVAL_UNDEF(&manifest);
+    ZVAL_UNDEF(&loader);
+    ZVAL_UNDEF(&program);
+
+    zend_string *manifest_path = zend_strpprintf(0, "%s/manifest.json", ZSTR_VAL(directory));
+    bool read = pt_read_artifact_file(manifest_path, &contents);
+    zend_string_release(manifest_path);
+    if (!read) {
+        pt_loader_failure("AST artifact manifest is missing in %s", ZSTR_VAL(directory));
+        RETURN_THROWS();
+    }
+
+    zval decode_args[2];
+    ZVAL_COPY(&decode_args[0], &contents);
+    ZVAL_TRUE(&decode_args[1]);
+    bool decoded = pt_call_php_function("json_decode", 2, decode_args, &manifest);
+    zval_ptr_dtor(&decode_args[0]);
+    zval_ptr_dtor(&contents);
+    if (!decoded || Z_TYPE(manifest) != IS_ARRAY) {
+        zval_ptr_dtor(&manifest);
+        pt_loader_failure("AST artifact manifest is not JSON in %s", ZSTR_VAL(directory));
+        RETURN_THROWS();
+    }
+
+    zval *mode = zend_hash_str_find(Z_ARRVAL(manifest), ZEND_STRL("mode"));
+    zval *entry = zend_hash_str_find(Z_ARRVAL(manifest), ZEND_STRL("entry"));
+    zval *files = zend_hash_str_find(Z_ARRVAL(manifest), ZEND_STRL("files"));
+    if (mode == NULL || Z_TYPE_P(mode) != IS_STRING || !zend_string_equals_literal(Z_STR_P(mode), "ast")) {
+        zval_ptr_dtor(&manifest);
+        pt_loader_failure("the artifact in %s is not an AST artifact", ZSTR_VAL(directory));
+        RETURN_THROWS();
+    }
+    if (entry == NULL || Z_TYPE_P(entry) != IS_STRING || files == NULL || Z_TYPE_P(files) != IS_ARRAY
+            || zend_hash_find(Z_ARRVAL_P(files), Z_STR_P(entry)) == NULL) {
+        zval_ptr_dtor(&manifest);
+        pt_loader_failure("AST artifact source graph is incomplete");
+        RETURN_THROWS();
+    }
+
+    object_init_ex(&loader, pt_array_loader_ce);
+    zend_string *name;
+    zval *file;
+    ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(files), name, file) {
+        zval *path = Z_TYPE_P(file) == IS_ARRAY ? zend_hash_str_find(Z_ARRVAL_P(file), ZEND_STRL("path")) : NULL;
+        zval *digest = Z_TYPE_P(file) == IS_ARRAY ? zend_hash_str_find(Z_ARRVAL_P(file), ZEND_STRL("artifactDigest")) : NULL;
+        if (name == NULL || path == NULL || Z_TYPE_P(path) != IS_STRING || digest == NULL || Z_TYPE_P(digest) != IS_STRING) {
+            zval_ptr_dtor(&loader);
+            zval_ptr_dtor(&manifest);
+            pt_loader_failure("AST artifact manifest has a file without a path or a digest");
+            RETURN_THROWS();
+        }
+        zend_string *file_path = zend_strpprintf(0, "%s/%s", ZSTR_VAL(directory), Z_STRVAL_P(path));
+        zval bytes;
+        bool found = pt_read_artifact_file(file_path, &bytes);
+        zend_string_release(file_path);
+        if (!found) {
+            zval_ptr_dtor(&loader);
+            zval_ptr_dtor(&manifest);
+            pt_loader_failure("AST artifact is missing or corrupt: %s", ZSTR_VAL(name));
+            RETURN_THROWS();
+        }
+        zval hash_args[2], sum;
+        ZVAL_STRING(&hash_args[0], "sha256");
+        ZVAL_COPY(&hash_args[1], &bytes);
+        bool hashed = pt_call_php_function("hash", 2, hash_args, &sum);
+        zval_ptr_dtor(&hash_args[0]);
+        zval_ptr_dtor(&hash_args[1]);
+        bool same = hashed && Z_TYPE(sum) == IS_STRING && zend_string_equals(Z_STR(sum), Z_STR_P(digest));
+        zval_ptr_dtor(&sum);
+        if (!same) {
+            zval_ptr_dtor(&bytes);
+            zval_ptr_dtor(&loader);
+            zval_ptr_dtor(&manifest);
+            pt_loader_failure("AST artifact is missing or corrupt: %s", ZSTR_VAL(name));
+            RETURN_THROWS();
+        }
+        zval ast;
+        pt_ast_decode(Z_STR(bytes), &ast);
+        zval_ptr_dtor(&bytes);
+        if (EG(exception) || Z_TYPE(ast) != IS_ARRAY) {
+            zval_ptr_dtor(&ast);
+            zval_ptr_dtor(&loader);
+            zval_ptr_dtor(&manifest);
+            RETURN_THROWS();
+        }
+        bool stored = pt_array_loader_set(Z_OBJ(loader), name, &ast, 2);
+        zval_ptr_dtor(&ast);
+        if (!stored) {
+            zval_ptr_dtor(&loader);
+            zval_ptr_dtor(&manifest);
+            RETURN_THROWS();
+        }
+    } ZEND_HASH_FOREACH_END();
+    zval_ptr_dtor(&manifest);
+
+    object_init_ex(&program, pt_ast_program_ce);
+    zend_call_method(Z_OBJ(program), pt_ast_program_ce, NULL, ZEND_STRL("__construct"), NULL, 1, &loader, NULL);
+    zval_ptr_dtor(&loader);
+    if (EG(exception)) {
+        zval_ptr_dtor(&program);
+        RETURN_THROWS();
+    }
+    ZVAL_COPY_VALUE(return_value, &program);
 }
 
 /* The callable that a table holds under a key, or null. */
