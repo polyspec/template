@@ -784,6 +784,19 @@
       ]
     },
     {
+      "id": "runtime-tiers",
+      "kind": "feature",
+      "requirements": ["RT-56"],
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/artifact-runtime.test.ts", "id": "artifact-runtime (RT-56) \u203a loads an AST artifact that the build compiler wrote and renders it with the bytes of its source" },
+        { "implementation": "go", "test": "packages/go/artifact_runtime_test.go", "id": "TestLoadArtifactRendersTheSourceBytes" },
+        { "implementation": "rust", "test": "packages/rust/tests/artifact_runtime.rs", "id": "load_artifact_renders_the_source_bytes" },
+        { "implementation": "php", "test": "packages/php/tests/ArtifactRuntimeTest.php", "id": "testLoadArtifactRendersTheSourceBytes" },
+        { "implementation": "php-ext", "test": "packages/php/tests/ArtifactRuntimeTest.php", "id": "testLoadArtifactRendersTheSourceBytes" },
+        { "implementation": "python", "test": "packages/python/tests/test_artifact_runtime.py", "id": "test_load_artifact_renders_the_source_bytes" }
+      ]
+    },
+    {
       "id": "level-absence",
       "kind": "feature",
       "requirements": ["RT-55"],
