@@ -39,6 +39,10 @@ def documented_names() -> set:
 
 
 class ExportTests(unittest.TestCase):
+    def test_the_package_does_not_export_analyze_prefix(self):
+        self.assertNotIn("analyze_prefix", template.__all__)
+        self.assertFalse(hasattr(template, "analyze_prefix"))
+
     def test_export_list_has_no_repeated_name(self):
         repeated = sorted(
             {name for name in template.__all__ if template.__all__.count(name) > 1}

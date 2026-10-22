@@ -18,7 +18,7 @@ from polyspec.template import (
     RuntimeEnvironment,
     SafeString,
     analyze,
-    analyze_prefix,
+    _analyze_prefix,
     bind,
     merge,
     parse,
@@ -131,8 +131,8 @@ class Parsing(unittest.TestCase):
         self.assertEqual(analysis.tags[0]["kind"], "echo")
         self.assertTrue(any(token["kind"] == "number" for token in analysis.tokens))
 
-    def test_analyze_prefix_reports_the_error_with_the_prefix(self):
-        analysis = analyze_prefix("{= 1 }{= ", "t.tpl")
+    def test__analyze_prefix_reports_the_error_with_the_prefix(self):
+        analysis = _analyze_prefix("{= 1 }{= ", "t.tpl")
         self.assertIsNotNone(analysis.error)
         self.assertEqual(analysis.tags[0]["kind"], "echo")
 

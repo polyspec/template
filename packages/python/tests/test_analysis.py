@@ -5,7 +5,7 @@ the body range of each tag and the prefix analysis of a source with an error
 
 import unittest
 
-from polyspec.template import ParseOptions, TemplateError, analyze, analyze_prefix
+from polyspec.template import ParseOptions, TemplateError, analyze, _analyze_prefix
 
 
 def classes(source: str, tokens) -> list[str]:
@@ -201,14 +201,14 @@ class PrefixAnalysis(unittest.TestCase):
 
     def test_returns_every_tag_and_token_and_no_error_for_a_source_that_parses(self):
         source = "{? a}{= b.c}{/}"
-        result = analyze_prefix(source, "t.tpl")
+        result = _analyze_prefix(source, "t.tpl")
         self.assertIsNone(result.error)
         self.assertEqual(result.tags, analyze(source, "t.tpl").tags)
         self.assertEqual(result.tokens, analyze(source, "t.tpl").tokens)
 
     def test_returns_every_tag_of_a_source_whose_block_is_not_closed(self):
         source = "<ul>{@ x = xs}<li>{= x}</li>"
-        result = analyze_prefix(source, "t.tpl")
+        result = _analyze_prefix(source, "t.tpl")
         self.assertIsInstance(result.error, TemplateError)
         self.assertEqual(result.error.code, "E_PARSE_UNCLOSED_BLOCK")
         self.assertEqual(self.kinds(source, result), ["for {@ x = xs}", "echo {= x}"])
@@ -219,7 +219,7 @@ class PrefixAnalysis(unittest.TestCase):
 
     def test_returns_the_tags_before_a_tag_that_fails_and_only_their_tokens(self):
         source = "{= a}{? b}{= c +}{= d}{/}"
-        result = analyze_prefix(source, "t.tpl")
+        result = _analyze_prefix(source, "t.tpl")
         self.assertEqual(result.error.code, "E_PARSE_UNEXPECTED_TOKEN")
         self.assertEqual(self.kinds(source, result), ["echo {= a}", "if {? b}"])
         self.assertEqual(
@@ -229,7 +229,7 @@ class PrefixAnalysis(unittest.TestCase):
 
     def test_uses_the_delimiter_option(self):
         source = "[? a]x"
-        result = analyze_prefix(source, "t.tpl", ParseOptions(delimiters="[]"))
+        result = _analyze_prefix(source, "t.tpl", ParseOptions(delimiters="[]"))
         self.assertEqual(self.kinds(source, result), ["if [? a]"])
 
 
