@@ -1,12 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9e0d22b625c1064e3fcd69589dcf303ad377a2aaff6a641d5d02a0e6c415fc35 -->
+<!-- source-sha256: 272e2c288b0718f0a0f04663d2204e9d9c734af2a7d980825c1d606436b7f11d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
-- T26.7-4-5-1: docs/spec/editor.md의 TypeScript 편집기 도구에만 묶인 규칙(EDT-1부터 EDT-7, EDT-10부터 EDT-21)은 id 없는 산문으로 docs/operations/editor-tools.md로 옮겼다. EDT-8과 EDT-9는 남아 모든 구현의 tokens와 analysis unit이 binding한다. unit lexical-tables, editor-fixtures, editor-template-root, editor-documents는 없어졌고 그 test는 ts의 internal 항목이 되었다. Red: 부모 커밋에서 옮긴 id에 `make text-absent`를 실행하면 옛 텍스트가 남는다; green: 모두 통과하고 `make parity-declarations-check UNITS="tokens analysis"`와 `make docs-check`도 통과한다 (T26.7-4-5-1).
+- T26.7-4-5-1: docs/spec/editor.md의 TypeScript 편집기 도구에만 묶인 규칙(EDT-1부터 EDT-7, EDT-10부터 EDT-21)은 id 없는 산문으로 docs/operations/editor-tools.md로 옮겼다. EDT-8과 EDT-9는 남아 모든 구현의 tokens와 analysis unit이 binding한다. unit lexical-tables, editor-fixtures, editor-template-root, editor-documents는 없어졌고 그 test는 ts의 internal 항목이 되었다. Red: 부모 커밋에서 옮긴 id에 `make text-absent`를 실행하면 옛 텍스트가 남는다; green: 모두 통과하고 `make parity-declarations-check UNITS="tokens analysis"`와 `make docs-check`도 통과한다 (T26.7-4-5-1). 91845a9a 다음 commit에서 마감되었다 (4921fce5에서 red 기록).
 - T26.7-4-5-2: Python은 편집기 도구만 쓰는 `analyze_prefix`를 더 이상 export하지 않는다. 그것은 비공개 `_analyze_prefix`가 되어 `__all__`과 README 표에서 빠지고, 그 test는 비공개 이름을 가져다 쓴다. Red: 테스트 commit에서 `make item-red`를 실행하면 Python test 세 파일이 exit 1; green: test_exports, test_analysis, test_api가 통과하고 `make lint-python`과 `make docs-check`가 통과한다 (T26.7-4-5-2). ce136776 다음 commit에서 마감되었다 (T26.7-4-5-2).
 - T26.7-67: row가 done이다. changelog와 checklist 행의 wording 수정은 70f2b5b9에 있고, 그 상태를 여기에 기록한다 (T26.7-67).
 - T26.7-67: T26.7-54 항목은 fork가 아닌 validator의 collect-all 동작을 일반적인 말로 적어, changelog에 다른 project의 동작이 없다 (T26.7-67).
