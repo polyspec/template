@@ -776,7 +776,11 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/concurrency_test.go", "id": "TestConcurrentRendersShareOneProgram" },
-        { "implementation": "python", "test": "packages/python/tests/test_concurrency.py", "id": "test_concurrent_renders_share_one_program" }
+        { "implementation": "python", "test": "packages/python/tests/test_concurrency.py", "id": "test_concurrent_renders_share_one_program" },
+        { "implementation": "ts", "test": "packages/ts/tests/concurrent-renders.test.ts", "id": "concurrent renders of one program (RT-70) \u203a renders one program concurrently with the output of each render own data" },
+        { "implementation": "rust", "test": "packages/rust/tests/concurrent_renders.rs", "id": "concurrent_renders_share_one_program_and_keep_their_own_data" },
+        { "implementation": "php", "test": "packages/php/tests/ConcurrentRendersTest.php", "id": "testInterleavedRendersOfOneProgramKeepTheirOwnData" },
+        { "implementation": "php-ext", "test": "packages/php/tests/ConcurrentRendersTest.php", "id": "testInterleavedRendersOfOneProgramKeepTheirOwnData" }
       ]
     },
     {
