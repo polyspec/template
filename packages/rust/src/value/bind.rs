@@ -5,7 +5,7 @@ use crate::error::ErrorCode;
 use crate::value::number::MAX_SAFE;
 use crate::value::{MAX_DEPTH, OrderedMap, Value};
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Error raised while binding host data (E_DATA_* codes).
 #[derive(Debug, Clone, PartialEq)]
@@ -110,7 +110,7 @@ pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
         return Ok(OrderedMap::new());
     }
     match bind_json(input)? {
-        Value::Map(map) => Ok(match Rc::try_unwrap(map) {
+        Value::Map(map) => Ok(match Arc::try_unwrap(map) {
             Ok(map) => map,
             Err(shared) => (*shared).clone(),
         }),

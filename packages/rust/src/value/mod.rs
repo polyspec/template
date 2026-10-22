@@ -10,7 +10,7 @@ use std::any::Any;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// The nesting depth limit of lists and maps (VAL-20).
 pub const MAX_DEPTH: usize = 64;
@@ -43,7 +43,7 @@ impl From<&str> for HostError {
 }
 
 /// Native object exposed to a template without copying its state (VAL-18, VAL-19).
-pub trait TemplateObject: fmt::Debug + Any {
+pub trait TemplateObject: fmt::Debug + Any + Send + Sync {
     /// Reads one public field or property. `Ok(None)` means that the object has no public
     /// field or property of that name; the lookup is then `null`.
     fn member(&self, key: &str) -> Result<Option<Value>, HostError>;
@@ -167,11 +167,11 @@ pub enum Value {
     /// A safe string (VAL-6).
     Safe(String),
     /// A list.
-    List(Rc<Vec<Value>>),
+    List(Arc<Vec<Value>>),
     /// An ordered map.
-    Map(Rc<OrderedMap>),
+    Map(Arc<OrderedMap>),
     /// A native object.
-    Object(Rc<dyn TemplateObject>),
+    Object(Arc<dyn TemplateObject>),
 }
 
 impl PartialEq for Value {
@@ -236,26 +236,26 @@ impl Value {
 
     /// A list value from its elements.
     pub fn list(items: Vec<Value>) -> Value {
-        Value::List(Rc::new(items))
+        Value::List(Arc::new(items))
     }
 
     /// A map value from its entries.
     pub fn map(entries: OrderedMap) -> Value {
-        Value::Map(Rc::new(entries))
+        Value::Map(Arc::new(entries))
     }
 
     /// Creates a value that retains the original native object.
     pub fn object(object: impl TemplateObject + 'static) -> Value {
-        Value::Object(Rc::new(object))
+        Value::Object(Arc::new(object))
     }
 
     /// Returns the original native object of a native object value when it has the type
     /// `T` (VAL-18). A host function receives a native object argument as `Value::Object` and
     /// recovers its own type with this method.
     #[allow(clippy::disallowed_methods, reason = "a native object of another type is absent")]
-    pub fn downcast_object<T: TemplateObject>(&self) -> Option<Rc<T>> {
+    pub fn downcast_object<T: TemplateObject>(&self) -> Option<Arc<T>> {
         match self {
-            Value::Object(object) => (Rc::clone(object) as Rc<dyn Any>).downcast::<T>().ok(),
+            Value::Object(object) => (Arc::clone(object) as Arc<dyn Any + Send + Sync>).downcast::<T>().ok(),
             _ => None,
         }
     }

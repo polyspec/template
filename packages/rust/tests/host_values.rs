@@ -5,7 +5,7 @@ mod common;
 
 use polyspec_template::{AstProgram, EngineOptions, HostError, MapLoader, OrderedMap, RenderOptions, RenderTarget, TemplateObject, Value};
 use std::path::PathBuf;
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 struct Order;
@@ -20,11 +20,11 @@ impl TemplateObject for Order {
     }
 }
 
-fn same_as(object: &Rc<dyn TemplateObject>, order: &Order) -> bool {
-    std::ptr::eq(Rc::as_ptr(object).cast::<()>(), std::ptr::from_ref(order).cast::<()>())
+fn same_as(object: &Arc<dyn TemplateObject>, order: &Order) -> bool {
+    std::ptr::eq(Arc::as_ptr(object).cast::<()>(), std::ptr::from_ref(order).cast::<()>())
 }
 
-fn describe_value(value: &Value, is_order: &dyn Fn(&Rc<dyn TemplateObject>) -> bool) -> String {
+fn describe_value(value: &Value, is_order: &dyn Fn(&Arc<dyn TemplateObject>) -> bool) -> String {
     match value {
         Value::Null => "null".to_string(),
         Value::Bool(value) => format!("bool({value})"),
@@ -50,7 +50,7 @@ fn describe_value(value: &Value, is_order: &dyn Fn(&Rc<dyn TemplateObject>) -> b
     }
 }
 
-fn describe_arguments(args: &[Value], is_order: impl Fn(&Rc<dyn TemplateObject>) -> bool) -> String {
+fn describe_arguments(args: &[Value], is_order: impl Fn(&Arc<dyn TemplateObject>) -> bool) -> String {
     args.iter()
         .map(|item| describe_value(item, &is_order))
         .collect::<Vec<_>>()
@@ -73,13 +73,13 @@ fn render(target: &str, names: &[String]) -> Result<String, polyspec_template::T
     .expect("valid engine options");
     let order = Value::object(Order);
     let Value::Object(original) = order.clone() else { unreachable!() };
-    let describe_original = Rc::clone(&original);
+    let describe_original = Arc::clone(&original);
     program
         .register(
             "describe",
             Box::new(move |args, _| {
                 Ok(Value::text(describe_arguments(args, |object| {
-                    Rc::ptr_eq(object, &describe_original)
+                    Arc::ptr_eq(object, &describe_original)
                 })))
             }),
         )
@@ -90,12 +90,12 @@ fn render(target: &str, names: &[String]) -> Result<String, polyspec_template::T
             Box::new(|args, _| {
                 // Values are shared and immutable: a host can change only its own copy.
                 if let Value::List(list) = &args[0] {
-                    let mut copy = Rc::clone(list);
-                    Rc::make_mut(&mut copy)[0] = Value::text("changed");
+                    let mut copy = Arc::clone(list);
+                    Arc::make_mut(&mut copy)[0] = Value::text("changed");
                 }
                 if let Value::Map(map) = &args[1] {
-                    let mut copy = Rc::clone(map);
-                    Rc::make_mut(&mut copy).insert("k".to_string(), Value::text("changed"));
+                    let mut copy = Arc::clone(map);
+                    Arc::make_mut(&mut copy).insert("k".to_string(), Value::text("changed"));
                 }
                 Ok(Value::Null)
             }),
@@ -104,12 +104,12 @@ fn render(target: &str, names: &[String]) -> Result<String, polyspec_template::T
     program
         .register("pick", Box::new(|args, _| Ok(args[0].clone())))
         .expect("register pick");
-    let class_original = Rc::clone(&original);
+    let class_original = Arc::clone(&original);
     program
         .register_class(
             "Order",
             "describe",
-            Box::new(move |args, _| Ok(Value::text(describe_arguments(args, |object| Rc::ptr_eq(object, &class_original))))),
+            Box::new(move |args, _| Ok(Value::text(describe_arguments(args, |object| Arc::ptr_eq(object, &class_original))))),
         )
         .expect("register class function");
     let mut root = OrderedMap::new();

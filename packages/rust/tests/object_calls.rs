@@ -5,7 +5,7 @@ use polyspec_template::{
     AstProgram, BindError, EngineOptions, ErrorCode, HostError, MapLoader, OrderedMap, ParseOptions, RenderOptions, RenderTarget,
     TemplateError, TemplateObject, Value, parse,
 };
-use std::rc::Rc;
+use std::sync::Arc;
 
 #[derive(Debug)]
 struct Order {
@@ -38,7 +38,7 @@ impl TemplateObject for Order {
             "same" => Some(Ok(Value::Bool(
                 args.first()
                     .and_then(Value::downcast_object::<Order>)
-                    .is_some_and(|other| std::ptr::eq(Rc::as_ptr(&other), self)),
+                    .is_some_and(|other| std::ptr::eq(Arc::as_ptr(&other), self)),
             ))),
             "nan" => Some(Ok(Value::Number(f64::NAN))),
             _ => None,
@@ -62,9 +62,9 @@ fn render(program: &AstProgram, index: usize, root: OrderedMap) -> Result<String
     program.render_values(RenderTarget::Name(&format!("page{index}.tpl")), root, &RenderOptions::default())
 }
 
-fn order_root(order: &Rc<Order>) -> OrderedMap {
+fn order_root(order: &Arc<Order>) -> OrderedMap {
     let mut root = OrderedMap::new();
-    root.insert("order".to_string(), Value::Object(Rc::clone(order) as Rc<dyn TemplateObject>));
+    root.insert("order".to_string(), Value::Object(Arc::clone(order) as Arc<dyn TemplateObject>));
     root
 }
 
@@ -72,7 +72,7 @@ fn order_root(order: &Rc<Order>) -> OrderedMap {
 #[test]
 fn native_instance_member_and_method_are_rendered_without_copying() {
     let program = program(&["{= order.total}|{= order['total']}|{= order.missing}|{= order.status_label(\"ready\")}"]);
-    let order = Rc::new(Order { total: 12.0 });
+    let order = Arc::new(Order { total: 12.0 });
     let result = render(&program, 0, order_root(&order));
     assert_eq!(result.unwrap(), "12|12||ready:12");
 }
@@ -81,7 +81,7 @@ fn native_instance_member_and_method_are_rendered_without_copying() {
 fn member_and_result_binding_failures_point_at_the_expression() {
     // VAL-19: a field that cannot be bound fails with its data code, an accessor failure is E_RUNTIME_HOST_FUNCTION,
     // and a method result is bound; every error points at the lookup or the call.
-    let order = Rc::new(Order { total: 1.0 });
+    let order = Arc::new(Order { total: 1.0 });
     let cases = [
         ("x{= order.huge}", ErrorCode::E_DATA_NUMBER_RANGE, 5),
         ("x{= order['invalid']}", ErrorCode::E_DATA_INVALID_UTF8, 5),
@@ -95,10 +95,10 @@ fn member_and_result_binding_failures_point_at_the_expression() {
     }
 }
 
-fn is_the_object(value: Option<&Value>, expected: &Rc<Order>) -> bool {
+fn is_the_object(value: Option<&Value>, expected: &Arc<Order>) -> bool {
     value
         .and_then(Value::downcast_object::<Order>)
-        .is_some_and(|value| Rc::ptr_eq(&value, expected))
+        .is_some_and(|value| Arc::ptr_eq(&value, expected))
 }
 
 #[test]
@@ -107,8 +107,8 @@ fn native_object_arguments_arrive_as_the_original_object() {
     // or a map argument.
     let source = r#"{= same(order, [order], ["k" => order])}|{= order.same(order)}|{= Order::same(order)}"#;
     let mut program = program(&[source]);
-    let order = Rc::new(Order { total: 3.0 });
-    let expected = Rc::clone(&order);
+    let order = Arc::new(Order { total: 3.0 });
+    let expected = Arc::clone(&order);
     program
         .register(
             "same",
@@ -126,7 +126,7 @@ fn native_object_arguments_arrive_as_the_original_object() {
             }),
         )
         .unwrap();
-    let expected_class = Rc::clone(&order);
+    let expected_class = Arc::clone(&order);
     program
         .register_class(
             "Order",
@@ -142,12 +142,12 @@ fn native_object_arguments_arrive_as_the_original_object() {
 fn host_function_results_are_bound() {
     // VAL-13: a returned native object is retained, a safe string becomes plain text and an invalid number fails at the call.
     let mut program = program(&["{= order().total}|{= tag()}", "{= huge()}"]);
-    let order = Rc::new(Order { total: 5.0 });
-    let returned = Rc::clone(&order);
+    let order = Arc::new(Order { total: 5.0 });
+    let returned = Arc::clone(&order);
     program
         .register(
             "order",
-            Box::new(move |_, _| Ok(Value::Object(Rc::clone(&returned) as Rc<dyn TemplateObject>))),
+            Box::new(move |_, _| Ok(Value::Object(Arc::clone(&returned) as Arc<dyn TemplateObject>))),
         )
         .unwrap();
     program.register("tag", Box::new(|_, _| Ok(Value::safe_text("<b>")))).unwrap();

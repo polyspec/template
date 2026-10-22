@@ -13,7 +13,7 @@ use crate::render::expressions::Evaluator;
 use crate::source::Source;
 use crate::value::Value;
 use crate::value::bind::bind_map;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// A token of a bare expression: type name and source text (CNF-13).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -64,10 +64,10 @@ pub fn evaluate_expression(expr: &Expr, data: &serde_json::Value) -> Result<Valu
     let engine = AstProgram::new(Default::default())
         .map_err(|error| TemplateError::without_position(ErrorCode::E_INTERNAL, "expression", error.message))?;
     let root = bind_map(data).map_err(|error| TemplateError::without_position(error.code, "expression", error.message))?;
-    let root = Rc::new(root);
+    let root = Arc::new(root);
     let mut context = RenderContext::new(
         &engine,
-        Rc::clone(&root),
+        Arc::clone(&root),
         crate::functions::Env {
             timezone: "Z".to_string(),
             now: 0.0,

@@ -15,7 +15,7 @@ use std::sync::OnceLock;
 
 /// A host function: receives the arguments and the context and returns a value or a host error
 /// (FUN-43, FUN-46). `Err("message".into())` reports a failure; a returned value is bound (VAL-13).
-pub type HostFunction = Box<dyn Fn(&[Value], &FunctionContext<'_>) -> Result<Value, HostError>>;
+pub type HostFunction = Box<dyn Fn(&[Value], &FunctionContext<'_>) -> Result<Value, HostError> + Send + Sync>;
 
 /// The table of built-in functions.
 pub fn builtins() -> &'static HashMap<&'static str, BuiltIn> {

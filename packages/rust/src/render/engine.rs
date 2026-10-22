@@ -13,9 +13,9 @@ use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
 use crate::value::{OrderedMap, Value};
-use std::cell::RefCell;
+use std::sync::{Mutex, PoisonError};
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Controls when compiled template artifacts are refreshed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -145,7 +145,7 @@ pub struct Engine {
 
 /// The bound root, the definition registry and the environment of one request.
 struct BoundRequest {
-    root: Rc<OrderedMap>,
+    root: Arc<OrderedMap>,
     registry: HashMap<String, DefineEntry>,
     env: Env,
 }
@@ -199,7 +199,7 @@ pub struct AstProgram {
     pub delimiters: Delimiters,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
-    cache: RefCell<HashMap<String, (String, Rc<ParsedTemplate>)>>,
+    cache: Mutex<HashMap<String, (String, Arc<ParsedTemplate>)>>,
 }
 
 /// A render request with data, definitions and the target template prepared once.
@@ -211,11 +211,11 @@ pub struct PreparedRender<'e> {
 
 struct AstPreparedExecution<'e> {
     engine: &'e AstProgram,
-    root: Rc<OrderedMap>,
+    root: Arc<OrderedMap>,
     registry: HashMap<String, DefineEntry>,
     env: Env,
     target_name: String,
-    template: Rc<ParsedTemplate>,
+    template: Arc<ParsedTemplate>,
 }
 
 impl AstProgram {
@@ -224,7 +224,7 @@ impl AstProgram {
         &self,
         target: RenderTarget<'_>,
         registry: &HashMap<String, DefineEntry>,
-    ) -> Result<(String, Rc<ParsedTemplate>), TemplateError> {
+    ) -> Result<(String, Arc<ParsedTemplate>), TemplateError> {
         let target_name = match target {
             RenderTarget::Name(name) => match registry.get(name) {
                 Some(DefineEntry::Template { template, .. }) => template.clone(),
@@ -234,7 +234,7 @@ impl AstProgram {
         };
         let template = match target {
             RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
-            RenderTarget::Ast(ast) => Rc::new(ParsedTemplate {
+            RenderTarget::Ast(ast) => Arc::new(ParsedTemplate {
                 ast: ast.clone(),
                 lines: None,
             }),
@@ -255,7 +255,7 @@ impl AstProgram {
             runtime: RuntimeEnvironment::new(options.limits, options.functions)?,
             delimiters,
             artifact_refresh: options.artifact_refresh,
-            cache: RefCell::new(HashMap::new()),
+            cache: Mutex::new(HashMap::new()),
         })
     }
 
@@ -270,7 +270,7 @@ impl AstProgram {
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
-    pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Rc<ParsedTemplate>, TemplateError> {
+    pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Arc<ParsedTemplate>, TemplateError> {
         let fail = |code: ErrorCode, message: String| match (from, span) {
             (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
             _ => TemplateError::without_position(code, name, message),
@@ -292,11 +292,11 @@ impl AstProgram {
                 format!("template {name} cannot be loaded: the loader returned no version"),
             ));
         }
-        if let Some((version, template)) = self.cache.borrow().get(name)
+        if let Some((version, template)) = self.cache.lock().unwrap_or_else(PoisonError::into_inner).get(name)
             && (self.artifact_refresh == ArtifactRefresh::False
                 || (self.artifact_refresh == ArtifactRefresh::True && version == loaded.version()))
         {
-            return Ok(Rc::clone(template));
+            return Ok(Arc::clone(template));
         }
         let version = loaded.version().to_string();
         let template = match loaded {
@@ -310,8 +310,8 @@ impl AstProgram {
                 }
             }
         };
-        let template = Rc::new(template);
-        self.cache.borrow_mut().insert(name.to_string(), (version, Rc::clone(&template)));
+        let template = Arc::new(template);
+        self.cache.lock().unwrap_or_else(PoisonError::into_inner).insert(name.to_string(), (version, Arc::clone(&template)));
         Ok(template)
     }
 
@@ -346,7 +346,7 @@ impl AstProgram {
     ) -> Result<PreparedRender<'e>, TemplateError> {
         let bound = (|| -> Result<BoundRequest, BindError> {
             let root = match assign {
-                Root::Json(json) => Rc::new(bind_map(json)?),
+                Root::Json(json) => Arc::new(bind_map(json)?),
                 Root::Bound(bound) => bound_root(bound),
             };
             let registry = bind_defines(&options.define)?;
@@ -398,7 +398,7 @@ impl AstProgram {
         let (target_name, template) = self.resolve_target(target, &registry)?;
         AstPreparedExecution {
             engine: self,
-            root: Rc::new(assign),
+            root: Arc::new(assign),
             registry,
             env,
             target_name,
@@ -467,13 +467,13 @@ impl<'e> PreparedRender<'e> {
 
 impl AstPreparedExecution<'_> {
     fn render(&self) -> Result<String, TemplateError> {
-        let mut context = RenderContext::new(self.engine, Rc::clone(&self.root), self.env.clone(), &self.target_name);
+        let mut context = RenderContext::new(self.engine, Arc::clone(&self.root), self.env.clone(), &self.target_name);
         context.registry = self.registry.clone();
         context.enter(&self.target_name, None, None)?;
         let frame = Frame {
             name: self.template.ast.name.clone(),
             lines: self.template.lines.clone(),
-            context: Rc::clone(&self.root),
+            context: Arc::clone(&self.root),
         };
         let mut scope = Scope::default();
         Renderer::new(&mut context, self.engine).render_nodes(&self.template.ast.body, &frame, &mut scope)?;

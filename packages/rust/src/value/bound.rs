@@ -4,14 +4,14 @@
 use crate::error::{TemplateError, internal_boundary};
 use crate::value::bind::{BindError, bind_map, bind_value, bind_values};
 use crate::value::{OrderedMap, Value};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// A map that passed host binding (VAL-22). `bind` and `merge` create it; its entries are private.
 ///
-/// It is not `Send`, because template values share their lists and maps with `Rc`, so a host binds
-/// data in the thread that renders it.
+/// It is `Send` and `Sync`: template values share their lists and maps through `Arc`, so one bound map
+/// renders in several threads at once (RT-70).
 pub struct BoundMap {
-    entries: Rc<OrderedMap>,
+    entries: Arc<OrderedMap>,
 }
 
 mod sealed {
@@ -66,10 +66,10 @@ pub fn bind<'a>(input: impl BindInput<'a>) -> Result<BoundMap, TemplateError> {
     let failure = |error: BindError| TemplateError::without_position(error.code, "", error.message);
     internal_boundary("", || {
         let entries = match input.source() {
-            Source::Bound(bound) => Rc::clone(&bound.entries),
+            Source::Bound(bound) => Arc::clone(&bound.entries),
             // The values that `render` uses as assign (RT-4) bind like assign.
-            Source::Json(json) => Rc::new(bind_map(json).map_err(failure)?),
-            Source::Values(map) => Rc::new(bind_values(map).map_err(failure)?),
+            Source::Json(json) => Arc::new(bind_map(json).map_err(failure)?),
+            Source::Values(map) => Arc::new(bind_values(map).map_err(failure)?),
         };
         Ok(BoundMap { entries })
     })
@@ -83,7 +83,7 @@ pub fn merge(first: &BoundMap, second: &BoundMap) -> BoundMap {
     for (key, value) in second.entries.iter() {
         entries.insert(key.clone(), value.clone());
     }
-    BoundMap { entries: Rc::new(entries) }
+    BoundMap { entries: Arc::new(entries) }
 }
 
 /// The data of a template definition (RT-24): a value that is bound like assign data, or a bound
@@ -100,7 +100,7 @@ impl Clone for DefineData {
         match self {
             DefineData::Value(value) => DefineData::Value(value.clone()),
             DefineData::Bound(bound) => DefineData::Bound(BoundMap {
-                entries: Rc::clone(&bound.entries),
+                entries: Arc::clone(&bound.entries),
             }),
         }
     }
@@ -120,12 +120,12 @@ impl std::fmt::Debug for DefineData {
 pub fn bind_data(data: &DefineData) -> Result<Value, BindError> {
     match data {
         DefineData::Value(value) => bind_value(value),
-        DefineData::Bound(bound) => Ok(Value::Map(Rc::clone(&bound.entries))),
+        DefineData::Bound(bound) => Ok(Value::Map(Arc::clone(&bound.entries))),
     }
 }
 
 /// The entries of a bound map given as assign (RT-4); they are shared and cannot be changed in
 /// place. Generated programs call it.
-pub fn bound_root(bound: &BoundMap) -> Rc<OrderedMap> {
-    Rc::clone(&bound.entries)
+pub fn bound_root(bound: &BoundMap) -> Arc<OrderedMap> {
+    Arc::clone(&bound.entries)
 }

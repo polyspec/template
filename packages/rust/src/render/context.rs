@@ -5,7 +5,7 @@ use crate::error::{ErrorCode, LineIndex, Span, TemplateError};
 use crate::functions::{Env, HostFunction};
 use crate::value::{OrderedMap, Value};
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Resource limits (RT-33).
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -58,7 +58,7 @@ pub enum DefineEntry {
         /// Root-relative template name.
         template: String,
         /// Entry data.
-        data: Option<Rc<OrderedMap>>,
+        data: Option<Arc<OrderedMap>>,
     },
     /// Pre-rendered HTML.
     Html(String),
@@ -89,7 +89,7 @@ pub struct Frame {
     /// Source line index, absent for precompiled artifacts.
     pub lines: Option<LineIndex>,
     /// Context data.
-    pub context: Rc<OrderedMap>,
+    pub context: Arc<OrderedMap>,
 }
 
 /// Local scope and active loops of a rendered file; shared with included templates (RT-21).
@@ -121,7 +121,7 @@ pub struct RenderContext<'e> {
     /// Shared runtime services.
     pub services: &'e dyn RuntimeServices,
     /// Root data.
-    pub root: Rc<OrderedMap>,
+    pub root: Arc<OrderedMap>,
     /// Environment.
     pub env: Env,
     /// Entry template name.
@@ -138,7 +138,7 @@ pub struct RenderContext<'e> {
 
 impl<'e> RenderContext<'e> {
     /// Creates a render context.
-    pub fn new(services: &'e dyn RuntimeServices, root: Rc<OrderedMap>, env: Env, entry: &str) -> RenderContext<'e> {
+    pub fn new(services: &'e dyn RuntimeServices, root: Arc<OrderedMap>, env: Env, entry: &str) -> RenderContext<'e> {
         RenderContext {
             services,
             root,

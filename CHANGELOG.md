@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-32-21 (Rust public API change): the Rust library is Send and Sync for RT-70: `Rc` became `Arc`, the template cache `RefCell` became `Mutex`, and `Loader`, `HostFunction` and `TemplateObject` require `Send + Sync`; a host with a non-Send loader or function must change it.
 - T26.7-4-6-3: RT-55 states the levels and the absent operations (spec ebacb176), and binds through the unit level-absence to a test in each implementation that asserts the absence (PHP and extension, TS, Go, Rust, Python). Red: `make parity-declarations-check RULES=R13 IDS="RT-55"` exit 2 at 2f05d06e; green: that check and `UNITS="level-absence"` pass after 72278555 (T26.7-4-6-3).
 - T26.7-4-6-2: RT-37 is listed in the requirements of every error case and bound through the conformance suite; both execution modes compare each case with its expected.error.json (K277). Red: `make parity-declarations-check RULES=R13 IDS="RT-37"` exit 2 at f6196f47 (RT-37 cited by no unit); green: that check passes after b55da64c (T26.7-4-6-2).
 - T26.7-4-6-1: RT-1 is cited by the unit runtime-operations, which binds the entry-point test of each implementation (ts, go, rust, php, php-ext with EntryPointsTest, python). Red: `make parity-declarations-check UNITS="runtime-operations"` fails at 8403c01c (the unit did not exist); green: it passes after 883e0fe8 (T26.7-4-6-1).

@@ -5,7 +5,7 @@ use crate::functions::helpers::{
     BuiltIn, FunctionContext, FunctionError, arg_integer, arg_list, arg_number, arg_string, optional, stringify_arg, type_error,
 };
 use crate::value::{Value, compare_values};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Maximum element count of `range` (FUN-14).
 pub const RANGE_LIMIT: usize = 1_000_000;
@@ -72,7 +72,7 @@ fn keys(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Functio
 fn values(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
     match &args[0] {
         Value::Map(map) => Ok(Value::list(map.values().cloned().collect())),
-        Value::List(list) => Ok(Value::List(Rc::clone(list))),
+        Value::List(list) => Ok(Value::List(Arc::clone(list))),
         _ => Err(type_error("values requires a map or a list")),
     }
 }

@@ -8,7 +8,7 @@ use crate::render::engine::AstProgram;
 use crate::render::expressions::Evaluator;
 use crate::render::runtime_bindings::RuntimeBindings;
 use crate::value::{OrderedMap, Value};
-use std::rc::Rc;
+use std::sync::Arc;
 
 /// Renders statement nodes into the output of a render context.
 pub struct Renderer<'c, 'e> {
@@ -168,7 +168,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
         let included = Frame {
             name: template.ast.name.clone(),
             lines: template.lines.clone(),
-            context: Rc::clone(&frame.context),
+            context: Arc::clone(&frame.context),
         };
         let result = self.render_nodes(&template.ast.body, &included, scope);
         self.context.leave();
@@ -255,7 +255,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
         let block_frame = Frame {
             name: template.ast.name.clone(),
             lines: template.lines.clone(),
-            context: Rc::new(data),
+            context: Arc::new(data),
         };
         let mut block_scope = Scope::default();
         let result = self.render_nodes(&template.ast.body, &block_frame, &mut block_scope);
