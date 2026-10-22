@@ -1,12 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6abf9c31969035097caa39dfb1e1fdbd45bdfdd7ff76150953e503065175d600 -->
+<!-- source-sha256: 251968f57d34c629d28f95a51dfe204ac205ffffcbea50b0348f2eb633a9923d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
-- T26.7-83: Rust showcase adapter는 라이브러리의 env_from_json으로 request의 env를 만들므로, 라이브러리와 다른 adapter처럼 없는 now는 현재 시각이고 없는 timezone은 Z이며 now = 0이 아니다. Red: 수정 전 코드에서 adapter test가 "now is the current time, not 0"으로 실패한다(fix commit의 Red-Test 줄은 compile 중 시간을 넘긴 실행을 기록한다); green: 통과한다 (T26.7-83).
 - T26.7-82: Rust와 Go는 값에 형태가 없거나 불변식이 깨진 곳에 기본값을 넣지 않는다. to_json_value는 Result를 돌려주고 native object(E_DATA_UNSUPPORTED_TYPE)나 유한하지 않은 수(E_INTERNAL)를 null로 쓰지 않고 실패한다. arbitrary_precision의 serde_json이 f64로 읽지 못하는 env.now는 0이 아니라 E_DATA_UNSUPPORTED_TYPE이다. decoded text 없는 string token과 sort의 비교 실패는 ""나 Equal을 읽지 않고 E_INTERNAL 경계까지 panic한다. Red: 63bcebdf에서 cargo --test json_value가 exit 1; green: conformance-go, conformance-rust, lint-rust, lint-go와 함께 통과한다 (T26.7-82).
 - T26.7-81: Python 구현의 utf8_length는 길이를 지어내지 않는다. 값 규칙이 output에 오지 못하게 하는 UTF-8 형태 없는 text는 surrogate마다 4바이트로 세어지지 않고 그 UnicodeEncodeError가 E_INTERNAL 경계까지 올라간다. Red: d0f499ab에서 packages/python/tests/test_escape.py가 exit 1; green: 통과한다 (T26.7-81).
 - T26.7-80: TypeScript formatter는 파싱되지 않는 source의 TemplateError와, parse와 analyze가 DelimiterOptionError로 던지는 잘못된 delimiters option만 parse 결과로 보고하고, analyzer의 내부 오류 같은 그 밖의 실패는 source의 오류로 보고하지 않고 던진다(FMT-14). Red: c4145fde에서 packages/language/tests/format-errors.test.ts가 exit 1; green: 통과한다 (T26.7-80).
