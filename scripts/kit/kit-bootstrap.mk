@@ -42,13 +42,19 @@ endif
 endif
 
 .PHONY: install-packages
+# install-packages runs npm ci of the lock as it is, the release record, since npm-install is a target of the kit.mk that it
+# installs (K511); make install links after it through install-link.
 # The package-lock pins @polyspec/kit by the URL of its release asset. npm 12 refuses a dependency of a URL unless the project
 # opts in; allow-remote=root allows only the URLs that package.json itself names. npm reads it from npm_config_allow_remote, the
 # one source for every npm that installs or changes the lock: npm ci of install-packages, and npm install, npm audit fix and npm
 # dedupe of dependency-review UPDATE=1 (K189).
 install-packages dependency-review: export npm_config_allow_remote := root
-install-packages: ## Install the packages of package-lock.json, @polyspec/kit included, with the npm of var/tools; only installs, never links or builds; ONLINE
+# The extra lock projects of the repository, such as a tools project outside its workspaces with its own package-lock.json, are
+# the make targets that INSTALL_PACKAGES_EXTRA names (K428). They run after npm ci, in order, each with make, and the first one
+# that fails stops the run. They only install: make install links after them through install-link.
+install-packages: ## Install the packages of package-lock.json, @polyspec/kit included, with the npm of var/tools, then the targets that INSTALL_PACKAGES_EXTRA names; only installs, never links or builds; ONLINE
 	$(ONLINE) $(NPM) ci
+	$(foreach target,$(INSTALL_PACKAGES_EXTRA),$(MAKE) --no-print-directory $(target) || exit $$?;)
 
 # The link of install-link (K360, K360-1, K360-2): it needs the Go of var/tools, which the full install-tools installs, and the
 # environments that the steps of the repository install, so make install runs it after all of them. KIT is the kit checkout beside
