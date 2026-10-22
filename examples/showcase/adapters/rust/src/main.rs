@@ -38,7 +38,7 @@ mod generated {
 }
 
 use polyspec_template::{
-    AstProgram, DefineInput, Engine, EngineOptions, Env, MapLoader, PreparedRender, RenderOptions,
+    AstProgram, DefineInput, Engine, EngineOptions, MapLoader, PreparedRender, RenderOptions,
     RenderTarget, RequestError, RuntimeEnvironment,
 };
 use render_adapter::{
@@ -215,13 +215,21 @@ fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
         );
     }
     if let Some(environment) = &request.env {
-        options.env = Some(Env {
-            timezone: environment
-                .timezone
-                .clone()
-                .unwrap_or_else(|| "Z".to_string()),
-            now: environment.now.unwrap_or(0.0),
-        });
+        // The env of the library from the fields that env.json holds: an absent timezone is Z and an absent now is the
+        // current time, as for the other adapters.
+        let mut object = serde_json::Map::new();
+        if let Some(timezone) = &environment.timezone {
+            object.insert("timezone".to_string(), Value::String(timezone.clone()));
+        }
+        if let Some(now) = environment.now {
+            let number = serde_json::Number::from_f64(now)
+                .ok_or_else(|| format!("env.now {now} is not a finite number"))?;
+            object.insert("now".to_string(), Value::Number(number));
+        }
+        options.env = Some(
+            polyspec_template::env_from_json(&Value::Object(object))
+                .map_err(|error| error.message)?,
+        );
     }
     Ok(options)
 }
@@ -419,4 +427,34 @@ fn main() {
         "recoveredSha256": digest(&recovered),
     });
     println!("{output}");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::render_options;
+    use crate::render_adapter::{Environment, RenderRequest};
+
+    // An env.json without now renders at the current time, as the library and the other adapters do, not at the epoch.
+    #[test]
+    fn an_absent_now_is_the_current_time() {
+        let request = RenderRequest {
+            target: "page.tpl".to_string(),
+            assign: serde_json::Map::new(),
+            define: Default::default(),
+            env: Some(Environment {
+                timezone: Some("+09:00".to_string()),
+                now: None,
+            }),
+        };
+        let env = render_options(&request)
+            .expect("the options build")
+            .env
+            .expect("the request has an env");
+        assert_eq!(env.timezone, "+09:00");
+        assert!(
+            env.now > 1_700_000_000.0,
+            "now is the current time, not {}",
+            env.now
+        );
+    }
 }
