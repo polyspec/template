@@ -42,6 +42,7 @@ const methodsOf = (type: { prototype: object }) => Object.getOwnPropertyNames(ty
 
 describe('compiler interface', () => {
   // RT-67, CMP-1: the declarations match the manifest in ownership, field order and operation placement.
+  // RT-1: the program and the engine expose the operations of the support levels that the implementation declares.
   it('program and engine', () => {
     // The AST program implements Program: it holds every operation of the Program contract.
     for (const operation of manifest.runtimeContract.Program.operations) expect(typeof Reflect.get(AstProgram.prototype, operation.name)).toBe('function');

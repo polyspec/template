@@ -8,6 +8,7 @@ use polyspec_template::{
     parse_json,
 };
 
+/// RT-1: the entry points of the API, which the implementation declares, are public items.
 #[test]
 fn the_entry_points_of_the_api_are_public_items() {
     parse(b"{= a}", "a.tpl", &ParseOptions::default()).expect("the template parses");

@@ -52,6 +52,7 @@ final class ExportsTest extends TestCase
         );
     }
 
+    /** RT-1: the static entry points of the API, which the implementation declares, exist. */
     public function testTheStaticEntryPointsExist(): void
     {
         $this->assertTrue(method_exists('Polyspec\Template\AstProgram', 'parse'));

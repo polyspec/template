@@ -8,6 +8,7 @@ import (
 )
 
 // RT-72: the public entry points of the API resolve through the exported names of the package.
+// TestExportedEntryPoints checks RT-1: the entry points of the API, which the implementation declares, are exported.
 func TestExportedEntryPoints(t *testing.T) {
 	functions := map[string]any{
 		"Parse":                 template.Parse,
