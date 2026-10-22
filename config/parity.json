@@ -784,6 +784,19 @@
       ]
     },
     {
+      "id": "request-path",
+      "kind": "feature",
+      "requirements": ["RT-59"],
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/request-path.test.ts", "id": "request path (RT-59) \u203a renders a loaded artifact twice with identical bytes and an unchanged assign" },
+        { "implementation": "go", "test": "packages/go/request_path_test.go", "id": "TestRequestPathRendersALoadedArtifactTheSameWay" },
+        { "implementation": "rust", "test": "packages/rust/tests/request_path.rs", "id": "request_path_renders_a_loaded_artifact_the_same_way" },
+        { "implementation": "php", "test": "packages/php/tests/RequestPathTest.php", "id": "testRendersALoadedArtifactTheSameWay" },
+        { "implementation": "php-ext", "test": "packages/php/tests/RequestPathTest.php", "id": "testRendersALoadedArtifactTheSameWay" },
+        { "implementation": "python", "test": "packages/python/tests/test_request_path.py", "id": "test_renders_a_loaded_artifact_the_same_way" }
+      ]
+    },
+    {
       "id": "runtime-tiers",
       "kind": "feature",
       "requirements": ["RT-56"],
