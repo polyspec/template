@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 7d0d0c3578a554386bc41eeba8308febc4e9a9c6821967843f6c882bc1e57026 -->
+<!-- source-sha256: e02e7604d42ca8d0f9a189a4af5bef1e1a11593007c08e803e79f25e2e8f9d8f -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -206,3 +206,4 @@
 | T26.7-78 | compiler는 `a ?? b`의 타입을 a가 null일 때의 b 타입으로 매기므로, 결과는 b가 optional일 때만 optional이다(EXP-31). examples/page case의 parts/head.tpl include는 og_image = meta.og_image ?? links.assets + "/og.png"를 필수 input으로 받고, make conformance-generated-ts가 262개 case를 모두 통과한다 | packages/compiler/src/ir.mts, scripts/check-compiler-ir.mts | `make compiler-ir-check`, `make conformance-generated-ts` | [o] |
 | T26.7-79 | Rust generated conformance는 test를 돌리기 전에 cargo test --no-run으로 test crate를 빌드하므로, 30초보다 오래 걸리는 generated program 234개의 compile이 첫 case의 timeout에 더해지지 않고(kit K371-1은 첫 test 전의 시간도 제한한다) make conformance-generated-rust가 모든 case를 돌린다. 빌드되지 않는 crate는 cargo의 오류로 실패한다 | tests/runner/conformance-generated-rust.mts, tests/runner/rust-steps.mts, tests/scripts/rust-generated-steps.test.mts | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/rust-generated-steps.test.mts` | [o] |
 | T26.7-80 | TypeScript formatter는 FMT-14와 다른 구현이 하듯 parse 결과로 보고하는 것을 둘로 한정한다. 파싱되지 않는 source의 TemplateError(그 code와 함께)와, parse와 analyze가 이제 DelimiterOptionError로 던지는 잘못된 delimiters option(code 없이)이다. analyzer의 내부 오류 같은 그 밖의 실패는 source의 오류로 보고하지 않고 던진다 | packages/ts/src/index.ts, packages/language/src/format.ts, packages/language/tests/format-errors.test.ts | `node node_modules/@polyspec/kit/dist/run-tests.mjs vitest -- packages/language/tests/format-errors.test.ts` | [o] |
+| T26.7-81 | Python 구현의 utf8_length는 길이를 지어내지 않는다. 값 규칙이 짝 없는 surrogate를 output 전에 거부하므로(E_DATA_INVALID_UTF8, bound value와 host 결과 모두), output 시점에 UTF-8 형태가 없는 text는 깨진 불변식이고, 그 UnicodeEncodeError는 surrogate마다 4바이트로 세어지지 않고 E_INTERNAL 경계까지 올라간다 | packages/python/src/polyspec/template/escape.py, packages/python/tests/test_escape.py, packages/python/vulture_whitelist.py | `node node_modules/@polyspec/kit/dist/run-tests.mjs python --venv var/python/venv -- packages/python/tests/test_escape.py` | [ ] |
