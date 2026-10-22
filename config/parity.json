@@ -784,6 +784,19 @@
       ]
     },
     {
+      "id": "engine-program",
+      "kind": "feature",
+      "requirements": ["RT-69"],
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/compiler-interface.test.ts", "id": "compiler interface \u203a program and engine" },
+        { "implementation": "go", "test": "packages/go/compiler_interface_test.go", "id": "TestCompilerRuntimeInterface" },
+        { "implementation": "rust", "test": "packages/rust/tests/compiler_interface.rs", "id": "runtime_declarations_match_manifest" },
+        { "implementation": "php", "test": "packages/php/tests/CompilerInterfaceTest.php", "id": "testRuntimeDeclarationsMatchManifest" },
+        { "implementation": "php-ext", "test": "packages/php/tests/CompilerInterfaceTest.php", "id": "testRuntimeDeclarationsMatchManifest" },
+        { "implementation": "python", "test": "packages/python/tests/test_compiler_interface.py", "id": "test_program_and_engine" }
+      ]
+    },
+    {
       "id": "prepared-render",
       "kind": "feature",
       "requirements": ["RT-62"],
