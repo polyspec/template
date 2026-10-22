@@ -28,7 +28,8 @@ test('make release-test-matrix runs the targets of make check through the same g
   // The guard is the full-run tool of the kit that the checkout uses, installed or linked, so only its file name is fixed.
   const lines = dryRun('check');
   assert.equal(lines.length, 1, `make check runs one command: ${lines.join('\n')}`);
-  const guard = lines[0] ?? '';
+  const guard = lines[0];
+  assert.ok(guard, 'make check prints its command');
   assert.ok(guard.startsWith(`${path.join(ROOT, 'var/tools/bin/node')} `), guard);
   assert.ok(guard.endsWith(`/full-run.mjs run ${CHECK_TARGETS.join(' ')}`), guard);
   assert.deepEqual(dryRun('release-test-matrix'), [guard]);
