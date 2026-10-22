@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 8ac690a2fff88aeac70cffdd4021299f0b692eebc6c2cbcda8e5ce9b93318cf0 -->
+<!-- source-sha256: 65bc9351e4312a76bf71a9e18bfbb5870b1dab8b61b64e04e32c31fc7366dc0f -->
 # 런타임
 
 [English](/spec/runtime).
@@ -162,7 +162,7 @@ sequenceDiagram
 
 ## 지원 레벨과 컴파일 artifact
 
-- **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다.
+- **RT-55** 구현은 manifest에 지원 레벨을 선언한다. 같은 레벨을 선언한 구현은 같은 논리 타입과 연산을 제공하고, 언어별 표기는 mapping에만 기록한다. 지원하지 않는 연산은 그 레벨에 넣지 않으며 빈 메소드나 runtime fallback으로 만들지 않는다. 레벨은 RT-56의 세 레벨(`source-compiler`: `parse`, `encodeArtifact`; `artifact-runtime`: `loadArtifact`, `render`; `core-runtime`: `render`)과 `packages/compiler/interface.json`의 지원 레벨이다: `core`(TypeScript, Go, Rust, PHP, Python, 컴파일 모드 `ast`와 `gen`), `extension`(PHP 확장, 컴파일 모드 `ast`만), `browser`(JavaScript ESM, 컴파일 모드 `ast`와 `gen`). `extension`인 언어는 생성 프로그램 연산을 노출하지 않으며, 생성 모드가 build compiler인 언어(PHP)는 라이브러리에 생성 프로그램용 class나 함수를 노출하지 않는다. 이 부재가 요구사항이다.
 - **RT-56** 모든 구현(TypeScript, Go, Rust, PHP, PHP 확장, Python)은 `core-runtime`, `artifact-runtime`과 두 `Program` variant를 제공한다. Build compiler는 `source-compiler`와 generated target backend를 제공한다. JavaScript ESM은 TypeScript backend가 생성하며 별도 의미 구현으로 세지 않는다.
 - **RT-59** Render request 경로에서는 parsing, source 탐색, artifact 생성, host compilation을 하지 않는다. 같은 program을 같은 assign, define, environment로 render하면 같은 output byte를 만들고 request를 변경하지 않는다. RT-59는 이 절의 주제인 compiled artifact를 다룬다. AST program은 runtime에 로드하는 템플릿을 RT-76에 따라 갱신한다.
 - **RT-76** AST program은 자기 artifact refresh 정책(`artifactRefresh`, `packages/compiler/interface.json`의 `ArtifactRefresh`)을 runtime에 로드하는 템플릿에 적용한다. `dev`에서는 호출마다 템플릿을 다시 로드하고 parse하며, `true`에서는 로더가 그 템플릿에 대해 보고하는 버전이 바뀔 때까지(RT-10) parse를 재사용하고, `false`에서는 첫 parse를 유지하며 runtime에 갱신하지 않는다.
