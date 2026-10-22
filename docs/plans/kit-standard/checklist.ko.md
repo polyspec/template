@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 4f47b68e6b05844a8d158fdf7e60d647919a36008585b25018aa2ffb0703effa -->
+<!-- source-sha256: fa8318de1311c7595f9504e3dc646fc474ac61614b54d8b906b415ead6c37875 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -195,3 +195,4 @@
 | T26.7-67 | AST decoder 행의 changelog가 다른 project의 동작을 설명하지 않는다 (K431, P19). | CHANGELOG.md and CHANGELOG.ko.md: the T26.7-54 row describes the collect-all behavior of the pinned validator in generic words; the checklist rows of T26.7-54 do the same | `make text-absent FILE=CHANGELOG.md TEXT="2.6.0 in collect-all mode returns"` and `! git grep -q -E "2[.]6[.]0.{1,4}collect-all mode" -- CHANGELOG.ko.md` and `! git grep -q -E "upstream 2[.]6 in collect-all mode reports" -- docs/plans/kit-standard/checklist.md` and `! git grep -q -E "upstream 2[.]6" -- docs/plans/kit-standard/checklist.ko.md` | [o] |
 | T26.7-68 | esbuild 0.27.2 예외를 해결한다: 0.28.2가 여전히 빌드 체인을 깨는지 시험하고, 제거 조건이 충족되면 올리고 예외를 제거한다. hyper는 낮추지 않는다. | package.json, package-lock.json, config/dependency-policy.json, config/dependency-review.json | `make dependency-policy-check` | [-] 원인: user 2026-10-22: 버전 고정 작업 금지; 이 행은 esbuild pin 예외만 유지했다 |
 | T26.7-69 | kit-sync가 kit lint 설정 사본(K514)과 polyspec lock 검사(K515)를 지운다. template은 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, .golangci.yml, clippy.toml, .oxlintrc.json, knip.json, config/api-extractor.kit.json, config/polyspec.json을 갖지 않고, 생성 코드 lint를 포함한 모든 lint가 설정을 kit 패키지에서 읽으며, 어떤 owner group, make target 목록, 문서도 지워진 파일이나 polyspec-lock-check를 적지 않는다 | the removed copies and config/polyspec.json, config/owner-checks.json, scripts/check-generated-lint.mts, Makefile CHECK_TARGETS, docs/operations/development.md and its Korean twin, the files that kit-sync writes | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/suite-parity.test.mts`, `make kit-check`, `make docs-check`, `make lint-ts`, `make lint-go`, `make lint-php`, `make lint-python` | [o] |
+| T26.7-70 | template이 K519가 들어간 kit 사본을 받는다. 링크된 worktree는 main checkout의 var/tools를 쓰고 아무것도 설치하지 않으며, kit-check는 kit과 다른 사본을 찾지 않는다 | the copies that make kit-sync writes | `make kit-check`, `make lint-python` | [ ] |
