@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4f4776b80cc0c2bdce32d2a4c91820fa7dcee3294ab905eb64a760eb4be58ffa -->
+<!-- source-sha256: 5ba27f90c37f31bec7b43418d574dbcd1caddfb39bc53325cde74c88cb4cbb0f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-32-22: concurrent-bound-map은 Go와 Python test가 검사하는 RT-70과 VAL-22만 인용한다. 나머지 id는 T26.7-4-6-1부터 -7까지의 unit 요구사항이다. Red: 5d0d1ba5에서 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15`가 exit 2 (go와 python이 RT-1 등을 인용); green: 06bd60e5 이후 같은 검사가 exit 0 (T26.7-32-22).
 - T26.7-2-8: language의 편집기 test와 CLI package의 예외 사유가 kit이 정한 종류(ecosystem)로 시작하므로 divergence-check가 통과한다. Red: 6479898d에서 `make divergence-check`가 exit 2; green: 60a24060 이후 divergence-check가 통과한다 (T26.7-2-8).
 - T26.7-53-2: packages/php/tests/CliPackageTest.php는 command line package의 배치를 검사하고 requirement는 검사하지 않으므로 php의 사유 있는 internal test다. R5가 성립한다. Red: 8491ec32에서 `make parity-declarations-check RULES=R5`가 exit 2; green: 그 검사가 통과한다 (T26.7-53-2).
 - T26.7-32-25: conformance-cases는 구현이 공유하는 구현(shares; php-ext는 php를 공유한다)의 generated runner를 실행하므로 php-ext는 자기 runner 파일이 필요 없다. case tests/cases/data/null-assign이 모든 언어에서 통과한다. Red: 수정 전 `make conformance-cases CASES=tests/cases/data/null-assign`이 exit 2 (86294d6c; php-ext에 runner 파일이 없었다); green: 그 실행이 통과한다 (T26.7-32-25).
