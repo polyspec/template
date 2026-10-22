@@ -1,4 +1,4 @@
-// FMT-14: the formatter reports a source that does not parse and an invalid delimiters option as its parse result, and throws
+// The formatter reports a source that does not parse and an invalid delimiters option as its parse result, and throws
 // any other failure instead of reporting it as an error of the source.
 import { describe, expect, it, vi } from 'vitest';
 
@@ -15,7 +15,7 @@ vi.mock('@polyspec/template', async original => {
 
 const { format } = await import('../src/index.js');
 
-describe('format errors (FMT-14)', () => {
+describe('format errors', () => {
   it('throws an internal failure of the analyzer instead of reporting it as a parse error', () => {
     expect(() => format('{= a}', { name: 'broken.tpl' })).toThrow(TypeError);
   });

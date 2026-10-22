@@ -226,6 +226,10 @@
       "kind": "policy",
       "reason": "the expected results of the language service for every editor fixture"
     },
+    "scripts/expected-rejection.mts": {
+      "kind": "policy",
+      "reason": "PRINCIPLES.md Standards, no fallback: a check that a call is refused counts only the expected failure and lets any other error through"
+    },
     "scripts/fixture-documents.mts": {
       "kind": "ecosystem",
       "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"

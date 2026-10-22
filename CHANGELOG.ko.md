@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e3b58892086d274da0c84d92d9232876808493feff88b2e4d71eaae8ab8e21f0 -->
+<!-- source-sha256: e3e2e6009a95c3e3b79f076d3cca3c12116393580a33a30f48cc5320f2478bdb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-89: T26.7-80, -81, -82, -84가 더한 test와 tool이 선언된다. config/parity.json은 format-errors.test.ts, json_value.rs, test_escape.py를 각 구현의 internal test로 적고, config/rebuild.json은 scripts/expected-rejection.mts를 policy로 분류한다. Red: b9dbe983에서 make parity-declarations-check와 make rebuild-check가 exit 2; green: 둘 다 통과한다 (T26.7-89).
 - T26.7-88: make kit-sync가 install-mise.mts(kit K532)를 가져오고, owner 규칙이 TypeScript, PHP, Python, Go, PHP extension source를 그 lint와 duplication-check로, Rust source를 duplication-check로 보낸다(kit K534). red: make kit-check가 실패했고, 변경 뒤 green(T26.7-88).
 - T26.7-87: make showcase는 실행 mode를 var/showcase/mode-benchmark.json에 측정하고 그 파일을 검사하며, 추적되는 examples/site/data/mode-benchmark.json을 쓰거나 make bench만 하는 update-benchmark-docs를 돌리지 않으므로 showcase build가 추적 tree를 그대로 둔다. make showcase가 통과하고 추적 파일을 바꾸지 않는다. Red: dcd3e7c5에서 tests/scripts/showcase-writes.test.mts가 exit 1; green: 통과한다 (T26.7-87).
 - T26.7-86: mode benchmark와 그 검사는 측정하는 언어와 mode의 목록 하나(scripts/benchmark-result.mts의 BENCHMARK_LANGUAGES, BENCHMARK_MODES)를 읽으므로, check-benchmark-results가 639875dd(T22.6-17) 이후 benchmark가 측정하는 Python 행을 기대하고 make showcase가 benchmark 검사를 통과한다. T22.6-17의 나머지는 사용자에게 남는다. Red: b828c095에서 tests/scripts/benchmark-rows.test.mts가 exit 1("benchmark row is missing or duplicated: python/ast"); green: 통과한다 (T26.7-86).
