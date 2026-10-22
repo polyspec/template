@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-53-2: packages/php/tests/CliPackageTest.php is an internal test of php with a reason, since it checks the layout of the command line package and no requirement; R5 holds. Red: `make parity-declarations-check RULES=R5` exit 2 at 8491ec32; green: that check passes (T26.7-53-2).
 - T26.7-32-25: conformance-cases runs the generated runner of the implementation that an implementation shares (shares; php-ext shares php), so php-ext needs no runner file of its own; the case tests/cases/data/null-assign passes in every language. Red: `make conformance-cases CASES=tests/cases/data/null-assign` exit 2 at 86294d6c (php-ext had no runner file); green: that run passes (T26.7-32-25).
 - T26.7-32-20: closed; the row is [o] with its red at 36c51c61 and its green in the conformance cases (T26.7-32-20).
 - T26.7-32-20: RT-44 states that an assign that is not a map fails with E_DATA_UNSUPPORTED_TYPE and the message assign is not a map, as every implementation does; the conformance cases data/list-assign-error and data/number-assign-error hold it in every implementation. Red: `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-44"` exit 2 before the fix (56f37eedae96); green: that check and the conformance cases pass (T26.7-32-20).

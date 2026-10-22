@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 07931fd6649a830694e6e772c75dbdf22869a57a7efb7663080a07dab155bb0d -->
+<!-- source-sha256: b9d042fe262780bb2d2f5c4a6b6e7260afb7295762b4ae0e25f29a070725c483 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-53-2: packages/php/tests/CliPackageTest.php는 command line package의 배치를 검사하고 requirement는 검사하지 않으므로 php의 사유 있는 internal test다. R5가 성립한다. Red: 8491ec32에서 `make parity-declarations-check RULES=R5`가 exit 2; green: 그 검사가 통과한다 (T26.7-53-2).
 - T26.7-32-25: conformance-cases는 구현이 공유하는 구현(shares; php-ext는 php를 공유한다)의 generated runner를 실행하므로 php-ext는 자기 runner 파일이 필요 없다. case tests/cases/data/null-assign이 모든 언어에서 통과한다. Red: 수정 전 `make conformance-cases CASES=tests/cases/data/null-assign`이 exit 2 (86294d6c; php-ext에 runner 파일이 없었다); green: 그 실행이 통과한다 (T26.7-32-25).
 - T26.7-32-20: 완료 처리했다. 행은 [o]이며, red는 36c51c61이고 green은 conformance case다 (T26.7-32-20).
 - T26.7-32-20: RT-44는 map이 아닌 assign이 E_DATA_UNSUPPORTED_TYPE과 메시지 assign is not a map으로 실패한다고 말하며, 모든 구현이 그렇게 한다. conformance case data/list-assign-error와 data/number-assign-error가 모든 구현에서 이를 확인한다. Red: 수정 전 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-44"`가 exit 2 (56f37eedae96); green: 그 검사와 conformance case가 통과한다 (T26.7-32-20).
