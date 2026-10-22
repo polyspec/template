@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 695a1ed089008d2d3c5a363136e33219dc27db89cf6123b600f2456e75cce2e9 -->
+<!-- source-sha256: 1b4698bc6dc65c60078f07acfaa88efc052717a534e2fb62a91eec0929ad99d1 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -78,7 +78,7 @@
 | T26.7-4-6-2 | RT-37은 error case의 case.json이 목록에 넣고, suite unit conformance가 인용한다. 두 실행 모드는 같은 expected.error.json과 비교하므로, 모드가 다르면 그 case가 실패한다 (K277). 요구사항은 언어별 feature binding 없이 쓰이고 binding된다. | config/parity.json, the tests of error-mode-codes in every implementation | `make parity-declarations-check RULES=R13 IDS="RT-37"`, `make schema-check` | [o] |
 | T26.7-4-6-3 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of manifest-levels in every implementation | `make parity-declarations-check UNITS="level-absence"`, `make parity-declarations-check RULES=R13 IDS="RT-55"` | [o] |
 | T26.7-4-6-4 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of runtime-tiers in every implementation | `make parity-declarations-check UNITS="runtime-tiers"` | [o] |
-| T26.7-4-6-5 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of request-path in every implementation | `make parity-declarations-check UNITS="request-path"` | [ ] |
+| T26.7-4-6-5 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of request-path in every implementation | `make parity-declarations-check UNITS="request-path"` | [o] |
 | T26.7-4-6-6 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of prepared-render in every implementation | `make parity-declarations-check UNITS="prepared-render"` | [ ] |
 | T26.7-4-6-7 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of engine-program in every implementation | `make parity-declarations-check UNITS="engine-program"` | [ ] |
 | T26.7-4-5 | 편집기 도구에만 묶인 spec 규칙과 Python 도구 helper는 spec을 떠나 도구 문서로 간다: 편집기 규칙은 docs/operations/editor-tools.md로 옮기고, Python helper analyze_prefix는 내부 함수가 된다 (link-owner 판정 a, hyper 선례; T26.7-4의 후속) | the children T26.7-4-5-1 and T26.7-4-5-2 | `make docs-check` | [ ] |
