@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-2-8: the exceptions of the editor tests of language and of the CLI package begin with a kind that kit defines (ecosystem), so divergence-check holds. Red: `make divergence-check` exit 2 at 6479898d; green: divergence-check passes after 60a24060 (T26.7-2-8).
 - T26.7-53-2: packages/php/tests/CliPackageTest.php is an internal test of php with a reason, since it checks the layout of the command line package and no requirement; R5 holds. Red: `make parity-declarations-check RULES=R5` exit 2 at 8491ec32; green: that check passes (T26.7-53-2).
 - T26.7-32-25: conformance-cases runs the generated runner of the implementation that an implementation shares (shares; php-ext shares php), so php-ext needs no runner file of its own; the case tests/cases/data/null-assign passes in every language. Red: `make conformance-cases CASES=tests/cases/data/null-assign` exit 2 at 86294d6c (php-ext had no runner file); green: that run passes (T26.7-32-25).
 - T26.7-32-20: closed; the row is [o] with its red at 36c51c61 and its green in the conformance cases (T26.7-32-20).
