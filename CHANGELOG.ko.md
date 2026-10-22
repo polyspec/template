@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5dc9c3989fdbe8e4bad5e250b2b18caebc9a01d3f31e2be88fff57ad4fd710d9 -->
+<!-- source-sha256: 709c8c2437af8c8ab0e36ec62ec2fa8f12aa159fd087afc7c0aa7917dbe9c954 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-2: config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol이나 binding을 가진다(R1, R2). 자식 행이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-2).
 - T26.6: docs/spec의 모든 요구사항은 ID가 있는 항목이고, config/parity.json의 각 unit은 검사하는 요구사항을 인용한다. kit-check가 통과한다. kit 복사본은 링크된 kit을 따르고(make kit-sync), CHECK_TARGETS는 polyspec-lock-check를 실행하며, config/polyspec.json은 @polyspec/kit을 링크 패키지로 선언한다(K468, K509). Red: b1007eff에서 `make kit-check`가 exit 2(지적 7건); green: kit-check와 polyspec-lock-check가 통과한다 (T26.6).
 - T26.7-4-5: 자식이 모두 닫힌 뒤 닫는다. Go 아티팩트 로더의 doc comment(053c310f)로 docs-check가 통과한다 (T26.7-4-5).
 - T26.7-4-5: TypeScript 편집기 도구에만 묶인 docs/spec/editor.md의 규칙은 docs/operations/editor-tools.md에 있고, Python package는 analyze_prefix를 export하지 않는다(자식 T26.7-4-5-1과 -2). Red: 91289159에서 `make text-absent FILE=docs/spec/editor.md TEXT="**EDT-1**"`가 실패(규칙이 명세에 남아 있었다); green: 편집기 규칙이 명세에서 빠지고 Python export test와 docs-check가 통과한다 (T26.7-4-5).

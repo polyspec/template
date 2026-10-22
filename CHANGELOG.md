@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-2: every API unit and feature unit of config/parity.json has a symbol or a binding in every implementation (R1, R2), as its children brought about; the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7-2).
 - T26.6: every requirement of docs/spec is a bullet with its ID, and each unit of config/parity.json cites the requirements it tests; kit-check holds: the kit copies follow the linked kit (make kit-sync), CHECK_TARGETS runs polyspec-lock-check, and config/polyspec.json declares @polyspec/kit as a linked package (K468, K509). Red: `make kit-check` exit 2 at b1007eff (seven findings); green: kit-check and polyspec-lock-check pass (T26.6).
 - T26.7-4-5: closed after its children; the doc comment of the Go artifact loader (053c310f) keeps docs-check green (T26.7-4-5).
 - T26.7-4-5: the rules of docs/spec/editor.md that bind only the TypeScript editor tools live in docs/operations/editor-tools.md, and the Python package does not export analyze_prefix (children T26.7-4-5-1 and -2). Red: `make text-absent FILE=docs/spec/editor.md TEXT="**EDT-1**"` fails at 91289159 (the rule was still in the spec); green: the editor rules are gone from the spec, the Python export test and docs-check pass (T26.7-4-5).
