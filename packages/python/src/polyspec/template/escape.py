@@ -25,15 +25,12 @@ def escape_html(text: str) -> str:
 
 
 def utf8_length(text: str) -> int:
-    """The number of UTF-8 bytes of a string."""
-    try:
-        return len(text.encode("utf-8"))
-    except UnicodeEncodeError:
-        # An unpaired surrogate has no UTF-8 form; the value rules reject it before here.
-        return sum(
-            4 if 0xD800 <= ord(char) <= 0xDFFF else len(char.encode("utf-8"))
-            for char in text
-        )
+    """The number of UTF-8 bytes of a string.
+
+    The value rules reject an unpaired surrogate before output (E_DATA_INVALID_UTF8), so a text without a UTF-8 form here is
+    a broken invariant: its UnicodeEncodeError propagates and the boundary reports it as E_INTERNAL.
+    """
+    return len(text.encode("utf-8"))
 
 
 def first_invalid_utf8(data: bytes) -> int:
