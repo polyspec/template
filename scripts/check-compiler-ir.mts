@@ -181,4 +181,23 @@ try {
   if (!String(error).includes('/functions/custom/implementation must be equal to one of the allowed values')) throw error;
 }
 
+// EXP-24 and EXP-31: `+` never gives null, and `a ?? b` is b when a is null, so it is optional only when b is. In the
+// examples/page case a local set to `meta.og_image ?? links.assets + '/og.png'` under a dynamic root is the required input of
+// an include.
+const member = (object: SourceExpr, key: string): SourceExpr => ({ type: 'Member', object, key, span });
+const ogImage: SourceExpr = {
+  type: 'Binary', op: '??', left: member(variable('meta'), 'og_image'),
+  right: { type: 'Binary', op: '+', left: member(variable('links'), 'assets'), right: literal('/og.png'), span }, span,
+};
+const pageGraph: SourceGraph = {
+  lines: new Map([['main.tpl', [0]], ['head.tpl', [0]]]),
+  templates: new Map([
+    ['main.tpl', template('main.tpl', [{ type: 'Set', name: 'og_image', expr: ogImage, span }, { type: 'Include', path: 'head.tpl', span }])],
+    ['head.tpl', template('head.tpl', [{ type: 'Echo', expr: variable('og_image'), span }])],
+  ]),
+};
+const pageManifest: TypeManifest = { ...structuredClone(dynamicRoot), fields: {}, defines: {}, templates: { 'head.tpl': { og_image: 'any' } } };
+const pageSet = loweredTemplate(lower(pageGraph, pageManifest), 'main.tpl').body.find((node): node is NodeOf<'set'> => node.op === 'set');
+if (pageSet?.expr.valueType.source !== 'any') throw new Error(`compiler IR typed the og_image of examples/page as ${pageSet?.expr.valueType.source ?? 'no set'}, not any`);
+
 process.stdout.write('compiler IR: all variants and source spans lowered; typed and dynamic roots plus host signatures accepted; invalid declarations rejected\n');
