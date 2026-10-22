@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { compileAst } from '../../compiler/src/ast-artifact.mts';
+import { compileGeneratedArtifact, generatedManifestPath } from '../../compiler/src/generated-artifact.mts';
 import { loadOrRefresh } from '../src/node/index.js';
 
 function fixtureRoot(): { source: string; output: string } {
@@ -52,5 +53,30 @@ describe('ArtifactStore.loadOrRefresh (RT-56)', () => {
     let builds = 0;
     expect(() => loadOrRefresh(output, 'false', () => { builds++; })).toThrow();
     expect(builds).toBe(0);
+  });
+});
+
+describe('the build side of ArtifactStore.loadOrRefresh (RT-56)', () => {
+  it('compileAst under true fails on a manifest that is not JSON instead of rebuilding it', () => {
+    const { source, output } = fixtureRoot();
+    compileAst({ root: source, output, entry: 'page.tpl', refresh: 'dev', typeManifest: null, delimiters: null });
+    writeFileSync(join(output, 'manifest.json'), 'not json');
+    expect(() => compileAst({ root: source, output, entry: 'page.tpl', refresh: 'true', typeManifest: null, delimiters: null })).toThrow(/is no JSON text/);
+  });
+
+  it('compileGeneratedArtifact under true fails on a manifest that is not JSON and compiles nothing', () => {
+    const { source, output } = fixtureRoot();
+    compileAst({ root: source, output, entry: 'page.tpl', refresh: 'dev', typeManifest: null, delimiters: null });
+    const typeManifestPath = join(output, '..', 'types.json');
+    writeFileSync(typeManifestPath, '');
+    const generated = join(output, '..', 'generated.ts');
+    writeFileSync(generatedManifestPath(generated), 'not json');
+    let compiles = 0;
+    const options = {
+      graphPath: join(output, 'manifest.json'), typeManifestPath, target: 'ts', output: generated, refresh: 'true',
+      compilerDigest: '0'.repeat(64), compile: () => { compiles++; return 'export {};\n'; },
+    };
+    expect(() => compileGeneratedArtifact(options)).toThrow(/is no JSON text/);
+    expect(compiles).toBe(0);
   });
 });
