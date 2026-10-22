@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: ed65492bae06ec08d270431916e86dc3b979abe052bd70567be2e62f2ba69c91 -->
+<!-- source-sha256: 58f5f017b3c4d05410506ff65fcc5e27dd3e820e3781c1de3b6cd2f72ad3dcc1 -->
 # polyspec/template
 
 [English](README.md).
@@ -65,17 +65,17 @@ $json = Ast::toJson($ast);
 ## 명령줄
 
 ```sh
-vendor/bin/template.php parse [--root DIR] [--delimiters OC] FILE
-vendor/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-vendor/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
-vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
+packages/cli/php/bin/template.php parse [--root DIR] [--delimiters OC] FILE
+packages/cli/php/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+packages/cli/php/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+packages/cli/php/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
 `parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. `format`은 포맷된 텍스트를 줄바꿈을 덧붙이지 않고 출력한다(들여쓰기 단위는 공백 `N`칸(1~8), `tab`, 또는 모든 줄의 들여쓰기를 유지하는 `none`이며 기본은 공백 두 칸). 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 
 명령은 Symfony Console 애플리케이션(`Polyspec\Template\Cli\CommandLine`, 런타임 의존성 `symfony/console`)이므로 옵션은 FILE 앞에 오고, 옵션 값은 `--name value` 또는 `--name=value`로 주며, 사용법 오류는 명령의 사용법을 출력하고 상태 1로 종료한다.
 
-PHP가 PHP 확장 `polyspec_template`을 로드하면 같은 `vendor/bin/template.php`가 그 확장 위에서 같은 명령을 실행한다. 로드는 `-d extension=var/php-ext/polyspec_template.so`로 하거나, 패키지 `polyspec/template-php-ext`에서 PIE가 빌드해 설치한 것으로 한다(`pie install polyspec/template-php-ext`). 그때 라이브러리의 class들은 같은 이름으로 등록된 확장의 class다. 확장이 없으면 같은 명령은 라이브러리의 PHP 구현으로 실행된다. 확장을 위한 다른 명령줄은 없다.
+PHP가 PHP 확장 `polyspec_template`을 로드하면 같은 `packages/cli/php/bin/template.php`가 그 확장 위에서 같은 명령을 실행한다. 로드는 `-d extension=var/php-ext/polyspec_template.so`로 하거나, 패키지 `polyspec/template-php-ext`에서 PIE가 빌드해 설치한 것으로 한다(`pie install polyspec/template-php-ext`). 그때 라이브러리의 class들은 같은 이름으로 등록된 확장의 class다. 확장이 없으면 같은 명령은 라이브러리의 PHP 구현으로 실행된다. 확장을 위한 다른 명령줄은 없다.
 
 ## 개발
 

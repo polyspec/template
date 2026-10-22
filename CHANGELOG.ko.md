@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 39f6b6ad06a83598d07b298e55e5b0ac48a65e7c2b6ba5a281ead5587089db3a -->
+<!-- source-sha256: c3cbdc12a62941a33a6194efa57285129909881a467ac666fb963a4e1670a179 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-53: PHP 라이브러리의 command line은 자기 Composer project packages/cli/php가 되었다(type project, K433). 이 project는 라이브러리와 symfony/console을 require한다. 라이브러리에는 command line도 console 의존성도 없다. Red: 2fb844d9에서 `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/CliPackageTest.php`가 exit 1 (package가 없었다); green: 그 test가 통과하고, `packages/cli/php/tests/CliTest.php`(command line 7개 test)가 통과하며, 확장 CLI test가 확장과 함께 통과한다 (T26.7-53).
 - T26.7-4-5-1: main에서 마감되었다: red는 4921fce5, green은 91845a9a에 있다 (T26.7-4-5-1).
 - T26.7-4-5-1: docs/spec/editor.md의 TypeScript 편집기 도구에만 묶인 규칙(EDT-1부터 EDT-7, EDT-10부터 EDT-21)은 id 없는 산문으로 docs/operations/editor-tools.md로 옮겼다. EDT-8과 EDT-9는 남아 모든 구현의 tokens와 analysis unit이 binding한다. unit lexical-tables, editor-fixtures, editor-template-root, editor-documents는 없어졌고 그 test는 ts의 internal 항목이 되었다. Red: 부모 커밋에서 옮긴 id에 `make text-absent`를 실행하면 옛 텍스트가 남는다; green: 모두 통과하고 `make parity-declarations-check UNITS="tokens analysis"`와 `make docs-check`도 통과한다 (T26.7-4-5-1). 91845a9a 다음 commit에서 마감되었다 (4921fce5에서 red 기록).
 - T26.7-4-5-2: Python은 편집기 도구만 쓰는 `analyze_prefix`를 더 이상 export하지 않는다. 그것은 비공개 `_analyze_prefix`가 되어 `__all__`과 README 표에서 빠지고, 그 test는 비공개 이름을 가져다 쓴다. Red: 테스트 commit에서 `make item-red`를 실행하면 Python test 세 파일이 exit 1; green: test_exports, test_analysis, test_api가 통과하고 `make lint-python`과 `make docs-check`가 통과한다 (T26.7-4-5-2). ce136776 다음 commit에서 마감되었다 (T26.7-4-5-2).
