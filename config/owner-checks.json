@@ -88,6 +88,25 @@
     },
     {
       "paths": [
+        "tests/fixtures/artifact-runtime/**"
+      ],
+      "targets": [
+        "test-go",
+        "test-php",
+        "test-php-ext"
+      ]
+    },
+    {
+      "paths": [
+        "packages/cli/php/**"
+      ],
+      "targets": [
+        "test-php",
+        "lint-php"
+      ]
+    },
+    {
+      "paths": [
         "tests/cases/**"
       ],
       "targets": [
@@ -393,8 +412,7 @@
       "paths": [
         "config/toolchain.json",
         "mise.toml",
-        "mise.lock",
-        "ruff.toml"
+        "mise.lock"
       ],
       "tests": [
         "tests/scripts/toolchain-files.test.mts"
@@ -816,15 +834,7 @@
         "PRINCIPLES.md",
         "PRINCIPLES.ko.md",
         "config/layout.kit.yml",
-        "ruff.toml",
-        "phpcs.xml.dist",
-        "phpstan.dist.neon",
-        ".golangci.yml",
-        "clippy.toml",
-        ".oxlintrc.json",
-        "knip.json",
         ".editorconfig",
-        "config/api-extractor.kit.json",
         "config/*.schema.json",
         "config/php-lint/**",
         "config/commit-identity.json",
@@ -877,10 +887,7 @@
     },
     {
       "paths": [
-        ".oxlintrc.json",
-        "knip.json",
-        "config/knip-entries.json",
-        "config/api-extractor.kit.json"
+        "config/knip-entries.json"
       ],
       "targets": [
         "lint-ts"
@@ -899,24 +906,6 @@
     },
     {
       "paths": [
-        ".golangci.yml"
-      ],
-      "targets": [
-        "lint-go"
-      ]
-    },
-    {
-      "paths": [
-        "clippy.toml"
-      ],
-      "targets": [
-        "lint-rust"
-      ]
-    },
-    {
-      "paths": [
-        "phpcs.xml.dist",
-        "phpstan.dist.neon",
         "config/php-lint/**"
       ],
       "targets": [
@@ -1146,9 +1135,7 @@
     {
       "check": "make lint-ts",
       "paths": [
-        "packages/{ts,language,lsp,codemirror,compiler,vscode}/**",
-        ".oxlintrc.json",
-        "knip.json"
+        "packages/{ts,language,lsp,codemirror,compiler,vscode}/**"
       ]
     },
     {
@@ -1162,8 +1149,7 @@
       "check": "make lint-go",
       "paths": [
         "packages/go/**",
-        "examples/showcase/adapters/go/**",
-        ".golangci.yml"
+        "examples/showcase/adapters/go/**"
       ]
     },
     {
@@ -1176,8 +1162,7 @@
       "check": "make lint-rust",
       "paths": [
         "packages/rust/**",
-        "examples/showcase/adapters/rust/**",
-        "clippy.toml"
+        "examples/showcase/adapters/rust/**"
       ]
     },
     {
@@ -1203,8 +1188,6 @@
       "paths": [
         "packages/php/**",
         "packages/php-ext/**",
-        "phpcs.xml.dist",
-        "phpstan.dist.neon",
         "config/php-lint/**"
       ]
     },
@@ -1614,8 +1597,7 @@
         "packages/python/**",
         "config/toolchain.json",
         "mise.toml",
-        "mise.lock",
-        "ruff.toml"
+        "mise.lock"
       ]
     },
     {
