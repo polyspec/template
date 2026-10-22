@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9462a56f13ecb1be58e4f64508fa154e3dfbc3d41ecb74845e25cf9aade1e2f5 -->
+<!-- source-sha256: 841c7f8aa172c93dff3f7a33a6df1391ac38ce6b65a23c7a4216ed52dec01ea8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4-6-4-1: 모든 구현의 artifact runtime은 오류를 숨기지 않는다. loadArtifact는 missing-or-stale 오류 하나(manifest나 파일이 없음, digest 불일치)로 실패하고 그 밖에는 원래 오류와 그 원인으로 실패하며, loadOrRefresh는 true일 때 그 오류에서만 다시 빌드한다. PHP는 @ 없이 읽고, 확장은 JSON_THROW_ON_ERROR로 디코드하며, Rust 엔진은 오염된 템플릿 캐시를 E_INTERNAL로 실패한다. Red: e4bab9b2에서 각 구현의 artifact-store test가 실패; green: 통과한다 (T26.7-4-6-4-1).
 - T26.7: 모든 자식 행이 닫힌 뒤 닫는다. config/parity.json은 docs/spec의 모든 요구사항을 모든 구현에서 binding하고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7).
 - T26.7-4: 모든 unit은 각 binding의 test가 이름으로 적는 요구사항만 인용하고, 모든 요구사항이 인용된다(R13, R15). 자식 T26.7-4-5와 T26.7-4-6이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-4).
 - T26.7-32: docs/spec의 모든 요구사항은 그것을 인용하는 unit의 모든 구현 test가 이름으로 적는다(R13). 자식 행이 test와 unit 묶음별로 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-32).

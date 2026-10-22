@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-4-6-4-1: the artifact runtime of every implementation hides no error: loadArtifact fails with one missing-or-stale error (an absent manifest or file, a digest mismatch) and with the original error and its cause otherwise, and loadOrRefresh under true rebuilds only on it; PHP reads without @, the extension decodes with JSON_THROW_ON_ERROR, and the Rust engine fails a poisoned template cache as E_INTERNAL. Red: the artifact-store test of each implementation fails at e4bab9b2; green: they pass (T26.7-4-6-4-1).
 - T26.7: closed after all its children; config/parity.json binds every requirement of docs/spec in every implementation and the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7).
 - T26.7-4: every unit cites only the requirements that the test of each of its bindings names, and every requirement is cited (R13, R15), as its children T26.7-4-5 and T26.7-4-6 brought about; the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7-4).
 - T26.7-32: every requirement of docs/spec is named by the tests of every implementation of a unit that cites it (R13), as its children brought about by test and unit group; the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7-32).
