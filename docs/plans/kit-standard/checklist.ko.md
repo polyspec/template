@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 8da97c28aa74a86c9dbde08295c257714ccf78a6afa76c6943da219d9211ecd0 -->
+<!-- source-sha256: f38c4a1d799eca3c31baa2f720735eb4839a173e998d0065f434336c2db9635b -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -200,3 +200,4 @@
 | T26.7-72 | make duplication-check가 통과한다. 이 검사가 보고하는 clone 15개(packages/php-ext/src에 14개, packages/rust/src/functions/date.rs에 1개)는 각각 두 곳이 함께 부르는 함수 하나로 옮겨진다 | packages/php-ext/src, packages/rust/src/functions/date.rs | `make duplication-check`, `make lint-php-ext`, `make lint-rust` | [o] |
 | T26.7-73 | PHP 라이브러리와 확장은 AstProgram의 같은 surface를 선언한다. 라이브러리의 다른 static factory가 자기 class 이름을 적듯 loadArtifact와 loadOrRefresh는 둘 다 AstProgram을 반환하므로, make test-php-ext가 test를 돌린다 | packages/php/src/AstProgram.php | `make test-php-ext CASES=ArtifactStoreTest` | [o] |
 | T26.7-74 | template은 kit이 내보내는 git hook을 .githooks/pre-merge-commit까지 make hooks로 써서 갖고 있으므로, rules-check와 owner-validate가 PRINCIPLES.md와 owner 규칙이 적는 모든 hook을 찾는다 | .githooks/pre-merge-commit | `make rules-check`, `make owner-validate` | [~] |
+| T26.7-75 | config/layout.yml은 template의 모든 root 파일과 package를 선언한다. root vitest.config.ts(root vitest 설정, T26.7-46)는 layout-root-files의 vars.root_files에, packages/cli(command line package, T26.7-53)는 layout-packages의 component에 들어가므로 make layout-check가 통과한다 | config/layout.yml | `make layout-check` | [ ] |
