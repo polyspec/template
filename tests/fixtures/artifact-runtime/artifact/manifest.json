@@ -1,0 +1,21 @@
+{
+  "schema": 3,
+  "mode": "ast",
+  "target": "canonical",
+  "entry": "page.tpl",
+  "delimiters": null,
+  "sourceDigest": "7f6f66bdd078937e6644189a4d2943f86b3772af7f2df123181d6ebcc121d466",
+  "typeDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "contractDigest": "3b9c9056a951b5c13ab48146770c4f64fcaba5cfb32b2561f073e49afd59a787",
+  "compilerDigest": "635e236aee8d636433a946b5843495e58778bd7d97414f200bfc939f85504727",
+  "files": {
+    "page.tpl": {
+      "path": "page.tpl.ast.json",
+      "sourceDigest": "22d3ef20f50ca4c1f05f1151d8988eb82704a40417d7a07047257c774d98d666",
+      "artifactDigest": "78aefe9a70ecfff0e3d3e818b64ffdfef9bc885e69f988137c0517b449496617",
+      "lines": [
+        0
+      ]
+    }
+  }
+}
