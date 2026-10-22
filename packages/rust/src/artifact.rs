@@ -4,7 +4,7 @@
 
 use crate::ast::decode_template;
 use crate::loader::{Loaded, Loader};
-use crate::render::engine::{AstProgram, EngineOptions};
+use crate::render::engine::{ArtifactRefresh, AstProgram, EngineOptions};
 use crate::sha256::sha256_hex;
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -65,4 +65,29 @@ pub fn load_artifact(directory: &Path) -> Result<AstProgram, String> {
         ..Default::default()
     })
     .map_err(|error| error.to_string())
+}
+
+/// ArtifactStore.loadOrRefresh (docs/spec/runtime.md): returns the program of the artifact in `directory`, building it first
+/// when the policy asks. `build` writes the AST artifact of the sources; the build compiler is passed in by the host, so the
+/// runtime carries no compiler. `Dev` builds on every call; `True` reuses an artifact that loads and rebuilds a missing or
+/// changed one; `False` loads the artifact that exists and never builds.
+pub fn load_or_refresh(
+    directory: &Path,
+    refresh: ArtifactRefresh,
+    build: impl Fn(&Path) -> Result<(), String>,
+) -> Result<AstProgram, String> {
+    match refresh {
+        ArtifactRefresh::False => load_artifact(directory),
+        ArtifactRefresh::Dev => {
+            build(directory)?;
+            load_artifact(directory)
+        }
+        ArtifactRefresh::True => match load_artifact(directory) {
+            Ok(program) => Ok(program),
+            Err(_) => {
+                build(directory)?;
+                load_artifact(directory)
+            }
+        },
+    }
 }
