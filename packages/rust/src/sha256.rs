@@ -24,7 +24,9 @@ pub fn sha256_hex(data: &[u8]) -> String {
         message.push(0);
     }
     message.extend_from_slice(&bit_length.to_be_bytes());
-    for block in message.chunks_exact(64) {
+    let (blocks, rest) = message.as_chunks::<64>();
+    assert!(rest.is_empty(), "the padding makes the message a multiple of 64 bytes");
+    for block in blocks {
         let mut w = [0u32; 64];
         for (index, word) in w.iter_mut().take(16).enumerate() {
             *word = u32::from_be_bytes([block[4 * index], block[4 * index + 1], block[4 * index + 2], block[4 * index + 3]]);

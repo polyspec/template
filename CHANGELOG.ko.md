@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c0030ec7813de112e8fdc8def531c40b75097310e53b1313049dd113840b24ff -->
+<!-- source-sha256: aa576919b91b08badaa195f4edade8b0780e10a6fd1131e836402f5c04565bf0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-71: make lint-rust가 통과한다. sha256.rs는 padding된 message를 as_chunks로 나누고 남는 것이 없음을 assert하며, compiler의 Rust backend는 라이브러리가 RT-70 이후 그러하듯 bound map을 Arc<RuntimeOrderedMap>에 담아 생성된 showcase Rust가 컴파일된다. Red: cb35b539에서 make lint-rust가 exit 2; green: generated-lint-check, typed-generator-compile-check와 함께 통과한다 (T26.7-71).
 - T26.7-70: template이 K519가 들어간 kit 사본을 받는다. 링크된 worktree는 main checkout의 var/tools를 쓰고 아무것도 설치하지 않는다. Red: 325cdadb에서 make kit-check가 exit 2; green: 통과한다 (T26.7-70).
 - T26.7-69: template이 kit 0.0.54를 kit lint 설정 사본 없이(K514), polyspec-lock-check와 config/polyspec.json 없이(K515) 받는다. 생성 코드 lint는 ruff.toml, phpcs.xml.dist, clippy.toml을 kit 패키지에서 읽고, CHECK_TARGETS와 config/owner-checks.json은 지워진 파일이나 target을 적지 않으며, 정적 CI 작업이 suppression-check를 돌리고, PHP command line과 artifact-runtime fixture에 owner가 생긴다. make owner-validate는 kit이 넘기는 owner 규칙의 glob 9개 때문에 아직 실패한다(kit 행). Red: 7b1b69d4에서 tests/scripts/suite-parity.test.mts가 exit 1; green: 통과한다 (T26.7-69).
 - T26.7-4-6-4-1: 모든 구현의 artifact runtime은 오류를 숨기지 않는다. loadArtifact는 missing-or-stale 오류 하나(manifest나 파일이 없음, digest 불일치)로 실패하고 그 밖에는 원래 오류와 그 원인으로 실패하며, loadOrRefresh는 true일 때 그 오류에서만 다시 빌드한다. PHP는 @ 없이 읽고, 확장은 JSON_THROW_ON_ERROR로 디코드하며, Rust 엔진은 오염된 템플릿 캐시를 E_INTERNAL로 실패한다. Red: e4bab9b2에서 각 구현의 artifact-store test가 실패; green: 통과한다 (T26.7-4-6-4-1).
