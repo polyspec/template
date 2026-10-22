@@ -96,6 +96,36 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
+     * ArtifactStore.loadOrRefresh (docs/spec/runtime.md): returns the program of the artifact in `$directory`, building it
+     * first when the policy asks. `$build` writes the AST artifact of the sources; the build compiler is passed in by the
+     * host. "dev" builds on every call, "true" reuses an artifact that loads and rebuilds a missing or changed one, and
+     * "false" loads the artifact that exists and never builds.
+     *
+     * @param callable(string): void $build
+     * @throws \InvalidArgumentException when `$refresh` is not a refresh policy
+     * @throws \RuntimeException when the artifact cannot be loaded
+     */
+    public static function loadOrRefresh(string $directory, string $refresh, callable $build): self
+    {
+        if ($refresh === 'false') {
+            return self::loadArtifact($directory);
+        }
+        if ($refresh === 'dev') {
+            $build($directory);
+            return self::loadArtifact($directory);
+        }
+        if ($refresh !== 'true') {
+            throw new \InvalidArgumentException($refresh . ' is not an artifact refresh policy');
+        }
+        try {
+            return self::loadArtifact($directory);
+        } catch (\RuntimeException) {
+            $build($directory);
+            return self::loadArtifact($directory);
+        }
+    }
+
+    /**
      * Runs a parser entry of Parser on one template source with the delimiters of the options.
      *
      * @param callable(Source, string, string): array<string, mixed> $parse
