@@ -508,42 +508,7 @@ ZEND_METHOD(Polyspec_Template_Value_MapValue, copy)
  * SafeString (the built-in functions return the safe text of escape and raw as the library does). */
 void pt_library_value(pt_value value, zval *result)
 {
-    switch (value.type) {
-        case PT_NULL: ZVAL_NULL(result); return;
-        case PT_BOOL: ZVAL_BOOL(result, value.u.b); return;
-        case PT_NUMBER: ZVAL_DOUBLE(result, value.u.number); return;
-        case PT_STRING: ZVAL_STRINGL(result, value.u.str.s, value.u.str.n); return;
-        case PT_SAFE:
-            object_init_ex(result, pt_safe_string_ce);
-            zend_update_property_stringl(pt_safe_string_ce, Z_OBJ_P(result), ZEND_STRL("text"), value.u.str.s, value.u.str.n);
-            return;
-        case PT_LIST:
-            array_init_size(result, value.u.list->count);
-            for (uint32_t i = 0; i < value.u.list->count; i++) {
-                zval item;
-                pt_library_value(value.u.list->items[i], &item);
-                add_next_index_zval(result, &item);
-            }
-            return;
-        case PT_MAP: {
-            const pt_map *map = value.u.map;
-            object_init_ex(result, pt_map_value_ce);
-            zval *items = OBJ_PROP_NUM(Z_OBJ_P(result), 0);
-            SEPARATE_ARRAY(items);
-            for (uint32_t i = 0; i < map->used; i++) {
-                if (!map->entries[i].live) {
-                    continue;
-                }
-                zval item;
-                pt_library_value(map->entries[i].value, &item);
-                zend_symtable_str_update(Z_ARRVAL_P(items), map->entries[i].key.s, map->entries[i].key.n, &item);
-            }
-            return;
-        }
-        default:
-            ZVAL_OBJ_COPY(result, value.u.object);
-            return;
-    }
+    pt_php_value(value, result, true);
 }
 
 /* Throws a BindError with its code and message; the message is released. */
@@ -1853,6 +1818,16 @@ ZEND_METHOD(Polyspec_Template_Loader_FilesystemLoader, __construct)
     }
     zend_update_property_str(pt_filesystem_loader_ce, Z_OBJ_P(ZEND_THIS), "root", sizeof("root") - 1, value);
     zend_string_release(value);
+}
+
+/* Calls the method `name` (lower case) of the class `ce`: of `object`, or the static method when `object` is NULL. The result is
+ * set in `result` (null first), and the caller checks EG(exception). The method exists: the extension declares it. */
+void pt_call_method(zend_class_entry *ce, zend_object *object, const char *name, size_t length, zval *result, uint32_t count, zval *args)
+{
+    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
+    ZEND_ASSERT(fn != NULL);
+    ZVAL_NULL(result);
+    zend_call_known_function(fn, object, ce, result, count, args, NULL);
 }
 
 /* Throws the RuntimeException of a failed load. */

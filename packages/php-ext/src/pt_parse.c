@@ -2684,6 +2684,17 @@ static bool pt_expr_initialized(bool initialized, zend_class_entry *ce)
     return true;
 }
 
+/* Runs the lexer work `work` (a peek or a next) of `lexer` into `result`, once the object of class `ce` is `initialized`; false
+ * with an exception set otherwise or when the work fails. */
+static bool pt_lexer_step(pt_lexer_object *lexer, bool initialized, zend_class_entry *ce, pt_work work, zval *result)
+{
+    if (!pt_expr_initialized(initialized, ce)) {
+        return false;
+    }
+    pt_lexer_call call = {lexer, result};
+    return pt_run_work(work, &call);
+}
+
 static zend_object *pt_lexer_create(zend_class_entry *class_type)
 {
     pt_lexer_object *lo = zend_object_alloc(sizeof(pt_lexer_object), class_type);
@@ -2770,25 +2781,41 @@ ZEND_METHOD(Polyspec_Template_Expr_Token, __construct)
 
 /* ---- Lexer ---- */
 
+/* The arguments of the constructors of Lexer and Parser: the source, the start, the close delimiter and its count, the open
+ * index and the template, with the close delimiter as a character. */
+typedef struct pt_expr_arguments {
+    zval *source;
+    zend_long start, close_count, open_index;
+    bool open_is_null;
+    zend_string *close, *template;
+    char close_char;
+} pt_expr_arguments;
+
+/* Reads the arguments of a constructor of Lexer or Parser; false with an exception set when one is invalid. */
+static bool pt_read_expr_arguments(zend_execute_data *execute_data, pt_expr_arguments *a)
+{
+    a->close = NULL;
+    a->open_index = 0;
+    a->open_is_null = true;
+    ZEND_PARSE_PARAMETERS_START(6, 6)
+        Z_PARAM_OBJECT_OF_CLASS(a->source, pt_source_ce)
+        Z_PARAM_LONG(a->start)
+        Z_PARAM_STR_OR_NULL(a->close)
+        Z_PARAM_LONG(a->close_count)
+        Z_PARAM_LONG_OR_NULL(a->open_index, a->open_is_null)
+        Z_PARAM_STR(a->template)
+    ZEND_PARSE_PARAMETERS_END_EX(return false);
+    return pt_expr_close_char(a->close, &a->close_char);
+}
+
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, __construct)
 {
-    zval *source;
-    zend_string *close = NULL, *template;
-    zend_long start, close_count, open_index = 0;
-    bool open_is_null = true;
-    ZEND_PARSE_PARAMETERS_START(6, 6)
-        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
-        Z_PARAM_LONG(start)
-        Z_PARAM_STR_OR_NULL(close)
-        Z_PARAM_LONG(close_count)
-        Z_PARAM_LONG_OR_NULL(open_index, open_is_null)
-        Z_PARAM_STR(template)
-    ZEND_PARSE_PARAMETERS_END();
-    char close_char;
-    if (!pt_expr_close_char(close, &close_char)) {
+    pt_expr_arguments a;
+    if (!pt_read_expr_arguments(execute_data, &a)) {
         RETURN_THROWS();
     }
-    pt_lexer_construct(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(source), start, close_char, close_count, !open_is_null, open_index, template, close);
+    pt_lexer_construct(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(a.source), a.start, a.close_char, a.close_count, !a.open_is_null, a.open_index, a.template,
+        a.close);
 }
 
 ZEND_METHOD(Polyspec_Template_Expr_Lexer, error)
@@ -2812,11 +2839,7 @@ ZEND_METHOD(Polyspec_Template_Expr_Lexer, peek)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
-    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
-        RETURN_THROWS();
-    }
-    pt_lexer_call call = {lo, return_value};
-    if (!pt_run_work(pt_lexer_peek_work, &call)) {
+    if (!pt_lexer_step(lo, lo->template != NULL, pt_lexer_ce, pt_lexer_peek_work, return_value)) {
         RETURN_THROWS();
     }
 }
@@ -2825,11 +2848,7 @@ ZEND_METHOD(Polyspec_Template_Expr_Lexer, next)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     pt_lexer_object *lo = pt_lexer_of(Z_OBJ_P(ZEND_THIS));
-    if (!pt_expr_initialized(lo->template != NULL, pt_lexer_ce)) {
-        RETURN_THROWS();
-    }
-    pt_lexer_call call = {lo, return_value};
-    if (!pt_run_work(pt_lexer_next_work, &call)) {
+    if (!pt_lexer_step(lo, lo->template != NULL, pt_lexer_ce, pt_lexer_next_work, return_value)) {
         RETURN_THROWS();
     }
 }
@@ -2889,26 +2908,15 @@ ZEND_METHOD(Polyspec_Template_Expr_Lexer, stringLiteral)
 
 ZEND_METHOD(Polyspec_Template_Expr_Parser, __construct)
 {
-    zval *source;
-    zend_string *close = NULL, *template;
-    zend_long start, close_count, open_index = 0;
-    bool open_is_null = true;
-    ZEND_PARSE_PARAMETERS_START(6, 6)
-        Z_PARAM_OBJECT_OF_CLASS(source, pt_source_ce)
-        Z_PARAM_LONG(start)
-        Z_PARAM_STR_OR_NULL(close)
-        Z_PARAM_LONG(close_count)
-        Z_PARAM_LONG_OR_NULL(open_index, open_is_null)
-        Z_PARAM_STR(template)
-    ZEND_PARSE_PARAMETERS_END();
-    char close_char;
-    if (!pt_expr_close_char(close, &close_char)) {
+    pt_expr_arguments a;
+    if (!pt_read_expr_arguments(execute_data, &a)) {
         RETURN_THROWS();
     }
     zval lexer;
     object_init_ex(&lexer, pt_lexer_ce);
     zend_object *lexer_object = Z_OBJ(lexer);
-    pt_lexer_construct(lexer_object, Z_OBJ_P(source), start, close_char, close_count, !open_is_null, open_index, template, close);
+    pt_lexer_construct(lexer_object, Z_OBJ_P(a.source), a.start, a.close_char, a.close_count, !a.open_is_null, a.open_index, a.template,
+        a.close);
     zend_object *object = Z_OBJ_P(ZEND_THIS);
     zend_update_property(pt_parser_ce, object, ZEND_STRL("lexer"), &lexer);
     zval_ptr_dtor(&lexer);
@@ -2923,11 +2931,7 @@ ZEND_METHOD(Polyspec_Template_Expr_Parser, peek)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
-    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
-        RETURN_THROWS();
-    }
-    pt_lexer_call call = {po->lexer, return_value};
-    if (!pt_run_work(pt_lexer_peek_work, &call)) {
+    if (!pt_lexer_step(po->lexer, po->lexer != NULL, pt_parser_ce, pt_lexer_peek_work, return_value)) {
         RETURN_THROWS();
     }
 }
@@ -2936,11 +2940,7 @@ ZEND_METHOD(Polyspec_Template_Expr_Parser, next)
 {
     ZEND_PARSE_PARAMETERS_NONE();
     pt_parser_object *po = pt_parser_of(Z_OBJ_P(ZEND_THIS));
-    if (!pt_expr_initialized(po->lexer != NULL, pt_parser_ce)) {
-        RETURN_THROWS();
-    }
-    pt_lexer_call call = {po->lexer, return_value};
-    if (!pt_run_work(pt_lexer_next_work, &call)) {
+    if (!pt_lexer_step(po->lexer, po->lexer != NULL, pt_parser_ce, pt_lexer_next_work, return_value)) {
         RETURN_THROWS();
     }
 }
@@ -3248,27 +3248,7 @@ static void pt_block_read_path_zval(pt_s path, const pt_syntax_token *word, zval
 static void pt_block_read_body_zval(const pt_node *node, const pt_tokens *words, size_t end, zval *result)
 {
     array_init(result);
-    if (node->has_id) {
-        add_assoc_stringl_ex(result, "id", 2, node->text.s, node->text.n);
-    } else {
-        add_assoc_null_ex(result, "id", 2);
-    }
-    if (node->has_path) {
-        add_assoc_stringl_ex(result, "path", 4, node->path.s, node->path.n);
-    } else {
-        add_assoc_null_ex(result, "path", 4);
-    }
-    zval scope;
-    array_init_size(&scope, node->scope_count);
-    for (uint32_t i = 0; i < node->scope_count; i++) {
-        zval item, expr;
-        array_init(&item);
-        add_assoc_stringl_ex(&item, "name", 4, node->scope[i].name.s, node->scope[i].name.n);
-        pt_expr_zval(node->scope[i].expr, &expr);
-        add_assoc_zval_ex(&item, "expr", 4, &expr);
-        add_next_index_zval(&scope, &item);
-    }
-    add_assoc_zval_ex(result, "scope", 5, &scope);
+    pt_add_block_target(result, node);
     zval list;
     array_init_size(&list, words->count);
     for (uint32_t i = 0; i < words->count; i++) {

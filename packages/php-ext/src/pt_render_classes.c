@@ -172,20 +172,13 @@ static zval *prop(zend_class_entry *ce, zend_object *object, const char *name, s
  * caller checks EG(exception). `name` is the method name in lower case. */
 static void call_method(zval *object, const char *name, size_t length, zval *result, uint32_t count, zval *args)
 {
-    zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
-    ZEND_ASSERT(fn != NULL);
-    ZVAL_NULL(result);
-    zend_call_known_function(fn, Z_OBJ_P(object), ce, result, count, args, NULL);
+    pt_call_method(Z_OBJCE_P(object), Z_OBJ_P(object), name, length, result, count, args);
 }
 
 /* `Class::name(...)` of a static method of a class of the extension. */
 static void call_static(zend_class_entry *ce, const char *name, size_t length, zval *result, uint32_t count, zval *args)
 {
-    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
-    ZEND_ASSERT(fn != NULL);
-    ZVAL_NULL(result);
-    zend_call_known_function(fn, NULL, ce, result, count, args, NULL);
+    pt_call_method(ce, NULL, name, length, result, count, args);
 }
 
 /* `new $ce(...)`: the object is set in `object`, and its constructor gets the arguments. */
@@ -425,34 +418,15 @@ static void eval_binary(pt_evaluator *self, zval *expr, zval *frame, zval *resul
         zval_ptr_dtor(&left);
         return;
     }
-    if (is_and) {
+    if (is_and || is_or) {
         bool first = truthy(runtime, &left);
         zval_ptr_dtor(&left);
         if (EG(exception)) {
             return;
         }
-        if (!first) {
-            ZVAL_FALSE(result);
-            return;
-        }
-        evaluate(self, FIELD(expr, "right"), frame, &right);
-        if (!EG(exception)) {
-            bool second = truthy(runtime, &right);
-            if (!EG(exception)) {
-                ZVAL_BOOL(result, second);
-            }
-        }
-        zval_ptr_dtor(&right);
-        return;
-    }
-    if (is_or) {
-        bool first = truthy(runtime, &left);
-        zval_ptr_dtor(&left);
-        if (EG(exception)) {
-            return;
-        }
-        if (first) {
-            ZVAL_TRUE(result);
+        /* and stops on a false left side and or on a true one; that side is the result. */
+        if (first == is_or) {
+            ZVAL_BOOL(result, first);
             return;
         }
         evaluate(self, FIELD(expr, "right"), frame, &right);

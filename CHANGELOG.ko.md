@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: aa576919b91b08badaa195f4edade8b0780e10a6fd1131e836402f5c04565bf0 -->
+<!-- source-sha256: 0308e75d7b22514ca084530bff0ace5b859290095d0e19b0a9087be2176e8f83 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-72: make duplication-check가 clone을 찾지 않는다. PHP 확장은 bound value를 library와 host로 바꾸는 일을 pt_php_value 하나로, block의 target 쓰기를 pt_add_block_target 하나로, 선언된 method 호출을 pt_call_method 하나로, formatter의 analyze와 parse 호출을 pt_fmt_read_text 하나로, Lexer와 Parser의 인자 읽기를 pt_read_expr_arguments 하나로, 그 peek과 next를 pt_lexer_step 하나로 하고, and와 or를 한 분기에서 평가하며, 숫자의 decimal 부분을 pt_decimal_result 하나로 만든다. Rust는 날짜의 숫자를 digits_at 하나로 읽는다. Red: 4eb81206에서 make duplication-check가 exit 2; green: lint-php-ext, lint-rust, 확장 conformance, 확장 위의 PHP test 573개와 함께 통과한다 (T26.7-72).
 - T26.7-71: make lint-rust가 통과한다. sha256.rs는 padding된 message를 as_chunks로 나누고 남는 것이 없음을 assert하며, compiler의 Rust backend는 라이브러리가 RT-70 이후 그러하듯 bound map을 Arc<RuntimeOrderedMap>에 담아 생성된 showcase Rust가 컴파일된다. Red: cb35b539에서 make lint-rust가 exit 2; green: generated-lint-check, typed-generator-compile-check와 함께 통과한다 (T26.7-71).
 - T26.7-70: template이 K519가 들어간 kit 사본을 받는다. 링크된 worktree는 main checkout의 var/tools를 쓰고 아무것도 설치하지 않는다. Red: 325cdadb에서 make kit-check가 exit 2; green: 통과한다 (T26.7-70).
 - T26.7-69: template이 kit 0.0.54를 kit lint 설정 사본 없이(K514), polyspec-lock-check와 config/polyspec.json 없이(K515) 받는다. 생성 코드 lint는 ruff.toml, phpcs.xml.dist, clippy.toml을 kit 패키지에서 읽고, CHECK_TARGETS와 config/owner-checks.json은 지워진 파일이나 target을 적지 않으며, 정적 CI 작업이 suppression-check를 돌리고, PHP command line과 artifact-runtime fixture에 owner가 생긴다. make owner-validate는 kit이 넘기는 owner 규칙의 glob 9개 때문에 아직 실패한다(kit 행). Red: 7b1b69d4에서 tests/scripts/suite-parity.test.mts가 exit 1; green: 통과한다 (T26.7-69).

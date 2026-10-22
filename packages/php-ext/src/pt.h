@@ -423,6 +423,10 @@ void pt_ast_to_zval(const pt_template *template, zval *result);
 
 /* One expression node as the nested PHP array of the AST (EXP-7 to EXP-16, AST-4). */
 void pt_expr_zval(const pt_expr *expr, zval *result);
+/* The id, the path and the scope items of a block node, as the AST array and readBlockBody write them (pt_ast.c). */
+void pt_add_block_target(zval *result, const pt_node *node);
+/* `$object->name(...)`, or `Class::name(...)` when object is NULL, of a method that the class declares (polyspec_template.c). */
+void pt_call_method(zend_class_entry *ce, zend_object *object, const char *name, size_t length, zval *result, uint32_t count, zval *args);
 
 /* The classes Token, Lexer and Parser of Polyspec\Template\Expr (pt_parse.c). */
 void pt_expr_register(zend_class_entry *token, zend_class_entry *lexer, zend_class_entry *parser);
@@ -572,6 +576,8 @@ void pt_throw_bind_error(const char *code, zend_string *message);
 void pt_throw_function_error(const char *code, zend_string *message);
 /* VAL-21: the host form of a value. */
 void pt_host_value(pt_value value, zval *result);
+/* The PHP value of a bound value for the library (true: SafeString, MapValue) or for the host (false: text, PHP array). */
+void pt_php_value(pt_value value, zval *result, bool library);
 /* VAL-19: the public properties of an object, by name. */
 bool pt_object_property(pt_arena *arena, zend_object *object, pt_s name, pt_value *result, bool *found, pt_bind_error *error);
 

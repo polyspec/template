@@ -353,22 +353,42 @@ static bool pt_positional(pt_arena *arena, double value, bool *negative, pt_s *i
     return true;
 }
 
-bool pt_number_positional(double value, zval *result)
+/* Builds `result` from the sign and the decimal parts of a number, in the arena of the parts. */
+typedef void (*pt_decimal_build)(pt_arena *arena, bool negative, pt_s integer, pt_s fraction, zval *result);
+
+/* The parts [negative, integer digits, fraction digits] as a PHP list. */
+static void pt_decimal_parts_zval(pt_arena *arena, bool negative, pt_s integer, pt_s fraction, zval *result)
+{
+    (void)arena;
+    array_init(result);
+    add_next_index_bool(result, negative);
+    add_next_index_stringl(result, integer.s, integer.n);
+    add_next_index_stringl(result, fraction.s, fraction.n);
+}
+
+static bool pt_round_decimal(pt_arena *arena, double value, zend_long decimals, bool *negative, pt_s *integer, pt_s *fraction);
+
+/* Splits `value` into its sign and decimal parts, rounded to `decimals` places when `rounded` and in full positional form
+ * otherwise, and builds `result` from them with `build`; false, with result untouched, when the value has no such form. */
+static bool pt_decimal_result(double value, zend_long decimals, bool rounded, pt_decimal_build build, zval *result)
 {
     pt_arena arena;
     pt_arena_init(&arena);
     bool negative;
     pt_s integer, fraction;
-    bool ok = pt_positional(&arena, value, &negative, &integer, &fraction);
+    bool ok = rounded ? pt_round_decimal(&arena, value, decimals, &negative, &integer, &fraction)
+                      : pt_positional(&arena, value, &negative, &integer, &fraction);
     if (ok) {
-        array_init(result);
-        add_next_index_bool(result, negative);
-        add_next_index_stringl(result, integer.s, integer.n);
-        add_next_index_stringl(result, fraction.s, fraction.n);
+        build(&arena, negative, integer, fraction, result);
     }
     pt_arena_free(&arena);
 
     return ok;
+}
+
+bool pt_number_positional(double value, zval *result)
+{
+    return pt_decimal_result(value, 0, false, pt_decimal_parts_zval, result);
 }
 
 /* The digits of a decimal string plus one unit in its last place (Number::increment). */
@@ -464,48 +484,31 @@ static bool pt_round_decimal(pt_arena *arena, double value, zend_long decimals, 
 
 bool pt_number_round_decimal(double value, zend_long decimals, zval *result)
 {
-    pt_arena arena;
-    pt_arena_init(&arena);
-    bool negative;
-    pt_s integer, fraction;
-    bool ok = pt_round_decimal(&arena, value, decimals, &negative, &integer, &fraction);
-    if (ok) {
-        array_init(result);
-        add_next_index_bool(result, negative);
-        add_next_index_stringl(result, integer.s, integer.n);
-        add_next_index_stringl(result, fraction.s, fraction.n);
-    }
-    pt_arena_free(&arena);
+    return pt_decimal_result(value, decimals, true, pt_decimal_parts_zval, result);
+}
 
-    return ok;
+/* The number that the sign and the decimal parts spell. */
+static void pt_decimal_number_zval(pt_arena *arena, bool negative, pt_s integer, pt_s fraction, zval *result)
+{
+    pt_buf buf;
+    pt_buf_init(&buf, arena);
+    pt_buf_adds(&buf, integer);
+    if (fraction.n > 0) {
+        pt_buf_addc(&buf, '.');
+        pt_buf_adds(&buf, fraction);
+    }
+    pt_s digits = pt_buf_done(&buf);
+    double parsed = zend_strtod(digits.s, NULL);
+    if (negative && parsed != 0.0) {
+        parsed = -parsed;
+    }
+    ZVAL_DOUBLE(result, parsed);
 }
 
 /* FUN-25: the rounded value as a number. */
 bool pt_number_round(double value, zend_long decimals, zval *result)
 {
-    pt_arena arena;
-    pt_arena_init(&arena);
-    bool negative;
-    pt_s integer, fraction;
-    bool ok = pt_round_decimal(&arena, value, decimals, &negative, &integer, &fraction);
-    if (ok) {
-        pt_buf buf;
-        pt_buf_init(&buf, &arena);
-        pt_buf_adds(&buf, integer);
-        if (fraction.n > 0) {
-            pt_buf_addc(&buf, '.');
-            pt_buf_adds(&buf, fraction);
-        }
-        pt_s digits = pt_buf_done(&buf);
-        double parsed = zend_strtod(digits.s, NULL);
-        if (negative && parsed != 0.0) {
-            parsed = -parsed;
-        }
-        ZVAL_DOUBLE(result, parsed);
-    }
-    pt_arena_free(&arena);
-
-    return ok;
+    return pt_decimal_result(value, decimals, true, pt_decimal_number_zval, result);
 }
 
 /* FUN-20 to FUN-24: the grouped text of a number with `decimals` places (Number::format). */

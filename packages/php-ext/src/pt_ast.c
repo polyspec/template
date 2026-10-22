@@ -42,6 +42,31 @@ static void pt_add_expr(zval *array, const char *key, const pt_expr *expr)
     add_assoc_zval_ex(array, key, strlen(key), &value);
 }
 
+/* Adds the id, the path and the scope items of the block `node` to `result`: an absent id or path is null. */
+void pt_add_block_target(zval *result, const pt_node *node)
+{
+    if (node->has_id) {
+        pt_add_string(result, "id", node->text);
+    } else {
+        add_assoc_null_ex(result, "id", 2);
+    }
+    if (node->has_path) {
+        pt_add_string(result, "path", node->path);
+    } else {
+        add_assoc_null_ex(result, "path", 4);
+    }
+    zval scope;
+    array_init_size(&scope, node->scope_count);
+    for (uint32_t i = 0; i < node->scope_count; i++) {
+        zval item;
+        array_init_size(&item, 2);
+        pt_add_string(&item, "name", node->scope[i].name);
+        pt_add_expr(&item, "expr", node->scope[i].expr);
+        add_next_index_zval(&scope, &item);
+    }
+    add_assoc_zval_ex(result, "scope", 5, &scope);
+}
+
 static void pt_add_exprs(zval *array, const char *key, pt_expr *const *items, uint32_t count)
 {
     zval value;
@@ -182,26 +207,7 @@ static void pt_node_zval(const pt_node *node, zval *result)
             break;
         case N_BLOCK: {
             add_assoc_string_ex(result, "type", 4, "Block");
-            if (node->has_id) {
-                pt_add_string(result, "id", node->text);
-            } else {
-                add_assoc_null_ex(result, "id", 2);
-            }
-            if (node->has_path) {
-                pt_add_string(result, "path", node->path);
-            } else {
-                add_assoc_null_ex(result, "path", 4);
-            }
-            zval scope;
-            array_init_size(&scope, node->scope_count);
-            for (uint32_t i = 0; i < node->scope_count; i++) {
-                zval item;
-                array_init_size(&item, 2);
-                pt_add_string(&item, "name", node->scope[i].name);
-                pt_add_expr(&item, "expr", node->scope[i].expr);
-                add_next_index_zval(&scope, &item);
-            }
-            add_assoc_zval_ex(result, "scope", 5, &scope);
+            pt_add_block_target(result, node);
             break;
         }
         case N_IF: {

@@ -264,6 +264,16 @@ ZEND_METHOD(Polyspec_Template_Format_Expression, join)
 /* Invariant                                                                                        */
 /* ----------------------------------------------------------------------------------------------- */
 
+/* Puts `value` into the array `result` under the string key `key`, or under the integer key `index` when `key` is NULL. */
+static void pt_fmt_put(zval *result, zend_string *key, zend_ulong index, zval *value)
+{
+    if (key != NULL) {
+        zend_hash_update(Z_ARRVAL_P(result), key, value);
+    } else {
+        zend_hash_index_update(Z_ARRVAL_P(result), index, value);
+    }
+}
+
 /* Copies an AST value without its `span` fields; a list stays a list (array_is_list decides the keys). */
 static void pt_fmt_without_spans(zval *value, zval *result)
 {
@@ -285,10 +295,8 @@ static void pt_fmt_without_spans(zval *value, zval *result)
         pt_fmt_without_spans(field, &copy);
         if (list) {
             zend_hash_next_index_insert(Z_ARRVAL_P(result), &copy);
-        } else if (key != NULL) {
-            zend_hash_update(Z_ARRVAL_P(result), key, &copy);
         } else {
-            zend_hash_index_update(Z_ARRVAL_P(result), index, &copy);
+            pt_fmt_put(result, key, index, &copy);
         }
     } ZEND_HASH_FOREACH_END();
 }
@@ -363,11 +371,7 @@ static void pt_fmt_without_line_indentation(zval *value, zval *result)
         } else {
             pt_fmt_without_line_indentation(field, &copy);
         }
-        if (key != NULL) {
-            zend_hash_update(Z_ARRVAL_P(result), key, &copy);
-        } else {
-            zend_hash_index_update(Z_ARRVAL_P(result), index, &copy);
-        }
+        pt_fmt_put(result, key, index, &copy);
     } ZEND_HASH_FOREACH_END();
 }
 
@@ -906,21 +910,29 @@ static void pt_fmt_static(const char *class_name, const char *name, size_t lengt
     zend_class_entry *ce = zend_lookup_class(lookup);
     zend_string_release(lookup);
     ZEND_ASSERT(ce != NULL);
-    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
-    ZEND_ASSERT(fn != NULL);
-    ZVAL_NULL(result);
-    zend_call_known_function(fn, NULL, ce, result, count, args, NULL);
+    pt_call_method(ce, NULL, name, length, result, count, args);
 }
 
 /* `$analyzer->name(...)` of an object of a class that implements Analyzer: the result is set in result (null first),
  * and the caller checks EG(exception). `name` is the method name in lower case. */
 static void pt_fmt_method(zval *object, const char *name, size_t length, zval *result, uint32_t count, zval *args)
 {
-    zend_class_entry *ce = Z_OBJCE_P(object);
-    zend_function *fn = zend_hash_str_find_ptr(&ce->function_table, name, length);
-    ZEND_ASSERT(fn != NULL);
-    ZVAL_NULL(result);
-    zend_call_known_instance_method(fn, Z_OBJ_P(object), result, count, args);
+    pt_call_method(Z_OBJCE_P(object), Z_OBJ_P(object), name, length, result, count, args);
+}
+
+/* `$analyzer->name($text, $settings->name, $settings->parseOptions)`, the analyze or the parse of a text with the options of
+ * the format: the result is set in result (null first), and the caller checks EG(exception). */
+static void pt_fmt_read_text(zval *analyzer, const char *name, size_t length, zend_string *text, const pt_fmt_options *settings,
+    zval *result)
+{
+    zval args[3];
+    ZVAL_STR_COPY(&args[0], text);
+    ZVAL_STR_COPY(&args[1], settings->name);
+    ZVAL_COPY(&args[2], &settings->parse_options);
+    pt_fmt_method(analyzer, name, length, result, 3, args);
+    zval_ptr_dtor(&args[0]);
+    zval_ptr_dtor(&args[1]);
+    zval_ptr_dtor(&args[2]);
 }
 
 /* The array value of a key of an array (dereferenced), or null when it is missing. */
@@ -1282,7 +1294,7 @@ static bool pt_fmt_run(zend_string *source, HashTable *options, zval *analyzer, 
     pt_fmt_edits edits = {0};
     pt_fmt_caught caught = {0};
     zend_string *text = NULL, *formatted = NULL;
-    zval analysis, after, args[3];
+    zval analysis, after;
     zend_long line = 0, col = 0;
     bool ok = false;
     ZVAL_NULL(&analysis);
@@ -1294,13 +1306,7 @@ static bool pt_fmt_run(zend_string *source, HashTable *options, zval *analyzer, 
     size_t shift = ZSTR_LEN(source) >= 3 && memcmp(ZSTR_VAL(source), PT_FMT_BOM, 3) == 0 ? 3 : 0;
     text = zend_string_init(ZSTR_VAL(source) + shift, ZSTR_LEN(source) - shift, 0);
 
-    ZVAL_STR_COPY(&args[0], text);
-    ZVAL_STR_COPY(&args[1], settings.name);
-    ZVAL_COPY(&args[2], &settings.parse_options);
-    pt_fmt_method(analyzer, ZEND_STRL("analyze"), &analysis, 3, args);
-    zval_ptr_dtor(&args[0]);
-    zval_ptr_dtor(&args[1]);
-    zval_ptr_dtor(&args[2]);
+    pt_fmt_read_text(analyzer, ZEND_STRL("analyze"), text, &settings, &analysis);
     if (EG(exception)) {
         if (pt_fmt_take(pt_error_ce, &caught)) {
             pt_fmt_error_result(result, "parse", caught.code, caught.line, caught.col, caught.message);
@@ -1413,13 +1419,7 @@ static bool pt_fmt_run(zend_string *source, HashTable *options, zval *analyzer, 
     }
     formatted = pt_fmt_apply(text, &edits);
 
-    ZVAL_STR_COPY(&args[0], formatted);
-    ZVAL_STR_COPY(&args[1], settings.name);
-    ZVAL_COPY(&args[2], &settings.parse_options);
-    pt_fmt_method(analyzer, ZEND_STRL("parse"), &after, 3, args);
-    zval_ptr_dtor(&args[0]);
-    zval_ptr_dtor(&args[1]);
-    zval_ptr_dtor(&args[2]);
+    pt_fmt_read_text(analyzer, ZEND_STRL("parse"), formatted, &settings, &after);
     if (EG(exception)) {
         if (pt_fmt_take(pt_error_ce, &caught)) {
             zend_string *message = zend_strpprintf(0, "formatted text does not parse: %s", ZSTR_VAL(caught.message));

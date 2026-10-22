@@ -330,33 +330,49 @@ bool pt_bind_map(pt_arena *arena, zval *input, pt_map **result, pt_bind_error *e
     return pt_bind_fail(error, PT_E_DATA_UNSUPPORTED_TYPE, zend_string_init("assign is not a map", 19, 0));
 }
 
-void pt_host_value(pt_value value, zval *result)
+/* The PHP value of a bound value. A list is a PHP list and a number a float (VAL-17). For the library (`library`) a safe string is a
+ * SafeString and a map a MapValue; for the host a safe string is its text and a map a PHP array, where the key conversion of a PHP
+ * array applies: a decimal integer key is an integer key. */
+void pt_php_value(pt_value value, zval *result, bool library)
 {
     switch (value.type) {
         case PT_NULL: ZVAL_NULL(result); return;
         case PT_BOOL: ZVAL_BOOL(result, value.u.b); return;
         case PT_NUMBER: ZVAL_DOUBLE(result, value.u.number); return;
-        case PT_STRING:
-        case PT_SAFE: ZVAL_STRINGL(result, value.u.str.s, value.u.str.n); return;
+        case PT_SAFE:
+            if (library) {
+                object_init_ex(result, pt_safe_string_ce);
+                zend_update_property_stringl(pt_safe_string_ce, Z_OBJ_P(result), ZEND_STRL("text"), value.u.str.s, value.u.str.n);
+                return;
+            }
+            ZVAL_STRINGL(result, value.u.str.s, value.u.str.n);
+            return;
+        case PT_STRING: ZVAL_STRINGL(result, value.u.str.s, value.u.str.n); return;
         case PT_LIST:
             array_init_size(result, value.u.list->count);
             for (uint32_t i = 0; i < value.u.list->count; i++) {
                 zval item;
-                pt_host_value(value.u.list->items[i], &item);
+                pt_php_value(value.u.list->items[i], &item, library);
                 add_next_index_zval(result, &item);
             }
             return;
         case PT_MAP: {
             const pt_map *map = value.u.map;
-            array_init_size(result, map->count);
+            zval *items = result;
+            if (library) {
+                object_init_ex(result, pt_map_value_ce);
+                items = OBJ_PROP_NUM(Z_OBJ_P(result), 0);
+                SEPARATE_ARRAY(items);
+            } else {
+                array_init_size(result, map->count);
+            }
             for (uint32_t i = 0; i < map->used; i++) {
                 if (!map->entries[i].live) {
                     continue;
                 }
                 zval item;
-                pt_host_value(map->entries[i].value, &item);
-                /* The key conversion of a PHP array applies: a decimal integer key is an integer key. */
-                zend_symtable_str_update(Z_ARRVAL_P(result), map->entries[i].key.s, map->entries[i].key.n, &item);
+                pt_php_value(map->entries[i].value, &item, library);
+                zend_symtable_str_update(Z_ARRVAL_P(items), map->entries[i].key.s, map->entries[i].key.n, &item);
             }
             return;
         }
@@ -364,6 +380,11 @@ void pt_host_value(pt_value value, zval *result)
             ZVAL_OBJ_COPY(result, value.u.object);
             return;
     }
+}
+
+void pt_host_value(pt_value value, zval *result)
+{
+    pt_php_value(value, result, false);
 }
 
 bool pt_object_property(pt_arena *arena, zend_object *object, pt_s name, pt_value *result, bool *found, pt_bind_error *error)

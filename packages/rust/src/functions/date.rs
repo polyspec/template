@@ -78,22 +78,24 @@ struct DateText {
     offset: Option<i64>,
 }
 
+/// The number that the ASCII digits of `text` at `range` spell, or None when the range is not all digits or splits a character.
+fn digits_at(text: &str, range: std::ops::Range<usize>) -> Option<i64> {
+    let part = text.get(range)?;
+    if part.bytes().all(|b| b.is_ascii_digit()) {
+        Some(part.parse::<i64>().expect("ASCII digits of at most four places parse as i64"))
+    } else {
+        None
+    }
+}
+
 fn parse_date_text(text: &str) -> Option<DateText> {
     let bytes = text.as_bytes();
     if bytes.len() < 10 || bytes[4] != b'-' || bytes[7] != b'-' {
         return None;
     }
-    let digits = |range: std::ops::Range<usize>| -> Option<i64> {
-        let part = text.get(range)?;
-        if part.bytes().all(|b| b.is_ascii_digit()) {
-            Some(part.parse::<i64>().expect("ASCII digits of at most four places parse as i64"))
-        } else {
-            None
-        }
-    };
-    let year = digits(0..4)?;
-    let month = digits(5..7)?;
-    let day = digits(8..10)?;
+    let year = digits_at(text, 0..4)?;
+    let month = digits_at(text, 5..7)?;
+    let day = digits_at(text, 8..10)?;
     let mut rest = text.get(10..)?;
     let (mut hour, mut minute, mut second) = (0, 0, 0);
     if rest.starts_with(' ') || rest.starts_with('T') {
@@ -102,17 +104,9 @@ fn parse_date_text(text: &str) -> Option<DateText> {
         }
         // A multi-byte character can end inside the time field; `get` rejects such a split.
         let time = rest.get(1..9)?;
-        let time_digits = |range: std::ops::Range<usize>| -> Option<i64> {
-            let part = time.get(range)?;
-            if part.bytes().all(|b| b.is_ascii_digit()) {
-                Some(part.parse::<i64>().expect("ASCII digits of at most four places parse as i64"))
-            } else {
-                None
-            }
-        };
-        hour = time_digits(0..2)?;
-        minute = time_digits(3..5)?;
-        second = time_digits(6..8)?;
+        hour = digits_at(time, 0..2)?;
+        minute = digits_at(time, 3..5)?;
+        second = digits_at(time, 6..8)?;
         rest = rest.get(9..)?;
     }
     // An offset that the text names but that is out of range makes the text no date (FUN-37).
