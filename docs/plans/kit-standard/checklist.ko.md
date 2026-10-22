@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 44a755e81117a0dd4b4c986b1ee5228c732b7a68a9502570d9b7757784db86e5 -->
+<!-- source-sha256: e3a3e51ff95340886c3c518c529c76acff9f8c0424248449a7d37b6acb6e4db7 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -203,4 +203,4 @@
 | T26.7-75 | config/layout.yml은 template의 모든 root 파일과 package를 선언한다. root vitest.config.ts(root vitest 설정, T26.7-46)는 layout-root-files의 vars.root_files에, packages/cli(command line package, T26.7-53)는 layout-packages의 component에 들어가므로 make layout-check가 통과한다 | config/layout.yml | `make layout-check` | [o] |
 | T26.7-76 | config/dependency-policy.json은 PHP command line의 Composer manifest(packages/cli/php/composer.json, T26.7-53 이후 독립 application package이고 어떤 manifest도 path repository로 요구하지 않음)를 그것이 고정한 PHP platform 8.4.1과 함께 composerPlatforms에 적으므로 make dependency-policy-check가 통과한다 | config/dependency-policy.json | `make dependency-policy-check` | [o] |
 | T26.7-77 | compiler는 true refresh 정책에서 AST 또는 generated artifact가 없거나 오래됐을 때만 다시 빌드한다. compileAst와 compileGeneratedArtifact는 검증의 ArtifactStaleError(없는 manifest나 파일, 다른 digest나 identity, 불완전한 source graph)만 잡고, JSON이 아닌 manifest 같은 그 밖의 실패는 다시 빌드하지 않고 원래 오류로 실패한다. 이 종류를 막는 kit lint는 없다. oxlint no-empty는 켜져 있지만(K256) 주석만 있는 catch를 비어 있지 않다고 보므로 이 catch가 lint-ts를 통과했다. 문장 없는 catch를 거부하는 검사는 kit 행이다 | packages/compiler/src/ast-artifact.mts, packages/compiler/src/generated-artifact.mts, packages/ts/tests/artifact-store.test.ts | `node node_modules/@polyspec/kit/dist/run-tests.mjs vitest -- packages/ts/tests/artifact-store.test.ts` | [o] |
-| T26.7-78 | compiler는 `a ?? b`의 타입을 a가 null일 때의 b 타입으로 매기므로, 결과는 b가 optional일 때만 optional이다(EXP-31). examples/page case의 parts/head.tpl include는 og_image = meta.og_image ?? links.assets + "/og.png"를 필수 input으로 받고, make conformance-generated-ts가 262개 case를 모두 통과한다 | packages/compiler/src/ir.mts, scripts/check-compiler-ir.mts | `make compiler-ir-check`, `make conformance-generated-ts` | [~] |
+| T26.7-78 | compiler는 `a ?? b`의 타입을 a가 null일 때의 b 타입으로 매기므로, 결과는 b가 optional일 때만 optional이다(EXP-31). examples/page case의 parts/head.tpl include는 og_image = meta.og_image ?? links.assets + "/og.png"를 필수 input으로 받고, make conformance-generated-ts가 262개 case를 모두 통과한다 | packages/compiler/src/ir.mts, scripts/check-compiler-ir.mts | `make compiler-ir-check`, `make conformance-generated-ts` | [o] |
