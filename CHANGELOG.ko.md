@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5ba27f90c37f31bec7b43418d574dbcd1caddfb39bc53325cde74c88cb4cbb0f -->
+<!-- source-sha256: c1a98ea9f2e9412058292e139ba939a3ba9ea5edbcfad21a80283c1aaa590d48 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4-6-1: RT-1은 unit runtime-operations가 인용하며, 이 unit은 모든 구현의 entry-point test를 binding한다(ts, go, rust, php, php-ext는 EntryPointsTest, python). Red: 8403c01c에서 `make parity-declarations-check UNITS="runtime-operations"`가 실패(unit이 없었다); green: 883e0fe8 이후 통과한다 (T26.7-4-6-1).
 - T26.7-32-22: concurrent-bound-map은 Go와 Python test가 검사하는 RT-70과 VAL-22만 인용한다. 나머지 id는 T26.7-4-6-1부터 -7까지의 unit 요구사항이다. Red: 5d0d1ba5에서 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15`가 exit 2 (go와 python이 RT-1 등을 인용); green: 06bd60e5 이후 같은 검사가 exit 0 (T26.7-32-22).
 - T26.7-2-8: language의 편집기 test와 CLI package의 예외 사유가 kit이 정한 종류(ecosystem)로 시작하므로 divergence-check가 통과한다. Red: 6479898d에서 `make divergence-check`가 exit 2; green: 60a24060 이후 divergence-check가 통과한다 (T26.7-2-8).
 - T26.7-53-2: packages/php/tests/CliPackageTest.php는 command line package의 배치를 검사하고 requirement는 검사하지 않으므로 php의 사유 있는 internal test다. R5가 성립한다. Red: 8491ec32에서 `make parity-declarations-check RULES=R5`가 exit 2; green: 그 검사가 통과한다 (T26.7-53-2).
