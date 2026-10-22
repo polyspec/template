@@ -157,7 +157,7 @@ The logical request has this JSON shape:
 }
 ```
 
-- **RT-44** A JSON value is `null`, boolean, number, string, array or object with string keys. `assign` is a root object. `define.data` is also an object when present.
+- **RT-44** A JSON value is `null`, boolean, number, string, array or object with string keys. `assign` is a root object. `define.data` is also an object when present. An `assign` that is not a map, a list, a number, a string or a boolean, fails with E_DATA_UNSUPPORTED_TYPE and the message `assign is not a map`; `null`, and in PHP an empty array, are the empty map of RT-4.
 - **RT-60** Native object instances may be placed directly in `assign`. The runtime retains the original instance, exposes public fields through member lookup and invokes public instance methods through `object.method(args...)`. Logical class functions are registered under `Class::method` and invoked through `Class::method(args...)`.
 
 ## Support levels and compiled artifacts

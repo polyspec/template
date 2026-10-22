@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 15f89261c14ff4708a16d05050885244b0810c8ceb47b3e9e04600927d2ecce0 -->
+<!-- source-sha256: 8ac690a2fff88aeac70cffdd4021299f0b692eebc6c2cbcda8e5ce9b93318cf0 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -157,7 +157,7 @@ sequenceDiagram
 }
 ```
 
-- **RT-44** JSON 값은 `null`, boolean, number, string, array 또는 문자열 키를 가진 object다. `assign`은 루트 object다. `define.data`가 있으면 역시 object다.
+- **RT-44** JSON 값은 `null`, boolean, number, string, array 또는 문자열 키를 가진 object다. `assign`은 루트 object다. `define.data`가 있으면 역시 object다. map이 아닌 `assign`, 즉 list, number, string, boolean은 E_DATA_UNSUPPORTED_TYPE과 메시지 `assign is not a map`으로 실패한다. `null`과 PHP의 빈 배열은 RT-4의 빈 map이다.
 - **RT-60** Native object instance는 `assign`에 직접 넣을 수 있다. Runtime은 원본 instance를 유지하고 member lookup으로 public field를 노출하며 `object.method(args...)`로 public instance method를 호출한다. 논리 class function은 `Class::method`로 등록하고 `Class::method(args...)`로 호출한다.
 
 ## 지원 레벨과 컴파일 artifact
