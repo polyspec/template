@@ -579,7 +579,10 @@ pub fn env_from_json(value: &serde_json::Value) -> Result<Env, BindError> {
     };
     let now = match object.get("now") {
         None => current_time()?,
-        Some(serde_json::Value::Number(number)) => number.as_f64().unwrap_or(0.0),
+        Some(serde_json::Value::Number(number)) => number.as_f64().ok_or_else(|| BindError {
+            code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+            message: format!("env.now {number} is not a number of the value model"),
+        })?,
         Some(_) => {
             return Err(BindError {
                 code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,

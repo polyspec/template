@@ -1,6 +1,7 @@
 package functions
 
 import (
+	"fmt"
 	"math"
 	"regexp"
 	"sort"
@@ -65,7 +66,11 @@ func sortList(list value.List, key *string) (value.List, error) {
 		return nil, typeError("sort requires all numbers or all strings")
 	}
 	sort.SliceStable(entries, func(i, j int) bool {
-		order, _ := value.Compare(entries[i].sortKey, entries[j].sortKey)
+		order, ok := value.Compare(entries[i].sortKey, entries[j].sortKey)
+		if !ok {
+			// The keys are all numbers or all strings, checked above; a failed comparison is a broken invariant (E_INTERNAL).
+			panic(fmt.Sprintf("sort compared keys of different types: %v and %v", entries[i].sortKey, entries[j].sortKey))
+		}
 		return order < 0
 	})
 	result := make(value.List, len(entries))

@@ -57,7 +57,11 @@ fn sort_list(list: &[Value], key: Option<&str>) -> Result<Vec<Value>, FunctionEr
         return Err(type_error("sort requires all numbers or all strings"));
     }
     let mut sorted = keyed;
-    sorted.sort_by(|a, b| compare_values(&a.1, &b.1).unwrap_or(std::cmp::Ordering::Equal).then(a.0.cmp(&b.0)));
+    sorted.sort_by(|a, b| {
+        compare_values(&a.1, &b.1)
+            .expect("sort compares only numbers or only strings, checked above")
+            .then(a.0.cmp(&b.0))
+    });
     Ok(sorted.into_iter().map(|(_, _, item)| item.clone()).collect())
 }
 

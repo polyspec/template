@@ -180,17 +180,31 @@ pub fn value_from_json(input: &serde_json::Value) -> Value {
     }
 }
 
-/// Converts a template value into a `serde_json::Value`; safe strings become plain strings.
-pub fn to_json_value(value: &Value) -> serde_json::Value {
-    match value {
+/// The JSON form of a template value (the form of VAL-21 without native objects); safe strings become plain strings. A
+/// native object has no JSON form and is E_DATA_UNSUPPORTED_TYPE; a number that is not finite is a broken invariant of the
+/// value model and is E_INTERNAL.
+pub fn to_json_value(value: &Value) -> Result<serde_json::Value, BindError> {
+    Ok(match value {
         Value::Null => serde_json::Value::Null,
         Value::Bool(value) => serde_json::Value::Bool(*value),
         Value::Number(number) => serde_json::Number::from_f64(*number)
             .map(serde_json::Value::Number)
-            .unwrap_or(serde_json::Value::Null),
+            .ok_or_else(|| BindError {
+                code: ErrorCode::E_INTERNAL,
+                message: format!("the number value {number} is not finite"),
+            })?,
         Value::Str(text) | Value::Safe(text) => serde_json::Value::String(text.to_string()),
-        Value::List(list) => serde_json::Value::Array(list.iter().map(to_json_value).collect()),
-        Value::Map(map) => serde_json::Value::Object(map.iter().map(|(key, value)| (key.clone(), to_json_value(value))).collect()),
-        Value::Object(_) => serde_json::Value::Null,
-    }
+        Value::List(list) => serde_json::Value::Array(list.iter().map(to_json_value).collect::<Result<_, _>>()?),
+        Value::Map(map) => serde_json::Value::Object(
+            map.iter()
+                .map(|(key, value)| Ok((key.clone(), to_json_value(value)?)))
+                .collect::<Result<_, BindError>>()?,
+        ),
+        Value::Object(_) => {
+            return Err(BindError {
+                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                message: "a native object has no JSON form".to_string(),
+            });
+        }
+    })
 }

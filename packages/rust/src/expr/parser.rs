@@ -493,7 +493,7 @@ impl<'a> ExpressionParser<'a> {
                 self.next_token()?;
                 Ok(Expr::Literal {
                     kind: "string".to_string(),
-                    value: LiteralValue::String(token.decoded.unwrap_or_default()),
+                    value: LiteralValue::String(token.decoded.expect("the lexer decodes every string token")),
                     span: self.span(token.start, token.end),
                 })
             }

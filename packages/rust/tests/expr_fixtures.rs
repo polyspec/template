@@ -70,8 +70,9 @@ fn vector(item: &Vector) -> Result<(), Failed> {
     }
     for (index, evaluation) in item.cases.iter().enumerate() {
         let value = evaluate_expression(&ast, &evaluation.data).map_err(|error| format!("value {index}: {error}"))?;
-        if !json_equal(&to_json_value(&value), &evaluation.value) {
-            return Err(format!("value {index}: got {}", to_json_value(&value)).into());
+        let json = to_json_value(&value).map_err(|error| format!("value {index}: {error}"))?;
+        if !json_equal(&json, &evaluation.value) {
+            return Err(format!("value {index}: got {json}").into());
         }
     }
     Ok(())
