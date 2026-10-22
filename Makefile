@@ -548,12 +548,13 @@ contract-generate: ## Generate the declarations and Mermaid diagrams of the show
 contract-check: cargo-downloads-check build-ts build-php python-package typed-generator ## Verify generated declarations, implementations and runtime state recovery
 	$(NODE) scripts/check-showcase-contract.mts
 
+# showcase measures the modes into var/showcase and checks that measurement; the committed benchmark and its documents change
+# only through make bench, so a showcase build leaves the tracked tree as it was (T26.7-87).
 showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
 	$(NODE) examples/showcase/build.mts --write --langs $(SHOWCASE_LANGS)
 	$(NODE) scripts/check-showcase-contract.mts
-	$(NODE) examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json
-	$(NODE) scripts/check-benchmark-results.mts
-	$(NODE) scripts/update-benchmark-docs.mts
+	$(NODE) examples/showcase/benchmark-modes.mts --output var/showcase/mode-benchmark.json
+	$(NODE) scripts/check-benchmark-results.mts var/showcase/mode-benchmark.json
 	$(NODE) examples/showcase/build-site.mts
 
 bench: cargo-downloads-check typed-generator build-php ## Measure production AST and generated artifacts

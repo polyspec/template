@@ -200,6 +200,7 @@ try {
     results,
   }, null, 2) + '\n';
   if (output) {
+    mkdirSync(dirname(output), { recursive: true });
     writeFileSync(`${output}.next-${process.pid}`, text);
     renameSync(`${output}.next-${process.pid}`, output);
   } else process.stdout.write(text);
