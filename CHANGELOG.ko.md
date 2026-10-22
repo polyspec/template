@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0222587b89bd390219159e39eba531d9836b5f9ce317e28f61d7aed8df031b9a -->
+<!-- source-sha256: d0be1bee35d9f967d9571b73b7826b50d99d1e71f580db5d8a7a05ace0c61a6c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-87: make showcase는 실행 mode를 var/showcase/mode-benchmark.json에 측정하고 그 파일을 검사하며, 추적되는 examples/site/data/mode-benchmark.json을 쓰거나 make bench만 하는 update-benchmark-docs를 돌리지 않으므로 showcase build가 추적 tree를 그대로 둔다. make showcase가 통과하고 추적 파일을 바꾸지 않는다. Red: dcd3e7c5에서 tests/scripts/showcase-writes.test.mts가 exit 1; green: 통과한다 (T26.7-87).
 - T26.7-86: mode benchmark와 그 검사는 측정하는 언어와 mode의 목록 하나(scripts/benchmark-result.mts의 BENCHMARK_LANGUAGES, BENCHMARK_MODES)를 읽으므로, check-benchmark-results가 639875dd(T22.6-17) 이후 benchmark가 측정하는 Python 행을 기대하고 make showcase가 benchmark 검사를 통과한다. T22.6-17의 나머지는 사용자에게 남는다. Red: b828c095에서 tests/scripts/benchmark-rows.test.mts가 exit 1("benchmark row is missing or duplicated: python/ast"); green: 통과한다 (T26.7-86).
 - T26.7-85: PHP showcase adapter는 render하는 request의 모든 map을 JSON object로 쓴다. Output::plain은 MapValue::entries()의 [key, value] 쌍을 list로 쓰지 않고 object로 읽으므로, make showcase의 request 계약이 다섯 scenario와 여섯 언어에서 통과한다. Red: e8d86ddf에서 tests/scripts/showcase-php-request.test.mts가 exit 1; green: 통과한다 (T26.7-85).
 - T26.7-84: scripts/의 검사는 기대하는 실패만 센다. check-showcase-contract와 check-benchmark-results는 기대 메시지와 맞는지 보고 그 밖의 오류는 올려 보내는 scripts/expected-rejection.mts의 rejects로 거부를 세고, check-conformance-type-manifest는 case가 그 template의 그 오류를 기대할 때만 파싱되지 않는 partial을 건너뛰며, check-typed-generator와 editor-fixtures는 fixture가 존재하지 않을 때만 없다고 읽는다. Red: bac1913f에서 tests/scripts/expected-rejection.test.mts가 exit 1, 아직 없던 module이라 실패한 단언이 아니라 load 실패; green: check-conformance-type-manifest, editor-fixtures --check와 함께 통과한다 (T26.7-84).
