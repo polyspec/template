@@ -781,7 +781,7 @@
     },
     {
       "id": "concurrent-bound-map",
-      "requirements": ["RT-1", "RT-37", "RT-55", "RT-56", "RT-59", "RT-62", "RT-69", "RT-70", "VAL-13", "VAL-22"],
+      "requirements": ["RT-70", "VAL-22"],
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },
