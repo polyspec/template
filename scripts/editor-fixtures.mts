@@ -2,7 +2,7 @@
 // Editor fixtures: writes or checks the expected language service results of every template under
 // packages/language/tests/editor. Every editor adapter compares its own results with these files.
 //   node scripts/editor-fixtures.mts --write | --check
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { DocumentOptions, TemplateDocument } from '@polyspec/template-language';
@@ -76,12 +76,8 @@ async function main(mode: '--write' | '--check'): Promise<void> {
       writeFileSync(path, expected);
       continue;
     }
-    let current: string | null = null;
-    try {
-      current = readFileSync(path, 'utf8');
-    } catch {
-      current = null;
-    }
+    // A missing expected file differs; any other read failure is the script's own and propagates.
+    const current = existsSync(path) ? readFileSync(path, 'utf8') : null;
     if (current !== expected) {
       process.stderr.write(`editor fixture differs: ${path}\n`);
       drift++;

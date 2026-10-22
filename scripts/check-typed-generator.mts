@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Compiles each generated artifact in an install project and exercises its Program implementation.
-import { copyFileSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import assert from 'node:assert/strict';
@@ -49,12 +49,7 @@ function fixture(id: string, name: string): string {
 }
 
 function fixtureExists(id: string, name: string): boolean {
-  try {
-    fixture(id, name);
-    return true;
-  } catch {
-    return false;
-  }
+  return existsSync(join(scenarioRoot, id, name));
 }
 
 function expected(id: string): string {

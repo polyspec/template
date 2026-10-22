@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { parse } from '../packages/ts/dist/index.mjs';
+import { parse, TemplateError } from '../packages/ts/dist/index.mjs';
 import { listCases, typeDefinitions } from '../tests/runner/cases.mts';
 import { deriveTypeManifest } from '../packages/compiler/src/type-manifest.mts';
 
@@ -24,7 +24,9 @@ for (const testCase of parseableCases) {
         try {
           templates.set(name, parse(readFileSync(path), name, testCase.options));
         } catch (error) {
-          if (name === 'input.tpl') throw error;
+          // A partial that does not parse is part of a case only when the case expects that very error.
+          const expected = testCase.expectedError;
+          if (!(error instanceof TemplateError) || expected === null || expected.template !== name || expected.code !== error.code) throw error;
         }
       }
     }

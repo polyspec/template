@@ -2,6 +2,7 @@
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { benchmarkResultDocument, METRICS, type BenchmarkResult } from './benchmark-result.mts';
+import { rejects } from './expected-rejection.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const path = process.argv[2] ?? join(root, 'examples/site/data/mode-benchmark.json');
@@ -35,8 +36,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const mutated = mutation.results[0];
   if (!mutated) throw new Error(`${path} holds no benchmark row to change`);
   mutated.output_sha256 = '0'.repeat(64);
-  let rejected = false;
-  try { validateBenchmark(mutation); } catch { rejected = true; }
-  if (!rejected) throw new Error('benchmark mutation was not rejected');
+  if (!rejects(() => validateBenchmark(mutation), /output contract differs$/)) throw new Error('benchmark mutation was not rejected');
   process.stdout.write(`benchmark: ${result.results.length} equal-output rows and mutation rejection passed\n`);
 }

@@ -12,6 +12,7 @@ import { runtimePayloadDocument, scenarioIds, scenarioMetadataDocument, type Run
 import { CARGO } from './temporary-workspace.mts';
 import { tsc } from './tools.mts';
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
+import { rejects } from './expected-rejection.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const adapterRoot = join(root, 'examples', 'showcase', 'adapters');
@@ -235,20 +236,9 @@ async function checkRuntimeAssertionHelpers() {
   const generated = join(adapterRoot, languageDefinition('javascript').generated);
   const contract: unknown = await import(pathToFileURL(generated).href);
   assert(isRuntimeAssertions(contract), `${generated} does not export assertRenderAdapter and assertRequestShape`);
-  let rejectedMissingOperation = false;
-  try {
-    contract.assertRenderAdapter({});
-  } catch {
-    rejectedMissingOperation = true;
-  }
-  assert(rejectedMissingOperation, 'generated adapter assertion accepts a missing operation');
-  let rejectedExtraField = false;
-  try {
-    contract.assertRequestShape({ target: 'layout', assign: new Map(), define: new Map(), extra: true });
-  } catch {
-    rejectedExtraField = true;
-  }
-  assert(rejectedExtraField, 'generated request assertion accepts an extra field');
+  assert(rejects(() => contract.assertRenderAdapter({}), /^missing adapter operation: /), 'generated adapter assertion accepts a missing operation');
+  const extraField = { target: 'layout', assign: new Map(), define: new Map(), extra: true };
+  assert(rejects(() => contract.assertRequestShape(extraField), /^request fields do not follow the manifest order$/), 'generated request assertion accepts an extra field');
 }
 
 function checkPhpReflection() {
