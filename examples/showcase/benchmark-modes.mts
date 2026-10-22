@@ -10,6 +10,8 @@ import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileFiles, compileSource } from '../../packages/compiler/src/compiler.mts';
 import { publishBuild } from '../../scripts/publish-build.mts';
 import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mts';
+import { showcasePythonModule } from './python-module.mts';
+import { pythonEnvironment, pythonPackageInterpreter } from '../../scripts/python-toolchain.mts';
 import { number, object, text } from './json.mts';
 
 const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..', '..'));
@@ -70,6 +72,7 @@ function directoryBytes(path: string): number {
 function generatedPath(language: string): string {
   if (language === 'go') return join(root, 'examples/showcase/adapters/go/generated/scope-precedence/generated.go');
   if (language === 'php') return join(root, showcasePhpDirectory('scope-precedence'));
+  if (language === 'python') return join(root, 'examples/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`);
   const extension = language === 'typescript' ? 'ts' : language;
   return join(root, `examples/showcase/adapters/generated/typed/scope-precedence.${extension}`);
 }
@@ -104,6 +107,7 @@ function timed(command: string, args: string[], mode: string, count: number, war
     cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
     env: {
       ...process.env,
+      ...pythonEnvironment(),
       PATH: `${home}/.cargo/bin:${searchPath}`,
       SHOWCASE_EXECUTION_MODE: mode === 'generated' ? 'generated' : 'ast',
       SHOWCASE_BENCH_ITERATIONS: String(count),
@@ -179,6 +183,7 @@ try {
     go: [goAdapter, [scenario]],
     rust: [rustAdapter, [scenario]],
     php: ['php', [join(root, 'examples/showcase/adapters/php.php'), scenario]],
+    python: [pythonPackageInterpreter, [join(root, 'examples/showcase/adapters/python.py'), scenario]],
   };
   const results: Record<string, unknown>[] = [];
   for (const [language, [command, args]] of Object.entries(commands)) {
