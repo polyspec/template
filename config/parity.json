@@ -784,6 +784,19 @@
       ]
     },
     {
+      "id": "prepared-render",
+      "kind": "feature",
+      "requirements": ["RT-62"],
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/prepared-render.test.ts", "id": "prepared render (RT-62) \u203a renders the same bytes on every call and equals the single-call render" },
+        { "implementation": "go", "test": "packages/go/prepared_render_test.go", "id": "TestPreparedRenderIsTheSingleCallRender" },
+        { "implementation": "rust", "test": "packages/rust/tests/prepared_render.rs", "id": "prepared_render_is_the_single_call_render" },
+        { "implementation": "php", "test": "packages/php/tests/PreparedRenderCallTest.php", "id": "testPreparedRenderIsTheSingleCallRender" },
+        { "implementation": "php-ext", "test": "packages/php/tests/PreparedRenderCallTest.php", "id": "testPreparedRenderIsTheSingleCallRender" },
+        { "implementation": "python", "test": "packages/python/tests/test_prepared_render.py", "id": "test_prepared_render_is_the_single_call_render" }
+      ]
+    },
+    {
       "id": "request-path",
       "kind": "feature",
       "requirements": ["RT-59"],
