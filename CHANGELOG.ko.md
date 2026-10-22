@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cf1ba66f12d0fab020bc0bf9a2edc58e53d9539a52aa642d2b4943ee8d5ed4db -->
+<!-- source-sha256: 41d6783ff766dcaa10b5c68cc1866802be408c8450091d4a95487383e1f4d7cd -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-77: compiler는 true refresh 정책에서 AST 또는 generated artifact가 없거나 오래됐을 때만(없는 manifest나 파일, 다른 compiler 형식의 manifest, 다른 digest나 identity, 불완전한 source graph) 다시 빌드하고, JSON이 아닌 manifest나 읽을 수 없는 파일은 다시 빌드하지 않고 원래 오류로 실패한다. 이 패턴을 막는 kit lint는 없다. oxlint no-empty는 주석만 있는 catch를 통과시킨다. Red: 4d28ba2f에서 packages/ts/tests/artifact-store.test.ts가 exit 1; green: compiler-ir-check, lint-ts와 함께 통과한다 (T26.7-77).
 - T26.7-74: template이 make hooks가 쓰는 git hook을 .githooks/pre-merge-commit과 .githooks/reference-transaction(K495)까지, main에서 land의 gate를 돌리는 pre-commit과 함께 갖는다. kit이 hook 6개를 소유하므로(K522) config/owner-checks.json은 pre-commit, commit-msg, prepare-commit-msg를 더 적지 않고, rules-check와 owner-validate가 통과한다. Red: a24788f0에서 make rules-check와 make owner-validate가 exit 2; green: 둘 다 통과한다 (T26.7-74).
 - T26.7-76: config/dependency-policy.json은 PHP command line의 Composer manifest인 packages/cli/php/composer.json을 그것이 고정한 PHP platform 8.4.1과 함께 composerPlatforms에 적으므로 make dependency-policy-check가 통과한다. Red: T26.7-76 등록 시점에 make dependency-policy-check가 exit 2; green: 통과한다 (T26.7-76).
 - T26.7-75: config/layout.yml은 root vitest.config.ts를 layout-root-files의 vars.root_files에, packages/cli를 layout-packages의 component에 선언하므로 make layout-check가 통과한다. Red: T26.7-75 등록 시점에 make layout-check가 exit 2; green: 통과한다 (T26.7-75).
