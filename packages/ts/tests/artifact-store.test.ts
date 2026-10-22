@@ -38,6 +38,15 @@ describe('ArtifactStore.loadOrRefresh (RT-56)', () => {
     expect(builds).toBe(0);
   });
 
+  it('true fails on a manifest that is not JSON and does not build', () => {
+    const { output } = fixtureRoot();
+    mkdirSync(output);
+    writeFileSync(join(output, 'manifest.json'), 'not json');
+    let builds = 0;
+    expect(() => loadOrRefresh(output, 'true', () => { builds++; })).toThrow(SyntaxError);
+    expect(builds).toBe(0);
+  });
+
   it('false fails when no artifact exists and never builds', () => {
     const { output } = fixtureRoot();
     let builds = 0;

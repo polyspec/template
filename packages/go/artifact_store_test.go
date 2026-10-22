@@ -2,6 +2,8 @@ package template_test
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	template "github.com/polyspec/template/packages/go"
@@ -37,4 +39,18 @@ func TestLoadOrRefreshPolicies(t *testing.T) {
 		t.Fatal("false loaded a missing artifact")
 	}
 	_ = failed
+}
+
+// TestLoadOrRefreshTrueFailsOnABrokenManifest checks that true rebuilds only a missing or stale artifact: a manifest that
+// is not JSON fails with its error and builds nothing.
+func TestLoadOrRefreshTrueFailsOnABrokenManifest(t *testing.T) {
+	directory := t.TempDir()
+	if err := os.WriteFile(filepath.Join(directory, "manifest.json"), []byte("not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	builds := 0
+	_, err := template.LoadOrRefresh(directory, template.ArtifactRefreshTrue, func(string) error { builds++; return nil })
+	if err == nil || builds != 0 {
+		t.Fatalf("true rebuilt a broken manifest: err %v, builds %d", err, builds)
+	}
 }

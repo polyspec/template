@@ -23,3 +23,17 @@ fn load_or_refresh_follows_its_policy() {
     let missing = directory.with_file_name("none");
     assert!(load_or_refresh(&missing, ArtifactRefresh::False, build).is_err(), "false loaded a missing artifact");
 }
+
+#[test]
+fn true_fails_on_a_broken_manifest() {
+    let directory = std::env::temp_dir().join(format!("artifact-store-broken-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).expect("create the directory");
+    std::fs::write(directory.join("manifest.json"), "not json").expect("write the manifest");
+    let builds = Cell::new(0);
+    let result = load_or_refresh(&directory, ArtifactRefresh::True, |_: &std::path::Path| {
+        builds.set(builds.get() + 1);
+        Ok(())
+    });
+    assert!(result.is_err(), "a broken manifest loaded");
+    assert_eq!(builds.get(), 0, "true rebuilt a broken manifest");
+}

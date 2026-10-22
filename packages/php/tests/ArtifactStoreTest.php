@@ -6,6 +6,7 @@ namespace Polyspec\Template\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
+use Polyspec\Template\Loader\ArtifactStaleException;
 
 /**
  * RT-56 ArtifactStore.loadOrRefresh: "dev" builds on every call, "true" reuses an artifact that loads, and "false" never
@@ -13,6 +14,46 @@ use Polyspec\Template\AstProgram;
  */
 final class ArtifactStoreTest extends TestCase
 {
+    public function testTrueFailsOnABrokenManifestAndDoesNotBuild(): void
+    {
+        $directory = sys_get_temp_dir() . '/artifact-store-broken-' . getmypid();
+        if (!is_dir($directory)) {
+            mkdir($directory);
+        }
+        file_put_contents($directory . '/manifest.json', 'not json');
+        $builds = 0;
+        try {
+            AstProgram::loadOrRefresh($directory, 'true', static function (string $path) use (&$builds): void {
+                ++$builds;
+            });
+            self::fail('a broken manifest loaded');
+        } catch (\JsonException) {
+            self::assertSame(0, $builds);
+        }
+    }
+
+    public function testTrueFailsOnAnUnreadableManifestAndDoesNotBuild(): void
+    {
+        $directory = sys_get_temp_dir() . '/artifact-store-unreadable-' . getmypid();
+        if (!is_dir($directory)) {
+            mkdir($directory);
+        }
+        file_put_contents($directory . '/manifest.json', '{}');
+        chmod($directory . '/manifest.json', 0);
+        $builds = 0;
+        try {
+            AstProgram::loadOrRefresh($directory, 'true', static function (string $path) use (&$builds): void {
+                ++$builds;
+            });
+            self::fail('an unreadable manifest loaded');
+        } catch (\RuntimeException $error) {
+            self::assertNotInstanceOf(ArtifactStaleException::class, $error);
+            self::assertSame(0, $builds);
+        } finally {
+            chmod($directory . '/manifest.json', 0644);
+        }
+    }
+
     public function testLoadOrRefreshFollowsItsPolicy(): void
     {
         $directory = Support::repoRoot() . '/tests/fixtures/artifact-runtime/artifact';
