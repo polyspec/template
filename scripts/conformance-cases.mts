@@ -14,11 +14,11 @@ import { fileURLToPath } from 'node:url';
 import { readParityConfig } from './parity-config.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-// The AST runner over every implementation, and the generated runner of every implementation of config/parity.json:
-// every unit holds in every implementation (kit S6).
+// The AST runner over every implementation, and the generated runner of every implementation of config/parity.json, or of
+// the implementation it shares (`shares`: php-ext runs the generated PHP programs of php): every unit holds in every implementation (kit S6).
 export const RUNNERS = [
   'tests/runner/conformance.mts',
-  ...readParityConfig().implementations.map(({ name }) => `tests/runner/conformance-generated-${name}.mts`),
+  ...[...new Set(readParityConfig().implementations.map(({ name, shares }) => shares ?? name))].map(generator => `tests/runner/conformance-generated-${generator}.mts`),
 ];
 
 /** The case ids of the paths, in order and without repetition; a path outside a case directory is an error. */

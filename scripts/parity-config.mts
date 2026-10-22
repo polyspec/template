@@ -7,9 +7,10 @@ import { fileURLToPath } from 'node:url';
 
 const parityFile = fileURLToPath(new URL('../config/parity.json', import.meta.url));
 
-/** An implementation: its name and, when its runner does not start the tool of the checkout, its command. */
+/** An implementation: its name, the implementation whose generated programs it shares (`shares`), and, when its runner does not start the tool of the checkout, its command. */
 export interface ParityImplementation {
   name: string;
+  shares?: string;
   command?: string;
 }
 
@@ -21,10 +22,14 @@ export interface ParityConfig {
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 
 function implementation(value: unknown, index: number): ParityImplementation {
-  if (!isObject(value) || typeof value.name !== 'string' || (value.command !== undefined && typeof value.command !== 'string')) {
-    throw new Error(`implementation ${index} of config/parity.json has no name or a command that is no string`);
+  if (!isObject(value) || typeof value.name !== 'string' || (value.shares !== undefined && typeof value.shares !== 'string') || (value.command !== undefined && typeof value.command !== 'string')) {
+    throw new Error(`implementation ${index} of config/parity.json has no name, or a shares or a command that is no string`);
   }
-  return value.command === undefined ? { name: value.name } : { name: value.name, command: value.command };
+  return {
+    name: value.name,
+    ...(value.shares === undefined ? {} : { shares: value.shares }),
+    ...(value.command === undefined ? {} : { command: value.command }),
+  };
 }
 
 /** The implementations of config/parity.json. */
