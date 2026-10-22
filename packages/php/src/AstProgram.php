@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template;
 
 use Polyspec\Template\Loader\ArrayLoader;
+use Polyspec\Template\Loader\ArtifactLoader;
 use Polyspec\Template\Loader\LoaderInterface;
 use Polyspec\Template\Loader\Path;
 use Polyspec\Template\Parser\Parser;
@@ -82,6 +83,16 @@ final class AstProgram implements Program, RuntimeServices
     public static function decodeTemplate(string $json): array
     {
         return AstDecoder::decode($json);
+    }
+
+    /**
+     * Loads the AST artifact that the build compiler wrote in `$directory` and returns the program that renders it (RT-56).
+     *
+     * @throws \RuntimeException when the artifact is missing, not an AST artifact, or a file does not match its digest
+     */
+    public static function loadArtifact(string $directory): self
+    {
+        return new self(ArtifactLoader::fromDirectory($directory));
     }
 
     /**
