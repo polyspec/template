@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cfb663c74c90d3d165f946bfa69108a04f26060f31f1bdf98b35c96b1b5811ea -->
+<!-- source-sha256: 0477046f1192b9a6123f21659498740fc9b4209a7d778f83e5c581da76482f96 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-32-20: 완료 처리했다. 행은 [o]이며, red는 36c51c61이고 green은 conformance case다 (T26.7-32-20).
 - T26.7-32-20: RT-44는 map이 아닌 assign이 E_DATA_UNSUPPORTED_TYPE과 메시지 assign is not a map으로 실패한다고 말하며, 모든 구현이 그렇게 한다. conformance case data/list-assign-error와 data/number-assign-error가 모든 구현에서 이를 확인한다. Red: 수정 전 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-44"`가 exit 2 (56f37eedae96); green: 그 검사와 conformance case가 통과한다 (T26.7-32-20).
 - T26.7-53: PHP 라이브러리의 command line은 자기 Composer project packages/cli/php가 되었다(type project, K433). 이 project는 라이브러리와 symfony/console을 require한다. 라이브러리에는 command line도 console 의존성도 없다. Red: 2fb844d9에서 `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/CliPackageTest.php`가 exit 1 (package가 없었다); green: 그 test가 통과하고, `packages/cli/php/tests/CliTest.php`(command line 7개 test)가 통과하며, 확장 CLI test가 확장과 함께 통과한다 (T26.7-53).
 - T26.7-4-5-1: main에서 마감되었다: red는 4921fce5, green은 91845a9a에 있다 (T26.7-4-5-1).
