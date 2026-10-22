@@ -1,4 +1,4 @@
-// Analysis cache: one language service document per open document version (EDT-4).
+// Analysis cache: one language service document per open document version.
 import { fileURLToPath } from 'node:url';
 import { openDocument, type TemplateDocument } from '@polyspec/template-language';
 import type { TextDocument } from 'vscode-languageserver-textdocument';

@@ -1,4 +1,4 @@
-// Server: declares the capabilities of EDT-14 and answers every request from the analysis of the document version.
+// Server: declares the capabilities of the language server and answers every request from the analysis of the document version.
 import { TOKEN_TYPES } from '@polyspec/template-language';
 import { pathToFileURL } from 'node:url';
 import { TextDocuments, TextDocumentSyncKind, type Connection, type InitializeResult } from 'vscode-languageserver';
@@ -53,7 +53,7 @@ export function startServer(connection: Connection): void {
   texts.onDidChangeContent(({ document: text }) => {
     const document = analyses.of(text);
     void connection.sendDiagnostics({ uri: text.uri, version: text.version, diagnostics: diagnosticsOf(text, document) });
-    // The marker of the document gets its own diagnostics, an empty list when it is valid (EDT-19).
+    // The marker of the document gets its own diagnostics, an empty list when it is valid.
     if (document.root !== null) {
       const uri = pathToFileURL(document.root.marker).href;
       void connection.sendDiagnostics({ uri, diagnostics: protocolDiagnostics(TextDocument.create(uri, 'json', 0, document.root.text), document.root.diagnostics) });

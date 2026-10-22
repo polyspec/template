@@ -1,4 +1,4 @@
-// Folding of closed template constructs (EDT-10).
+// Folding of closed template constructs.
 import { foldService } from '@codemirror/language';
 import { templateDocument } from './document.js';
 

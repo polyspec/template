@@ -1,3 +1,4 @@
+# EDT-8 and EDT-9: the tokens and the tags of the template are the parts that the editors paint.
 #!/usr/bin/env python3
 """The tokens of the conformance cases (CNF-17): every case whose input parses
 has the tokens of expected.tokens.json, the EDT-8 tokens of the analysis as

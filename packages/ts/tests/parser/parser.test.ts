@@ -1,3 +1,4 @@
+// EDT-9: the tags of the analysis are the accepted tags that the editors paint.
 // Parser behavior that the fixtures do not cover directly.
 import { describe, expect, it } from 'vitest';
 import { analyze, analyzePrefix, AstProgram, parse, TemplateError } from '../../src/index.js';

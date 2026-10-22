@@ -5,7 +5,7 @@
   },
   "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The API units are the operations and types that the specification defines as public API (T22.6-14, T22.6-18), read by the symbol extractor of each implementation; every other public symbol is a nativeOnly entry with the spec anchor of its reason. The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools; every other test file of an implementation is the native test of a feature unit (T24.8, T24.11).",
   "implementations": [
-    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "internal": [{ "glob": "packages/ts/tests/cli.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/command.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/cli.test.ts", "reason": "ecosystem: the test of the npm command template-fmt, the packaging form of the formatter in the TypeScript ecosystem" }], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/index.d.ts" } },
+    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "internal": [{ "glob": "packages/ts/tests/cli.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/command.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/cli.test.ts", "reason": "ecosystem: the test of the npm command template-fmt, the packaging form of the formatter in the TypeScript ecosystem" }, { "glob": "packages/language/tests/editor.test.ts", "reason": "tool: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/lexical-tables.test.ts", "reason": "tool: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/root.test.ts", "reason": "tool: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/document.test.ts", "reason": "tool: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/index.d.ts" } },
     { "name": "go", "runner": "go", "prose": ["Go"], "internal": [{ "glob": "packages/go/cmd/template/main_test.go", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" }, "symbols": { "extractor": "go", "entry": "packages/go" } },
     { "name": "rust", "runner": "cargo", "prose": ["Rust"], "internal": [{ "glob": "packages/rust/tests/cli.rs", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs"], "support": ["packages/rust/tests/common/*.rs"], "errors": { "file": "packages/rust/src/error.rs", "pattern": "^    (E_[A-Z0-9_]+),$" }, "symbols": { "extractor": "rust", "entry": "packages/rust/Cargo.toml" } },
     { "name": "php", "runner": "php", "prose": ["PHP"], "internal": [{ "glob": "packages/php/tests/CliTest.php", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/php/tests/Utf8Test.php", "reason": "test: the test of the UTF-8 helper Utf8 of this implementation, which checks that isValid agrees with firstInvalid; the contract of invalid text is the unit invalid-text" }], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" }, "symbols": { "extractor": "php", "entry": "packages/php/src" } },
@@ -50,7 +50,7 @@
     },
     {
       "id": "tokens",
-      "requirements": ["LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23", "FMT-1", "FMT-2"],
+      "requirements": ["LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23", "FMT-1", "FMT-2", "EDT-8", "EDT-9"],
       "kind": "suite",
       "file": "tests/cases",
       "cases": "*/*",
@@ -134,7 +134,7 @@
     },
     {
       "id": "analysis",
-      "requirements": ["FMT-1", "GRM-2"],
+      "requirements": ["FMT-1", "GRM-2", "EDT-8", "EDT-9"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "syntax analysis \u203a classifies every part of every tag kind" },
@@ -767,38 +767,6 @@
         { "implementation": "php", "test": "packages/php/tests/PackageDataTest.php", "id": "testDecodeReadsTheResourceOfThePackageOutsideTheRepository" },
         { "implementation": "php-ext", "test": "packages/php/tests/PackageDataTest.php", "id": "testDecodeReadsTheResourceOfThePackageOutsideTheRepository" },
         { "implementation": "python", "test": "packages/python/tests/test_package_data.py", "id": "test_the_schema_is_read_from_the_package_outside_the_repository" }
-      ]
-    },
-    {
-      "id": "editor-documents",
-      "requirements": ["EDT-1", "EDT-2", "EDT-3", "EDT-4", "EDT-5", "EDT-6", "EDT-7", "EDT-8", "EDT-9", "EDT-10", "EDT-11", "EDT-12", "EDT-13", "EDT-14", "EDT-15", "EDT-16", "EDT-17", "EDT-18", "EDT-19", "EDT-20", "EDT-21"],
-      "kind": "feature",
-      "bindings": [
-        { "implementation": "ts", "test": "packages/language/tests/document.test.ts", "id": "constructs › returns the tags of an if construct in source order" }
-      ]
-    },
-    {
-      "id": "editor-fixtures",
-      "requirements": ["EDT-1", "EDT-2", "EDT-3", "EDT-4", "EDT-5", "EDT-6", "EDT-7", "EDT-8", "EDT-9", "EDT-10", "EDT-11", "EDT-12", "EDT-13", "EDT-14", "EDT-15", "EDT-16", "EDT-17", "EDT-18", "EDT-19", "EDT-20", "EDT-21"],
-      "kind": "feature",
-      "bindings": [
-        { "implementation": "ts", "test": "packages/language/tests/editor.test.ts", "id": "editor fixtures › board.tpl" }
-      ]
-    },
-    {
-      "id": "editor-template-root",
-      "requirements": ["EDT-1", "EDT-2", "EDT-3", "EDT-4", "EDT-5", "EDT-6", "EDT-7", "EDT-8", "EDT-9", "EDT-10", "EDT-11", "EDT-12", "EDT-13", "EDT-14", "EDT-15", "EDT-16", "EDT-17", "EDT-18", "EDT-19", "EDT-20", "EDT-21"],
-      "kind": "feature",
-      "bindings": [
-        { "implementation": "ts", "test": "packages/language/tests/root.test.ts", "id": "template root › is the directory of the marker in the nearest ancestor" }
-      ]
-    },
-    {
-      "id": "lexical-tables",
-      "requirements": ["EDT-1", "EDT-2", "EDT-3", "EDT-4", "EDT-5", "EDT-6", "EDT-7", "EDT-8", "EDT-9", "EDT-10", "EDT-11", "EDT-12", "EDT-13", "EDT-14", "EDT-15", "EDT-16", "EDT-17", "EDT-18", "EDT-19", "EDT-20", "EDT-21", "LEX-1", "LEX-2", "LEX-3", "LEX-4", "LEX-5", "LEX-6", "LEX-7", "LEX-8", "LEX-9", "LEX-10", "LEX-11", "LEX-12", "LEX-13", "LEX-14", "LEX-15", "LEX-16", "LEX-17", "LEX-18", "LEX-19", "LEX-20", "LEX-21", "LEX-22", "LEX-23"],
-      "kind": "feature",
-      "bindings": [
-        { "implementation": "ts", "test": "packages/language/tests/lexical-tables.test.ts", "id": "lexical tables › every listed entry is still in the sources" }
       ]
     },
     {

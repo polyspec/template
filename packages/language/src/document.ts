@@ -1,4 +1,4 @@
-// Language service document: one analysis of a template text and every editor result of EDT-4 to EDT-13.
+// Language service document: one analysis of a template text and every editor result of the document.
 import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template';
 import { format, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
@@ -13,11 +13,11 @@ export interface DocumentOptions {
   name?: string;
   /** Engine delimiter option as two characters (LEX-22). The default is `{}`. */
   delimiters?: string;
-  /** The file of the document and the host that reaches the files around it (EDT-18). Without it no root is declared. */
+  /** The file of the document and the host that reaches the files around it. Without it no root is declared. */
   location?: DocumentLocation;
 }
 
-/** A parser error of the text, a path diagnostic (EDT-7, EDT-20) or a marker diagnostic (EDT-19). */
+/** A parser error of the text, a path diagnostic or a marker diagnostic. */
 export interface Diagnostic {
   start: number;
   end: number;
@@ -38,7 +38,7 @@ export interface TagRange extends Range {
   kind: SyntaxTag['kind'];
 }
 
-/** A folding range by 0-based line numbers (EDT-10). */
+/** A folding range by 0-based line numbers. */
 export interface FoldingRange {
   startLine: number;
   endLine: number;
@@ -57,17 +57,17 @@ export type DocumentFormatOptions = Omit<FormatOptions, 'name' | 'delimiters'>;
 
 const BOM = '﻿';
 
-/** One analysis of a template text and its editor results. Positions are UTF-16 string indexes into `text` (EDT-5). */
+/** One analysis of a template text and its editor results. Positions are UTF-16 string indexes into `text`. */
 export class TemplateDocument {
-  /** The parser error of a text that does not parse, otherwise the path diagnostics (EDT-7, EDT-20). */
+  /** The parser error of a text that does not parse, otherwise the path diagnostics. */
   readonly diagnostics: readonly Diagnostic[];
-  /** The marker in the nearest ancestor of the document, or null when none declares a root (EDT-18). */
+  /** The marker in the nearest ancestor of the document, or null when none declares a root. */
   readonly root: TemplateRoot | null;
-  /** Every accepted tag except comments (EDT-9). */
+  /** Every accepted tag except comments. */
   readonly tags: readonly TagRange[];
-  /** The highlight tokens of the accepted tags, sorted and not overlapping (EDT-8). */
+  /** The highlight tokens of the accepted tags, sorted and not overlapping. */
   readonly tokens: readonly Token[];
-  /** The closed block constructs (EDT-10). */
+  /** The closed block constructs. */
   readonly constructs: readonly Construct[];
   private readonly accepted: readonly TagRange[];
   private readonly lineStarts: number[];
@@ -114,7 +114,7 @@ export class TemplateDocument {
     return start;
   }
 
-  /** The constructs whose close tag starts on a later line, from the opening line to the line before the close tag (EDT-10). */
+  /** The constructs whose close tag starts on a later line, from the opening line to the line before the close tag. */
   foldingRanges(): FoldingRange[] {
     const ranges: FoldingRange[] = [];
     for (const construct of this.constructs) {
@@ -128,25 +128,25 @@ export class TemplateDocument {
     return ranges;
   }
 
-  /** The tags of the construct with a tag containing the index, including the index after the tag (EDT-11). */
+  /** The tags of the construct with a tag containing the index, including the index after the tag. */
   highlights(index: number): Range[] {
     const found = constructAt(this.constructs, index);
     return found === null ? [] : found.construct.tags.map(tag => ({ start: tag.start, end: tag.end }));
   }
 
-  /** The start of the next tag of the construct under the index, or of the innermost construct around it (EDT-11). */
+  /** The start of the next tag of the construct under the index, or of the innermost construct around it. */
   matchingTag(index: number): number | null {
     return matchingTagOf(this.constructs, index);
   }
 
-  /** Formats the text with the document's name and delimiters (EDT-12). */
+  /** Formats the text with the document's name and delimiters. */
   format(options: DocumentFormatOptions = {}): FormatResult {
     const base: FormatOptions = this.options.delimiters === undefined ? { name: this.options.name ?? 'template.tpl' } : { name: this.options.name ?? 'template.tpl', delimiters: this.options.delimiters };
     return format(this.text, { ...base, ...options });
   }
 
   /**
-   * The indentation a line gets while it is typed (EDT-13): the formatter's rule over the accepted tags without
+   * The indentation a line gets while it is typed: the formatter's rule over the accepted tags without
    * requiring a balanced structure. A line inside an element or a tag whose lines the formatter keeps keeps its
    * indentation.
    */
@@ -161,7 +161,7 @@ export class TemplateDocument {
   }
 }
 
-/** Analyzes a template text once (EDT-4). */
+/** Analyzes a template text once. */
 export function openDocument(text: string, options: DocumentOptions = {}): TemplateDocument {
   return new TemplateDocument(text, options);
 }

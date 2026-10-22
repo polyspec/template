@@ -1,6 +1,6 @@
-// Template root (EDT-18 to EDT-21): the marker `template-root.json`, the root of a document by nearest ancestor and the
+// Template root: the marker `template-root.json`, the root of a document by nearest ancestor and the
 // diagnostics of the include and block paths that name no regular file under the root. Files are reached only through
-// an injected host, so the language service stays free of Node.js (EDT-3).
+// an injected host, so the language service stays free of Node.js.
 import { PathError, resolvePath, type Template } from '@polyspec/template';
 import type { Diagnostic } from './document.js';
 
@@ -32,11 +32,11 @@ export interface TemplateRoot {
   marker: string;
   text: string;
   path: string | null;
-  /** The diagnostics of the marker text, positions into that text (EDT-19). */
+  /** The diagnostics of the marker text, positions into that text. */
   diagnostics: Diagnostic[];
 }
 
-/** The diagnostics of a marker text: empty for `{"schema": 1}`, otherwise one error over the whole text (EDT-19). */
+/** The diagnostics of a marker text: empty for `{"schema": 1}`, otherwise one error over the whole text. */
 export function checkRootMarker(text: string): Diagnostic[] {
   const invalid = (message: string): Diagnostic[] => [
     { start: 0, end: text.length, code: 'E_ROOT_INVALID', message, severity: 'error', source: 'polyspec-template' },
@@ -56,7 +56,7 @@ export function checkRootMarker(text: string): Diagnostic[] {
   return [];
 }
 
-/** The marker in the nearest ancestor directory of a document, its own directory first, or null when none has one (EDT-18). */
+/** The marker in the nearest ancestor directory of a document, its own directory first, or null when none has one. */
 export function findRoot(location: DocumentLocation): TemplateRoot | null {
   let directory = parentOf(location.path);
   while (directory !== null) {
@@ -78,7 +78,7 @@ interface PathTag {
 }
 
 /**
- * The diagnostics of the include paths and block paths of a template (EDT-20), with byte spans. A block of an id alone
+ * The diagnostics of the include paths and block paths of a template, with byte spans. A block of an id alone
  * renders a definition of `define` and is not resolved (RT-24, RT-25).
  */
 export function pathDiagnostics(ast: Template, location: DocumentLocation | undefined, root: TemplateRoot | null): { span: [number, number]; code: string; message: string }[] {

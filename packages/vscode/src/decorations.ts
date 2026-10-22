@@ -32,7 +32,7 @@ export async function tagRangesOf(client: LanguageClient, document: vscode.TextD
 
 /**
  * Paints tag backgrounds in visible template editors when they appear and after a document changes. A document
- * that does not parse still has the tags the parser accepted before its error (EDT-6), so a tag being typed does not
+ * that does not parse still has the tags the parser accepted before its error, so a tag being typed does not
  * clear the backgrounds of the whole document.
  */
 export function registerDecorations(context: vscode.ExtensionContext, client: LanguageClient, language: string): void {

@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "comment": "The editor layer boundaries of template (docs/spec/editor.md, EDT-2 and EDT-3), checked by make editor-boundary-check with the editor boundary checker of kit.",
+  "comment": "The editor layer boundaries of template (docs/operations/editor-tools.md, the rules of the language service), checked by make editor-boundary-check with the editor boundary checker of kit.",
   "boundaries": [
     {
-      "comment": "EDT-2: an adapter depends on @polyspec/template-language and neither declares nor imports the parser @polyspec/template.",
+      "comment": "An adapter depends on @polyspec/template-language and neither declares nor imports the parser @polyspec/template.",
       "packages": [
         "packages/lsp",
         "packages/codemirror",
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "comment": "EDT-3: the language service uses no editor, Node.js or DOM module or global; its command line entry src/cli is the one part that may use Node.js.",
+      "comment": "The language service uses no editor, Node.js or DOM module or global; its command line entry src/cli is the one part that may use Node.js.",
       "packages": [
         "packages/language"
       ],

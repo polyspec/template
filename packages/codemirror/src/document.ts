@@ -1,4 +1,4 @@
-// The language service document of an editor state: one analysis per document text (EDT-4).
+// The language service document of an editor state: one analysis per document text.
 import { StateField, type EditorState } from '@codemirror/state';
 import { openDocument, type DocumentOptions, type TemplateDocument } from '@polyspec/template-language';
 import { templateOptions } from './options.js';

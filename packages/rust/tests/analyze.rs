@@ -1,3 +1,4 @@
+// EDT-9: the tags of the analysis are the accepted tags that the editors paint.
 //! Tag analysis (EDT-8): the accepted tags with their kind and body ranges, and the token class of every part of them.
 
 use polyspec_template::{ParseOptions, TagKind, analyze};

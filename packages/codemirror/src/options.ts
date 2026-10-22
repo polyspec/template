@@ -12,7 +12,7 @@ export interface TemplateOptions {
   name?: string;
   /**
    * The file of the document and the host that reaches the files around it, against whose `template-root.json` include
-   * and block paths resolve (EDT-18). Without it every such path reports that no template root is declared.
+   * and block paths resolve. Without it every such path reports that no template root is declared.
    */
   location?: DocumentLocation;
 }

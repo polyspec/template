@@ -1,4 +1,4 @@
-// Formatting and typing indentation: format() and lineIndentation() of the language service with the client's indent unit (EDT-12, EDT-13).
+// Formatting and typing indentation: format() and lineIndentation() of the language service with the client's indent unit.
 import type { FormatError, TemplateDocument } from '@polyspec/template-language';
 import { TextEdit, type FormattingOptions, type Position, type Range } from 'vscode-languageserver';
 import type { TextDocument } from 'vscode-languageserver-textdocument';

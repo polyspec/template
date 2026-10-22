@@ -1,4 +1,4 @@
-// Editor fixtures (EDT-17): the adapter gives, through an EditorState, the results of the language service fixtures.
+// Editor fixtures: the adapter gives, through an EditorState, the results of the language service fixtures.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { countColumn } from '@codemirror/state';

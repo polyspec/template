@@ -10,16 +10,16 @@ import { describe, expect, it } from 'vitest';
 const SOURCES = path.resolve(import.meta.dirname, '../src');
 
 const ALLOWED: Record<string, string> = {
-  // The indent option of the formatter and of the document (EDT-12, EDT-13), not template syntax.
+  // The indent option of the formatter and of the document, not template syntax.
   'format.ts /^(?: +|\\t)$/': 'indent option',
   'document.ts /^(?: +|\\t)$/': 'indent option',
   // Whitespace between the parser tokens of a tag body, and a body that spans lines.
   'body.ts /^[ \\t\\r\\n]*$/': 'whitespace between tokens',
   'body.ts /[\\r\\n]/': 'a body that spans lines',
-  // HTML tags and the leading whitespace of a line for the indentation (EDT-13).
+  // HTML tags and the leading whitespace of a line for the indentation.
   'indent.ts /^<(\\/?)([A-Za-z][A-Za-z0-9-]*)/': 'HTML tag name',
   'indent.ts /^[ \\t]*$/': 'leading whitespace of a line',
-  // HTML void elements and the elements whose content keeps its lines (EDT-13).
+  // HTML void elements and the elements whose content keeps its lines.
   'indent.ts [area, base, br, col, embed, hr, img, input, link, meta, param, source, track, wbr]': 'HTML void elements',
   'indent.ts [script, style, textarea]': 'HTML raw text elements',
   'indent.ts [pre, script, style, textarea]': 'HTML elements that keep their lines',
@@ -30,7 +30,7 @@ const ALLOWED: Record<string, string> = {
   'invariant.ts /(^|\\n)[ \\t]+/g': 'leading whitespace of text lines',
   // The --indent option of template-fmt.
   'cli/args.ts /^[1-8]$/': 'indent width option',
-  // The LSP legend of the token types of EDT-8.
+  // The LSP legend of the token types of the tokens rule (the classified parts of the text).
   'tokens.ts [delimiter, keyword, variable, property, function, string, number, operator, comment, path]': 'semantic token legend',
 };
 

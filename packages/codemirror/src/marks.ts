@@ -4,9 +4,9 @@ import { Decoration, EditorView, type DecorationSet } from '@codemirror/view';
 import type { TemplateDocument } from '@polyspec/template-language';
 import { templateDocument } from './document.js';
 
-// The class of the tag background mark (EDT-9).
+// The class of the tag background mark.
 const TAG_CLASS = 'cm-template-tag';
-// The class of the matching tag highlight mark (EDT-11).
+// The class of the matching tag highlight mark.
 const HIGHLIGHT_CLASS = 'cm-template-highlight';
 
 const tagMark = Decoration.mark({ class: TAG_CLASS });

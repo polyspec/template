@@ -1,4 +1,4 @@
-// Indentation of a line from the typing indentation of the language service (EDT-13).
+// Indentation of a line from the typing indentation of the language service.
 import { countColumn } from '@codemirror/state';
 import { indentService, indentUnit, type IndentContext } from '@codemirror/language';
 import type { TemplateDocument } from '@polyspec/template-language';

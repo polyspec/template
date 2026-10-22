@@ -65,7 +65,7 @@ class TemplateAnalysis:
 
 class PrefixAnalysis:
     """The tags a parse accepted before its first error, their tokens, and that
-    error (EDT-6). Ranges are those of `TemplateAnalysis`."""
+    error. Ranges are those of `TemplateAnalysis`."""
 
     __slots__ = ("tags", "tokens", "error")
 
@@ -93,7 +93,7 @@ def analyze_template_prefix(
     source: Source, delimiters: tuple[str, str] = DEFAULT_DELIMITERS
 ) -> PrefixAnalysis:
     """The tags a parse accepted before its first error, the tokens of those
-    tags, and that error (EDT-6)."""
+    tags, and that error."""
     parser = _TemplateParser(source, delimiters)
     try:
         analysis = parser.parse()

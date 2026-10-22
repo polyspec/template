@@ -1,4 +1,4 @@
-// Commands of the template extension: formatting (EDT-12) and moving to the matching tag (EDT-11).
+// Commands of the template extension: formatting and moving to the matching tag.
 import { EditorSelection, type StateCommand } from '@codemirror/state';
 import { indentUnit } from '@codemirror/language';
 import { EditorView } from '@codemirror/view';

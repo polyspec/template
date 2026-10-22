@@ -1,4 +1,4 @@
-// Fixture form of the server results (EDT-17): every result is requested through the protocol and its positions are
+// Fixture form of the server results: every result is requested through the protocol and its positions are
 // converted to string indexes, so it can be compared with the editor fixtures of the language service.
 import type { DocumentHighlight, FoldingRange, Position, SemanticTokens, TextEdit } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -10,7 +10,7 @@ export const SPACES = { tabSize: 2, insertSpaces: true };
 // The labels of format errors in the server log, by the reason of the fixtures; a parse error is logged with its code.
 const REASONS: Record<string, string> = { 'HTML structure': 'html', 'formatted AST differs': 'invariant' };
 
-/** The string index where every line of the language service starts (EDT-5). */
+/** The string index where every line of the language service starts. */
 function lineStarts(text: string): number[] {
   const starts = [0];
   for (let index = text.indexOf('\n'); index >= 0; index = text.indexOf('\n', index + 1)) starts.push(index + 1);

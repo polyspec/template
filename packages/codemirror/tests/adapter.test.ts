@@ -103,7 +103,7 @@ describe('template root', () => {
     },
   };
 
-  it('resolves include paths against the marker of the location option (EDT-16, EDT-20)', () => {
+  it('resolves include paths against the marker of the location option', () => {
     const diagnostics = templateDiagnostics(createState('{+ part.tpl}{+ missing.tpl}', { location }));
     expect(diagnostics.map(item => [item.from, item.to, item.message])).toEqual([[12, 27, 'E_LOAD_NOT_FOUND: template missing.tpl does not exist']]);
   });

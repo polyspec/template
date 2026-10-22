@@ -76,7 +76,7 @@
     },
     "packages/lsp/bin/template-lsp.mjs": {
       "kind": "ecosystem",
-      "tool": "node runs the built vscode-languageserver entry of the language server (EDT-14)"
+      "tool": "node runs the built vscode-languageserver entry of the language server"
     },
     "packages/php/bin/template.php": {
       "kind": "ecosystem",
@@ -224,7 +224,7 @@
     },
     "scripts/editor-fixtures.mts": {
       "kind": "policy",
-      "reason": "polyspec rule EDT-17: the expected results of the language service for every editor fixture"
+      "reason": "the expected results of the language service for every editor fixture"
     },
     "scripts/fixture-documents.mts": {
       "kind": "ecosystem",

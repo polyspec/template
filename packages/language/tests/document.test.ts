@@ -1,5 +1,5 @@
 // The language service document: diagnostics, tags, tokens, constructs, folding, highlights, matching tags and line
-// indentation (EDT-4 to EDT-13), and the agreement of its constructs with the AST spans.
+// indentation, and the agreement of its constructs with the AST spans.
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { parse, type Node } from '@polyspec/template';
@@ -227,7 +227,7 @@ describe('agreement with the AST', () => {
         expect(document.diagnostics).toHaveLength(1);
         return;
       }
-      // A text that parses has only path diagnostics, here without a declared root (EDT-20).
+      // A text that parses has only path diagnostics, here without a declared root.
       expect(document.diagnostics.filter(item => item.code !== 'E_ROOT_UNDECLARED')).toEqual([]);
       const text = source.startsWith('﻿') ? source.slice(1) : source;
       const shift = source.length - text.length;

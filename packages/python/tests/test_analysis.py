@@ -1,7 +1,8 @@
+# EDT-9: the tags of the analysis are the accepted tags that the editors paint.
 #!/usr/bin/env python3
 """Syntax analysis of accepted tags: the EDT-8 class of every part of a tag,
 the body range of each tag and the prefix analysis of a source with an error
-(EDT-6). Ranges are code point indexes into the source string."""
+. Ranges are code point indexes into the source string."""
 
 import unittest
 

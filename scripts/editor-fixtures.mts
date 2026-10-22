@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Editor fixtures (EDT-17): writes or checks the expected language service results of every template under
+// Editor fixtures: writes or checks the expected language service results of every template under
 // packages/language/tests/editor. Every editor adapter compares its own results with these files.
 //   node scripts/editor-fixtures.mts --write | --check
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';

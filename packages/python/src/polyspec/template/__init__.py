@@ -151,7 +151,7 @@ def analyze(source: "str | bytes", name: str, options: "ParseOptions | None" = N
 def _analyze_prefix(
     source: "str | bytes", name: str, options: "ParseOptions | None" = None
 ):
-    """Parses a template and returns the ranges it accepted before its first error (EDT-6)."""
+    """Parses a template and returns the ranges it accepted before its first error."""
     delimiters = _delimiters_of(options.delimiters if options else None)
     parsed = (
         Source.from_text(name, source)

@@ -33,7 +33,7 @@ export interface TemplateAnalysis {
 /** The token types of EDT-8. */
 type SyntaxTokenKind = 'delimiter' | 'keyword' | 'variable' | 'property' | 'function' | 'string' | 'number' | 'operator' | 'comment' | 'path';
 
-/** A classified range of an accepted tag (EDT-8). `start` and `end` are string indexes. */
+/** A classified range of an accepted tag. `start` and `end` are string indexes. */
 export interface SyntaxToken {
   start: number;
   end: number;
@@ -128,7 +128,7 @@ export function analyzeTemplate(source: Source, delimiters: Delimiters = DEFAULT
   return new TemplateParser(source, delimiters).parse();
 }
 
-/** The tags a parse accepted before its first error, their tokens, and that error (EDT-6). */
+/** The tags a parse accepted before its first error, their tokens, and that error. */
 /**
  * The tags and tokens that the parser accepted, with either the AST of a source that parses or the first error and no
  * AST.

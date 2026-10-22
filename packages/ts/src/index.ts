@@ -37,7 +37,7 @@ export function parse(source: string | Uint8Array, name: string, options: ParseO
 
 /**
  * Parses a template and returns the tag ranges and expression tokens the parser accepted before its first error,
- * with that error, or every tag and token and a null error when the source parses (EDT-6). Editors use it while a
+ * with that error, or every tag and token and a null error when the source parses. Editors use it while a
  * text is being typed and does not parse.
  */
 export function analyzePrefix(source: string | Uint8Array, name: string, options: ParseOptions = {}): PrefixAnalysis {

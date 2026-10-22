@@ -1,4 +1,4 @@
-// Result conversion: language service results at UTF-16 string indexes to Language Server Protocol positions (EDT-5).
+// Result conversion: language service results at UTF-16 string indexes to Language Server Protocol positions.
 import { TOKEN_TYPES, type Diagnostic as LanguageDiagnostic, type TemplateDocument } from '@polyspec/template-language';
 import {
   DiagnosticSeverity,
@@ -17,7 +17,7 @@ export function rangeOf(text: TextDocument, start: number, end: number): Range {
   return { start: text.positionAt(start), end: text.positionAt(end) };
 }
 
-/** The parser error or the path diagnostics of the document (EDT-7, EDT-20). */
+/** The parser error or the path diagnostics of the document. */
 export function diagnosticsOf(text: TextDocument, document: TemplateDocument): Diagnostic[] {
   return protocolDiagnostics(text, document.diagnostics);
 }
@@ -35,7 +35,7 @@ export function protocolDiagnostics(text: TextDocument, diagnostics: readonly La
 
 /**
  * The tokens of the document in the relative encoding of `textDocument/semanticTokens` with {@link TOKEN_TYPES} as
- * the legend (EDT-8). A client without `multilineTokenSupport` gets a token that spans lines as one token per line.
+ * the legend. A client without `multilineTokenSupport` gets a token that spans lines as one token per line.
  */
 export function semanticTokensOf(text: TextDocument, document: TemplateDocument, multiline: boolean): number[] {
   const data: number[] = [];
@@ -63,7 +63,7 @@ export function semanticTokensOf(text: TextDocument, document: TemplateDocument,
 }
 
 /**
- * The folding ranges of the document (EDT-10). A line of the language service starts at a string index; the range
+ * The folding ranges of the document. A line of the language service starts at a string index; the range
  * ends on the protocol line before the line of the close tag.
  */
 export function foldingRangesOf(text: TextDocument, document: TemplateDocument): FoldingRange[] {
@@ -74,18 +74,18 @@ export function foldingRangesOf(text: TextDocument, document: TemplateDocument):
   }));
 }
 
-/** The tags of the construct at a position (EDT-11). */
+/** The tags of the construct at a position. */
 export function highlightsOf(text: TextDocument, document: TemplateDocument, position: Position): DocumentHighlight[] {
   return document.highlights(text.offsetAt(position)).map(range => ({ range: rangeOf(text, range.start, range.end), kind: DocumentHighlightKind.Text }));
 }
 
-/** The start of the matching tag of a position (EDT-11). */
+/** The start of the matching tag of a position. */
 export function matchingTagOf(text: TextDocument, document: TemplateDocument, position: Position): Position | null {
   const target = document.matchingTag(text.offsetAt(position));
   return target === null ? null : text.positionAt(target);
 }
 
-/** The ranges of every accepted tag except comments (EDT-9). */
+/** The ranges of every accepted tag except comments. */
 export function tagRangesOf(text: TextDocument, document: TemplateDocument): Range[] {
   return document.tags.map(tag => rangeOf(text, tag.start, tag.end));
 }

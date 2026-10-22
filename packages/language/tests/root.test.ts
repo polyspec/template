@@ -1,4 +1,4 @@
-// Template root (EDT-18 to EDT-21): the marker vectors, the root by nearest ancestor and the path diagnostics through an
+// Template root: the marker vectors, the root by nearest ancestor and the path diagnostics through an
 // injected host.
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';

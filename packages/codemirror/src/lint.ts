@@ -1,4 +1,4 @@
-// Diagnostics of the language service as CodeMirror lint diagnostics (EDT-7).
+// Diagnostics of the language service as CodeMirror lint diagnostics.
 import type { EditorState } from '@codemirror/state';
 import { linter, type Diagnostic } from '@codemirror/lint';
 import { templateDocument } from './document.js';

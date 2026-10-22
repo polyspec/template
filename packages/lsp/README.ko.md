@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-lsp-readme -->
-<!-- source-sha256: 4a18812b6eb4f7ef0858a8848984c328cb489574d26e38eac277447697018e83 -->
+<!-- source-sha256: c391c4cd29bb228498acd8dc9c44b34cb50de6cd82aa8ab836d00d19a97dcfe8 -->
 # @polyspec/template-lsp
 
 [English](README.md).
@@ -18,4 +18,4 @@ template-lsp --stdio
 import { MATCHING_TAG_METHOD, TAG_RANGES_METHOD, type MatchingTagParams } from '@polyspec/template-lsp';
 ```
 
-기능과 요청 형태는 [에디터 지원](../../docs/spec/editor.ko.md)(EDT-14)에 정의되어 있고, 명령과 그 검증은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.
+기능과 요청 형태는 [에디터 지원](../../docs/spec/editor.ko.md)에 정의되어 있고, 명령과 그 검증은 [포매터, 언어 서버, 에디터](../../docs/operations/editor-tools.ko.md)에 설명되어 있다.

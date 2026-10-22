@@ -1,4 +1,4 @@
-// The host of root resolution over the file system (EDT-21): the language service reaches files only through it.
+// The host of root resolution over the file system: the language service reaches files only through it.
 import { lstatSync, readFileSync } from 'node:fs';
 import type { EntryType, RootHost } from '@polyspec/template-language';
 

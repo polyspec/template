@@ -1,3 +1,4 @@
+// EDT-9: the tags of a template are the accepted tags that the editors paint.
 //! The tokens and the format results of every conformance case (CNF-17, CNF-18), one trial per case: `tokens::<case>`
 //! and `formatting::<case>`, as the suite units tokens and formatting of config/parity.json read the results. libtest has
 //! no tests made at run time, so the target runs with libtest-mimic (`harness = false`).

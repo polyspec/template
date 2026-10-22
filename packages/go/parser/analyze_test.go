@@ -1,4 +1,5 @@
 package parser_test
+// EDT-9: the tags of the analysis are the accepted tags that the editors paint.
 
 import (
 	"encoding/json"

@@ -1,5 +1,5 @@
-// The server through its protocol over standard input and output: capabilities (EDT-14), the editor fixtures (EDT-17)
-// and the conversion of UTF-16 positions (EDT-5).
+// The server through its protocol over standard input and output: capabilities, the editor fixtures
+// and the conversion of UTF-16 positions.
 import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -37,7 +37,7 @@ afterAll(async () => {
 });
 
 describe('initialize', () => {
-  it('declares the capabilities of EDT-14', () => {
+  it('declares the capabilities of the language server', () => {
     expect(client.initialized?.capabilities).toEqual({
       positionEncoding: 'utf-16',
       textDocumentSync: { openClose: true, change: 1 },
@@ -200,7 +200,7 @@ describe('template root', () => {
     rmSync(directory, { recursive: true, force: true });
   });
 
-  it('reports a missing include against the marker of the nearest ancestor (EDT-18, EDT-20)', async () => {
+  it('reports a missing include against the marker of the nearest ancestor', async () => {
     writeFileSync(join(directory, 'template-root.json'), '{"schema": 1}');
     writeFileSync(join(directory, 'part.tpl'), 'x');
     const uri = pathToFileURL(join(directory, 'page.tpl')).href;
@@ -212,7 +212,7 @@ describe('template root', () => {
     await client.close(uri);
   });
 
-  it('publishes an invalid marker on its own URI and reports the paths as undeclared (EDT-19)', async () => {
+  it('publishes an invalid marker on its own URI and reports the paths as undeclared', async () => {
     writeFileSync(join(directory, 'template-root.json'), '{"schema": 1, "root": "src"}');
     const uri = pathToFileURL(join(directory, 'other.tpl')).href;
     await client.open(uri, '{+ part.tpl}');

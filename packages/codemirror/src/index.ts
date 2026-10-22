@@ -1,4 +1,4 @@
-// Package entry: the CodeMirror 6 adapter of the template language service (EDT-16).
+// Package entry: the CodeMirror 6 adapter of the template language service.
 import type { Extension } from '@codemirror/state';
 import { html } from '@codemirror/lang-html';
 import { templateFormatKey } from './commands.js';

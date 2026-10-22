@@ -1,4 +1,4 @@
-// Editor fixtures (EDT-17): the language service gives the expected results of every fixture. The LSP server and the
+// Editor fixtures: the language service gives the expected results of every fixture. The LSP server and the
 // CodeMirror adapter compare their results with the same files.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';

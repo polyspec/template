@@ -1,4 +1,4 @@
-// Tag structure: the block constructs of the accepted tags (GRM-18), the construct at a position and the next tag of a construct (EDT-10, EDT-11).
+// Tag structure: the block constructs of the accepted tags (GRM-18), the construct at a position and the next tag of a construct.
 
 /** One tag of a construct. `start` and `end` are string indexes into the text. */
 export interface ConstructTag {

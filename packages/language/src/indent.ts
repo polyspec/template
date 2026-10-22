@@ -83,7 +83,7 @@ export function indentEdits(text: string, tags: readonly IndentTag[], options: I
 
 /**
  * Returns the indentation of every line. A tolerant computation does not require a balanced structure: an end tag
- * closes up to the open element of the same name and is ignored when no such element is open (EDT-13).
+ * closes up to the open element of the same name and is ignored when no such element is open.
  */
 export function lineIndentations(text: string, tags: readonly IndentTag[], unit: string, templateBlocks: 'indent' | 'flat', tolerant: boolean): { lines: LineIndentation[] } | { error: IndentError } {
   const scan = scanStructure(text, tags, templateBlocks, tolerant);

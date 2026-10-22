@@ -1,3 +1,4 @@
+// EDT-8 and EDT-9: the tokens and the tags of the template are the classified parts of the text that the editors paint.
 // The tokens of the conformance cases (CNF-17): every case whose input parses has the tokens of expected.tokens.json, the
 // EDT-8 tokens of analyze() as [start, end, type] with UTF-8 byte offsets counted after the byte order mark (FMT-1,
 // FMT-2), and a case whose input does not parse has no such file. Each case is a top-level test named by its id, as the

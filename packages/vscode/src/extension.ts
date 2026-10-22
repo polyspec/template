@@ -1,5 +1,5 @@
 // VS Code extension entry: starts the bundled language server template-lsp as a client and registers the tag
-// backgrounds and the matching tag command, which use the custom requests of the server (EDT-15).
+// backgrounds and the matching tag command, which use the custom requests of the server.
 import * as vscode from 'vscode';
 import { LanguageClient, TransportKind } from 'vscode-languageclient/node';
 import { registerDecorations, tagRangesOf } from './decorations.js';
