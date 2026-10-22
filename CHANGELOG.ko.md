@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 915b7401bd7bfa7ac8b0a7aec0a968c6d03c5c55c51c5f24e394d26390e043ac -->
+<!-- source-sha256: c9e853598ae846c8760071e0d59f6b87629ecd469acea8ba3a6b159e96003ed6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-85: PHP showcase adapter는 render하는 request의 모든 map을 JSON object로 쓴다. Output::plain은 MapValue::entries()의 [key, value] 쌍을 list로 쓰지 않고 object로 읽으므로, make showcase의 request 계약이 다섯 scenario와 여섯 언어에서 통과한다. Red: e8d86ddf에서 tests/scripts/showcase-php-request.test.mts가 exit 1; green: 통과한다 (T26.7-85).
 - T26.7-84: scripts/의 검사는 기대하는 실패만 센다. check-showcase-contract와 check-benchmark-results는 기대 메시지와 맞는지 보고 그 밖의 오류는 올려 보내는 scripts/expected-rejection.mts의 rejects로 거부를 세고, check-conformance-type-manifest는 case가 그 template의 그 오류를 기대할 때만 파싱되지 않는 partial을 건너뛰며, check-typed-generator와 editor-fixtures는 fixture가 존재하지 않을 때만 없다고 읽는다. Red: bac1913f에서 tests/scripts/expected-rejection.test.mts가 exit 1, 아직 없던 module이라 실패한 단언이 아니라 load 실패; green: check-conformance-type-manifest, editor-fixtures --check와 함께 통과한다 (T26.7-84).
 - T26.7-83: Rust showcase adapter는 라이브러리의 env_from_json으로 request의 env를 만들므로, 라이브러리와 다른 adapter처럼 없는 now는 현재 시각이고 없는 timezone은 Z이며 now = 0이 아니다. Red: 수정 전 코드에서 adapter test가 "now is the current time, not 0"으로 실패한다(fix commit의 Red-Test 줄은 compile 중 시간을 넘긴 실행을 기록한다); green: 통과한다 (T26.7-83).
 - T26.7-82: Rust와 Go는 값에 형태가 없거나 불변식이 깨진 곳에 기본값을 넣지 않는다. to_json_value는 Result를 돌려주고 native object(E_DATA_UNSUPPORTED_TYPE)나 유한하지 않은 수(E_INTERNAL)를 null로 쓰지 않고 실패한다. arbitrary_precision의 serde_json이 f64로 읽지 못하는 env.now는 0이 아니라 E_DATA_UNSUPPORTED_TYPE이다. decoded text 없는 string token과 sort의 비교 실패는 ""나 Equal을 읽지 않고 E_INTERNAL 경계까지 panic한다. Red: 63bcebdf에서 cargo --test json_value가 exit 1; green: conformance-go, conformance-rust, lint-rust, lint-go와 함께 통과한다 (T26.7-82).
