@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: db285bdd49163f4add66364c8f78ca49397d485806c3b48d2dab0d485c606d45 -->
+<!-- source-sha256: d9d10ac038d1465fbe865c0067f8fd876bdda94a5b0624457921e91c2d516add -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -10,7 +10,7 @@
 | T26.4 | AGENTS.md의 모든 rule은 CI나 Git hook이 실행하는 check를 이름으로 든다. pre-commit hook이 생성 경로의 staging을 거부한다 | config/checklist.json lists the pre-commit hook, .githooks/pre-commit runs make staged-generated-hook, tests/scripts/pre-commit-hook.test.mts checks the hook, and the rule of the links of AGENTS.md names make staged-generated-hook, since the links sit in node_modules, with make link-check as a development aid | `node --test tests/scripts/pre-commit-hook.test.mts`; `make rules-check` | [o] |
 | T26.5 | kit 0.0.54 복사본이 73cf59e1을 따르며, gate에서 전체 parity check를 실행한다 | PRINCIPLES.md and PRINCIPLES.ko.md, the copies that make kit-sync writes from the installed package: rule S6 names make parity-check beside make parity-declarations-check | `make kit-check` | [o] |
 | T26.6 | docs/spec의 모든 requirement는 ID를 가진 bullet이며, config/parity.json의 각 unit은 자신이 시험하는 requirement를 인용한다(K273) | The spec bullets of docs/spec/*.md and their Korean twins, config/parity.json with requirements.pattern and the requirements of every unit, and the kit copies of make kit-sync | `make kit-check` | [o] |
-| T26.7 | config/parity.json의 모든 unit은 모든 구현에서 성립하고, test가 이름으로 적은 spec requirement를 인용한다 (kit K273, K275, K276) | config/parity.json, docs/spec, the tests of every implementation | `make parity-declarations-check` | [~] |
+| T26.7 | config/parity.json의 모든 unit은 모든 구현에서 성립하고, test가 이름으로 적은 spec requirement를 인용한다 (kit K273, K275, K276) | config/parity.json, docs/spec, the tests of every implementation | `make parity-declarations-check` | [o] |
 | T26.7-1 | 모든 case.json이 명세 규칙을 requirements로 나열하고(kit K277), check-rules는 kit에 없는 검사만 유지한다 | The requirements field of the case.json files of tests/cases, tests/runner/cases.mts, scripts/check-rules.mts, the CNF table of docs/spec/conformance.md, docs/operations/testing.md, docs/operations/conformance.md and their Korean twins | `make parity-declarations-check`, `make rules-check` | [o] |
 | T26.7-3 | 모든 문서는 config/parity.json의 구현을 있는 그대로 세고 나열한다(R10) | The prose of README*.md, docs/spec, docs/operations and packages/*/README*.md that counts or lists implementations, and the prose name of the PHP extension in config/parity.json | `make parity-declarations-check` | [o] |
 | T26.7-2 | config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol 또는 binding을 가진다(R1, R2) | The PHP extension registers the classes and functions of packages/php under the same names (S10), and the missing bindings of the units, spec first | `make parity-declarations-check` | [o] |

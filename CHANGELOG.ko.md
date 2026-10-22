@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2ca348f5d13fbae02225ce01dae273638f7a642c5727d8832d34e987f560db2a -->
+<!-- source-sha256: 9462a56f13ecb1be58e4f64508fa154e3dfbc3d41ecb74845e25cf9aade1e2f5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7: 모든 자식 행이 닫힌 뒤 닫는다. config/parity.json은 docs/spec의 모든 요구사항을 모든 구현에서 binding하고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7).
 - T26.7-4: 모든 unit은 각 binding의 test가 이름으로 적는 요구사항만 인용하고, 모든 요구사항이 인용된다(R13, R15). 자식 T26.7-4-5와 T26.7-4-6이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-4).
 - T26.7-32: docs/spec의 모든 요구사항은 그것을 인용하는 unit의 모든 구현 test가 이름으로 적는다(R13). 자식 행이 test와 unit 묶음별로 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-32).
 - T26.7-2: config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol이나 binding을 가진다(R1, R2). 자식 행이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-2).
