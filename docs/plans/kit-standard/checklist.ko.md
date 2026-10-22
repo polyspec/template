@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 8828b5161e1614e7896189359de7bcbf7053a323cdb5834a977fb232c847abe9 -->
+<!-- source-sha256: e1968df62d52e5a0a40786c552f54fa73bde737ad5cd31ce3183be18fb152b09 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -76,7 +76,7 @@
 | T26.7-4-6 | concurrent-bound-map은 그 test가 검사하는 RT-70과 VAL-22를 인용하고, conformance suite는 그 case가 명명하는 RT와 VAL id를 인용한다 (T26.7-4-2의 후속): 어떤 case나 test도 명명하지 않는 RT와 VAL id 47개는 그것을 검사하는 test를 unit이 binding할 때까지 concurrent-bound-map에 남는다; Go test는 낡은 RT-62a 대신 RT-70과 RT-62를 그것을 검사하는 곳에서 명명한다 | config/parity.json, packages/go/bound_test.go | `var/tools/bin/node node_modules/@polyspec/kit/dist/run-tests.mjs go --cwd packages/go -- -run 'TestConcurrentRendersReadOneBoundMap\|TestBoundMapRendersTheBytesOfTheHostMap\|TestConformanceCases' .`, `var/tools/bin/node node_modules/@polyspec/kit/dist/run-tests.mjs python --venv var/python/venv -- packages/python/tests/test_concurrency.py packages/python/tests/test_case_conformance.py` | [~] |
 | T26.7-4-6-1 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of runtime-operations in every implementation | `make parity-declarations-check UNITS="runtime-operations"` | [o] |
 | T26.7-4-6-2 | RT-37은 error case의 case.json이 목록에 넣고, suite unit conformance가 인용한다. 두 실행 모드는 같은 expected.error.json과 비교하므로, 모드가 다르면 그 case가 실패한다 (K277). 요구사항은 언어별 feature binding 없이 쓰이고 binding된다. | config/parity.json, the tests of error-mode-codes in every implementation | `make parity-declarations-check RULES=R13 IDS="RT-37"`, `make schema-check` | [o] |
-| T26.7-4-6-3 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of manifest-levels in every implementation | `make parity-declarations-check UNITS="level-absence"`, `make parity-declarations-check RULES=R13 IDS="RT-55"` | [~] |
+| T26.7-4-6-3 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of manifest-levels in every implementation | `make parity-declarations-check UNITS="level-absence"`, `make parity-declarations-check RULES=R13 IDS="RT-55"` | [o] |
 | T26.7-4-6-4 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of runtime-tiers in every implementation | `make parity-declarations-check UNITS="runtime-tiers"` | [ ] |
 | T26.7-4-6-5 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of request-path in every implementation | `make parity-declarations-check UNITS="request-path"` | [ ] |
 | T26.7-4-6-6 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of prepared-render in every implementation | `make parity-declarations-check UNITS="prepared-render"` | [ ] |
