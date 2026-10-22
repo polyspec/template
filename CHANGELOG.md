@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-32-25: conformance-cases runs the generated runner of the implementation that an implementation shares (shares; php-ext shares php), so php-ext needs no runner file of its own; the case tests/cases/data/null-assign passes in every language. Red: `make conformance-cases CASES=tests/cases/data/null-assign` exit 2 at 86294d6c (php-ext had no runner file); green: that run passes (T26.7-32-25).
 - T26.7-32-20: closed; the row is [o] with its red at 36c51c61 and its green in the conformance cases (T26.7-32-20).
 - T26.7-32-20: RT-44 states that an assign that is not a map fails with E_DATA_UNSUPPORTED_TYPE and the message assign is not a map, as every implementation does; the conformance cases data/list-assign-error and data/number-assign-error hold it in every implementation. Red: `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15 IDS="RT-44"` exit 2 before the fix (56f37eedae96); green: that check and the conformance cases pass (T26.7-32-20).
 - T26.7-53: the command line of the PHP library is a Composer project of its own, packages/cli/php (type project, K433), that requires the library and symfony/console; the library holds no command line and no console dependency. Red: `node node_modules/@polyspec/kit/dist/run-tests.mjs phpunit -- packages/php/tests/CliPackageTest.php` exit 1 at 2fb844d9 (the package did not exist); green: that test passes, `packages/cli/php/tests/CliTest.php` passes (7 tests of the command line), and the extension CLI test passes with the extension (T26.7-53).
