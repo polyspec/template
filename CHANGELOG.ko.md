@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d84ba89045bfb9de7d72f60cd4c45508fafa5928d83794a427ab973e99e65d03 -->
+<!-- source-sha256: a9586b30c03a097678fd1c4cfc47e5a7c9eacd650c0aabd434e6696f5c3a2ec8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-79: Rust generated conformance는 test를 돌리기 전에 cargo test --no-run으로 test crate를 빌드하므로, generated program의 compile이 첫 case의 30초 timeout에 더해지지 않고(kit K371-1) make conformance-generated-rust가 262/262 통과한다. Red: 74fc5c70에서 tests/scripts/rust-generated-steps.test.mts가 exit 1; green: 통과한다 (T26.7-79).
 - T26.7-78: compiler는 merge한 type의 source를 optional 표시와 맞추고, `a ?? b`를 b가 optional일 때만 optional로(EXP-31), `+`를 null이 되지 않는 값으로(EXP-24) 매기므로, local og_image = meta.og_image ?? links.assets + '/og.png'를 include의 필수 input으로 쓰는 examples/page case가 compile되고 generated conformance가 TypeScript, Go, Python, PHP에서 262/262 통과한다. Red: 8cae0c99에서 make compiler-ir-check가 exit 2; green: conformance-generated-ts와 함께 통과한다 (T26.7-78).
 - T26.7-77: compiler는 true refresh 정책에서 AST 또는 generated artifact가 없거나 오래됐을 때만(없는 manifest나 파일, 다른 compiler 형식의 manifest, 다른 digest나 identity, 불완전한 source graph) 다시 빌드하고, JSON이 아닌 manifest나 읽을 수 없는 파일은 다시 빌드하지 않고 원래 오류로 실패한다. 이 패턴을 막는 kit lint는 없다. oxlint no-empty는 주석만 있는 catch를 통과시킨다. Red: 4d28ba2f에서 packages/ts/tests/artifact-store.test.ts가 exit 1; green: compiler-ir-check, lint-ts와 함께 통과한다 (T26.7-77).
 - T26.7-74: template이 make hooks가 쓰는 git hook을 .githooks/pre-merge-commit과 .githooks/reference-transaction(K495)까지, main에서 land의 gate를 돌리는 pre-commit과 함께 갖는다. kit이 hook 6개를 소유하므로(K522) config/owner-checks.json은 pre-commit, commit-msg, prepare-commit-msg를 더 적지 않고, rules-check와 owner-validate가 통과한다. Red: a24788f0에서 make rules-check와 make owner-validate가 exit 2; green: 둘 다 통과한다 (T26.7-74).
