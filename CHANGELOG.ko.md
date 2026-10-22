@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8194c741677a684375cec5f654c36da3f08cade8a0760a61d7ece873b31bbdd6 -->
+<!-- source-sha256: 81e34d11cfceb93d4ad1712444b72580d4aa664b2107eb3ec54873c7f0a3f7d2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-81: Python 구현의 utf8_length는 길이를 지어내지 않는다. 값 규칙이 output에 오지 못하게 하는 UTF-8 형태 없는 text는 surrogate마다 4바이트로 세어지지 않고 그 UnicodeEncodeError가 E_INTERNAL 경계까지 올라간다. Red: d0f499ab에서 packages/python/tests/test_escape.py가 exit 1; green: 통과한다 (T26.7-81).
 - T26.7-80: TypeScript formatter는 파싱되지 않는 source의 TemplateError와, parse와 analyze가 DelimiterOptionError로 던지는 잘못된 delimiters option만 parse 결과로 보고하고, analyzer의 내부 오류 같은 그 밖의 실패는 source의 오류로 보고하지 않고 던진다(FMT-14). Red: c4145fde에서 packages/language/tests/format-errors.test.ts가 exit 1; green: 통과한다 (T26.7-80).
 - T26.7-79: Rust generated conformance는 test를 돌리기 전에 cargo test --no-run으로 test crate를 빌드하므로, generated program의 compile이 첫 case의 30초 timeout에 더해지지 않고(kit K371-1) make conformance-generated-rust가 262/262 통과한다. Red: 74fc5c70에서 tests/scripts/rust-generated-steps.test.mts가 exit 1; green: 통과한다 (T26.7-79).
 - T26.7-78: compiler는 merge한 type의 source를 optional 표시와 맞추고, `a ?? b`를 b가 optional일 때만 optional로(EXP-31), `+`를 null이 되지 않는 값으로(EXP-24) 매기므로, local og_image = meta.og_image ?? links.assets + '/og.png'를 include의 필수 input으로 쓰는 examples/page case가 compile되고 generated conformance가 TypeScript, Go, Python, PHP에서 262/262 통과한다. Red: 8cae0c99에서 make compiler-ir-check가 exit 2; green: conformance-generated-ts와 함께 통과한다 (T26.7-78).
