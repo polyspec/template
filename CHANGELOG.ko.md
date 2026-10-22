@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 26b13871f0e6977756a1d9d3d4393fc8e919e83bb228592b53da7656b7e942cd -->
+<!-- source-sha256: 2ca348f5d13fbae02225ce01dae273638f7a642c5727d8832d34e987f560db2a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4: 모든 unit은 각 binding의 test가 이름으로 적는 요구사항만 인용하고, 모든 요구사항이 인용된다(R13, R15). 자식 T26.7-4-5와 T26.7-4-6이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-4).
 - T26.7-32: docs/spec의 모든 요구사항은 그것을 인용하는 unit의 모든 구현 test가 이름으로 적는다(R13). 자식 행이 test와 unit 묶음별로 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-32).
 - T26.7-2: config/parity.json의 모든 API unit과 feature unit은 모든 구현에 symbol이나 binding을 가진다(R1, R2). 자식 행이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-2).
 - T26.6: docs/spec의 모든 요구사항은 ID가 있는 항목이고, config/parity.json의 각 unit은 검사하는 요구사항을 인용한다. kit-check가 통과한다. kit 복사본은 링크된 kit을 따르고(make kit-sync), CHECK_TARGETS는 polyspec-lock-check를 실행하며, config/polyspec.json은 @polyspec/kit을 링크 패키지로 선언한다(K468, K509). Red: b1007eff에서 `make kit-check`가 exit 2(지적 7건); green: kit-check와 polyspec-lock-check가 통과한다 (T26.6).

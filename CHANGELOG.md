@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-4: every unit cites only the requirements that the test of each of its bindings names, and every requirement is cited (R13, R15), as its children T26.7-4-5 and T26.7-4-6 brought about; the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7-4).
 - T26.7-32: every requirement of docs/spec is named by the tests of every implementation of a unit that cites it (R13), as its children brought about by test and unit group; the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7-32).
 - T26.7-2: every API unit and feature unit of config/parity.json has a symbol or a binding in every implementation (R1, R2), as its children brought about; the full parity check holds. Red: `make parity-declarations-check` exit 2 at 935efcc5; green: it passes (T26.7-2).
 - T26.6: every requirement of docs/spec is a bullet with its ID, and each unit of config/parity.json cites the requirements it tests; kit-check holds: the kit copies follow the linked kit (make kit-sync), CHECK_TARGETS runs polyspec-lock-check, and config/polyspec.json declares @polyspec/kit as a linked package (K468, K509). Red: `make kit-check` exit 2 at b1007eff (seven findings); green: kit-check and polyspec-lock-check pass (T26.6).
