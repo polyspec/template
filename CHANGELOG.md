@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-4-6-2: RT-37 is listed in the requirements of every error case and bound through the conformance suite; both execution modes compare each case with its expected.error.json (K277). Red: `make parity-declarations-check RULES=R13 IDS="RT-37"` exit 2 at f6196f47 (RT-37 cited by no unit); green: that check passes after b55da64c (T26.7-4-6-2).
 - T26.7-4-6-1: RT-1 is cited by the unit runtime-operations, which binds the entry-point test of each implementation (ts, go, rust, php, php-ext with EntryPointsTest, python). Red: `make parity-declarations-check UNITS="runtime-operations"` fails at 8403c01c (the unit did not exist); green: it passes after 883e0fe8 (T26.7-4-6-1).
 - T26.7-32-22: concurrent-bound-map cites only RT-70 and VAL-22, which its Go and Python tests check; the other ids it listed are unit requirements of T26.7-4-6-1 to -7. Red: `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15` exit 2 at 5d0d1ba5 (go and python cite RT-1 and more); green: `UNITS="concurrent-bound-map" RULES=R15` exit 0 after 06bd60e5 (T26.7-32-22).
 - T26.7-2-8: the exceptions of the editor tests of language and of the CLI package begin with a kind that kit defines (ecosystem), so divergence-check holds. Red: `make divergence-check` exit 2 at 6479898d; green: divergence-check passes after 60a24060 (T26.7-2-8).
