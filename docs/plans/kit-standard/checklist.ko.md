@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: c077e0239df6b56fd4caa215130a1e14da0da911e3cf03ad553c65019c568d8c -->
+<!-- source-sha256: f1a540f6ae31fa3e364123ad5e6212316c1fc9155be04eab1820c3374e3a7ab4 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -202,4 +202,4 @@
 | T26.7-74 | template은 kit이 내보내는 git hook을 .githooks/pre-merge-commit까지 make hooks로 써서 갖고 있으므로, rules-check와 owner-validate가 PRINCIPLES.md와 owner 규칙이 적는 모든 hook을 찾는다 | .githooks/pre-merge-commit | `make rules-check`, `make owner-validate` | [o] |
 | T26.7-75 | config/layout.yml은 template의 모든 root 파일과 package를 선언한다. root vitest.config.ts(root vitest 설정, T26.7-46)는 layout-root-files의 vars.root_files에, packages/cli(command line package, T26.7-53)는 layout-packages의 component에 들어가므로 make layout-check가 통과한다 | config/layout.yml | `make layout-check` | [o] |
 | T26.7-76 | config/dependency-policy.json은 PHP command line의 Composer manifest(packages/cli/php/composer.json, T26.7-53 이후 독립 application package이고 어떤 manifest도 path repository로 요구하지 않음)를 그것이 고정한 PHP platform 8.4.1과 함께 composerPlatforms에 적으므로 make dependency-policy-check가 통과한다 | config/dependency-policy.json | `make dependency-policy-check` | [o] |
-| T26.7-77 | compiler는 true refresh 정책에서 AST 또는 generated artifact가 없거나 오래됐을 때만 다시 빌드한다. compileAst와 compileGeneratedArtifact는 검증의 ArtifactStaleError(없는 manifest나 파일, 다른 digest나 identity, 불완전한 source graph)만 잡고, JSON이 아닌 manifest 같은 그 밖의 실패는 다시 빌드하지 않고 원래 오류로 실패한다. lint로 이 종류를 막을 수 있는지 행에 적는다. oxlint no-empty는 빈 catch block을 금지하므로, 주석만 있는 compiler의 catch는 lint-ts의 finding이 된다 | packages/compiler/src/ast-artifact.mts, packages/compiler/src/generated-artifact.mts, packages/ts/tests/artifact-store.test.ts | `node node_modules/@polyspec/kit/dist/run-tests.mjs vitest -- packages/ts/tests/artifact-store.test.ts` | [ ] |
+| T26.7-77 | compiler는 true refresh 정책에서 AST 또는 generated artifact가 없거나 오래됐을 때만 다시 빌드한다. compileAst와 compileGeneratedArtifact는 검증의 ArtifactStaleError(없는 manifest나 파일, 다른 digest나 identity, 불완전한 source graph)만 잡고, JSON이 아닌 manifest 같은 그 밖의 실패는 다시 빌드하지 않고 원래 오류로 실패한다. 이 종류를 막는 kit lint는 없다. oxlint no-empty는 켜져 있지만(K256) 주석만 있는 catch를 비어 있지 않다고 보므로 이 catch가 lint-ts를 통과했다. 문장 없는 catch를 거부하는 검사는 kit 행이다 | packages/compiler/src/ast-artifact.mts, packages/compiler/src/generated-artifact.mts, packages/ts/tests/artifact-store.test.ts | `node node_modules/@polyspec/kit/dist/run-tests.mjs vitest -- packages/ts/tests/artifact-store.test.ts` | [~] |

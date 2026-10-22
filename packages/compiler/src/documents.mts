@@ -7,6 +7,11 @@ import { Ajv, type JSONSchemaType, type Schema } from 'ajv';
 
 const ajv = new Ajv({ allErrors: true, strict: true });
 
+/** A JSON value that is not a document of its schema, such as a manifest that an older compiler wrote in another form. */
+export class DocumentSchemaError extends Error {
+  override name = 'DocumentSchemaError';
+}
+
 /** A JSON document of type T: `parse` validates a value, `read` a file; both fail with the source and the errors. */
 export interface JsonDocument<T> {
   parse(value: unknown, source: string): T;
@@ -17,7 +22,7 @@ function jsonDocument<T>(what: string, schema: Schema | JSONSchemaType<T>): Json
   const validate = ajv.compile<T>(schema);
   const parse = (value: unknown, source: string): T => {
     if (validate(value)) return value;
-    throw new Error(`compiler: ${source} is no ${what}: ${ajv.errorsText(validate.errors)}`);
+    throw new DocumentSchemaError(`compiler: ${source} is no ${what}: ${ajv.errorsText(validate.errors)}`);
   };
   return { parse, read: path => parse(readJson(path), path) };
 }

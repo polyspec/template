@@ -64,6 +64,13 @@ describe('the build side of ArtifactStore.loadOrRefresh (RT-56)', () => {
     expect(() => compileAst({ root: source, output, entry: 'page.tpl', refresh: 'true', typeManifest: null, delimiters: null })).toThrow(/is no JSON text/);
   });
 
+  it('compileAst under true rebuilds a manifest in the form of another compiler', () => {
+    const { source, output } = fixtureRoot();
+    compileAst({ root: source, output, entry: 'page.tpl', refresh: 'dev', typeManifest: null, delimiters: null });
+    writeFileSync(join(output, 'manifest.json'), JSON.stringify({ schema: 2, mode: 'ast' }));
+    expect(compileAst({ root: source, output, entry: 'page.tpl', refresh: 'true', typeManifest: null, delimiters: null }).schema).toBe(3);
+  });
+
   it('compileGeneratedArtifact under true fails on a manifest that is not JSON and compiles nothing', () => {
     const { source, output } = fixtureRoot();
     compileAst({ root: source, output, entry: 'page.tpl', refresh: 'dev', typeManifest: null, delimiters: null });

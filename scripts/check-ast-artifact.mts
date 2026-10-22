@@ -71,7 +71,7 @@ try {
   rmSync(source, { recursive: true });
   assert.equal(compileAst({ root: source, output, entry: 'ignored.tpl', refresh: 'false' }).sourceDigest, dependency.sourceDigest);
   writeFileSync(join(output, artifactFile(dependency, 'layout.tpl').path), 'corrupt');
-  assert.throws(() => compileAst({ root: source, output, entry: 'ignored.tpl', refresh: 'false' }), /corrupt/);
+  assert.throws(() => compileAst({ root: source, output, entry: 'ignored.tpl', refresh: 'false' }), /AST artifact file is missing or changed: layout.tpl/);
 } finally {
   rmSync(directory, { recursive: true, force: true });
 }

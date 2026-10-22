@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, s
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { parse, type Node, type Template } from '@polyspec/template';
 import { astCompilerDigest } from './compiler-digest.mts';
-import { astManifestDocument, type AstFile, type AstManifest } from './documents.mts';
+import { astManifestDocument, DocumentSchemaError, type AstFile, type AstManifest } from './documents.mts';
 import { contractPath, hash, json } from './artifact-support.mts';
 const lineIndex = (bytes: Buffer): number[] => {
   const starts = [0];
@@ -51,18 +51,37 @@ function ascending(values: number[]): boolean {
   return true;
 }
 
+/**
+ * An artifact that is missing or stale: its manifest or one of its files is absent, its manifest is in the form of another
+ * compiler (not a document of the schema), a file does not match its digest, or its source graph is incomplete. It is the one failure of a verification that a rebuild fixes, so the true refresh policy rebuilds
+ * on it and on nothing else.
+ */
+export class ArtifactStaleError extends Error {
+  override name = 'ArtifactStaleError';
+}
+
+/** Reads a manifest; one in the form of another compiler is stale, and a manifest that is not JSON or not readable fails as it is. */
+export function readStale<T>(read: () => T): T {
+  try {
+    return read();
+  } catch (error) {
+    if (error instanceof DocumentSchemaError) throw new ArtifactStaleError(error.message, { cause: error });
+    throw error;
+  }
+}
+
 function verify(output: string): AstManifest {
   const manifestPath = join(output, 'manifest.json');
-  if (!existsSync(manifestPath)) throw new Error(`AST artifact manifest is missing: ${manifestPath}`);
-  const manifest = astManifestDocument.read(manifestPath);
+  if (!existsSync(manifestPath)) throw new ArtifactStaleError(`AST artifact manifest is missing: ${manifestPath}`);
+  const manifest = readStale(() => astManifestDocument.read(manifestPath));
   const files = Object.entries(manifest.files);
-  if (files.length === 0 || !manifest.files[manifest.entry]) throw new Error('AST artifact source graph is incomplete');
+  if (files.length === 0 || !manifest.files[manifest.entry]) throw new ArtifactStaleError('AST artifact source graph is incomplete');
   for (const [name, file] of files) {
     if (file.lines[0] !== 0 || !ascending(file.lines)) {
       throw new Error(`AST artifact line index is invalid: ${name}`);
     }
     const path = join(output, file.path);
-    if (!existsSync(path) || hash(readFileSync(path)) !== file.artifactDigest) throw new Error(`AST artifact is missing or corrupt: ${name}`);
+    if (!existsSync(path) || hash(readFileSync(path)) !== file.artifactDigest) throw new ArtifactStaleError(`AST artifact file is missing or changed: ${name}`);
   }
   return manifest;
 }
@@ -122,8 +141,9 @@ export function compileAst(options: CompileAstOptions): AstManifest {
     try {
       const current = verify(output);
       if (current.contractDigest === contractDigest && current.compilerDigest === compilerDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry && current.delimiters === delimiters) return current;
-    } catch {
-      // A changed or damaged artifact is rebuilt under the true refresh policy.
+    } catch (error) {
+      // Only a missing or stale artifact is rebuilt under the true refresh policy; any other failure is its own.
+      if (!(error instanceof ArtifactStaleError)) throw error;
     }
   }
   const temporary = join(dirname(output), `.${basename(output)}-${process.pid}.tmp`);

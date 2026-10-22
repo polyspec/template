@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
 import { astManifestDocument, generatedManifestDocument, type GeneratedManifest } from './documents.mts';
+import { ArtifactStaleError, readStale } from './ast-artifact.mts';
 import { contractPath, hash, json } from './artifact-support.mts';
 import { filesUnder } from './package-root.mts';
 
@@ -19,20 +20,20 @@ type Expected = Pick<GeneratedManifest, 'entry' | 'sourceDigest' | 'typeDigest' 
 
 function verifyGeneratedArtifact(output: string, target: string, expected: Expected | null = null): GeneratedManifest {
   const manifestPath = generatedManifestPath(output);
-  if (!existsSync(manifestPath)) throw new Error(`generated artifact manifest is missing: ${manifestPath}`);
-  const manifest = generatedManifestDocument.read(manifestPath);
+  if (!existsSync(manifestPath)) throw new ArtifactStaleError(`generated artifact manifest is missing: ${manifestPath}`);
+  const manifest = readStale(() => generatedManifestDocument.read(manifestPath));
   if (manifest.target !== target) {
-    throw new Error('generated artifact manifest identity differs');
+    throw new ArtifactStaleError('generated artifact manifest identity differs');
   }
   const files = Object.entries(manifest.files);
   const listed = isDirectory(output)
     ? files.length > 0 && filesUnder(output).join('\n') === files.map(([name]) => name).sort().join('\n')
     : files.length === 1 && files[0]?.[0] === basename(output);
   const intact = files.every(([name, file]) => file.path === name && existsSync(join(artifactBase(output), name)) && hash(readFileSync(join(artifactBase(output), name))) === file.artifactDigest);
-  if (!listed || !intact) throw new Error(`generated artifact is missing or corrupt: ${output}`);
+  if (!listed || !intact) throw new ArtifactStaleError(`generated artifact files are missing or changed: ${output}`);
   if (expected) {
     for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'compilerDigest'] as const) {
-      if (manifest[key] !== expected[key]) throw new Error(`generated artifact ${key} differs`);
+      if (manifest[key] !== expected[key]) throw new ArtifactStaleError(`generated artifact ${key} differs`);
     }
   }
   return manifest;
@@ -80,8 +81,9 @@ export function compileGeneratedArtifact(options: GeneratedArtifactOptions): Gen
   if (refresh === 'true' && !check) {
     try {
       return verifyGeneratedArtifact(output, target, expected);
-    } catch {
-      // A stale or damaged generated artifact is rebuilt under the true policy.
+    } catch (error) {
+      // Only a missing or stale generated artifact is rebuilt under the true policy; any other failure is its own.
+      if (!(error instanceof ArtifactStaleError)) throw error;
     }
   }
   // compile returns the source of a file artifact, or the sources of a directory artifact by their relative paths.
