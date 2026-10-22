@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-python-readme -->
-<!-- source-sha256: 1fd390b31c30adf8a3e49cb865e6ec2b904b3c1726fff92ea16293e103e9aedd -->
+<!-- source-sha256: 1c55a9204a63db2abbe1b5ede5d740fb007bf1ed7800c6c99e0c6d406f81e1ca -->
 # polyspec-template
 
 [English](README.md)
@@ -70,7 +70,6 @@ python -m polyspec.template.cli format [--indent none|tab|N] [--delimiters OC] F
 | `parse(source, name, options)` | 하나의 template을 AST로 파싱합니다. `options.delimiters`가 구분자를 고릅니다. |
 | `decode_template(text)` | AST JSON 텍스트를 jsonschema로 패키지가 package data로 가진 `contracts/schema/ast.schema.json`에 대해 검증해 `parse`가 반환하는 dict로 읽습니다. 스키마가 거부한 JSON은 `path`가 잘못된 노드의 JSON Pointer인 `AstDecodeError`를, JSON이 아닌 텍스트는 `ValueError`를 일으킵니다(AST-10). |
 | `analyze(source, name, options)` | 한 번 파싱해 AST, 본문 범위를 포함한 tag 범위, 각 tag의 모든 부분에 대한 EDT-8 분류를 돌려줍니다. 범위는 source의 code point index이며 `Source.byte_at`이 UTF-8 byte offset을 줍니다. |
-| `analyze_prefix(source, name, options)` | 첫 오류 전에 받아들인 tag, 그 tag들의 token, 그 오류를 돌려줍니다. |
 | `format_template(source, options)` | tag 안의 공백과 줄 들여쓰기를 정리하고 `FormatResult(ok, text, changed, error)`를 돌려줍니다. `FormatOptions`: `name`, `delimiters`, `range`(code point index), `indent`(공백 연속 또는 tab 하나, 기본 공백 두 칸; `None`은 모든 줄을 유지), `template_blocks`(`"indent"` 또는 `"flat"`). source가 파싱되지 않거나(`parse`), HTML 구조를 들여쓸 수 없거나(`html`), 정리한 AST가 다르면(`invariant`) `FormatError(reason, code, line, col, message)`로 거절합니다. |
 | `AstProgram(options)` | AST program을 만듭니다. 옵션: `loader`, `functions`, `class_functions`, `limits`, `delimiters`, `artifact_refresh`. |
 | `Engine(program)` | 하나의 AST 또는 생성된 program에 위임하는 engine을 만듭니다. |

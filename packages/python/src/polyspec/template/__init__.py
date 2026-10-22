@@ -89,7 +89,6 @@ __all__ = [
     "TemplateAnalysis",
     "TemplateError",
     "analyze",
-    "analyze_prefix",
     "analyze_template",
     "analyze_template_prefix",
     "bind",
@@ -149,7 +148,7 @@ def analyze(source: "str | bytes", name: str, options: "ParseOptions | None" = N
     return internal_boundary(name, lambda: analyze_template(parsed, delimiters))
 
 
-def analyze_prefix(
+def _analyze_prefix(
     source: "str | bytes", name: str, options: "ParseOptions | None" = None
 ):
     """Parses a template and returns the ranges it accepted before its first error (EDT-6)."""

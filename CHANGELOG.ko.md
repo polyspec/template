@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8be4ba28c07883ce82e03db5484d16aee3da78f897b9c9b9c404b65bea52beb4 -->
+<!-- source-sha256: 9f49136fac36d07bda875dffe236dd55465dddd16ab2bff4e6c3c8315265df7d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4-5-2: Python은 편집기 도구만 쓰는 `analyze_prefix`를 더 이상 export하지 않는다. 그것은 비공개 `_analyze_prefix`가 되어 `__all__`과 README 표에서 빠지고, 그 test는 비공개 이름을 가져다 쓴다. Red: 테스트 commit에서 `make item-red`를 실행하면 Python test 세 파일이 exit 1; green: test_exports, test_analysis, test_api가 통과하고 `make lint-python`과 `make docs-check`가 통과한다 (T26.7-4-5-2).
 - T26.7-67: row가 done이다. changelog와 checklist 행의 wording 수정은 70f2b5b9에 있고, 그 상태를 여기에 기록한다 (T26.7-67).
 - T26.7-67: T26.7-54 항목은 fork가 아닌 validator의 collect-all 동작을 일반적인 말로 적어, changelog에 다른 project의 동작이 없다 (T26.7-67).
 - T26.7-32-19: VAL-13이 중립 규칙 하나를 말한다(각 구현은 자기 언어의 바인딩 표로 호스트 값을 변환한다). TypeScript, PHP, Go, Rust, Python의 표는 그 아래 본문이 되고, VAL-14, VAL-15, VAL-16, VAL-23은 spec, unit, 주석에서 사라졌다. 새 unit host-binding-tables가 각 구현의 표 test를 binding한다 (T26.7-32-18-1의 후속). Red: 네 id에 대해 data-model.md, data-model.ko.md, config/parity.json에 `make text-absent`를 실행하면 옛 텍스트가 남아 실패한다(15건); green: 모두 통과하고 `make parity-declarations-check UNITS="host-binding-tables"`와 `make docs-check`도 통과한다 (T26.7-32-19).
