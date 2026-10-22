@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 671cdb4e9d7113387e5bc4c7774bf3759624200ca48c2d020db827fa19f9494e -->
+<!-- source-sha256: bd0397b67afb716bb66caf3edfca0ee516330e66db79a5e00d9ad5eecd5d895f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4-6-7: RT-69가 모든 구현에서 성립한다. interface test는 engine이 manifest가 지정한 program 하나만 가진다는 것을 검사한다(test a90f4131, unit engine-program 5ca5c4ce). Red: 5263c35d에서 `make parity-declarations-check UNITS="engine-program"`이 실패(unit 없음); green: 5ca5c4ce 이후 통과한다 (T26.7-4-6-7).
 - T26.7-4-6-6: RT-62가 모든 구현에서 성립한다. 읽어 들인 아티팩트의 prepared render는 매번 같은 바이트를 내고 한 번 호출하는 render와 같다(test f6e0ad1b, unit prepared-render c17a6413). Red: 1b945ddb에서 `make parity-declarations-check UNITS="prepared-render"`가 실패(unit 없음); green: c17a6413 이후 통과한다 (T26.7-4-6-6).
 - T26.7-4-6-5: RT-59가 모든 구현에서 성립한다. 읽어 들인 아티팩트는 파싱이나 소스 탐색 없이 렌더되고, 같은 assign으로 두 번 렌더해도 바이트가 같으며 assign은 바뀌지 않는다(test a7931455, unit request-path 0fcadd0e). Red: ff75f36a에서 `make parity-declarations-check UNITS="request-path"`가 실패(unit 없음); green: 0fcadd0e 이후 통과한다 (T26.7-4-6-5).
 - T26.7-4-6-4: RT-56 artifact-runtime이 모든 구현에서 성립한다. loadArtifact는 build compiler의 AST 아티팩트를 읽고, manifest와 각 파일의 digest를 검사한 뒤 렌더한다(TS 8eaea197, Go 07ff4ebd, Rust daad693e, PHP aebfe3c4, Python 0b4a2a3e, PHP 확장 02e2a620). ArtifactStore.loadOrRefresh는 dev, true, false 정책을 적용한다(TS d4132d7f, Go bbd9711c, Rust 92893fd2, PHP a3b70d57, 확장 b8a713b0, Python 0176747f). unit runtime-tiers가 이를 binding한다(e21a31c1). Red: 4efd8fa7에서 `make parity-declarations-check UNITS="runtime-tiers"`가 실패(unit 없음); green: e21a31c1 이후 통과한다 (T26.7-4-6-4).
