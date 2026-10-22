@@ -9,7 +9,8 @@ import { rustString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
 import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
-import { stepProgress } from './bounded.mts';
+import { runStep, stepProgress } from './bounded.mts';
+import { rustBuildArgs, rustRunArgs } from './rust-steps.mts';
 import { root } from './drivers.mts';
 import { CARGO, rustWorkspace } from '../../scripts/temporary-workspace.mts';
 
@@ -99,12 +100,17 @@ ${modules}
 ${tests}
 `);
   if (runnable.length > 0) {
-    const run = await runCaseTests(['cargo', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', '--locked', '--offline', '--test', 'generated_conformance_check'], {
-      cwd: root,
-      env: { ...workspace.env, PATH: `${dirname(CARGO)}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' },
-    }, new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
-    failures.push(...caseTestFailures('Rust', run));
-    if (run.status === 0 || run.failed.length > 0) executed = runnable.length - run.failed.length;
+    const env = { ...workspace.env, PATH: `${dirname(CARGO)}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' };
+    // The crate is built before its tests run: its compile is no test and has no case timeout.
+    const build = await runStep(CARGO, rustBuildArgs('generated_conformance_check'), { cwd: temporary, env });
+    if (build.status !== 0) {
+      failures.push(`the generated Rust test crate does not build (exit ${String(build.status)}):\n${build.stderr.trim()}`);
+    } else {
+      const run = await runCaseTests(rustRunArgs('generated_conformance_check', temporary, CASE_TIMEOUT_SECONDS), { cwd: root, env },
+        new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
+      failures.push(...caseTestFailures('Rust', run));
+      if (run.status === 0 || run.failed.length > 0) executed = runnable.length - run.failed.length;
+    }
   }
 } finally {
   rmSync(temporary, { recursive: true, force: true });
