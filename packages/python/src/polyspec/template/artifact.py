@@ -51,3 +51,23 @@ def load_artifact(directory: str) -> AstProgram:
             raise RuntimeError(f"AST artifact is missing or corrupt: {name}")
         templates[name] = LoadedAst(decode_template(data), file["artifactDigest"])
     return AstProgram(EngineOptions(loader=ArtifactLoader(templates)))
+
+
+def load_or_refresh(directory: str, refresh: str, build) -> AstProgram:
+    """ArtifactStore.loadOrRefresh (docs/spec/runtime.md): returns the program of the artifact in `directory`, building it
+    first when the policy asks. `build` writes the AST artifact of the sources; the build compiler is passed in by the host.
+    "dev" builds on every call, "true" reuses an artifact that loads and rebuilds a missing or changed one, and "false"
+    loads the artifact that exists and never builds.
+    """
+    if refresh == "false":
+        return load_artifact(directory)
+    if refresh == "dev":
+        build(directory)
+        return load_artifact(directory)
+    if refresh != "true":
+        raise ValueError(f"{refresh} is not an artifact refresh policy")
+    try:
+        return load_artifact(directory)
+    except RuntimeError:
+        build(directory)
+        return load_artifact(directory)
