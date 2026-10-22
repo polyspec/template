@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: bd0397b67afb716bb66caf3edfca0ee516330e66db79a5e00d9ad5eecd5d895f -->
+<!-- source-sha256: 58d93d88d5bf75399663bbed84f31589aefe0a3ec4a891d64c92764488ff23ee -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-31: config/parity.json의 모든 unit은 binding의 test가 이름으로 적는 요구사항만 인용하고, 모든 test 파일이 선언된다. 9fb62722 이후 전체 parity 검사가 통과한다(unit artifact-store가 loadOrRefresh test를 binding하고, Rust SHA-256 test는 internal이다). Red: 935efcc5에서 `make parity-declarations-check`가 exit 2(test 파일 6개의 R5); green: 9fb62722 이후 통과한다 (T26.7-31).
 - T26.7-4-6-7: RT-69가 모든 구현에서 성립한다. interface test는 engine이 manifest가 지정한 program 하나만 가진다는 것을 검사한다(test a90f4131, unit engine-program 5ca5c4ce). Red: 5263c35d에서 `make parity-declarations-check UNITS="engine-program"`이 실패(unit 없음); green: 5ca5c4ce 이후 통과한다 (T26.7-4-6-7).
 - T26.7-4-6-6: RT-62가 모든 구현에서 성립한다. 읽어 들인 아티팩트의 prepared render는 매번 같은 바이트를 내고 한 번 호출하는 render와 같다(test f6e0ad1b, unit prepared-render c17a6413). Red: 1b945ddb에서 `make parity-declarations-check UNITS="prepared-render"`가 실패(unit 없음); green: c17a6413 이후 통과한다 (T26.7-4-6-6).
 - T26.7-4-6-5: RT-59가 모든 구현에서 성립한다. 읽어 들인 아티팩트는 파싱이나 소스 탐색 없이 렌더되고, 같은 assign으로 두 번 렌더해도 바이트가 같으며 assign은 바뀌지 않는다(test a7931455, unit request-path 0fcadd0e). Red: ff75f36a에서 `make parity-declarations-check UNITS="request-path"`가 실패(unit 없음); green: 0fcadd0e 이후 통과한다 (T26.7-4-6-5).

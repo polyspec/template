@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-31: every unit of config/parity.json cites only the requirements that the tests of its bindings name, and every test file is declared: the full parity check holds after 9fb62722 (the unit artifact-store binds the loadOrRefresh tests, and the Rust SHA-256 test is internal). Red: `make parity-declarations-check` exit 2 at 935efcc5 (R5 on six test files); green: it passes after 9fb62722 (T26.7-31).
 - T26.7-4-6-7: RT-69 holds in every implementation: the interface test checks that the engine owns exactly the one program that the manifest names (tests a90f4131, unit engine-program 5ca5c4ce). Red: `make parity-declarations-check UNITS="engine-program"` fails at 5263c35d (no unit); green: it passes after 5ca5c4ce (T26.7-4-6-7).
 - T26.7-4-6-6: RT-62 holds in every implementation: a prepared render of a loaded artifact renders identical bytes on every call and equals the single-call render (tests f6e0ad1b, unit prepared-render c17a6413). Red: `make parity-declarations-check UNITS="prepared-render"` fails at 1b945ddb (no unit); green: it passes after c17a6413 (T26.7-4-6-6).
 - T26.7-4-6-5: RT-59 holds in every implementation: a loaded artifact renders without parsing or source discovery, twice with identical bytes and an unchanged assign (tests a7931455, unit request-path 0fcadd0e). Red: `make parity-declarations-check UNITS="request-path"` fails at ff75f36a (no unit); green: it passes after 0fcadd0e (T26.7-4-6-5).
