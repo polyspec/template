@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-32-23: concurrent-renders binds RT-70 in TypeScript, Rust, PHP and the PHP extension, each with a test that renders one program concurrently with its own data. Red: `make parity-declarations-check UNITS="concurrent-renders" RULES=R2` exit 2 at 4e375d39 (no binding); green: that check holds after 3d4eae64, and the Rust concurrent-renders test passes (T26.7-32-23).
 - T26.7-32-21: concurrent-bound-map binds RT-70 and VAL-22 in TypeScript, Rust, PHP and the PHP extension, each with a concurrent test of one bound map. Red: `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R2` exit 2 at 97f9d9ad (rust, ts, php, php-ext had no binding and Rust was not Send); green: that check holds after b61496fa, and `cargo --test concurrent_bound_map` passes after 7b36807b (T26.7-32-21).
 - T26.7-32-21 (Rust public API change): the Rust library is Send and Sync for RT-70: `Rc` became `Arc`, the template cache `RefCell` became `Mutex`, and `Loader`, `HostFunction` and `TemplateObject` require `Send + Sync`; a host with a non-Send loader or function must change it.
 - T26.7-4-6-3: RT-55 states the levels and the absent operations (spec ebacb176), and binds through the unit level-absence to a test in each implementation that asserts the absence (PHP and extension, TS, Go, Rust, Python). Red: `make parity-declarations-check RULES=R13 IDS="RT-55"` exit 2 at 2f05d06e; green: that check and `UNITS="level-absence"` pass after 72278555 (T26.7-4-6-3).

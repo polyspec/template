@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 33ee4f39abcc20e6b90cf1382a3cf23fc5b81f64fe7b9a2cc0a37f7a3b823974 -->
+<!-- source-sha256: 7cabe4a0ef165c18b09a21b88abdab8061dacb5bf0cbf45ca6e54cb9ea5e5ebd -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-32-23: concurrent-renders는 RT-70을 TypeScript, Rust, PHP, PHP 확장에서 binding하며, 각 구현은 한 프로그램을 자기 데이터로 동시에 render하는 test를 가진다. Red: 4e375d39에서 `make parity-declarations-check UNITS="concurrent-renders" RULES=R2`가 exit 2(binding이 없었다); green: 3d4eae64 이후 그 검사가 통과하고 Rust test가 통과한다 (T26.7-32-23).
 - T26.7-32-21: concurrent-bound-map은 RT-70과 VAL-22를 TypeScript, Rust, PHP, PHP 확장에서 binding하며, 각 구현이 bound map 하나의 동시 render test를 가진다. Red: 97f9d9ad에서 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R2`가 exit 2(binding이 없었고 Rust는 Send가 아니었다); green: b61496fa 이후 그 검사가 통과하고, 7b36807b 이후 `cargo --test concurrent_bound_map`이 통과한다 (T26.7-32-21).
 - T26.7-32-21 (Rust 공개 API 변경): Rust 라이브러리가 RT-70을 위해 Send와 Sync가 되었다. `Rc`는 `Arc`가 되고, template cache의 `RefCell`은 `Mutex`가 되며, `Loader`, `HostFunction`, `TemplateObject`는 `Send + Sync`를 요구한다. Send가 아닌 loader나 함수를 쓰던 호스트는 고쳐야 한다.
 - T26.7-4-6-3: RT-55는 레벨과 없어야 할 연산을 명세한다(명세 ebacb176). unit level-absence를 통해 각 구현의 부재 test에 binding한다(PHP와 확장, TS, Go, Rust, Python). Red: 2f05d06e에서 `make parity-declarations-check RULES=R13 IDS="RT-55"`가 exit 2; green: 72278555 이후 그 검사와 `UNITS="level-absence"`가 통과한다 (T26.7-4-6-3).

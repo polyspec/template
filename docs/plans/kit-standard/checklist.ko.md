@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: e7bd54e96227aa6acc5c826a97be222a7bce8541424483531a93c8a91ba4e9f7 -->
+<!-- source-sha256: 9c2be5780eda4846e5a2ab581b77f6a4d2d4393a12e19f6c43c52e41cc63c7ed -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -137,7 +137,7 @@
 | T26.7-32-25 | conformance-cases는 각 구현이 config/parity.json에서 선언한 generated program 언어(key generated)로 generated runner를 실행한다. 그래서 php-ext는 php의 generated runner를 쓰고, 구현마다 runner 파일을 따로 두지 않는다. case 하나의 실행은 모든 구현에서 통과한다 | scripts/conformance-cases.mts, config/parity.json | `make conformance-cases CASES=tests/cases/data/null-assign`, `make parity-declarations-check UNITS="conformance"` | [o] |
 | T26.7-32-21 | concurrent-bound-map: ts, rust, php, php-ext가 각각 unit을 binding한다. 실제 test가 bound map 하나를 여러 thread 또는 goroutine에서 동시에 render하며, RT-70과 VAL-22가 말하는 대로 검사한다 (R2) | config/parity.json, packages/ts/tests, packages/rust/tests, packages/php/tests, packages/php-ext/tests | `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R2` | [o] |
 | T26.7-32-22 | concurrent-bound-map: 이 unit을 검사하는 Go와 Python test가 검사하는 requirement를 이름으로 적는다 (R15): 검사하는 곳의 RT-1, RT-37, RT-55, RT-56, RT-59, RT-62, RT-69, VAL-13 | packages/go/bound_test.go, packages/python/tests/test_concurrency.py | `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R15` | [o] |
-| T26.7-32-23 | concurrent-renders: ts, rust, php, php-ext가 각각 unit을 binding한다. 실제 test가 RT-70이 말하는 대로 동시 render를 검사하며, program이 읽은 template만 공유한다 (R2) | config/parity.json, packages/ts/tests, packages/rust/tests, packages/php/tests, packages/php-ext/tests | `make parity-declarations-check UNITS="concurrent-renders" RULES=R2` | [ ] |
+| T26.7-32-23 | concurrent-renders: ts, rust, php, php-ext가 각각 unit을 binding한다. 실제 test가 RT-70이 말하는 대로 동시 render를 검사하며, program이 읽은 template만 공유한다 (R2) | config/parity.json, packages/ts/tests, packages/rust/tests, packages/php/tests, packages/php-ext/tests | `make parity-declarations-check UNITS="concurrent-renders" RULES=R2` | [o] |
 | T26.7-33 | conformance CLI의 test는 unit cli-parse와 cli-format이 아니라 각 구현의 internal test다(P32, K313) | The internal globs of config/parity.json and the removal of the units cli-parse and cli-format | `make parity-declarations-check` | [o] |
 | T26.7-34 | 중립 규칙 하나: 각 package는 자기 생태계의 manifest로 공개 진입점을 노출하며 각 구현이 자기 native test를 bind한다(unit export-list) | docs/spec rule and its Korean twin, the tests of the six implementations, the unit export-list | `make parity-declarations-check` | [o] |
 | T26.7-35 | template-fmt 명령의 test는 TypeScript language package의 internal test다(P32) | The internal glob of ts in config/parity.json and the removal of the unit template-fmt | `make parity-declarations-check` | [o] |
