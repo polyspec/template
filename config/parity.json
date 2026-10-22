@@ -780,6 +780,19 @@
       ]
     },
     {
+      "id": "level-absence",
+      "kind": "feature",
+      "requirements": ["RT-55"],
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/level-absence.test.ts", "id": "level absence \u203a the library exports no generated-program class or source-compiler operation" },
+        { "implementation": "go", "test": "packages/go/level_absence_test.go", "id": "TestLevelAbsence" },
+        { "implementation": "rust", "test": "packages/rust/tests/level_absence.rs", "id": "the_crate_exposes_no_generated_program_or_source_compiler_operation" },
+        { "implementation": "php", "test": "packages/php/tests/LevelAbsenceTest.php", "id": "testTheLibraryExposesNoGeneratedProgramOperation" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/LevelAbsenceTest.php", "id": "testTheExtensionExposesNoGeneratedProgramOperation" },
+        { "implementation": "python", "test": "packages/python/tests/test_level_absence.py", "id": "test_the_library_exports_no_generated_program_or_source_compiler_operation" }
+      ]
+    },
+    {
       "id": "runtime-operations",
       "kind": "feature",
       "requirements": ["RT-1"],
