@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 841c7f8aa172c93dff3f7a33a6df1391ac38ce6b65a23c7a4216ed52dec01ea8 -->
+<!-- source-sha256: 790cbfbdbb82a0b4f0703f4ee30f4baebb0c52b1d65dcf26e595ca0a08ac092e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-69: template이 kit 0.0.54를 kit lint 설정 사본 없이(K514), polyspec-lock-check와 config/polyspec.json 없이(K515) 받는다. 생성 코드 lint는 ruff.toml, phpcs.xml.dist, clippy.toml을 kit 패키지에서 읽고, CHECK_TARGETS와 config/owner-checks.json은 지워진 파일이나 target을 적지 않으며, 정적 CI 작업이 suppression-check를 돌리고, PHP command line과 artifact-runtime fixture에 owner가 생긴다. make owner-validate는 kit이 넘기는 owner 규칙의 glob 9개 때문에 아직 실패한다(kit 행). Red: 7b1b69d4에서 tests/scripts/suite-parity.test.mts가 exit 1; green: 통과한다 (T26.7-69).
 - T26.7-4-6-4-1: 모든 구현의 artifact runtime은 오류를 숨기지 않는다. loadArtifact는 missing-or-stale 오류 하나(manifest나 파일이 없음, digest 불일치)로 실패하고 그 밖에는 원래 오류와 그 원인으로 실패하며, loadOrRefresh는 true일 때 그 오류에서만 다시 빌드한다. PHP는 @ 없이 읽고, 확장은 JSON_THROW_ON_ERROR로 디코드하며, Rust 엔진은 오염된 템플릿 캐시를 E_INTERNAL로 실패한다. Red: e4bab9b2에서 각 구현의 artifact-store test가 실패; green: 통과한다 (T26.7-4-6-4-1).
 - T26.7: 모든 자식 행이 닫힌 뒤 닫는다. config/parity.json은 docs/spec의 모든 요구사항을 모든 구현에서 binding하고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7).
 - T26.7-4: 모든 unit은 각 binding의 test가 이름으로 적는 요구사항만 인용하고, 모든 요구사항이 인용된다(R13, R15). 자식 T26.7-4-5와 T26.7-4-6이 이를 이루었고, 전체 parity 검사가 통과한다. Red: 935efcc5에서 `make parity-declarations-check`가 exit 2; green: 통과한다 (T26.7-4).
