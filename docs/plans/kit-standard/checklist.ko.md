@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: b74bcf495112c86cde9be6f1276739c8e8f41bfae9b7faf82a3b7d98b0b36cee -->
+<!-- source-sha256: 32ba14d9b61e25ad2b61af1c9989f37886ca04502c7588d1f19e0078464ccc2a -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -201,3 +201,4 @@
 | T26.7-73 | PHP 라이브러리와 확장은 AstProgram의 같은 surface를 선언한다. 라이브러리의 다른 static factory가 자기 class 이름을 적듯 loadArtifact와 loadOrRefresh는 둘 다 AstProgram을 반환하므로, make test-php-ext가 test를 돌린다 | packages/php/src/AstProgram.php | `make test-php-ext CASES=ArtifactStoreTest` | [o] |
 | T26.7-74 | template은 kit이 내보내는 git hook을 .githooks/pre-merge-commit까지 make hooks로 써서 갖고 있으므로, rules-check와 owner-validate가 PRINCIPLES.md와 owner 규칙이 적는 모든 hook을 찾는다 | .githooks/pre-merge-commit | `make rules-check`, `make owner-validate` | [~] |
 | T26.7-75 | config/layout.yml은 template의 모든 root 파일과 package를 선언한다. root vitest.config.ts(root vitest 설정, T26.7-46)는 layout-root-files의 vars.root_files에, packages/cli(command line package, T26.7-53)는 layout-packages의 component에 들어가므로 make layout-check가 통과한다 | config/layout.yml | `make layout-check` | [o] |
+| T26.7-76 | config/dependency-policy.json은 PHP command line의 Composer manifest(packages/cli/php/composer.json, T26.7-53 이후 독립 application package이고 어떤 manifest도 path repository로 요구하지 않음)를 그것이 고정한 PHP platform 8.4.1과 함께 composerPlatforms에 적으므로 make dependency-policy-check가 통과한다 | config/dependency-policy.json | `make dependency-policy-check` | [ ] |
