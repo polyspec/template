@@ -69,3 +69,29 @@ func LoadArtifact(directory string) (*AstProgram, error) {
 	}
 	return NewAstProgram(Options{Loader: artifactLoader{templates: templates}})
 }
+
+// LoadOrRefresh is ArtifactStore.loadOrRefresh (docs/spec/runtime.md): it returns the program of the artifact in directory,
+// building it first when the policy asks. build writes the AST artifact of the sources; the build compiler is passed in by
+// the host, so the runtime carries no compiler. dev builds on every call; true reuses a verified artifact and rebuilds a
+// missing or changed one; false loads the artifact that exists and never builds.
+func LoadOrRefresh(directory string, refresh ArtifactRefresh, build func(directory string) error) (*AstProgram, error) {
+	switch refresh {
+	case ArtifactRefreshFalse:
+		return LoadArtifact(directory)
+	case ArtifactRefreshDev:
+		if err := build(directory); err != nil {
+			return nil, err
+		}
+		return LoadArtifact(directory)
+	case ArtifactRefreshTrue:
+		if program, err := LoadArtifact(directory); err == nil {
+			return program, nil
+		}
+		if err := build(directory); err != nil {
+			return nil, err
+		}
+		return LoadArtifact(directory)
+	default:
+		return nil, fmt.Errorf("%s is not an artifact refresh policy", refresh)
+	}
+}

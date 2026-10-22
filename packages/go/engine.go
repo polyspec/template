@@ -40,6 +40,15 @@ type HostFunction = functions.HostFunction
 // Limits are the resource limits.
 type Limits = render.Limits
 
+// ArtifactRefresh is the refresh policy of an artifact store (RT-76).
+type ArtifactRefresh = render.ArtifactRefresh
+
+const (
+	ArtifactRefreshDev   = render.ArtifactRefreshDev
+	ArtifactRefreshTrue  = render.ArtifactRefreshTrue
+	ArtifactRefreshFalse = render.ArtifactRefreshFalse
+)
+
 // RuntimeEnvironment owns host functions and limits for both compiler modes.
 type RuntimeEnvironment = render.RuntimeEnvironment
 
