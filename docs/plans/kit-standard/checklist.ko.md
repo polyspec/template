@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 2972222096b53ef4f85b88be9609333f71c0e51cf89796e61ae6e08db6822298 -->
+<!-- source-sha256: 8da97c28aa74a86c9dbde08295c257714ccf78a6afa76c6943da219d9211ecd0 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -199,4 +199,4 @@
 | T26.7-71 | make lint-rust가 통과한다. packages/rust/src/sha256.rs는 상수 크기의 chunks_exact 없이 message를 block으로 나누고, compiler의 Rust backend(packages/compiler/src/backends/rust.mts)는 라이브러리가 7b36807b(RT-70) 이후 그러하듯 bound map을 Arc<RuntimeOrderedMap>에 담아 생성된 showcase Rust가 컴파일된다 | packages/rust/src/sha256.rs, packages/compiler/src/backends/rust.mts, the generated showcase Rust | `make lint-rust` | [o] |
 | T26.7-72 | make duplication-check가 통과한다. 이 검사가 보고하는 clone 15개(packages/php-ext/src에 14개, packages/rust/src/functions/date.rs에 1개)는 각각 두 곳이 함께 부르는 함수 하나로 옮겨진다 | packages/php-ext/src, packages/rust/src/functions/date.rs | `make duplication-check`, `make lint-php-ext`, `make lint-rust` | [o] |
 | T26.7-73 | PHP 라이브러리와 확장은 AstProgram의 같은 surface를 선언한다. 라이브러리의 다른 static factory가 자기 class 이름을 적듯 loadArtifact와 loadOrRefresh는 둘 다 AstProgram을 반환하므로, make test-php-ext가 test를 돌린다 | packages/php/src/AstProgram.php | `make test-php-ext CASES=ArtifactStoreTest` | [o] |
-| T26.7-74 | template은 kit이 내보내는 git hook을 .githooks/pre-merge-commit까지 make hooks로 써서 갖고 있으므로, rules-check와 owner-validate가 PRINCIPLES.md와 owner 규칙이 적는 모든 hook을 찾는다 | .githooks/pre-merge-commit | `make rules-check`, `make owner-validate` | [ ] |
+| T26.7-74 | template은 kit이 내보내는 git hook을 .githooks/pre-merge-commit까지 make hooks로 써서 갖고 있으므로, rules-check와 owner-validate가 PRINCIPLES.md와 owner 규칙이 적는 모든 hook을 찾는다 | .githooks/pre-merge-commit | `make rules-check`, `make owner-validate` | [~] |
