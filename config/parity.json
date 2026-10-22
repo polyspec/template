@@ -812,7 +812,11 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "go", "test": "packages/go/bound_test.go", "id": "TestConcurrentRendersReadOneBoundMap" },
-        { "implementation": "python", "test": "packages/python/tests/test_concurrency.py", "id": "test_concurrent_renders_read_one_bound_map" }
+        { "implementation": "python", "test": "packages/python/tests/test_concurrency.py", "id": "test_concurrent_renders_read_one_bound_map" },
+        { "implementation": "ts", "test": "packages/ts/tests/concurrent-bound-map.test.ts", "id": "concurrent renders of one bound map (RT-70, VAL-22) \u203a renders one bound map from concurrent renders with the bytes of the fixture" },
+        { "implementation": "rust", "test": "packages/rust/tests/concurrent_bound_map.rs", "id": "concurrent_renders_read_one_bound_map" },
+        { "implementation": "php", "test": "packages/php/tests/ConcurrentBoundMapTest.php", "id": "testInterleavedRendersReadOneBoundMap" },
+        { "implementation": "php-ext", "test": "packages/php/tests/ConcurrentBoundMapTest.php", "id": "testInterleavedRendersReadOneBoundMap" }
       ]
     },
     {
