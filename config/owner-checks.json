@@ -996,6 +996,63 @@
       "targets": [
         "hooks-check"
       ]
+    },
+    {
+      "paths": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mts",
+        "**/*.mjs",
+        "**/*.cjs"
+      ],
+      "targets": [
+        "lint-ts",
+        "duplication-check"
+      ]
+    },
+    {
+      "paths": [
+        "**/*.py"
+      ],
+      "targets": [
+        "lint-python",
+        "duplication-check"
+      ]
+    },
+    {
+      "paths": [
+        "**/*.php"
+      ],
+      "targets": [
+        "lint-php",
+        "duplication-check"
+      ]
+    },
+    {
+      "paths": [
+        "**/*.go"
+      ],
+      "targets": [
+        "lint-go",
+        "duplication-check"
+      ]
+    },
+    {
+      "paths": [
+        "packages/php-ext/**"
+      ],
+      "targets": [
+        "lint-php-ext",
+        "duplication-check"
+      ]
+    },
+    {
+      "paths": [
+        "**/*.rs"
+      ],
+      "targets": [
+        "duplication-check"
+      ]
     }
   ],
   "inputs": [
