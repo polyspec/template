@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7cabe4a0ef165c18b09a21b88abdab8061dacb5bf0cbf45ca6e54cb9ea5e5ebd -->
+<!-- source-sha256: 1f737858478e1f6c016e58ca0b7984e8a2bcc31093c6b82b46dd1c599e439121 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-4-6-4: RT-56 artifact-runtime이 모든 구현에서 성립한다. loadArtifact는 build compiler의 AST 아티팩트를 읽고, manifest와 각 파일의 digest를 검사한 뒤 렌더한다(TS 8eaea197, Go 07ff4ebd, Rust daad693e, PHP aebfe3c4, Python 0b4a2a3e, PHP 확장 02e2a620). ArtifactStore.loadOrRefresh는 dev, true, false 정책을 적용한다(TS d4132d7f, Go bbd9711c, Rust 92893fd2, PHP a3b70d57, 확장 b8a713b0, Python 0176747f). unit runtime-tiers가 이를 binding한다(e21a31c1). Red: 4efd8fa7에서 `make parity-declarations-check UNITS="runtime-tiers"`가 실패(unit 없음); green: e21a31c1 이후 통과한다 (T26.7-4-6-4).
 - T26.7-32-23: concurrent-renders는 RT-70을 TypeScript, Rust, PHP, PHP 확장에서 binding하며, 각 구현은 한 프로그램을 자기 데이터로 동시에 render하는 test를 가진다. Red: 4e375d39에서 `make parity-declarations-check UNITS="concurrent-renders" RULES=R2`가 exit 2(binding이 없었다); green: 3d4eae64 이후 그 검사가 통과하고 Rust test가 통과한다 (T26.7-32-23).
 - T26.7-32-21: concurrent-bound-map은 RT-70과 VAL-22를 TypeScript, Rust, PHP, PHP 확장에서 binding하며, 각 구현이 bound map 하나의 동시 render test를 가진다. Red: 97f9d9ad에서 `make parity-declarations-check UNITS="concurrent-bound-map" RULES=R2`가 exit 2(binding이 없었고 Rust는 Send가 아니었다); green: b61496fa 이후 그 검사가 통과하고, 7b36807b 이후 `cargo --test concurrent_bound_map`이 통과한다 (T26.7-32-21).
 - T26.7-32-21 (Rust 공개 API 변경): Rust 라이브러리가 RT-70을 위해 Send와 Sync가 되었다. `Rc`는 `Arc`가 되고, template cache의 `RefCell`은 `Mutex`가 되며, `Loader`, `HostFunction`, `TemplateObject`는 `Send + Sync`를 요구한다. Send가 아닌 loader나 함수를 쓰던 호스트는 고쳐야 한다.

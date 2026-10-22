@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 9c2be5780eda4846e5a2ab581b77f6a4d2d4393a12e19f6c43c52e41cc63c7ed -->
+<!-- source-sha256: b65c3b4a77e53f70f48838f2cdd4663ca150de83015d8d1245eaab5198ed22e3 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -77,7 +77,7 @@
 | T26.7-4-6-1 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of runtime-operations in every implementation | `make parity-declarations-check UNITS="runtime-operations"` | [o] |
 | T26.7-4-6-2 | RT-37은 error case의 case.json이 목록에 넣고, suite unit conformance가 인용한다. 두 실행 모드는 같은 expected.error.json과 비교하므로, 모드가 다르면 그 case가 실패한다 (K277). 요구사항은 언어별 feature binding 없이 쓰이고 binding된다. | config/parity.json, the tests of error-mode-codes in every implementation | `make parity-declarations-check RULES=R13 IDS="RT-37"`, `make schema-check` | [o] |
 | T26.7-4-6-3 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of manifest-levels in every implementation | `make parity-declarations-check UNITS="level-absence"`, `make parity-declarations-check RULES=R13 IDS="RT-55"` | [o] |
-| T26.7-4-6-4 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of runtime-tiers in every implementation | `make parity-declarations-check UNITS="runtime-tiers"` | [ ] |
+| T26.7-4-6-4 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of runtime-tiers in every implementation | `make parity-declarations-check UNITS="runtime-tiers"` | [o] |
 | T26.7-4-6-5 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of request-path in every implementation | `make parity-declarations-check UNITS="request-path"` | [ ] |
 | T26.7-4-6-6 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of prepared-render in every implementation | `make parity-declarations-check UNITS="prepared-render"` | [ ] |
 | T26.7-4-6-7 | 인용하는 unit이 config/parity.json에 없다(T26.7-32-22 이후); unit  모든 구현에서 실제 test로  binding한다 | config/parity.json, the tests of engine-program in every implementation | `make parity-declarations-check UNITS="engine-program"` | [ ] |
