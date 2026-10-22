@@ -207,21 +207,17 @@
             "dist": {
                 "type": "path",
                 "url": "packages/php",
-                "reference": "cd73347bd4f779bf71fae7bda4f2f66f57bdf0c1"
+                "reference": "7aa3e48bd07fa489a06d161faf2a2cd1ad7fd565"
             },
             "require": {
                 "ext-mbstring": "*",
                 "opis/json-schema": "^2.6",
-                "php": ">=8.4",
-                "symfony/console": "^8.1"
+                "php": ">=8.4"
             },
             "require-dev": {
                 "laravel/pint": "^1.0",
                 "phpunit/phpunit": "^13.4"
             },
-            "bin": [
-                "bin/template.php"
-            ],
             "type": "library",
             "autoload": {
                 "psr-4": {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Polyspec\Template\Tests;
+namespace Polyspec\Template\Cli\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Cli\FormatCommand;
@@ -14,15 +14,11 @@ use Polyspec\Template\Cli\PackageRuntime;
 final class CliTest extends TestCase
 {
     /**
-     * The proxy of a command of bin/ in the vendor/bin of the Composer project that runs PHPUnit, which Composer names
-     * in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of that project.
+     * The command of bin/ of this package, which runs on the autoloader of its own vendor directory.
      */
     private static function command(string $name): string
     {
-        $binDir = $GLOBALS['_composer_bin_dir'] ?? null;
-        self::assertIsString($binDir, 'PHPUnit runs without the proxy of vendor/bin/phpunit');
-
-        return $binDir . '/' . $name;
+        return dirname(__DIR__) . '/bin/' . $name;
     }
 
     /**

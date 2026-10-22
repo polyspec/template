@@ -7,7 +7,7 @@ namespace Polyspec\Template\Tests;
 use PHPUnit\Framework\TestCase;
 
 /**
- * The command line is an application package of its own (K433): it lives in packages/php-cli, a Composer project
+ * The command line is an application package of its own (K433): it lives in packages/cli/php, a Composer project
  * that requires polyspec/template, and the library holds no command line of its own.
  */
 final class CliPackageTest extends TestCase
@@ -15,7 +15,7 @@ final class CliPackageTest extends TestCase
     public function testTheCommandLineIsAComposerProjectThatRequiresTheLibrary(): void
     {
         $root = dirname(__DIR__, 3);
-        $manifest = $root . '/packages/php-cli/composer.json';
+        $manifest = $root . '/packages/cli/php/composer.json';
         $this->assertFileExists($manifest);
         $composer = json_decode((string) file_get_contents($manifest), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('project', $composer['type']);

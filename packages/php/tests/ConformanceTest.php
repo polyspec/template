@@ -1,4 +1,5 @@
 <?php
+
 // EDT-8 and EDT-9: the tokens and the tags of the template are the parts that the editors paint.
 
 declare(strict_types=1);

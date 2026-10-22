@@ -88,10 +88,12 @@ export const drivers: Record<Language, Driver> = {
     dir: join(packages, 'php'),
     build() {
       build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
+      // The command line package installs its own vendor directory, which its bin runs on.
+      build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), join(root, 'packages', 'cli', 'php')], root);
     },
     command(args) {
-      // The proxy of vendor/bin sets the autoloader of the development root composer.json for bin/template.php.
-      return ['php', [join(root, 'vendor', 'bin', 'template.php'), ...args]];
+      // The command line is the bin of its own package (packages/cli/php), which runs on the autoloader of that package.
+      return ['php', [join(root, 'packages', 'cli', 'php', 'bin', 'template.php'), ...args]];
     },
   },
   // The command is the python of var/python/venv, where make python-package installs packages/python editable, so
@@ -109,13 +111,14 @@ export const drivers: Record<Language, Driver> = {
   'php-ext': {
     dir: join(packages, 'php-ext'),
     build() {
-      // The proxy of vendor/bin/template.php of the development root composer.json runs the library's command line on the classes of the extension.
+      // The bin of the command line package runs the library's command line on the classes of the extension.
       build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
+      build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), join(root, 'packages', 'cli', 'php')], root);
       // The C extension is built by kit's make build-php-ext (S10): phpize, configure and make, publishing its library itself.
       build('php-ext', 'make', ['build-php-ext'], root);
     },
     command(args) {
-      return ['php', [`-dextension=${published['php-ext']}`, join(root, 'vendor', 'bin', 'template.php'), ...args]];
+      return ['php', [`-dextension=${published['php-ext']}`, join(root, 'packages', 'cli', 'php', 'bin', 'template.php'), ...args]];
     },
   },
 };

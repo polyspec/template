@@ -12,16 +12,11 @@ use PHPUnit\Framework\TestCase;
 final class CliTest extends TestCase
 {
     /**
-     * The proxy of bin/template.php of polyspec/template in the vendor/bin of the Composer project that runs
-     * PHPUnit, which Composer names in $_composer_bin_dir of the proxy of PHPUnit; the proxy sets the autoloader of
-     * that project.
+     * The bin of the command line package (packages/cli/php), which runs on the autoloader of its own vendor directory.
      */
     private static function command(): string
     {
-        $binDir = $GLOBALS['_composer_bin_dir'] ?? null;
-        self::assertIsString($binDir, 'PHPUnit runs without the proxy of vendor/bin/phpunit');
-
-        return $binDir . '/template.php';
+        return Support::repositoryRoot() . '/packages/cli/php/bin/template.php';
     }
 
     public function testTheCommandLineIsTheLibrarysOnTheClassesOfTheExtension(): void
