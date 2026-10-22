@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: da583e6551ba362514e046e15a1568359077ea3b4ecbdf62179be1dbe607cfd3 -->
+<!-- source-sha256: 2654fc34af7d8fd2e9a94adb5eac019c6b416c82f9c740b5e7c0fc99b1b91840 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -194,3 +194,4 @@
 | T26.7-66 | 이 저장소의 잠금에는 검토 시점의 취약점 권고가 없고 모든 레지스트리 의존성은 검토 시점에 알려진 최신 안정 릴리스에 있다(kit K435): markdown-it, vite와 vitepress 아래의 vite, oxc-parser, vitest, @codemirror/view, setuptools, ruff를 올리고 config/dependency-review.json을 다시 기록한다 | package.json, package-lock.json, packages/codemirror/package.json, packages/python/pyproject.toml, mise.toml, config/dependency-review.json, docs/operations/dependencies.md and its Korean twin when they name a version | `make dependency-policy-check` | [-] 원인: user 2026-10-22: 버전 고정 작업 금지; 이 행은 의존성 버전을 올리고 pin으로 권고를 지웠다 |
 | T26.7-67 | AST decoder 행의 changelog가 다른 project의 동작을 설명하지 않는다 (K431, P19). | CHANGELOG.md and CHANGELOG.ko.md: the T26.7-54 row describes the collect-all behavior of the pinned validator in generic words; the checklist rows of T26.7-54 do the same | `make text-absent FILE=CHANGELOG.md TEXT="2.6.0 in collect-all mode returns"` and `! git grep -q -E "2[.]6[.]0.{1,4}collect-all mode" -- CHANGELOG.ko.md` and `! git grep -q -E "upstream 2[.]6 in collect-all mode reports" -- docs/plans/kit-standard/checklist.md` and `! git grep -q -E "upstream 2[.]6" -- docs/plans/kit-standard/checklist.ko.md` | [o] |
 | T26.7-68 | esbuild 0.27.2 예외를 해결한다: 0.28.2가 여전히 빌드 체인을 깨는지 시험하고, 제거 조건이 충족되면 올리고 예외를 제거한다. hyper는 낮추지 않는다. | package.json, package-lock.json, config/dependency-policy.json, config/dependency-review.json | `make dependency-policy-check` | [-] 원인: user 2026-10-22: 버전 고정 작업 금지; 이 행은 esbuild pin 예외만 유지했다 |
+| T26.7-69 | kit-sync가 kit lint 설정 사본을 지운다(K514). template은 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, .golangci.yml, clippy.toml, .oxlintrc.json, knip.json을 따로 갖지 않고, 모든 lint가 설정을 kit 패키지에서 읽는다 | the removed copies, config/owner-checks.json, the files that kit-sync writes | `make kit-check`, `make lint-ts`, `make lint-go`, `make lint-php`, `make lint-python` | [ ] |
