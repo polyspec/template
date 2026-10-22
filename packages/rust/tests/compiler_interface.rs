@@ -101,6 +101,7 @@ struct Operation {
 
 /// RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json, in
 /// ownership, field order and operation placement (CMP-1).
+/// RT-69: the engine owns exactly one program, the one field that the manifest names (Engine.owns).
 #[test]
 fn runtime_declarations_match_manifest() {
     let manifest_path = match std::env::var("TEMPLATE_INTERFACE_MANIFEST") {

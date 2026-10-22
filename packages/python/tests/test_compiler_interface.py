@@ -55,6 +55,7 @@ class CompilerInterface(unittest.TestCase):
         self.assertTrue(inspect.isclass(getattr(template, MAPPING["boundMap"]["type"])))
 
     def test_program_and_engine(self):
+        # RT-69: the engine owns exactly one program, the one field that the manifest names.
         # RT-67, CMP-1: the declarations of the package match the prepared render contract
         # of packages/compiler/interface.json in ownership, field order and operation
         # placement.

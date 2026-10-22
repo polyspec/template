@@ -59,6 +59,7 @@ type runtimeManifest struct {
 // TestCompilerRuntimeInterface compares Go declarations with the common manifest through go/ast.
 // RT-67: the declarations of the package match the prepared render contract of packages/compiler/interface.json, in
 // ownership, field order and operation placement (CMP-1).
+// RT-69: the engine owns exactly one program, the one field that the manifest names (Engine.owns).
 func TestCompilerRuntimeInterface(t *testing.T) {
 	manifestPath := os.Getenv("TEMPLATE_INTERFACE_MANIFEST")
 	if manifestPath == "" {

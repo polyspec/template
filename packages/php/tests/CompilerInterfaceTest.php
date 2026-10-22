@@ -18,6 +18,7 @@ use Polyspec\Template\Render\Scope;
 final class CompilerInterfaceTest extends TestCase
 {
     /**
+     * RT-69: the engine owns exactly one program, the one field that the manifest names (Engine.owns).
      * RT-67, CMP-1: compares the PHP declarations with the prepared render contract of the manifest through
      * Reflection: ownership, field order and operation placement.
      */
