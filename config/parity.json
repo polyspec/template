@@ -780,6 +780,20 @@
       ]
     },
     {
+      "id": "runtime-operations",
+      "kind": "feature",
+      "requirements": ["RT-1"],
+      "bindings": [
+        { "implementation": "ts", "test": "packages/ts/tests/compiler-interface.test.ts", "id": "compiler interface \u203a program and engine" },
+        { "implementation": "go", "test": "packages/go/exports_test.go", "id": "TestExportedEntryPoints" },
+        { "implementation": "rust", "test": "packages/rust/tests/exports.rs", "id": "the_entry_points_of_the_api_are_public_items" },
+        { "implementation": "php", "test": "packages/php/tests/ExportsTest.php", "id": "testTheStaticEntryPointsExist" },
+        { "implementation": "php-ext", "test": "packages/php-ext/tests/EntryPointsTest.php", "id": "testTheStaticEntryPointsExistInTheExtension" },
+        { "implementation": "python", "test": "packages/python/tests/test_exports.py", "id": "test_every_exported_name_resolves" }
+      
+      ]
+    },
+    {
       "id": "concurrent-bound-map",
       "requirements": ["RT-70", "VAL-22"],
       "kind": "feature",
