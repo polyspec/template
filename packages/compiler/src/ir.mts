@@ -178,7 +178,12 @@ function required(type: ValueType): ValueType { return { ...type, optional: fals
 function nullable(type: ValueType): ValueType { return { ...type, optional: true, source: typeSource(type, true) }; }
 function sameType(left: ValueType, right: ValueType): boolean { return typeSource(required(left)) === typeSource(required(right)); }
 function acceptsType(actual: ValueType, expected: ValueType): boolean { return required(expected).kind === 'any' || sameType(actual, expected); }
-function mergeType(left: ValueType, right: ValueType): ValueType { return sameType(left, right) ? { ...required(left), optional: left.optional || right.optional } : parseType('any'); }
+// The merged type keeps its source in step with its optional flag: the source of a required type with `?` when either side is optional.
+function mergeType(left: ValueType, right: ValueType): ValueType {
+  if (!sameType(left, right)) return parseType('any');
+  const merged = { ...required(left), optional: left.optional || right.optional };
+  return { ...merged, source: typeSource(merged) };
+}
 function holdsRecord(type: ValueType): boolean {
   const value = required(type);
   return value.kind === 'record' || (value.kind === 'list' && holdsRecord(value.item)) || (value.kind === 'map' && holdsRecord(value.value));
@@ -360,7 +365,14 @@ export function lowerSourceGraph(graph: SourceGraph, manifest: TypeManifest): Pr
         const right = shortCircuit ? lowerExpr(node.right, scope, loops) : dynamicValue(lowerExpr(node.right, scope, loops));
         const boolean = ['&&', '||', '==', '!=', '===', '!==', '<', '>', '<=', '>=', 'in'].includes(node.op);
         const arithmetic = ['-', '*', '/', '%'].includes(node.op);
-        return { op: 'binary', operator: node.op, left, right, valueType: boolean ? parseType('boolean') : arithmetic ? parseType('number') : mergeType(left.valueType, right.valueType), span: node.span };
+        // EXP-31: `a ?? b` is b when a is null, so it is optional only when b is. EXP-24: `+` concatenates or adds and never
+        // gives null.
+        const valueType = boolean ? parseType('boolean')
+          : arithmetic ? parseType('number')
+          : node.op === '??' ? mergeType(required(left.valueType), right.valueType)
+          : node.op === '+' ? required(mergeType(left.valueType, right.valueType))
+          : mergeType(left.valueType, right.valueType);
+        return { op: 'binary', operator: node.op, left, right, valueType, span: node.span };
       }
       case 'Ternary': {
         const test = lowerExpr(node.test, scope, loops);
