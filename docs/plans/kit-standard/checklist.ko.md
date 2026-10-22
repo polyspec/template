@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 64bc5f8e9ef487b8d10d6009cf7d5fcbb1b7b01dde3bea10df83fcd3330ddd9d -->
+<!-- source-sha256: 0c947cdb59f93c040f74878871a44307ca20a4d36dd26be6b49c1d7d19481f42 -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -196,3 +196,4 @@
 | T26.7-68 | esbuild 0.27.2 예외를 해결한다: 0.28.2가 여전히 빌드 체인을 깨는지 시험하고, 제거 조건이 충족되면 올리고 예외를 제거한다. hyper는 낮추지 않는다. | package.json, package-lock.json, config/dependency-policy.json, config/dependency-review.json | `make dependency-policy-check` | [-] 원인: user 2026-10-22: 버전 고정 작업 금지; 이 행은 esbuild pin 예외만 유지했다 |
 | T26.7-69 | kit-sync가 kit lint 설정 사본(K514)과 polyspec lock 검사(K515)를 지운다. template은 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, .golangci.yml, clippy.toml, .oxlintrc.json, knip.json, config/api-extractor.kit.json, config/polyspec.json을 갖지 않고, 생성 코드 lint를 포함한 모든 lint가 설정을 kit 패키지에서 읽으며, 어떤 owner group, make target 목록, 문서도 지워진 파일이나 polyspec-lock-check를 적지 않는다 | the removed copies and config/polyspec.json, config/owner-checks.json, scripts/check-generated-lint.mts, Makefile CHECK_TARGETS, docs/operations/development.md and its Korean twin, the files that kit-sync writes | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/suite-parity.test.mts`, `make kit-check`, `make docs-check`, `make lint-ts`, `make lint-go`, `make lint-php`, `make lint-python` | [o] |
 | T26.7-70 | template이 K519가 들어간 kit 사본을 받는다. 링크된 worktree는 main checkout의 var/tools를 쓰고 아무것도 설치하지 않으며, kit-check는 kit과 다른 사본을 찾지 않는다 | the copies that make kit-sync writes | `make kit-check`, `make lint-python` | [o] |
+| T26.7-71 | make lint-rust가 통과한다. packages/rust/src/sha256.rs는 상수 크기의 chunks_exact 없이 message를 block으로 나누고, compiler의 Rust backend(packages/compiler/src/backends/rust.mts)는 라이브러리가 7b36807b(RT-70) 이후 그러하듯 bound map을 Arc<RuntimeOrderedMap>에 담아 생성된 showcase Rust가 컴파일된다 | packages/rust/src/sha256.rs, packages/compiler/src/backends/rust.mts, the generated showcase Rust | `make lint-rust` | [ ] |
