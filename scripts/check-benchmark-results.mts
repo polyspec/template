@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { benchmarkResultDocument, METRICS, type BenchmarkResult } from './benchmark-result.mts';
+import { BENCHMARK_LANGUAGES, BENCHMARK_MODES, benchmarkResultDocument, METRICS, type BenchmarkResult } from './benchmark-result.mts';
 import { rejects } from './expected-rejection.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -9,7 +9,7 @@ const path = process.argv[2] ?? join(root, 'examples/site/data/mode-benchmark.js
 
 export function validateBenchmark(result: BenchmarkResult): void {
   if (result.schema !== 1) throw new Error('benchmark result schema is invalid');
-  const expected = new Set(['typescript/ast', 'typescript/generated', 'go/ast', 'go/generated', 'rust/ast', 'rust/generated', 'php/ast', 'php/generated']);
+  const expected = new Set(BENCHMARK_LANGUAGES.flatMap(language => BENCHMARK_MODES.map(mode => `${language}/${mode}`)));
   let hash: string | null = null;
   let bytes: number | null = null;
   for (const row of result.results) {

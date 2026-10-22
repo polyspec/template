@@ -8,6 +8,7 @@ import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileFiles, compileSource } from '../../packages/compiler/src/compiler.mts';
+import { BENCHMARK_LANGUAGES, BENCHMARK_MODES } from '../../scripts/benchmark-result.mts';
 import { publishBuild } from '../../scripts/publish-build.mts';
 import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mts';
 import { showcasePythonModule } from './python-module.mts';
@@ -185,9 +186,12 @@ try {
     php: ['php', [join(root, 'examples/showcase/adapters/php.php'), scenario]],
     python: [pythonPackageInterpreter, [join(root, 'examples/showcase/adapters/python.py'), scenario]],
   };
+  if (JSON.stringify(Object.keys(commands)) !== JSON.stringify(BENCHMARK_LANGUAGES)) {
+    throw new Error(`the benchmark commands ${Object.keys(commands).join(', ')} are not BENCHMARK_LANGUAGES ${BENCHMARK_LANGUAGES.join(', ')}`);
+  }
   const results: Record<string, unknown>[] = [];
   for (const [language, [command, args]] of Object.entries(commands)) {
-    for (const mode of ['ast', 'generated']) results.push(measure(language, command, args, mode));
+    for (const mode of BENCHMARK_MODES) results.push(measure(language, command, args, mode));
   }
   const text = JSON.stringify({
     schema: 1,

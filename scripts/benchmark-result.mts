@@ -6,6 +6,11 @@ import { jsonDocument } from './json-document.mts';
 export const METRICS = ['compile_ms', 'cold_process_ms', 'cold_rss_mib', 'render_ms', 'prepared_render_ms', 'persistent_process_ms_per_render', 'persistent_rss_mib'] as const;
 export type Metric = (typeof METRICS)[number];
 
+/** The languages that the mode benchmark measures, each in every mode of BENCHMARK_MODES: one list for the benchmark and its check. */
+export const BENCHMARK_LANGUAGES = ['typescript', 'go', 'rust', 'php', 'python'] as const;
+/** The execution modes of each measured language. */
+export const BENCHMARK_MODES = ['ast', 'generated'] as const;
+
 /** One row: a language in a mode with its metrics. */
 export type BenchmarkRow = Record<Metric, { median: number; p95: number }> & {
   language: string;
