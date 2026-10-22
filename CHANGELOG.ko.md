@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d9d0f19d054c017904d574e02422d3d3ce94caaebaf94dceb59b02311fbe0cb2 -->
+<!-- source-sha256: cf1ba66f12d0fab020bc0bf9a2edc58e53d9539a52aa642d2b4943ee8d5ed4db -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- T26.7-74: template이 make hooks가 쓰는 git hook을 .githooks/pre-merge-commit과 .githooks/reference-transaction(K495)까지, main에서 land의 gate를 돌리는 pre-commit과 함께 갖는다. kit이 hook 6개를 소유하므로(K522) config/owner-checks.json은 pre-commit, commit-msg, prepare-commit-msg를 더 적지 않고, rules-check와 owner-validate가 통과한다. Red: a24788f0에서 make rules-check와 make owner-validate가 exit 2; green: 둘 다 통과한다 (T26.7-74).
 - T26.7-76: config/dependency-policy.json은 PHP command line의 Composer manifest인 packages/cli/php/composer.json을 그것이 고정한 PHP platform 8.4.1과 함께 composerPlatforms에 적으므로 make dependency-policy-check가 통과한다. Red: T26.7-76 등록 시점에 make dependency-policy-check가 exit 2; green: 통과한다 (T26.7-76).
 - T26.7-75: config/layout.yml은 root vitest.config.ts를 layout-root-files의 vars.root_files에, packages/cli를 layout-packages의 component에 선언하므로 make layout-check가 통과한다. Red: T26.7-75 등록 시점에 make layout-check가 exit 2; green: 통과한다 (T26.7-75).
 - T26.7-73: PHP 라이브러리는 확장처럼, 그리고 라이브러리의 다른 static factory가 자기 class 이름을 적듯 AstProgram::loadArtifact와 loadOrRefresh의 반환형을 AstProgram으로 선언하므로, make test-php-ext가 surface에서 멈추지 않고 test를 돌린다. Red: ecc8a9ba에서 make test-php-ext CASES=ArtifactStoreTest가 exit 2; green: 통과한다 (T26.7-73).

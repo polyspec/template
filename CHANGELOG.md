@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- T26.7-74: template holds the git hooks that make hooks writes, .githooks/pre-merge-commit and .githooks/reference-transaction (K495) included, with the pre-commit that runs the gates of land on main; kit owns the six hooks (K522), so config/owner-checks.json no longer names pre-commit, commit-msg and prepare-commit-msg, and rules-check and owner-validate pass. Red: make rules-check and make owner-validate exit 2 at a24788f0; green: both pass (T26.7-74).
 - T26.7-76: config/dependency-policy.json names packages/cli/php/composer.json, the Composer manifest of the PHP command line, in composerPlatforms with the PHP platform 8.4.1 that it pins, so make dependency-policy-check passes. Red: make dependency-policy-check exit 2 at the registration of T26.7-76; green: it passes (T26.7-76).
 - T26.7-75: config/layout.yml declares the root vitest.config.ts in vars.root_files of layout-root-files and packages/cli among the components of layout-packages, so make layout-check passes. Red: make layout-check exit 2 at the registration of T26.7-75; green: it passes (T26.7-75).
 - T26.7-73: the PHP library declares AstProgram as the return type of AstProgram::loadArtifact and loadOrRefresh, as the extension does and as the other static factories of the library name their class, so make test-php-ext runs its tests instead of stopping on the surface. Red: make test-php-ext CASES=ArtifactStoreTest exit 2 at ecc8a9ba; green: it passes (T26.7-73).
