@@ -6,6 +6,7 @@
 
 #![deny(missing_docs)]
 
+pub mod artifact;
 pub mod ast;
 pub mod error;
 pub mod escape;
@@ -18,6 +19,8 @@ pub mod parser;
 pub mod render;
 pub mod source;
 pub mod value;
+
+mod sha256;
 
 pub use ast::{AstDecodeError, Comment, Expr, Node, Template, decode_template};
 pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};
