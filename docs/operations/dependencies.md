@@ -30,7 +30,7 @@ Run it when a dependency is chosen or updated; a change of a manifest or a lock 
 - a Composer manifest or lock that does not resolve for the declared minimum PHP, and a lock that `composer validate --strict` finds stale, run with `COMPOSER_DISABLE_NETWORK=1`;
 - a package of this repository locked at another directory or version, and a `package-lock.json` that records other dependencies than `package.json`.
 
-Its mutation gate `node_modules/@polyspec/kit/dist/check-dependency-policy-mutation.mjs` (`make dependency-policy-mutation-check`) copies the dependency files and proves that the check rejects an outdated dependency without an exception, a Composer platform other than the declared minimum, a lock changed without a review and a lock with an advisory. kit tests the gate and the review against stub registries in its own repository.
+Its mutation gate `node_modules/@polyspec/kit/scripts/kit/check-dependency-policy-mutation.mts` (`make dependency-policy-mutation-check`) copies the dependency files and proves that the check rejects an outdated dependency without an exception, a Composer platform other than the declared minimum, a lock changed without a review and a lock with an advisory. kit tests the gate and the review against stub registries in its own repository.
 
 ## Exceptions
 

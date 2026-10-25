@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The documents name the kit sources that make runs, scripts/kit/<tool>.mts of @polyspec/kit, instead of its dist (T26.7-95).
 - The workflow tests check only the workflows of template, without the workflows of kit, and the install, check and test target tests expect the kit sources that make runs (T26.7-94).
 
 - The gates workflow installs the packages of the sibling kit, whose sources the consumer runs, and builds nothing (kit K613) (T26.7-93).

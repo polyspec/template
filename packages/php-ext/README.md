@@ -48,4 +48,4 @@ The package is the C extension only: Composer installs no package of the type `p
 make test-php-ext
 ```
 
-`make test-php-ext` (kit) builds the extension, compares its declarations by Reflection with those of the PHP library, and runs the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/dist/run-tests.mjs phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. `make template-test-ext` runs the conformance cases only, through the command line interface, after `make build-php` installs the root `vendor/`. The templates of the unit tests are in `tests/templates`.
+`make test-php-ext` (kit) builds the extension, compares its declarations by Reflection with those of the PHP library, and runs the suite in `tests/` with PHPUnit through `node_modules/@polyspec/kit/scripts/kit/run-tests.mts phpunit --php-extension`, which loads the built library and prints each test with its elapsed time. `make template-test-ext` runs the conformance cases only, through the command line interface, after `make build-php` installs the root `vendor/`. The templates of the unit tests are in `tests/templates`.

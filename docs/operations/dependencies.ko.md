@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-dependencies -->
-<!-- source-sha256: 63fb71649634364c0072136bf16824b028df76439a714ff194d677fe36639755 -->
+<!-- source-sha256: 45d0c148b02e17b41928769fbb4730f7b22cfa2874d8a85aff87968676e432cc -->
 # 의존성 정책
 
 [English](/operations/dependencies).
@@ -31,7 +31,7 @@ Registry 의존성은 registry가 해석하는 직접 의존성이다. 루트 `p
 - 선언한 최저 PHP로 해석하지 않는 Composer manifest나 lock, 그리고 `COMPOSER_DISABLE_NETWORK=1`로 실행한 `composer validate --strict`가 오래되었다고 보는 lock
 - 다른 directory나 version으로 잠긴 이 저장소의 package, 그리고 `package.json`과 다른 의존성을 기록한 `package-lock.json`
 
-mutation gate `node_modules/@polyspec/kit/dist/check-dependency-policy-mutation.mjs`(`make dependency-policy-mutation-check`)는 의존성 file을 복사해, 검사가 예외 없는 오래된 의존성, 선언한 최저 버전과 다른 Composer platform, review 없이 바뀐 lock, 보안 권고가 있는 lock을 거부함을 증명한다. kit은 자기 저장소에서 gate와 review를 stub registry로 test한다.
+mutation gate `node_modules/@polyspec/kit/scripts/kit/check-dependency-policy-mutation.mts`(`make dependency-policy-mutation-check`)는 의존성 file을 복사해, 검사가 예외 없는 오래된 의존성, 선언한 최저 버전과 다른 Composer platform, review 없이 바뀐 lock, 보안 권고가 있는 lock을 거부함을 증명한다. kit은 자기 저장소에서 gate와 review를 stub registry로 test한다.
 
 ## 예외
 

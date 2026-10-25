@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5d6e82be283f67c956799d76675fc1d8c134ceacdc3ed37ef43151b06f839339 -->
+<!-- source-sha256: 1d93e52eadf1eff20be72efbc408ce720b2a6068f0202ef6cc351c9df5e5ed08 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 문서는 kit의 dist 대신 make가 실행하는 kit source, @polyspec/kit의 scripts/kit/<tool>.mts를 이름 붙인다(T26.7-95).
 - workflow test는 kit의 workflow를 빼고 template의 workflow만 검사하고, install, check, test target test는 make가 실행하는 kit source를 기대한다(T26.7-94).
 
 - gates workflow는 소비자가 실행하는 source를 가진 옆의 kit의 package를 설치하고 아무것도 build하지 않는다(kit K613)(T26.7-93).
