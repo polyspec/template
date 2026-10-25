@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The gates workflow installs the packages of the sibling kit, whose sources the consumer runs, and builds nothing (kit K613) (T26.7-93).
 - The repository holds no copy of the kit bootstrap or of PRINCIPLES: the Makefile includes the kit-bootstrap.mk of ../kit, config/php-lint is gone, and PRINCIPLES.md, its twin, .editorconfig and .claude/settings.json are links to ../kit (kit K614) (T26.7-92).
 - The copies of kit follow the linked kit, and go follows its 1.27.3 in mise.toml, mise.lock, go.work and both go.mod, so make install-tools builds kit-symbols-go again (T26.7-91).
 - No catch of template accepts every failure in silence: the eight catches without a binding that kit K561 refuses bind their error, take only the failure that their outcome names (TemplateError, SyntaxError, EACCES, ENOENT or ENOTDIR) and throw every other (T26.7-90).
