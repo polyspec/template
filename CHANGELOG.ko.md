@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a9e180187d4c4333f38cc12b529c69f81abe0deea853f99eaa92d789221b5e4d -->
+<!-- source-sha256: 7e4bb27da0ba72e985fcb07bc51d08f9624ba446302bc009d858a1e7328867e9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- kit 복사본이 link된 kit을 따르고, go가 mise.toml, mise.lock, go.work, 두 go.mod에서 kit의 1.27.3을 따르므로 make install-tools가 다시 kit-symbols-go를 build한다(T26.7-91).
 - template의 어떤 catch도 모든 실패를 말없이 받지 않는다. kit K561이 거부하는 binding 없는 catch 여덟 개가 오류를 bind하고 그 결과가 가리키는 실패(TemplateError, SyntaxError, EACCES, ENOENT, ENOTDIR)만 받으며 나머지는 모두 던진다(T26.7-90).
 - T26.7-89: T26.7-80, -81, -82, -84가 더한 test와 tool이 선언된다. config/parity.json은 format-errors.test.ts, json_value.rs, test_escape.py를 각 구현의 internal test로 적고, config/rebuild.json은 scripts/expected-rejection.mts를 policy로 분류한다. Red: b9dbe983에서 make parity-declarations-check와 make rebuild-check가 exit 2; green: 둘 다 통과한다 (T26.7-89).
 - T26.7-88: make kit-sync가 install-mise.mts(kit K532)를 가져오고, owner 규칙이 TypeScript, PHP, Python, Go, PHP extension source를 그 lint와 duplication-check로, Rust source를 duplication-check로 보낸다(kit K534). red: make kit-check가 실패했고, 변경 뒤 green(T26.7-88).

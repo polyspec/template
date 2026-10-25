@@ -10,7 +10,7 @@
 | Node.js | 26.12.0 | `node` of `mise.toml`, the pin of kit; `make install-tools TOOLS=npm` installs it with mise at the digest of `mise.lock` into `var/tools` and writes `var/tools/bin/node`, which every recipe runs as `$(NODE)` (kit K171); `engines.node` of every `package.json` is `>=26.12.0` |
 | npm | 12.2.0 | `packageManager` of `package.json`; `make install-tools TOOLS=npm` installs it into `var/tools` |
 | mise | 2026.10.8 | `config/toolchain.json` `mise`, with the sha256 of its archive by platform; `make install-tools TOOLS=npm` installs it into `var/tools` after npm |
-| Go | 1.27.2 | `go` of `mise.toml`, the pin of kit, which the go directive of every `go.mod` equals with no toolchain line; `make install-tools` installs it with mise at the digest of `mise.lock` |
+| Go | 1.27.3 | `go` of `mise.toml`, the pin of kit, which the go directive of every `go.mod` equals with no toolchain line; `make install-tools` installs it with mise at the digest of `mise.lock` |
 | Rust | 1.99.0 with rustfmt and clippy | `rust-toolchain.toml`, the pin of kit, which `rust-version` of every Cargo package equals; installed with rustup, `~/.cargo/bin` is added to `PATH` by the Makefile |
 | PHP | 8.4 | `config/toolchain.json`, the minor version and the pin of kit; `require.php` of every `composer.json` is `>=8.4` and `config.platform.php` is `8.4.0`; the patch of each run is recorded in the report of each CI job |
 | Composer | 2.10.3 | `http:composer` of `mise.toml`, with the sha256 of `composer.phar` |

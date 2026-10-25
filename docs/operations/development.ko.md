@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 5deff21d078148b094df50f4205806c5145d1e51f0e710faefea962aa9227ea3 -->
+<!-- source-sha256: 78affa5456632b2dffcb8dec11d8ceba9557efc9593c58d7b398c99b62e4b3bd -->
 # 개발
 
 [English](/operations/development).
@@ -11,7 +11,7 @@
 | Node.js | 26.12.0 | kit의 pin인 `mise.toml`의 `node`; `make install-tools TOOLS=npm`이 mise로 `mise.lock`의 digest에 맞춰 `var/tools`에 설치하고 `var/tools/bin/node`를 쓰며, 모든 recipe는 이것을 `$(NODE)`로 실행(kit K171); 모든 `package.json`의 `engines.node`는 `>=26.12.0` |
 | npm | 12.2.0 | `package.json`의 `packageManager`; `make install-tools TOOLS=npm`이 `var/tools`에 설치 |
 | mise | 2026.10.8 | 플랫폼별 archive의 sha256을 포함한 `config/toolchain.json`의 `mise`; `make install-tools TOOLS=npm`이 npm 다음에 `var/tools`에 설치 |
-| Go | 1.27.2 | 모든 `go.mod`의 go directive가 toolchain 줄 없이 같아야 하는 kit의 pin인 `mise.toml`의 `go`; `make install-tools`가 mise로 `mise.lock`의 digest에 맞춰 설치 |
+| Go | 1.27.3 | 모든 `go.mod`의 go directive가 toolchain 줄 없이 같아야 하는 kit의 pin인 `mise.toml`의 `go`; `make install-tools`가 mise로 `mise.lock`의 digest에 맞춰 설치 |
 | Rust | rustfmt와 clippy를 포함한 1.99.0 | 모든 Cargo package의 `rust-version`이 같아야 하는 kit의 pin인 `rust-toolchain.toml`; rustup으로 설치, Makefile이 `~/.cargo/bin`을 `PATH`에 추가 |
 | PHP | 8.4 | kit의 pin인 `config/toolchain.json`의 minor version; 모든 `composer.json`의 `require.php`는 `>=8.4`, `config.platform.php`는 `8.4.0`; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `composer.phar`의 sha256을 포함한 `mise.toml`의 `http:composer` |
