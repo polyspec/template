@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- No catch of template accepts every failure in silence: the eight catches without a binding that kit K561 refuses bind their error, take only the failure that their outcome names (TemplateError, SyntaxError, EACCES, ENOENT or ENOTDIR) and throw every other (T26.7-90).
 - T26.7-89: the tests and the tool that T26.7-80, -81, -82 and -84 added are declared: config/parity.json names format-errors.test.ts, json_value.rs and test_escape.py as internal tests of their implementations, and config/rebuild.json classes scripts/expected-rejection.mts as policy. Red: make parity-declarations-check and make rebuild-check exit 2 at b9dbe983; green: both pass (T26.7-89).
 - T26.7-88: make kit-sync brings install-mise.mts (kit K532), and the owner rules route the TypeScript, PHP, Python, Go and PHP extension sources to their lints and duplication-check and the Rust sources to duplication-check (kit K534); red: make kit-check failed, green after the change (T26.7-88).
 - T26.7-87: make showcase measures the execution modes into var/showcase/mode-benchmark.json and checks that file, and no longer writes the tracked examples/site/data/mode-benchmark.json or runs update-benchmark-docs, which only make bench does, so a showcase build leaves the tracked tree as it was; make showcase passes and changes no tracked file. Red: tests/scripts/showcase-writes.test.mts exit 1 at dcd3e7c5; green: it passes (T26.7-87).

@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e3e2e6009a95c3e3b79f076d3cca3c12116393580a33a30f48cc5320f2478bdb -->
+<!-- source-sha256: a9e180187d4c4333f38cc12b529c69f81abe0deea853f99eaa92d789221b5e4d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- template의 어떤 catch도 모든 실패를 말없이 받지 않는다. kit K561이 거부하는 binding 없는 catch 여덟 개가 오류를 bind하고 그 결과가 가리키는 실패(TemplateError, SyntaxError, EACCES, ENOENT, ENOTDIR)만 받으며 나머지는 모두 던진다(T26.7-90).
 - T26.7-89: T26.7-80, -81, -82, -84가 더한 test와 tool이 선언된다. config/parity.json은 format-errors.test.ts, json_value.rs, test_escape.py를 각 구현의 internal test로 적고, config/rebuild.json은 scripts/expected-rejection.mts를 policy로 분류한다. Red: b9dbe983에서 make parity-declarations-check와 make rebuild-check가 exit 2; green: 둘 다 통과한다 (T26.7-89).
 - T26.7-88: make kit-sync가 install-mise.mts(kit K532)를 가져오고, owner 규칙이 TypeScript, PHP, Python, Go, PHP extension source를 그 lint와 duplication-check로, Rust source를 duplication-check로 보낸다(kit K534). red: make kit-check가 실패했고, 변경 뒤 green(T26.7-88).
 - T26.7-87: make showcase는 실행 mode를 var/showcase/mode-benchmark.json에 측정하고 그 파일을 검사하며, 추적되는 examples/site/data/mode-benchmark.json을 쓰거나 make bench만 하는 update-benchmark-docs를 돌리지 않으므로 showcase build가 추적 tree를 그대로 둔다. make showcase가 통과하고 추적 파일을 바꾸지 않는다. Red: dcd3e7c5에서 tests/scripts/showcase-writes.test.mts가 exit 1; green: 통과한다 (T26.7-87).
