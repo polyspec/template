@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The repository holds no copy of the kit bootstrap or of PRINCIPLES: the Makefile includes the kit-bootstrap.mk of ../kit, config/php-lint is gone, and PRINCIPLES.md, its twin, .editorconfig and .claude/settings.json are links to ../kit (kit K614) (T26.7-92).
 - The copies of kit follow the linked kit, and go follows its 1.27.3 in mise.toml, mise.lock, go.work and both go.mod, so make install-tools builds kit-symbols-go again (T26.7-91).
 - No catch of template accepts every failure in silence: the eight catches without a binding that kit K561 refuses bind their error, take only the failure that their outcome names (TemplateError, SyntaxError, EACCES, ENOENT or ENOTDIR) and throw every other (T26.7-90).
 - T26.7-89: the tests and the tool that T26.7-80, -81, -82 and -84 added are declared: config/parity.json names format-errors.test.ts, json_value.rs and test_escape.py as internal tests of their implementations, and config/rebuild.json classes scripts/expected-rejection.mts as policy. Red: make parity-declarations-check and make rebuild-check exit 2 at b9dbe983; green: both pass (T26.7-89).

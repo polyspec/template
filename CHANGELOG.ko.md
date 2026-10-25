@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7e4bb27da0ba72e985fcb07bc51d08f9624ba446302bc009d858a1e7328867e9 -->
+<!-- source-sha256: 3fa7d7058b1d2f351cc3373a9df0834ef3f6be47d90a669998231a39515be076 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- 저장소는 kit bootstrap이나 PRINCIPLES의 복사본을 두지 않는다. Makefile은 ../kit의 kit-bootstrap.mk를 include하고, config/php-lint는 없어졌으며, PRINCIPLES.md, 그 짝, .editorconfig, .claude/settings.json은 ../kit로 가는 link다(kit K614)(T26.7-92).
 - kit 복사본이 link된 kit을 따르고, go가 mise.toml, mise.lock, go.work, 두 go.mod에서 kit의 1.27.3을 따르므로 make install-tools가 다시 kit-symbols-go를 build한다(T26.7-91).
 - template의 어떤 catch도 모든 실패를 말없이 받지 않는다. kit K561이 거부하는 binding 없는 catch 여덟 개가 오류를 bind하고 그 결과가 가리키는 실패(TemplateError, SyntaxError, EACCES, ENOENT, ENOTDIR)만 받으며 나머지는 모두 던진다(T26.7-90).
 - T26.7-89: T26.7-80, -81, -82, -84가 더한 test와 tool이 선언된다. config/parity.json은 format-errors.test.ts, json_value.rs, test_escape.py를 각 구현의 internal test로 적고, config/rebuild.json은 scripts/expected-rejection.mts를 policy로 분류한다. Red: b9dbe983에서 make parity-declarations-check와 make rebuild-check가 exit 2; green: 둘 다 통과한다 (T26.7-89).
