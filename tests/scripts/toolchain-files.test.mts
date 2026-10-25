@@ -255,9 +255,9 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
   // python-package, which prints its own recipe after its command line when the environment is out of date.
   const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
-  // KIT is the dist of the kit checkout beside the repository when there is one, else that of the installed @polyspec/kit
-  // (K348-1): the bootstrap line names it, and every later command of kit runs from the same one.
-  const kit = lines.map(line => /^\S.* node (\S+)\/bootstrap\/bootstrap\.mjs$/.exec(line)?.[1]).find(Boolean);
+  // KIT is the scripts/kit of the kit checkout beside the repository, whose sources make runs (kit K613): the bootstrap line
+  // names it, and every later command of kit runs from the same one.
+  const kit = lines.map(line => /^\S.* node (\S+)\/bootstrap\/bootstrap\.mts$/.exec(line)?.[1]).find(Boolean);
   assert.ok(kit !== undefined, `make install runs no bootstrap of kit:\n${lines.join('\n')}`);
   const at = (pattern: RegExp) => lines.findIndex(line => pattern.test(line));
   // The bootstrap of kit runs first (T24.1): npm with the node of PATH, then the packages of package-lock.json, then the tools.
@@ -265,18 +265,18 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // which installs offline from what the downloads fetched, and the link of kit comes last, after every install (K360-2).
   const bootstrap = [
     at(/\bmake --no-print-directory install-tools TOOLS=npm$/),
-    lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.mjs`),
+    lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.mts`),
     at(/\bmake --no-print-directory install-packages$/),
     lines.indexOf(`${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`),
     at(/\bmake --no-print-directory install-tools$/),
-    lines.indexOf(`${online} ${node} ${kit}/install-tools.mjs`),
-    lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.mjs --fetch`),
+    lines.indexOf(`${online} ${node} ${kit}/install-tools.mts`),
+    lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.mts --fetch`),
   ];
   assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
   const fetched = bootstrap.at(-1) ?? -1;
   const last = at(/\bmake python-package$/);
   assert.ok(last > fetched, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
-  assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.mjs link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
+  assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.mts link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
   const downloads = lines.slice(fetched + 1, last);
   assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `)), [], 'commands of make install that keep the offline settings of the recipes');
   for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
@@ -516,8 +516,8 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
   const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   // install-tools of kit installs the toolchain of rust-toolchain.toml with rustup before cargo-audit runs.
   assert.ok(recipe[0] !== undefined && recipe[1] !== undefined, 'make -n dependency-review prints its two commands');
-  assert.match(recipe[0], /install-tools\.mjs $/);
-  assert.match(recipe[1], /dependency-review\.mjs +$/);
+  assert.match(recipe[0], /install-tools\.mts $/);
+  assert.match(recipe[1], /dependency-review\.mts +$/);
   assert.ok(!jobs('.github/workflows/dependency-review.yml').some(job => usesOf(job, 'actions/setup-python@').length > 0), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 

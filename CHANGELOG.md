@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The workflow tests check only the workflows of template, without the workflows of kit, and the install, check and test target tests expect the kit sources that make runs (T26.7-94).
 
 - The gates workflow installs the packages of the sibling kit, whose sources the consumer runs, and builds nothing (kit K613) (T26.7-93).
 - The repository holds no copy of the kit bootstrap or of PRINCIPLES: the Makefile includes the kit-bootstrap.mk of ../kit, config/php-lint is gone, and PRINCIPLES.md, its twin, .editorconfig and .claude/settings.json are links to ../kit (kit K614) (T26.7-92).

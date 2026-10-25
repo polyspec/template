@@ -1,31 +1,21 @@
 // The workflows of template, parsed with the yaml package, for the tool tests that check them: the files that the
-// repository owns (a workflow that kit copies, kit.copies of @polyspec/kit, is kit's, and make kit-check compares it),
+// repository owns (a workflow of kit, workflows/ of @polyspec/kit, is kit's, and the repository takes it as kit writes it),
 // their jobs with their steps, and the action pins with their version comments.
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { JSONSchemaType } from 'ajv';
 import { isPair, isScalar, LineCounter, parseDocument, visit } from 'yaml';
-import { jsonDocument } from '../../scripts/json-document.mts';
 import { isJsonObject, yamlObject } from '../runner/checked.mts';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-const KIT_PACKAGE_SCHEMA: JSONSchemaType<{ kit: { copies: Record<string, string> } }> = {
-  type: 'object',
-  properties: {
-    kit: { type: 'object', properties: { copies: { type: 'object', required: [], additionalProperties: { type: 'string' } } }, required: ['copies'] },
-  },
-  required: ['kit'],
-};
+/** The workflows of kit (workflows/ of @polyspec/kit), which the repository takes as kit writes them (kit K270). */
+const KIT_WORKFLOWS = new Set(readdirSync(path.join(path.dirname(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json'))), 'workflows'))
+  .map(name => `.github/workflows/${name}`));
 
-/** The files that @polyspec/kit copies into the repository (kit.copies of its package.json). */
-const KIT_COPIES = new Set(Object.keys(jsonDocument<{ kit: { copies: Record<string, string> } }>('package.json of @polyspec/kit', KIT_PACKAGE_SCHEMA)
-  .read(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json'))).kit.copies));
-
-/** The workflows of template, without the ones that kit copies. */
+/** The workflows of template, without the ones of kit. */
 export const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml'))
-  .map(name => `.github/workflows/${name}`).filter(file => !KIT_COPIES.has(file));
+  .map(name => `.github/workflows/${name}`).filter(file => !KIT_WORKFLOWS.has(file));
 
 /** A step of a job with the fields that the tests read. */
 interface Step {

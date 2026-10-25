@@ -22,17 +22,17 @@ function commands(target: string) {
 const RUNS_TESTS_DIRECTLY = /\bnpm (?:test|run test:extension)\b|\bvitest\b(?! --cwd)|\bnode --test\b/;
 
 const RUNNERS: [string, string][] = [
-  ['test-ts', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/ts`],
-  ['template-test-language', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/language`],
-  ['template-test-lsp', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/lsp`],
-  ['template-test-codemirror', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs vitest --cwd packages/codemirror`],
-  ['template-test-vscode', `${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
+  ['test-ts', `${NODE} ../kit/scripts/kit/run-tests.mts vitest --cwd packages/ts`],
+  ['template-test-language', `${NODE} ../kit/scripts/kit/run-tests.mts vitest --cwd packages/language`],
+  ['template-test-lsp', `${NODE} ../kit/scripts/kit/run-tests.mts vitest --cwd packages/lsp`],
+  ['template-test-codemirror', `${NODE} ../kit/scripts/kit/run-tests.mts vitest --cwd packages/codemirror`],
+  ['template-test-vscode', `${NODE} ../kit/scripts/kit/run-tests.mts node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
 ];
 for (const [target, runner] of RUNNERS) {
   test(`${target} runs its unit tests through the run-tests tool of @polyspec/kit`, () => {
     const lines = commands(target);
     assert.ok(lines.includes(runner), lines.join('\n'));
-    assert.deepEqual(lines.filter(line => !line.startsWith(`${NODE} node_modules/@polyspec/kit/dist/run-tests.mjs`) && RUNS_TESTS_DIRECTLY.test(line)), []);
+    assert.deepEqual(lines.filter(line => !line.startsWith(`${NODE} ../kit/scripts/kit/run-tests.mts`) && RUNS_TESTS_DIRECTLY.test(line)), []);
   });
 }
 
@@ -47,7 +47,7 @@ const PHP_READERS: [string, string][] = [
   ['showcase', 'examples/showcase/build.mts runs examples/showcase/adapters/php.php'],
   ['typed-generator-compile-check', 'scripts/check-typed-generator.mts'],
   ['compiler-interface-check', 'scripts/check-compiler-interface.mts'],
-  ['test-php', 'node_modules/@polyspec/kit/dist/run-tests.mjs phpunit'],
+  ['test-php', '../kit/scripts/kit/run-tests.mts phpunit'],
 ];
 for (const [target, reader] of PHP_READERS) {
   test(`${target} installs the Composer packages of the root composer.json before ${reader}`, () => {

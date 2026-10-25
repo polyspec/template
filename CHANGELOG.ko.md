@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9926d4c4821f58b2730bae6e0c75fbbf367ce632c7ae44b9ac6430748a2680dc -->
+<!-- source-sha256: 5d6e82be283f67c956799d76675fc1d8c134ceacdc3ed37ef43151b06f839339 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- workflow test는 kit의 workflow를 빼고 template의 workflow만 검사하고, install, check, test target test는 make가 실행하는 kit source를 기대한다(T26.7-94).
 
 - gates workflow는 소비자가 실행하는 source를 가진 옆의 kit의 package를 설치하고 아무것도 build하지 않는다(kit K613)(T26.7-93).
 - 저장소는 kit bootstrap이나 PRINCIPLES의 복사본을 두지 않는다. Makefile은 ../kit의 kit-bootstrap.mk를 include하고, config/php-lint는 없어졌으며, PRINCIPLES.md, 그 짝, .editorconfig, .claude/settings.json은 ../kit로 가는 link다(kit K614)(T26.7-92).
