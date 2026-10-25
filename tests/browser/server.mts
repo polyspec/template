@@ -20,7 +20,9 @@ const server = createServer((request, response) => {
   let stats;
   try {
     stats = statSync(file);
-  } catch {
+  } catch (error) {
+    // A path that names no file is 404; any other failure of stat is a defect of the server or its root.
+    if (!(error instanceof Error && 'code' in error && (error.code === 'ENOENT' || error.code === 'ENOTDIR'))) throw error;
     response.writeHead(404).end();
     return;
   }

@@ -322,8 +322,10 @@ export function parseErrorOutput(stderr: string): { code: unknown; template: unk
     const parsed: unknown = JSON.parse(text);
     if (!isJsonObject(parsed)) return null;
     return { code: parsed.code, template: parsed.template, line: parsed.line, col: parsed.col };
-  } catch {
-    return null;
+  } catch (error) {
+    // Standard error that is not JSON is no error object; any other failure is a defect.
+    if (error instanceof SyntaxError) return null;
+    throw error;
   }
 }
 

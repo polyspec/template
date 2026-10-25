@@ -2,7 +2,7 @@
 // indentation, and the agreement of its constructs with the AST spans.
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { parse, type Node } from '@polyspec/template';
+import { parse, TemplateError, type Node } from '@polyspec/template';
 import { describe, expect, it } from 'vitest';
 import { caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
 import { openDocument, type TemplateDocument } from '../src/index.js';
@@ -223,7 +223,9 @@ describe('agreement with the AST', () => {
       let ast;
       try {
         ast = parse(source, 'x.tpl', options);
-      } catch {
+      } catch (error) {
+        // A text that does not parse fails with a template error; any other error fails the test.
+        if (!(error instanceof TemplateError)) throw error;
         expect(document.diagnostics).toHaveLength(1);
         return;
       }

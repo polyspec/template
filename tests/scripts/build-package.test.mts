@@ -46,8 +46,11 @@ function needed(dist: string, files: string[]) {
     let text;
     try {
       text = readFileSync(path.join(dist, file), 'utf8');
-    } catch {
-      continue;
+    } catch (error) {
+      // A file that is absent while the build replaces dist is recorded as missing by the poll; any other read failure fails
+      // the test.
+      if (error instanceof Error && 'code' in error && error.code === 'ENOENT') continue;
+      throw error;
     }
     for (const match of text.matchAll(/(?:from|import|require)\s*\(?\s*["'](\.\.?\/[^"']+)["']/g)) {
       const specifier = match[1];

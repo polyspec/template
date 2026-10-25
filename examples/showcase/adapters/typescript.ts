@@ -7,6 +7,7 @@ import {
   AstProgram,
   Engine,
   MapLoader,
+  TemplateError,
   decodeTemplate,
   parseJsonBytes,
   type DefineInput,
@@ -239,7 +240,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let failureObserved = false;
   try {
     adapter.render({ ...request, target: '__contract_missing_target__' });
-  } catch {
+  } catch (error) {
+    // The missing target fails the render with a template error; any other error is a defect of the adapter.
+    if (!(error instanceof TemplateError)) throw error;
     failureObserved = true;
   }
   const recovered = digest(adapter.render(request));

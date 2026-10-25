@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { AstProgram, Engine, MapLoader, decodeTemplate, parseJsonBytes } from '../../../packages/ts/dist/index.mjs';
+import { AstProgram, Engine, MapLoader, TemplateError, decodeTemplate, parseJsonBytes } from '../../../packages/ts/dist/index.mjs';
 import { assertRenderAdapter, assertRequestShape } from './generated/render_adapter.mjs';
 import { GeneratedProgram as CompilerCoverageProgram } from './generated/javascript/compiler-coverage.js';
 import { GeneratedProgram as EmptyStateProgram } from './generated/javascript/empty-state.js';
@@ -174,7 +174,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let failureObserved = false;
   try {
     adapter.render({ ...request, target: '__contract_missing_target__' });
-  } catch {
+  } catch (error) {
+    // The missing target fails the render with a template error; any other error is a defect of the adapter.
+    if (!(error instanceof TemplateError)) throw error;
     failureObserved = true;
   }
   const recovered = digest(adapter.render(request));

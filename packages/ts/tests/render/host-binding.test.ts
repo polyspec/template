@@ -203,7 +203,13 @@ describe('loader failures', () => {
       const files = new AstProgram({ loader: new FsLoader(root) });
       // Root reads a file of mode 0o000, every other user cannot (T19.11): the file fails to load exactly when the
       // process cannot read it, and the process cannot read it exactly when it does not run as root.
-      const readable = (() => { try { readFileSync(join(root, 'locked.tpl')); return true; } catch { return false; } })();
+      const readable = (() => {
+        try { readFileSync(join(root, 'locked.tpl')); return true; } catch (error) {
+          // Only the denied read (EACCES) means the process cannot read it; any other failure fails the test.
+          if (error instanceof Error && 'code' in error && error.code === 'EACCES') return false;
+          throw error;
+        }
+      })();
       expect(readable).toBe(process.getuid?.() === 0);
       if (readable) expect(files.render('locked.tpl', {})).toBe('x');
       else expect(code(() => files.render('locked.tpl', {}))).toBe('E_LOAD_FAILED');

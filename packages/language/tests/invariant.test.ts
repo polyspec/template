@@ -4,7 +4,7 @@
 // The environment variable TEMPLATE_SOURCE_ROOT adds an explicit external template tree to the same checks.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { analyze, parse } from '@polyspec/template';
+import { analyze, parse, TemplateError } from '@polyspec/template';
 import { describe, expect, it } from 'vitest';
 import { readCaseOptions } from '../../../tests/runner/case-list.mts';
 import { format } from '../src/index.js';
@@ -45,8 +45,10 @@ function parses(source: string, delimiters: string | undefined): boolean {
   try {
     parse(source, 'x.tpl', delimiters === undefined ? {} : { delimiters });
     return true;
-  } catch {
-    return false;
+  } catch (error) {
+    // A text that does not parse fails with a template error; any other error is no answer.
+    if (error instanceof TemplateError) return false;
+    throw error;
   }
 }
 
