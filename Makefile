@@ -42,10 +42,10 @@ MAKEFLAGS += -k
 
 # The shared targets of kit (kit-sync, kit-check, hooks, push-gate-commit, rerun-failed, docs-check, owner-check,
 # ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, toolchain-check, layout-check,
-# cargo-downloads-check, lint-*) come from the npm package @polyspec/kit: scripts/kit/kit-bootstrap.mk, a copy that make
-# kit-sync writes, includes the kit.mk of the installed package and runs its tools as node $(KIT)/<tool>.$(KIT_EXT). Only
-# config/*.json differ between repositories.
-include scripts/kit/kit-bootstrap.mk
+# cargo-downloads-check, lint-*) come from @polyspec/kit: the kit-bootstrap.mk of the kit checkout beside the repository, no
+# copy (kit K614), includes the kit.mk of the kit and runs its tools as node $(KIT)/<tool>.$(KIT_EXT). Only config/*.json differ
+# between repositories.
+include ../kit/scripts/kit/kit-bootstrap.mk
 
 .PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-build-ts template-build-go template-build-rust template-build-php template-test-php template-test-python template-rules-check template-test-scripts compiler-interface-generate compiler-interface-check \
 	conformance delimiter-matrix template-test-browser template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \

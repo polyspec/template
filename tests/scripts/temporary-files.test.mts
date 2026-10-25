@@ -37,11 +37,9 @@ function inCheckout(argument: string): boolean {
   return RELATIVE_PATH.test(argument) || CHECKOUT_PATH.test(argument.replace(/'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, "''"));
 }
 
-// The one exception: the bootstrap installer that kit copies (kit.copies) builds a tool beside its install prefix in
-// var/tools, the cache of the checkout that no test reads, and renames it into place. The exception names the file and the
-// exact argument, so any other call of that file fails. Removal condition: kit builds a tool in the system temporary
-// directory.
-const EXCEPTIONS: Record<string, string[]> = { 'scripts/kit/bootstrap/install-tool.mts': ['`${prefix}.next-`'] };
+// No tracked script has an exception: the bootstrap installer of kit, which builds a tool beside its install prefix, is no copy of
+// this repository since kit K614.
+const EXCEPTIONS: Record<string, string[]> = {};
 
 test('no mkdtemp of a tracked script makes its directory in the checkout', () => {
   const found: string[] = [];

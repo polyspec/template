@@ -829,14 +829,12 @@
     },
     {
       "paths": [
-        "scripts/kit/**",
         ".github/workflows/release.yml",
         "PRINCIPLES.md",
         "PRINCIPLES.ko.md",
         "config/layout.kit.yml",
         ".editorconfig",
         "config/*.schema.json",
-        "config/php-lint/**",
         "config/commit-identity.json",
         "package.json",
         "package-lock.json"
@@ -902,14 +900,6 @@
       ],
       "tests": [
         "tests/scripts/vitest-collection.test.mts"
-      ]
-    },
-    {
-      "paths": [
-        "config/php-lint/**"
-      ],
-      "targets": [
-        "lint-php"
       ]
     },
     {
@@ -1241,8 +1231,7 @@
       "check": "make lint-php",
       "paths": [
         "packages/php/**",
-        "packages/php-ext/**",
-        "config/php-lint/**"
+        "packages/php-ext/**"
       ]
     },
     {
