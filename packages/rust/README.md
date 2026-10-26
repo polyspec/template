@@ -64,3 +64,5 @@ cargo test --locked
 ```
 
 Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.
+
+Built-in function implementations and their registry are private implementation details. Generated programs use `RuntimeBindings`; host callbacks use `Env`, `FunctionContext` and `HostFunction` from the crate root.

@@ -279,7 +279,7 @@ test-php: template-test-php ## PHP unit tests
 template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
-template-test-scripts: typed-generator compiler-interface-generate cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
+template-test-scripts: build-rust typed-generator compiler-interface-generate cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js

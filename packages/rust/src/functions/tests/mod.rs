@@ -1,10 +1,10 @@
 //! Built-in functions that need checks beyond the fixture cases, and the engine API.
 
-use polyspec_template::functions::builtins;
-use polyspec_template::functions::date::{format_date, parse_offset, to_unix_seconds};
-use polyspec_template::functions::encoding::{percent_encode, to_json};
-use polyspec_template::value::{OrderedMap, Value};
-use polyspec_template::{
+use crate::functions::builtins;
+use crate::functions::date::{format_date, parse_offset, to_unix_seconds};
+use crate::functions::encoding::{percent_encode, to_json};
+use crate::value::{OrderedMap, Value};
+use crate::{
     ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Limits, Loaded, Loader, MapLoader, RenderOptions, RenderTarget,
     RuntimeEnvironment,
 };
@@ -122,7 +122,7 @@ fn engine_reports_host_failures_and_limits() {
     loader.set("b.tpl", "{@ i = range(1, 10)}{= i}{/}");
     let mut engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
-        limits: Some(polyspec_template::Limits {
+        limits: Some(crate::Limits {
             iterations: 5,
             ..Default::default()
         }),
@@ -287,12 +287,12 @@ fn the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec() {
 /// RT-4: a define or an env of the request that is no object fails with E_DATA_UNSUPPORTED_TYPE, named by its message.
 #[test]
 fn the_request_options_that_are_no_object_fail() {
-    let Err(error) = polyspec_template::defines_from_json(&serde_json::json!("b.tpl")) else {
+    let Err(error) = crate::defines_from_json(&serde_json::json!("b.tpl")) else {
         panic!("a define that is no object");
     };
     assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
     assert_eq!(error.message, "define is not an object");
-    let Err(error) = polyspec_template::env_from_json(&serde_json::json!(0)) else {
+    let Err(error) = crate::env_from_json(&serde_json::json!(0)) else {
         panic!("an env that is no object");
     };
     assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
@@ -320,7 +320,7 @@ fn a_safe_string_is_its_text() {
 
 #[test]
 fn engine_renders_a_parsed_template_and_reparses_new_versions() {
-    let ast = polyspec_template::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse");
+    let ast = crate::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse");
     let mut loader = MapLoader::new();
     loader.set_ast("x.tpl", ast.clone());
     let engine = AstProgram::new(EngineOptions {
@@ -363,7 +363,7 @@ fn render_targets_give_the_same_output() {
             .expect("render"),
         "<p>1</p>"
     );
-    let ast = polyspec_template::parse(b"<p>{= x}</p>", "a.tpl", &Default::default()).expect("parse");
+    let ast = crate::parse(b"<p>{= x}</p>", "a.tpl", &Default::default()).expect("parse");
     assert_eq!(
         engine
             .render(RenderTarget::Ast(&ast), &assign, &RenderOptions::default())

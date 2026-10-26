@@ -1087,6 +1087,19 @@
       "tests": [
         "tests/scripts/api-contract-declarations.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "tests/scripts/rust-public-api.test.mts",
+        "packages/rust/src/**",
+        "packages/rust/tests/fixtures/public-api/**"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/rust-public-api.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1743,7 +1756,10 @@
         "packages/ts/api-extractor.json",
         "tests/scripts/api-contract-declarations.test.mts",
         "config/parity.json",
-        "packages/compiler/interface.json"
+        "packages/compiler/interface.json",
+        "tests/scripts/rust-public-api.test.mts",
+        "packages/rust/src/**",
+        "packages/rust/tests/fixtures/public-api/**"
       ]
     }
   ]

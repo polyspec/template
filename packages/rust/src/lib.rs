@@ -3,6 +3,9 @@
 //! The specification is in `docs/spec/` of the repository. `parse` produces the AST of one template,
 //! `Engine::render` renders a template name or a parsed template with JSON assign data and template definitions;
 //! `bind` checks data once and `Engine::render_bound` renders the bound map without checking it again.
+//!
+//! Built-in implementations are private. Generated programs call `RuntimeBindings`,
+//! and host callbacks use the public `FunctionContext` and `HostFunction` types.
 
 #![deny(missing_docs)]
 
@@ -12,7 +15,7 @@ pub mod error;
 pub mod escape;
 pub mod expr;
 pub mod format;
-pub mod functions;
+mod functions;
 pub mod loader;
 pub mod page_cache;
 pub mod parser;

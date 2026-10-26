@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cb97de755f1b54b7a2eae90e5888beb8f2aebc2965dc4892aaf25cef1663a9d0 -->
+<!-- source-sha256: a68870e56823d651eda671f34a7d0164561e0331d4780b699e45971aa452b6a0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- Rust는 crate 루트에서 host callback 타입을 공개하고 내장 함수 구현 모듈은 비공개로 유지한다. 함수 테스트 17개를 빠짐없이 crate 안으로 옮기고 feature binding의 정확한 한정 테스트 ID를 유지했다. Red: 16d466d2에서 외부 소비자가 구현 registry를 import할 수 있었다. Green: 외부 callback 컴파일 성공·구현 접근 E0603 거부·함수 단위 17개·clippy·타입 검사·해당 파일 린트·parity 선언 검증 통과(T27.1-1-4).
 - 단일 compiler manifest의 RuntimeBindings 연산 20개를 공유 API 단위로 선언하고 네이티브 메서드 심볼 120개에 연결했다. 선언 단위가 구현 누락·잘못된 네이티브 메서드 대응·RT-67 추적 누락을 거부한다. 여섯 네이티브 compiler-interface 검사(15개 사례, PHP 확장은 재빌드)와 선언 회귀 검증·기반 도구 타입 검사·해당 파일 린트·parity 선언 검사가 통과했다. 나머지 API 목록은 검토 중이다(T27.1-1-3).
 - 공개 서명 검증이 실제 TypeScript 패키지에 API Extractor를 실행하고 참조한 타입에 접근할 수 없으면 오류로 처리한다. 별도의 잘못된 선언 fixture는 ae-forgotten-export로 실패해야 한다. 소비자·모델·export 단위 5개가 모두 통과하며 생성 API 모델은 var/report에만 둔다(T27.1-1-2).
 - TypeScript 공개 서명에서 이미 도달할 수 있던 타입을 패키지 진입점에서 import할 수 있게 하고 AST 대입·루프 메타데이터·소스 범위의 이름을 구분했다. 런타임 생성자를 추가로 export하지 않는다. Python AstProgram은 비공개 구현 기반 타입을 노출하지 않고 공개 Program을 직접 따른다. Red: a7c1418e에서 소비자 타입 import와 Python 공개 기반 타입 회귀 검증이 실패했다. Green: TypeScript 소비자·export 단위 3개, Python export·API 단위 55개, 타입 검사·문서 범위·해당 파일 린트 통과(T27.1-1-1).

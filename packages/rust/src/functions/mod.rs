@@ -7,7 +7,7 @@ pub mod helpers;
 pub mod number;
 pub mod string;
 
-pub use helpers::{BuiltIn, Env, FunctionContext, FunctionError, to_number};
+pub use helpers::{BuiltIn, Env, FunctionContext, to_number};
 
 use crate::value::{HostError, Value};
 use std::collections::HashMap;
@@ -36,3 +36,6 @@ pub fn builtins() -> &'static HashMap<&'static str, BuiltIn> {
         table
     })
 }
+
+#[cfg(test)]
+mod tests;

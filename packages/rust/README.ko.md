@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 56bf19c95923cf5032820fd7041ce59e1be478f79dff7ace5eaa77c63845c1e8 -->
+<!-- source-sha256: b25bbe8a6fd429a2dc08f2607c09d52bd596a884e7c4733c027dd5e643997cdc -->
 # polyspec-template
 
 [English](README.md).
@@ -65,3 +65,5 @@ cargo test --locked
 ```
 
 테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.
+
+내장 함수 구현과 registry는 비공개 구현 세부 사항이다. 생성 프로그램은 `RuntimeBindings`를 사용하고 host callback은 crate 루트의 `Env`, `FunctionContext`, `HostFunction`을 사용한다.
