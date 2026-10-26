@@ -1112,6 +1112,19 @@
       "tests": [
         "tests/scripts/go-public-api.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "tests/scripts/php-public-api.test.mts",
+        "packages/php/src/**",
+        "packages/php-ext/src/polyspec_template.stub.php"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/php-public-api.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1773,7 +1786,10 @@
         "packages/rust/src/**",
         "packages/rust/tests/fixtures/public-api/**",
         "tests/scripts/go-public-api.test.mts",
-        "packages/go/**"
+        "packages/go/**",
+        "tests/scripts/php-public-api.test.mts",
+        "packages/php/src/**",
+        "packages/php-ext/src/polyspec_template.stub.php"
       ]
     }
   ]

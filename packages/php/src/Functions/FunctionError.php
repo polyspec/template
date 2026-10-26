@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Polyspec\Template\Functions;
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * Failure raised by a built-in function; the evaluator attaches the call position.
  */
 final class FunctionError extends \RuntimeException

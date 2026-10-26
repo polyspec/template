@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: f6b60bbdb40f9b72b6674a8a3348e8110dd8de2c9b800e6f3f1598045a059c3d -->
+<!-- source-sha256: 3b71b2ba1e83fbaedbb1b1d080624e38d173c2698e81239ef45a405fff53f76d -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -389,3 +389,4 @@
 | T27.1-1-12 | Go lexer·parser·expression 구현을 internal 패키지로 유지하고 공개 Parse·Analyze SDK와 지정 가능한 tag·token kind 타입을 제공한다. 이동한 모든 suite 연결을 유지한다 | Go internal 패키지·SDK 소비자 fixture·네이티브 parser 테스트 | `var/tools/bin/node --test tests/scripts/go-public-api.test.mts`; 선택한 네이티브 lexer·parser 단위; `make template-test-go-vet`; `make template-test-go-backend-vet`; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-2 | P1: 공개한 kit 0.0.56의 정확한 asset·integrity와 설치한 package bootstrap·CI lock 설치를 적용한다. provider source를 수정하지 않고 공유 복사본·훅·의존성 검토를 갱신한다 | npm manifest·lock, CI workflow, bootstrap 단위, 절차·공유 복사본 | `make kit-check`; `make lint-ts`; `make dependency-policy-check`; `make hooks-check`; 선택한 bootstrap·suite·runner·SDK 단위; `make docs-check`; CI | [o] |
 | T27.1-3 | P0: Go 패키지를 internal로 이동한 뒤 깨진 expression fixture 탐색을 수정한다. 모듈 루트에서 벡터 파일을 찾고 전체 공유 runner를 유지한다 | Go expression fixture loader·탐색 단위 | `node node_modules/@polyspec/kit/dist/run-tests.mjs go --cwd packages/go -- -run ^TestExpressionFixtureDiscovery$ ./internal/expr`; `make parity-declarations-check`; `make docs-check`; CI expression 벡터 | [o] |
+| T27.1-1-13 | PHP 라이브러리·확장 stub의 내장 함수 구현 그룹을 internal로 유지하고 host·runtime SDK 연산을 보존한다. 공개 signature의 내부 클래스 누출을 거부한다 | PHPDoc 공개 범위·확장 arginfo·네이티브 SDK 추출 단위 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/php-public-api.test.mts`; PHP·PHP 확장 네이티브 함수 단위; `make lint-php`; `make docs-check` | [o] |

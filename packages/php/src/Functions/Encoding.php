@@ -11,6 +11,8 @@ use Polyspec\Template\Value\SafeString;
 use Polyspec\Template\Value\Value;
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
  */
 final class Encoding implements FunctionGroup

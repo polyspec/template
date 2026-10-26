@@ -1195,6 +1195,8 @@ final class HostArgument
 namespace Polyspec\Template\Functions;
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * Failure raised by a built-in function; the evaluator attaches the call position.
  */
 final class FunctionError extends \RuntimeException
@@ -1205,6 +1207,8 @@ final class FunctionError extends \RuntimeException
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * A group of built-in functions: Registry joins the tables of the groups.
  */
 interface FunctionGroup
@@ -1219,6 +1223,8 @@ interface FunctionGroup
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * Argument helpers shared by the function groups.
  */
 final class Helpers
@@ -1248,6 +1254,8 @@ final class Helpers
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * upper, lower, trim, replace, split, truncate, contains, starts_with, ends_with, length (FUN-12, FUN-13).
  */
 final class Strings implements FunctionGroup
@@ -1256,6 +1264,8 @@ final class Strings implements FunctionGroup
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * number, round, floor, ceil, abs, min, max, num (FUN-16, FUN-17, FUN-20 to FUN-25).
  */
 final class Numbers implements FunctionGroup
@@ -1264,6 +1274,8 @@ final class Numbers implements FunctionGroup
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
  */
 final class Encoding implements FunctionGroup
@@ -1282,6 +1294,8 @@ final class Encoding implements FunctionGroup
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * keys, values, first, last, reverse, slice, sort, join, range, default (FUN-14, FUN-15, FUN-31 to FUN-36).
  */
 final class Collection implements FunctionGroup
@@ -1292,6 +1306,8 @@ final class Collection implements FunctionGroup
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * date and now (FUN-37 to FUN-42).
  */
 final class Dates implements FunctionGroup
@@ -1319,6 +1335,8 @@ final class Dates implements FunctionGroup
 }
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * The built-in functions of the library (docs/spec/functions.md): builtins joins the tables of the groups in the order
  * of the library, and isBuiltin tells whether a name is a built-in function.
  */

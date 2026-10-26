@@ -9,6 +9,8 @@ use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\Value;
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * upper, lower, trim, replace, split, truncate, contains, starts_with, ends_with, length (FUN-12, FUN-13).
  */
 final class Strings implements FunctionGroup

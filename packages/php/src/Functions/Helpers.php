@@ -9,6 +9,8 @@ use Polyspec\Template\Value\SafeString;
 use Polyspec\Template\Value\Value;
 
 /**
+ * @internal Built-in implementation; SDK callers use the shared runtime services.
+ *
  * Argument helpers shared by the function groups.
  */
 final class Helpers
