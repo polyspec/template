@@ -1160,6 +1160,266 @@
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Context" },
         { "implementation": "python", "symbol": "template.RenderContext" }
       ]
+    },
+    {
+      "id": "api-runtime-bindings-truthy",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#truthy:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Truthy"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::truthy"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::truthy"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::truthy"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.truthy"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-unary",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#unary:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Unary"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::unary"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::unary"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::unary"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.unary"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-binary",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#binary:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Binary"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::binary"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::binary"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::binary"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.binary"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-stringify",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#stringify:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Stringify"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::stringify"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::stringify"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::stringify"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.stringify"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-escape",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#escape:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Escape"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::escape"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::escape"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::escape"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.escape"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-number",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#number:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Number"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::number"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::number"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::number"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.number"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-finite",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#finite:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Finite"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::finite"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::finite"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::finite"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.finite"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-equal",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#equal:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Equal"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::equal"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::equal"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::equal"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.equal"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-compare",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#compare:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Compare"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::compare"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::compare"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::compare"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.compare"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-member",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#member:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Member"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::member"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::member"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::member"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.member"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-member-call",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#memberCall:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.MemberCall"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::member_call"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::memberCall"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::memberCall"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.member_call"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-class-call",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#classCall:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.ClassCall"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::class_call"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::classCall"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::classCall"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.class_call"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-index",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#index:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Index"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::index"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::index"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::index"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.index"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-depth",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#depth:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Depth"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::depth"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::depth"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::depth"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.depth"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-entries",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#entries:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Entries"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::entries"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::entries"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::entries"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.entries"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-list-spread",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#listSpread:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.ListSpread"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::list_spread"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::listSpread"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::listSpread"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.list_spread"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-map-spread",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#mapSpread:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.MapSpread"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::map_spread"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::mapSpread"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::mapSpread"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.map_spread"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-call",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#call:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Call"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::call"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::call"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::call"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.call"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-limit",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#limit:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Limit"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::limit"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::limit"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::limit"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.limit"}
+      ]
+    },
+    {
+      "id": "api-runtime-bindings-error",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#error:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Error"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::error"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::error"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::error"},
+        {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.error"}
+      ]
     }
   ]
 }

@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: ecd99799f3c789087270aa44345f7db9161f9cce94ca1e0412caaf54e7ea99bd -->
+<!-- source-sha256: 6c8c93559b3a94547bb7576b0a521a968c83365c1f94cdfffaa82c4cf9c9f35d -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -377,3 +377,4 @@
 | T27.1-1 | 공개 API와 공유 계약을 일치시킨다. CI 40321448224의 R11 공개 심볼과 R17 내부 타입 노출을 모두 검토하고 구현 세부 사항은 비공개로 유지하며 구현 간 동등성을 검증한 공개 연산만 선언한다. native-only 예외를 복구하거나 심볼 검사를 약화하지 않는다 | 런타임 패키지 진입점, 공개 선언, API 단위와 export 테스트 | 해당 export/type 단위 테스트; `make parity-declarations-check`; CI의 전체 API/parity 매트릭스 | [ ] |
 | T27.1-1-1 | TypeScript 패키지 진입점에서 공개 서명의 AST·로더·런타임 타입을 import할 수 있게 하고, 동작 변경 없이 공개 상속 관계에서 Python AstProgram의 비공개 기반 타입을 제거한다 | TypeScript 타입 진입점, Python AstProgram, 소비자 fixture와 export 테스트 | `var/tools/bin/node --test tests/scripts/typescript-exports.test.mts`; Python export·API 단위; `make docs-check` | [o] |
 | T27.1-1-2 | 네이티브 API Extractor로 공개 서명의 타입 도달 가능성을 검증한다. 실제 패키지 모델은 통과하고 비공개 구현 기반 타입을 노출하는 fixture는 거부한다 | TypeScript API 추출 설정, 비공개 기반 타입 fixture와 선언 모델 단위 | `var/tools/bin/node --test tests/scripts/typescript-exports.test.mts`; `make docs-check` | [o] |
+| T27.1-1-3 | compiler manifest의 RuntimeBindings 연산 20개를 공유 API 단위로 선언하고 각 TypeScript·Go·Rust·PHP·PHP 확장·Python 실제 메서드에 연결한다. 다른 연산을 가리키는 단위가 없음을 검증한다 | API 선언, compiler manifest 대응과 네이티브 interface 단위 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts`; 네이티브 compiler-interface 단위 테스트; `make parity-declarations-check`; `make docs-check` | [o] |

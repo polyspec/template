@@ -1074,6 +1074,19 @@
       "tests": [
         "tests/scripts/typescript-exports.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "tests/scripts/api-contract-declarations.test.mts",
+        "config/parity.json",
+        "packages/compiler/interface.json"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/api-contract-declarations.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1727,7 +1740,10 @@
       "check": "make template-test-scripts",
       "paths": [
         "tests/fixtures/public-types/**",
-        "packages/ts/api-extractor.json"
+        "packages/ts/api-extractor.json",
+        "tests/scripts/api-contract-declarations.test.mts",
+        "config/parity.json",
+        "packages/compiler/interface.json"
       ]
     }
   ]
