@@ -424,7 +424,8 @@ conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeS
 PYTHON_PACKAGE := packages/python
 # make reads the environment when it parses the Makefile, before make install-tools TOOLS=npm has installed the node of
 # the checkout, so the node of the machine that starts the bootstrap reads it (kit K171).
-PYTHON_VENV := $(shell $(BOOTSTRAP_NODE) scripts/python-venv.mts)
+PYTHON_BOOTSTRAP_NODE := $(if $(wildcard var/tools/bin/node),$(CURDIR)/var/tools/bin/node,node)
+PYTHON_VENV := $(shell $(PYTHON_BOOTSTRAP_NODE) scripts/python-venv.mts)
 ifeq ($(PYTHON_VENV),)
 $(error scripts/python-venv.mts read no environment of the implementation python from config/parity.json)
 endif

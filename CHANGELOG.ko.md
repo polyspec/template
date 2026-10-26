@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c70c2cc2006f7cad65d602962b860cff9601bc54725ceccfaafe8d76e6bb53c8 -->
+<!-- source-sha256: 6cd49ba78affcde4a5e432891195c339a347ff201e93311fd80c611f068cdaa6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- Make가 공유 BOOTSTRAP_NODE 변수에 의존하지 않고 템플릿 자체의 부트스트랩 Node 선택으로 Python 환경을 읽는다. Red: 24267157에서 해당 부트스트랩 단위가 permission denied로 실패했다. Green: Python 도구 체인과 Makefile 단위 검증이 통과한다(T27.1).
 - 후보 개발과 0.0.12 준비를 가드 검사를 거친 커밋으로 main에 통합했다. 최종 릴리스 승인은 kit 버전 정합성과 정확한 main 커밋의 전체 CI를 기다린다(T27.1).
 - esbuild 0.28.2의 패키지 빌드와 문서 빌드가 통과했고 전체 CI 검증은 대기 중이다. 철회한 CLI 플랫폼 작업은 T26.7-76으로 이미 완료됐다(T26.7-68, T26.7-53-1).
 - PHPUnit을 정확히 13.4.3으로 고정하고 Composer lock과 의존성 검토를 일치시켰다. (T26.7-65).

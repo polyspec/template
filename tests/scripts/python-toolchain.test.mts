@@ -3,6 +3,7 @@
 // interpreter fails with the path and the fix; the interpreter of PATH is never tried. A program that imports the package
 // runs the python of packages/python/.venv, with no changed import path (PRINCIPLES S3).
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -34,4 +35,10 @@ test('the python that imports the package is the python of packages/python/.venv
   assert.equal(pythonPackageEnvironment(), 'packages/python/.venv');
   assert.ok(!readFileSync(new URL('../../scripts/python-toolchain.mts', import.meta.url), 'utf8').includes("'packages/python/.venv"), 'python-toolchain.mjs restates the environment that config/parity.json declares');
   assert.equal(pythonPackageCommand(), pythonPackageInterpreter, 'run make python-package');
+});
+
+test('make reads the Python environment without a shared BOOTSTRAP_NODE variable', { timeout: 5000 }, () => {
+  const result = spawnSync('make', ['--no-print-directory', '-n', 'python-package', 'BOOTSTRAP_NODE='], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.doesNotMatch(result.stderr, /Permission denied|read no environment/);
 });
