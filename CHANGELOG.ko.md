@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e31f232c7ffcae4ac6e56a875292c7e3dbea2ad3cb91e00b94e70c7ca53b38e9 -->
+<!-- source-sha256: 59fff59b9779202f7584acc4084677c110f0a29d3f946629cb120b7e6d111ab2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- TypeScript core 진입점이 formatter 호출·옵션·결과·오류 타입을 공개하고 language formatter가 런타임 adapter 없이 같은 계약을 구현한다. 네이티브 formatter 선언을 각 SDK 연산에 연결한다. Red: b5c233c3에서 소비자가 공통 타입을 import할 수 없다. Green: SDK·선언 단위 15개·formatter 단위 23개·language 타입 검사·parity 선언 검사 통과(T27.1-1-15).
 - 기본 릴리스 SDK의 Rust expression·source 구현을 비공개로 유지한다. 네이티브 expression 벡터의 타입 지정 helper 연산 3개는 비기본 harness bridge에 유지하며 Make 단위·parity 명령이 이를 명시적으로 활성화하고 벡터 target도 이 기능을 요구한다. Fixture 전용 token 이름 변환은 harness에 둔다. Red: 643e420c에서 기본 소비자가 두 구현을 import할 수 있었다. Green: SDK·선언 단위 19개·네이티브 bridge 단위·벡터 target 컴파일·release 빌드·clippy·타입 검사 통과. CI 전체 벡터 검증은 계속 필수다(T27.1-1-14).
 - PHP 구현 클래스에서 같은 SDK 정책 문장을 반복하지 않고 네이티브 internal annotation과 각 클래스 설명을 유지한다. 확장 stub hash를 다시 생성했다. Red: 643e420c의 CI가 중복 header block 8개를 보고한다. Green: duplication-check 중복 0개·PHP SDK 추출 단위 6개 통과(T27.1-6).
 - 템플릿 소유 CI job이 전체 빌드·다운로드·테스트 실행에 짧은 시간 제한을 걸지 않는다. editor job은 정상 브라우저 의존성 다운로드 중 5분에, Rust job은 두 suite target이 모두 통과한 직후 6분에 제한으로 취소됐다. 테스트별 제한과 모든 CHECK_TARGETS 작업은 유지한다. Red: ec6d4c6d에서 job 제한 회귀 검사가 이 제한들을 찾는다. Green: workflow·toolchain·suite 단위 34개·기반 도구 타입 검사 통과(T27.1-4).

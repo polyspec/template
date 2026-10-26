@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-formatting -->
-<!-- source-sha256: addcaa5b41fc371a6a6b1e99d68510eb82e7ebe616abbb61813570bc5e191a6c -->
+<!-- source-sha256: bb2da649aeeaaac51e9459ff9ccf4aa528f647d2c46f095a792c977bc00838f8 -->
 # 포맷
 
 [English](/spec/formatting).
@@ -98,3 +98,7 @@
 `line`과 `col`은 1부터 센다. `col`은 파서 오류처럼 바이트를 센다(ERR-1). 바뀌는 것이 없으면 텍스트는 소스와 같다.
 
 - **FMT-15** 포맷은 멱등이다. 포맷한 텍스트를 같은 옵션으로 다시 포맷하면 같은 텍스트가 나온다.
+
+## SDK 계약
+
+- **FMT-16** 모든 SDK는 formatter의 호출 signature, 옵션과 성공·실패 결과를 공개한다. 이름 있는 callable 계약으로 같은 SDK의 다른 진입점에서 공개한 구현을 기술할 수 있다. 공개 구현은 formatting 동작을 바꾸는 adapter 없이 이 계약을 충족한다.

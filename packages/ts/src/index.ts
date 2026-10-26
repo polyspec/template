@@ -77,3 +77,5 @@ export type { RenderOptions as EngineRenderOptions };
 export type { TagRange } from './parser/standalone.js';
 // The parser-free AST program exported by the render-only entry.
 export type { AstProgramCore as RenderAstProgram } from './render/engine.js';
+
+export type { Formatter, FormatError, FormatOptions, FormatResult } from './format-types.js';

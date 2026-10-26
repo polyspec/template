@@ -642,7 +642,7 @@
     },
     {
       "id": "format-unchanged",
-      "requirements": ["FMT-14"],
+      "requirements": ["FMT-14", "FMT-16"],
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/language/tests/format.test.ts", "id": "format › reports an unchanged source" },
@@ -2173,6 +2173,138 @@
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope::loopMeta"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope::loopMeta"},
         {"implementation": "python", "symbol": "template.context.Scope.loop_meta"}
+      ]
+    },
+    {
+      "id": "api-formatter",
+      "requirements": [
+        "FMT-16"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Formatter:type"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go.Format"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::format"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Format\\Formatter::format"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Format\\Formatter::format"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.format_template"
+        }
+      ]
+    },
+    {
+      "id": "api-format-options",
+      "requirements": [
+        "FMT-16"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!FormatOptions:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go.FormatOptions"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::FormatOptions"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Format\\Formatter::format"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Format\\Formatter::format"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.FormatOptions"
+        }
+      ]
+    },
+    {
+      "id": "api-format-result",
+      "requirements": [
+        "FMT-16"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!FormatResult:type"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go.FormatResult"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Formatted"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Format\\FormatResult"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Format\\FormatResult"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.FormatResult"
+        }
+      ]
+    },
+    {
+      "id": "api-format-error",
+      "requirements": [
+        "FMT-16"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!FormatError:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go.FormatError"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::FormatError"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Format\\FormatError"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Format\\FormatError"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.FormatError"
+        }
       ]
     }
   ]

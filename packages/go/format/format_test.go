@@ -1,3 +1,4 @@
+// FMT-16: the published formatter accepts options and returns its success/failure result.
 package format
 
 import (

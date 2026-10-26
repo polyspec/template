@@ -1,8 +1,12 @@
+// FMT-16: the published formatter accepts options and returns its success/failure result.
 // Expected formatter output, idempotency and error results.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { format, type FormatResult } from '../src/index.js';
+import type { Formatter } from '@polyspec/template';
+import { format as formatImplementation, type FormatResult } from '../src/index.js';
+
+const format: Formatter = formatImplementation;
 import { sameTree } from '../src/invariant.js';
 import { fixtures } from './helpers.js';
 

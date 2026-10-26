@@ -1,3 +1,4 @@
+# FMT-16: the published formatter accepts options and returns its success/failure result.
 #!/usr/bin/env python3
 """The formatter: token spacing of the formatting style, tag bodies, the
 indentation of lines by HTML elements and template blocks, error results and

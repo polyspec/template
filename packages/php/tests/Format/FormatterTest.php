@@ -1,4 +1,5 @@
 <?php
+// FMT-16: the published formatter accepts options and returns its success/failure result.
 
 declare(strict_types=1);
 

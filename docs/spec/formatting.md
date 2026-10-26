@@ -97,3 +97,7 @@ Spaces and tabs at the start of a line are part of the rendered output, except o
 `line` and `col` are 1-based; `col` counts bytes as parser errors do (ERR-1). When nothing changes, the text is the source.
 
 - **FMT-15** Formatting is idempotent: formatting a formatted text with the same options returns the same text.
+
+## SDK contract
+
+- **FMT-16** Every SDK publishes the formatter callable signature, its options and its success/failure result. A named callable contract may describe an implementation published by another entry point of the same SDK. The published implementation satisfies that contract without an adapter that changes formatting behaviour.

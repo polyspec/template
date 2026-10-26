@@ -1,3 +1,4 @@
+// FMT-16: the published formatter accepts options and returns its success/failure result.
 //! The formatter: the formatting style of tag bodies, the indentation of lines by HTML elements and template blocks,
 //! the safety invariant and idempotence, and the error results (docs/operations/editor-tools.md).
 
