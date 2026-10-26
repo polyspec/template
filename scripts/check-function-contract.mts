@@ -46,7 +46,7 @@ function pairs(source: string, expression: RegExp, normalize = (value: string): 
 
 const files: Record<string, string[]> = {
   typescript: ['packages/ts/src/functions/encoding.ts', 'packages/ts/src/functions/string.ts', 'packages/ts/src/functions/collection.ts', 'packages/ts/src/functions/number.ts', 'packages/ts/src/functions/date.ts'],
-  go: ['packages/go/functions/encoding.go', 'packages/go/functions/string.go', 'packages/go/functions/collection.go', 'packages/go/functions/number.go', 'packages/go/functions/date.go'],
+  go: ['packages/go/internal/functions/encoding.go', 'packages/go/internal/functions/string.go', 'packages/go/internal/functions/collection.go', 'packages/go/internal/functions/number.go', 'packages/go/internal/functions/date.go'],
   rust: ['packages/rust/src/functions/encoding.rs', 'packages/rust/src/functions/string.rs', 'packages/rust/src/functions/collection.rs', 'packages/rust/src/functions/number.rs', 'packages/rust/src/functions/date.rs'],
   python: ['packages/python/src/polyspec/template/functions.py'],
 };

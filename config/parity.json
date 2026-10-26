@@ -425,7 +425,7 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/functions/functions.test.ts", "id": "date \u203a parses offsets and formats civil dates" },
-        { "implementation": "go", "test": "packages/go/functions/functions_test.go", "id": "TestDate" },
+        { "implementation": "go", "test": "packages/go/internal/functions/functions_test.go", "id": "TestDate" },
         { "implementation": "rust", "test": "packages/rust/src/functions/tests/mod.rs", "id": "functions::tests::date_parsing_and_formatting" },
         { "implementation": "php", "test": "packages/php/tests/Functions/FunctionsTest.php", "id": "testDateOffsetsAndFormatting" },
         { "implementation": "php-ext", "test": "packages/php/tests/Functions/FunctionsTest.php", "id": "testDateOffsetsAndFormatting" },
@@ -633,7 +633,7 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/functions/functions.test.ts", "id": "arity table \u203a declares minimum and maximum arguments for every built-in" },
-        { "implementation": "go", "test": "packages/go/functions/functions_test.go", "id": "TestArityTable" },
+        { "implementation": "go", "test": "packages/go/internal/functions/functions_test.go", "id": "TestArityTable" },
         { "implementation": "rust", "test": "packages/rust/src/functions/tests/mod.rs", "id": "functions::tests::builtins_declare_arity" },
         { "implementation": "php", "test": "packages/php/tests/Functions/FunctionsTest.php", "id": "testArityTable" },
         { "implementation": "php-ext", "test": "packages/php/tests/Functions/FunctionsTest.php", "id": "testArityTable" },

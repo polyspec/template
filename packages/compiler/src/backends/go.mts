@@ -271,7 +271,7 @@ const imports: [name: string, path: string][] = [
   ['bytes', '"bytes"'], ['json', '"encoding/json"'], ['errors', '"errors"'], ['fmt', '"fmt"'],
   ['template', 'template "github.com/polyspec/template/packages/go"'],
   ['ast', '"github.com/polyspec/template/packages/go/ast"'], ['errs', '"github.com/polyspec/template/packages/go/errs"'],
-  ['functions', '"github.com/polyspec/template/packages/go/functions"'], ['render', '"github.com/polyspec/template/packages/go/render"'],
+  ['render', '"github.com/polyspec/template/packages/go/render"'],
   ['value', '"github.com/polyspec/template/packages/go/value"'], ['time', '"time"'], ['utf8', '"unicode/utf8"'],
 ];
 
@@ -400,7 +400,7 @@ export function emitEntry(context: BackendContext): Part[] {
       'runtime, err := template.NewRuntimeEnvironment(options.Limits, options.Functions)',
       braced('if err != nil', 'return nil, err'),
       'return &GeneratedProgram{Runtime: runtime}, nil')}`,
-    `\n${goStruct('generatedPrepared', [['name', 'string'], ['target', 'string'], ['assign', 'Assign'], ['definitions', '*Definitions'], ['rootData', '*value.OrderedMap'], ['env', 'functions.Env'], ['runtime', '*template.RuntimeEnvironment'], ['html', '*string']])}`,
+    `\n${goStruct('generatedPrepared', [['name', 'string'], ['target', 'string'], ['assign', 'Assign'], ['definitions', '*Definitions'], ['rootData', '*value.OrderedMap'], ['env', 'template.Env'], ['runtime', '*template.RuntimeEnvironment'], ['html', '*string']])}`,
     `\n${braced('func (p *generatedPrepared) Render() (string, error)', 'return render.Guard(p.name, p.render)')}`,
     `\n${braced('func (p *generatedPrepared) render() (string, error)',
       'context := render.NewContext(p.runtime, p.rootData, p.env, p.target)',

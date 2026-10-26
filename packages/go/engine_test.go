@@ -7,7 +7,7 @@ import (
 
 	template "github.com/polyspec/template/packages/go"
 	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/functions"
+	"github.com/polyspec/template/packages/go/internal/functions"
 	"github.com/polyspec/template/packages/go/render"
 )
 

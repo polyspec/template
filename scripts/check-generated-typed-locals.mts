@@ -73,8 +73,8 @@ if (!(error instanceof TemplateError) || error.code !== 'E_RUNTIME_TYPE' || erro
       try {
         writeFileSync(join(goDir, 'generated.go'), source);
         writeFileSync(join(goDir, 'generated_test.go'), `package generated
-import ("testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/functions"; "github.com/polyspec/template/packages/go/value")
-func TestGeneratedTypedLocals(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; if err := program.Runtime.Register("label", func(args []value.Value, _ functions.Context) (any, error) { return args[0].(string) + "!", nil }); err != nil { t.Fatal(err) }; page := value.NewOrderedMap(); page.Set("title", "T"); first := value.NewOrderedMap(); first.Set("name", "a"); second := value.NewOrderedMap(); second.Set("name", "b"); assign := value.NewOrderedMap(); assign.Set("page", page); assign.Set("rows", value.List{first, second}); actual, err := program.Render("input.tpl", assign, template.RenderOptions{}); if err != nil || actual != ${goString(expected)} { t.Fatalf("generated Go typed locals = %q %v", actual, err) } }
+import ("testing"; template "github.com/polyspec/template/packages/go"; "github.com/polyspec/template/packages/go/value")
+func TestGeneratedTypedLocals(t *testing.T) { program, err := NewGeneratedProgram(template.Options{}); if err != nil { t.Fatal(err) }; if err := program.Runtime.Register("label", func(args []value.Value, _ template.FunctionContext) (any, error) { return args[0].(string) + "!", nil }); err != nil { t.Fatal(err) }; page := value.NewOrderedMap(); page.Set("title", "T"); first := value.NewOrderedMap(); first.Set("name", "a"); second := value.NewOrderedMap(); second.Set("name", "b"); assign := value.NewOrderedMap(); assign.Set("page", page); assign.Set("rows", value.List{first, second}); actual, err := program.Render("input.tpl", assign, template.RenderOptions{}); if err != nil || actual != ${goString(expected)} { t.Fatalf("generated Go typed locals = %q %v", actual, err) } }
 `);
         runChecked('go', ['test', '.'], goDir);
       } finally {

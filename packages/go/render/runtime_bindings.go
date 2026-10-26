@@ -11,7 +11,7 @@ import (
 
 	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/functions"
+	"github.com/polyspec/template/packages/go/internal/functions"
 	"github.com/polyspec/template/packages/go/value"
 )
 

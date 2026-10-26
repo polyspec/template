@@ -21,7 +21,6 @@ import (
   "os"
 
   template "github.com/polyspec/template/packages/go"
-  "github.com/polyspec/template/packages/go/functions"
 )
 
 func main() {
@@ -29,7 +28,7 @@ func main() {
   if err != nil {
     panic(err)
   }
-  _ = program.Register("greet", func(args []template.Value, _ functions.Context) (any, error) {
+  _ = program.Register("greet", func(args []template.Value, _ template.FunctionContext) (any, error) {
     return "Hello, " + args[0].(string), nil
   })
   engine := template.NewEngine(program)

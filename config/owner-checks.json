@@ -1100,6 +1100,18 @@
       "tests": [
         "tests/scripts/rust-public-api.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "tests/scripts/go-public-api.test.mts",
+        "packages/go/**"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/go-public-api.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1759,7 +1771,9 @@
         "packages/compiler/interface.json",
         "tests/scripts/rust-public-api.test.mts",
         "packages/rust/src/**",
-        "packages/rust/tests/fixtures/public-api/**"
+        "packages/rust/tests/fixtures/public-api/**",
+        "tests/scripts/go-public-api.test.mts",
+        "packages/go/**"
       ]
     }
   ]

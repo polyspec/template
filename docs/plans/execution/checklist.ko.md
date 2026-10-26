@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 8c8c947ef9a6d65c4a82fcbcfa6d0d32411692ecbe0921262018ca9cc2898420 -->
+<!-- source-sha256: 0a2a51cd4e5c18c4f20489cda0bc572f25ad30fd904843772a88333f2a3821c2 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -381,3 +381,4 @@
 | T27.1-1-4 | Rust 내장 함수 구현 모듈을 비공개로 유지하고 공개 callback API를 보존한다. 함수 테스트를 내용 변경 없이 crate 안으로 옮기고 모든 feature binding을 유지하며 외부 소비자가 callback은 사용하고 구현 registry는 import할 수 없음을 증명한다 | Rust 함수 모듈, 유지한 단위 테스트, 소비자 fixture와 parity binding | `make build-rust`; `var/tools/bin/node --test tests/scripts/rust-public-api.test.mts`; 네이티브 함수 단위 테스트; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-1-5 | compiler manifest의 Program·Engine prepare/render와 RuntimeServices 조회·제한 메서드를 공유 API로 선언하고 여섯 구현의 정확한 네이티브 소유자에 연결한다 | API 선언과 manifest 기반 회귀 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts`; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-1-6 | 오류 코드 값 41개를 공유 API 데이터로 선언하고 실제 네이티브 상수 또는 공개 문자열 union·catalog 표현에 연결한다. error-codes-check와 parity R7의 정확한 catalog 검증을 유지한다 | 오류 값 API 단위와 catalog 기반 회귀 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts tests/scripts/error-codes.test.mts`; `make parity-declarations-check`; `make docs-check` | [o] |
+| T27.1-1-7 | Go 내장 함수 구현을 internal 패키지로 옮기고 root SDK에서 host callback context를 공개한다. 생성 코드와 함수 테스트 연결을 유지한다 | Go SDK·compiler backend·소비자 fixture·테스트 연결 | `var/tools/bin/node --test tests/scripts/go-public-api.test.mts`; 선택한 네이티브 함수·callback 단위; `make template-test-compiler-types`; `make docs-check` | [o] |

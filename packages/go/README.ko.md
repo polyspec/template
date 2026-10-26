@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-go-readme -->
-<!-- source-sha256: 06d164b704081bd26781df4016baa3dfbf856ac46203cfd2a5334aae6dabdf51 -->
+<!-- source-sha256: a0a78a2fe6029f98878bb7a36eaf9b1644930448c7f6395abf19f2a477ba2803 -->
 # github.com/polyspec/template/packages/go
 
 [English](README.md).
@@ -22,7 +22,6 @@ import (
   "os"
 
   template "github.com/polyspec/template/packages/go"
-  "github.com/polyspec/template/packages/go/functions"
 )
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
   if err != nil {
     panic(err)
   }
-  _ = program.Register("greet", func(args []template.Value, _ functions.Context) (any, error) {
+  _ = program.Register("greet", func(args []template.Value, _ template.FunctionContext) (any, error) {
     return "Hello, " + args[0].(string), nil
   })
   engine := template.NewEngine(program)

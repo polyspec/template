@@ -8,7 +8,7 @@ import (
 	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/format"
-	"github.com/polyspec/template/packages/go/functions"
+	"github.com/polyspec/template/packages/go/internal/functions"
 	"github.com/polyspec/template/packages/go/lexer"
 	"github.com/polyspec/template/packages/go/loader"
 	"github.com/polyspec/template/packages/go/parser"
@@ -33,6 +33,9 @@ type OrderedMap = value.OrderedMap
 
 // Env is the render environment.
 type Env = functions.Env
+
+// FunctionContext is the context passed to a host callback.
+type FunctionContext = functions.Context
 
 // HostFunction is a function registered by the host.
 type HostFunction = functions.HostFunction
