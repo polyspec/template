@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 472cd714a65cc2ea9530941e51517027a4944c8f9002e0aab4b9f28a9814d85a -->
+<!-- source-sha256: c53b7d9b43eac57e119888c7d00b1c026496a449e5d839d4a6feb3af95e0af6e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- PHP 확장의 버전 상수를 후보 0.0.12에 맞춰 준비했다(T27.1).
 
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 - 릴리스 준비에 PHP CLI 배포 파일과 이식 가능한 consumer를 포함하고, 패키지 환경에서 Python 단위를 발견하며 모든 Go 패키지에 테스트를 둔다. TypeScript star export를 추적하고 계획 문서의 마크업을 검증한다. Rust 생성 호출 fixture는 Arc를 사용한다. 검증: 선택한 도구 단위 테스트 30개와 문서 빌드 통과. 전체 CI는 대기 중이다(T27.1).

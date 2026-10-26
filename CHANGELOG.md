@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The PHP extension version constant is prepared for candidate 0.0.12 (T27.1).
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 - Release preparation includes the PHP CLI archive and its portable consumer, discovers Python units in the package environment, tests every Go package, follows TypeScript star exports and validates plan-page markup. Generated Rust call fixtures use Arc. Verification: 30 selected tooling unit tests and the documentation build pass; full CI remains pending (T27.1).
