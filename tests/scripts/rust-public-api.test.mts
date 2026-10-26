@@ -87,3 +87,8 @@ test('a Rust consumer can use the public source context', { timeout: 30_000 }, (
   const result = compile('public-source.rs');
   assert.equal(result.status, 0, result.stderr);
 });
+
+test('a Rust consumer can name every canonical AST literal', { timeout: 30_000 }, () => {
+  const result = compile('public-ast-literals.rs');
+  assert.equal(result.status, 0, result.stderr);
+});

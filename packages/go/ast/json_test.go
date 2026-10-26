@@ -162,7 +162,17 @@ func TestDecodeReadsTheEmbeddedSchemaOutsideTheRepository(t *testing.T) {
 
 // AST-10: class-call data decodes without registering the class to render it.
 func TestPublicDecoderPreservesClassCallASTFields(t *testing.T) {
-	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "fixtures", "ast-decode", "class-call.json"))
+	assertPublicDecoderRoundTrip(t, "class-call.json")
+}
+
+// AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
+func TestPublicDecoderPreservesCanonicalEnumLiterals(t *testing.T) {
+	assertPublicDecoderRoundTrip(t, "enum-literals.json")
+}
+
+func assertPublicDecoderRoundTrip(t *testing.T, fixture string) {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "fixtures", "ast-decode", fixture))
 	if err != nil {
 		t.Fatal(err)
 	}

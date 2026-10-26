@@ -72,3 +72,9 @@ it('preserves class-call AST fields through the public decoder (AST-10)', () => 
   const text = readFileSync(join(repoRoot, 'tests/fixtures/ast-decode/class-call.json'), 'utf8');
   expect(decodeTemplate(text)).toEqual(JSON.parse(text));
 });
+
+// AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
+it('preserves canonical enum literals through the public decoder (AST-10)', () => {
+  const text = readFileSync(join(repoRoot, 'tests/fixtures/ast-decode/enum-literals.json'), 'utf8');
+  expect(decodeTemplate(text)).toEqual(JSON.parse(text));
+});

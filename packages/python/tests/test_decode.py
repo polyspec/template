@@ -78,6 +78,15 @@ class DecodeTemplateTest(unittest.TestCase):
             json.loads(json.dumps(decode_template(text))), json.loads(text)
         )
 
+    def test_public_decoder_preserves_canonical_enum_literals(self):
+        # AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
+        text = (ROOT / "tests/fixtures/ast-decode/enum-literals.json").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            json.loads(json.dumps(decode_template(text))), json.loads(text)
+        )
+
     def test_decode_fails_on_text_that_is_not_json(self):
         # NaN and Infinity, which the json module reads by default, are no
         # JSON either.

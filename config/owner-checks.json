@@ -148,6 +148,7 @@
         "test-go",
         "test-rust",
         "test-php",
+        "test-php-ext",
         "test-python"
       ]
     },
@@ -1640,7 +1641,8 @@
       "check": "make test-php-ext",
       "paths": [
         "packages/php-ext/**",
-        "tests/fixtures/source-context.json"
+        "tests/fixtures/source-context.json",
+        "tests/fixtures/ast-decode/**"
       ]
     },
     {

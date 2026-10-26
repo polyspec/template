@@ -28,6 +28,8 @@ The span of a tag written as a wrapped tag runs from the wrapper opener to the e
 
 - **AST-4** Expression nodes:
 
+Operator and loop metadata literal sets are public SDK data contracts. TypeScript names them with string unions; Rust uses the public `UnaryOp`, `BinaryOp` and `LoopMetaField` enums and serializes them to the schema strings. Go uses the string fields of its AST node types, while PHP, the PHP extension and Python use AST map fields. Every public AST decoder validates these fields against the same schema and preserves every canonical literal. Rust `BinaryOp::as_str` returns that same canonical operator text.
+
 | Node | Fields | Value rules |
 | --- | --- | --- |
 | `Literal` | `kind`, `value` | `kind` is `null`, `bool`, `number` or `string`; `value` is `null`, a boolean, a JSON number or the decoded string |

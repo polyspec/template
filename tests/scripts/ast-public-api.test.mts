@@ -115,3 +115,24 @@ test('every schema shape and field names its native public representation', { ti
     }
   }
 });
+
+// The same committed data is decoded by all six SDKs, so adding a schema literal
+// without exercising it through the public decoders must fail this unit.
+test('the shared enum fixture covers every canonical AST literal', { timeout: 5000 }, () => {
+  const fixture: unknown = JSON.parse(readFileSync('tests/fixtures/ast-decode/enum-literals.json', 'utf8'));
+  assert.ok(record(fixture) && Array.isArray(fixture.body));
+  for (const [name, field] of [['Binary', 'op'], ['Unary', 'op'], ['LoopMeta', 'field']] as const) {
+    const property = schema.definitions[name]?.properties?.[field];
+    assert.ok(record(property) && Array.isArray(property.enum));
+    const literals: unknown[] = property.enum;
+    const expected = literals.map(value => { assert.equal(typeof value, 'string'); return String(value); });
+    const found: string[] = fixture.body.flatMap((node: unknown) => {
+      assert.ok(record(node) && record(node.expr));
+      if (node.expr.type !== name) return [];
+      const value = node.expr[field];
+      assert.equal(typeof value, 'string');
+      return [String(value)];
+    });
+    assert.deepEqual([...found].sort(), [...expected].sort(), `${name}.${field}`);
+  }
+});

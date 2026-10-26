@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 07165dff5931f879f57303752f48c08fd03590591f9ce96fc42a67f9019b434f -->
+<!-- source-sha256: cab1408021267977165385e8d2f169b256ed254a4f6fcc4569239c20a857255b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- AST 연산자와 loop metadata API 선언에 정규 리터럴 타입과 값을 포함한다. 공유 decoder fixture 하나로 SDK 6개의 모든 이항·단항 연산자와 loop metadata 필드를 검증한다. 계약 단위는 누락된 리터럴을 거부하며 Rust 소비자는 공개 enum variant 전체를 참조한다. 네이티브 Rust 연산자 텍스트는 직렬화된 AST 텍스트와 같다. Green: SDK 6개의 decoder 단위(TypeScript 7개·Go 2개·Rust 2개)·AST 계약 단위 4개·Rust 소비자 단위 19개·네이티브 lint를 통과한다 (T27.1-1-29).
 - 자원 제한 API 선언에 RT-33의 네 가지 네이티브 SDK 필드와 동적 map 변환을 명시한다. 각 SDK는 모든 기본값과 필드별 재정의를 검증하며 나머지 기본값이 유지되는지 확인한다. Green: SDK 6개의 네이티브 제한 단위(TypeScript 엔진 단위 15개)·네이티브 lint·선언 검사를 통과한다 (T27.1-1-28).
 - 오류 API 선언에 정규 필드 7개·네이티브 생성·위치가 있는 factory와 없는 factory·일반 데이터 변환을 포함한다. 네이티브 오류 단위는 없는 템플릿 오류의 위치가 모두 0인지 검증하고, Go는 선언된 필드 식별자를 reflection 및 JSON 키와 대조한다. Green: SDK 6개의 오류 단위(TypeScript 파서 단위 15개)·네이티브 lint·선언 검사를 통과한다. 공개 동작과 릴리즈 기준을 유지한다 (T27.1-1-27).
 - 모든 SDK가 네이티브 인덱스 변환과 위치 오류를 제공하는 검증된 Source context를 공개한다. 공유 fixture로 metadata·입력 소유권·BOM 하나 제거·Unicode 인덱스·잘못된 UTF-8을 검증한다. TypeScript는 입력 바이트를 복사하고 두 번째 BOM을 유지하며 짝이 없는 텍스트 서로게이트를 거부한다. Python 바이트 생성자는 factory와 같은 정규화를 적용한다. Go는 source 패키지를, Rust는 파서 내부를 노출하지 않는 공개 wrapper를 제공한다. Green: SDK 6개의 공유 Source 단위·SDK 소비자 및 추출 단위 35개·네이티브 lint와 빌드·선언 및 문서 검사를 통과한다. 전체 릴리즈 CI는 계속 필수다 (T27.1-1-26).

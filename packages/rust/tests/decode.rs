@@ -103,3 +103,22 @@ fn public_decoder_preserves_class_call_ast_fields() {
     let expected: serde_json::Value = serde_json::from_str(&text).expect("fixture JSON");
     assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
 }
+
+/// AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
+#[test]
+fn public_decoder_preserves_canonical_enum_literals() {
+    let path = common::repo_root().join("tests/fixtures/ast-decode/enum-literals.json");
+    let text = std::fs::read_to_string(path).expect("enum literal fixture");
+    let decoded = decode_template(&text).expect("decode enum literals");
+    let expected: serde_json::Value = serde_json::from_str(&text).expect("fixture JSON");
+    for (node, expected_node) in decoded.body.iter().zip(expected["body"].as_array().expect("fixture body")) {
+        if let polyspec_template::Node::Echo {
+            expr: polyspec_template::Expr::Binary { op, .. },
+            ..
+        } = node
+        {
+            assert_eq!(op.as_str(), expected_node["expr"]["op"].as_str().expect("operator"));
+        }
+    }
+    assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
+}

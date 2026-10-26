@@ -45,6 +45,13 @@ final class AstDecodeTest extends TestCase
         self::assertEquals(Support::json($text), AstProgram::decodeTemplate($text));
     }
 
+    /** AST-4, AST-10: every operator and loop metadata literal retains its canonical value. */
+    public function testPublicDecoderPreservesCanonicalEnumLiterals(): void
+    {
+        $text = Support::read(Support::repoRoot() . '/tests/fixtures/ast-decode/enum-literals.json');
+        self::assertEquals(Support::json($text), AstProgram::decodeTemplate($text));
+    }
+
     /** The decode returns the AST of parse, which a program renders without its source (RT-41). */
     public function testADecodedTemplateIsTheAstThatParseReturnsAndRenders(): void
     {

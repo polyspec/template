@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-ast -->
-<!-- source-sha256: e15fc873658892be8e82d9c9afe7e3dcf5fb6e0ce2f3e314d09fb69a94a267e1 -->
+<!-- source-sha256: bb1117e15d350bd677234fd0530648b79d67cea98564a240b874014712973881 -->
 # AST
 
 [English](/spec/ast).
@@ -28,6 +28,8 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
 래퍼 태그로 쓴 태그의 span은 래퍼 열기에서 래퍼 닫기의 끝까지다. `If.branches`의 각 항목은 여는 태그(`{? ...}` 또는 `{:? ...}`)의 `span`을 가진다. `else`는 블록에 `{:}` 태그가 없으면 `null`이고, 있으면 빈 목록을 포함한 목록이다.
 
 - **AST-4** 표현식 노드:
+
+연산자와 loop metadata 리터럴 집합은 공개 SDK 데이터 계약이다. TypeScript는 문자열 union으로 이름을 붙이며 Rust는 공개 `UnaryOp`, `BinaryOp`, `LoopMetaField` enum을 사용하고 스키마 문자열로 직렬화한다. Go는 AST 노드 타입의 문자열 필드를 사용하고 PHP·PHP 확장·Python은 AST map 필드를 사용한다. 모든 공개 AST decoder는 이 필드들을 같은 스키마로 검증하고 정규 리터럴을 모두 보존한다. Rust의 `BinaryOp::as_str`은 같은 정규 연산자 텍스트를 반환한다.
 
 | 노드 | 필드 | 값 규칙 |
 | --- | --- | --- |
