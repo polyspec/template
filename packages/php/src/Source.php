@@ -6,6 +6,7 @@ namespace Polyspec\Template;
 
 /**
  * Template source: UTF-8 validation, BOM removal and the line index (LEX-1, LEX-2, LEX-16).
+ * @internal
  */
 final class Source
 {

@@ -9,6 +9,7 @@ namespace Polyspec\Template\Value;
  * (docs/spec/data-model.md, docs/spec/expressions.md).
  *
  * A value is null, bool, float, string, SafeString, a PHP list or a MapValue.
+ * @internal
  */
 final class Value
 {

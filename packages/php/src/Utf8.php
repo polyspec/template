@@ -6,6 +6,7 @@ namespace Polyspec\Template;
 
 /**
  * UTF-8 helpers shared by the source reader, the data binder and the functions.
+ * @internal
  */
 final class Utf8
 {

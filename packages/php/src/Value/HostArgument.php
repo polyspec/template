@@ -6,6 +6,7 @@ namespace Polyspec\Template\Value;
 
 /**
  * The host form of a template value that a template passes to host code (VAL-18, VAL-21).
+ * @internal
  */
 final class HostArgument
 {

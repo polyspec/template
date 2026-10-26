@@ -9,8 +9,10 @@ namespace Polyspec\Template;
  */
 final class Ast
 {
+    /** @internal */
     public const LOOP_META_FIELDS = ['index_', 'key_', 'value_', 'last_', 'first_', 'size_'];
 
+    /** @internal */
     public static function isLoopMetaField(string $name): bool
     {
         return in_array($name, self::LOOP_META_FIELDS, true);
@@ -21,6 +23,7 @@ final class Ast
      *
      * @param array<string, mixed> $fields
      * @return array<string, mixed>
+     * @internal
      */
     public static function node(string $type, array $fields, int $start, int $end): array
     {

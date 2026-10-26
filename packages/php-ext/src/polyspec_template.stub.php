@@ -873,6 +873,7 @@ final class PageCache
 
 /**
  * Template source: UTF-8 validation, BOM removal and the line index (LEX-1, LEX-2, LEX-16).
+ * @internal
  */
 final class Source
 {
@@ -908,6 +909,7 @@ final class Source
 
 /**
  * UTF-8 helpers shared by the source reader, the data binder and the functions.
+ * @internal
  */
 final class Utf8
 {
@@ -937,6 +939,7 @@ final class Utf8
 
 /**
  * HTML escaping (RT-32, FUN-10).
+ * @internal
  */
 final class Escape
 {
@@ -1085,6 +1088,7 @@ final class Json
  * (docs/spec/data-model.md, docs/spec/expressions.md).
  *
  * A value is null, bool, float, string, SafeString, a PHP list or a MapValue.
+ * @internal
  */
 final class Value
 {
@@ -1136,6 +1140,7 @@ final class Value
 
 /**
  * Number conversion and formatting (VAL-9, VAL-10, FUN-20 to FUN-25).
+ * @internal
  */
 final class Number
 {
@@ -1183,6 +1188,7 @@ final class Number
 
 /**
  * The host form of a template value that a template passes to host code (VAL-18, VAL-21).
+ * @internal
  */
 final class HostArgument
 {
@@ -1698,6 +1704,7 @@ namespace Polyspec\Template;
  */
 final class Ast
 {
+    /** @internal */
     public static function isLoopMetaField(string $name): bool {}
 
     /**
@@ -1705,6 +1712,7 @@ final class Ast
      * @phpstan-param array<string, mixed> $fields
      * @return array
      * @phpstan-return array<string, mixed>
+     * @internal
      */
     public static function node(string $type, array $fields, int $start, int $end): array {}
 

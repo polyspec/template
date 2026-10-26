@@ -6,6 +6,7 @@ namespace Polyspec\Template\Value;
 
 /**
  * Number conversion and formatting (VAL-9, VAL-10, FUN-20 to FUN-25).
+ * @internal
  */
 final class Number
 {

@@ -6,6 +6,7 @@ namespace Polyspec\Template;
 
 /**
  * HTML escaping (RT-32, FUN-10).
+ * @internal
  */
 final class Escape
 {
