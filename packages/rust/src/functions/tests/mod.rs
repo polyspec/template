@@ -145,6 +145,17 @@ fn engine_reports_host_failures_and_limits() {
 // RT-36: a failed render aborts and returns no partial output.
 #[test]
 fn render_limits_default_output_and_abort() {
+    for index in 0..4 {
+        let mut configured = Limits::default();
+        match index {
+            0 => configured.iterations = 7,
+            1 => configured.depth = 7,
+            2 => configured.output_bytes = 7,
+            _ => configured.expression_depth = 7,
+        }
+        let environment = RuntimeEnvironment::new(Some(configured), Default::default()).expect("valid limits");
+        assert_eq!(environment.limits, configured);
+    }
     let Limits {
         iterations,
         depth,

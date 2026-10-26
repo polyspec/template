@@ -1,6 +1,6 @@
 // Engine API: loaders, host functions, limits and AST rendering (RT-1 to RT-6, RT-40, RT-41).
 import { describe, expect, it } from 'vitest';
-import { AstProgram, Engine, MapLoader, parse, TemplateError, type Loader } from '../../src/index.js';
+import { AstProgram, Engine, MapLoader, parse, TemplateError, RuntimeEnvironment, type Loader } from '../../src/index.js';
 import { AstProgram as RenderAstProgram, Engine as RenderEngine } from '../../src/render.js';
 
 describe('Engine', () => {
@@ -211,6 +211,11 @@ describe('Engine', () => {
   // RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it fails;
   // RT-36: a failed render aborts and returns no partial output.
   it('applies the default limits, checks the output size as it writes and returns no output on an error (RT-33, RT-35, RT-36)', () => {
+    for (const key of ['iterations', 'depth', 'outputBytes', 'expressionDepth'] as const) {
+      const baseline = { iterations: 1_000_000, depth: 32, outputBytes: 16 * 1024 * 1024, expressionDepth: 64 };
+      const environment = new RuntimeEnvironment({ [key]: 7 });
+      expect(environment.limits()).toEqual({ ...baseline, [key]: 7 });
+    }
     const defaults = new AstProgram({ loader: new MapLoader({ 'a.tpl': '1' }) });
     expect(defaults.limits()).toEqual({ iterations: 1_000_000, depth: 32, outputBytes: 16 * 1024 * 1024, expressionDepth: 64 });
 

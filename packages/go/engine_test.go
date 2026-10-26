@@ -284,6 +284,26 @@ func TestLimits(t *testing.T) {
 // RT-36: a failed render aborts and returns no partial output.
 func TestRenderLimitsDefaultsOutputAndAbort(t *testing.T) {
 	want := render.Limits{Iterations: 1_000_000, Depth: 32, OutputBytes: 16 * 1024 * 1024, ExpressionDepth: 64}
+	for index := range 4 {
+		configured := template.Limits(want)
+		switch index {
+		case 0:
+			configured.Iterations = 7
+		case 1:
+			configured.Depth = 7
+		case 2:
+			configured.OutputBytes = 7
+		case 3:
+			configured.ExpressionDepth = 7
+		}
+		environment, err := template.NewRuntimeEnvironment(&configured, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := environment.Limits(); got != configured {
+			t.Errorf("configured limit %d = %+v, want %+v", index, got, configured)
+		}
+	}
 	if render.DefaultLimits != want {
 		t.Errorf("DefaultLimits = %+v, want %+v", render.DefaultLimits, want)
 	}

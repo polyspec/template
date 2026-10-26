@@ -95,6 +95,10 @@ final class EngineRefreshTest extends TestCase
      */
     public function testRenderLimitsDefaultsOutputAndAbort(): void
     {
+        $defaults = ['iterations' => 1000000, 'depth' => 32, 'outputBytes' => 16777216, 'expressionDepth' => 64];
+        foreach (array_keys($defaults) as $key) {
+            self::assertSame(array_replace($defaults, [$key => 7]), (new RuntimeEnvironment([$key => 7]))->limits());
+        }
         self::assertSame(
             ['iterations' => 1000000, 'depth' => 32, 'outputBytes' => 16777216, 'expressionDepth' => 64],
             (new RuntimeEnvironment([], []))->limits(),

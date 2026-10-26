@@ -474,6 +474,17 @@ class ValuesAndErrors(unittest.TestCase):
         self.assertGreater(error["col"], 0)
 
     def test_render_limits_defaults_output_and_abort(self):
+        defaults = dict(
+            iterations=1_000_000,
+            depth=32,
+            outputBytes=16 * 1024 * 1024,
+            expressionDepth=64,
+        )
+        for key in defaults:
+            with self.subTest(key):
+                self.assertEqual(
+                    RuntimeEnvironment({key: 7}).limits(), {**defaults, key: 7}
+                )
         # RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it
         # fails; RT-36: a failed render aborts and returns no partial output.
         self.assertEqual(
