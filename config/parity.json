@@ -2083,6 +2083,97 @@
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\PreparedRender::render"},
         {"implementation": "python", "symbol": "template.engine.PreparedRender.render"}
       ]
+    },
+    {
+      "id": "api-render-frame-field-name",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Frame#name:member"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Frame.Name"},
+        {"implementation": "rust", "symbol": "polyspec_template::Frame::name"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Frame::$name"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Frame::$name"},
+        {"implementation": "python", "symbol": "template.context.Frame"}
+      ]
+    },
+    {
+      "id": "api-render-frame-field-lines",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Frame#lines:member"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Frame.Lines"},
+        {"implementation": "rust", "symbol": "polyspec_template::Frame::lines"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Frame::$lines"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Frame::$lines"},
+        {"implementation": "python", "symbol": "template.context.Frame"}
+      ]
+    },
+    {
+      "id": "api-render-frame-field-context",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Frame#context:member"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Frame.Context"},
+        {"implementation": "rust", "symbol": "polyspec_template::Frame::context"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Frame::$context"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Frame::$context"},
+        {"implementation": "python", "symbol": "template.context.Frame"}
+      ]
+    },
+    {
+      "id": "api-render-scope-field-locals",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Scope#locals:member"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Scope.Locals"},
+        {"implementation": "rust", "symbol": "polyspec_template::Scope::locals"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope::$locals"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope::$locals"},
+        {"implementation": "python", "symbol": "template.context.Scope"}
+      ]
+    },
+    {
+      "id": "api-render-scope-field-loops",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Scope#loops:member"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Scope.Loops"},
+        {"implementation": "rust", "symbol": "polyspec_template::Scope::loops"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope::$loops"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope::$loops"},
+        {"implementation": "python", "symbol": "template.context.Scope"}
+      ]
+    },
+    {
+      "id": "api-render-scope-lookup",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Scope#lookup:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Scope.Lookup"},
+        {"implementation": "rust", "symbol": "polyspec_template::Scope::lookup"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope::lookup"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope::lookup"},
+        {"implementation": "python", "symbol": "template.context.Scope.lookup"}
+      ]
+    },
+    {
+      "id": "api-render-scope-loop-meta",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Scope#loopMeta:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Scope.LoopMeta"},
+        {"implementation": "rust", "symbol": "polyspec_template::Scope::loop_meta"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope::loopMeta"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope::loopMeta"},
+        {"implementation": "python", "symbol": "template.context.Scope.loop_meta"}
+      ]
     }
   ]
 }

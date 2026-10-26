@@ -32,6 +32,14 @@ const parity = jsonDocument<{ units: Unit[] }>('API units', {
 const manifest = compilerManifestDocument.read('packages/compiler/interface.json');
 
 const owners: Record<string, Record<string, string>> = {
+  RenderFrame: {
+    ts: 'Frame', go: 'github.com/polyspec/template/packages/go/render.Frame', rust: 'polyspec_template::Frame',
+    php: 'Polyspec\\Template\\Render\\Frame', python: 'template.context.Frame',
+  },
+  RenderScope: {
+    ts: 'Scope', go: 'github.com/polyspec/template/packages/go/render.Scope', rust: 'polyspec_template::Scope',
+    php: 'Polyspec\\Template\\Render\\Scope', python: 'template.context.Scope',
+  },
   RuntimeEnvironment: {
     ts: 'RuntimeEnvironment', go: 'github.com/polyspec/template/packages/go/render.RuntimeEnvironment',
     rust: 'polyspec_template::RuntimeEnvironment',
@@ -72,6 +80,7 @@ const contracts = [
   { owner: 'RuntimeEnvironment', operations: manifest.runtimeContract.RuntimeEnvironment.operations
     .map(item => item.name).filter(name => !manifest.runtimeContract.RuntimeServices.operations.some(item => item.name === name)) },
   { owner: 'PreparedRender', operations: ['render'] },
+  { owner: 'RenderScope', operations: manifest.runtimeContract.RenderScope.operations },
 ];
 
 for (const contract of contracts) test(`every ${contract.owner} operation declares its actual native API in every implementation`, { timeout: 5000 }, () => {
@@ -93,6 +102,8 @@ for (const contract of contracts) test(`every ${contract.owner} operation declar
       const environmentIndex = manifest.runtimeContract.RuntimeEnvironment.operations.findIndex(item => item.name === operation);
       const mapped = contract.owner === 'RuntimeEnvironment'
         ? mapping.runtimeEnvironmentOperations?.[environmentIndex]
+        : contract.owner === 'RenderScope'
+          ? mapping.scopeOperations?.[manifest.runtimeContract.RenderScope.operations.indexOf(operation)]
         : (contract.owner === 'RuntimeBindings' ? mapping.runtimeBindingOperationNames : mapping.runtimeServiceOperationNames)?.[operation] ?? operation;
       assert.ok(mapped !== undefined, `${id}: native operation name`);
       const owner = owners[contract.owner]?.[binding.implementation === 'php-ext' ? 'php' : binding.implementation];
@@ -100,6 +111,38 @@ for (const contract of contracts) test(`every ${contract.owner} operation declar
       const expected = binding.implementation === 'ts' ? `@polyspec/template!${owner}#${mapped}:member(1)`
         : binding.implementation === 'go' ? `${owner}.${mapped.charAt(0).toUpperCase()}${mapped.slice(1)}`
           : binding.implementation === 'rust' || language === 'php' ? `${owner}::${mapped}` : `${owner}.${mapped}`;
+      assert.equal(binding.symbol, expected, `${id}: ${binding.implementation}`);
+    }
+  }
+});
+
+for (const contract of [
+  { owner: 'RenderFrame', fields: manifest.runtimeContract.RenderFrame.fields, mapping: 'frameFields' as const },
+  { owner: 'RenderScope', fields: manifest.runtimeContract.RenderScope.fields, mapping: 'scopeFields' as const },
+]) test(`every ${contract.owner} field declares its native publication point`, { timeout: 5000 }, () => {
+  const implementations = readParityConfig().implementations.map(item => item.name).sort();
+  for (const [index, field] of contract.fields.entries()) {
+    const family = contract.owner === 'RenderFrame' ? 'render-frame' : 'render-scope';
+    const id = `api-${family}-field-${field}`;
+    const unit = parity.units.find(item => item.id === id);
+    assert.ok(unit !== undefined, `${id}: missing API field`);
+    assert.equal(unit.kind, 'api');
+    assert.ok(unit.requirements.includes('RT-67'));
+    assert.ok(unit.symbols !== undefined);
+    assert.deepEqual(unit.symbols.map(item => item.implementation).sort(), implementations);
+    for (const binding of unit.symbols) {
+      const language = { ts: 'typescript', go: 'go', rust: 'rust', php: 'php', 'php-ext': 'php', python: 'python' }[binding.implementation];
+      assert.ok(language !== undefined);
+      const mapped = manifest.languages[language]?.[contract.mapping]?.[index];
+      assert.ok(mapped !== undefined, `${id}: native field name`);
+      const owner = owners[contract.owner]?.[binding.implementation === 'php-ext' ? 'php' : binding.implementation];
+      assert.ok(owner !== undefined);
+      // Python's extractor represents a slotted field through its class. The
+      // native compiler-interface unit checks every actual __slots__ name.
+      const expected = binding.implementation === 'ts' ? `@polyspec/template!${owner}#${mapped}:member`
+        : binding.implementation === 'go' ? `${owner}.${mapped}`
+          : binding.implementation === 'rust' ? `${owner}::${mapped}`
+            : language === 'php' ? `${owner}::$${mapped}` : owner;
       assert.equal(binding.symbol, expected, `${id}: ${binding.implementation}`);
     }
   }
