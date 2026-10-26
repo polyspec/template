@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a521d23196872115f3b0881e9176784f0566fe800a74d945cde746982cdd3096 -->
+<!-- source-sha256: 3380fde166d483d0fdcc0319b0ba616ba9c8a8effefcd977dc65dfe886d11249 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- Python의 AST와 generated 모드 벤치마크를 21표본과 persistent 표본당 1,000회 렌더로 측정했고, 10개 행의 출력이 모두 같다. 벤치마크 문서를 parity 선언 검사에 포함하며 make bench가 Python 패키지를 설치한다. 검증: make bench, make benchmark-check, make parity-declarations-check, Python adapter 테스트 8개와 benchmark/catalog 테스트 11개 통과(T22.6-17, T22.6).
 - CI는 commits-check가 읽는 전체 commit history를 checkout한다. Red: sibling-kit 회귀 검사는 얕은 checkout을 거부한다. Green: 선택한 workflow test가 통과한다(T26.7-96).
 - CI는 make가 공유 bootstrap을 읽기 전에 형제 kit source와 package를 준비하고, 전체 설치 job은 선언된 PHP를 선택한다. action 검증 기록은 기존 download-artifact v8.0.2 commit을 포함한다. Red: sibling-kit unit은 scripts job에서 실패했다. Green: workflow unit test가 통과한다(T26.7-96).
 - 문서는 kit의 dist 대신 make가 실행하는 kit source, @polyspec/kit의 scripts/kit/<tool>.mts를 이름 붙인다(T26.7-95).

@@ -17,3 +17,12 @@ test('make showcase writes no tracked benchmark file', () => {
   assert.ok(lines.some(line => line.includes('check-benchmark-results.mts var/showcase/mode-benchmark.json')));
   assert.equal(lines.some(line => line.includes('update-benchmark-docs.mts')), false);
 });
+
+test('make bench installs the Python package before measuring its adapter', () => {
+  const run = spawnSync('make', ['--no-print-directory', '-n', '-W', 'packages/python/pyproject.toml', 'bench'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: '' } });
+  assert.equal(run.status, 0, run.stderr);
+  const lines = run.stdout.split('\n');
+  const install = lines.findIndex(line => line.includes('pip install') && line.includes('packages/python/pylock.toml'));
+  const measure = lines.findIndex(line => line.includes('benchmark-modes.mts'));
+  assert.ok(install >= 0 && measure > install, 'bench must install the Python package before the measurement');
+});

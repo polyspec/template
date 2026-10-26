@@ -557,7 +557,7 @@ showcase: cargo-downloads-check typed-generator build-php python-package ## Buil
 	$(NODE) scripts/check-benchmark-results.mts var/showcase/mode-benchmark.json
 	$(NODE) examples/showcase/build-site.mts
 
-bench: cargo-downloads-check typed-generator build-php ## Measure production AST and generated artifacts
+bench: cargo-downloads-check typed-generator build-php python-package ## Measure production AST and generated artifacts
 	$(NODE) examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json
 	$(NODE) scripts/check-benchmark-results.mts
 	$(NODE) scripts/update-benchmark-docs.mts

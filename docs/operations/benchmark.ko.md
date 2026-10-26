@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-benchmark -->
-<!-- source-sha256: 42592979f84e9959b01b7bade67d24868771006f18c4fe17f327b4f5f5124ec9 -->
+<!-- source-sha256: 1e14ec8401bf8531c0ae9e621993df3a3edca4a71c1e7ff2063861fc96f930b3 -->
 # 성능 측정
 
 제품 산출물 벤치마크는 다음 명령으로 실행한다.
@@ -8,7 +8,9 @@
 make bench
 ```
 
-벤치마크는 TypeScript, Go, Rust, PHP의 `ast`와 `generated` 모드에 동일한 `scope-precedence` 요청을 전달한다. 모든 행은 같은 assign과 define 값을 받고 같은 SHA-256을 갖는 UTF-8 177바이트를 출력하며 최종 페이지 캐시는 사용하지 않는다. 최초 출력, 반복 출력, prepared 출력 중 하나라도 다르면 결과를 기록하기 전에 실패한다.
+벤치마크는 TypeScript, Go, Rust, PHP, Python의 `ast`와 `generated` 모드에 동일한 `scope-precedence` 요청을 전달하며, C로 작성한 별도 구현인 PHP 확장은 generated program 연산이 없어 측정 행이 없다. 모든 행은 같은 assign과 define 값을 받고 같은 SHA-256을 갖는 UTF-8 177바이트를 출력하며 최종 페이지 캐시는 사용하지 않는다. 최초 출력, 반복 출력, prepared 출력 중 하나라도 다르면 결과를 기록하기 전에 실패한다.
+
+PHP 확장의 출력 동등성은 conformance suite가 검사한다.
 
 각 행은 독립 cold process 21표본과 20회 준비 실행 뒤 1,000번 렌더하는 독립 persistent process 21표본으로 구성된다. 다음 항목의 중앙값과 P95를 기록한다.
 
@@ -26,16 +28,18 @@ make bench
 <!-- benchmark-results:start -->
 | 언어 | 모드 | Cold process | 전체 render | Prepared render | Persistent RSS |
 | --- | --- | ---: | ---: | ---: | ---: |
-| TypeScript | AST | 137.41 ms | 0.0080 ms | 0.0020 ms | 94.25 MiB |
-| TypeScript | generated | 131.65 ms | 0.0073 ms | 0.0010 ms | 92.97 MiB |
-| Go | AST | 7.11 ms | 0.0030 ms | 0.0016 ms | 11.34 MiB |
-| Go | generated | 8.60 ms | 0.0038 ms | 0.0008 ms | 10.70 MiB |
-| Rust | AST | 9.64 ms | 0.0051 ms | 0.0024 ms | 2.80 MiB |
-| Rust | generated | 5.81 ms | 0.0043 ms | 0.0017 ms | 2.53 MiB |
-| Php | AST | 70.12 ms | 0.0178 ms | 0.0106 ms | 28.08 MiB |
-| Php | generated | 81.61 ms | 0.0130 ms | 0.0045 ms | 28.22 MiB |
+| TypeScript | AST | 94.74 ms | 0.0120 ms | 0.0022 ms | 109.05 MiB |
+| TypeScript | generated | 99.12 ms | 0.0093 ms | 0.0019 ms | 108.31 MiB |
+| Go | AST | 12.07 ms | 0.0036 ms | 0.0017 ms | 13.31 MiB |
+| Go | generated | 8.50 ms | 0.0051 ms | 0.0006 ms | 12.75 MiB |
+| Rust | AST | 9.53 ms | 0.0047 ms | 0.0021 ms | 6.05 MiB |
+| Rust | generated | 5.35 ms | 0.0044 ms | 0.0016 ms | 2.95 MiB |
+| Php | AST | 98.51 ms | 0.0214 ms | 0.0131 ms | 29.02 MiB |
+| Php | generated | 91.54 ms | 0.0255 ms | 0.0067 ms | 26.91 MiB |
+| Python | AST | 137.66 ms | 0.0347 ms | 0.0146 ms | 34.27 MiB |
+| Python | generated | 112.87 ms | 0.0274 ms | 0.0099 ms | 34.11 MiB |
 <!-- benchmark-results:end -->
 
-Generated 모드는 네 구현 모두에서 prepared render를 개선했다. 작은 페이지에서는 요청 바인딩이 지배적인 비용이 될 수 있다. Go generated의 전체 render는 AST보다 느리지만 prepared renderer는 더 빠르고, Rust의 전체 render는 두 모드가 비슷하다. 모드를 선택할 때 두 측정값을 함께 봐야 하며 prepared render 하나만으로 전체 요청 비용을 설명할 수 없다.
+Generated 모드는 측정한 모든 모드 쌍에서 prepared render를 개선했다. 작은 페이지에서는 요청 바인딩이 지배적인 비용이 될 수 있다. Go generated의 전체 render는 AST보다 느리지만 prepared renderer는 더 빠르고, PHP도 같은 양상을 보인다. 모드를 선택할 때 두 측정값을 함께 봐야 하며 prepared render 하나만으로 전체 요청 비용을 설명할 수 없다.
 
 커밋된 JSON에는 예제 사이트가 사용하는 정확한 중앙값, P95, compiler와 artifact 크기 값이 들어 있다. 절대 수치는 머신과 도구 체인에 영향을 받으므로 서로 다른 실행 결과를 섞지 말고 한 실행 안에서 모드를 비교한다.
