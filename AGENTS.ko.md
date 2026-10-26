@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 1ebf6d4c3eb51ae0992550130b0ab463599aabdb35987538d7eed976512bb007 -->
+<!-- source-sha256: 674b83017639f008beb392d8d5db7b29f8ed7dd04aa62cadd4875bce1f4918f5 -->
 # 개발
 
 ## 문서
@@ -8,12 +8,12 @@
   Enforced by: none, which document is authoritative is a judgement.
 - Own: 테스트 결과와 배포를 따로 기록한다. 이전 코드의 결과를 변경된 코드의 근거로 사용하지 않는다.
   Enforced by: none, the separation of results is a judgement.
-- Own: `make docs-check`는 기본 검사에 포함된다. 링크, 번역 쌍, 동일한 코드 블록, 상태 필드를 검사한다(`config/documents.json`). 모든 쌍은 같은 `<!-- doc-id: <id> -->`를 한 번 가지고, 한글 파일은 `<!-- source-sha256: <영어 파일의 sha256> -->`를 가지며, 이 값은 번역을 검토한 뒤에 갱신한다. 내용의 정확성은 코드와 테스트를 읽어 확인한다.
+- Own: `make docs-check`는 기본 검사에 포함된다. 링크, 번역 쌍, 동일한 코드 블록, 상태 필드를 검사한다(`config/documents.json`). 모든 쌍은 같은 `<!-- doc-id: <id> -->`를 한 번 가지고, 한글 파일은 `<!-- source-sha256: 674b83017639f008beb392d8d5db7b29f8ed7dd04aa62cadd4875bce1f4918f5 -->`를 가지며, 이 값은 번역을 검토한 뒤에 갱신한다. 내용의 정확성은 코드와 테스트를 읽어 확인한다.
   Enforced by: `make docs-check`
 
 ## 구현
 
-- Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 kit의 `kit.mk`를 include하는, 곁의 kit checkout의 파일 `../kit/scripts/kit/kit-bootstrap.mk`를 include하고, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `PRINCIPLES.md`, 그 짝, `.editorconfig`, `.claude/settings.json`은 `make kit-sync`가 쓰는 일반 파일 복사본이다. `make kit-check`는 복사본을 package와, `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`dependency-policy`, `dependency-review`, `owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
+- Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치한 package의 `node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk`를 include한다. bootstrap은 그 package의 `kit.mk`를 include하고 native 개발 link에서는 source 도구를, release 설치에서는 컴파일한 도구를 선택하며, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `PRINCIPLES.md`, 그 짝, `.editorconfig`, `.claude/settings.json`은 `make kit-sync`가 쓰는 일반 파일 복사본이다. `make kit-check`는 복사본을 package와, `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`dependency-policy`, `dependency-review`, `owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
   Enforced by: `make kit-check`
 - Own: polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며, link는 `node_modules/`에 있는 생성 경로라 commit하지 않는다. `make link-check`는 개발 보조로 그 link를 나열한다.
   Enforced by: `make staged-generated-hook`
@@ -30,7 +30,7 @@
 
 검사는 같은 tree에 대해 언제, 어느 machine에서나 같은 결과를 낸다. 아래 규칙은 각각 한 종류의 결함을 다룬다. 한 종류의 결함은 그 종류가 나타나는 모든 곳에서 고치고, 규칙에는 test를 둔다.
 
-- Refines S4: Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `mise.toml`(mise가 `var/tools`에 설치하고 `$(NODE)`로 실행, kit K171), npm은 `package.json`의 `packageManager`, Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `packages/go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 kit의 `make build-php-ext`가 실패한다). `make install-tools`(`node_modules/@polyspec/kit/scripts/kit/install-tools.mts`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mts`가 모든 변경에서 version을 검사한다.
+- Refines S4: Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `mise.toml`(mise가 `var/tools`에 설치하고 `$(NODE)`로 실행, kit K171), npm은 `package.json`의 `packageManager`, Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `packages/go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 kit의 `make build-php-ext`가 실패한다). `make install-tools`(`$(KIT)/install-tools.$(KIT_EXT)`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mts`가 모든 변경에서 version을 검사한다.
   Enforced by: `make toolchain-check`
 - Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. registry에 묻는 review는 따로 있는 명령이고 그 결과를 commit한다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로, `make release-consumer`가 `tests/fixtures/release-consumer`의 commit된 lock으로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`, `dependency-review`, `release-consumer-lock`의 download와 `make release-consumer`의 설치를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). cargo를 실행하는 모든 target은 `cargo-downloads-check`에 의존하며, 이것은 없는 crate에 대해 `make install`을 밝히므로 어떤 검사도 offline mode를 벗어나라는 cargo의 안내를 보이지 않는다.
   Enforced by: `make dependency-policy-check`

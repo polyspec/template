@@ -31,7 +31,7 @@ test('make release-test-matrix runs the targets of make check through the same g
   const guard = lines[0];
   assert.ok(guard, 'make check prints its command');
   assert.ok(guard.startsWith(`${path.join(ROOT, 'var/tools/bin/node')} `), guard);
-  assert.ok(guard.endsWith(`/full-run.mts run ${CHECK_TARGETS.join(' ')}`), guard);
+  assert.ok(['mts', 'mjs'].some(extension => guard.endsWith(`/full-run.${extension} run ${CHECK_TARGETS.join(' ')}`)), guard);
   assert.deepEqual(dryRun('release-test-matrix'), [guard]);
 });
 

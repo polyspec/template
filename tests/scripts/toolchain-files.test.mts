@@ -78,7 +78,8 @@ const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof valu
 const CI_PASSED = 'ci-passed';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
 // make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs both first (kit K171).
-const CI_PASSED_INSTALL = ['git clone --depth 1 https://github.com/polyspec/kit.git ../kit', 'make -k -C ../kit install-tools TOOLS=npm', 'make -k -C ../kit install-packages', 'make install-tools TOOLS=npm', 'make install-packages'];
+const LOCKED_KIT_INSTALL = "npm_config_cache=\"$PWD/var/bootstrap/npm-cache\" npm exec --yes --package=\"$(node -p 'require(\"./package.json\").packageManager.split(\"+\")[0]')\" -- npm ci --ignore-scripts --allow-remote=root";
+const CI_PASSED_INSTALL = [LOCKED_KIT_INSTALL, 'make install-tools TOOLS=npm', 'make install-packages'];
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text: string) {
@@ -124,6 +125,12 @@ function recipe(command: string, env: NodeJS.ProcessEnv = {}, make = 'make') {
     rmSync(directory, { recursive: true, force: true });
   }
 }
+
+test('make reads the installed kit bootstrap without a sibling checkout', () => {
+  const files = recipe('printf "%s\\n" "$(MAKEFILE_LIST)"').split(/\s+/);
+  assert.ok(files.includes('node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk'));
+  assert.ok(!files.some(file => file.startsWith('../kit/')), files.join('\n'));
+});
 
 test('Node.js is the node of mise.toml, which engines.node of package.json names as its floor', () => {
   const version = textOf(MISE_TOOLS.node, 'the node of mise.toml');
@@ -255,9 +262,11 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
   // python-package, which prints its own recipe after its command line when the environment is out of date.
   const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
-  // KIT is the scripts/kit of the kit checkout beside the repository, whose sources make runs (kit K613): the bootstrap line
-  // names it, and every later command of kit runs from the same one.
-  const kit = lines.map(line => /^\S.* node (\S+)\/bootstrap\/bootstrap\.mts$/.exec(line)?.[1]).find(Boolean);
+  // The installed bootstrap selects source or packed tools. All later commands use that same directory and extension.
+  const selected = lines.map(line => /^\S.* node (\S+)\/bootstrap\/bootstrap\.(mts|mjs)$/.exec(line)).find(match => match !== null);
+  assert.ok(selected !== undefined);
+  const kit = selected[1];
+  const extension = selected[2];
   assert.ok(kit !== undefined, `make install runs no bootstrap of kit:\n${lines.join('\n')}`);
   const at = (pattern: RegExp) => lines.findIndex(line => pattern.test(line));
   // The bootstrap of kit runs first (T24.1): npm with the node of PATH, then the packages of package-lock.json, then the tools.
@@ -265,18 +274,18 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // which installs offline from what the downloads fetched, and the link of kit comes last, after every install (K360-2).
   const bootstrap = [
     at(/\bmake --no-print-directory install-tools TOOLS=npm$/),
-    lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.mts`),
+    lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.${extension}`),
     at(/\bmake --no-print-directory install-packages$/),
     lines.indexOf(`${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`),
     at(/\bmake --no-print-directory install-tools$/),
-    lines.indexOf(`${online} ${node} ${kit}/install-tools.mts`),
-    lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.mts --fetch`),
+    lines.indexOf(`${online} ${node} ${kit}/install-tools.${extension}`),
+    lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.${extension} --fetch`),
   ];
   assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
   const fetched = bootstrap.at(-1) ?? -1;
   const last = at(/\bmake python-package$/);
   assert.ok(last > fetched, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
-  assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.mts link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
+  assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.${extension} link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
   const downloads = lines.slice(fetched + 1, last);
   assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `)), [], 'commands of make install that keep the offline settings of the recipes');
   for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
@@ -299,7 +308,7 @@ test('every recipe runs cargo, go, npm and Composer offline, so no check reaches
   assert.equal(go, 'off', `go of the recipes: expected GOPROXY off, actual ${go}`);
 });
 
-test('every installing job prepares the sibling kit before the first make', () => {
+test('every installing job prepares the locked kit before the first make', () => {
   for (const file of ['.github/workflows/ci.yml', '.github/workflows/dependency-review.yml']) {
     for (const job of jobs(file)) {
       const commands = runsOf(job);
@@ -307,11 +316,11 @@ test('every installing job prepares the sibling kit before the first make', () =
       if (firstMake < 0) continue;
       assert.ok(usesOf(job, 'actions/checkout@').some(step => step.with['fetch-depth'] === 0),
         `${file} job ${job.name} must fetch the commit history that commits-check reads`);
-      const checkout = commands.indexOf('git clone --depth 1 https://github.com/polyspec/kit.git ../kit');
-      const npm = commands.indexOf('make -k -C ../kit install-tools TOOLS=npm');
-      const packages = commands.indexOf('make -k -C ../kit install-packages');
-      assert.ok(checkout >= 0 && checkout < npm && npm < packages && packages < firstMake,
-        `${file} job ${job.name} must clone and install the sibling kit before make reads its sources`);
+      const installed = commands.indexOf(LOCKED_KIT_INSTALL);
+      assert.ok(installed >= 0 && installed < firstMake,
+        `${file} job ${job.name} must install locked packages before make reads the installed bootstrap`);
+      assert.ok(!commands.some(command => command.includes('../kit')),
+        `${file} job ${job.name} depends on an unpinned sibling checkout`);
     }
   }
 });
@@ -533,8 +542,8 @@ test('make dependency-review installs the Rust toolchain before cargo-audit and 
   const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review', 'TARGETS='], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   // install-tools of kit installs the toolchain of rust-toolchain.toml with rustup before cargo-audit runs.
   assert.ok(recipe[0] !== undefined && recipe[1] !== undefined, 'make -n dependency-review prints its two commands');
-  assert.match(recipe[0], /install-tools\.mts $/);
-  assert.match(recipe[1], /dependency-review\.mts +$/);
+  assert.match(recipe[0], /install-tools\.(?:mts|mjs) $/);
+  assert.match(recipe[1], /dependency-review\.(?:mts|mjs) +$/);
   assert.ok(!jobs('.github/workflows/dependency-review.yml').some(job => usesOf(job, 'actions/setup-python@').length > 0), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
