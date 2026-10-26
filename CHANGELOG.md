@@ -7,6 +7,7 @@
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 ## 0.0.12
+- Documentation links use public Korean locale routes instead of .ko.md source filenames in editor, runtime, build and plan pages. Red: the route unit rejects the source links at 49fcdecd; green: nine markup/route units, docs-check and selected type-aware lint pass (T27.1).
 - The document-markup unit loads VitePress as unknown and verifies its renderer API at runtime, without unsafe type assertions or unbound method calls. Verification: eight units, infrastructure typecheck and the selected type-aware lint pass (T27.1).
 - The TypeScript export traversal declares its oxc-parser ecosystem dependency in the tool classification. Red: rebuild-check fails at 82b09213; green: it passes (T27.1).
 - Make reads the Python environment with a template-owned bootstrap Node selection, independent of the shared BOOTSTRAP_NODE variable. Red: the targeted bootstrap unit fails with permission denied at 24267157; green: Python toolchain and Makefile units pass (T27.1).

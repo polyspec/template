@@ -30,3 +30,11 @@ for (const file of files) {
     assert.deepEqual(failures, [], `${file}: inline source must be code, and HTML tags must close`);
   });
 }
+
+test('documentation links target locale routes instead of Korean source filenames', { timeout: 5000 }, () => {
+  const documents = execFileSync('git', ['ls-files', '-z', '--', 'docs/*.md', 'docs/**/*.md'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
+  for (const file of documents) {
+    const source = readFileSync(new URL(file, new URL('../../', import.meta.url)), 'utf8');
+    assert.doesNotMatch(source, /\]\([^)]*\.ko(?:\.md)?(?:[)#])/, `${file}: link the public Korean locale route`);
+  }
+});

@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 81c32945b543329336df45ba3124e8f0e8ac2c5ec0f4016af91e0a52f2288ef5 -->
+<!-- source-sha256: 23a91fc9a5c7574a4c337930a47f9b2dbeecb422b603e7e4ce18e3d4919b5ea9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- 편집기·런타임·빌드·계획 문서 링크가 .ko.md 소스 파일명 대신 공개 한국어 경로를 사용한다. Red: 49fcdecd에서 경로 단위가 소스 링크를 거부했다. Green: 마크업·경로 단위 9개, docs-check와 해당 파일의 타입 기반 린트 통과(T27.1).
 - 문서 마크업 단위가 VitePress를 unknown으로 읽고 렌더러 API를 런타임에서 검증해 안전하지 않은 타입 단언과 바인딩 없는 메서드 호출을 제거했다. 검증: 단위 8개, 기반 도구 타입 검사와 해당 파일의 타입 기반 린트 통과(T27.1).
 - TypeScript export 추적 도구가 도구 분류에 oxc-parser 생태계 의존성을 선언한다. Red: 82b09213에서 rebuild-check가 실패했고 green: 수정 후 통과한다(T27.1).
 - Make가 공유 BOOTSTRAP_NODE 변수에 의존하지 않고 템플릿 자체의 부트스트랩 Node 선택으로 Python 환경을 읽는다. Red: 24267157에서 해당 부트스트랩 단위가 permission denied로 실패했다. Green: Python 도구 체인과 Makefile 단위 검증이 통과한다(T27.1).

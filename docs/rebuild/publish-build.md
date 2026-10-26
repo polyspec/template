@@ -1,7 +1,7 @@
 <!-- doc-id: rebuild-publish-build -->
 # Rebuild record: publish-build
 
-[한국어](publish-build.ko.md)
+[한국어](/ko/rebuild/publish-build)
 
 Verdict: **none fits.** The repository keeps its own publication of a build output. Measured on 2026-10-20.
 

@@ -8,7 +8,7 @@
 
 ## 계층
 
-편집기 규칙은 [편집기 도구 문서](../operations/editor-tools.ko.md)에 정의되며, 아래의 tokens와 tags 규칙만 여기에 남는다.
+편집기 규칙은 [편집기 도구 문서](/ko/operations/editor-tools)에 정의되며, 아래의 tokens와 tags 규칙만 여기에 남는다.
 
 - **EDT-8** `tokens`는 텍스트의 템플릿 부분을 분류하며, 위치 순서로 정렬되고 겹치지 않는다. 태그 밖의 텍스트에는 토큰이 없다. 어댑터는 그 텍스트를 HTML로 강조한다.
 

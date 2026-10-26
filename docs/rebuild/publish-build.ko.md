@@ -1,5 +1,5 @@
 <!-- doc-id: rebuild-publish-build -->
-<!-- source-sha256: ba607e8317fe2fa8e545ef61d68c3ee92a191c445d4b4bcb08a632c6e3e8dc94 -->
+<!-- source-sha256: 26b8c96dc86106caec4ea2815ef920cd56f632fc96c5a2d7d1c08953760ca526 -->
 # 재구현 기록: publish-build
 
 [English](publish-build.md)
