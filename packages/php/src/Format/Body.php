@@ -6,6 +6,7 @@ namespace Polyspec\Template\Format;
 
 /**
  * Tag body formatting: writes the body of each tag kind in the formatting style (GRM-2).
+ * @internal
  */
 final class Body
 {

@@ -36,6 +36,16 @@ test(`${entry}: scanner and expression implementations are outside the public SD
   }
 });
 
+test(`${entry}: formatter and renderer implementation helpers are internal`, { timeout: 30_000 }, () => {
+  const found = extract(entry);
+  const internal = ['Format\\Body', 'Format\\Expression', 'Format\\Indent', 'Format\\Invariant', 'Render\\Evaluator', 'Render\\Renderer'];
+  assert.deepEqual(found.filter(symbol => internal.some(name => {
+    const qualified = `Polyspec\\Template\\${name}`;
+    return symbol === qualified || symbol.startsWith(`${qualified}::`);
+  })), []);
+  assert.ok(found.includes('Polyspec\\Template\\Format\\Formatter::format'));
+});
+
 test(`${entry}: host registration and compiler-runtime types remain public`, { timeout: 30_000 }, () => {
   const found = new Set(extract(entry));
   for (const name of [

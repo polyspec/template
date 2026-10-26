@@ -9,6 +9,7 @@ namespace Polyspec\Template\Format;
  *
  * Offsets are byte offsets into the text. A step is a change of depth at an offset; `dedent` marks a tag that takes one
  * level from its own line.
+ * @internal
  */
 final class Indent
 {

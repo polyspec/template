@@ -7,6 +7,7 @@ namespace Polyspec\Template\Format;
 /**
  * Safety invariant: two templates are equivalent when their ASTs are equal after every `span` field is removed (AST-2,
  * AST-7), and, for indented lines, after the spaces and tabs at the start of every line of text are removed.
+ * @internal
  */
 final class Invariant
 {

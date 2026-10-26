@@ -342,7 +342,10 @@ final class RuntimeBindings
     public function error(Frame $frame, array $span, string $code, string $message): \Polyspec\Template\TemplateError {}
 }
 
-/** Expression evaluation (docs/spec/expressions.md). */
+/**
+ * Expression evaluation (docs/spec/expressions.md).
+ * @internal
+ */
 final class Evaluator
 {
     public readonly RuntimeBindings $runtime;
@@ -353,7 +356,10 @@ final class Evaluator
     public function evaluate(array $expr, Frame $frame, ?Scope $scope = null): mixed {}
 }
 
-/** Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32). */
+/**
+ * Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32).
+ * @internal
+ */
 final class Renderer
 {
     public function __construct(Context $context, \Polyspec\Template\AstProgram $program) {}
@@ -1409,6 +1415,7 @@ final class FormatResult
  * Expression spacing: joins the expression tokens of one tag with the separators of the formatting style.
  *
  * A token is its text and the EDT-8 class that the parser gives it.
+ * @internal
  */
 final class Expression
 {
@@ -1427,6 +1434,7 @@ final class Expression
 /**
  * Safety invariant: two templates are equivalent when their ASTs are equal after every `span` field is removed (AST-2,
  * AST-7), and, for indented lines, after the spaces and tabs at the start of every line of text are removed.
+ * @internal
  */
 final class Invariant
 {
@@ -1451,6 +1459,7 @@ final class Invariant
  * Indentation: the spaces and tabs at the start of each line, set by the nesting of HTML elements and template blocks.
  *
  * Offsets are byte offsets into the text.
+ * @internal
  */
 final class Indent
 {
@@ -1513,6 +1522,7 @@ final class PackageAnalyzer implements Analyzer
 
 /**
  * Tag body formatting: writes the body of each tag kind in the formatting style (GRM-2).
+ * @internal
  */
 final class Body
 {

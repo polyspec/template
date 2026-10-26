@@ -14,6 +14,7 @@ use Polyspec\Template\Loader\Path;
  * @phpstan-import-type Span from Frame
  *
  * @phpstan-type Node array<string, mixed> an AST node (docs/spec/ast.md)
+ * @internal
  */
 final class Renderer
 {

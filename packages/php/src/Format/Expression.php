@@ -8,6 +8,7 @@ namespace Polyspec\Template\Format;
  * Expression spacing: joins the expression tokens of one tag with the separators of the formatting style.
  *
  * A token is its text and the EDT-8 class that the parser gives it.
+ * @internal
  */
 final class Expression
 {

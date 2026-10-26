@@ -14,6 +14,7 @@ use Polyspec\Template\Value\MapValue;
  * @phpstan-import-type Span from Frame
  *
  * @phpstan-type Expr array<string, mixed> an expression node (docs/spec/ast.md)
+ * @internal
  */
 final class Evaluator
 {
