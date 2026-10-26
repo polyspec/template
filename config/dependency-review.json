@@ -1,16 +1,16 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-26T09:53:29.813Z",
+  "reviewed": "2026-10-26T11:38:06.189Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "dab9bb5a3e925f352f22bb40e9bc474b1f256cd34b81ce4db1db171a189ab47f",
+      "sha256": "c05ecd21cef66ef868151103970282b05e772a64bc0543ceda99e13a63788ce0",
       "advisories": []
     },
     {
       "lock": "composer.lock",
-      "sha256": "a6e0d30a1c4fd53fa2371d9436a7ee80a0316c2c08889cb286e87a11438078ef",
+      "sha256": "c5f129113263d15e8564ccc22b1086bb086e0d3068c6c0c942ab409b6a35cbad",
       "advisories": []
     },
     {
@@ -20,7 +20,7 @@
     },
     {
       "lock": "packages/cli/php/composer.lock",
-      "sha256": "b4367633da90a0c3a3eade29090a513ca4ba78a3e40a08eed0dbb571783a361e",
+      "sha256": "1b7b858899d4f06696ee4207186528b7be3cd9e6f1eaf38cd02987e9032b1efa",
       "advisories": []
     },
     {
@@ -93,6 +93,13 @@
       "package": "@vscode/test-electron",
       "version": "3.1.0",
       "latest": "3.1.0"
+    },
+    {
+      "ecosystem": "npm",
+      "manifest": "package.json",
+      "package": "@vue/compiler-dom",
+      "version": "3.5.44",
+      "latest": "3.5.44"
     },
     {
       "ecosystem": "npm",
@@ -287,8 +294,8 @@
       "ecosystem": "composer",
       "manifest": "composer.json",
       "package": "opis/json-schema",
-      "version": "2.6.0-p1",
-      "latest": "2.6.0-p1"
+      "version": "v2.6.0-p1",
+      "latest": "v2.6.0-p1"
     },
     {
       "ecosystem": "composer",
@@ -301,7 +308,7 @@
       "ecosystem": "composer",
       "manifest": "packages/php/composer.json",
       "package": "opis/json-schema",
-      "version": "2.6.0-p1",
+      "version": "v2.6.0-p1",
       "latest": "2.6.0"
     },
     {

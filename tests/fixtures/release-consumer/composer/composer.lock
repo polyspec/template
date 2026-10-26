@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a059d9e4797df1df3a95ffa12709a78f",
+    "content-hash": "138eaaa03f2caf63cd195bf0d6653d3b",
     "packages": [
         {
             "name": "opis/json-schema",
@@ -207,17 +207,12 @@
             "require": {
                 "ext-mbstring": "*",
                 "opis/json-schema": "^2.6",
-                "php": ">=8.5",
-                "symfony/console": "^8.1"
+                "php": ">=8.4"
             },
             "require-dev": {
                 "laravel/pint": "^1.0",
                 "phpunit/phpunit": "^13.4"
             },
-            "bin": [
-                "bin/template.php",
-                "bin/template-ext.php"
-            ],
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -233,6 +228,42 @@
                 "MIT"
             ],
             "description": "Template language implementation: lexer, parser, renderer, functions and CLI"
+        },
+        {
+            "name": "polyspec/template-cli",
+            "version": "0.0.11",
+            "dist": {
+                "type": "zip",
+                "url": "artifacts/polyspec-template-cli-php-0.0.11.zip",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=8.4",
+                "polyspec/template": "0.0.11",
+                "symfony/console": "^8.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^13.4"
+            },
+            "bin": [
+                "bin/template.php"
+            ],
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "Polyspec\\Template\\Cli\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Polyspec\\Template\\Cli\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Command line of the template language on the PHP library: an application, not a library (K433)"
         },
         {
             "name": "psr/container",
@@ -1058,11 +1089,11 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.5"
+        "php": ">=8.4"
     },
     "platform-dev": {},
     "platform-overrides": {
-        "php": "8.5"
+        "php": "8.4.1"
     },
     "plugin-api-version": "2.9.0"
 }

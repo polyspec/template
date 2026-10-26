@@ -277,7 +277,7 @@
     },
     {
       "paths": [
-        ".githooks/pre-push"
+        ".githooks/**"
       ],
       "targets": [
         "hooks-check",
@@ -1043,6 +1043,25 @@
       "targets": [
         "duplication-check"
       ]
+    },
+    {
+      "paths": [
+        "scripts/typescript-exports.mts"
+      ],
+      "targets": [
+        "compiler-interface-check"
+      ],
+      "tests": [
+        "tests/scripts/typescript-exports.test.mts"
+      ]
+    },
+    {
+      "paths": [
+        "tests/scripts/docs-markup.test.mts"
+      ],
+      "targets": [
+        "docs-markup-check"
+      ]
     }
   ],
   "inputs": [
@@ -1106,7 +1125,8 @@
     {
       "check": "make compiler-interface-languages-check",
       "paths": [
-        "scripts/check-compiler-interface.mts"
+        "scripts/check-compiler-interface.mts",
+        "scripts/typescript-exports.mts"
       ]
     },
     {
@@ -1682,6 +1702,13 @@
         "docs/spec/*.md",
         "docs/operations/*.md",
         "packages/*/README*.md"
+      ]
+    },
+    {
+      "check": "make docs-markup-check",
+      "paths": [
+        "tests/scripts/docs-markup.test.mts",
+        "docs/plans/**/*.md"
       ]
     }
   ]

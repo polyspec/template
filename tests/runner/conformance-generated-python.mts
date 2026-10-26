@@ -59,7 +59,7 @@ except Exception as error:  # noqa: BLE001  a failure of the generated program i
     print(json.dumps({'failure': f'{type(error).__name__}: {error}'}))
 `);
 
-// The python of var/python/venv, checked once before the first case.
+// The python of packages/python/.venv, checked once before the first case.
 const interpreter = pythonPackageCommand();
 const environment = { ...process.env, ...pythonEnvironment() };
 

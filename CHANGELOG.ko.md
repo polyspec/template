@@ -1,11 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 12a032f93c6828c60e186f3a9382c591c480c21a84ecbe52a9374eabb4da668c -->
+<!-- source-sha256: 472cd714a65cc2ea9530941e51517027a4944c8f9002e0aab4b9f28a9814d85a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
+- 릴리스 준비에 PHP CLI 배포 파일과 이식 가능한 consumer를 포함하고, 패키지 환경에서 Python 단위를 발견하며 모든 Go 패키지에 테스트를 둔다. TypeScript star export를 추적하고 계획 문서의 마크업을 검증한다. Rust 생성 호출 fixture는 Arc를 사용한다. 검증: 선택한 도구 단위 테스트 30개와 문서 빌드 통과. 전체 CI는 대기 중이다(T27.1).
 - 릴리스 의존성 검토가 레지스트리 의존성 49개와 lock 8개를 다루며 수용하지 않은 보안 권고나 설명 없는 구버전이 없다. language-server 의존성, parser 도구, PHPUnit, setuptools, ruff를 갱신하고 VitePress의 Vite를 6.4.5, VSIX 도구의 MSAL 의존성을 7.1.0으로 패치했다. 오래된 보안 권고와 esbuild 예외를 제거했다. 검증: dependency-policy-check, python-lock-check, npm audit, VSIX packaging, 선택한 editor/runtime 단위 검증 통과(T26.7-66).
 - 잘못된 구분자 옵션은 일반 Error를 상속한 DelimiterOptionError를 일으켜 ERR-13이 인자 오류를 JavaScript RangeError로 분류하지 않는다. Red: parser 구분자 단위 검증이 RangeError에서 실패했으며 green: 선택한 parser, AST decode, editor 단위 테스트 437개가 통과한다(T27.1).
 - 문자열 키의 host Map이 일반 객체와 같은 바이트를 렌더한다. bound-data 회귀 검증을 포함한 단위 테스트 23개가 통과한다(T26.7-18).

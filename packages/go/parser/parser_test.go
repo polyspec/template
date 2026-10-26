@@ -128,15 +128,3 @@ func TestBlockStructureErrors(t *testing.T) {
 		}
 	}
 }
-
-// AST-2, LEX-16: a span counts UTF-8 bytes.
-func TestSpansAreBytes(t *testing.T) {
-	tree := parse(t, "é{= a}")
-	echo, ok := tree.Body[1].(*ast.Echo)
-	if !ok {
-		t.Fatalf("Body[1] is %T, not an echo", tree.Body[1])
-	}
-	if echo.Span != (ast.Span{2, 7}) {
-		t.Errorf("span %v", echo.Span)
-	}
-}

@@ -3,6 +3,7 @@
 // its wheel, and the Rust crate, which no registry holds, by git tag with the install that `make release-proof` runs from the
 // tag. The test reads the configuration and the manifests and installs nothing.
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
@@ -19,7 +20,7 @@ const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 interface ReleaseConfig {
   packages: { kind: string; directory: string; name: string }[];
   manifests: Record<string, string>;
-  consumers: { wheel: { smoke: Record<string, string[]> } };
+  consumers: { wheel: { smoke: Record<string, string[]> }; composer: { smoke: Record<string, string[]> } };
   proof: { gitTag: Record<string, { kind: string; name: string }> };
   goModules: Record<string, string>;
 }
@@ -40,13 +41,18 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
     consumers: {
       type: 'object',
       properties: {
+        composer: {
+          type: 'object',
+          properties: { smoke: { type: 'object', required: [], additionalProperties: { type: 'array', items: { type: 'string' } } } },
+          required: ['smoke'],
+        },
         wheel: {
           type: 'object',
           properties: { smoke: { type: 'object', required: [], additionalProperties: { type: 'array', items: { type: 'string' } } } },
           required: ['smoke'],
         },
       },
-      required: ['wheel'],
+      required: ['wheel', 'composer'],
     },
     proof: {
       type: 'object',
@@ -110,9 +116,30 @@ test('the Python package is released as a wheel named by its pyproject.toml, wit
   assert.ok(read(file).includes(`requires = ["${BACKEND.requirement}"]`), `${file}: build-system.requires is not the pythonBackend ${BACKEND.requirement} of config/toolchain.json`);
 });
 
+test('the PHP command line is released separately from the runtime library', { timeout: 1000 }, () => {
+  const file = 'packages/cli/php/composer.json';
+  const manifest = parsedJsonObject(read(file), file);
+  assert.deepEqual(CONFIG.packages.find(item => item.directory === 'packages/cli/php'), {
+    kind: 'composer', directory: 'packages/cli/php', name: manifest.name,
+  });
+  assert.equal(CONFIG.manifests[file], 'archive');
+  assert.equal(manifest.repositories, undefined, 'the CLI installs from released dependencies');
+});
+
+test('the Composer smoke commands contain valid PHP source', { timeout: 5000 }, () => {
+  for (const [name, command] of Object.entries(CONFIG.consumers.composer.smoke)) {
+    assert.equal(command[0], 'php', name);
+    assert.equal(command[1], '-r', name);
+    const code = command[2];
+    assert.ok(code !== undefined, `${name}: PHP source is missing`);
+    const result = spawnSync(path.join(ROOT, 'var/tools/bin/php'), ['-l'], { input: `<?php\n${code}`, encoding: 'utf8' });
+    assert.equal(result.status, 0, `${name}: ${result.stdout}${result.stderr}`);
+  }
+});
+
 test('the Rust crate is released by git tag with the name of its Cargo.toml', () => {
   const file = 'packages/rust/Cargo.toml';
-  assert.equal(CONFIG.manifests[file], 'git-tag', `${file}: cargo package would rewrite its git dependencies, so no archive holds the crate`);
+  assert.equal(CONFIG.manifests[file], 'git-tag', `${file}: the supported release installation uses its git tag`);
   const proof = CONFIG.proof.gitTag[file];
   assert.ok(proof, `${file}: config/release.json has no proof.gitTag entry`);
   assert.equal(proof.kind, 'rust');

@@ -8,7 +8,7 @@ import { posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readParityConfig } from './parity-config.mts';
 
-/** The command of the implementation python of config/parity.json, relative to the root, such as `var/python/venv/bin/python`. */
+/** The command of the implementation python of config/parity.json, relative to the root, such as `packages/python/.venv/bin/python`. */
 export function pythonPackageCommandPath(): string {
   const command = readParityConfig().implementations.find(implementation => implementation.name === 'python')?.command;
   if (command === undefined || posix.basename(posix.dirname(command)) !== 'bin' || posix.basename(command) !== 'python') {
@@ -17,7 +17,7 @@ export function pythonPackageCommandPath(): string {
   return command;
 }
 
-/** The environment of the Python package relative to the root, such as `var/python/venv`. */
+/** The environment of the Python package relative to the root, such as `packages/python/.venv`. */
 export function pythonPackageEnvironment(): string {
   return posix.dirname(posix.dirname(pythonPackageCommandPath()));
 }

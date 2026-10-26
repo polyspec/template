@@ -1,7 +1,7 @@
 // Tests scripts/python-toolchain.mts (T22.4-20, T22.5-5, T24.12, T23.2): the interpreter is the shim
 // var/tools/mise/shims/python3 of the python of mise.toml, which must report the minor release of that python. A missing
 // interpreter fails with the path and the fix; the interpreter of PATH is never tried. A program that imports the package
-// runs the python of var/python/venv, with no changed import path (PRINCIPLES S3).
+// runs the python of packages/python/.venv, with no changed import path (PRINCIPLES S3).
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -29,9 +29,9 @@ test('the environment of a Python program writes no bytecode and sets no import 
   assert.deepEqual(pythonEnvironment(), { PYTHONDONTWRITEBYTECODE: '1' });
 });
 
-test('the python that imports the package is the python of var/python/venv, which make python-package makes', () => {
-  assert.equal(pythonPackageInterpreter, join(pythonInterpreter, '../../../../python/venv/bin/python'));
-  assert.equal(pythonPackageEnvironment(), 'var/python/venv');
-  assert.ok(!readFileSync(new URL('../../scripts/python-toolchain.mts', import.meta.url), 'utf8').includes("'var/python/venv"), 'python-toolchain.mjs restates the environment that config/parity.json declares');
+test('the python that imports the package is the python of packages/python/.venv, which make python-package makes', () => {
+  assert.equal(pythonPackageInterpreter, join(pythonInterpreter, '../../../../../packages/python/.venv/bin/python'));
+  assert.equal(pythonPackageEnvironment(), 'packages/python/.venv');
+  assert.ok(!readFileSync(new URL('../../scripts/python-toolchain.mts', import.meta.url), 'utf8').includes("'packages/python/.venv"), 'python-toolchain.mjs restates the environment that config/parity.json declares');
   assert.equal(pythonPackageCommand(), pythonPackageInterpreter, 'run make python-package');
 });

@@ -23,13 +23,9 @@
             "Polyspec\\Template\\Cli\\Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../../php"
-        }
+    "bin": [
+        "bin/template.php"
     ],
-    "bin": ["bin/template.php"],
     "config": {
         "platform": {
             "php": "8.4.1"

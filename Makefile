@@ -192,6 +192,7 @@ install: template-install ## Install the tools and packages in the bootstrap ord
 template-install: install-kit cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Go modules of go.work, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
 	$(ONLINE) $(GO) mod download
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
+	$(ONLINE) $(NODE) scripts/composer-install.mts packages/cli/php
 	$(ONLINE) $(CURDIR)/var/tools/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r $(PYTHON_PACKAGE)/build-requirements.txt
 	$(MAKE) python-package
 
@@ -235,7 +236,11 @@ template-build-rust: cargo-downloads-check
 
 build-php: template-build-php ## Install the Composer packages of the development root composer.json into vendor/
 
-template-build-php:
+.PHONY: template-build-php-cli
+template-build-php-cli:
+	$(NODE) scripts/composer-install.mts packages/cli/php
+
+template-build-php: template-build-php-cli
 	$(NODE) scripts/composer-install.mts .
 
 test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests ## TypeScript unit tests and type check
@@ -514,7 +519,11 @@ schema-fixtures-check:
 schema-mutations-check:
 	$(NODE) scripts/check-schema-mutations.mts
 
-docs-check: compiler-interface-generate schema-check doc-coverage benchmark-docs-check ## Document checks
+docs-check: compiler-interface-generate schema-check doc-coverage benchmark-docs-check docs-markup-check ## Document checks
+
+.PHONY: docs-markup-check
+docs-markup-check:
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/docs-markup.test.mts
 
 .PHONY: benchmark-docs-check
 benchmark-docs-check:
@@ -630,7 +639,7 @@ compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules
 .PHONY: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check
 ast-artifact-check: build-ts
 	$(NODE) scripts/check-ast-artifact.mts
-generated-artifact-check: build-ts
+generated-artifact-check: build-ts showcase-compile
 	$(NODE) scripts/check-generated-artifact.mts
 compiler-ir-rules-check: build-ts
 	$(NODE) scripts/check-compiler-ir.mts

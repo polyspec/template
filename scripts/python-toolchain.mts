@@ -1,7 +1,7 @@
 // The Python interpreters of the checks that run Python (T22.4-20, T22.5-5). The interpreter is
 // var/tools/mise/shims/python3, the shim of the python of mise.toml, which `make install-tools` installs with mise at the
 // digest of mise.lock (T24.12, kit K127). No check runs the `python3` of PATH or of the machine (AGENTS, Idempotency:
-// Toolchains). A program that imports `polyspec.template` runs the python of var/python/venv, where `make python-package`
+// Toolchains). A program that imports `polyspec.template` runs the python of packages/python/.venv, where `make python-package`
 // installs packages/python editable, so it imports the package from the sources of the checkout through its
 // environment, with no changed import path (PRINCIPLES S3).
 import { spawnSync } from 'node:child_process';
@@ -44,7 +44,7 @@ export function pythonCommand(interpreter: string = pythonInterpreter, fix: stri
   return interpreter;
 }
 
-/** The python of var/python/venv, checked as pythonCommand checks it; missing, it fails with the fix make python-package. */
+/** The python of packages/python/.venv, checked as pythonCommand checks it; missing, it fails with the fix make python-package. */
 export function pythonPackageCommand(): string {
   return pythonCommand(pythonPackageInterpreter, 'make python-package');
 }

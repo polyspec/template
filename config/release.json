@@ -41,6 +41,11 @@
     },
     {
       "kind": "composer",
+      "directory": "packages/cli/php",
+      "name": "polyspec/template-cli"
+    },
+    {
+      "kind": "composer",
       "directory": "packages/php-ext",
       "name": "polyspec/template-php-ext"
     },
@@ -61,7 +66,8 @@
     "packages/php/composer.json": "archive",
     "packages/php-ext/composer.json": "archive",
     "packages/rust/Cargo.toml": "git-tag",
-    "packages/python/pyproject.toml": "archive"
+    "packages/python/pyproject.toml": "archive",
+    "packages/cli/php/composer.json": "archive"
   },
   "notReleased": {
     "composer.json": "the development root of the Composer packages of packages/, never published",
@@ -116,7 +122,12 @@
         "polyspec/template": [
           "php",
           "-r",
-          "require 'vendor/autoload.php';\nif (!class_exists('Polyspec\\\\Template\\\\Engine')) { fwrite(STDERR, \"Polyspec\\\\Template\\\\Engine is not autoloaded\\n\"); exit(1); }\nfile_put_contents('smoke.tpl', \"<p>{=title}</p>\\n\");\n$run = static function (string $command): array { $process = proc_open([PHP_BINARY, 'vendor/bin/' . $command, 'parse', 'smoke.tpl'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes); $out = stream_get_contents($pipes[1]); $err = stream_get_contents($pipes[2]); return [proc_close($process), $out, $err]; };\n[$status, $out] = $run('template.php');\nif ($status !== 0 || json_decode($out, true)['type'] !== 'Template') { fwrite(STDERR, \"vendor/bin/template.php parse failed with status $status\\n\"); exit(1); }"
+          "require \"vendor/autoload.php\"; if (!class_exists(\"Polyspec\\\\Template\\\\Engine\")) { exit(1); }"
+        ],
+        "polyspec/template-cli": [
+          "php",
+          "-r",
+          "file_put_contents(\"smoke.tpl\", \"<p>{=title}</p>\\n\"); $process = proc_open([PHP_BINARY, \"vendor/bin/template.php\", \"parse\", \"smoke.tpl\"], [1 => [\"pipe\", \"w\"], 2 => [\"pipe\", \"w\"]], $pipes); $out = stream_get_contents($pipes[1]); $err = stream_get_contents($pipes[2]); $status = proc_close($process); if ($status !== 0 || json_decode($out, true)[\"type\"] !== \"Template\") { fwrite(STDERR, $err); exit(1); }"
         ]
       }
     },

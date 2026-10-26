@@ -8,6 +8,7 @@ import { compilerManifestDocument, languageMapping, manifestPath, typeFields, ty
 import { pythonPackageCommand } from './python-toolchain.mts';
 import { required } from './required.mts';
 import { CARGO } from './temporary-workspace.mts';
+import { typescriptExports } from './typescript-exports.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 
@@ -254,14 +255,10 @@ for (const member of boundClass.body.body) {
 const boundEntries: [string, string][] = [['typescript', 'index.ts'], ['javascript-esm', 'render.ts']];
 for (const [language, entry] of boundEntries) {
   const entryPath = resolve(root, 'packages/ts/src', entry);
-  const entrySource = parseSource(entryPath);
-  const exported = entrySource.statements
-    .flatMap(statement => statement.type === 'ExportNamedDeclaration' && !statement.declaration
-      ? statement.specifiers.map(specifier => specifier.exported.type === 'Literal' ? specifier.exported.value : specifier.exported.name)
-      : []);
+  const exported = typescriptExports(entryPath, file => readFileSync(file, 'utf8'));
   const boundMap = languageMapping(manifest, language).boundMap;
   for (const name of [...Object.values(boundMap.operations), boundMap.type]) {
-    if (!exported.includes(name)) throw new Error(`${language}: ${entry} does not export ${name}`);
+    if (!exported.has(name)) throw new Error(`${language}: ${entry} does not export ${name}`);
   }
 }
 
