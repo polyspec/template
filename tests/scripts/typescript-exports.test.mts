@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { typescriptExports } from '../../scripts/typescript-exports.mts';
+
+test('a package consumer can name the types in public signatures', { timeout: 30_000 }, () => {
+  const result = spawnSync('node_modules/.bin/tsc', ['-p', 'tests/fixtures/public-types/tsconfig.json'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+});
 
 test('star re-exports expose runtime and type names through cycles without a default export', { timeout: 1000 }, () => {
   const entry = resolve('entry.ts');

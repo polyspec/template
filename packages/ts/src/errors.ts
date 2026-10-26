@@ -48,6 +48,7 @@ export type ErrorCode =
   | 'E_INTERNAL';
   // END GENERATED ERROR CODES
 
+// Half-open source byte offsets attached to an error (AST-2).
 export type Span = readonly [number, number];
 
 // The fields of a template error (ERR-1). Conformance compares `code`, `template`, `line` and

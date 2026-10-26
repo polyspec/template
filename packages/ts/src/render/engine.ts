@@ -10,6 +10,7 @@ import { Frame, RenderContext, Scope, type DefineEntry, type Limits, type Parsed
 import { RuntimeEnvironment } from './runtime-environment.js';
 import { Renderer } from './statements.js';
 
+// Parses one loader source into its AST and source-line index (RT-2, RT-9).
 export type ParseFunction = (source: string | Uint8Array, name: string, delimiters: Delimiters) => ParsedTemplate;
 
 // Controls when a compiled template artifact is refreshed.

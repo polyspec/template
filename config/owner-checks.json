@@ -1062,6 +1062,17 @@
       "targets": [
         "docs-markup-check"
       ]
+    },
+    {
+      "paths": [
+        "tests/fixtures/public-types/**"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/typescript-exports.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1709,6 +1720,12 @@
       "paths": [
         "tests/scripts/docs-markup.test.mts",
         "docs/plans/**/*.md"
+      ]
+    },
+    {
+      "check": "make template-test-scripts",
+      "paths": [
+        "tests/fixtures/public-types/**"
       ]
     }
   ]

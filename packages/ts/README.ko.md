@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-ts-readme -->
-<!-- source-sha256: 72f7dce661416757df5aeeae177d61c7301173f2038e849bbe34e6d85286dbbd -->
+<!-- source-sha256: 1ce3be8edfce3fae3d6a669cdaaad3ed6e4cf99eedf4383049b24bbc41095628 -->
 # @polyspec/template
 
 [English](README.md).
@@ -89,3 +89,5 @@ make test-ts
 ```
 
 테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.
+
+패키지는 공개 서명에 쓰이는 AST·로더·런타임 타입의 이름을 export한다. `SetNode`는 AST 대입, `LoopMetaExpression`은 AST 메타데이터 표현식, `RuntimeLoopMeta`는 활성 루프 메타데이터, `SourceSpan`은 오류의 소스 범위를 나타낸다. 이들은 타입 export이다. `RenderAstProgram`은 render 전용 진입점의 `AstProgram` 타입이며 루트 런타임 export에 생성자를 추가하지 않는다. 소비자는 구현 파일 경로 없이 패키지 진입점에서 이 타입들을 import할 수 있다.

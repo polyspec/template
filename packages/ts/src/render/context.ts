@@ -28,8 +28,10 @@ export interface ParsedTemplate {
   lines: LineIndex | null;
 }
 
+// A resolved template definition or a literal HTML definition (RT-24).
 export type DefineEntry = { template: string; data: MapValue | null } | { html: string };
 
+// Metadata of one active render loop (RT-18).
 export interface LoopMeta {
   index: number;
   key: Value;

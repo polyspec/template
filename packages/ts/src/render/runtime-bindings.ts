@@ -12,6 +12,7 @@ import {
 } from '../value/value.js';
 import type { Frame, RenderContext } from './context.js';
 
+// The expression or iteration counter charged by runtime evaluation (RT-35).
 export type RuntimeLimit = 'expression' | 'iteration';
 
 /** One implementation of the observable value semantics used by both compiler modes. */

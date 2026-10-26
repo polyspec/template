@@ -88,3 +88,5 @@ make test-ts
 ```
 
 Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.
+
+The package exports names for the AST, loader and runtime types that appear in its public signatures. `SetNode` names an AST assignment, `LoopMetaExpression` an AST metadata expression, `RuntimeLoopMeta` the active loop metadata, and `SourceSpan` an error source span. These are type exports. `RenderAstProgram` names the type of `AstProgram` from the render-only entry; it adds no constructor to the root runtime exports. A consumer can import these types through the package entry without an implementation path.

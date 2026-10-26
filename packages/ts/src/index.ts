@@ -13,7 +13,7 @@ export type { Comment } from './ast.js';
 export { PathError } from './loader.js';
 export type { ArtifactRefresh } from './render/engine.js';
 export type { Delimiters } from './parser/scanner.js';
-export type { PrefixAnalysis, SyntaxTag, SyntaxToken } from './parser/parser.js';
+export type { PrefixAnalysis, SyntaxTag, SyntaxToken, SyntaxTokenKind } from './parser/parser.js';
 export { Source } from './source.js';
 export { PageCache, type PageCacheTTL } from './page-cache.js';
 
@@ -73,3 +73,7 @@ export class AstProgram extends AstProgramCore {
 export type { ParsedTemplate };
 export type { PreparedRender } from './render/engine.js';
 export type { RenderOptions as EngineRenderOptions };
+
+export type { TagRange } from './parser/standalone.js';
+// The parser-free AST program exported by the render-only entry.
+export type { AstProgramCore as RenderAstProgram } from './render/engine.js';

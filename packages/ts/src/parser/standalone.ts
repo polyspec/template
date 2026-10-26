@@ -1,6 +1,7 @@
 // Standalone line groups (LEX-14, LEX-15).
 import { elementAt } from '../checked.js';
 
+// String-index boundaries of a tag used to detect standalone lines (LEX-14, LEX-15).
 export interface TagRange {
   // String indexes of the tag including any wrapper.
   start: number;

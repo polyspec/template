@@ -3,6 +3,7 @@ import { boundEntries } from './bound.js';
 import { MAX_SAFE } from './number.js';
 import { NativeObject, SafeString, type MapValue, type Value } from './value.js';
 
+// Error codes of invalid host data before rendering (ERR-14).
 export type BindErrorCode = 'E_DATA_NUMBER_RANGE' | 'E_DATA_NUMBER_NOT_FINITE' | 'E_DATA_UNSUPPORTED_TYPE' | 'E_DATA_INVALID_UTF8' | 'E_DATA_DEPTH' | 'E_DATA_INVALID_JSON';
 
 /** The nesting depth limit of lists and maps (VAL-20). */

@@ -96,6 +96,12 @@ class ExportTests(unittest.TestCase):
             unexported, [], f"documents import names missing from __all__: {unexported}"
         )
 
+    def test_ast_program_has_only_exported_package_base_types(self):
+        for base in AstProgram.__mro__[1:]:
+            if base.__module__.startswith(template.__name__):
+                self.assertIn(base.__name__, template.__all__)
+                self.assertIs(getattr(template, base.__name__), base)
+
     def test_the_entry_points_share_one_runtime(self):
         # RT-74: the package entry re-exports the objects of the modules that define them, so a bound map that a module
         # creates is the bound map of the package entry, and a program renders it.

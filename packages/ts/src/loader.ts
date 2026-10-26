@@ -1,12 +1,14 @@
 // Loader interface, map loader and template name resolution (RT-7 to RT-10).
 import type { Template } from './ast.js';
 
-interface LoadedSource {
+// Source text and the loader version used for parsed-template caching (RT-9, RT-40).
+export interface LoadedSource {
   source: string | Uint8Array;
   version: string;
 }
 
-interface LoadedAst {
+// An already parsed template and its loader cache version (RT-9, RT-40).
+export interface LoadedAst {
   ast: Template;
   version: string;
 }

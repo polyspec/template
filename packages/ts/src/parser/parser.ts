@@ -31,7 +31,7 @@ export interface TemplateAnalysis {
 }
 
 /** The token types of EDT-8. */
-type SyntaxTokenKind = 'delimiter' | 'keyword' | 'variable' | 'property' | 'function' | 'string' | 'number' | 'operator' | 'comment' | 'path';
+export type SyntaxTokenKind = 'delimiter' | 'keyword' | 'variable' | 'property' | 'function' | 'string' | 'number' | 'operator' | 'comment' | 'path';
 
 /** A classified range of an accepted tag. `start` and `end` are string indexes. */
 export interface SyntaxToken {
