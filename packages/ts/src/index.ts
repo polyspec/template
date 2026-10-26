@@ -23,7 +23,7 @@ export interface ParseOptions {
 }
 
 /** A delimiters option that is not a delimiter pair: an invalid argument of parse and analyze, not an error of the source. */
-export class DelimiterOptionError extends RangeError {
+export class DelimiterOptionError extends Error {
   override name = 'DelimiterOptionError';
 }
 

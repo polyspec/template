@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9ef55b9df5258f654fdbde76ddb988971fd80d7ecfffc14141a97963511a704f -->
+<!-- source-sha256: 56e92cd943b729f927fd44f93d5e74a70bd66ee7d8695692e7ffb68778754877 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 잘못된 구분자 옵션은 일반 Error를 상속한 DelimiterOptionError를 일으켜 ERR-13이 인자 오류를 JavaScript RangeError로 분류하지 않는다. Red: parser 구분자 단위 검증이 RangeError에서 실패했으며 green: 선택한 parser, AST decode, editor 단위 테스트 437개가 통과한다(T27.1).
 - 문자열 키의 host Map이 일반 객체와 같은 바이트를 렌더한다. bound-data 회귀 검증을 포함한 단위 테스트 23개가 통과한다(T26.7-18).
 - 마지막 Python 벤치마크 측정을 마쳐 언어 parity 반영을 완료했다(T22.6).
 - Python의 AST와 generated 모드 벤치마크를 21표본과 persistent 표본당 1,000회 렌더로 측정했고, 10개 행의 출력이 모두 같다. 벤치마크 문서를 parity 선언 검사에 포함하며 make bench가 Python 패키지를 설치한다. 검증: make bench, make benchmark-check, make parity-declarations-check, Python adapter 테스트 8개와 benchmark/catalog 테스트 11개 통과(T22.6-17, T22.6).

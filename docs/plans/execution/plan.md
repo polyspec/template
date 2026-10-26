@@ -202,3 +202,8 @@ Evidence of 2026-10-02, with Node 26.8.1, Go 1.27.1 (from the `go.mod` toolchain
 - `node tests/runner/parity.mjs` reported that 244 of 244 cases agree across `ts`, `go`, `rust`, `php` and `php-ext` on commit "Make template tags stand out in VS Code whatever the color theme is".
 - `make conformance-all-modes` passed all 1,952 cells without a fallback; `make test-browser`, `make install-check`, `make showcase-check` and `make docs-verify-idempotent` passed.
 - `make release-check` passed on commit "Make template tags stand out in VS Code whatever the color theme is": it ran `make release-test-matrix`, all seven layers, in an isolated clean checkout.
+
+## Wave 27 — Release preparation
+
+Dependencies: T22.6 and the release-time reassessment of the withdrawn dependency tasks of kit-standard. The remaining work is the current dependency graph, its advisories, the build compatibility of esbuild, the release manifests and consumers, and CI installation failures. T27.1 ends when the release candidate carries current dependency review evidence and its complete CI workflow succeeds. Local verification uses the owning unit tests and documentation checks. Tags and publication follow this preparation.
+

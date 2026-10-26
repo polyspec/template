@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Invalid delimiter options raise DelimiterOptionError as an ordinary Error, so ERR-13 does not classify an argument failure as a JavaScript RangeError. Red: the parser delimiter unit failed on RangeError; green: 437 selected parser, AST decode and editor unit tests pass (T27.1).
 - A host Map with string keys renders the same bytes as a plain object; the bound-data regression passes with 23 unit tests (T26.7-18).
 - The language-parity landing is complete after its final Python benchmark measurement (T22.6).
 - Python benchmark results cover AST and generated modes with 21 samples and 1,000 renders per persistent sample; all 10 rows render identical output. The benchmark documents participate in parity declarations, and make bench installs its Python package. Verification: make bench, make benchmark-check, make parity-declarations-check, 8 Python adapter tests and 11 benchmark/catalog tests passed (T22.6-17, T22.6).

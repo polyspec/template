@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: e89d3f97b54f07c8af3b5f8455deb46932db76aaa00ce9f08fe4c77bd21f9c1c -->
+<!-- source-sha256: da53334411eead4d51475064da948bbc9dd0515421b1e7476e0bcf310a153bb0 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -203,3 +203,8 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 - 커밋 "Make template tags stand out in VS Code whatever the color theme is"에서 `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, `php-ext` 사이에 244개 케이스 중 244개가 일치한다고 보고했다.
 - `make conformance-all-modes`가 1,952개 칸을 fallback 없이 모두 통과했다. `make test-browser`, `make install-check`, `make showcase-check`, `make docs-verify-idempotent`가 통과했다.
 - 커밋 "Make template tags stand out in VS Code whatever the color theme is"에서 `make release-check`가 통과했다. 격리된 깨끗한 체크아웃에서 `make release-test-matrix`의 일곱 계층을 모두 실행했다.
+
+## Wave 27 — 릴리스 준비
+
+의존성: T22.6과 kit-standard에서 철회한 의존성 작업의 릴리스 시점 재검토. 현재 의존성 그래프와 보안 권고, esbuild 빌드 호환성, 릴리스 manifest와 소비자, CI 설치 실패를 처리한다. T27.1은 릴리스 후보가 현재 의존성 검토 근거를 갖추고 전체 CI workflow가 성공하면 끝난다. 로컬에서는 소유 단위 테스트와 문서 검사를 실행한다. 태그와 발행은 이 준비 다음 단계다.
+
