@@ -530,7 +530,7 @@ test('the job that runs lint-python installs the tools of mise.toml before it, w
 });
 
 test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {
-  const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review', 'TARGETS='], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
   // install-tools of kit installs the toolchain of rust-toolchain.toml with rustup before cargo-audit runs.
   assert.ok(recipe[0] !== undefined && recipe[1] !== undefined, 'make -n dependency-review prints its two commands');
   assert.match(recipe[0], /install-tools\.mts $/);

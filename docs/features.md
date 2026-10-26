@@ -18,7 +18,7 @@ The table records the status of each feature. The implementations and the units 
 | showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](operations/showcase) |
 | generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/compiler) |
 | docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/documentation) |
-| release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](operations/testing) |
+| release-test-matrix | Release verification matrix | implemented | go: partial<br>php: partial<br>rust: partial<br>typescript: partial<br>python: partial | [Evidence](operations/testing) |
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/template-functions) |
 | template-language | Template language service, formatter and CLI | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/editor-tools) |
 | formatting | Tokens and formatter of every runtime (`tokens`, `format`) | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/formatting) |
@@ -33,3 +33,5 @@ The table records the status of each feature. The implementations and the units 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
 
 Release candidate 0.0.12 has synchronized manifests, native lock files and nine locally built archive candidates, including the PHP CLI. Version coverage, selected tooling and Python API units, type checks and documentation checks pass locally. The candidate is integrated on main; clean CI verification of the exact locked dependency graph and its complete release matrix remains pending. Candidate archives are preparation artifacts, not published releases.
+
+CI 40321448224 failed: shared installation errors affect multiple jobs, and template script tests and public API declarations also have failures. These template failures are not external-only waiting conditions.

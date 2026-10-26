@@ -7,6 +7,7 @@
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 ## 0.0.12
+- Script units now build their generated showcase programs and adapter contracts before discovery. Dry-run tests distinguish the showcase output from the committed benchmark, follow shared PHP generators, verify both pre-commit gates and clear inherited review targets. The UTF-16 parity binding names its full test path and parity JSON has no trailing whitespace. Verification: 57 selected units, two package-install tool units, one selected atomic-publication unit, infrastructure types, selected lint, declarations and documentation checks pass. Full CI still reports an unfinished public API audit; release acceptance remains open (T27.1, T27.1-1).
 - Documentation links use public Korean locale routes instead of .ko.md source filenames in editor, runtime, build and plan pages. Red: the route unit rejects the source links at 49fcdecd; green: nine markup/route units, docs-check and selected type-aware lint pass (T27.1).
 - The document-markup unit loads VitePress as unknown and verifies its renderer API at runtime, without unsafe type assertions or unbound method calls. Verification: eight units, infrastructure typecheck and the selected type-aware lint pass (T27.1).
 - The TypeScript export traversal declares its oxc-parser ecosystem dependency in the tool classification. Red: rebuild-check fails at 82b09213; green: it passes (T27.1).

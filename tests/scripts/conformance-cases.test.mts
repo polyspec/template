@@ -14,10 +14,10 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
 const NODE = path.join(ROOT, 'var/tools/bin/node');
 const run = (...args: string[]) => spawnSync(process.execPath, ['scripts/conformance-cases.mts', ...args], { cwd: ROOT, encoding: 'utf8' });
-const parityDocument = jsonDocument<{ implementations: { name: string }[] }>('parity declaration', {
+const parityDocument = jsonDocument<{ implementations: { name: string; shares?: string }[] }>('parity declaration', {
   type: 'object',
   required: ['implementations'],
-  properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } } } },
+  properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' }, shares: { type: 'string', nullable: true } } } } },
 });
 
 test('changed paths name each case once', () => {
@@ -34,8 +34,8 @@ test('a case runs in every mode and a removed case has nothing to run', () => {
 });
 
 test('every implementation of config/parity.json has its generated runner (S6)', () => {
-  const declared = parityDocument.read(path.join(ROOT, 'config/parity.json')).implementations.map(item => item.name);
-  assert.deepEqual(RUNNERS.slice(1), declared.map(name => `tests/runner/conformance-generated-${name}.mts`));
+  const declared = parityDocument.read(path.join(ROOT, 'config/parity.json')).implementations.map(item => item.shares ?? item.name);
+  assert.deepEqual(RUNNERS.slice(1), [...new Set(declared)].map(name => `tests/runner/conformance-generated-${name}.mts`));
 });
 
 test('a path outside a case directory fails with its name', () => {

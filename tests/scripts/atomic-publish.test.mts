@@ -1,6 +1,6 @@
 // Tests that the commands that publish a file or a directory that others read replace it at once and keep the
 // previous version when they fail (T19.7): a reader never finds it missing or half written.
-// - `make showcase` and `make bench` write examples/site/data/mode-benchmark.json with `benchmark-modes.mts --output`,
+// - `make showcase` and `make bench` write the target-specific benchmark output with `benchmark-modes.mts --output`,
 //   which writes a temporary file and renames it, instead of a shell redirection that empties the file first;
 // - `make docs-verify-idempotent` keeps the copy of its first build in a directory of its own run outside the
 //   checkout, not in the fixed docs/.vitepress/dist.first that two runs shared;
@@ -35,7 +35,8 @@ before(() => {
 test('make showcase and make bench write the mode benchmark with --output, not with a shell redirection', () => {
   for (const target of ['showcase', 'bench']) {
     const lines = commands(target).filter(line => line.includes('benchmark-modes.mts'));
-    assert.deepEqual(lines, [`${NODE} examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json`], `make -n ${target}`);
+    const output = target === 'showcase' ? 'var/showcase/mode-benchmark.json' : 'examples/site/data/mode-benchmark.json';
+    assert.deepEqual(lines, [`${NODE} examples/showcase/benchmark-modes.mts --output ${output}`], `make -n ${target}`);
   }
 });
 

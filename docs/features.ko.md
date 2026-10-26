@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: f9920ce22699a8efd050b63e15b937a9993331f9842ec41bb73ff80fe1e9441d -->
+<!-- source-sha256: e9d2060a52a27be640f9cb74a1d67667c6a1ee2f0a59a3dbf96d1d4b68c64974 -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -19,7 +19,7 @@
 | showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [근거](operations/showcase) |
 | generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [근거](spec/compiler) |
 | docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [근거](operations/documentation) |
-| release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [근거](operations/testing) |
+| release-test-matrix | Release verification matrix | implemented | go: partial<br>php: partial<br>rust: partial<br>typescript: partial<br>python: partial | [근거](operations/testing) |
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [근거](operations/template-functions) |
 | template-language | 템플릿 언어 서비스, 포매터, CLI | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [근거](operations/editor-tools) |
 | formatting | 모든 런타임의 토큰과 포매터(`tokens`, `format`) | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [근거](spec/formatting) |
@@ -34,3 +34,5 @@
 implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.
 
 릴리스 후보 0.0.12의 매니페스트와 네이티브 lock 파일을 동기화하고 PHP CLI를 포함한 배포 파일 후보 9개를 로컬에서 빌드했다. 버전 범위 검사, 선택한 도구와 Python API 단위 테스트, 타입 검사와 문서 검사가 로컬에서 통과했다. 후보는 main에 통합했다. 깨끗한 CI 환경에서 정확히 고정된 의존성 그래프 및 전체 릴리스 매트릭스 검증은 남아 있다. 후보 배포 파일은 준비 산출물이며 공개된 릴리스가 아니다.
+
+CI 40321448224는 실패했다. 공유 설치 오류가 여러 job에 영향을 주며 템플릿 스크립트 테스트와 공개 API 선언도 실패했다. 이 템플릿 실패를 외부 요인만 기다리는 상태로 분류하지 않는다.

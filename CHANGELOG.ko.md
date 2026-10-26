@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 23a91fc9a5c7574a4c337930a47f9b2dbeecb422b603e7e4ce18e3d4919b5ea9 -->
+<!-- source-sha256: 6f889fb2ee08707411bb9703de0e4834e83d0a4e5b68ec64ca6525866364b0a4 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- 스크립트 단위 테스트 전에 showcase 생성 프로그램과 adapter 계약을 빌드한다. dry-run 테스트는 showcase 출력과 커밋된 벤치마크를 구분하고 공유 PHP generator를 따르며 pre-commit 가드 두 개를 검증하고 상속된 review 대상을 비운다. UTF-16 parity binding이 전체 테스트 경로를 지정하고 parity JSON의 후행 공백을 제거했다. 검증: 선택한 단위 57개, 패키지 설치 도구 단위 2개, 선택한 원자적 기록 단위 1개, 기반 도구 타입·해당 파일 린트·선언·문서 검사 통과. 전체 CI의 공개 API 검토는 미완료이며 릴리스 승인은 열려 있다(T27.1, T27.1-1).
 - 편집기·런타임·빌드·계획 문서 링크가 .ko.md 소스 파일명 대신 공개 한국어 경로를 사용한다. Red: 49fcdecd에서 경로 단위가 소스 링크를 거부했다. Green: 마크업·경로 단위 9개, docs-check와 해당 파일의 타입 기반 린트 통과(T27.1).
 - 문서 마크업 단위가 VitePress를 unknown으로 읽고 렌더러 API를 런타임에서 검증해 안전하지 않은 타입 단언과 바인딩 없는 메서드 호출을 제거했다. 검증: 단위 8개, 기반 도구 타입 검사와 해당 파일의 타입 기반 린트 통과(T27.1).
 - TypeScript export 추적 도구가 도구 분류에 oxc-parser 생태계 의존성을 선언한다. Red: 82b09213에서 rebuild-check가 실패했고 green: 수정 후 통과한다(T27.1).
