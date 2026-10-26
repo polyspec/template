@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 4c2cb1428df762d0244a61069f06fb2ebc5b7ef91df702a07ec4b603fe531dbe -->
+<!-- source-sha256: 201040cbc09de58f2a53479635b82360cb34aaadffd0ac1c66381a5a9b020259 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -410,3 +410,4 @@
 | T27.1-1-27 | 정규 오류 필드 7개와 오류 생성·직렬화 연산의 실제 SDK 표면을 선언하고 위치가 있는 오류와 없는 오류 값을 검증한다 | Error API declarations and native error units | `make parity-declarations-check`; error-object SDK units; `make docs-check` | [o] |
 | T27.1-1-28 | RT-33에 따라 자원 제한 값과 네이티브 SDK 필드를 선언하고 SDK 6개에서 기본값 네 개와 재정의를 검증한다 | Resource limit API declarations and native units | `make parity-declarations-check`; native limit units; `make docs-check` | [o] |
 | T27.1-1-29 | 정규 AST 연산자와 loop metadata 리터럴을 선언하고 공개 enum 식별자 및 모든 SDK decoder의 전체 리터럴 round-trip을 검증한다 | AST enum declarations and shared decoder fixture | `make parity-declarations-check`; native enum/decoder units; `make docs-check` | [o] |
+| T27.1-1-30 | 공개 readonly 속성을 유지하면서 확인된 PHP Source 속성 추출 실패를 수정하고 두 네이티브 SDK 모델에서 Source metadata 필드 전체를 검증한다 | Explicit Source properties and extraction regression | `node --test tests/scripts/php-public-api.test.mts`; Source SDK units; `make docs-check` | [o] |

@@ -12,8 +12,13 @@ final class Source
     /** @var list<int> byte offsets of line starts */
     public readonly array $lines;
 
-    private function __construct(public readonly string $name, public readonly string $text)
+    public readonly string $name;
+    public readonly string $text;
+
+    private function __construct(string $name, string $text)
     {
+        $this->name = $name;
+        $this->text = $text;
         $this->lines = self::lineIndex($text);
     }
 

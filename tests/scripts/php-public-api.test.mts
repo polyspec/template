@@ -57,9 +57,18 @@ test(`${entry}: Unicode, value and AST construction helpers are internal`, { tim
   for (const name of ['node', 'isLoopMetaField', 'LOOP_META_FIELDS']) {
     assert.ok(!found.includes(`Polyspec\\Template\\Ast::${name}`), name);
   }
-  for (const name of ['Source::fromBytes', 'Source::fromText', 'Source::span', 'Ast::toJson', 'Value\\SafeString', 'Value\\MapValue', 'Value\\Bind::map']) {
+  for (const name of ['Ast::toJson', 'Value\\SafeString', 'Value\\MapValue', 'Value\\Bind::map']) {
     assert.ok(found.includes(`Polyspec\\Template\\${name}`), name);
   }
+});
+
+test(`${entry}: source metadata and factories are public with a private constructor`, { timeout: 30_000 }, () => {
+  const found = new Set(extract(entry));
+  for (const name of ['$name', '$text', '$lines', 'fromBytes', 'fromText', 'bytes', 'length',
+    'byteAt', 'span', 'lineIndex', 'position', 'error']) {
+    assert.ok(found.has(`Polyspec\\Template\\Source::${name}`), name);
+  }
+  assert.ok(!found.has('Polyspec\\Template\\Source::__construct'));
 });
 
 test(`${entry}: host registration and compiler-runtime types remain public`, { timeout: 30_000 }, () => {

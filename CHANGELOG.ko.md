@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cab1408021267977165385e8d2f169b256ed254a4f6fcc4569239c20a857255b -->
+<!-- source-sha256: d49319eeab2b01f7f01d9bac448570af240ec872314fc94d0a761761e47adcf1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- PHP Source는 공개 readonly name/text 속성을 private 생성자와 별도로 선언해 네이티브 SDK 모델에 모두 포함한다. 생성자는 private으로 유지하며 두 PHP SDK 모델에서 metadata와 factory 메서드를 검증한다. Red: 5e2f7e75의 CI와 강화된 속성 검사가 누락된 선언을 거부한다. Green: 추출 단위 14개·네이티브 Source 단위 2개(assertion 674개)·PHP 및 TypeScript lint를 통과한다 (T27.1-1-30).
 - AST 연산자와 loop metadata API 선언에 정규 리터럴 타입과 값을 포함한다. 공유 decoder fixture 하나로 SDK 6개의 모든 이항·단항 연산자와 loop metadata 필드를 검증한다. 계약 단위는 누락된 리터럴을 거부하며 Rust 소비자는 공개 enum variant 전체를 참조한다. 네이티브 Rust 연산자 텍스트는 직렬화된 AST 텍스트와 같다. Green: SDK 6개의 decoder 단위(TypeScript 7개·Go 2개·Rust 2개)·AST 계약 단위 4개·Rust 소비자 단위 19개·네이티브 lint를 통과한다 (T27.1-1-29).
 - 자원 제한 API 선언에 RT-33의 네 가지 네이티브 SDK 필드와 동적 map 변환을 명시한다. 각 SDK는 모든 기본값과 필드별 재정의를 검증하며 나머지 기본값이 유지되는지 확인한다. Green: SDK 6개의 네이티브 제한 단위(TypeScript 엔진 단위 15개)·네이티브 lint·선언 검사를 통과한다 (T27.1-1-28).
 - 오류 API 선언에 정규 필드 7개·네이티브 생성·위치가 있는 factory와 없는 factory·일반 데이터 변환을 포함한다. 네이티브 오류 단위는 없는 템플릿 오류의 위치가 모두 0인지 검증하고, Go는 선언된 필드 식별자를 reflection 및 JSON 키와 대조한다. Green: SDK 6개의 오류 단위(TypeScript 파서 단위 15개)·네이티브 lint·선언 검사를 통과한다. 공개 동작과 릴리즈 기준을 유지한다 (T27.1-1-27).
