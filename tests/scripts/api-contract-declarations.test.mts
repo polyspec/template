@@ -15,6 +15,8 @@ interface Unit {
   symbols?: { implementation: string; symbol: string }[];
 }
 
+
+
 const parity = jsonDocument<{ units: Unit[] }>('API units', {
   type: 'object', required: ['units'],
   properties: { units: { type: 'array', items: {
@@ -174,4 +176,10 @@ test('each error code publishes its native literal or code type/catalog', { time
     };
     for (const binding of unit.symbols) assert.equal(binding.symbol, expected[binding.implementation], `${id}: ${binding.implementation}`);
   }
+});
+
+test('map binding names the Rust operation that accepts unbound host data', { timeout: 5000 }, () => {
+  const unit = parity.units.find(item => item.id === 'api-bind-map');
+  assert.ok(unit !== undefined);
+  assert.equal(unit.symbols?.find(item => item.implementation === 'rust')?.symbol, 'polyspec_template::bind_map');
 });

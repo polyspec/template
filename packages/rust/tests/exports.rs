@@ -17,14 +17,14 @@ fn the_entry_points_of_the_api_are_public_items() {
     assert!(parse_json("{}").is_ok());
 }
 
-// RT-74: the modules of the crate share one runtime. The functions and types of the root are those of the modules that
-// define them, so a bound map that one path creates is the bound map of the other, and a program renders it.
+// RT-74: loaders created through a public module and values bound through the SDK root
+// share one runtime with the root program.
 #[test]
 fn the_entry_points_share_one_runtime() {
     use polyspec_template::{AstProgram, EngineOptions, MapLoader, RenderOptions, RenderTarget};
-    let from_module: BoundMap = polyspec_template::value::bound::bind(&serde_json::json!({ "a": "x", "list": [1, 2] })).expect("bind");
-    let from_root: polyspec_template::value::bound::BoundMap = bind(&serde_json::json!({ "b": 1 })).expect("bind");
-    let mut loader = MapLoader::new();
+    let first: BoundMap = bind(&serde_json::json!({ "a": "x", "list": [1, 2] })).expect("bind");
+    let second: BoundMap = bind(&serde_json::json!({ "b": 1 })).expect("bind");
+    let mut loader: MapLoader = polyspec_template::loader::MapLoader::new();
     loader.set("page.tpl", "{= a}{@ x = list}{= x}{/}");
     let program = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
@@ -36,11 +36,7 @@ fn the_entry_points_share_one_runtime() {
             .render_bound(RenderTarget::Name("page.tpl"), assign, &RenderOptions::default())
             .expect("render")
     };
-    assert_eq!(render(&from_module), "x12", "value::bound::bind");
-    assert_eq!(render(&merge(&from_module, &from_root)), "x12", "merged by merge");
-    assert_eq!(
-        render(&polyspec_template::value::bound::merge(&from_root, &from_module)),
-        "x12",
-        "merged by value::bound::merge"
-    );
+    assert_eq!(render(&first), "x12", "bound map with module loader");
+    assert_eq!(render(&merge(&first, &second)), "x12", "merged by merge");
+    assert_eq!(render(&merge(&second, &first)), "x12", "module loader accepts merged bound data");
 }

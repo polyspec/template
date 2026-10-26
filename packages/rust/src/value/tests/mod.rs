@@ -1,8 +1,8 @@
 //! Number formatting, truthiness, equality, ordering and binding (VAL-9, EXP-33 to EXP-38, VAL-12).
 
-use polyspec_template::value::number::{format_number, number_to_string, positional, round_number, shortest_digits};
-use polyspec_template::value::{OrderedMap, Value, compare_values, loose_equals, strict_equals};
-use polyspec_template::{ErrorCode, bind_json, bind_value, parse_json, parse_json_bytes};
+use crate::value::number::{format_number, number_to_string, positional, round_number, shortest_digits};
+use crate::value::{OrderedMap, Value, compare_values, loose_equals, strict_equals};
+use crate::{ErrorCode, bind_json, bind_value, parse_json, parse_json_bytes};
 use std::cmp::Ordering;
 
 /// VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.

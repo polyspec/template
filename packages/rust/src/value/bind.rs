@@ -45,17 +45,6 @@ pub fn check_number(value: f64) -> Result<f64, BindError> {
     Ok(value)
 }
 
-/// VAL-2: accepts an integer-typed host value whose magnitude is at most 2^53 − 1, compared exactly.
-pub fn check_integer(value: i128) -> Result<f64, BindError> {
-    if value.unsigned_abs() > MAX_SAFE as u128 {
-        return Err(bind_error(
-            ErrorCode::E_DATA_NUMBER_RANGE,
-            format!("integer {value} is outside the safe range"),
-        ));
-    }
-    Ok(value as f64)
-}
-
 /// VAL-20: fails when a list or map would be entered at a level greater than the limit.
 /// `level` is the number of enclosing lists and maps, including the one being entered.
 pub fn check_level(level: usize) -> Result<(), BindError> {

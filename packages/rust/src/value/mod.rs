@@ -458,3 +458,6 @@ pub fn stringify(value: &Value) -> Result<String, StringifyError> {
         Value::List(_) | Value::Map(_) | Value::Object(_) => Err(StringifyError),
     }
 }
+
+#[cfg(test)]
+mod tests;

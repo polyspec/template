@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 79e1a54aef3850d90154b848fc3320d85499ef16f63b0af7fbe8d9bdf36c03f5 -->
+<!-- source-sha256: 22cfd6b7545e82dbfe73e29ed08b1ccd124fdd0dd43bfef297689b0e61492c3e -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -402,3 +402,4 @@
 | T27.1-1-19 | PHP formatter 구현 helper·interpreter 클래스를 내부로 유지하고 formatter·compiler-runtime SDK를 보존한다 | PHPDoc 가시성·네이티브 SDK probe·확장 arginfo | SDK 추출 단위 10개; 두 SDK의 네이티브 formatter smoke 단위; PHP lint·포맷; 중복·문서 검사 | [o] |
 | T27.1-1-20 | 네이티브 export list로 Python builtin·interpreter·expression·formatter 구현 이름을 SDK 밖에 유지하고 host callback 계약·모든 네이티브 벡터를 보존한다 | Package export·module export list·소비자 회귀 | Export 단위 9개; 네이티브 registry·formatter 단위 2개; Python lint; parity 선언; 문서; CI 전체 벡터 | [o] |
 | T27.1-1-21 | Go AST의 ID 선언을 정정하고 추정한 대문자 변환 대신 reflection으로 모든 네이티브 필드 식별자를 검증한다 | Go AST 선언·reflection 회귀·owner input | 네이티브 식별자 대조 Red; Go reflection case 28개; AST 계약 단위 3개; 선언·owner·타입·문서 검사 | [o] |
+| T27.1-1-22 | Rust value·number 구현 모듈을 내부로 유지하고 SDK root에서 값·binding 계약을 지명할 수 있게 하며 이동한 모든 네이티브 값 단위·공유 binding을 보존한다 | Rust value facade·compiler 호출·네이티브 단위 위치·SDK probe | SDK·선언 단위 24개; 이동한 값 단위 9개; export 단위 2개; release 빌드·clippy; 타입·선언·문서 검사 | [o] |
