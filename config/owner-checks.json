@@ -1065,7 +1065,8 @@
     },
     {
       "paths": [
-        "tests/fixtures/public-types/**"
+        "tests/fixtures/public-types/**",
+        "packages/ts/api-extractor.json"
       ],
       "targets": [
         "template-test-scripts"
@@ -1725,7 +1726,8 @@
     {
       "check": "make template-test-scripts",
       "paths": [
-        "tests/fixtures/public-types/**"
+        "tests/fixtures/public-types/**",
+        "packages/ts/api-extractor.json"
       ]
     }
   ]

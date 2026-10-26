@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: add84b3fc5b0611c0ce69393dc74681e7526f460058af04d60f4c3ad23eeb8dc -->
+<!-- source-sha256: ecd99799f3c789087270aa44345f7db9161f9cce94ca1e0412caaf54e7ea99bd -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -376,3 +376,4 @@
 | T27.1 | 태그 생성 전까지 다음 릴리스를 준비한다: 철회된 의존성 작업 T26.7-43, T26.7-43-1, T26.7-53-1, T26.7-65, T26.7-66, T26.7-68을 재검토하고, host Map 사례 T26.7-18을 검증하며, CI 실패를 해결하고 manifest와 릴리스 소비자를 맞추고 현재 CI 근거를 기록한다 | 릴리스 manifest, lock, 의존성 검토, 발행 절차와 CI 근거 | `var/tools/bin/node --test tests/scripts/release-config.test.mts`; `make docs-check`; CI | [!] cause: CI still reports template public-API coverage and type leaks, plus shared installation failures; retry: resolve T27.1-1 and all candidate CI failures without exceptions |
 | T27.1-1 | 공개 API와 공유 계약을 일치시킨다. CI 40321448224의 R11 공개 심볼과 R17 내부 타입 노출을 모두 검토하고 구현 세부 사항은 비공개로 유지하며 구현 간 동등성을 검증한 공개 연산만 선언한다. native-only 예외를 복구하거나 심볼 검사를 약화하지 않는다 | 런타임 패키지 진입점, 공개 선언, API 단위와 export 테스트 | 해당 export/type 단위 테스트; `make parity-declarations-check`; CI의 전체 API/parity 매트릭스 | [ ] |
 | T27.1-1-1 | TypeScript 패키지 진입점에서 공개 서명의 AST·로더·런타임 타입을 import할 수 있게 하고, 동작 변경 없이 공개 상속 관계에서 Python AstProgram의 비공개 기반 타입을 제거한다 | TypeScript 타입 진입점, Python AstProgram, 소비자 fixture와 export 테스트 | `var/tools/bin/node --test tests/scripts/typescript-exports.test.mts`; Python export·API 단위; `make docs-check` | [o] |
+| T27.1-1-2 | 네이티브 API Extractor로 공개 서명의 타입 도달 가능성을 검증한다. 실제 패키지 모델은 통과하고 비공개 구현 기반 타입을 노출하는 fixture는 거부한다 | TypeScript API 추출 설정, 비공개 기반 타입 fixture와 선언 모델 단위 | `var/tools/bin/node --test tests/scripts/typescript-exports.test.mts`; `make docs-check` | [o] |

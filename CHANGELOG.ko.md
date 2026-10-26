@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a66d469645a6603df682983aadbdb710cf7b1695ce3c913d54d92d80f93162a3 -->
+<!-- source-sha256: a28b8036e53637677f589fd5e69770be5c56bf0abf6e0c474d1ca4cbc038e005 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- 공개 서명 검증이 실제 TypeScript 패키지에 API Extractor를 실행하고 참조한 타입에 접근할 수 없으면 오류로 처리한다. 별도의 잘못된 선언 fixture는 ae-forgotten-export로 실패해야 한다. 소비자·모델·export 단위 5개가 모두 통과하며 생성 API 모델은 var/report에만 둔다(T27.1-1-2).
 - TypeScript 공개 서명에서 이미 도달할 수 있던 타입을 패키지 진입점에서 import할 수 있게 하고 AST 대입·루프 메타데이터·소스 범위의 이름을 구분했다. 런타임 생성자를 추가로 export하지 않는다. Python AstProgram은 비공개 구현 기반 타입을 노출하지 않고 공개 Program을 직접 따른다. Red: a7c1418e에서 소비자 타입 import와 Python 공개 기반 타입 회귀 검증이 실패했다. Green: TypeScript 소비자·export 단위 3개, Python export·API 단위 55개, 타입 검사·문서 범위·해당 파일 린트 통과(T27.1-1-1).
 - 스크립트 단위 테스트 전에 showcase 생성 프로그램과 adapter 계약을 빌드한다. dry-run 테스트는 showcase 출력과 커밋된 벤치마크를 구분하고 공유 PHP generator를 따르며 pre-commit 가드 두 개를 검증하고 상속된 review 대상을 비운다. UTF-16 parity binding이 전체 테스트 경로를 지정하고 parity JSON의 후행 공백을 제거했다. 검증: 선택한 단위 57개, 패키지 설치 도구 단위 2개, 선택한 원자적 기록 단위 1개, 기반 도구 타입·해당 파일 린트·선언·문서 검사 통과. 전체 CI의 공개 API 검토는 미완료이며 릴리스 승인은 열려 있다(T27.1, T27.1-1).
 - 편집기·런타임·빌드·계획 문서 링크가 .ko.md 소스 파일명 대신 공개 한국어 경로를 사용한다. Red: 49fcdecd에서 경로 단위가 소스 링크를 거부했다. Green: 마크업·경로 단위 9개, docs-check와 해당 파일의 타입 기반 린트 통과(T27.1).
