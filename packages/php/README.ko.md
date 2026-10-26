@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: 58f5f017b3c4d05410506ff65fcc5e27dd3e820e3781c1de3b6cd2f72ad3dcc1 -->
+<!-- source-sha256: 7ffd8bd39f04291307e3d0d8e01c92f06bc75acf28dccbf8a54b82bc59494945 -->
 # polyspec/template
 
 [English](README.md).
@@ -88,3 +88,5 @@ make template-lint-php-format
 패키지는 자기 lock을 갖지 않는다. 저장소에서는 root에서 실행한 `composer install`이 root `composer.json`의 `path` repository로 이 패키지와 그 의존성을 root `vendor/`에 설치하고, `make test-php`는 그 directory의 `vendor/bin/phpunit`을 패키지의 `phpunit.xml`로 실행한다.
 
 테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.
+
+두 PHP SDK는 `Source::fromBytes`와 `Source::fromText`를 공개한다. 소스는 맨 앞 BOM 하나를 제거한 검증된 UTF-8을 소유하고 `name`, `text`, `lines`, `bytes()`, `length()`를 제공한다. `byteAt`과 `span`은 네이티브 바이트 인덱스를 검증하고 `lineIndex`와 `position`은 바이트 위치를 찾는다. `error`는 바이트 오프셋으로 위치가 있는 템플릿 오류를 만든다.

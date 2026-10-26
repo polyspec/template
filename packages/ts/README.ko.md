@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-ts-readme -->
-<!-- source-sha256: 1ce3be8edfce3fae3d6a669cdaaad3ed6e4cf99eedf4383049b24bbc41095628 -->
+<!-- source-sha256: 05b21ef9889033a8c0191b5fb8e0c2f1994763039f10010248ef6ced50809f98 -->
 # @polyspec/template
 
 [English](README.md).
@@ -91,3 +91,5 @@ make test-ts
 테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.
 
 패키지는 공개 서명에 쓰이는 AST·로더·런타임 타입의 이름을 export한다. `SetNode`는 AST 대입, `LoopMetaExpression`은 AST 메타데이터 표현식, `RuntimeLoopMeta`는 활성 루프 메타데이터, `SourceSpan`은 오류의 소스 범위를 나타낸다. 이들은 타입 export이다. `RenderAstProgram`은 render 전용 진입점의 `AstProgram` 타입이며 루트 런타임 export에 생성자를 추가하지 않는다. 소비자는 구현 파일 경로 없이 패키지 진입점에서 이 타입들을 import할 수 있다.
+
+`Source.fromBytes`와 `Source.fromText`는 맨 앞 BOM 하나를 제거한 검증된 UTF-8을 복사해 보관한다. 소스는 `name`, `text`, `bytes`, `lines`, `length`를 제공하며 `byteAt`과 `span`은 UTF-16 인덱스를 UTF-8 바이트 오프셋으로 변환한다. `Source.lineIndex`와 `Source.position`은 바이트 위치를 찾고 `error`는 바이트 오프셋으로 위치가 있는 템플릿 오류를 만든다. 잘못된 UTF-8과 짝이 없는 텍스트 서로게이트는 거부한다.

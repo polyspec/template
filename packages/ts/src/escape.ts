@@ -65,3 +65,17 @@ export function firstInvalidUtf8(bytes: Uint8Array): number {
 
 export const utf8Decoder = new TextDecoder('utf-8');
 export const utf8Encoder = new TextEncoder();
+
+// Index of the first unpaired UTF-16 surrogate, or -1 for Unicode scalar text.
+export function firstUnpairedSurrogate(text: string): number {
+  for (let index = 0; index < text.length; index++) {
+    const unit = text.charCodeAt(index);
+    if (unit >= 0xd800 && unit <= 0xdbff) {
+      const next = text.charCodeAt(index + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) { index++; continue; }
+      return index;
+    }
+    if (unit >= 0xdc00 && unit <= 0xdfff) return index;
+  }
+  return -1;
+}

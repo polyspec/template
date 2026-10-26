@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: cbd57b06a48602fe1165ffd770a583da9c8d7f3119c0f116f96f7255250dea57 -->
+<!-- source-sha256: a3256e7b179426a501a1ee8dc68e745528850c52bc13f273c5cbe4d1733b05e7 -->
 # polyspec-template
 
 [English](README.md).
@@ -67,3 +67,5 @@ cargo test --locked --features __test_support
 통합 테스트는 `tests/`에 있고 내부 단위는 각 모듈 옆에 있다. Conformance case와 expression fixture를 process 안에서 실행한다. Rust 단위·parity target은 네이티브 expression 벡터·formatter 불변식 bridge와 전체 formatter target에 `__test_support`를 활성화한다. 릴리스 소비자는 formatting 계약을 공개하고 expression·source·value·formatter 구현을 비공개로 유지하는 기본 SDK를 사용한다.
 
 내장 함수 구현과 registry는 비공개 구현 세부 사항이다. 생성 프로그램은 `RuntimeBindings`를 사용하고 host callback은 crate 루트의 `Env`, `FunctionContext`, `HostFunction`을 사용한다.
+
+루트 `Source` 타입은 `from_bytes`와 `from_text`를 제공하며 맨 앞 BOM 하나를 제거한 검증된 UTF-8을 소유한다. `name`, `text`, `bytes`, `lines`, `length` 접근자는 소스 메타데이터를 제공한다. `byte_at`과 `span`은 네이티브 바이트 인덱스를 검증하고, `error`는 바이트 오프셋으로 위치가 있는 템플릿 오류를 만든다.

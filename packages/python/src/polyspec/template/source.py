@@ -3,7 +3,7 @@ indexes to byte offsets (LEX-1, LEX-2, LEX-16)."""
 
 from __future__ import annotations
 
-from .errors import Span, error_at, line_index_of
+from .errors import Span, TemplateError, error_at, line_index_of
 from .escape import first_invalid_utf8
 
 
@@ -16,6 +16,17 @@ class Source:
     """
 
     def __init__(self, name: str, data: bytes):
+        data = bytes(data)
+        invalid = first_invalid_utf8(data)
+        if invalid >= 0:
+            raise error_at(
+                "E_LEX_INVALID_UTF8",
+                name,
+                line_index_of(data),
+                (invalid, invalid + 1),
+                f"invalid UTF-8 byte at offset {invalid}",
+            )
+        data = data[3:] if data.startswith(b"\xef\xbb\xbf") else data
         self.name = name
         self.bytes = data
         self.text = data.decode("utf-8")
@@ -36,28 +47,42 @@ class Source:
 
         Invalid UTF-8 raises E_LEX_INVALID_UTF8 at the first invalid byte.
         """
-        invalid = first_invalid_utf8(data)
-        if invalid >= 0:
-            raise error_at(
-                "E_LEX_INVALID_UTF8",
-                name,
-                line_index_of(data),
-                (invalid, invalid + 1),
-                f"invalid UTF-8 byte at offset {invalid}",
-            )
-        stripped = data[3:] if data[:3] == b"\xef\xbb\xbf" else data
-        return Source(name, stripped)
+        return Source(name, data)
 
     @staticmethod
     def from_text(name: str, text: str) -> "Source":
         """Reads a source from a string, which is already valid UTF-8."""
-        stripped = text[1:] if text.startswith("\ufeff") else text
-        return Source(name, stripped.encode("utf-8"))
+        try:
+            data = text.encode("utf-8")
+        except UnicodeEncodeError as error:
+            prefix = text[: error.start].encode("utf-8")
+            offset = len(prefix)
+            raise error_at(
+                "E_LEX_INVALID_UTF8",
+                name,
+                line_index_of(prefix),
+                (offset, offset + 1),
+                "source contains an unpaired surrogate",
+            ) from error
+        return Source(name, data)
+
+    @property
+    def length(self) -> int:
+        """Number of native code point indexes, excluding the end position (LEX-24)."""
+        return len(self.text)
 
     def byte_at(self, index: int) -> int:
         """The byte offset of a code point index."""
+        if not isinstance(index, int) or index < 0 or index > self.length:
+            raise ValueError("index is outside the source")
         return self._byte_offset[index]
 
     def span(self, start: int, end: int) -> Span:
         """The byte span of a range of code point indexes."""
-        return (self._byte_offset[start], self._byte_offset[end])
+        if start > end:
+            raise ValueError("source range is reversed")
+        return (self.byte_at(start), self.byte_at(end))
+
+    def error(self, code: str, start: int, end: int, message: str) -> TemplateError:
+        """Creates a template error at a supplied byte span, including an EOF span."""
+        return error_at(code, self.name, self.lines, (start, end), message)

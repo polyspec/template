@@ -95,3 +95,5 @@ go test -race -count=1 ./...
 ```
 
 Tests are in `*_test.go` files that use external test packages. The conformance cases and the expression fixtures of the repository run in-process.
+
+The public `source` package provides `FromBytes` and `FromText`. A `Source` owns its validated UTF-8 text after exactly one leading BOM is removed, exposes `Name`, `Text`, `Lines`, `Bytes()` and `Length()`, and converts native byte indexes with `ByteAt` and `Span`. `Error` creates a positioned template error from byte offsets.

@@ -873,7 +873,6 @@ final class PageCache
 
 /**
  * Template source: UTF-8 validation, BOM removal and the line index (LEX-1, LEX-2, LEX-16).
- * @internal
  */
 final class Source
 {
@@ -890,6 +889,21 @@ final class Source
      * Checks the bytes as UTF-8 and removes the byte order mark; an invalid byte is E_LEX_INVALID_UTF8 at its offset.
      */
     public static function fromBytes(string $name, string $bytes): Source {}
+
+    /** Captures text through the UTF-8 byte constructor (LEX-24). */
+    public static function fromText(string $name, string $text): Source {}
+
+    /** Returns normalized UTF-8 bytes. */
+    public function bytes(): string {}
+
+    /** Maps a native byte index to a byte offset. */
+    public function byteAt(int $index): int {}
+
+    /** @phpstan-return array{0: int, 1: int} */
+    public function span(int $start, int $end): array {}
+
+    /** Creates a template error at a supplied byte span, including an EOF span. */
+    public function error(string $code, int $start, int $end, string $message): TemplateError {}
 
     /**
      * @return list<int>

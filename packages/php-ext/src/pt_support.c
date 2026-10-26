@@ -76,6 +76,71 @@ ZEND_METHOD(Polyspec_Template_Source, fromBytes)
     pt_source_fill(Z_OBJ_P(return_value), name, data, length);
 }
 
+/* Native strings hold bytes, so the text and byte constructors share validation. */
+ZEND_METHOD(Polyspec_Template_Source, fromText)
+{
+    ZEND_MN(Polyspec_Template_Source_fromBytes)(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Polyspec_Template_Source, bytes)
+{
+    ZEND_PARSE_PARAMETERS_NONE();
+    zval rv;
+    zval *text = zend_read_property(pt_source_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("text"), 0, &rv);
+    RETURN_STR_COPY(Z_STR_P(text));
+}
+
+ZEND_METHOD(Polyspec_Template_Source, byteAt)
+{
+    zend_long index;
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+        Z_PARAM_LONG(index)
+    ZEND_PARSE_PARAMETERS_END();
+    zval rv;
+    zval *text = zend_read_property(pt_source_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("text"), 0, &rv);
+    if (index < 0 || (size_t)index > Z_STRLEN_P(text)) {
+        zend_value_error("index is outside the source");
+        RETURN_THROWS();
+    }
+    RETURN_LONG(index);
+}
+
+ZEND_METHOD(Polyspec_Template_Source, span)
+{
+    zend_long start, end;
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_LONG(start)
+        Z_PARAM_LONG(end)
+    ZEND_PARSE_PARAMETERS_END();
+    zval rv;
+    zval *text = zend_read_property(pt_source_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("text"), 0, &rv);
+    if (start > end || start < 0 || (size_t)end > Z_STRLEN_P(text)) {
+        zend_value_error("source range is reversed or outside the source");
+        RETURN_THROWS();
+    }
+    array_init_size(return_value, 2);
+    add_next_index_long(return_value, start);
+    add_next_index_long(return_value, end);
+}
+
+ZEND_METHOD(Polyspec_Template_Source, error)
+{
+    zend_string *code, *message;
+    zend_long start, end;
+    ZEND_PARSE_PARAMETERS_START(4, 4)
+        Z_PARAM_STR(code)
+        Z_PARAM_LONG(start)
+        Z_PARAM_LONG(end)
+        Z_PARAM_STR(message)
+    ZEND_PARSE_PARAMETERS_END();
+    zval name_rv, lines_rv;
+    zval *name = zend_read_property(pt_source_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("name"), 0, &name_rv);
+    zval *lines = zend_read_property(pt_source_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("lines"), 0, &lines_rv);
+    zend_long line, col;
+    pt_error_position(Z_ARRVAL_P(lines), start, &line, &col);
+    RETURN_OBJ(pt_error_object(ZSTR_VAL(code), Z_STR_P(name), line, col, start, end, message));
+}
+
 ZEND_METHOD(Polyspec_Template_Source, lineIndex)
 {
     zend_string *text;

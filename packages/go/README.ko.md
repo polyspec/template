@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-go-readme -->
-<!-- source-sha256: a0a78a2fe6029f98878bb7a36eaf9b1644930448c7f6395abf19f2a477ba2803 -->
+<!-- source-sha256: 6bde9dae82598391db118731691ceea327707c482051281432de2302db4b5db4 -->
 # github.com/polyspec/template/packages/go
 
 [English](README.md).
@@ -96,3 +96,5 @@ go test -race -count=1 ./...
 ```
 
 테스트는 외부 테스트 패키지를 쓰는 `*_test.go` 파일에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.
+
+공개 `source` 패키지는 `FromBytes`와 `FromText`를 제공한다. `Source`는 맨 앞 BOM 하나를 제거한 검증된 UTF-8 텍스트를 소유하며 `Name`, `Text`, `Lines`, `Bytes()`, `Length()`를 제공한다. `ByteAt`과 `Span`은 네이티브 바이트 인덱스를 변환하고, `Error`는 바이트 오프셋으로 위치가 있는 템플릿 오류를 만든다.

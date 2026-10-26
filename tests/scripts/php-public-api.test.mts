@@ -50,14 +50,14 @@ test(`${entry}: formatter and renderer implementation helpers are internal`, { t
   assert.ok(found.includes('Polyspec\\Template\\Format\\Formatter::format'));
 });
 
-test(`${entry}: source, value and AST construction helpers are internal`, { timeout: 30_000 }, () => {
+test(`${entry}: Unicode, value and AST construction helpers are internal`, { timeout: 30_000 }, () => {
   const found = extract(entry);
-  const internal = ['Source', 'Utf8', 'Escape', 'Value\\Value', 'Value\\Number', 'Value\\HostArgument'];
+  const internal = ['Utf8', 'Escape', 'Value\\Value', 'Value\\Number', 'Value\\HostArgument'];
   assert.deepEqual(classSymbols(found, internal), []);
   for (const name of ['node', 'isLoopMetaField', 'LOOP_META_FIELDS']) {
     assert.ok(!found.includes(`Polyspec\\Template\\Ast::${name}`), name);
   }
-  for (const name of ['Ast::toJson', 'Value\\SafeString', 'Value\\MapValue', 'Value\\Bind::map']) {
+  for (const name of ['Source::fromBytes', 'Source::fromText', 'Source::span', 'Ast::toJson', 'Value\\SafeString', 'Value\\MapValue', 'Value\\Bind::map']) {
     assert.ok(found.includes(`Polyspec\\Template\\${name}`), name);
   }
 });

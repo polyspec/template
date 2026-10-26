@@ -90,3 +90,5 @@ make test-ts
 Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.
 
 The package exports names for the AST, loader and runtime types that appear in its public signatures. `SetNode` names an AST assignment, `LoopMetaExpression` an AST metadata expression, `RuntimeLoopMeta` the active loop metadata, and `SourceSpan` an error source span. These are type exports. `RenderAstProgram` names the type of `AstProgram` from the render-only entry; it adds no constructor to the root runtime exports. A consumer can import these types through the package entry without an implementation path.
+
+`Source.fromBytes` and `Source.fromText` capture validated UTF-8 after exactly one leading BOM is removed. A source exposes `name`, `text`, `bytes`, `lines` and `length`; `byteAt` and `span` convert UTF-16 indexes to UTF-8 byte offsets. `Source.lineIndex` and `Source.position` locate bytes, and `error` creates a positioned template error from byte offsets. Invalid UTF-8 and unpaired text surrogates are rejected.

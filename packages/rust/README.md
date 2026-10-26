@@ -66,3 +66,5 @@ cargo test --locked --features __test_support
 Integration tests are in `tests/`; internal units live beside their modules. The conformance cases and expression fixtures run in-process. Rust unit and parity targets enable `__test_support` for the native expression-vector and formatter-invariant bridges, including the complete formatter target. Release consumers use the default SDK with public formatting contracts and private expression, source, value and formatter implementations.
 
 Built-in function implementations and their registry are private implementation details. Generated programs use `RuntimeBindings`; host callbacks use `Env`, `FunctionContext` and `HostFunction` from the crate root.
+
+The root `Source` type provides `from_bytes` and `from_text`, owning validated UTF-8 after exactly one leading BOM is removed. Its `name`, `text`, `bytes`, `lines` and `length` accessors expose source metadata. `byte_at` and `span` validate native byte indexes; `error` creates a positioned template error from byte offsets.

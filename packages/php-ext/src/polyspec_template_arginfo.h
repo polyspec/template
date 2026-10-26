@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3dccd00331e025d3b6a03e12b39ddb1615e2a99f */
+ * Stub hash: d857fb24a5335695843bba77fd71db1a65d38d96 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -441,6 +441,29 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Source_fr
 	ZEND_ARG_TYPE_INFO(0, bytes, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Source_fromText, 0, 2, Polyspec\\Template\\Source, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Polyspec_Template_Source_bytes arginfo_class_Polyspec_Template_Render_Context_output
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Source_byteAt, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Source_span, 0, 2, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Source_error, 0, 4, Polyspec\\Template\\TemplateError, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Source_lineIndex, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -800,12 +823,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer___construct, 0
 	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_error, 0, 4, Polyspec\\Template\\TemplateError, 0)
-	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_Polyspec_Template_Expr_Lexer_error arginfo_class_Polyspec_Template_Source_error
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_peek, 0, 0, Polyspec\\Template\\Expr\\Token, 0)
 ZEND_END_ARG_INFO()
@@ -1012,6 +1030,11 @@ ZEND_METHOD(Polyspec_Template_PageCache, delete);
 ZEND_METHOD(Polyspec_Template_PageCache, clear);
 ZEND_METHOD(Polyspec_Template_Source, __construct);
 ZEND_METHOD(Polyspec_Template_Source, fromBytes);
+ZEND_METHOD(Polyspec_Template_Source, fromText);
+ZEND_METHOD(Polyspec_Template_Source, bytes);
+ZEND_METHOD(Polyspec_Template_Source, byteAt);
+ZEND_METHOD(Polyspec_Template_Source, span);
+ZEND_METHOD(Polyspec_Template_Source, error);
 ZEND_METHOD(Polyspec_Template_Source, lineIndex);
 ZEND_METHOD(Polyspec_Template_Source, position);
 ZEND_METHOD(Polyspec_Template_Source, length);
@@ -1351,6 +1374,11 @@ static const zend_function_entry class_Polyspec_Template_PageCache_methods[] = {
 static const zend_function_entry class_Polyspec_Template_Source_methods[] = {
 	ZEND_ME(Polyspec_Template_Source, __construct, arginfo_class_Polyspec_Template_Source___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(Polyspec_Template_Source, fromBytes, arginfo_class_Polyspec_Template_Source_fromBytes, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Source, fromText, arginfo_class_Polyspec_Template_Source_fromText, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Source, bytes, arginfo_class_Polyspec_Template_Source_bytes, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Source, byteAt, arginfo_class_Polyspec_Template_Source_byteAt, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Source, span, arginfo_class_Polyspec_Template_Source_span, ZEND_ACC_PUBLIC)
+	ZEND_ME(Polyspec_Template_Source, error, arginfo_class_Polyspec_Template_Source_error, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Source, lineIndex, arginfo_class_Polyspec_Template_Source_lineIndex, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Source, position, arginfo_class_Polyspec_Template_Source_position, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Source, length, arginfo_class_Polyspec_Template_Source_length, ZEND_ACC_PUBLIC)

@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1a3b3c36d77e1fa74b1008beedb58cffe960058589c7f272e7616556e6b2caa3 -->
+<!-- source-sha256: f915445736f122bdee696d36dbdbc81ea8337fa7293fee2d9c547c8299a1f612 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- 모든 SDK가 네이티브 인덱스 변환과 위치 오류를 제공하는 검증된 Source context를 공개한다. 공유 fixture로 metadata·입력 소유권·BOM 하나 제거·Unicode 인덱스·잘못된 UTF-8을 검증한다. TypeScript는 입력 바이트를 복사하고 두 번째 BOM을 유지하며 짝이 없는 텍스트 서로게이트를 거부한다. Python 바이트 생성자는 factory와 같은 정규화를 적용한다. Go는 source 패키지를, Rust는 파서 내부를 노출하지 않는 공개 wrapper를 제공한다. Green: SDK 6개의 공유 Source 단위·SDK 소비자 및 추출 단위 35개·네이티브 lint와 빌드·선언 및 문서 검사를 통과한다. 전체 릴리즈 CI는 계속 필수다 (T27.1-1-26).
 - Rust 오류 위치 타입(`LineIndex`·`Span`)을 SDK root에서 지명할 수 있게 하고 생성 프로그램도 그 경로를 사용하며 정의 모듈은 내부로 유지한다. 공개 위치 오류는 네이티브 error protocol과 canonical 필드 7개를 보존한다. Red: 369ccc91의 기본 소비자가 모듈을 import할 수 있지만 root 위치 타입 두 개는 지명할 수 없다. Green: SDK·선언 단위 28개·네이티브 error-object 단위·release 빌드·clippy·타입·선언 검사 통과. 릴리스 완료 범위에 정확한 main CI 이후 발행을 포함하고 해결한 bootstrap 실패를 현재 차단 사유에서 제거했다(T27.1-1-25).
 - 기본 Rust SDK가 formatter 호출·옵션·결과·오류 계약을 공개하고 정의 모듈·불변식 helper를 내부로 유지한다. 모든 네이티브 formatter case의 본문·식별자는 그대로이며 기존 비기본 harness 기능에서 불변식 helper를 받는다. Formatter target이 이 기능을 요구하고 단위·parity 명령은 이미 활성화한다. Red: 313c1add의 기본 소비자가 불변식 helper를 import할 수 있다. Green: SDK·선언 단위 26개·네이티브 bridge·unchanged-source 단위·전체 formatter target 컴파일·release 빌드·clippy·타입·선언 검사 통과. CI의 모든 formatter case는 계속 필수다(T27.1-1-24).
 - 두 PHP SDK의 source·Unicode·escaping·값 변환 클래스와 AST 구성 helper를 내부로 유지한다. 문서화된 `Ast::toJson`·safe string·map 값·host map binding은 공개 상태를 유지하며 SDK signature에 내부 타입 누출이 없다. Red: bf13f4d4에서 두 SDK probe가 helper를 노출한다. Green: SDK 단위 12개·SDK별 네이티브 Unicode 경계 단위 2개·확장 재빌드·PHP lint·포맷·중복 검사 통과(T27.1-1-23).

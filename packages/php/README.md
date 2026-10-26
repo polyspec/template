@@ -87,3 +87,5 @@ make template-lint-php-format
 The package has no lock of its own: in the repository, `composer install` at the root installs it with its dependencies into the root `vendor/` through the `path` repository of the root `composer.json`, and `make test-php` runs `vendor/bin/phpunit` of that directory with `phpunit.xml` of the package.
 
 Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.
+
+Both PHP SDKs publish `Source::fromBytes` and `Source::fromText`. A source owns validated UTF-8 after exactly one leading BOM is removed and exposes `name`, `text`, `lines`, `bytes()` and `length()`. `byteAt` and `span` validate native byte indexes; `lineIndex` and `position` locate bytes. `error` creates a positioned template error from byte offsets.

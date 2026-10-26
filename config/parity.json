@@ -6635,6 +6635,546 @@
           "id": "test_public_decoder_preserves_class_call_ast_fields"
         }
       ]
+    },
+    {
+      "id": "api-source-type",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source:class"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source"
+        }
+      ]
+    },
+    {
+      "id": "api-source-constructor",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source.fromBytes:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.FromBytes"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::from_bytes"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::fromBytes"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::fromBytes"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.Source"
+        }
+      ]
+    },
+    {
+      "id": "api-source-from-bytes",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source.fromBytes:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.FromBytes"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::from_bytes"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::fromBytes"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::fromBytes"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source.from_bytes"
+        }
+      ]
+    },
+    {
+      "id": "api-source-from-text",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source.fromText:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.FromText"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::from_text"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::fromText"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::fromText"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source.from_text"
+        }
+      ]
+    },
+    {
+      "id": "api-source-name",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::name"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::$name"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::$name"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source"
+        }
+      ]
+    },
+    {
+      "id": "api-source-text",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#text:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Text"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::text"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::$text"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::$text"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source"
+        }
+      ]
+    },
+    {
+      "id": "api-source-bytes",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#bytes:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Bytes"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::bytes"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::bytes"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::bytes"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source"
+        }
+      ]
+    },
+    {
+      "id": "api-source-lines",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#lines:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Lines"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::lines"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::$lines"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::$lines"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source"
+        }
+      ]
+    },
+    {
+      "id": "api-source-length",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#length:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Length"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::length"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::length"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::length"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source.length"
+        }
+      ]
+    },
+    {
+      "id": "api-source-byte-at",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#byteAt:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.ByteAt"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::byte_at"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::byteAt"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::byteAt"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source.byte_at"
+        }
+      ]
+    },
+    {
+      "id": "api-source-span",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#span:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::span"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::span"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::span"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source.span"
+        }
+      ]
+    },
+    {
+      "id": "api-source-line-index",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source.lineIndex:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/errs.NewLineIndex"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::LineIndex::of"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::lineIndex"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::lineIndex"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.errors.line_index_of"
+        }
+      ]
+    },
+    {
+      "id": "api-source-position",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source.position:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/errs.LineIndex.Position"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::LineIndex::position"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::position"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::position"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.errors.position_of"
+        }
+      ]
+    },
+    {
+      "id": "api-source-error",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Source#error:member(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/source.Source.Error"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Source::error"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Source::error"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Source::error"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.source.Source.error"
+        }
+      ]
+    },
+    {
+      "id": "source-contexts",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "feature",
+      "bindings": [
+        {
+          "implementation": "ts",
+          "test": "packages/ts/tests/source.test.ts",
+          "id": "public source contexts › preserves unicode"
+        },
+        {
+          "implementation": "go",
+          "test": "packages/go/source/source_test.go",
+          "id": "TestPublicSourceContexts"
+        },
+        {
+          "implementation": "rust",
+          "test": "packages/rust/tests/source.rs",
+          "id": "public_source_contexts_preserve_the_shared_fixtures"
+        },
+        {
+          "implementation": "php",
+          "test": "packages/php/tests/SourceTest.php",
+          "id": "testPublicSourceContextsPreserveTheSharedFixtures"
+        },
+        {
+          "implementation": "php-ext",
+          "test": "packages/php/tests/SourceTest.php",
+          "id": "testPublicSourceContextsPreserveTheSharedFixtures"
+        },
+        {
+          "implementation": "python",
+          "test": "packages/python/tests/test_source.py",
+          "id": "test_preserves_shared_source_contexts"
+        }
+      ]
+    },
+    {
+      "id": "source-invalid-utf8",
+      "requirements": [
+        "LEX-24"
+      ],
+      "kind": "feature",
+      "bindings": [
+        {
+          "implementation": "ts",
+          "test": "packages/ts/tests/source.test.ts",
+          "id": "public source contexts › rejects surrogate"
+        },
+        {
+          "implementation": "go",
+          "test": "packages/go/source/source_test.go",
+          "id": "TestPublicSourceRejectsInvalidUTF8"
+        },
+        {
+          "implementation": "rust",
+          "test": "packages/rust/tests/source.rs",
+          "id": "public_source_rejects_shared_invalid_utf8"
+        },
+        {
+          "implementation": "php",
+          "test": "packages/php/tests/SourceTest.php",
+          "id": "testPublicSourceRejectsSharedInvalidUtf8"
+        },
+        {
+          "implementation": "php-ext",
+          "test": "packages/php/tests/SourceTest.php",
+          "id": "testPublicSourceRejectsSharedInvalidUtf8"
+        },
+        {
+          "implementation": "python",
+          "test": "packages/python/tests/test_source.py",
+          "id": "test_rejects_shared_invalid_source_bytes"
+        }
+      ]
     }
   ]
 }

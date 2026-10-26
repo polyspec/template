@@ -6,7 +6,6 @@ namespace Polyspec\Template;
 
 /**
  * Template source: UTF-8 validation, BOM removal and the line index (LEX-1, LEX-2, LEX-16).
- * @internal
  */
 final class Source
 {
@@ -36,6 +35,44 @@ final class Source
         }
 
         return new self($name, $bytes);
+    }
+
+    /** Captures text through the UTF-8 byte constructor (LEX-24). */
+    public static function fromText(string $name, string $text): Source
+    {
+        return self::fromBytes($name, $text);
+    }
+
+    /** Returns normalized UTF-8 bytes. */
+    public function bytes(): string
+    {
+        return $this->text;
+    }
+
+    /** Maps a native byte index, including the end position, to a byte offset. */
+    public function byteAt(int $index): int
+    {
+        if ($index < 0 || $index > $this->length()) {
+            throw new \ValueError('index is outside the source');
+        }
+
+        return $index;
+    }
+
+    /** @return array{0: int, 1: int} Half-open byte span of native indexes. */
+    public function span(int $start, int $end): array
+    {
+        if ($start > $end) {
+            throw new \ValueError('source range is reversed');
+        }
+
+        return [$this->byteAt($start), $this->byteAt($end)];
+    }
+
+    /** Creates a template error at a supplied byte span, including an EOF span. */
+    public function error(string $code, int $start, int $end, string $message): TemplateError
+    {
+        return TemplateError::at($code, $this->name, $this->lines, $start, $end, $message);
     }
 
     /**

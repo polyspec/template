@@ -1,4 +1,5 @@
 // Host binding of JavaScript values (VAL-13), the number rule (VAL-2, VAL-3) and the depth limit (VAL-20).
+import { firstUnpairedSurrogate } from '../escape.js';
 import { boundEntries } from './bound.js';
 import { MAX_SAFE } from './number.js';
 import { NativeObject, SafeString, type MapValue, type Value } from './value.js';
@@ -27,18 +28,7 @@ export function checkNumber(value: number): number {
 
 // VAL-13, VAL-17: a string or a map key must be well-formed UTF-16, so that it has a UTF-8 form.
 export function checkText(text: string): string {
-  for (let index = 0; index < text.length; index++) {
-    const unit = text.charCodeAt(index);
-    if (unit >= 0xd800 && unit <= 0xdbff) {
-      const next = text.charCodeAt(index + 1);
-      if (next >= 0xdc00 && next <= 0xdfff) {
-        index++;
-        continue;
-      }
-      throw new BindError('E_DATA_INVALID_UTF8', 'string contains an unpaired surrogate');
-    }
-    if (unit >= 0xdc00 && unit <= 0xdfff) throw new BindError('E_DATA_INVALID_UTF8', 'string contains an unpaired surrogate');
-  }
+  if (firstUnpairedSurrogate(text) >= 0) throw new BindError('E_DATA_INVALID_UTF8', 'string contains an unpaired surrogate');
   return text;
 }
 

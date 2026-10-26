@@ -82,3 +82,8 @@ test('a Rust consumer can construct positioned errors through the SDK root', { t
   const result = compile('public-errors.rs');
   assert.equal(result.status, 0, result.stderr);
 });
+
+test('a Rust consumer can use the public source context', { timeout: 30_000 }, () => {
+  const result = compile('public-source.rs');
+  assert.equal(result.status, 0, result.stderr);
+});

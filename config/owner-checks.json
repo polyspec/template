@@ -1150,6 +1150,29 @@
         "template-test-go-unit"
       ],
       "tests": []
+    },
+    {
+      "paths": [
+        "tests/fixtures/source-context.json"
+      ],
+      "targets": [
+        "template-test-ts-unit",
+        "template-test-go-unit",
+        "template-test-rust-unit",
+        "template-test-php",
+        "test-php-ext",
+        "template-test-python"
+      ],
+      "tests": []
+    },
+    {
+      "paths": [
+        "scripts/json-document.mts"
+      ],
+      "targets": [
+        "template-test-ts-unit"
+      ],
+      "tests": []
     }
   ],
   "inputs": [
@@ -1348,7 +1371,9 @@
         "packages/ts/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
-        "tests/fixtures/ast-decode/**"
+        "tests/fixtures/ast-decode/**",
+        "tests/fixtures/source-context.json",
+        "scripts/json-document.mts"
       ]
     },
     {
@@ -1460,7 +1485,8 @@
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**",
-        "config/parity.json"
+        "config/parity.json",
+        "tests/fixtures/source-context.json"
       ]
     },
     {
@@ -1475,7 +1501,8 @@
         "packages/rust/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
-        "tests/fixtures/ast-decode/**"
+        "tests/fixtures/ast-decode/**",
+        "tests/fixtures/source-context.json"
       ]
     },
     {
@@ -1612,7 +1639,8 @@
     {
       "check": "make test-php-ext",
       "paths": [
-        "packages/php-ext/**"
+        "packages/php-ext/**",
+        "tests/fixtures/source-context.json"
       ]
     },
     {

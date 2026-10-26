@@ -20,6 +20,7 @@ pub mod loader;
 pub mod page_cache;
 mod parser;
 mod render;
+mod sdk_source;
 mod source;
 mod value;
 
@@ -51,6 +52,8 @@ pub use value::bind::{BindError, bind_json, bind_map, bind_value, bind_values, t
 pub use value::bound::{BindInput, BoundMap, DefineData, bind, bind_data, bound_root, merge};
 pub use value::json::{parse_json, parse_json_bytes, read_json};
 pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value, ValueType};
+
+pub use sdk_source::Source;
 
 pub use parser::{SyntaxTag, SyntaxToken, TagKind, TemplateAnalysis, TokenKind};
 
