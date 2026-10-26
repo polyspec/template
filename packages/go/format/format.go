@@ -12,8 +12,8 @@ import (
 
 	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/lexer"
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/lexer"
+	"github.com/polyspec/template/packages/go/internal/parser"
 	"github.com/polyspec/template/packages/go/render"
 )
 

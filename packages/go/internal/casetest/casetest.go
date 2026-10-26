@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/parser"
 )
 
 // Case is one conformance case: its id <group>/<name> and its directory.

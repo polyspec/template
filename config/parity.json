@@ -57,7 +57,7 @@
       "cases": "*/*",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/tokens.test.ts" },
-        { "implementation": "go", "test": "packages/go/parser/analyze_test.go", "symbol": "TestConformanceTokens" },
+        { "implementation": "go", "test": "packages/go/internal/parser/analyze_test.go", "symbol": "TestConformanceTokens" },
         { "implementation": "rust", "test": "packages/rust/tests/cases.rs", "symbol": "tokens" },
         { "implementation": "php", "test": "packages/php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testTokens" },
         { "implementation": "php-ext", "test": "packages/php/tests/ConformanceTest.php", "symbol": "Polyspec\\Template\\Tests\\ConformanceTest::testTokens" },
@@ -87,7 +87,7 @@
       "cases": "$[*].name",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/expr/fixtures.test.ts" },
-        { "implementation": "go", "test": "packages/go/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
+        { "implementation": "go", "test": "packages/go/internal/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
         { "implementation": "rust", "test": "packages/rust/tests/expr_fixtures.rs", "symbol": "expressions" },
         { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "php-ext", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
@@ -100,7 +100,7 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "spans \u203a counts bytes, not code units" },
-        { "implementation": "go", "test": "packages/go/lexer/source_test.go", "id": "TestSpansAreBytes" },
+        { "implementation": "go", "test": "packages/go/internal/lexer/source_test.go", "id": "TestSpansAreBytes" },
         { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "spans_count_bytes" },
         { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testSpansCountBytes" },
         { "implementation": "php-ext", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testSpansCountBytes" },
@@ -113,7 +113,7 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "delimiters \u203a accepts the engine option and the directive" },
-        { "implementation": "go", "test": "packages/go/parser/parser_test.go", "id": "TestDelimiters" },
+        { "implementation": "go", "test": "packages/go/internal/parser/parser_test.go", "id": "TestDelimiters" },
         { "implementation": "rust", "test": "packages/rust/tests/parser.rs", "id": "delimiters_come_from_the_option_and_the_directive" },
         { "implementation": "php", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testDelimitersOptionAndDirective" },
         { "implementation": "php-ext", "test": "packages/php/tests/Parser/ParserTest.php", "id": "testDelimitersOptionAndDirective" },
@@ -139,7 +139,7 @@
       "kind": "feature",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/parser/parser.test.ts", "id": "syntax analysis \u203a classifies every part of every tag kind" },
-        { "implementation": "go", "test": "packages/go/parser/analyze_test.go", "id": "TestAnalyzeClassifiesEveryPartOfEveryTagKind" },
+        { "implementation": "go", "test": "packages/go/internal/parser/analyze_test.go", "id": "TestAnalyzeClassifiesEveryPartOfEveryTagKind" },
         { "implementation": "rust", "test": "packages/rust/tests/analyze.rs", "id": "classifies_every_part_of_every_tag_kind" },
         { "implementation": "php", "test": "packages/php/tests/Parser/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind with data set \"echo\"" },
         { "implementation": "php-ext", "test": "packages/php/tests/Parser/AnalyzeTest.php", "id": "testClassifiesEveryPartOfEveryTagKind with data set \"echo\"" },

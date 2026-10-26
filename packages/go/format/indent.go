@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/parser"
 )
 
 // Indentation: the spaces and tabs at the start of each line, set by the nesting of HTML elements and template blocks.

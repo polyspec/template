@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/lexer"
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/lexer"
+	"github.com/polyspec/template/packages/go/internal/parser"
 )
 
 // AST-2, LEX-16: a span counts UTF-8 bytes.

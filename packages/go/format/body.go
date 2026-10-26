@@ -3,7 +3,7 @@ package format
 import (
 	"strings"
 
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/parser"
 )
 
 // bodyInput is the source text of one tag body and the tokens that the parser classified inside it, its sigil first.

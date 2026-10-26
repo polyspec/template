@@ -26,11 +26,16 @@ test('a Go consumer can name the host callback context through the SDK', { timeo
   assert.equal(result.status, 0, result.stderr);
 });
 
-for (const file of ['private-builtins.go', 'internal-builtins.go']) {
-  test(`a Go consumer cannot import the built-in implementation through ${file}`, { timeout: 30_000 }, () => {
+test('a Go consumer can name parser analysis types through the SDK', { timeout: 30_000 }, () => {
+  const result = compile('public-parser.go');
+  assert.equal(result.status, 0, result.stderr);
+});
+
+for (const file of ['private-builtins.go', 'internal-builtins.go', 'private-lexer.go', 'private-parser.go', 'private-expression.go']) {
+  test(`a Go consumer cannot import an implementation through ${file}`, { timeout: 30_000 }, () => {
     const result = compile(file);
     assert.equal(result.error, undefined);
     assert.notEqual(result.status, null);
-    assert.notEqual(result.status, 0, 'the implementation registry is publicly accessible');
+    assert.notEqual(result.status, 0, 'an implementation package is publicly accessible');
   });
 }

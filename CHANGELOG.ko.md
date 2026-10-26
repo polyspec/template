@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5d9f583a83ce76b103c915ccff51a716219ea4c23b1f0f45f2b82406f5770071 -->
+<!-- source-sha256: ca00968ba1ce6f5a227ac6cd417be19bea55f577dacca5c5e4138efae8f40191 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Go lexer·parser·expression 구현 패키지를 internal로 유지한다. 공개 Parse·Analyze를 유지하고 SDK에서 TagKind·TokenKind를 지정할 수 있다. 이동한 모든 테스트와 suite 연결을 유지했다. Red: 5a51a833에서 외부 소비자가 구현을 import할 수 있었으며 SDK kind 타입은 지정할 수 없었다. Green: 외부 SDK 검사 7개·네이티브 lexer 및 parser 단위 9개·Go 및 backend vet·parity 선언·선택한 lint 통과(T27.1-1-12).
 - Frame·scope 필드와 scope 조회 연산을 compiler manifest에 연결한 공유 API 단위 7개로 선언했다. Python 슬롯은 클래스를 통해 공개하며 정확한 슬롯 이름을 네이티브 검사로 확인한다. Red: 5e14e2ba에서 선언 그룹 세 개의 API 연결이 없었다. Green: 선언 단위 10개·여섯 네이티브 compiler-interface 검사(단위 15개), 기반 도구 타입·parity 선언·선택한 lint 통과(T27.1-1-11).
 - Rust compiler runtime 타입은 SDK root에서 공개하고 renderer 구현 모듈은 비공개로 유지한다. 생성 코드는 공개 facade를 import하며 API 선언도 정확한 공개 심볼을 가리킨다. Red: 3abc9844에서 runtime 소비자가 root service를 찾지 못하고 구현에는 접근할 수 있었다. Green: SDK·선언 단위 14개·네이티브 interface·export·object 단위 10개, 빌드·compiler 및 기반 도구 타입·clippy·선택한 lint 통과. 선언 회귀 검사가 선택 항목인 네이티브 연산 목록을 확인한 뒤 해당 연산명을 사용한다(T27.1-1-10).
 - Rust scanner와 HTML escape 모듈을 비공개 구현으로 유지하고 검증한 AstProgram delimiter 상태는 crate 내부에서만 접근한다. 외부 소비자는 root parse/analyze 연산과 공개 결과 타입을 계속 사용할 수 있다. Red: 85f02d76에서 두 helper를 모두 import할 수 있었다. Green: 외부 SDK 검사 5개·네이티브 parser 및 delimiter 단위 8개·clippy·선택한 lint 통과(T27.1-1-9).

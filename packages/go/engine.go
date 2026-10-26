@@ -9,9 +9,9 @@ import (
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/format"
 	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/lexer"
+	"github.com/polyspec/template/packages/go/internal/lexer"
+	"github.com/polyspec/template/packages/go/internal/parser"
 	"github.com/polyspec/template/packages/go/loader"
-	"github.com/polyspec/template/packages/go/parser"
 	"github.com/polyspec/template/packages/go/render"
 	"github.com/polyspec/template/packages/go/value"
 )
@@ -117,6 +117,12 @@ func Parse(source []byte, name string, options ParseOptions) (*ast.Template, err
 // Analysis is the AST of a template with the accepted tags and their EDT-8 tokens; offsets are UTF-8 byte offsets
 // after a leading byte order mark.
 type Analysis = parser.Analysis
+
+// TagKind is the kind of an accepted tag.
+type TagKind = parser.TagKind
+
+// TokenKind is the classification of a parser token.
+type TokenKind = parser.TokenKind
 
 // Tag is the source range of one accepted tag, with its kind and the range of its body.
 type Tag = parser.Tag

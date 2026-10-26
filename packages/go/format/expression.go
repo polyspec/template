@@ -3,7 +3,7 @@ package format
 import (
 	"strings"
 
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/parser"
 )
 
 // expressionToken is an expression token: its text and the EDT-8 class that the parser gives it.

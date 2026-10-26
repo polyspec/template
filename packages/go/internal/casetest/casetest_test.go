@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/parser"
+	"github.com/polyspec/template/packages/go/internal/parser"
 )
 
 func TestDelimiterOptions(t *testing.T) {

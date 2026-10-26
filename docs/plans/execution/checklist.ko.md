@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: caa7152f5564436807f3ffe17c7238d92d1b0ef41f8e19011342863749f7e716 -->
+<!-- source-sha256: 757bbe8a99bb91bdb92d5943f4229b06ee5e81f9a184295a3a875fbc7d350441 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -386,3 +386,4 @@
 | T27.1-1-9 | Rust scanner·escape 구현을 비공개로 유지하고 root parsing·analysis API는 유지한다. 검증한 delimiter 상태는 crate 내부에 둔다 | Rust 모듈 공개 범위·외부 소비자 fixture·parser 단위 | `make build-rust`; `var/tools/bin/node --test tests/scripts/rust-public-api.test.mts`; 네이티브 parser·delimiter 단위; `make template-test-rust-clippy`; `make docs-check` | [o] |
 | T27.1-1-10 | Rust compiler runtime 타입을 SDK root에서 공개하고 renderer 구현 모듈을 비공개로 유지한다. compiler import와 정확한 API 연결을 갱신한다 | Rust SDK facade·compiler backend·외부 소비자 검사 | `make build-rust`; `var/tools/bin/node --test tests/scripts/rust-public-api.test.mts tests/scripts/api-contract-declarations.test.mts`; 네이티브 interface·export·object 단위; `make docs-check` | [o] |
 | T27.1-1-11 | compiler manifest의 공통 frame·scope 필드 5개와 scope 연산 2개를 선언하고 Python 슬롯 필드는 네이티브 interface 테스트로 확인한다 | Frame·scope API 단위·네이티브 compiler-interface 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts`; 여섯 네이티브 compiler-interface 단위 검사; `make typecheck`; `make parity-declarations-check`; `make docs-check` | [o] |
+| T27.1-1-12 | Go lexer·parser·expression 구현을 internal 패키지로 유지하고 공개 Parse·Analyze SDK와 지정 가능한 tag·token kind 타입을 제공한다. 이동한 모든 suite 연결을 유지한다 | Go internal 패키지·SDK 소비자 fixture·네이티브 parser 테스트 | `var/tools/bin/node --test tests/scripts/go-public-api.test.mts`; 선택한 네이티브 lexer·parser 단위; `make template-test-go-vet`; `make template-test-go-backend-vet`; `make parity-declarations-check`; `make docs-check` | [o] |

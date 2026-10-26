@@ -7,8 +7,8 @@ import (
 
 	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/expr"
-	"github.com/polyspec/template/packages/go/lexer"
+	"github.com/polyspec/template/packages/go/internal/expr"
+	"github.com/polyspec/template/packages/go/internal/lexer"
 )
 
 var reserved = map[string]bool{"true": true, "false": true, "null": true, "in": true}
