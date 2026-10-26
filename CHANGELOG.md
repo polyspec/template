@@ -7,6 +7,7 @@
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 ## 0.0.12
+- The VitePress lock uses Vite 6.4.5 with its reviewed advisory fixes; dependency-policy-check passes. (T26.7-43-1).
 - The dependency refresh is complete; the candidate review covers 50 registry dependencies and 8 locks, and dependency-policy-check passes. (T26.7-43).
 - The PHP extension version constant is prepared for candidate 0.0.12 (T27.1).
 - Release candidate 0.0.12 synchronizes package versions, native locks and nine archive candidates, including the PHP CLI. Its review covers 50 registry dependencies and 8 locks. Version coverage, selected tooling units (30), Python API units (47), type checks and documentation build pass locally; main integration and complete CI acceptance remain pending. Dependency refresh, Vite security patch and the exact PHPUnit pin are prepared (T27.1, T26.7-43, T26.7-43-1, T26.7-65).

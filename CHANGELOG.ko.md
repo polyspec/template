@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 406713af0c7275dc4b6e7a90905fa21885677ec776bf62083e7c43eaa6fe7691 -->
+<!-- source-sha256: fe2c0d398802c1293458c1a077c3834e895e3666be0b5a7afe79cf9c6d90aad9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- VitePress lock이 검토한 보안 수정을 포함한 Vite 6.4.5를 사용하며 dependency-policy-check가 통과한다. (T26.7-43-1).
 - 의존성 갱신을 완료했다. 후보의 레지스트리 의존성 50개와 lock 8개를 검토했고 dependency-policy-check가 통과한다. (T26.7-43).
 - PHP 확장의 버전 상수를 후보 0.0.12에 맞춰 준비했다(T27.1).
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
