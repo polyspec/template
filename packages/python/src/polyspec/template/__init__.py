@@ -19,7 +19,7 @@ from .engine import (
 )
 from .errors import ERROR_CODES, TemplateError, internal_boundary
 from .formatter import FormatError, FormatOptions, FormatResult, format_template
-from .functions import BUILTINS, Env, FunctionContext, HostFunction
+from .functions import Env, FunctionContext, HostFunction
 from .json_parse import parse_json, parse_json_bytes
 from .loader import (
     LoadedAst,
@@ -43,7 +43,6 @@ from .runtime_environment import RuntimeEnvironment, RuntimeServices
 from .runtime_bindings import RuntimeBindings
 from .scanner import DEFAULT_DELIMITERS, parse_delimiters
 from .source import Source
-from .statements import Evaluator, Renderer
 from .values import NativeObject, SafeString
 
 __all__ = [
@@ -51,7 +50,6 @@ __all__ = [
     "load_artifact",
     "load_or_refresh",
     "MAX_SAFE",
-    "BUILTINS",
     "DEFAULT_DELIMITERS",
     "ERROR_CODES",
     "AstDecodeError",
@@ -61,7 +59,6 @@ __all__ = [
     "Engine",
     "EngineOptions",
     "Env",
-    "Evaluator",
     "Frame",
     "FormatError",
     "FormatOptions",
@@ -83,7 +80,6 @@ __all__ = [
     "Program",
     "RenderContext",
     "RenderOptions",
-    "Renderer",
     "RuntimeBindings",
     "RuntimeEnvironment",
     "RuntimeServices",

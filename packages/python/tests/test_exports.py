@@ -13,7 +13,19 @@ from pathlib import Path
 
 import polyspec.template as template
 from polyspec.template import AstProgram, EngineOptions, MapLoader, Engine
-from polyspec.template import bind_operations, engine, loader
+from polyspec.template import (
+    bind_operations,
+    engine,
+    loader,
+    functions,
+    expr_lexer,
+    expr_parser,
+    format_body,
+    format_expression,
+    format_indent,
+    format_invariant,
+    statements,
+)
 from polyspec.template.bind import BoundMap
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -42,6 +54,28 @@ class ExportTests(unittest.TestCase):
     def test_the_package_does_not_export_analyze_prefix(self):
         self.assertNotIn("analyze_prefix", template.__all__)
         self.assertFalse(hasattr(template, "analyze_prefix"))
+
+    def test_builtin_and_interpreter_implementations_are_not_sdk_exports(self):
+        for name in ("BUILTINS", "Evaluator", "Renderer"):
+            self.assertNotIn(name, template.__all__)
+            self.assertFalse(hasattr(template, name), name)
+        internal = (
+            expr_lexer,
+            expr_parser,
+            format_body,
+            format_expression,
+            format_indent,
+            format_invariant,
+            statements,
+        )
+        for module in internal:
+            with self.subTest(module.__name__):
+                self.assertEqual(getattr(module, "__all__", None), [])
+        self.assertEqual(
+            set(functions.__all__), {"Env", "FunctionContext", "HostFunction"}
+        )
+        for name in functions.__all__:
+            self.assertIs(getattr(functions, name), getattr(template, name))
 
     def test_export_list_has_no_repeated_name(self):
         repeated = sorted(

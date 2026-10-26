@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: a1f1cac6c0c55e9a5a0e14fb6c675628279fc1cfb879837a1f69bdf61d37db01 -->
+<!-- source-sha256: 6017af638055f56e99c11e104bee19d09778ac94e4451d36c2ebf834569f5cef -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -400,3 +400,4 @@
 | T27.1-1-17 | Rust AST signature 타입을 모두 SDK root에서 공개하고 정의 모듈을 내부로 유지하며 compiler가 root-qualified 연산자를 생성하게 한다 | Rust AST facade·compiler backend·외부 소비자 probe | Release 빌드; SDK·선언 단위 21개; clippy; 네이티브 포맷; 타입·선언·문서 검사; CI 생성 프로그램 | [o] |
 | T27.1-1-18 | Canonical AST shape·필드를 각 네이티브 공개 표현에 선언하고 TypeScript·Go 필드 일치와 모든 decoder fixture의 필드 coverage를 검증하며 모든 SDK의 class call을 포함한다 | AST API 단위 130개·schema 기반 계약 검사·네이티브 decoder 회귀 | Schema·선언 단위 3개; TypeScript decoder 단위; 네이티브 class-call decoder 6개; Go reflection 단위; 타입·lint·선언·문서 검사 | [o] |
 | T27.1-1-19 | PHP formatter 구현 helper·interpreter 클래스를 내부로 유지하고 formatter·compiler-runtime SDK를 보존한다 | PHPDoc 가시성·네이티브 SDK probe·확장 arginfo | SDK 추출 단위 10개; 두 SDK의 네이티브 formatter smoke 단위; PHP lint·포맷; 중복·문서 검사 | [o] |
+| T27.1-1-20 | 네이티브 export list로 Python builtin·interpreter·expression·formatter 구현 이름을 SDK 밖에 유지하고 host callback 계약·모든 네이티브 벡터를 보존한다 | Package export·module export list·소비자 회귀 | Export 단위 9개; 네이티브 registry·formatter 단위 2개; Python lint; parity 선언; 문서; CI 전체 벡터 | [o] |

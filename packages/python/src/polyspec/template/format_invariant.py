@@ -50,3 +50,6 @@ def same_tree(left, right) -> bool:
     """Compares two AST values structurally, ignoring object key order and every
     `span` field."""
     return without_spans(left) == without_spans(right)
+
+
+__all__ = []

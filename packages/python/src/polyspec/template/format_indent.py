@@ -299,3 +299,6 @@ def _scan_structure(text: str, tags: list[dict], template_blocks: str):
 
 def _starts_with_end_tag(text: str, index: int, name: str) -> bool:
     return text[index : index + len(name) + 2].lower() == f"</{name}"
+
+
+__all__ = []

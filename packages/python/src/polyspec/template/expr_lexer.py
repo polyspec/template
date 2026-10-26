@@ -395,3 +395,6 @@ def json_char(value: str) -> str:
     import json
 
     return json.dumps(value)
+
+
+__all__ = []

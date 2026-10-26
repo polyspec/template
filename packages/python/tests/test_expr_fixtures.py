@@ -9,7 +9,6 @@ from pathlib import Path
 from polyspec.template import (
     AstProgram,
     EngineOptions,
-    Evaluator,
     Frame,
     RenderContext,
     Scope,
@@ -19,6 +18,7 @@ from polyspec.template import (
 from polyspec.template.expr_lexer import ExpressionLexer, LexerOptions
 from polyspec.template.expr_parser import ExpressionParser
 from polyspec.template.functions import Env
+from polyspec.template.statements import Evaluator
 from polyspec.template.source import Source
 
 CASES = json.loads(

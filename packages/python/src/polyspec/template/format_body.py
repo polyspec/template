@@ -126,3 +126,6 @@ def _words(text: str) -> list[str]:
     if current:
         result.append(current)
     return result
+
+
+__all__ = []

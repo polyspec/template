@@ -9,7 +9,6 @@ import unittest
 from pathlib import Path
 
 from polyspec.template import (
-    BUILTINS,
     AstProgram,
     Engine,
     EngineOptions,
@@ -20,7 +19,7 @@ from polyspec.template import (
     TemplateError,
     parse,
 )
-from polyspec.template.functions import Env
+from polyspec.template.functions import BUILTINS, Env
 
 CONTRACT = json.loads(
     (

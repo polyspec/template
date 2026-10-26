@@ -316,3 +316,6 @@ class Renderer:
             self.render_nodes(node["body"], frame, scope)
         elif node["else"] is not None:
             self.render_nodes(node["else"], frame, scope)
+
+
+__all__ = []

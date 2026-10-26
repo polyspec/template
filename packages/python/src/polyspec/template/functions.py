@@ -744,3 +744,7 @@ def _build_builtins() -> dict[str, BuiltIn]:
 
 
 BUILTINS: dict[str, BuiltIn] = _build_builtins()
+
+
+# Host callbacks are SDK contracts; built-in implementations are internal.
+__all__ = ["Env", "FunctionContext", "HostFunction"]
