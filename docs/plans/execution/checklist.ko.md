@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 83858bcbbde56a095dce7348b40b30ba7e8d7f8d08c51391b1a831a8ad6cf579 -->
+<!-- source-sha256: 8c8c947ef9a6d65c4a82fcbcfa6d0d32411692ecbe0921262018ca9cc2898420 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -380,3 +380,4 @@
 | T27.1-1-3 | compiler manifest의 RuntimeBindings 연산 20개를 공유 API 단위로 선언하고 각 TypeScript·Go·Rust·PHP·PHP 확장·Python 실제 메서드에 연결한다. 다른 연산을 가리키는 단위가 없음을 검증한다 | API 선언, compiler manifest 대응과 네이티브 interface 단위 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts`; 네이티브 compiler-interface 단위 테스트; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-1-4 | Rust 내장 함수 구현 모듈을 비공개로 유지하고 공개 callback API를 보존한다. 함수 테스트를 내용 변경 없이 crate 안으로 옮기고 모든 feature binding을 유지하며 외부 소비자가 callback은 사용하고 구현 registry는 import할 수 없음을 증명한다 | Rust 함수 모듈, 유지한 단위 테스트, 소비자 fixture와 parity binding | `make build-rust`; `var/tools/bin/node --test tests/scripts/rust-public-api.test.mts`; 네이티브 함수 단위 테스트; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-1-5 | compiler manifest의 Program·Engine prepare/render와 RuntimeServices 조회·제한 메서드를 공유 API로 선언하고 여섯 구현의 정확한 네이티브 소유자에 연결한다 | API 선언과 manifest 기반 회귀 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts`; `make parity-declarations-check`; `make docs-check` | [o] |
+| T27.1-1-6 | 오류 코드 값 41개를 공유 API 데이터로 선언하고 실제 네이티브 상수 또는 공개 문자열 union·catalog 표현에 연결한다. error-codes-check와 parity R7의 정확한 catalog 검증을 유지한다 | 오류 값 API 단위와 catalog 기반 회귀 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts tests/scripts/error-codes.test.mts`; `make parity-declarations-check`; `make docs-check` | [o] |

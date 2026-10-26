@@ -1511,6 +1511,539 @@
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Engine::render"},
         {"implementation": "python", "symbol": "template.engine.Engine.render"}
       ]
+    },
+    {
+      "id": "api-error-code-value-lex-invalid-utf8",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.LexInvalidUTF8"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_LEX_INVALID_UTF8"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_LEX_INVALID_UTF8"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_LEX_INVALID_UTF8"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-unterminated-tag",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseUnterminatedTag"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNTERMINATED_TAG"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNTERMINATED_TAG"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-unterminated-comment",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseUnterminatedComment"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNTERMINATED_COMMENT"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNTERMINATED_COMMENT"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-unterminated-string",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseUnterminatedString"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNTERMINATED_STRING"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNTERMINATED_STRING"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-unexpected-token",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseUnexpectedToken"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNEXPECTED_TOKEN"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNEXPECTED_TOKEN"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-invalid-number",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseInvalidNumber"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_NUMBER"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_NUMBER"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-invalid-escape",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseInvalidEscape"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_ESCAPE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_ESCAPE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-unexpected-close",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseUnexpectedClose"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNEXPECTED_CLOSE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNEXPECTED_CLOSE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-unclosed-block",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseUnclosedBlock"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNCLOSED_BLOCK"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_UNCLOSED_BLOCK"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-else-outside-block",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseElseOutsideBlock"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-duplicate-else",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseDuplicateElse"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_DUPLICATE_ELSE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_DUPLICATE_ELSE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-elseif-after-else",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseElseifAfterElse"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-elseif-not-in-if",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseElseifNotInIf"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-reserved-name",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseReservedName"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_RESERVED_NAME"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_RESERVED_NAME"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-invalid-path",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseInvalidPath"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_INVALID_PATH"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_PATH"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_PATH"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-invalid-block-tag",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseInvalidBlockTag"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_BLOCK_TAG"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_BLOCK_TAG"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-invalid-wrapper",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseInvalidWrapper"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_WRAPPER"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_WRAPPER"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-parse-invalid-directive",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.ParseInvalidDirective"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_DIRECTIVE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_PARSE_INVALID_DIRECTIVE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-load-not-found",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.LoadNotFound"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_LOAD_NOT_FOUND"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_NOT_FOUND"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_NOT_FOUND"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-load-cycle",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.LoadCycle"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_LOAD_CYCLE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_CYCLE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_CYCLE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-load-outside-root",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.LoadOutsideRoot"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_OUTSIDE_ROOT"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_OUTSIDE_ROOT"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-load-failed",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.LoadFailed"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_LOAD_FAILED"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_FAILED"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_LOAD_FAILED"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-data-number-range",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.DataNumberRange"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_NUMBER_RANGE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_NUMBER_RANGE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-data-number-not-finite",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.DataNumberNotFinite"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_NUMBER_NOT_FINITE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_NUMBER_NOT_FINITE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-data-invalid-utf8",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.DataInvalidUTF8"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_DATA_INVALID_UTF8"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_INVALID_UTF8"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_INVALID_UTF8"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-data-unsupported-type",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.DataUnsupportedType"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_UNSUPPORTED_TYPE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_UNSUPPORTED_TYPE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-data-depth",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.DataDepth"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_DATA_DEPTH"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_DEPTH"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_DEPTH"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-data-invalid-json",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.DataInvalidJSON"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_DATA_INVALID_JSON"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_INVALID_JSON"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_DATA_INVALID_JSON"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-type",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeType"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_TYPE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_TYPE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_TYPE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-compare",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeCompare"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_COMPARE"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_COMPARE"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_COMPARE"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-div-zero",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeDivZero"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_DIV_ZERO"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_DIV_ZERO"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-stringify",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeStringify"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_STRINGIFY"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_STRINGIFY"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-unknown-function",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeUnknownFunction"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-arity",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeArity"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_ARITY"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_ARITY"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_ARITY"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-host-function",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeHostFunction"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_HOST_FUNCTION"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_HOST_FUNCTION"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_HOST_FUNCTION"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-unknown-loop",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeUnknownLoop"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_UNKNOWN_LOOP"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_UNKNOWN_LOOP"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-block-undefined",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeBlockUndefined"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_BLOCK_UNDEFINED"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_BLOCK_UNDEFINED"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-block-redefined",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeBlockRedefined"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_BLOCK_REDEFINED"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_BLOCK_REDEFINED"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-depth",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeDepth"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_DEPTH"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_DEPTH"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_DEPTH"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-runtime-limit",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.RuntimeLimit"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_RUNTIME_LIMIT"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_LIMIT"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_RUNTIME_LIMIT"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
+    },
+    {
+      "id": "api-error-code-value-internal",
+      "requirements": ["ERR-1"],
+      "kind": "api",
+      "symbols": [
+        {"implementation":"ts","symbol":"@polyspec/template!ErrorCode:type"},
+        {"implementation":"go","symbol":"github.com/polyspec/template/packages/go/errs.Internal"},
+        {"implementation":"rust","symbol":"polyspec_template::ErrorCode::E_INTERNAL"},
+        {"implementation":"php","symbol":"Polyspec\\Template\\ErrorCode::E_INTERNAL"},
+        {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_INTERNAL"},
+        {"implementation":"python","symbol":"template.ERROR_CODES"}
+      ]
     }
   ]
 }

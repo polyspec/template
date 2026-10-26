@@ -1,8 +1,10 @@
 // API symbols must identify the operation of the shared compiler contract,
 // rather than an arbitrary symbol that happens to exist in each implementation.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { compilerManifestDocument } from '../../scripts/compiler-manifest.mts';
+import { CATALOG, goName, parseCatalog } from '../../scripts/generate-error-codes.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { readParityConfig } from '../../scripts/parity-config.mts';
 
@@ -81,5 +83,33 @@ for (const contract of contracts) test(`every ${contract.owner} operation declar
           : binding.implementation === 'rust' || language === 'php' ? `${owner}::${mapped}` : `${owner}.${mapped}`;
       assert.equal(binding.symbol, expected, `${id}: ${binding.implementation}`);
     }
+  }
+});
+
+test('each error code publishes its native literal or code type/catalog', { timeout: 5000 }, () => {
+  // String-union and native-string representations do not introduce a named
+  // constant per value. Their membership remains enforced by error-codes-check
+  // and parity's complete catalog comparison, alongside these publication points.
+  const codes = parseCatalog(readFileSync(CATALOG, 'utf8'));
+  const implementations = readParityConfig().implementations.map(item => item.name).sort();
+  const expectedIds = codes.map(({ code }) => `api-error-code-value-${code.slice(2).toLowerCase().replaceAll('_', '-')}`);
+  assert.deepEqual(parity.units.filter(unit => unit.id.startsWith('api-error-code-value-')).map(unit => unit.id).sort(), [...expectedIds].sort());
+  for (const { code } of codes) {
+    const id = `api-error-code-value-${code.slice(2).toLowerCase().replaceAll('_', '-')}`;
+    const unit = parity.units.find(item => item.id === id);
+    assert.ok(unit !== undefined);
+    assert.equal(unit.kind, 'api');
+    assert.ok(unit.requirements.includes('ERR-1'));
+    assert.ok(unit.symbols !== undefined);
+    assert.deepEqual(unit.symbols.map(item => item.implementation).sort(), implementations, id);
+    const expected: Record<string, string> = {
+      ts: '@polyspec/template!ErrorCode:type',
+      go: `github.com/polyspec/template/packages/go/errs.${goName(code)}`,
+      rust: `polyspec_template::ErrorCode::${code}`,
+      php: `Polyspec\\Template\\ErrorCode::${code}`,
+      'php-ext': `Polyspec\\Template\\ErrorCode::${code}`,
+      python: 'template.ERROR_CODES',
+    };
+    for (const binding of unit.symbols) assert.equal(binding.symbol, expected[binding.implementation], `${id}: ${binding.implementation}`);
   }
 });
