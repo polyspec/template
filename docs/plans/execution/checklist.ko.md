@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 6dcd11fe44e6330ee2d481a07e0abdc90dcbf9a0679c384e104611ebd49309fa -->
+<!-- source-sha256: beaf06dd02f71238c6a830fc4e0cdc32295e8442e7d775df07aeee16dec98552 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -407,3 +407,4 @@
 | T27.1-1-24 | 기본 SDK의 Rust formatter 구현·불변식 helper를 내부로 유지하고 기존 비기본 네이티브 harness 기능으로 모든 formatter case를 보존한다 | Root formatter 소비자·내부 구현 probe·네이티브 harness·Cargo target | SDK·선언 단위 26개; formatter bridge·unchanged-source 단위; 전체 formatter target 컴파일; release 빌드·clippy; 타입·선언·문서 검사; CI 전체 formatter case | [o] |
 | T27.1-1-25 | Rust 오류 위치 타입을 SDK root에서 공개하고 정의 모듈을 내부로 유지하며 compiler가 root-qualified 위치 타입을 생성하게 한다 | 오류 facade·compiler 참조·네이티브 SDK probe | SDK·선언 단위 28개; 네이티브 error-object 단위; release 빌드·clippy; 타입·선언·owner·문서 검사 | [o] |
 | T27.1-1-26 | P0: 문서화된 Source API를 유지하고 모든 SDK에 실제 UTF-8·소스 위치 계약을 구현하며 공유 fixture로 생성자·metadata·index 변환·네이티브 오류 생성을 검증한다 | 공개 source context·source 계약·네이티브 SDK 단위 6개·API 선언 | `make parity-declarations-check`; `make docs-check`; Source SDK unit tests; SDK consumers; native lint/build; complete CI | [o] |
+| T27.1-1-27 | 정규 오류 필드 7개와 오류 생성·직렬화 연산의 실제 SDK 표면을 선언하고 위치가 있는 오류와 없는 오류 값을 검증한다 | Error API declarations and native error units | `make parity-declarations-check`; error-object SDK units; `make docs-check` | [o] |

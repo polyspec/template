@@ -27,6 +27,7 @@ from polyspec.template import (
     resolve_path,
 )
 from polyspec.template.errors import TemplateError as TE
+from polyspec.template.errors import error_without_position
 from polyspec.template.number import format_number, number_to_string, round_number
 from polyspec.template.values import is_truthy, loose_equals, parse_numeric_string
 
@@ -154,6 +155,19 @@ class Parsing(unittest.TestCase):
             ["E_PARSE_UNCLOSED_BLOCK", "x.tpl", 2, 1, 2, 3],
         )
         self.assertNotEqual(error["message"], "")
+        missing = error_without_position("E_LOAD_NOT_FOUND", "missing.tpl", "missing")
+        self.assertEqual(
+            missing.to_object(),
+            dict(
+                code="E_LOAD_NOT_FOUND",
+                template="missing.tpl",
+                line=0,
+                col=0,
+                offset=0,
+                end=0,
+                message="missing",
+            ),
+        )
 
 
 class Expressions(unittest.TestCase):

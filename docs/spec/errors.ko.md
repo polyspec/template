@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 70d33e3bd5c2a1a32660dd860b20e8fb8d46cd14bbb3016e743194c9d9e353de -->
+<!-- source-sha256: 51e70540ec0f4e537ad2c9d85bf39f501786fafe1a878c763b5fb3bf19562d55 -->
 # 오류
 
 [English](/spec/errors).
@@ -7,6 +7,8 @@
 ## 오류 객체
 
 - **ERR-1** 오류는 `code`, `template`, `line`, `col`, `offset`, `end`, `message` 필드를 가진 객체다. `code`는 이 문서에 나열된 코드 중 하나다. `template`은 오류가 위치한 템플릿의 이름이다. `message`는 영어 자유 텍스트다.
+
+SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 필드를 제공한다. TypeScript는 `ErrorObject`와 `TemplateError.toObject`, Go는 `errs.Error`의 공개 필드와 `JSON`, Rust는 `TemplateError` 필드와 직렬화 구현을 사용한다. PHP와 PHP 확장은 `TemplateError.toArray`를 사용하며 속성 이름은 `errorCode`, `errorLine`, `errorCol`이고 메시지는 네이티브 예외에서 읽는다. Python은 `TemplateError` 속성과 `to_object`를 사용한다. 네이티브 생성자나 구조체 리터럴은 같은 값을 만든다. 위치 factory는 바이트 span과 줄 인덱스를 받고, 위치 없는 factory 또는 위치에 0을 넣는 TypeScript 생성자는 위치 필드 네 개에 모두 0을 유지한다.
 
 - **ERR-2** `line`은 1부터 시작하며 오류 위치 앞의 `\n` 바이트 수를 센다. `col`은 그 줄의 시작부터 오류 위치까지의 1부터 시작하는 바이트 오프셋이다. `offset`과 `end`는 오류가 가리키는 토큰 또는 노드의 바이트 범위 `[offset, end)`다. `offset`이 오류 위치다.
 

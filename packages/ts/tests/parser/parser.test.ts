@@ -167,5 +167,8 @@ describe('error object', () => {
     expect(Object.keys(object)).toEqual(['code', 'template', 'line', 'col', 'offset', 'end', 'message']);
     expect(object).toMatchObject({ code: 'E_PARSE_UNCLOSED_BLOCK', template: 'x.tpl', line: 2, col: 1, offset: 2, end: 3 });
     expect(object.message).not.toBe('');
+    const missing = { code: 'E_LOAD_NOT_FOUND' as const, template: 'missing.tpl',
+      line: 0, col: 0, offset: 0, end: 0, message: 'missing' };
+    expect(new TemplateError(missing).toObject()).toEqual(missing);
   });
 });

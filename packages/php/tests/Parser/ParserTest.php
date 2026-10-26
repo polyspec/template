@@ -115,6 +115,10 @@ final class ParserTest extends TestCase
             self::assertSame(['code', 'template', 'line', 'col', 'offset', 'end', 'message'], array_keys($object));
             self::assertSame(['E_PARSE_UNCLOSED_BLOCK', 'x.tpl', 2, 1, 2, 3], array_slice(array_values($object), 0, 6));
             self::assertNotSame('', $object['message']);
+            self::assertSame([
+                'code' => 'E_LOAD_NOT_FOUND', 'template' => 'missing.tpl', 'line' => 0,
+                'col' => 0, 'offset' => 0, 'end' => 0, 'message' => 'missing',
+            ], TemplateError::withoutPosition('E_LOAD_NOT_FOUND', 'missing.tpl', 'missing')->toArray());
         }
     }
 

@@ -7,6 +7,8 @@
 
 - **ERR-1** An error is an object with the fields `code`, `template`, `line`, `col`, `offset`, `end` and `message`. `code` is one of the codes listed in this document. `template` is the name of the template in which the error is located. `message` is free text in English.
 
+The SDK exposes these seven fields through native error values and their plain-data projection. TypeScript uses `ErrorObject` and `TemplateError.toObject`; Go uses the exported fields of `errs.Error` and `JSON`; Rust uses `TemplateError` fields and its serialization implementation; PHP and the PHP extension use `TemplateError.toArray` (with `errorCode`, `errorLine`, `errorCol` properties and the native exception message); Python uses `TemplateError` attributes and `to_object`. Native constructors or struct literals create the same value. Positioned factories accept byte spans and line indexes; unpositioned factories, or a TypeScript constructor with zero positions, preserve zero in all four position fields.
+
 - **ERR-2** `line` is 1-based and counts `\n` bytes before the error position. `col` is the 1-based byte offset of the error position from the start of its line. `offset` and `end` are the byte span `[offset, end)` of the token or node the error refers to. `offset` is the error position.
 
 - **ERR-3** Conformance compares `code`, `template`, `line` and `col`. `offset`, `end` and `message` are not compared.
