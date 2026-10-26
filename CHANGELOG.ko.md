@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 853ca923502b5ba43bce7a4c8ce2e525924da23815395fb024b8cd7401b7c434 -->
+<!-- source-sha256: b5fb81704ed98abf72b6ed448a1257d9201dc36ea896f6f65846deec4b7f5c77 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- 템플릿 소유 CI job이 전체 빌드·다운로드·테스트 실행에 짧은 시간 제한을 걸지 않는다. editor job은 정상 브라우저 의존성 다운로드 중 5분에, Rust job은 두 suite target이 모두 통과한 직후 6분에 제한으로 취소됐다. 테스트별 제한과 모든 CHECK_TARGETS 작업은 유지한다. Red: ec6d4c6d에서 job 제한 회귀 검사가 이 제한들을 찾는다. Green: workflow·toolchain·suite 단위 34개·기반 도구 타입 검사 통과(T27.1-4).
 - PHP 내장 함수 구현 그룹을 라이브러리 source와 확장 stub 모두에서 SDK의 internal 구현으로 선언했다. 네이티브 PHP 추출 검사가 공개 program·runtime 연산을 보존하고 signature 누출을 거부하며 확장 arginfo를 다시 생성했다. Red: 4be401cb에서 내장 함수 구현 심볼이 공개됐다. Green: SDK 추출 단위 6개·두 PHP backend의 함수 단위·PHP 및 TypeScript lint·타입 검사 통과(T27.1-1-13).
 - Go expression runner가 고정한 패키지 깊이를 가정하지 않고 모듈 루트에서 벡터를 찾는다. internal로 이동해도 벡터 파일을 읽을 수 있다. 별도 harness 단위가 탐색과 비어 있지 않은 고유 벡터명을 검사하며 모든 공유 벡터 실행은 기존 runner에 유지한다. Red: 435d7ead에서 탐색 단위가 파일 없음으로 실패한다. Green: 탐색·parity 선언·소유권 검증 통과. 전체 벡터 실행은 CI에서 검증한다(T27.1-3).
 - 개발 도구를 release asset과 integrity로 kit 0.0.56에 고정했다. Make는 설치한 bootstrap을 읽고 CI·의존성 검토는 첫 make 전에 lock package를 설치하며 공유 복사본·훅도 설치한 release와 일치한다. Runner 테스트는 source·배포 형태에서 공개 export 도구의 실제 파일 정체성을 확인한다. 검증: 소유 단위 52개·TypeScript lint 전체·kit-check·hooks-check·dependency-policy-check 통과. 레지스트리 의존성 50개·lock 8개의 검토를 갱신했고 예외 없이 남은 보안 권고가 없다. 로컬 link-state-check는 개발 source link와 상위 Bash 훅을 요구하며, 정확한 release 설치는 CI 수용 조건으로 남는다(T27.1-2).

@@ -11,8 +11,8 @@
 # (workflow_dispatch): the job ci-passed, the last job, passes only when every other job of this workflow passed
 # (T22.1-3), and a release requires its check run on the tagged commit of main; .github/workflows/release.yml
 # releases a tag. A newer push to a branch does not cancel the run of an earlier push.
-# Every job declares timeout-minutes, about twice its longest successful run, so a job that stops making progress
-# fails instead of holding the concurrency group and every later run of main behind it (T24.21).
+# Builds, downloads and complete jobs report progress and are judged by exit status. Only individual test cases
+# have repository-defined timeouts; a job deadline must not cancel a normal operation or successful tests.
 name: CI
 
 on:
@@ -34,7 +34,6 @@ env:
 jobs:
   scripts:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,7 +69,6 @@ jobs:
 
   generated:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -104,7 +102,6 @@ jobs:
 
   delimiters:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -138,7 +135,6 @@ jobs:
 
   showcase:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -178,7 +174,6 @@ jobs:
 
   docs:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -212,7 +207,6 @@ jobs:
 
   typescript:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -246,7 +240,6 @@ jobs:
 
   browser:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -282,7 +275,6 @@ jobs:
 
   python:
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -316,7 +308,6 @@ jobs:
 
   editor:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -355,7 +346,6 @@ jobs:
 
   go:
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -389,7 +379,6 @@ jobs:
 
   rust:
     runs-on: ubuntu-24.04
-    timeout-minutes: 6
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -423,7 +412,6 @@ jobs:
 
   php:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
     # A failure of one PHP version does not cancel the job of the other, so each version reports its own result (T20.1-13).
     strategy:
       fail-fast: false
@@ -469,7 +457,6 @@ jobs:
     if: ${{ always() }}
     needs: [scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php]
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 3b71b2ba1e83fbaedbb1b1d080624e38d173c2698e81239ef45a405fff53f76d -->
+<!-- source-sha256: b622ea84f2a18c95e64f51cb372dc0086c7e547867e05ec576b4b83d0aae3c6a -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -390,3 +390,5 @@
 | T27.1-2 | P1: 공개한 kit 0.0.56의 정확한 asset·integrity와 설치한 package bootstrap·CI lock 설치를 적용한다. provider source를 수정하지 않고 공유 복사본·훅·의존성 검토를 갱신한다 | npm manifest·lock, CI workflow, bootstrap 단위, 절차·공유 복사본 | `make kit-check`; `make lint-ts`; `make dependency-policy-check`; `make hooks-check`; 선택한 bootstrap·suite·runner·SDK 단위; `make docs-check`; CI | [o] |
 | T27.1-3 | P0: Go 패키지를 internal로 이동한 뒤 깨진 expression fixture 탐색을 수정한다. 모듈 루트에서 벡터 파일을 찾고 전체 공유 runner를 유지한다 | Go expression fixture loader·탐색 단위 | `node node_modules/@polyspec/kit/dist/run-tests.mjs go --cwd packages/go -- -run ^TestExpressionFixtureDiscovery$ ./internal/expr`; `make parity-declarations-check`; `make docs-check`; CI expression 벡터 | [o] |
 | T27.1-1-13 | PHP 라이브러리·확장 stub의 내장 함수 구현 그룹을 internal로 유지하고 host·runtime SDK 연산을 보존한다. 공개 signature의 내부 클래스 누출을 거부한다 | PHPDoc 공개 범위·확장 arginfo·네이티브 SDK 추출 단위 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/php-public-api.test.mts`; PHP·PHP 확장 네이티브 함수 단위; `make lint-php`; `make docs-check` | [o] |
+| T27.1-4 | P0: 정상 CI 설치와 성공한 Rust 테스트를 취소한 전체 job 제한을 제거하고 테스트별 제한과 모든 suite target을 유지한다 | 템플릿 소유 workflow·시간 제한 회귀 검사 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/job-timeouts.test.mts tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts`; `make docs-check`; CI | [o] |
+| T27.1-5 | P0: 정확한 main 커밋의 전체 CI matrix가 통과하면 0.0.12를 발행한다. 릴리스 자산·consumer lock·의존성 검토를 갱신하고 릴리스 태그를 만든 뒤 공개한 archive를 확인한다 | 릴리스 후보·main CI·태그·GitHub Release 자산 | 정확한 main의 `ci-passed`; 릴리스 검증; 공개한 자산 검증 | [ ] |
