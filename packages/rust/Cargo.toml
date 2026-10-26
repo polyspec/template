@@ -7,6 +7,10 @@ description = "Template language implementation: lexer, parser, renderer, functi
 license = "MIT"
 publish = false
 
+[features]
+# Native expression-vector harness only; the release SDK keeps implementation modules private.
+__test_support = []
+
 [lib]
 name = "polyspec_template"
 path = "src/lib.rs"
@@ -32,6 +36,7 @@ harness = false
 name = "expr_fixtures"
 path = "tests/expr_fixtures.rs"
 harness = false
+required-features = ["__test_support"]
 
 [lints]
 workspace = true

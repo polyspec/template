@@ -6,7 +6,7 @@ mod common;
 
 use common::{json_equal, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
-use polyspec_template::expr::{evaluate_expression, parse_expression, tokenize_expression};
+use polyspec_template::__test_support::{evaluate_expression, parse_expression, tokenize_expression};
 use polyspec_template::to_json_value;
 use serde::Deserialize;
 

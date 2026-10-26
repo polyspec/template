@@ -13,17 +13,23 @@ pub mod artifact;
 pub mod ast;
 pub mod error;
 mod escape;
-pub mod expr;
+mod expr;
 pub mod format;
 mod functions;
 pub mod loader;
 pub mod page_cache;
 mod parser;
 mod render;
-pub mod source;
+mod source;
 pub mod value;
 
 mod sha256;
+
+/// Native conformance harness bridge, enabled only for repository test targets.
+#[cfg(feature = "__test_support")]
+pub mod __test_support {
+    pub use crate::expr::vectors::{ExpressionToken, evaluate_expression, parse_expression, tokenize_expression};
+}
 
 pub use ast::{AstDecodeError, Comment, Expr, Node, Template, decode_template};
 pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};

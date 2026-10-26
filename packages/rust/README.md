@@ -60,9 +60,9 @@ template format [--indent none|tab|N] [--delimiters OC] FILE
 ```sh
 cargo fmt --check
 cargo clippy --locked --release -- -D warnings
-cargo test --locked
+cargo test --locked --features __test_support
 ```
 
-Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process.
+Tests are in `tests/`. The conformance cases and the expression fixtures of the repository run in-process. The Rust unit and parity targets enable `__test_support` for the native expression-vector bridge; release consumers use the default SDK, whose expression and source implementations are private.
 
 Built-in function implementations and their registry are private implementation details. Generated programs use `RuntimeBindings`; host callbacks use `Env`, `FunctionContext` and `HostFunction` from the crate root.

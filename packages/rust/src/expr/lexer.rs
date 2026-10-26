@@ -88,54 +88,6 @@ pub enum TokenType {
     Close,
 }
 
-impl TokenType {
-    /// Token type name of CNF-13.
-    pub fn name(self) -> &'static str {
-        match self {
-            TokenType::Ident => "IDENT",
-            TokenType::Number => "NUMBER",
-            TokenType::Str => "STRING",
-            TokenType::DotIdent => "DOT_IDENT",
-            TokenType::DotIndex => "DOT_INDEX",
-            TokenType::LParen => "LPAREN",
-            TokenType::RParen => "RPAREN",
-            TokenType::LBracket => "LBRACKET",
-            TokenType::RBracket => "RBRACKET",
-            TokenType::Comma => "COMMA",
-            TokenType::Pipe => "PIPE",
-            TokenType::Question => "QUESTION",
-            TokenType::Colon => "COLON",
-            TokenType::DoubleColon => "DOUBLE_COLON",
-            TokenType::Elvis => "ELVIS",
-            TokenType::Coalesce => "COALESCE",
-            TokenType::Arrow => "ARROW",
-            TokenType::Spread => "SPREAD",
-            TokenType::Plus => "PLUS",
-            TokenType::Minus => "MINUS",
-            TokenType::Star => "STAR",
-            TokenType::Slash => "SLASH",
-            TokenType::Percent => "PERCENT",
-            TokenType::Bang => "BANG",
-            TokenType::Eq => "EQ",
-            TokenType::Ne => "NE",
-            TokenType::Seq => "SEQ",
-            TokenType::Sne => "SNE",
-            TokenType::Lt => "LT",
-            TokenType::Gt => "GT",
-            TokenType::Le => "LE",
-            TokenType::Ge => "GE",
-            TokenType::And => "AND",
-            TokenType::Or => "OR",
-            TokenType::In => "IN",
-            TokenType::Null => "NULL",
-            TokenType::True => "TRUE",
-            TokenType::False => "FALSE",
-            TokenType::Eof => "EOF",
-            TokenType::Close => "CLOSE",
-        }
-    }
-}
-
 /// A token with byte offsets into the source text.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Token {

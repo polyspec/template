@@ -39,16 +39,6 @@ impl Source {
         })
     }
 
-    /// Builds a source from a string; removes a leading BOM.
-    pub fn from_text(name: &str, text: &str) -> Source {
-        let stripped = text.strip_prefix('\u{feff}').unwrap_or(text);
-        Source {
-            name: name.to_string(),
-            lines: LineIndex::of(stripped.as_bytes()),
-            text: stripped.to_string(),
-        }
-    }
-
     /// The bytes of the text.
     pub fn bytes(&self) -> &[u8] {
         self.text.as_bytes()
