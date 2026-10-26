@@ -49,7 +49,12 @@ test('a Rust consumer can use the root parser and analysis types', { timeout: 30
   assert.equal(result.status, 0, result.stderr);
 });
 
-for (const file of ['private-scanner.rs', 'private-escape.rs']) {
+test('a Rust consumer can use compiler runtime services through the SDK', { timeout: 30_000 }, () => {
+  const result = compile('public-runtime.rs');
+  assert.equal(result.status, 0, result.stderr);
+});
+
+for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.rs']) {
   test(`a Rust consumer cannot import the implementation through ${file}`, { timeout: 30_000 }, () => {
     const result = compile(file);
     assert.notEqual(result.status, 0, 'the implementation is publicly accessible');

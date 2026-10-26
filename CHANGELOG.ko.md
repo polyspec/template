@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: af00a727ab6f25d3e4ace5cd8bd43a43ec4919fe07a6d4b4a88e02f8b6bbc3a4 -->
+<!-- source-sha256: d95266ef3d6f163e190cd6544ccfe7080314d3b945b13c2f414a3b680a40fb41 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,9 +8,10 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Rust compiler runtime 타입은 SDK root에서 공개하고 renderer 구현 모듈은 비공개로 유지한다. 생성 코드는 공개 facade를 import하며 API 선언도 정확한 공개 심볼을 가리킨다. Red: 3abc9844에서 runtime 소비자가 root service를 찾지 못하고 구현에는 접근할 수 있었다. Green: SDK·선언 단위 14개·네이티브 interface·export·object 단위 10개, 빌드·compiler 및 기반 도구 타입·clippy·선택한 lint 통과. 선언 회귀 검사가 선택 항목인 네이티브 연산 목록을 확인한 뒤 해당 연산명을 사용한다(T27.1-1-10).
 - Rust scanner와 HTML escape 모듈을 비공개 구현으로 유지하고 검증한 AstProgram delimiter 상태는 crate 내부에서만 접근한다. 외부 소비자는 root parse/analyze 연산과 공개 결과 타입을 계속 사용할 수 있다. Red: 85f02d76에서 두 helper를 모두 import할 수 있었다. Green: 외부 SDK 검사 5개·네이티브 parser 및 delimiter 단위 8개·clippy·선택한 lint 통과(T27.1-1-9).
 - SDK 공개 범위 단위가 사용하는 고정 버전 Go compiler를 외부 실행 파일로 선언했다. CI에서 TypeScript fixture 진입점의 미사용 파일 문제가 사라졌으며, Go 실행 파일 선언은 새 미등록 실행 파일 문제를 해결한다(T27.1).
-- RuntimeEnvironment register/registerClass와 PreparedRender.render를 여섯 구현의 공유 API로 선언했다. 등록 메서드명은 compiler manifest를 따르고 준비된 호출은 RT-62에 연결한다. Red: 638b9c61에서 계약 그룹 두 개의 선언이 없었다. Green: 선언 단위 7개·타입·선택한 lint·parity 선언 검사 통과(T27.1-1-8).
+- RuntimeEnvironment register/registerClass와 PreparedRender.render를 여섯 구현의 공유 API로 선언했다. 등록 메서드명은 compiler manifest를 따르고 준비된 호출은 RT-62에 연결한다. Red: 638b9c61에서 계약 그룹 두 개의 선언이 없었다. Green: 선언 단위 7개·선택한 lint·parity 선언 검사 통과. 선택 항목인 네이티브 연산 목록에 접근하면서 생긴 기반 도구 타입 오류는 T27.1-1-10에서 수정했다(T27.1-1-8).
 - Go 내장 함수 helper를 internal 구현 패키지로 옮기고 root SDK에서 HostFunction과 함께 FunctionContext를 공개한다. Go 생성 코드와 callback 검증은 공개 SDK 타입을 사용하고 기존 함수 테스트·parity 연결은 이동한 구현을 따른다. Red: f2f0d8e7에서 외부 코드가 registry를 import할 수 있었으며 root callback context를 지정할 수 없었다. Green: 외부 소비자 검사 3개·네이티브 함수 및 callback 단위 7개, compiler 타입·Go vet·선택한 lint·parity 선언 검사 통과(T27.1-1-7).
 - 공개 SDK 소비자 fixture를 도구 진입점으로 선언했다. TypeScript는 tsconfig로 소비자를, API Extractor는 설정으로 잘못된 선언을 읽는다. 비공개 구현은 미사용 파일 검사에서 제외하지 않고 해당 선언의 import를 통해 추적한다(T27.1).
 - 오류 코드 값 41개를 Go·Rust·PHP의 네이티브 상수, TypeScript 문자열 union 타입, Python 공개 catalog에 대응하는 공유 API로 선언했다. 모든 구현의 정확한 코드 값을 요구하는 catalog 검사를 유지하고 회귀 검증이 각 네이티브 공개 지점을 원본 catalog와 대조한다. 검증: 선언·catalog 단위 13개, parity 선언과 기반 도구 타입 검사 통과(T27.1-1-6).

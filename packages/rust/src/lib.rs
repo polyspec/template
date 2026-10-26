@@ -19,7 +19,7 @@ mod functions;
 pub mod loader;
 pub mod page_cache;
 mod parser;
-pub mod render;
+mod render;
 pub mod source;
 pub mod value;
 
@@ -30,11 +30,12 @@ pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_
 pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
-pub use render::context::{Limits, ParsedTemplate};
+pub use render::context::{DefineEntry, Frame, Limits, LoopMeta, ParsedTemplate, RenderContext, RuntimeServices, Scope};
 pub use render::engine::{
     ArtifactRefresh, AstProgram, DefineInput, Engine, EngineOptions, PreparedRender, Program, RenderOptions, RenderTarget,
     defines_from_json, env_from_json,
 };
+pub use render::runtime_bindings::{RuntimeBindings, RuntimeEntry};
 pub use render::runtime_environment::RuntimeEnvironment;
 pub use value::bind::{BindError, bind_json, bind_value, bind_values, to_json_value, value_from_json};
 pub use value::bound::{BindInput, BoundMap, DefineData, bind, bind_data, bound_root, merge};

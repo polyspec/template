@@ -44,12 +44,12 @@ const owners: Record<string, Record<string, string>> = {
   },
   RuntimeBindings: {
     ts: 'RuntimeBindings', go: 'github.com/polyspec/template/packages/go/render.RuntimeBindings',
-    rust: 'polyspec_template::render::runtime_bindings::RuntimeBindings',
+    rust: 'polyspec_template::RuntimeBindings',
     php: 'Polyspec\\Template\\Render\\RuntimeBindings', python: 'template.runtime_bindings.RuntimeBindings',
   },
   RuntimeServices: {
     ts: 'RuntimeServices', go: 'github.com/polyspec/template/packages/go/render.RuntimeServices',
-    rust: 'polyspec_template::render::context::RuntimeServices',
+    rust: 'polyspec_template::RuntimeServices',
     php: 'Polyspec\\Template\\Render\\RuntimeServices', python: 'template.runtime_environment.RuntimeServices',
   },
   Program: {
@@ -92,7 +92,7 @@ for (const contract of contracts) test(`every ${contract.owner} operation declar
       assert.ok(mapping !== undefined, `${id}: language mapping ${language}`);
       const environmentIndex = manifest.runtimeContract.RuntimeEnvironment.operations.findIndex(item => item.name === operation);
       const mapped = contract.owner === 'RuntimeEnvironment'
-        ? mapping.runtimeEnvironmentOperations[environmentIndex]
+        ? mapping.runtimeEnvironmentOperations?.[environmentIndex]
         : (contract.owner === 'RuntimeBindings' ? mapping.runtimeBindingOperationNames : mapping.runtimeServiceOperationNames)?.[operation] ?? operation;
       assert.ok(mapped !== undefined, `${id}: native operation name`);
       const owner = owners[contract.owner]?.[binding.implementation === 'php-ext' ? 'php' : binding.implementation];

@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: 3b3925ec8f3b3ebe314796dbe57262fcefb68999bd56abd9816763859c3457aa -->
+<!-- source-sha256: c8541f91d01c7ae40d16b21ca7d90e1d67828a6377f0667d9f23fe09a7599403 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -209,3 +209,5 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 의존성: T22.6과 kit-standard에서 철회한 의존성 작업의 릴리스 시점 재검토. 현재 의존성 그래프와 보안 권고, esbuild 빌드 호환성, 릴리스 manifest와 소비자, CI 설치 실패를 처리한다. T27.1은 릴리스 후보가 현재 의존성 검토 근거를 갖추고 전체 CI workflow가 성공하면 끝난다. 로컬에서는 소유 단위 테스트와 문서 검사를 실행한다. 태그와 발행은 이 준비 다음 단계다.
 
 CI 40321448224에서 공개 API 검토의 미완료도 드러났다(T27.1-1). R11은 미선언 공개 심볼 2,741개, R17은 내부 타입 노출 35건을 보고한다. 클래스 멤버, 데이터 표현, helper를 공유 계약과 대조한 뒤 export나 API 선언을 바꿔야 한다. 일괄 별칭, native-only 예외, 검증하지 않은 심볼 대응으로 수만 줄이는 것은 통과 근거가 아니다. 정확한 후보의 전체 CI 매트릭스가 통과해야 이 릴리스 wave를 마친다.
+
+638b9c61의 CI [40348515848](https://github.com/polyspec/template/actions/runs/40348515848)에서 script 단위 213개, Go 테스트 960개와 Go conformance 검사 540개가 모두 통과했다. 공개 API 감사는 R11 2,513건을 보고하고 R17 보고는 없다. TypeScript fixture의 미사용 파일 문제는 해결됐으며 새로 보고한 Go compiler 실행 파일도 선언했다. 공유 설치·kit 복사본 정합성과 미완료 공개 API 감사로 릴리스 수용은 여전히 불가능하다. 이후 SDK 공개 범위 변경은 해당 커밋의 CI 증거가 필요하다.

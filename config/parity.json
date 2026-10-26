@@ -1090,7 +1090,7 @@
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RuntimeServices:interface" },
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices" },
-        { "implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices" },
+        { "implementation": "rust", "symbol": "polyspec_template::RuntimeServices" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices" },
         { "implementation": "python", "symbol": "template.RuntimeServices" }
@@ -1116,7 +1116,7 @@
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings:class" },
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings" },
-        { "implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings" },
+        { "implementation": "rust", "symbol": "polyspec_template::RuntimeBindings" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings" },
         { "implementation": "python", "symbol": "template.RuntimeBindings" }
@@ -1129,7 +1129,7 @@
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Frame:class" },
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Frame" },
-        { "implementation": "rust", "symbol": "polyspec_template::render::context::Frame" },
+        { "implementation": "rust", "symbol": "polyspec_template::Frame" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\Frame" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Frame" },
         { "implementation": "python", "symbol": "template.Frame" }
@@ -1142,7 +1142,7 @@
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!Scope:class" },
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Scope" },
-        { "implementation": "rust", "symbol": "polyspec_template::render::context::Scope" },
+        { "implementation": "rust", "symbol": "polyspec_template::Scope" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope" },
         { "implementation": "python", "symbol": "template.Scope" }
@@ -1155,7 +1155,7 @@
       "symbols": [
         { "implementation": "ts", "symbol": "@polyspec/template!RenderContext:class" },
         { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Context" },
-        { "implementation": "rust", "symbol": "polyspec_template::render::context::RenderContext" },
+        { "implementation": "rust", "symbol": "polyspec_template::RenderContext" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\Context" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Context" },
         { "implementation": "python", "symbol": "template.RenderContext" }
@@ -1168,7 +1168,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#truthy:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Truthy"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::truthy"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::truthy"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::truthy"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::truthy"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.truthy"}
@@ -1181,7 +1181,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#unary:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Unary"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::unary"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::unary"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::unary"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::unary"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.unary"}
@@ -1194,7 +1194,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#binary:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Binary"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::binary"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::binary"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::binary"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::binary"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.binary"}
@@ -1207,7 +1207,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#stringify:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Stringify"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::stringify"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::stringify"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::stringify"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::stringify"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.stringify"}
@@ -1220,7 +1220,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#escape:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Escape"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::escape"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::escape"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::escape"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::escape"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.escape"}
@@ -1233,7 +1233,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#number:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Number"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::number"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::number"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::number"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::number"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.number"}
@@ -1246,7 +1246,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#finite:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Finite"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::finite"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::finite"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::finite"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::finite"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.finite"}
@@ -1259,7 +1259,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#equal:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Equal"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::equal"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::equal"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::equal"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::equal"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.equal"}
@@ -1272,7 +1272,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#compare:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Compare"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::compare"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::compare"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::compare"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::compare"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.compare"}
@@ -1285,7 +1285,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#member:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Member"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::member"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::member"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::member"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::member"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.member"}
@@ -1298,7 +1298,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#memberCall:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.MemberCall"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::member_call"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::member_call"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::memberCall"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::memberCall"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.member_call"}
@@ -1311,7 +1311,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#classCall:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.ClassCall"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::class_call"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::class_call"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::classCall"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::classCall"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.class_call"}
@@ -1324,7 +1324,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#index:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Index"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::index"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::index"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::index"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::index"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.index"}
@@ -1337,7 +1337,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#depth:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Depth"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::depth"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::depth"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::depth"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::depth"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.depth"}
@@ -1350,7 +1350,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#entries:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Entries"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::entries"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::entries"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::entries"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::entries"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.entries"}
@@ -1363,7 +1363,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#listSpread:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.ListSpread"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::list_spread"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::list_spread"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::listSpread"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::listSpread"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.list_spread"}
@@ -1376,7 +1376,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#mapSpread:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.MapSpread"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::map_spread"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::map_spread"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::mapSpread"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::mapSpread"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.map_spread"}
@@ -1389,7 +1389,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#call:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Call"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::call"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::call"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::call"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::call"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.call"}
@@ -1402,7 +1402,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#limit:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Limit"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::limit"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::limit"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::limit"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::limit"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.limit"}
@@ -1415,7 +1415,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#error:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Error"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::runtime_bindings::RuntimeBindings::error"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::error"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::error"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::error"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.error"}
@@ -1428,7 +1428,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeServices#limits:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices.Limits"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices::limits"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeServices::limits"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"},
         {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.limits"}
@@ -1441,7 +1441,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeServices#hostFunction:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices.HostFunction"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices::host_function"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeServices::host_function"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::hostFunction"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::hostFunction"},
         {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.host_function"}
@@ -1454,7 +1454,7 @@
       "symbols": [
         {"implementation": "ts", "symbol": "@polyspec/template!RuntimeServices#classFunction:member(1)"},
         {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices.ClassFunction"},
-        {"implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices::class_function"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeServices::class_function"},
         {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::classFunction"},
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::classFunction"},
         {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.class_function"}

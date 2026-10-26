@@ -113,7 +113,7 @@ let ${name}_last_index = entries.len().saturating_sub(1);
 let ${name}_previous = scope.locals.get(${rustString(node.name)}).cloned();
 for (${name}_index_raw, (${name}_key, ${name}_value)) in entries.iter().cloned().enumerate() {
     scope.locals.insert(${rustString(node.name)}.to_string(), ${name}_value.clone());
-    scope.loops.entry(${rustString(node.name)}.to_string()).or_default().push(polyspec_template::render::context::LoopMeta { index: ${name}_index_raw, key: ${name}_key, value: ${name}_value, first: ${name}_index_raw == 0, last: ${name}_index_raw == ${name}_last_index, size: ${name}_size });
+    scope.loops.entry(${rustString(node.name)}.to_string()).or_default().push(polyspec_template::LoopMeta { index: ${name}_index_raw, key: ${name}_key, value: ${name}_value, first: ${name}_index_raw == 0, last: ${name}_index_raw == ${name}_last_index, size: ${name}_size });
     context.iterations += 1;
     runtime.limit(context, "iteration", context.iterations, &frame, ${rustSpan(node.span)})?;
 ${emitNodes(node.body, target, n + 1)}
@@ -218,7 +218,7 @@ export function emitDeclarations(context: BackendContext): Part[] {
   // The root holds the fields that a template reads and checks every other one (T24.31).
   const read = (name: string): boolean => usage.readFields.has(name);
   const assignType = `#[derive(Clone, Default)] pub struct Assign {\n${Object.entries(assignMembers).filter(([name]) => read(name)).map(([name, type]) => `    pub ${name}: ${rustType(type)},`).join('\n')}\n}\n${recordConvert(usage, 'Assign', assignMembers, read)}`;
-  return [`// Generated.\nuse polyspec_template::{ArgumentError, ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateError, Value, internal_boundary};\nuse polyspec_template::error::LineIndex;\nuse polyspec_template::render::context::{Frame, RenderContext, Scope};\nuse polyspec_template::render::runtime_bindings::RuntimeBindings;\nuse serde_json::Value as JsonValue;\nuse std::collections::HashMap;\nuse std::sync::Arc;\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}`, ...rustRecords];
+  return [`// Generated.\nuse polyspec_template::{ArgumentError, ErrorCode, OrderedMap as RuntimeOrderedMap, PreparedRender, Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, TemplateError, Value, internal_boundary};\nuse polyspec_template::error::LineIndex;\nuse polyspec_template::{Frame, RenderContext, Scope};\nuse polyspec_template::RuntimeBindings;\nuse serde_json::Value as JsonValue;\nuse std::collections::HashMap;\nuse std::sync::Arc;\n${assignType}\n${inputTypes}\n${definitionDataTypes}\n${definitionsType}`, ...rustRecords];
 }
 
 export function emitRuntime(context: BackendContext): Part[] {
