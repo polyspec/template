@@ -32,6 +32,16 @@ const parity = jsonDocument<{ units: Unit[] }>('API units', {
 const manifest = compilerManifestDocument.read('packages/compiler/interface.json');
 
 const owners: Record<string, Record<string, string>> = {
+  RuntimeEnvironment: {
+    ts: 'RuntimeEnvironment', go: 'github.com/polyspec/template/packages/go/render.RuntimeEnvironment',
+    rust: 'polyspec_template::RuntimeEnvironment',
+    php: 'Polyspec\\Template\\Render\\RuntimeEnvironment', python: 'template.runtime_environment.RuntimeEnvironment',
+  },
+  PreparedRender: {
+    ts: 'PreparedRender', go: 'github.com/polyspec/template/packages/go/render.PreparedRender',
+    rust: 'polyspec_template::PreparedRender', php: 'Polyspec\\Template\\PreparedRender',
+    python: 'template.engine.PreparedRender',
+  },
   RuntimeBindings: {
     ts: 'RuntimeBindings', go: 'github.com/polyspec/template/packages/go/render.RuntimeBindings',
     rust: 'polyspec_template::render::runtime_bindings::RuntimeBindings',
@@ -57,6 +67,11 @@ const contracts = [
   { owner: 'RuntimeServices', operations: manifest.runtimeContract.RuntimeServices.operations.map(item => item.name) },
   { owner: 'Program', operations: manifest.runtimeContract.Program.operations.map(item => item.name) },
   { owner: 'Engine', operations: manifest.runtimeContract.Engine.operations },
+  // The remaining RuntimeEnvironment operations implement RuntimeServices;
+  // registration is the additional contract of the concrete environment.
+  { owner: 'RuntimeEnvironment', operations: manifest.runtimeContract.RuntimeEnvironment.operations
+    .map(item => item.name).filter(name => !manifest.runtimeContract.RuntimeServices.operations.some(item => item.name === name)) },
+  { owner: 'PreparedRender', operations: ['render'] },
 ];
 
 for (const contract of contracts) test(`every ${contract.owner} operation declares its actual native API in every implementation`, { timeout: 5000 }, () => {
@@ -67,7 +82,7 @@ for (const contract of contracts) test(`every ${contract.owner} operation declar
     const unit = parity.units.find(item => item.id === id);
     assert.ok(unit !== undefined, `${id}: missing API operation`);
     assert.equal(unit.kind, 'api');
-    assert.ok(unit.requirements.includes('RT-67'), `${id}: trace the compiler contract`);
+    assert.ok(unit.requirements.includes(contract.owner === 'PreparedRender' ? 'RT-62' : 'RT-67'), `${id}: trace the runtime contract`);
     assert.ok(unit.symbols !== undefined);
     assert.deepEqual(unit.symbols.map(item => item.implementation).sort(), implementations, id);
     for (const binding of unit.symbols) {
@@ -75,7 +90,11 @@ for (const contract of contracts) test(`every ${contract.owner} operation declar
       assert.ok(language !== undefined);
       const mapping = manifest.languages[language];
       assert.ok(mapping !== undefined, `${id}: language mapping ${language}`);
-      const mapped = (contract.owner === 'RuntimeBindings' ? mapping.runtimeBindingOperationNames : mapping.runtimeServiceOperationNames)?.[operation] ?? operation;
+      const environmentIndex = manifest.runtimeContract.RuntimeEnvironment.operations.findIndex(item => item.name === operation);
+      const mapped = contract.owner === 'RuntimeEnvironment'
+        ? mapping.runtimeEnvironmentOperations[environmentIndex]
+        : (contract.owner === 'RuntimeBindings' ? mapping.runtimeBindingOperationNames : mapping.runtimeServiceOperationNames)?.[operation] ?? operation;
+      assert.ok(mapped !== undefined, `${id}: native operation name`);
       const owner = owners[contract.owner]?.[binding.implementation === 'php-ext' ? 'php' : binding.implementation];
       assert.ok(owner !== undefined);
       const expected = binding.implementation === 'ts' ? `@polyspec/template!${owner}#${mapped}:member(1)`

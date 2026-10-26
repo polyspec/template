@@ -2044,6 +2044,45 @@
         {"implementation":"php-ext","symbol":"Polyspec\\Template\\ErrorCode::E_INTERNAL"},
         {"implementation":"python","symbol":"template.ERROR_CODES"}
       ]
+    },
+    {
+      "id": "api-runtime-environment-register",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeEnvironment#register:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.Register"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeEnvironment::register"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::register"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::register"},
+        {"implementation": "python", "symbol": "template.runtime_environment.RuntimeEnvironment.register"}
+      ]
+    },
+    {
+      "id": "api-runtime-environment-register-class",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeEnvironment#registerClass:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.RegisterClass"},
+        {"implementation": "rust", "symbol": "polyspec_template::RuntimeEnvironment::register_class"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::registerClass"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::registerClass"},
+        {"implementation": "python", "symbol": "template.runtime_environment.RuntimeEnvironment.register_class"}
+      ]
+    },
+    {
+      "id": "api-prepared-render-render",
+      "requirements": ["RT-62"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!PreparedRender#render:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.PreparedRender.Render"},
+        {"implementation": "rust", "symbol": "polyspec_template::PreparedRender::render"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\PreparedRender::render"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\PreparedRender::render"},
+        {"implementation": "python", "symbol": "template.engine.PreparedRender.render"}
+      ]
     }
   ]
 }
