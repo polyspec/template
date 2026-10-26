@@ -7,7 +7,7 @@ namespace Polyspec\Template\Functions;
 use Polyspec\Template\Value\Value;
 
 /**
- * @internal Built-in implementation; SDK callers use the shared runtime services.
+ * @internal
  *
  * date and now (FUN-37 to FUN-42).
  */

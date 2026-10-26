@@ -8,7 +8,7 @@ use Polyspec\Template\Value\Number;
 use Polyspec\Template\Value\Value;
 
 /**
- * @internal Built-in implementation; SDK callers use the shared runtime services.
+ * @internal
  *
  * number, round, floor, ceil, abs, min, max, num (FUN-16, FUN-17, FUN-20 to FUN-25).
  */

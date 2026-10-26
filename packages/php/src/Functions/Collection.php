@@ -10,7 +10,7 @@ use Polyspec\Template\Value\MapValue;
 use Polyspec\Template\Value\Value;
 
 /**
- * @internal Built-in implementation; SDK callers use the shared runtime services.
+ * @internal
  *
  * keys, values, first, last, reverse, slice, sort, join, range, default (FUN-14, FUN-15, FUN-31 to FUN-36).
  */

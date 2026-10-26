@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Functions;
 
 /**
- * @internal Built-in implementation; SDK callers use the shared runtime services.
+ * @internal
  *
  * Failure raised by a built-in function; the evaluator attaches the call position.
  */

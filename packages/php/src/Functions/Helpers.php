@@ -9,7 +9,7 @@ use Polyspec\Template\Value\SafeString;
 use Polyspec\Template\Value\Value;
 
 /**
- * @internal Built-in implementation; SDK callers use the shared runtime services.
+ * @internal
  *
  * Argument helpers shared by the function groups.
  */

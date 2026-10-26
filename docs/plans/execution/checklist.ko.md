@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: b622ea84f2a18c95e64f51cb372dc0086c7e547867e05ec576b4b83d0aae3c6a -->
+<!-- source-sha256: 1c4af85b8cfd671610bcb836df6b9b22fd7335c7e030ecbb59e4ffdf3f79f2e3 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -392,3 +392,4 @@
 | T27.1-1-13 | PHP 라이브러리·확장 stub의 내장 함수 구현 그룹을 internal로 유지하고 host·runtime SDK 연산을 보존한다. 공개 signature의 내부 클래스 누출을 거부한다 | PHPDoc 공개 범위·확장 arginfo·네이티브 SDK 추출 단위 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/php-public-api.test.mts`; PHP·PHP 확장 네이티브 함수 단위; `make lint-php`; `make docs-check` | [o] |
 | T27.1-4 | P0: 정상 CI 설치와 성공한 Rust 테스트를 취소한 전체 job 제한을 제거하고 테스트별 제한과 모든 suite target을 유지한다 | 템플릿 소유 workflow·시간 제한 회귀 검사 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/job-timeouts.test.mts tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts`; `make docs-check`; CI | [o] |
 | T27.1-5 | P0: 정확한 main 커밋의 전체 CI matrix가 통과하면 0.0.12를 발행한다. 릴리스 자산·consumer lock·의존성 검토를 갱신하고 릴리스 태그를 만든 뒤 공개한 archive를 확인한다 | 릴리스 후보·main CI·태그·GitHub Release 자산 | 정확한 main의 `ci-passed`; 릴리스 검증; 공개한 자산 검증 | [ ] |
+| T27.1-6 | P0: PHP 공개 범위의 중복 설명 문장을 제거하고 모든 네이티브 internal 선언과 클래스별 설명은 유지한다. stub hash를 갱신한다 | PHP 함수 클래스 문서·확장 arginfo | `make duplication-check`; PHP SDK 추출 단위; `make docs-check` | [o] |

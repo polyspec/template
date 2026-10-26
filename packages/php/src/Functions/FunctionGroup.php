@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Polyspec\Template\Functions;
 
 /**
- * @internal Built-in implementation; SDK callers use the shared runtime services.
+ * @internal
  *
  * A group of built-in functions: Registry joins the tables of the groups.
  */
