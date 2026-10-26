@@ -54,7 +54,7 @@ test('a Rust consumer can use compiler runtime services through the SDK', { time
   assert.equal(result.status, 0, result.stderr);
 });
 
-for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.rs', 'private-expression.rs', 'private-source.rs', 'private-ast.rs', 'private-values.rs', 'private-formatter.rs']) {
+for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.rs', 'private-expression.rs', 'private-source.rs', 'private-ast.rs', 'private-values.rs', 'private-formatter.rs', 'private-errors.rs']) {
   test(`a Rust consumer cannot import the implementation through ${file}`, { timeout: 30_000 }, () => {
     const result = compile(file);
     assert.notEqual(result.status, 0, 'the implementation is publicly accessible');
@@ -75,5 +75,10 @@ test('a Rust consumer can bind and inspect values through the SDK root', { timeo
 
 test('a Rust consumer can format through the default SDK root', { timeout: 30_000 }, () => {
   const result = compile('public-formatter.rs');
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test('a Rust consumer can construct positioned errors through the SDK root', { timeout: 30_000 }, () => {
+  const result = compile('public-errors.rs');
   assert.equal(result.status, 0, result.stderr);
 });

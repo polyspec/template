@@ -203,9 +203,9 @@ Evidence of 2026-10-02, with Node 26.8.1, Go 1.27.1 (from the `go.mod` toolchain
 - `make conformance-all-modes` passed all 1,952 cells without a fallback; `make test-browser`, `make install-check`, `make showcase-check` and `make docs-verify-idempotent` passed.
 - `make release-check` passed on commit "Make template tags stand out in VS Code whatever the color theme is": it ran `make release-test-matrix`, all seven layers, in an isolated clean checkout.
 
-## Wave 27 — Release preparation
+## Wave 27 — Release completion
 
-Dependencies: T22.6 and the release-time reassessment of the withdrawn dependency tasks of kit-standard. The remaining work is the current dependency graph, its advisories, the build compatibility of esbuild, the release manifests and consumers, and CI installation failures. T27.1 ends when the release candidate carries current dependency review evidence and its complete CI workflow succeeds. Local verification uses the owning unit tests and documentation checks. Tags and publication follow this preparation.
+Dependencies: T22.6 and the release-time reassessment of the withdrawn dependency tasks. Release work covers the locked dependency graph and its advisories, esbuild build compatibility, manifests, consumers and candidate CI failures. T27.1 ends after current dependency review, successful complete CI of the exact main candidate, release tags, publication and verification of the published assets and consumers. Local verification uses owning unit tests and documentation checks; tags follow successful exact-main CI. The released-tool bootstrap and installation have passed candidate CI; the public API audit remains unfinished.
 
 CI 40321448224 also exposes an unfinished public API audit (T27.1-1): R11 reports 2,741 undeclared public symbols and R17 reports 35 leaked types. Class members, data representations and helpers must be reviewed against the shared contract before changing exports or API declarations. A count reduced by blanket aliases, native-only exceptions or unchecked symbol mappings is no acceptance evidence. The release exits this wave only after the exact candidate passes the complete CI matrix.
 

@@ -11,7 +11,7 @@
 
 pub mod artifact;
 mod ast;
-pub mod error;
+mod error;
 mod escape;
 mod expr;
 mod format;
@@ -36,7 +36,7 @@ pub use ast::{
     AstDecodeError, BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp,
     decode_template,
 };
-pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};
+pub use error::{ArgumentError, ErrorCode, LineIndex, RequestError, Span, TemplateError, internal_boundary};
 pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};

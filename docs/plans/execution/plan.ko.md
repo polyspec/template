@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: c8541f91d01c7ae40d16b21ca7d90e1d67828a6377f0667d9f23fe09a7599403 -->
+<!-- source-sha256: ffd0fa3ac25d790efa82d0c2f14b32db6d5a95f631afc25c0e56f4dccb5040ed -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -204,9 +204,9 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 - `make conformance-all-modes`가 1,952개 칸을 fallback 없이 모두 통과했다. `make test-browser`, `make install-check`, `make showcase-check`, `make docs-verify-idempotent`가 통과했다.
 - 커밋 "Make template tags stand out in VS Code whatever the color theme is"에서 `make release-check`가 통과했다. 격리된 깨끗한 체크아웃에서 `make release-test-matrix`의 일곱 계층을 모두 실행했다.
 
-## Wave 27 — 릴리스 준비
+## Wave 27 — 릴리스 완료
 
-의존성: T22.6과 kit-standard에서 철회한 의존성 작업의 릴리스 시점 재검토. 현재 의존성 그래프와 보안 권고, esbuild 빌드 호환성, 릴리스 manifest와 소비자, CI 설치 실패를 처리한다. T27.1은 릴리스 후보가 현재 의존성 검토 근거를 갖추고 전체 CI workflow가 성공하면 끝난다. 로컬에서는 소유 단위 테스트와 문서 검사를 실행한다. 태그와 발행은 이 준비 다음 단계다.
+의존성: T22.6과 철회한 의존성 작업의 릴리스 시점 재검토. 고정한 의존성 그래프·보안 권고·esbuild 빌드 호환성·manifest·소비자·후보 CI 실패를 처리한다. T27.1은 현재 의존성 검토, 정확한 main 후보의 전체 CI 성공, 릴리스 태그, 발행, 공개 자산·소비자 검증까지 완료하면 끝난다. 로컬에서는 소유 단위 테스트와 문서 검사를 실행하고 태그는 정확한 main CI 성공 뒤에 생성한다. 공개 도구의 bootstrap·설치는 후보 CI에서 통과했으며 공개 API 감사는 아직 미완료다.
 
 CI 40321448224에서 공개 API 검토의 미완료도 드러났다(T27.1-1). R11은 미선언 공개 심볼 2,741개, R17은 내부 타입 노출 35건을 보고한다. 클래스 멤버, 데이터 표현, helper를 공유 계약과 대조한 뒤 export나 API 선언을 바꿔야 한다. 일괄 별칭, native-only 예외, 검증하지 않은 심볼 대응으로 수만 줄이는 것은 통과 근거가 아니다. 정확한 후보의 전체 CI 매트릭스가 통과해야 이 릴리스 wave를 마친다.
 
