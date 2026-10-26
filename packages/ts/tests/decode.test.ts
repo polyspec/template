@@ -67,3 +67,8 @@ describe('decodeTemplate', () => {
     expect(() => decodeTemplate('{')).toThrow(SyntaxError);
   });
 });
+
+it('preserves class-call AST fields through the public decoder (AST-10)', () => {
+  const text = readFileSync(join(repoRoot, 'tests/fixtures/ast-decode/class-call.json'), 'utf8');
+  expect(decodeTemplate(text)).toEqual(JSON.parse(text));
+});

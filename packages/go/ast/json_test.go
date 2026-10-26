@@ -159,3 +159,91 @@ func TestDecodeReadsTheEmbeddedSchemaOutsideTheRepository(t *testing.T) {
 		t.Fatalf("an invalid AST: %v", err)
 	}
 }
+
+// AST-10: class-call data decodes without registering the class to render it.
+func TestPublicDecoderPreservesClassCallASTFields(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "fixtures", "ast-decode", "class-call.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	decoded, err := ast.DecodeTemplate(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	encoded, err := json.Marshal(decoded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var expected, actual any
+	if err := json.Unmarshal(data, &expected); err != nil {
+		t.Fatal(err)
+	}
+	if err := json.Unmarshal(encoded, &actual); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("AST changed: %s", encoded)
+	}
+}
+
+// AST-10: the public native data fields have the canonical serialization keys.
+func TestPublicASTFieldsMatchTheSchema(t *testing.T) {
+	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "..", "contracts", "schema", "ast.schema.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var schema struct {
+		Definitions map[string]struct{ Properties map[string]json.RawMessage }
+	}
+	if err := json.Unmarshal(data, &schema); err != nil {
+		t.Fatal(err)
+	}
+	types := map[string]reflect.Type{
+		"Template":   reflect.TypeOf(ast.Template{}),
+		"Comment":    reflect.TypeOf(ast.Comment{}),
+		"Text":       reflect.TypeOf(ast.Text{}),
+		"Echo":       reflect.TypeOf(ast.Echo{}),
+		"IfBranch":   reflect.TypeOf(ast.IfBranch{}),
+		"If":         reflect.TypeOf(ast.If{}),
+		"For":        reflect.TypeOf(ast.For{}),
+		"Set":        reflect.TypeOf(ast.Set{}),
+		"Include":    reflect.TypeOf(ast.Include{}),
+		"ScopeItem":  reflect.TypeOf(ast.ScopeItem{}),
+		"Block":      reflect.TypeOf(ast.Block{}),
+		"IfBlock":    reflect.TypeOf(ast.IfBlock{}),
+		"Literal":    reflect.TypeOf(ast.Literal{}),
+		"Var":        reflect.TypeOf(ast.Var{}),
+		"LoopMeta":   reflect.TypeOf(ast.LoopMeta{}),
+		"Member":     reflect.TypeOf(ast.Member{}),
+		"Index":      reflect.TypeOf(ast.Index{}),
+		"MemberCall": reflect.TypeOf(ast.MemberCall{}),
+		"ClassCall":  reflect.TypeOf(ast.ClassCall{}),
+		"Call":       reflect.TypeOf(ast.Call{}),
+		"Unary":      reflect.TypeOf(ast.Unary{}),
+		"Binary":     reflect.TypeOf(ast.Binary{}),
+		"Ternary":    reflect.TypeOf(ast.Ternary{}),
+		"Spread":     reflect.TypeOf(ast.Spread{}),
+		"List":       reflect.TypeOf(ast.List{}),
+		"MapEntry":   reflect.TypeOf(ast.MapEntry{}),
+		"Map":        reflect.TypeOf(ast.Map{}),
+	}
+	for name, native := range types {
+		t.Run(name, func(t *testing.T) {
+			fields := map[string]bool{}
+			for i := 0; i < native.NumField(); i++ {
+				field := native.Field(i)
+				if !field.IsExported() {
+					t.Fatalf("%s is not public", field.Name)
+				}
+				key := strings.Split(field.Tag.Get("json"), ",")[0]
+				if _, ok := schema.Definitions[name].Properties[key]; !ok {
+					t.Fatalf("undeclared field %s", key)
+				}
+				fields[key] = true
+			}
+			if len(fields) != len(schema.Definitions[name].Properties) {
+				t.Fatalf("%s: schema fields are missing", name)
+			}
+		})
+	}
+}

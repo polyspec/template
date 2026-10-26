@@ -1,0 +1,34 @@
+{
+  "type": "Template",
+  "name": "sdk.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "ClassCall",
+        "className": "Catalog",
+        "method": "lookup",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "key",
+            "span": [
+              0,
+              0
+            ]
+          }
+        ],
+        "span": [
+          0,
+          0
+        ]
+      },
+      "span": [
+        0,
+        0
+      ]
+    }
+  ],
+  "comments": []
+}

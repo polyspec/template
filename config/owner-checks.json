@@ -1125,6 +1125,22 @@
       "tests": [
         "tests/scripts/php-public-api.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "tests/scripts/ast-public-api.test.mts",
+        "contracts/schema/ast.schema.json",
+        "packages/ts/src/ast.ts",
+        "tests/runner/case-list.mts",
+        "tests/cases/**",
+        "tests/fixtures/ast-decode/**"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/ast-public-api.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1789,7 +1805,13 @@
         "packages/go/**",
         "tests/scripts/php-public-api.test.mts",
         "packages/php/src/**",
-        "packages/php-ext/src/polyspec_template.stub.php"
+        "packages/php-ext/src/polyspec_template.stub.php",
+        "tests/scripts/ast-public-api.test.mts",
+        "contracts/schema/ast.schema.json",
+        "packages/ts/src/ast.ts",
+        "tests/runner/case-list.mts",
+        "tests/cases/**",
+        "tests/fixtures/ast-decode/**"
       ]
     }
   ]

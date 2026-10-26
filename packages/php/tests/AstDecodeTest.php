@@ -38,6 +38,13 @@ final class AstDecodeTest extends TestCase
         self::assertGreaterThan(0, $count, 'no case has an expected.ast.json');
     }
 
+    /** AST-10: decoding class-call data does not require a registered host class. */
+    public function testPublicDecoderPreservesClassCallAstFields(): void
+    {
+        $text = Support::read(Support::repoRoot() . '/tests/fixtures/ast-decode/class-call.json');
+        self::assertEquals(Support::json($text), AstProgram::decodeTemplate($text));
+    }
+
     /** The decode returns the AST of parse, which a program renders without its source (RT-41). */
     public function testADecodedTemplateIsTheAstThatParseReturnsAndRenders(): void
     {

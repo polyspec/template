@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-ast -->
-<!-- source-sha256: 5e1f7de660cade0b7f673e9ece2c73d84dc1a9318afe651675b3c0dd8c0f539c -->
+<!-- source-sha256: e15fc873658892be8e82d9c9afe7e3dcf5fb6e0ce2f3e314d09fb69a94a267e1 -->
 # AST
 
 [English](/spec/ast).
@@ -110,3 +110,5 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
   ]
 }
 ```
+
+공개 shape와 필드는 canonical schema를 따른다. TypeScript interface·Go struct·Rust struct 또는 enum variant가 각 네이티브 표현을 공개한다. PHP 배열과 Python dictionary는 AST-10의 공개 decoder를 통해 같은 필드를 공개한다. API 선언은 독립적인 symbol이 있는 네이티브 property를 식별하고, 암묵적인 enum tag는 variant에, 배열·dictionary 필드는 decoder 계약에 속한다. 등록된 클래스가 없는 class call을 포함해 decoder 왕복 검사가 모든 schema shape와 필드를 다룬다.

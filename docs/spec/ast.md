@@ -109,3 +109,5 @@ Source `<b>{= product.price | number}</b>` with template name `x.tpl`:
   ]
 }
 ```
+
+The public shapes and fields are those of the canonical schema. TypeScript interfaces, Go structs and Rust structs or enum variants publish their native representations. PHP arrays and Python dictionaries publish the same fields through the public decoder of AST-10. An API declaration identifies a native property when it has a symbol of its own; an implicit enum tag belongs to its variant, and an array or dictionary field belongs to the decoder contract. Decoder round trips cover every schema shape and field, including class calls without a registered class.

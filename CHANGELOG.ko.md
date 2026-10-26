@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c666981a9b315e42d87baa244055f0011d0bc6a74857d7eabcf1871364496c04 -->
+<!-- source-sha256: df763f1b491726368049bd015cc41a3caaeeb3122b862f17fcc01b40bafda163 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Canonical AST shape·필드를 네이티브 공개 API로 선언한다(130개 단위). TypeScript interface 필드·공개 Go JSON 필드를 schema와 대조하고 성공하는 네이티브 decoder fixture 전체가 모든 shape·필드를 다룬다. 빠졌던 class-call fixture와 모든 SDK의 공개 decoder 회귀를 추가했다. Red: 697effe5에 AST 필드 선언이 없고 기존 왕복 fixture에 ClassCall이 없다. Green: schema·선언 단위 3개·TypeScript decoder 단위 6개·나머지 SDK별 class-call decoder 단위 1개·Go 필드 reflection case 28개 통과(T27.1-1-18).
 - Rust AST 데이터·연산자 타입을 SDK root에서 공개하고 정의 모듈은 내부로 유지하며 compiler도 root-qualified 연산자를 생성한다. 소비자가 template·expression 데이터를 구성하고 branch·scope·map entry 타입을 지명할 수 있다. Red: b39dd266의 기본 소비자가 정의 모듈을 import할 수 있지만 root에서 모든 signature 타입을 import할 수 없다. Green: SDK·선언 단위 21개·release 빌드·clippy·네이티브 포맷·타입·선언 검사 통과. 생성 프로그램은 CI에서 계속 검증한다(T27.1-1-17).
 - PHP 라이브러리·확장 SDK metadata에서 parser·scanner·expression 구현 클래스를 내부로 유지한다. `AstProgram::parse`·`analyze`는 공개 상태를 유지한다. Red: 97b7ffdb에서 두 SDK 가시성 probe가 내부 helper를 노출한다. Green: SDK 추출 단위 8개·SDK별 parser 단위 3개 통과하며 네이티브 signature에 내부 타입 누출이 없다(T27.1-1-16).
 - parser를 internal로 이동한 뒤 Go renderer import를 네이티브 순서로 정렬한다. Red: main CI의 gofmt가 `packages/go/render/engine.go`를 보고한다. Green: 네이티브 Go 포맷 검사 통과(T27.1-7).

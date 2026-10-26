@@ -2306,6 +2306,4335 @@
           "symbol": "template.FormatError"
         }
       ]
+    },
+    {
+      "id": "api-ast-shape-template",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Template:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Template"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Template"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-template-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Template#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Template.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Template"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-template-name",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Template#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Template.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Template::name"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-template-body",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Template#body:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Template.Body"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Template::body"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-template-comments",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Template#comments:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Template.Comments"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Template::comments"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-comment",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Comment:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Comment"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Comment"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-comment-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Comment#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Comment.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Comment"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-comment-value",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Comment#value:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Comment.Value"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Comment::value"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-comment-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Comment#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Comment.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Comment::span"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-text",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Text:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Text"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Text"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-text-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Text#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Text.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Text"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-text-value",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Text#value:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Text.Value"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Text"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-text-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Text#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Text.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Text"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-echo",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Echo:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Echo"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Echo"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-echo-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Echo#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Echo.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Echo"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-echo-expr",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Echo#expr:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Echo.Expr"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Echo"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-echo-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Echo#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Echo.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Echo"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifbranch",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBranch:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBranch"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::IfBranch"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifbranch-test",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBranch#test:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBranch.Test"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::IfBranch::test"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifbranch-body",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBranch#body:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBranch.Body"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::IfBranch::body"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifbranch-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBranch#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBranch.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::IfBranch::span"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-if",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!If:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.If"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::If"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-if-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!If#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.If.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::If"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-if-branches",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!If#branches:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.If.Branches"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::If"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-if-else",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!If#else:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.If.Else"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::If"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-if-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!If#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.If.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::If"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for-name",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for-iter",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For#iter:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For.Iter"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for-body",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For#body:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For.Body"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for-empty",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For#empty:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For.Empty"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-for-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!For#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.For.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::For"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-set",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!SetNode:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Set"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Set"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-set-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!SetNode#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Set.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Set"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-set-name",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!SetNode#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Set.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Set"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-set-expr",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!SetNode#expr:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Set.Expr"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Set"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-set-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!SetNode#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Set.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Set"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-include",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Include:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Include"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Include"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-include-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Include#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Include.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Include"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-include-path",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Include#path:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Include.Path"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Include"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-include-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Include#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Include.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Include"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-scopeitem",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ScopeItem:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ScopeItem"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::ScopeItem"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-scopeitem-name",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ScopeItem#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ScopeItem.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::ScopeItem::name"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-scopeitem-expr",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ScopeItem#expr:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ScopeItem.Expr"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::ScopeItem::expr"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-block",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Block:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Block"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-block-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Block#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Block"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-block-id",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Block#id:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block.Id"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Block"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-block-path",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Block#path:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block.Path"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Block"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-block-scope",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Block#scope:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block.Scope"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Block"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-block-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Block#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::Block"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifblock",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBlock:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::IfBlock"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifblock-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBlock#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::IfBlock"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifblock-id",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBlock#id:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.Id"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::IfBlock"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifblock-body",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBlock#body:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.Body"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::IfBlock"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifblock-else",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBlock#else:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.Else"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::IfBlock"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ifblock-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!IfBlock#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Node::IfBlock"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-literal",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Literal:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Literal"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Literal"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-literal-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Literal#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Literal.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Literal"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-literal-kind",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Literal#kind:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Literal.Kind"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Literal"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-literal-value",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Literal#value:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Literal.Value"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Literal"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-literal-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Literal#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Literal.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Literal"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-var",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Var:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Var"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Var"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-var-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Var#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Var.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Var"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-var-name",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Var#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Var.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Var"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-var-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Var#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Var.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Var"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-loopmeta",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!LoopMetaExpression:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.LoopMeta"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::LoopMeta"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-loopmeta-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!LoopMetaExpression#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.LoopMeta.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::LoopMeta"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-loopmeta-loop",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!LoopMetaExpression#loop:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.LoopMeta.Loop"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::LoopMeta"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-loopmeta-field",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!LoopMetaExpression#field:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.LoopMeta.Field"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::LoopMeta"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-loopmeta-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!LoopMetaExpression#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.LoopMeta.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::LoopMeta"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-member",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Member:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Member"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Member"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-member-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Member#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Member.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Member"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-member-object",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Member#object:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Member.Object"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Member"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-member-key",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Member#key:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Member.Key"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Member"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-member-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Member#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Member.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Member"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-index",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Index:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Index"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Index"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-index-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Index#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Index.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Index"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-index-object",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Index#object:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Index.Object"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Index"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-index-index",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Index#index:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Index.Index"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Index"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-index-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Index#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Index.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Index"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-membercall",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MemberCall:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MemberCall"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::MemberCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-membercall-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MemberCall#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MemberCall.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::MemberCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-membercall-object",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MemberCall#object:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MemberCall.Object"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::MemberCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-membercall-method",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MemberCall#method:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MemberCall.Method"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::MemberCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-membercall-args",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MemberCall#args:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MemberCall.Args"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::MemberCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-membercall-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MemberCall#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MemberCall.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::MemberCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-classcall",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ClassCall:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ClassCall"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::ClassCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-classcall-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ClassCall#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ClassCall.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::ClassCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-classcall-classname",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ClassCall#className:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ClassCall.ClassName"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::ClassCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-classcall-method",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ClassCall#method:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ClassCall.Method"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::ClassCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-classcall-args",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ClassCall#args:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ClassCall.Args"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::ClassCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-classcall-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!ClassCall#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.ClassCall.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::ClassCall"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-call",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Call:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Call"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Call"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-call-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Call#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Call.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Call"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-call-name",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Call#name:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Call.Name"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Call"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-call-args",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Call#args:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Call.Args"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Call"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-call-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Call#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Call.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Call"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-unary",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Unary:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Unary"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Unary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-unary-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Unary#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Unary.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Unary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-unary-op",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Unary#op:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Unary.Op"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Unary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-unary-operand",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Unary#operand:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Unary.Operand"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Unary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-unary-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Unary#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Unary.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Unary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-binary",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Binary:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Binary"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Binary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-binary-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Binary#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Binary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-binary-op",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Binary#op:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Op"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Binary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-binary-left",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Binary#left:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Left"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Binary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-binary-right",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Binary#right:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Right"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Binary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-binary-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Binary#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Binary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ternary",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Ternary:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Ternary"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Ternary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ternary-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Ternary#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Ternary.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Ternary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ternary-test",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Ternary#test:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Ternary.Test"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Ternary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ternary-then",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Ternary#then:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Ternary.Then"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Ternary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ternary-else",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Ternary#else:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Ternary.Else"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Ternary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-ternary-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Ternary#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Ternary.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Ternary"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-spread",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Spread:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Spread"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Spread"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-spread-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Spread#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Spread.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Spread"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-spread-expr",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Spread#expr:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Spread.Expr"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Spread"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-spread-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Spread#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Spread.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Spread"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-list",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!List:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.List"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::List"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-list-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!List#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.List.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::List"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-list-items",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!List#items:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.List.Items"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::List"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-list-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!List#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.List.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::List"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-mapentry",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapEntry:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MapEntry"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::MapEntry::Entry"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-mapentry-key",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapEntry#key:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MapEntry.Key"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::MapEntry::Entry"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-mapentry-value",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapEntry#value:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.MapEntry.Value"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::MapEntry::Entry"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-map",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapLiteral:interface"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Map"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Map"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-map-type",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapLiteral#type:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Map.Type"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Map"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-map-entries",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapLiteral#entries:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Map.Entries"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Map"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "api-ast-shape-map-span",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "api",
+      "symbols": [
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!MapLiteral#span:member"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/ast.Map.Span"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Expr::Map"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.decode_template"
+        }
+      ]
+    },
+    {
+      "id": "ast-class-call-decode",
+      "requirements": [
+        "AST-10"
+      ],
+      "kind": "feature",
+      "bindings": [
+        {
+          "implementation": "ts",
+          "test": "packages/ts/tests/decode.test.ts",
+          "id": "preserves class-call AST fields through the public decoder (AST-10)"
+        },
+        {
+          "implementation": "go",
+          "test": "packages/go/ast/json_test.go",
+          "id": "TestPublicDecoderPreservesClassCallASTFields"
+        },
+        {
+          "implementation": "rust",
+          "test": "packages/rust/tests/decode.rs",
+          "id": "public_decoder_preserves_class_call_ast_fields"
+        },
+        {
+          "implementation": "php",
+          "test": "packages/php/tests/AstDecodeTest.php",
+          "id": "testPublicDecoderPreservesClassCallAstFields"
+        },
+        {
+          "implementation": "php-ext",
+          "test": "packages/php/tests/AstDecodeTest.php",
+          "id": "testPublicDecoderPreservesClassCallAstFields"
+        },
+        {
+          "implementation": "python",
+          "test": "packages/python/tests/test_decode.py",
+          "id": "test_public_decoder_preserves_class_call_ast_fields"
+        }
+      ]
     }
   ]
 }

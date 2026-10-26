@@ -93,3 +93,13 @@ fn decode_fails_on_text_that_is_not_json() {
     assert!(error.path().is_none(), "{error}");
     assert!(matches!(error, polyspec_template::AstDecodeError::Json(_)), "{error}");
 }
+
+/// AST-10: class-call data decodes without registering the class to render it.
+#[test]
+fn public_decoder_preserves_class_call_ast_fields() {
+    let path = common::repo_root().join("tests/fixtures/ast-decode/class-call.json");
+    let text = std::fs::read_to_string(path).expect("class-call fixture");
+    let decoded = decode_template(&text).expect("decode class call");
+    let expected: serde_json::Value = serde_json::from_str(&text).expect("fixture JSON");
+    assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
+}

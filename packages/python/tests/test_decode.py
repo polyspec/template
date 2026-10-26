@@ -69,6 +69,15 @@ class DecodeTemplateTest(unittest.TestCase):
                 shown = case["path"] or "the root"
                 self.assertIn(shown, str(raised.exception))
 
+    def test_public_decoder_preserves_class_call_ast_fields(self):
+        # AST-10: this shape is valid without registering a host class to render it.
+        text = (ROOT / "tests/fixtures/ast-decode/class-call.json").read_text(
+            encoding="utf-8"
+        )
+        self.assertEqual(
+            json.loads(json.dumps(decode_template(text))), json.loads(text)
+        )
+
     def test_decode_fails_on_text_that_is_not_json(self):
         # NaN and Infinity, which the json module reads by default, are no
         # JSON either.
