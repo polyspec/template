@@ -58,6 +58,13 @@ describe('bound data (VAL-22)', () => {
     expect(program().render('page.tpl', copy(cases.assign))).toBe(cases.outputs.page);
   });
 
+  it('renders a host Map with string keys like a plain object (RT-4)', () => {
+    const assign = copy(cases.assign);
+    const host = new Map(Object.entries(assign));
+    expect(program().render('page.tpl', host)).toBe(cases.outputs.page);
+    expect(program().render('page.tpl', assign)).toBe(cases.outputs.page);
+  });
+
   it('renders a prepared bound map more than once with the same bytes (RT-62)', () => {
     const prepared = program().prepare('page.tpl', bind(copy(cases.assign)));
     expect(prepared.render()).toBe(cases.outputs.page);

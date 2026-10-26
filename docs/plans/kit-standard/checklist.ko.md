@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 765ceed4ee259e233902d0f3274bd34aaef47b198ae4d133c5aac2c8d29ba6fc -->
+<!-- source-sha256: 87e7f8dbf2a7982c584c59bd3e86c99579c6609a140583ee40116570b66c36ac -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -99,7 +99,7 @@
 | T26.7-15 | 추적되는 모든 경로는 config/owner-checks.json에 owner를 가진다 | The owners of .claude/settings.json, .githooks/pre-commit and config/generated.json | `make owner-validate` | [o] |
 | T26.7-16 | AGENTS.md의 모든 규칙은 Own이거나 principle을 id로 구체화한다 | AGENTS.md and AGENTS.ko.md | `make rules-check` | [o] |
 | T26.7-17 | 의존성 policy는 repository의 단일 PHP platform 8.4.1을 선언한다 | composerPlatforms of config/dependency-policy.json | `make dependency-policy-check` | [o] |
-| T26.7-18 | assign으로 준 문자열 key의 host Map은 일반 객체와 같이 렌더된다 (hyper: assign is not a map) | packages/ts/tests/value/bound.test.ts | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/value/bound.test.ts` | [-] 원인: 실패가 재현되지 않는다. 2026-10-20 11:57에 build한 template main의 dist로 hyper http test가 48개 중 48개 통과한다 |
+| T26.7-18 | assign으로 준 문자열 key의 host Map은 일반 객체와 같이 렌더된다 (hyper: assign is not a map) | packages/ts/tests/value/bound.test.ts | `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/value/bound.test.ts` | [o] |
 | T26.7-19 | packages/ts의 AST validator는 make가 만들고 추적하지 않는다 | scripts/generate-ast-validator.mts, the Makefile, .gitignore and the owner and knip declarations | `make build-ts`, `var/tools/bin/node node_modules/.bin/vitest run packages/ts/tests/decode.test.ts` | [o] |
 | T26.7-20 | kit 복사본은 연결된 kit을 따르고 CHECK_TARGETS는 link-state-check와 bypass-check를 실행한다 | PRINCIPLES.md, PRINCIPLES.ko.md, config/php-lint, Makefile, .github/workflows/ci.yml | `make kit-check` | [o] |
 | T26.7-21 | showcase의 compile된 AST artifact와 generated program은 make가 만들고 추적하지 않는다 | RT-57 and the showcase documents, the Makefile, .gitignore, pages.yml and the removal of scripts/check-artifact-digests.mts | `make typed-generator`, `make typed-generator-check`, `var/tools/bin/node --test tests/scripts/ignored-files.test.mts` | [o] |
