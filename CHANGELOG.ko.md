@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: acb2fc3d9f23ed2d73ec1250e21f779b42d800196d9db08c99e35528822dbf9c -->
+<!-- source-sha256: a521d23196872115f3b0881e9176784f0566fe800a74d945cde746982cdd3096 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- CI는 commits-check가 읽는 전체 commit history를 checkout한다. Red: sibling-kit 회귀 검사는 얕은 checkout을 거부한다. Green: 선택한 workflow test가 통과한다(T26.7-96).
 - CI는 make가 공유 bootstrap을 읽기 전에 형제 kit source와 package를 준비하고, 전체 설치 job은 선언된 PHP를 선택한다. action 검증 기록은 기존 download-artifact v8.0.2 commit을 포함한다. Red: sibling-kit unit은 scripts job에서 실패했다. Green: workflow unit test가 통과한다(T26.7-96).
 - 문서는 kit의 dist 대신 make가 실행하는 kit source, @polyspec/kit의 scripts/kit/<tool>.mts를 이름 붙인다(T26.7-95).
 - workflow test는 kit의 workflow를 빼고 template의 workflow만 검사하고, install, check, test target test는 make가 실행하는 kit source를 기대한다(T26.7-94).

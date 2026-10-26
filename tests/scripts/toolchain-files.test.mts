@@ -305,6 +305,8 @@ test('every installing job prepares the sibling kit before the first make', () =
       const commands = runsOf(job);
       const firstMake = commands.findIndex(command => /^make (?!-k -C )/.test(command));
       if (firstMake < 0) continue;
+      assert.ok(usesOf(job, 'actions/checkout@').some(step => step.with['fetch-depth'] === 0),
+        `${file} job ${job.name} must fetch the commit history that commits-check reads`);
       const checkout = commands.indexOf('git clone --depth 1 https://github.com/polyspec/kit.git ../kit');
       const npm = commands.indexOf('make -k -C ../kit install-tools TOOLS=npm');
       const packages = commands.indexOf('make -k -C ../kit install-packages');

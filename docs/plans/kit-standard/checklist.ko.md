@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-kit-standard -->
-<!-- source-sha256: 8bdf39bd8d0efac74974f7af77228b03432ea0c6b1a31fe3771386839bc25135 -->
+<!-- source-sha256: 765ceed4ee259e233902d0f3274bd34aaef47b198ae4d133c5aac2c8d29ba6fc -->
 # kit 표준 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -221,4 +221,4 @@
 | T26.7-93 | gates workflow는 옆의 kit의 package를 설치하고 아무것도 build하지 않는다(kit K613). 원인: kit K613 이후 소비자 bootstrap은 ../kit의 source를 실행하는데, workflow는 여전히 옆 kit의 dist를 build했다. 수정: step은 ../kit의 npm과 package를 설치하고 kit-build는 하지 않는다 | .github/workflows/gates.yml | `make layout-check` | [o] |
 | T26.7-94 | template의 workflow test와 install test는 K613의 kit을 기대한다(kit K613). 원인: kit K613 이후 kit의 package.json은 kit.copies에 workflow를 두지 않아서, tests/scripts/workflows.mts의 WORKFLOWS가 kit의 gates와 release workflow를 담고 template의 규칙이 그것들을 실패시키며, install, check, test target test는 make가 ../kit/scripts/kit/<tool>.mts를 실행하는데도 kit의 dist(bootstrap.mjs, install-tools.mjs, full-run.mjs, run-tests.mjs)를 기대한다. 수정: WORKFLOWS는 @polyspec/kit의 workflows/ 파일을 빼고, test는 kit source를 기대한다 | tests/scripts/workflows.mts, tests/scripts/toolchain-files.test.mts, tests/scripts/suite-parity.test.mts, tests/scripts/test-targets.test.mts | `node ../kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts tests/scripts/test-targets.test.mts` | [o] |
 | T26.7-95 | 문서는 make가 실행하는 kit source를 이름 붙인다(kit K613, K646). 원인: AGENTS, docs/operations, packages/php-ext/README가 kit이 더 build하지 않는 dist인 node_modules/@polyspec/kit/dist/<tool>.mjs를 이름 붙인다. 수정: 그것들은 node_modules/@polyspec/kit/scripts/kit/<tool>.mts를 이름 붙인다. full-run 참조는 로컬 전체 실행의 계획을 기다린다 | AGENTS.md, docs/operations, packages/php-ext/README.md and their Korean twins | `make docs-check` | [o] |
-| T26.7-96 | CI는 dependency review와 결과 job을 포함하여 첫 make 전에 형제 kit의 source와 package를 준비한다 | .github/workflows/ci.yml, .github/workflows/dependency-review.yml, tests/scripts/toolchain-files.test.mts | `node ../kit/scripts/kit/run-tests.mts node -- --test-name-pattern="sibling kit" tests/scripts/toolchain-files.test.mts` | [o] |
+| T26.7-96 | CI는 commit history를 가져오고 dependency review와 결과 job을 포함하여 첫 make 전에 형제 kit의 source와 package를 준비한다 | .github/workflows/ci.yml, .github/workflows/dependency-review.yml, tests/scripts/toolchain-files.test.mts | `node ../kit/scripts/kit/run-tests.mts node -- --test-name-pattern="sibling kit" tests/scripts/toolchain-files.test.mts` | [o] |
