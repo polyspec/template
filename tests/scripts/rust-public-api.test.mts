@@ -54,7 +54,7 @@ test('a Rust consumer can use compiler runtime services through the SDK', { time
   assert.equal(result.status, 0, result.stderr);
 });
 
-for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.rs', 'private-expression.rs', 'private-source.rs']) {
+for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.rs', 'private-expression.rs', 'private-source.rs', 'private-ast.rs']) {
   test(`a Rust consumer cannot import the implementation through ${file}`, { timeout: 30_000 }, () => {
     const result = compile(file);
     assert.notEqual(result.status, 0, 'the implementation is publicly accessible');
@@ -62,3 +62,8 @@ for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.r
     assert.ok(errors.includes('E0603'), result.stderr);
   });
 }
+
+test('a Rust consumer can construct and inspect AST data through the SDK root', { timeout: 30_000 }, () => {
+  const result = compile('public-ast.rs');
+  assert.equal(result.status, 0, result.stderr);
+});

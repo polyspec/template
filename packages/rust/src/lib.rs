@@ -10,7 +10,7 @@
 #![deny(missing_docs)]
 
 pub mod artifact;
-pub mod ast;
+mod ast;
 pub mod error;
 mod escape;
 mod expr;
@@ -31,7 +31,10 @@ pub mod __test_support {
     pub use crate::expr::vectors::{ExpressionToken, evaluate_expression, parse_expression, tokenize_expression};
 }
 
-pub use ast::{AstDecodeError, Comment, Expr, Node, Template, decode_template};
+pub use ast::{
+    AstDecodeError, BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp,
+    decode_template,
+};
 pub use error::{ArgumentError, ErrorCode, RequestError, TemplateError, internal_boundary};
 pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};

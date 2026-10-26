@@ -15,13 +15,13 @@ const rustDefinitionData = (name: string): string => rustSymbol('DefinitionData'
 // A typed value of generated Rust is read from a canonical Value into the Rust type of its destination.
 // A runtime conversion names the value by the input that it fills (ERR-13 paths name request values only).
 const convert = (value: string, destination: ValueType, name: string): string => `generated_result::<${rustType(destination.source)}>(&${value}, ${rustString(name)})?`;
-const unaryVariant: Record<ExprOf<'unary'>['operator'], string> = { '!': 'polyspec_template::ast::UnaryOp::Not', '-': 'polyspec_template::ast::UnaryOp::Negate' };
+const unaryVariant: Record<ExprOf<'unary'>['operator'], string> = { '!': 'polyspec_template::UnaryOp::Not', '-': 'polyspec_template::UnaryOp::Negate' };
 const binaryVariant: Record<Exclude<ExprOf<'binary'>['operator'], '&&' | '||' | '??'>, string> = {
-  '+': 'polyspec_template::ast::BinaryOp::Add', '-': 'polyspec_template::ast::BinaryOp::Subtract', '*': 'polyspec_template::ast::BinaryOp::Multiply',
-  '/': 'polyspec_template::ast::BinaryOp::Divide', '%': 'polyspec_template::ast::BinaryOp::Remainder', '==': 'polyspec_template::ast::BinaryOp::Equal',
-  '!=': 'polyspec_template::ast::BinaryOp::NotEqual', '===': 'polyspec_template::ast::BinaryOp::StrictEqual',
-  '!==': 'polyspec_template::ast::BinaryOp::StrictNotEqual', '<': 'polyspec_template::ast::BinaryOp::Less', '>': 'polyspec_template::ast::BinaryOp::Greater',
-  '<=': 'polyspec_template::ast::BinaryOp::LessEqual', '>=': 'polyspec_template::ast::BinaryOp::GreaterEqual', in: 'polyspec_template::ast::BinaryOp::In',
+  '+': 'polyspec_template::BinaryOp::Add', '-': 'polyspec_template::BinaryOp::Subtract', '*': 'polyspec_template::BinaryOp::Multiply',
+  '/': 'polyspec_template::BinaryOp::Divide', '%': 'polyspec_template::BinaryOp::Remainder', '==': 'polyspec_template::BinaryOp::Equal',
+  '!=': 'polyspec_template::BinaryOp::NotEqual', '===': 'polyspec_template::BinaryOp::StrictEqual',
+  '!==': 'polyspec_template::BinaryOp::StrictNotEqual', '<': 'polyspec_template::BinaryOp::Less', '>': 'polyspec_template::BinaryOp::Greater',
+  '<=': 'polyspec_template::BinaryOp::LessEqual', '>=': 'polyspec_template::BinaryOp::GreaterEqual', in: 'polyspec_template::BinaryOp::In',
 };
 
 export function createTarget({ program }: { program: Program }): Target {
