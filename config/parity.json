@@ -1420,6 +1420,97 @@
         {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::error"},
         {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.error"}
       ]
+    },
+    {
+      "id": "api-runtime-services-limits",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeServices#limits:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices.Limits"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices::limits"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"},
+        {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.limits"}
+      ]
+    },
+    {
+      "id": "api-runtime-services-host-function",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeServices#hostFunction:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices.HostFunction"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices::host_function"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::hostFunction"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::hostFunction"},
+        {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.host_function"}
+      ]
+    },
+    {
+      "id": "api-runtime-services-class-function",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!RuntimeServices#classFunction:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeServices.ClassFunction"},
+        {"implementation": "rust", "symbol": "polyspec_template::render::context::RuntimeServices::class_function"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::classFunction"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::classFunction"},
+        {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.class_function"}
+      ]
+    },
+    {
+      "id": "api-program-prepare",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Program#prepare:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Program.Prepare"},
+        {"implementation": "rust", "symbol": "polyspec_template::Program::prepare"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Program::prepare"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Program::prepare"},
+        {"implementation": "python", "symbol": "template.engine.Program.prepare"}
+      ]
+    },
+    {
+      "id": "api-program-render",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Program#render:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Program.Render"},
+        {"implementation": "rust", "symbol": "polyspec_template::Program::render"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Program::render"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Program::render"},
+        {"implementation": "python", "symbol": "template.engine.Program.render"}
+      ]
+    },
+    {
+      "id": "api-engine-prepare",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Engine#prepare:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Engine.Prepare"},
+        {"implementation": "rust", "symbol": "polyspec_template::Engine::prepare"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Engine::prepare"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Engine::prepare"},
+        {"implementation": "python", "symbol": "template.engine.Engine.prepare"}
+      ]
+    },
+    {
+      "id": "api-engine-render",
+      "requirements": ["RT-67"],
+      "kind": "api",
+      "symbols": [
+        {"implementation": "ts", "symbol": "@polyspec/template!Engine#render:member(1)"},
+        {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Engine.Render"},
+        {"implementation": "rust", "symbol": "polyspec_template::Engine::render"},
+        {"implementation": "php", "symbol": "Polyspec\\Template\\Engine::render"},
+        {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Engine::render"},
+        {"implementation": "python", "symbol": "template.engine.Engine.render"}
+      ]
     }
   ]
 }

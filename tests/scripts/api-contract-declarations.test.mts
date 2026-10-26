@@ -29,10 +29,39 @@ const parity = jsonDocument<{ units: Unit[] }>('API units', {
 }).read('config/parity.json');
 const manifest = compilerManifestDocument.read('packages/compiler/interface.json');
 
-test('every RuntimeBindings operation declares its actual native API in every implementation', { timeout: 5000 }, () => {
+const owners: Record<string, Record<string, string>> = {
+  RuntimeBindings: {
+    ts: 'RuntimeBindings', go: 'github.com/polyspec/template/packages/go/render.RuntimeBindings',
+    rust: 'polyspec_template::render::runtime_bindings::RuntimeBindings',
+    php: 'Polyspec\\Template\\Render\\RuntimeBindings', python: 'template.runtime_bindings.RuntimeBindings',
+  },
+  RuntimeServices: {
+    ts: 'RuntimeServices', go: 'github.com/polyspec/template/packages/go/render.RuntimeServices',
+    rust: 'polyspec_template::render::context::RuntimeServices',
+    php: 'Polyspec\\Template\\Render\\RuntimeServices', python: 'template.runtime_environment.RuntimeServices',
+  },
+  Program: {
+    ts: 'Program', go: 'github.com/polyspec/template/packages/go.Program', rust: 'polyspec_template::Program',
+    php: 'Polyspec\\Template\\Program', python: 'template.engine.Program',
+  },
+  Engine: {
+    ts: 'Engine', go: 'github.com/polyspec/template/packages/go.Engine', rust: 'polyspec_template::Engine',
+    php: 'Polyspec\\Template\\Engine', python: 'template.engine.Engine',
+  },
+};
+
+const contracts = [
+  { owner: 'RuntimeBindings', operations: manifest.runtimeContract.RuntimeBindings.operations.map(item => item.name) },
+  { owner: 'RuntimeServices', operations: manifest.runtimeContract.RuntimeServices.operations.map(item => item.name) },
+  { owner: 'Program', operations: manifest.runtimeContract.Program.operations.map(item => item.name) },
+  { owner: 'Engine', operations: manifest.runtimeContract.Engine.operations },
+];
+
+for (const contract of contracts) test(`every ${contract.owner} operation declares its actual native API in every implementation`, { timeout: 5000 }, () => {
   const implementations = readParityConfig().implementations.map(item => item.name).sort();
-  for (const operation of manifest.runtimeContract.RuntimeBindings.operations) {
-    const id = `api-runtime-bindings-${operation.name.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`;
+  for (const operation of contract.operations) {
+    const kebab = (value: string) => value.replace(/[A-Z]/g, (letter, index: number) => `${index === 0 ? '' : '-'}${letter.toLowerCase()}`);
+    const id = `api-${kebab(contract.owner)}-${kebab(operation)}`;
     const unit = parity.units.find(item => item.id === id);
     assert.ok(unit !== undefined, `${id}: missing API operation`);
     assert.equal(unit.kind, 'api');
@@ -44,16 +73,13 @@ test('every RuntimeBindings operation declares its actual native API in every im
       assert.ok(language !== undefined);
       const mapping = manifest.languages[language];
       assert.ok(mapping !== undefined, `${id}: language mapping ${language}`);
-      const mapped = mapping.runtimeBindingOperationNames?.[operation.name] ?? operation.name;
-      const expected: Record<string, string> = {
-        ts: `@polyspec/template!RuntimeBindings#${mapped}:member(1)`,
-        go: `github.com/polyspec/template/packages/go/render.RuntimeBindings.${mapped.charAt(0).toUpperCase()}${mapped.slice(1)}`,
-        rust: `polyspec_template::render::runtime_bindings::RuntimeBindings::${mapped}`,
-        php: `Polyspec\\Template\\Render\\RuntimeBindings::${mapped}`,
-        'php-ext': `Polyspec\\Template\\Render\\RuntimeBindings::${mapped}`,
-        python: `template.runtime_bindings.RuntimeBindings.${mapped}`,
-      };
-      assert.equal(binding.symbol, expected[binding.implementation], `${id}: ${binding.implementation}`);
+      const mapped = (contract.owner === 'RuntimeBindings' ? mapping.runtimeBindingOperationNames : mapping.runtimeServiceOperationNames)?.[operation] ?? operation;
+      const owner = owners[contract.owner]?.[binding.implementation === 'php-ext' ? 'php' : binding.implementation];
+      assert.ok(owner !== undefined);
+      const expected = binding.implementation === 'ts' ? `@polyspec/template!${owner}#${mapped}:member(1)`
+        : binding.implementation === 'go' ? `${owner}.${mapped.charAt(0).toUpperCase()}${mapped.slice(1)}`
+          : binding.implementation === 'rust' || language === 'php' ? `${owner}::${mapped}` : `${owner}.${mapped}`;
+      assert.equal(binding.symbol, expected, `${id}: ${binding.implementation}`);
     }
   }
 });

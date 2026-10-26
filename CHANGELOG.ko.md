@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a68870e56823d651eda671f34a7d0164561e0331d4780b699e45971aa452b6a0 -->
+<!-- source-sha256: 96b4ad1409ff654c49f99daf0ca6c3af81ebcd96f6bae31c01ec502b23dfe8c3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- Program·Engine의 요청 메서드와 RuntimeServices 메서드를 공유 API 단위 7개로 선언하고 관측된 네이티브 심볼 42개에 연결했다. manifest 기반 회귀 검증이 기존 RuntimeBindings 연산 20개와 함께 여섯 소유자·연산명을 검증한다. Red: 751fe80a에서 추가한 계약 그룹 세 개의 선언이 없었다. Green: 선언 단위 4개·parity 선언·기반 도구 타입 검사 통과(T27.1-1-5).
 - Rust는 crate 루트에서 host callback 타입을 공개하고 내장 함수 구현 모듈은 비공개로 유지한다. 함수 테스트 17개를 빠짐없이 crate 안으로 옮기고 feature binding의 정확한 한정 테스트 ID를 유지했다. Red: 16d466d2에서 외부 소비자가 구현 registry를 import할 수 있었다. Green: 외부 callback 컴파일 성공·구현 접근 E0603 거부·함수 단위 17개·clippy·타입 검사·해당 파일 린트·parity 선언 검증 통과(T27.1-1-4).
 - 단일 compiler manifest의 RuntimeBindings 연산 20개를 공유 API 단위로 선언하고 네이티브 메서드 심볼 120개에 연결했다. 선언 단위가 구현 누락·잘못된 네이티브 메서드 대응·RT-67 추적 누락을 거부한다. 여섯 네이티브 compiler-interface 검사(15개 사례, PHP 확장은 재빌드)와 선언 회귀 검증·기반 도구 타입 검사·해당 파일 린트·parity 선언 검사가 통과했다. 나머지 API 목록은 검토 중이다(T27.1-1-3).
 - 공개 서명 검증이 실제 TypeScript 패키지에 API Extractor를 실행하고 참조한 타입에 접근할 수 없으면 오류로 처리한다. 별도의 잘못된 선언 fixture는 ae-forgotten-export로 실패해야 한다. 소비자·모델·export 단위 5개가 모두 통과하며 생성 API 모델은 var/report에만 둔다(T27.1-1-2).
