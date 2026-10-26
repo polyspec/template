@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 01f61823b2df3637a6581be3871a9b58a84853856f42e3d04b5771dd03e4db2c -->
+<!-- source-sha256: af00a727ab6f25d3e4ace5cd8bd43a43ec4919fe07a6d4b4a88e02f8b6bbc3a4 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Rust scanner와 HTML escape 모듈을 비공개 구현으로 유지하고 검증한 AstProgram delimiter 상태는 crate 내부에서만 접근한다. 외부 소비자는 root parse/analyze 연산과 공개 결과 타입을 계속 사용할 수 있다. Red: 85f02d76에서 두 helper를 모두 import할 수 있었다. Green: 외부 SDK 검사 5개·네이티브 parser 및 delimiter 단위 8개·clippy·선택한 lint 통과(T27.1-1-9).
 - SDK 공개 범위 단위가 사용하는 고정 버전 Go compiler를 외부 실행 파일로 선언했다. CI에서 TypeScript fixture 진입점의 미사용 파일 문제가 사라졌으며, Go 실행 파일 선언은 새 미등록 실행 파일 문제를 해결한다(T27.1).
 - RuntimeEnvironment register/registerClass와 PreparedRender.render를 여섯 구현의 공유 API로 선언했다. 등록 메서드명은 compiler manifest를 따르고 준비된 호출은 RT-62에 연결한다. Red: 638b9c61에서 계약 그룹 두 개의 선언이 없었다. Green: 선언 단위 7개·타입·선택한 lint·parity 선언 검사 통과(T27.1-1-8).
 - Go 내장 함수 helper를 internal 구현 패키지로 옮기고 root SDK에서 HostFunction과 함께 FunctionContext를 공개한다. Go 생성 코드와 callback 검증은 공개 SDK 타입을 사용하고 기존 함수 테스트·parity 연결은 이동한 구현을 따른다. Red: f2f0d8e7에서 외부 코드가 registry를 import할 수 있었으며 root callback context를 지정할 수 없었다. Green: 외부 소비자 검사 3개·네이티브 함수 및 callback 단위 7개, compiler 타입·Go vet·선택한 lint·parity 선언 검사 통과(T27.1-1-7).

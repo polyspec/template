@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 8e7b7f2a52fa076ba050467fcad64b3a1db69b40ddc4e8431cc66b1cd5be4255 -->
+<!-- source-sha256: ce609d48abe7601e1584d40717b95c872dd838b45d4cd821aa7ea3e550249f22 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -383,3 +383,4 @@
 | T27.1-1-6 | 오류 코드 값 41개를 공유 API 데이터로 선언하고 실제 네이티브 상수 또는 공개 문자열 union·catalog 표현에 연결한다. error-codes-check와 parity R7의 정확한 catalog 검증을 유지한다 | 오류 값 API 단위와 catalog 기반 회귀 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts tests/scripts/error-codes.test.mts`; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-1-7 | Go 내장 함수 구현을 internal 패키지로 옮기고 root SDK에서 host callback context를 공개한다. 생성 코드와 함수 테스트 연결을 유지한다 | Go SDK·compiler backend·소비자 fixture·테스트 연결 | `var/tools/bin/node --test tests/scripts/go-public-api.test.mts`; 선택한 네이티브 함수·callback 단위; `make template-test-compiler-types`; `make docs-check` | [o] |
 | T27.1-1-8 | runtime의 등록 연산과 준비된 render 호출을 정확한 네이티브 메서드로 선언하고 compiler manifest에서 등록 연산명을 대조한다 | Runtime API 단위·선언 회귀 검사 | `var/tools/bin/node --test tests/scripts/api-contract-declarations.test.mts`; `make typecheck`; `make parity-declarations-check`; `make docs-check` | [o] |
+| T27.1-1-9 | Rust scanner·escape 구현을 비공개로 유지하고 root parsing·analysis API는 유지한다. 검증한 delimiter 상태는 crate 내부에 둔다 | Rust 모듈 공개 범위·외부 소비자 fixture·parser 단위 | `make build-rust`; `var/tools/bin/node --test tests/scripts/rust-public-api.test.mts`; 네이티브 parser·delimiter 단위; `make template-test-rust-clippy`; `make docs-check` | [o] |

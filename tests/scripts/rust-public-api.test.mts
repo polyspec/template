@@ -43,3 +43,17 @@ test('a Rust consumer cannot access the built-in implementation registry', { tim
   const errors = result.stderr.split('\n').filter(Boolean).map(line => diagnostic.parse(line, 'rustc stderr').code?.code);
   assert.ok(errors.includes('E0603'), result.stderr);
 });
+
+test('a Rust consumer can use the root parser and analysis types', { timeout: 30_000 }, () => {
+  const result = compile('public-parser.rs');
+  assert.equal(result.status, 0, result.stderr);
+});
+
+for (const file of ['private-scanner.rs', 'private-escape.rs']) {
+  test(`a Rust consumer cannot import the implementation through ${file}`, { timeout: 30_000 }, () => {
+    const result = compile(file);
+    assert.notEqual(result.status, 0, 'the implementation is publicly accessible');
+    const errors = result.stderr.split('\n').filter(Boolean).map(line => diagnostic.parse(line, 'rustc stderr').code?.code);
+    assert.ok(errors.includes('E0603'), result.stderr);
+  });
+}

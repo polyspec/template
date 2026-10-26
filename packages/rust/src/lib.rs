@@ -12,13 +12,13 @@
 pub mod artifact;
 pub mod ast;
 pub mod error;
-pub mod escape;
+mod escape;
 pub mod expr;
 pub mod format;
 mod functions;
 pub mod loader;
 pub mod page_cache;
-pub mod parser;
+mod parser;
 pub mod render;
 pub mod source;
 pub mod value;

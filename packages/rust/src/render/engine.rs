@@ -196,7 +196,7 @@ pub struct AstProgram {
     /// Host functions and limits shared with generated programs.
     pub runtime: RuntimeEnvironment,
     /// Delimiters.
-    pub delimiters: Delimiters,
+    pub(crate) delimiters: Delimiters,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
     cache: Mutex<HashMap<String, (String, Arc<ParsedTemplate>)>>,
