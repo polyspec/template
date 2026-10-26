@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/polyspec/template/packages/go/errs"
+	"github.com/polyspec/template/packages/go/internal/casetest"
 	"github.com/polyspec/template/packages/go/internal/expr"
 	"github.com/polyspec/template/packages/go/internal/functions"
 	"github.com/polyspec/template/packages/go/internal/lexer"
@@ -70,8 +71,9 @@ func plain(v value.Value) any {
 	return v
 }
 
-func TestExpressionFixtures(t *testing.T) {
-	data, err := os.ReadFile(filepath.Join("..", "..", "..", "tests", "fixtures", "expr", "cases.json"))
+func expressionFixtures(t testing.TB) []exprCase {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "fixtures", "expr", "cases.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,6 +81,11 @@ func TestExpressionFixtures(t *testing.T) {
 	if err := json.Unmarshal(data, &cases); err != nil {
 		t.Fatal(err)
 	}
+	return cases
+}
+
+func TestExpressionFixtures(t *testing.T) {
+	cases := expressionFixtures(t)
 	engine, err := render.NewEngine(render.Options{}, func() float64 { return 0 })
 	if err != nil {
 		t.Fatal(err)
