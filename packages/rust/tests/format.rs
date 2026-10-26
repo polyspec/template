@@ -5,7 +5,7 @@
 mod common;
 
 use common::{case_delimiters, repo_root, templates};
-use polyspec_template::format::invariant::{without_line_indentation, without_spans};
+use polyspec_template::__test_support::{without_line_indentation, without_spans};
 use polyspec_template::{
     FormatErrorReason, FormatOptions, Formatted, IndentUnit, ParseOptions, RequestError, TemplateBlocks, format, format_bytes, parse,
 };

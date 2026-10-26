@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 51aa5cac965be61b21d3f95de4e52afc0b8dfc6ce7c34b0dc1ddbb6a40b99344 -->
+<!-- source-sha256: cbd57b06a48602fe1165ffd770a583da9c8d7f3119c0f116f96f7255250dea57 -->
 # polyspec-template
 
 [English](README.md).
@@ -64,6 +64,6 @@ cargo clippy --locked --release -- -D warnings
 cargo test --locked --features __test_support
 ```
 
-테스트는 `tests/`에 있다. 저장소의 conformance case와 expression fixture를 process 안에서 실행한다. Rust 단위·parity target은 네이티브 expression 벡터 bridge에 `__test_support`를 활성화한다. 릴리스 소비자는 expression·source 구현이 비공개인 기본 SDK를 사용한다.
+통합 테스트는 `tests/`에 있고 내부 단위는 각 모듈 옆에 있다. Conformance case와 expression fixture를 process 안에서 실행한다. Rust 단위·parity target은 네이티브 expression 벡터·formatter 불변식 bridge와 전체 formatter target에 `__test_support`를 활성화한다. 릴리스 소비자는 formatting 계약을 공개하고 expression·source·value·formatter 구현을 비공개로 유지하는 기본 SDK를 사용한다.
 
 내장 함수 구현과 registry는 비공개 구현 세부 사항이다. 생성 프로그램은 `RuntimeBindings`를 사용하고 host callback은 crate 루트의 `Env`, `FunctionContext`, `HostFunction`을 사용한다.

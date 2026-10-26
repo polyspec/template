@@ -38,6 +38,12 @@ path = "tests/expr_fixtures.rs"
 harness = false
 required-features = ["__test_support"]
 
+# Formatter cases retain native invariant helpers in the non-default harness bridge.
+[[test]]
+name = "format"
+path = "tests/format.rs"
+required-features = ["__test_support"]
+
 [lints]
 workspace = true
 

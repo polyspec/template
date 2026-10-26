@@ -14,7 +14,7 @@ mod ast;
 pub mod error;
 mod escape;
 mod expr;
-pub mod format;
+mod format;
 mod functions;
 pub mod loader;
 pub mod page_cache;
@@ -29,6 +29,7 @@ mod sha256;
 #[cfg(feature = "__test_support")]
 pub mod __test_support {
     pub use crate::expr::vectors::{ExpressionToken, evaluate_expression, parse_expression, tokenize_expression};
+    pub use crate::format::invariant::{without_line_indentation, without_spans};
 }
 
 pub use ast::{

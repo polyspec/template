@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9286f6fb2c54adf5fe807d6f28dfcdcb9efc8e488b2f0ce14e5b272f3007ad45 -->
+<!-- source-sha256: d549cc79f2f6bca444f3a364ad2b84af665b8e0b88c7da9cacc85e9a36a6375e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- 기본 Rust SDK가 formatter 호출·옵션·결과·오류 계약을 공개하고 정의 모듈·불변식 helper를 내부로 유지한다. 모든 네이티브 formatter case의 본문·식별자는 그대로이며 기존 비기본 harness 기능에서 불변식 helper를 받는다. Formatter target이 이 기능을 요구하고 단위·parity 명령은 이미 활성화한다. Red: 313c1add의 기본 소비자가 불변식 helper를 import할 수 있다. Green: SDK·선언 단위 26개·네이티브 bridge·unchanged-source 단위·전체 formatter target 컴파일·release 빌드·clippy·타입·선언 검사 통과. CI의 모든 formatter case는 계속 필수다(T27.1-1-24).
 - 두 PHP SDK의 source·Unicode·escaping·값 변환 클래스와 AST 구성 helper를 내부로 유지한다. 문서화된 `Ast::toJson`·safe string·map 값·host map binding은 공개 상태를 유지하며 SDK signature에 내부 타입 누출이 없다. Red: bf13f4d4에서 두 SDK probe가 helper를 노출한다. Green: SDK 단위 12개·SDK별 네이티브 Unicode 경계 단위 2개·확장 재빌드·PHP lint·포맷·중복 검사 통과(T27.1-1-23).
 - Rust value·number 구현 모듈을 내부로 유지하고 `ValueType`·host map binding을 SDK root에서 지명할 수 있게 하며 생성 프로그램도 root를 사용한다. Map-binding 선언은 bound-map 조회 helper 대신 미바인딩 host 데이터를 받는 `bind_map`을 가리킨다. 네이티브 값 단위 9개와 공유 binding을 crate 안으로 옮기고 module loader·root program 상호운용 검증을 유지한다. 참조가 없는 integer 검사 helper를 제거했다. Red: 14820268의 소비자가 number 내부 구현을 import할 수 있지만 root의 값·binding 계약은 지명할 수 없다. Green: SDK·선언 단위 24개·값 단위 9개·export 단위 2개·release 빌드·clippy·타입·선언 검사 통과(T27.1-1-22).
 - Go AST 선언을 네이티브 약어 표기인 `Block.ID`·`IfBlock.ID`로 정정한다. Reflection이 JSON key뿐 아니라 선언된 모든 Go AST field symbol을 실제 공개 필드와 대조하며 선언 파일을 명시적인 단위 검사 input으로 등록한다. Red: 74a8a924의 CI와 bc31712e에서 강화한 네이티브 검사가 `Id` mapping 두 곳을 거부한다. Green: 네이티브 reflection case 28개·AST 계약 단위 3개 통과(T27.1-1-21).
