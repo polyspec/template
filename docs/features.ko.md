@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 0230b0fcd4afc8ded0d5583146beaca877b3317a6511df863cbed0b9799d79d2 -->
+<!-- source-sha256: 8923c433cb46180c85fe77566db396d46a5858a5e095afff8615db128f38d94e -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -32,3 +32,5 @@
 | bound-data | 여러 render를 위한 bound data | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [근거](spec/data-model) |
 
 implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.
+
+릴리스 후보 0.0.12의 매니페스트와 네이티브 lock 파일을 동기화하고 PHP CLI를 포함한 배포 파일 후보 9개를 로컬에서 빌드했다. 버전 범위 검사, 선택한 도구와 Python API 단위 테스트, 타입 검사와 문서 검사가 로컬에서 통과했다. main 통합과 깨끗한 CI 환경에서 정확히 고정된 의존성 그래프 및 전체 릴리스 매트릭스 검증은 남아 있다. 후보 배포 파일은 준비 산출물이며 공개된 릴리스가 아니다.

@@ -4,9 +4,11 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
-- The PHP extension version constant is prepared for candidate 0.0.12 (T27.1).
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
+## 0.0.12
+- The PHP extension version constant is prepared for candidate 0.0.12 (T27.1).
+- Release candidate 0.0.12 synchronizes package versions, native locks and nine archive candidates, including the PHP CLI. Its review covers 50 registry dependencies and 8 locks. Version coverage, selected tooling units (30), Python API units (47), type checks and documentation build pass locally; main integration and complete CI acceptance remain pending. Dependency refresh, Vite security patch and the exact PHPUnit pin are prepared (T27.1, T26.7-43, T26.7-43-1, T26.7-65).
 - Release preparation includes the PHP CLI archive and its portable consumer, discovers Python units in the package environment, tests every Go package, follows TypeScript star exports and validates plan-page markup. Generated Rust call fixtures use Arc. Verification: 30 selected tooling unit tests and the documentation build pass; full CI remains pending (T27.1).
 - The release dependency review covers 49 registry dependencies and 8 locks without an unaccepted advisory or unexplained older version. Updated language-server dependencies, parser tools, PHPUnit, setuptools and ruff; patched VitePress Vite to 6.4.5 and the VSIX tooling MSAL dependency to 7.1.0. Removed stale advisory and esbuild exceptions. Verification: dependency-policy-check, python-lock-check, npm audit, VSIX packaging and selected editor/runtime units pass (T26.7-66).
 - Invalid delimiter options raise DelimiterOptionError as an ordinary Error, so ERR-13 does not classify an argument failure as a JavaScript RangeError. Red: the parser delimiter unit failed on RangeError; green: 437 selected parser, AST decode and editor unit tests pass (T27.1).

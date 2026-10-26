@@ -31,3 +31,5 @@ The table records the status of each feature. The implementations and the units 
 | bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](spec/data-model) |
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
+
+Release candidate 0.0.12 has synchronized manifests, native lock files and nine locally built archive candidates, including the PHP CLI. Version coverage, selected tooling and Python API units, type checks and documentation checks pass locally. Main integration, the exact locked dependency graph in clean CI and its complete release matrix remain unverified. Candidate archives are preparation artifacts, not published releases.

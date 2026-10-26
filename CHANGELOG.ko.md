@@ -1,13 +1,15 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c53b7d9b43eac57e119888c7d00b1c026496a449e5d839d4a6feb3af95e0af6e -->
+<!-- source-sha256: 9c77b21674e106e90947c87e50727baaeafb8497348b3a5536145d1ec30655d9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
-- PHP 확장의 버전 상수를 후보 0.0.12에 맞춰 준비했다(T27.1).
 
+## 0.0.12
+- PHP 확장의 버전 상수를 후보 0.0.12에 맞춰 준비했다(T27.1).
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
+- 릴리스 후보 0.0.12의 패키지 버전, 네이티브 lock, PHP CLI를 포함한 배포 파일 후보 9개를 동기화했다. 레지스트리 의존성 50개와 lock 8개를 검토했다. 버전 범위 검사, 선택한 도구 단위 30개, Python API 단위 47개, 타입 검사와 문서 빌드가 로컬에서 통과했다. main 통합과 전체 CI 검증은 대기 중이다. 의존성 갱신, Vite 보안 패치와 정확한 PHPUnit 버전 고정을 준비했다(T27.1, T26.7-43, T26.7-43-1, T26.7-65).
 - 릴리스 준비에 PHP CLI 배포 파일과 이식 가능한 consumer를 포함하고, 패키지 환경에서 Python 단위를 발견하며 모든 Go 패키지에 테스트를 둔다. TypeScript star export를 추적하고 계획 문서의 마크업을 검증한다. Rust 생성 호출 fixture는 Arc를 사용한다. 검증: 선택한 도구 단위 테스트 30개와 문서 빌드 통과. 전체 CI는 대기 중이다(T27.1).
 - 릴리스 의존성 검토가 레지스트리 의존성 49개와 lock 8개를 다루며 수용하지 않은 보안 권고나 설명 없는 구버전이 없다. language-server 의존성, parser 도구, PHPUnit, setuptools, ruff를 갱신하고 VitePress의 Vite를 6.4.5, VSIX 도구의 MSAL 의존성을 7.1.0으로 패치했다. 오래된 보안 권고와 esbuild 예외를 제거했다. 검증: dependency-policy-check, python-lock-check, npm audit, VSIX packaging, 선택한 editor/runtime 단위 검증 통과(T26.7-66).
 - 잘못된 구분자 옵션은 일반 Error를 상속한 DelimiterOptionError를 일으켜 ERR-13이 인자 오류를 JavaScript RangeError로 분류하지 않는다. Red: parser 구분자 단위 검증이 RangeError에서 실패했으며 green: 선택한 parser, AST decode, editor 단위 테스트 437개가 통과한다(T27.1).
