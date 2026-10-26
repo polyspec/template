@@ -1,6 +1,8 @@
 {
   "schema": 1,
   "entries": {
+    "tests/fixtures/public-types/consumer.ts": "The external SDK consumer compiled by tests/scripts/typescript-exports.test.mts through its fixture tsconfig.json.",
+    "tests/fixtures/public-types/private-base.d.ts": "The intentionally invalid SDK entry loaded by API Extractor through private-api-extractor.json in tests/scripts/typescript-exports.test.mts; it must retain its inaccessible implementation base.",
     "docs/.vitepress/config.mts": "The VitePress configuration of the documentation site: make docs runs vitepress build docs, which loads it.",
     "examples/showcase/*.mts": "The builder of the example site: make showcase, showcase-compile, typed-generator, showcase-*-check and bench run these scripts by path.",
     "examples/showcase/adapters/typescript.ts": "The TypeScript adapter of the showcase: scripts/check-showcase-contract.mts and examples/showcase/benchmark-modes.mts run it by path.",
