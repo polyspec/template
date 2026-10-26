@@ -13,6 +13,7 @@
     "examples/site/scenarios/react-boundary/react-host.tsx": "The site shows it as the react-boundary integration source (scenario.json integrationFiles); make typecheck checks it with examples/site/scenarios/tsconfig.json."
   },
   "binaries": {
+    "go": "The pinned Go compiler of mise.toml: tests/scripts/go-public-api.test.mts builds standalone consumers to verify public SDK types and the internal-package boundary.",
     "gmake": "GNU Make of Homebrew: tests/scripts/toolchain-files.test.mts runs the recipes with it where the make of the machine is the GNU Make 3.81 of macOS.",
     "make": "The make of the machine: the tests of tests/scripts run the recipes of the Makefile with it (make -n or a target), such as test-targets.test.mts and toolchain-files.test.mts.",
     "php": "The PHP of the machine (setup-php in CI): scripts/check-function-contract.mts asks Registry::builtins() of the PHP package for the arities of its functions.",
