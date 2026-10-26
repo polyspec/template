@@ -4,9 +4,18 @@
 the body range of each tag and the prefix analysis of a source with an error
 . Ranges are code point indexes into the source string."""
 
+import json
 import unittest
+from pathlib import Path
 
-from polyspec.template import ParseOptions, TemplateError, analyze, _analyze_prefix
+from polyspec.template import (
+    ParseOptions,
+    Source,
+    TemplateError,
+    analyze,
+    _analyze_prefix,
+    parse,
+)
 
 
 def classes(source: str, tokens) -> list[str]:
@@ -232,6 +241,54 @@ class PrefixAnalysis(unittest.TestCase):
         source = "[? a]x"
         result = _analyze_prefix(source, "t.tpl", ParseOptions(delimiters="[]"))
         self.assertEqual(self.kinds(source, result), ["if [? a]"])
+
+
+FIXTURE = json.loads(
+    (
+        Path(__file__).resolve().parents[3] / "tests/fixtures/analysis-context.json"
+    ).read_text(encoding="utf-8")
+)
+
+
+class PublicAnalysis(unittest.TestCase):
+    """EDT-10: public analysis preserves AST, tags and classified ranges."""
+
+    def test_preserves_shared_analysis_contexts(self):
+        for item in FIXTURE["cases"]:
+            with self.subTest(item["id"]):
+                source = Source.from_text(item["name"], item["source"])
+                result = analyze(item["source"], item["name"])
+                tags = [
+                    dict(
+                        kind=tag["kind"],
+                        echo=tag["echo"],
+                        start=source.byte_at(tag["start"]),
+                        end=source.byte_at(tag["end"]),
+                        bodyStart=source.byte_at(tag["body_start"]),
+                        bodyEnd=source.byte_at(tag["body_end"]),
+                    )
+                    for tag in result.tags
+                ]
+                tokens = [
+                    dict(
+                        kind=token["kind"],
+                        start=source.byte_at(token["start"]),
+                        end=source.byte_at(token["end"]),
+                    )
+                    for token in result.tokens
+                ]
+                self.assertEqual(
+                    dict(
+                        ast=json.loads(json.dumps(result.ast)), tags=tags, tokens=tokens
+                    ),
+                    item["expected"],
+                )
+                self.assertEqual(result.ast, parse(item["source"], item["name"]))
+
+    def test_rejects_incomplete_source(self):
+        with self.assertRaises(TemplateError) as caught:
+            analyze("{? x}", "invalid.tpl")
+        self.assertEqual(caught.exception.code, "E_PARSE_UNCLOSED_BLOCK")
 
 
 if __name__ == "__main__":

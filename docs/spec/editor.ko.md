@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-editor -->
-<!-- source-sha256: 5962c8d3fbb65f060bb41af7642f3a8ad56e74f7e64d7c857253b7871ed62837 -->
+<!-- source-sha256: 717854ecfc9b87f8aa5e8a288a7083c845ab16e5bfc4e46500f30a7e1b5e0f2e -->
 # 에디터 지원
 
 [English](/spec/editor).
@@ -26,3 +26,5 @@
 | `path` | 따옴표 없는 include 경로와 block 태그 본문의 따옴표 없는 단어 |
 
 - **EDT-9** `tags`는 주석을 뺀, 받아들인 모든 태그의 범위다. 에디터는 이 범위에 태그 배경을 칠한다. 어두운 테마에서는 `#16351c`, 밝은 테마에서는 `#e3f6dd`이다.
+
+- **EDT-10** 공개 전체 분석 연산은 `parse`와 같은 AST, 파서의 원시 태그 record, 분류된 토큰 record를 반환한다. 파싱 오류가 나면 연산을 거부한다. 원시 태그마다 네이티브 필드 표기로 `kind`, `echo`, `start`, `end`, `bodyStart`, `bodyEnd`를 기록한다. 원시 record에는 주석 태그도 포함하며 EDT-9의 에디터 변환에서 이를 제외한다. 태그 종류는 `assignment`, `block`, `close`, `comment`, `directive`, `echo`, `else`, `elseif`, `for`, `if`, `ifblock`, `include`다. 토큰마다 EDT-8의 종류로 `kind`, `start`, `end`를 기록한다. TypeScript 범위는 UTF-16 인덱스, Python 범위는 코드 포인트 인덱스이며 Go·Rust·PHP·PHP 확장은 UTF-8 바이트 인덱스를 사용한다. 모든 범위는 맨 앞 BOM 하나를 제거한 텍스트를 기준으로 하며 공개 Source context가 네이티브 인덱스를 바이트 오프셋으로 변환한다(LEX-24).

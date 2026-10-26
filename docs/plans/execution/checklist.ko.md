@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 201040cbc09de58f2a53479635b82360cb34aaadffd0ac1c66381a5a9b020259 -->
+<!-- source-sha256: 0b56ad1ce7933ea97da410aeb08423c308c08ad83bec153de02a83af2bbaae8d -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -411,3 +411,4 @@
 | T27.1-1-28 | RT-33에 따라 자원 제한 값과 네이티브 SDK 필드를 선언하고 SDK 6개에서 기본값 네 개와 재정의를 검증한다 | Resource limit API declarations and native units | `make parity-declarations-check`; native limit units; `make docs-check` | [o] |
 | T27.1-1-29 | 정규 AST 연산자와 loop metadata 리터럴을 선언하고 공개 enum 식별자 및 모든 SDK decoder의 전체 리터럴 round-trip을 검증한다 | AST enum declarations and shared decoder fixture | `make parity-declarations-check`; native enum/decoder units; `make docs-check` | [o] |
 | T27.1-1-30 | 공개 readonly 속성을 유지하면서 확인된 PHP Source 속성 추출 실패를 수정하고 두 네이티브 SDK 모델에서 Source metadata 필드 전체를 검증한다 | Explicit Source properties and extraction regression | `node --test tests/scripts/php-public-api.test.mts`; Source SDK units; `make docs-check` | [o] |
+| T27.1-1-31 | 전체 분석 공개 API 선언을 완성하고 공유 fixture로 SDK 6개의 모든 태그·토큰 종류와 범위 및 AST를 검증한다 | Full analysis API, shared fixtures and native SDK units | `make parity-declarations-check`; native analysis units; `make docs-check` | [o] |

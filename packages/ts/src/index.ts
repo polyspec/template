@@ -1,6 +1,6 @@
 // Package entry: parser, engine, loaders, values and errors.
 import type { Template } from './ast.js';
-import { analyzeTemplate, analyzeTemplatePrefix, parseTemplate, type PrefixAnalysis, type SyntaxTag, type SyntaxToken } from './parser/parser.js';
+import { analyzeTemplate, analyzeTemplatePrefix, parseTemplate, type TemplateAnalysis, type PrefixAnalysis } from './parser/parser.js';
 import { DEFAULT_DELIMITERS, parseDelimiters, type Delimiters } from './parser/scanner.js';
 import { AstProgramCore, type EngineOptions, type RenderOptions } from './render/engine.js';
 import type { ParsedTemplate } from './render/context.js';
@@ -13,7 +13,7 @@ export type { Comment } from './ast.js';
 export { PathError } from './loader.js';
 export type { ArtifactRefresh } from './render/engine.js';
 export type { Delimiters } from './parser/scanner.js';
-export type { PrefixAnalysis, SyntaxTag, SyntaxToken, SyntaxTokenKind } from './parser/parser.js';
+export type { TemplateAnalysis, PrefixAnalysis, SyntaxTag, SyntaxToken, SyntaxTokenKind } from './parser/parser.js';
 export { Source } from './source.js';
 export { PageCache, type PageCacheTTL } from './page-cache.js';
 
@@ -51,7 +51,7 @@ export function analyzePrefix(source: string | Uint8Array, name: string, options
 }
 
 /** Parses a template once and returns its AST with exact parser-owned tag ranges. */
-export function analyze(source: string | Uint8Array, name: string, options: ParseOptions = {}): { ast: Template; tags: readonly SyntaxTag[]; tokens: readonly SyntaxToken[] } {
+export function analyze(source: string | Uint8Array, name: string, options: ParseOptions = {}): TemplateAnalysis {
   const delimiters = delimitersOf(options.delimiters);
   return internalBoundary(name, () => analyzeTemplate(typeof source === 'string' ? Source.fromText(name, source) : Source.fromBytes(name, source), delimiters));
 }
