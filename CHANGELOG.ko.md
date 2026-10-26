@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6f8c82adeec03318f03eb082864b5f2b8565e516a88fe28a2b193f8cb17611d4 -->
+<!-- source-sha256: 5b5c91a6f1855cc8ef30fea064812a6f5038720a1dc13ec3d93680f1c0708f1b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- esbuild 0.28.2의 패키지 빌드와 문서 빌드가 통과했고 전체 CI 검증은 대기 중이다. 철회한 CLI 플랫폼 작업은 T26.7-76으로 이미 완료됐다(T26.7-68, T26.7-53-1).
 - PHPUnit을 정확히 13.4.3으로 고정하고 Composer lock과 의존성 검토를 일치시켰다. (T26.7-65).
 - VitePress lock이 검토한 보안 수정을 포함한 Vite 6.4.5를 사용하며 dependency-policy-check가 통과한다. (T26.7-43-1).
 - 의존성 갱신을 완료했다. 후보의 레지스트리 의존성 50개와 lock 8개를 검토했고 dependency-policy-check가 통과한다. (T26.7-43).

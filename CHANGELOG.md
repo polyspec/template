@@ -7,6 +7,7 @@
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 ## 0.0.12
+- esbuild 0.28.2 passes package builds and the documentation build; complete CI acceptance remains pending. The withdrawn CLI platform task is already covered by T26.7-76 (T26.7-68, T26.7-53-1).
 - PHPUnit is pinned exactly to 13.4.3 and the Composer locks and dependency review agree. (T26.7-65).
 - The VitePress lock uses Vite 6.4.5 with its reviewed advisory fixes; dependency-policy-check passes. (T26.7-43-1).
 - The dependency refresh is complete; the candidate review covers 50 registry dependencies and 8 locks, and dependency-policy-check passes. (T26.7-43).
