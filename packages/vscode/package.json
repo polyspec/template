@@ -131,7 +131,7 @@
   },
   "dependencies": {
     "@polyspec/template-lsp": "0.0.11",
-    "vscode-languageclient": "^10.1.2"
+    "vscode-languageclient": "^11.0.0"
   },
   "scripts": {
     "package:vsix": "vsce package --no-dependencies --skip-license --out dist/polyspec-template.vsix"

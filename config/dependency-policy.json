@@ -33,17 +33,6 @@
     {
       "ecosystem": "npm",
       "manifest": "package.json",
-      "package": "esbuild",
-      "reason": "The latest stable release removes transforms required by the current package and documentation build chains.",
-      "removalCondition": "Remove the pin when the latest stable release is accepted by both build chains and make test-ts docs-verify-idempotent passes.",
-      "verification": [
-        "make test-ts",
-        "make docs-verify-idempotent"
-      ]
-    },
-    {
-      "ecosystem": "npm",
-      "manifest": "package.json",
       "package": "@types/vscode",
       "reason": "vsce refuses to package an extension whose @types/vscode is newer than engines.vscode (^1.138.0): \"@types/vscode ^1.140.0 greater than engines.vscode ^1.138.0\". The extension uses no API added after VS Code 1.138, so raising engines.vscode would only exclude VS Code 1.138 and 1.139.",
       "removalCondition": "Remove the exception when engines.vscode is raised to the latest @types/vscode release, because the extension needs an API of that release, and make vscode-package template-test-vscode-integration passes.",
@@ -53,13 +42,5 @@
       ]
     }
   ],
-  "advisoryExceptions": [
-    {
-      "lock": "package-lock.json",
-      "package": "sprintf-js",
-      "advisory": "1241202",
-      "reason": "GHSA-hp3w-g68c-fv3c (npm advisory 1241202) covers every release of sprintf-js, so no release fixes it. kit pulls sprintf-js 1.0.3 in only through @microsoft/api-extractor -> @rushstack/ts-command-line -> argparse 1.0.10 -> sprintf-js, which formats the help and error texts of the api-extractor command with its own format strings; make lint-ts runs that command with fixed arguments only, and no input of a user reaches sprintf-js",
-      "removalCondition": "a release of sprintf-js fixes GHSA-hp3w-g68c-fv3c, or @microsoft/api-extractor no longer depends on argparse; make dependency-review then reports the exception as stale"
-    }
-  ]
+  "advisoryExceptions": []
 }

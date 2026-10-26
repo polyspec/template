@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@polyspec/template-language": "0.0.11",
-    "vscode-languageserver": "^10.1.2",
-    "vscode-languageserver-textdocument": "^1.0.15"
+    "vscode-languageserver": "^11.0.0",
+    "vscode-languageserver-textdocument": "^1.0.16"
   }
 }

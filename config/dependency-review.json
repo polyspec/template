@@ -1,30 +1,26 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-20T10:28:43.416Z",
+  "reviewed": "2026-10-26T09:53:29.813Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "1a112e98da16f035f913299d9da63de0b6ef854626925f9363d8514d463ccc17",
-      "advisories": [
-        {
-          "package": "sprintf-js",
-          "version": "1.0.3",
-          "id": "1241202",
-          "severity": "moderate",
-          "title": "sprintf-js vulnerable to denial of service through unbounded precision specifiers",
-          "url": "https://github.com/advisories/GHSA-hp3w-g68c-fv3c"
-        }
-      ]
+      "sha256": "dab9bb5a3e925f352f22bb40e9bc474b1f256cd34b81ce4db1db171a189ab47f",
+      "advisories": []
     },
     {
       "lock": "composer.lock",
-      "sha256": "b1c26e4a18bafc6a86f7d4a9d7596fdc4c29dceef4d3f9e3b18036ad2ba95d25",
+      "sha256": "a6e0d30a1c4fd53fa2371d9436a7ee80a0316c2c08889cb286e87a11438078ef",
       "advisories": []
     },
     {
       "lock": "packages/php-ext/composer.lock",
       "sha256": "f7c355e9d820187c4e760fa140f25e68ad209f31269613efdfc44445595d9157",
+      "advisories": []
+    },
+    {
+      "lock": "packages/cli/php/composer.lock",
+      "sha256": "b4367633da90a0c3a3eade29090a513ca4ba78a3e40a08eed0dbb571783a361e",
       "advisories": []
     },
     {
@@ -116,14 +112,14 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "esbuild",
-      "version": "0.27.2",
+      "version": "0.28.2",
       "latest": "0.28.2"
     },
     {
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "oxc-parser",
-      "version": "0.154.0",
+      "version": "0.155.0",
       "latest": "0.155.0"
     },
     {
@@ -179,15 +175,15 @@
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "vitest",
-      "version": "5.0.4",
+      "version": "5.0.5",
       "latest": "5.0.5"
     },
     {
       "ecosystem": "npm",
       "manifest": "package.json",
       "package": "vscode-jsonrpc",
-      "version": "9.0.3",
-      "latest": "9.0.3"
+      "version": "10.0.0",
+      "latest": "10.0.0"
     },
     {
       "ecosystem": "npm",
@@ -235,7 +231,7 @@
       "ecosystem": "npm",
       "manifest": "packages/codemirror/package.json",
       "package": "@codemirror/view",
-      "version": "6.43.14",
+      "version": "6.43.15",
       "latest": "6.43.15"
     },
     {
@@ -249,15 +245,15 @@
       "ecosystem": "npm",
       "manifest": "packages/lsp/package.json",
       "package": "vscode-languageserver",
-      "version": "10.1.2",
-      "latest": "10.1.2"
+      "version": "11.0.0",
+      "latest": "11.0.0"
     },
     {
       "ecosystem": "npm",
       "manifest": "packages/lsp/package.json",
       "package": "vscode-languageserver-textdocument",
-      "version": "1.0.15",
-      "latest": "1.0.15"
+      "version": "1.0.16",
+      "latest": "1.0.16"
     },
     {
       "ecosystem": "npm",
@@ -270,8 +266,8 @@
       "ecosystem": "npm",
       "manifest": "packages/vscode/package.json",
       "package": "vscode-languageclient",
-      "version": "10.1.2",
-      "latest": "10.1.2"
+      "version": "11.0.0",
+      "latest": "11.0.0"
     },
     {
       "ecosystem": "npm",
@@ -291,29 +287,43 @@
       "ecosystem": "composer",
       "manifest": "composer.json",
       "package": "opis/json-schema",
-      "version": "v2.6.0-p1",
-      "latest": "v2.6.0-p1"
+      "version": "2.6.0-p1",
+      "latest": "2.6.0-p1"
     },
     {
       "ecosystem": "composer",
       "manifest": "composer.json",
       "package": "phpunit/phpunit",
-      "version": "13.4.2",
+      "version": "13.4.3",
       "latest": "13.4.3"
     },
     {
       "ecosystem": "composer",
       "manifest": "packages/php/composer.json",
       "package": "opis/json-schema",
-      "version": "v2.6.0-p1",
-      "latest": "v2.6.0-p1"
+      "version": "2.6.0-p1",
+      "latest": "2.6.0"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/cli/php/composer.json",
+      "package": "symfony/console",
+      "version": "v8.1.9",
+      "latest": "v8.1.9"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/cli/php/composer.json",
+      "package": "phpunit/phpunit",
+      "version": "13.4.3",
+      "latest": "13.4.3"
     },
     {
       "ecosystem": "composer",
       "manifest": "packages/php/composer.json",
-      "package": "symfony/console",
-      "version": "v8.1.9",
-      "latest": "v8.1.9"
+      "package": "opis/json-schema",
+      "version": "2.6.0",
+      "latest": "2.6.0"
     },
     {
       "ecosystem": "pypi",
@@ -354,15 +364,15 @@
       "ecosystem": "pypi",
       "manifest": "packages/python/pyproject.toml",
       "package": "setuptools",
-      "version": "84.0.0",
-      "latest": "84.2.0"
+      "version": "84.2.1",
+      "latest": "84.2.1"
     },
     {
       "ecosystem": "pypi",
       "manifest": "mise.toml",
       "package": "ruff",
-      "version": "0.17.0",
-      "latest": "0.17.1"
+      "version": "0.17.2",
+      "latest": "0.17.2"
     },
     {
       "ecosystem": "go",

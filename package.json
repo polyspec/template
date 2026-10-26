@@ -34,8 +34,8 @@
     "@vscode/test-electron": "^3.1.0",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
-    "esbuild": "0.27.2",
-    "oxc-parser": "^0.154.0",
+    "esbuild": "0.28.2",
+    "oxc-parser": "^0.155.0",
     "picomatch": "^4.0.7",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -43,8 +43,8 @@
     "tsup": "^9.0.0",
     "typescript": "7.0.2",
     "vitepress": "^1.6.4",
-    "vitest": "^5.0.4",
-    "vscode-jsonrpc": "^9.0.3",
+    "vitest": "^5.0.5",
+    "vscode-jsonrpc": "^10.0.0",
     "yaml": "^2.9.1"
   },
   "allowScripts": {
@@ -55,7 +55,10 @@
   },
   "overrides": {
     "vitepress": {
-      "vite": "6.4.3"
+      "vite": "6.4.5"
+    },
+    "@azure/identity": {
+      "@azure/msal-node": "7.1.0"
     }
   }
 }
