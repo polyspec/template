@@ -7,6 +7,7 @@
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 ## 0.0.12
+- The dependency refresh is complete; the candidate review covers 50 registry dependencies and 8 locks, and dependency-policy-check passes. (T26.7-43).
 - The PHP extension version constant is prepared for candidate 0.0.12 (T27.1).
 - Release candidate 0.0.12 synchronizes package versions, native locks and nine archive candidates, including the PHP CLI. Its review covers 50 registry dependencies and 8 locks. Version coverage, selected tooling units (30), Python API units (47), type checks and documentation build pass locally; main integration and complete CI acceptance remain pending. Dependency refresh, Vite security patch and the exact PHPUnit pin are prepared (T27.1, T26.7-43, T26.7-43-1, T26.7-65).
 - Release preparation includes the PHP CLI archive and its portable consumer, discovers Python units in the package environment, tests every Go package, follows TypeScript star exports and validates plan-page markup. Generated Rust call fixtures use Arc. Verification: 30 selected tooling unit tests and the documentation build pass; full CI remains pending (T27.1).
