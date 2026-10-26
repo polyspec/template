@@ -7,6 +7,7 @@
 - Release preparation names executable unit and documentation checks in its verification cell (T27.1).
 
 ## 0.0.12
+- The TypeScript export traversal declares its oxc-parser ecosystem dependency in the tool classification. Red: rebuild-check fails at 82b09213; green: it passes (T27.1).
 - Make reads the Python environment with a template-owned bootstrap Node selection, independent of the shared BOOTSTRAP_NODE variable. Red: the targeted bootstrap unit fails with permission denied at 24267157; green: Python toolchain and Makefile units pass (T27.1).
 - Candidate development and 0.0.12 preparation are integrated on main through guarded commits. Final release acceptance waits for kit version alignment and complete CI on the exact main commit (T27.1).
 - esbuild 0.28.2 passes package builds and the documentation build; complete CI acceptance remains pending. The withdrawn CLI platform task is already covered by T26.7-76 (T26.7-68, T26.7-53-1).

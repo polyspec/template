@@ -66,6 +66,10 @@
       "kind": "policy",
       "reason": "names the Python module of the generated program of a showcase scenario, as adapters/python.py imports it"
     },
+    "packages/cli/php/bin/template.php": {
+      "kind": "ecosystem",
+      "tool": "symfony/console parses the conformance command line (CNF-4) on the PHP package"
+    },
     "packages/language/bin/template-fmt.mjs": {
       "kind": "ecosystem",
       "tool": "node runs the built entry of the command template-fmt; the command line is parsed by args.ts of the package"
@@ -77,10 +81,6 @@
     "packages/lsp/bin/template-lsp.mjs": {
       "kind": "ecosystem",
       "tool": "node runs the built vscode-languageserver entry of the language server"
-    },
-    "packages/cli/php/bin/template.php": {
-      "kind": "ecosystem",
-      "tool": "symfony/console parses the conformance command line (CNF-4) on the PHP package"
     },
     "packages/ts/bin/template.mjs": {
       "kind": "ecosystem",
@@ -329,6 +329,10 @@
     "scripts/tools.mts": {
       "kind": "ecosystem",
       "tool": "npm links the command of each package into node_modules/.bin; the script names the commands of the installed tools"
+    },
+    "scripts/typescript-exports.mts": {
+      "kind": "ecosystem",
+      "tool": "oxc-parser reads module exports; the traversal follows local re-exports for the compiler interface contract"
     },
     "scripts/update-benchmark-docs.mts": {
       "kind": "policy",
