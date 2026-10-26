@@ -10,8 +10,8 @@ import (
 	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/loader"
 	"github.com/polyspec/template/packages/go/internal/parser"
+	"github.com/polyspec/template/packages/go/loader"
 	"github.com/polyspec/template/packages/go/value"
 )
 
