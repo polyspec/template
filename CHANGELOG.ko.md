@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d971300ed140e18e39b1ce13a5e6a4196343b0fb197017693fa3fd33b4011c44 -->
+<!-- source-sha256: f784a464834ae847e38edf13009e6d327d9062a6eeb102b6d8e9c0be0092a6e6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Go AST 선언을 네이티브 약어 표기인 `Block.ID`·`IfBlock.ID`로 정정한다. Reflection이 JSON key뿐 아니라 선언된 모든 Go AST field symbol을 실제 공개 필드와 대조하며 선언 파일을 명시적인 단위 검사 input으로 등록한다. Red: 74a8a924의 CI와 bc31712e에서 강화한 네이티브 검사가 `Id` mapping 두 곳을 거부한다. Green: 네이티브 reflection case 28개·AST 계약 단위 3개 통과(T27.1-1-21).
 - Python은 builtin·interpreter 구현 이름 대신 host callback 계약을 SDK에서 공개한다. Expression·formatter·interpreter 구현 모듈은 네이티브 `__all__`로 SDK export가 없음을 선언하고 네이티브 벡터는 구현을 직접 import한다. Red: fee0d8a8에서 패키지가 builtin registry·interpreter 클래스를 노출한다. Green: export 단위 9개·네이티브 registry·formatter 단위 2개·Python lint·parity 선언 검사 통과. 전체 벡터는 CI에서 계속 필수다(T27.1-1-20).
 - 두 PHP SDK의 formatter body·expression·indent·invariant helper와 interpreter evaluator·renderer 클래스를 내부로 유지한다. 공개 formatter·compiler-runtime 진입점은 계속 사용할 수 있으며 signature에 내부 타입 누출이 없다. Red: 74a8a924에서 두 SDK probe가 구현 클래스를 노출한다. Green: SDK 추출 단위 10개·SDK별 formatter smoke 단위 1개·확장 재빌드·PHP lint·포맷·중복 검사 통과(T27.1-1-19).
 - Canonical AST shape·필드를 네이티브 공개 API로 선언한다(130개 단위). TypeScript interface 필드·공개 Go JSON 필드를 schema와 대조하고 성공하는 네이티브 decoder fixture 전체가 모든 shape·필드를 다룬다. 빠졌던 class-call fixture와 모든 SDK의 공개 decoder 회귀를 추가했다. Red: 697effe5에 AST 필드 선언이 없고 기존 왕복 fixture에 ClassCall이 없다. Green: schema·선언 단위 3개·TypeScript decoder 단위 6개·나머지 SDK별 class-call decoder 단위 1개·Go 필드 reflection case 28개 통과(T27.1-1-18).

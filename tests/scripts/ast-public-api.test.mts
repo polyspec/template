@@ -101,7 +101,7 @@ test('every schema shape and field names its native public representation', { ti
       assert.equal(unit.kind, 'api');
       assert.ok(unit.requirements.includes('AST-10'), id);
       const rustField = field !== undefined && field !== 'type' && structs.has(name) ? `::${field}` : '';
-      const goField = field === undefined ? '' : `.${field[0]?.toUpperCase()}${field.slice(1)}`;
+      const goField = field === undefined ? '' : field === 'id' ? '.ID' : `.${field[0]?.toUpperCase()}${field.slice(1)}`;
       assert.deepEqual(unit.symbols, [
         { implementation: 'ts', symbol: `@polyspec/template!${native}${field === undefined ? ':interface' : `#${field}:member`}` },
         { implementation: 'go', symbol: `github.com/polyspec/template/packages/go/ast.${name}${goField}` },

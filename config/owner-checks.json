@@ -1141,6 +1141,15 @@
       "tests": [
         "tests/scripts/ast-public-api.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "config/parity.json"
+      ],
+      "targets": [
+        "template-test-go-unit"
+      ],
+      "tests": []
     }
   ],
   "inputs": [
@@ -1450,7 +1459,8 @@
         "packages/go/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
-        "tests/fixtures/ast-decode/**"
+        "tests/fixtures/ast-decode/**",
+        "config/parity.json"
       ]
     },
     {

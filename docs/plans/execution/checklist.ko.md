@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 6017af638055f56e99c11e104bee19d09778ac94e4451d36c2ebf834569f5cef -->
+<!-- source-sha256: 79e1a54aef3850d90154b848fc3320d85499ef16f63b0af7fbe8d9bdf36c03f5 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -401,3 +401,4 @@
 | T27.1-1-18 | Canonical AST shape·필드를 각 네이티브 공개 표현에 선언하고 TypeScript·Go 필드 일치와 모든 decoder fixture의 필드 coverage를 검증하며 모든 SDK의 class call을 포함한다 | AST API 단위 130개·schema 기반 계약 검사·네이티브 decoder 회귀 | Schema·선언 단위 3개; TypeScript decoder 단위; 네이티브 class-call decoder 6개; Go reflection 단위; 타입·lint·선언·문서 검사 | [o] |
 | T27.1-1-19 | PHP formatter 구현 helper·interpreter 클래스를 내부로 유지하고 formatter·compiler-runtime SDK를 보존한다 | PHPDoc 가시성·네이티브 SDK probe·확장 arginfo | SDK 추출 단위 10개; 두 SDK의 네이티브 formatter smoke 단위; PHP lint·포맷; 중복·문서 검사 | [o] |
 | T27.1-1-20 | 네이티브 export list로 Python builtin·interpreter·expression·formatter 구현 이름을 SDK 밖에 유지하고 host callback 계약·모든 네이티브 벡터를 보존한다 | Package export·module export list·소비자 회귀 | Export 단위 9개; 네이티브 registry·formatter 단위 2개; Python lint; parity 선언; 문서; CI 전체 벡터 | [o] |
+| T27.1-1-21 | Go AST의 ID 선언을 정정하고 추정한 대문자 변환 대신 reflection으로 모든 네이티브 필드 식별자를 검증한다 | Go AST 선언·reflection 회귀·owner input | 네이티브 식별자 대조 Red; Go reflection case 28개; AST 계약 단위 3개; 선언·owner·타입·문서 검사 | [o] |

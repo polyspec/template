@@ -3871,7 +3871,7 @@
         },
         {
           "implementation": "go",
-          "symbol": "github.com/polyspec/template/packages/go/ast.Block.Id"
+          "symbol": "github.com/polyspec/template/packages/go/ast.Block.ID"
         },
         {
           "implementation": "rust",
@@ -4069,7 +4069,7 @@
         },
         {
           "implementation": "go",
-          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.Id"
+          "symbol": "github.com/polyspec/template/packages/go/ast.IfBlock.ID"
         },
         {
           "implementation": "rust",

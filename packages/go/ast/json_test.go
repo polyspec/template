@@ -198,6 +198,27 @@ func TestPublicASTFieldsMatchTheSchema(t *testing.T) {
 	if err := json.Unmarshal(data, &schema); err != nil {
 		t.Fatal(err)
 	}
+	declaration, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "..", "config", "parity.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var parity struct {
+		Units []struct {
+			ID      string
+			Symbols []struct{ Implementation, Symbol string }
+		}
+	}
+	if err := json.Unmarshal(declaration, &parity); err != nil {
+		t.Fatal(err)
+	}
+	symbols := map[string]string{}
+	for _, unit := range parity.Units {
+		for _, entry := range unit.Symbols {
+			if entry.Implementation == "go" {
+				symbols[unit.ID] = entry.Symbol
+			}
+		}
+	}
 	types := map[string]reflect.Type{
 		"Template":   reflect.TypeOf(ast.Template{}),
 		"Comment":    reflect.TypeOf(ast.Comment{}),
@@ -238,6 +259,11 @@ func TestPublicASTFieldsMatchTheSchema(t *testing.T) {
 				key := strings.Split(field.Tag.Get("json"), ",")[0]
 				if _, ok := schema.Definitions[name].Properties[key]; !ok {
 					t.Fatalf("undeclared field %s", key)
+				}
+				id := "api-ast-shape-" + strings.ToLower(name) + "-" + strings.ToLower(key)
+				want := "github.com/polyspec/template/packages/go/ast." + name + "." + field.Name
+				if symbols[id] != want {
+					t.Fatalf("%s: native field is %s, declared %s", id, want, symbols[id])
 				}
 				fields[key] = true
 			}
