@@ -78,7 +78,7 @@ const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof valu
 const CI_PASSED = 'ci-passed';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
 // make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs both first (kit K171).
-const CI_PASSED_INSTALL = ['make install-tools TOOLS=npm', 'make install-packages'];
+const CI_PASSED_INSTALL = ['git clone --depth 1 https://github.com/polyspec/kit.git ../kit', 'make -k -C ../kit install-tools TOOLS=npm', 'make -k -C ../kit install-packages', 'make install-tools TOOLS=npm', 'make install-packages'];
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text: string) {
@@ -299,6 +299,21 @@ test('every recipe runs cargo, go, npm and Composer offline, so no check reaches
   assert.equal(go, 'off', `go of the recipes: expected GOPROXY off, actual ${go}`);
 });
 
+test('every installing job prepares the sibling kit before the first make', () => {
+  for (const file of ['.github/workflows/ci.yml', '.github/workflows/dependency-review.yml']) {
+    for (const job of jobs(file)) {
+      const commands = runsOf(job);
+      const firstMake = commands.findIndex(command => /^make (?!-k -C )/.test(command));
+      if (firstMake < 0) continue;
+      const checkout = commands.indexOf('git clone --depth 1 https://github.com/polyspec/kit.git ../kit');
+      const npm = commands.indexOf('make -k -C ../kit install-tools TOOLS=npm');
+      const packages = commands.indexOf('make -k -C ../kit install-packages');
+      assert.ok(checkout >= 0 && checkout < npm && npm < packages && packages < firstMake,
+        `${file} job ${job.name} must clone and install the sibling kit before make reads its sources`);
+    }
+  }
+});
+
 test('every CI job installs with make install-tools TOOLS=npm, make install-packages and make install, and sets up no Go', () => {
   for (const file of WORKFLOWS) {
     const direct = jobs(file).flatMap(runLines).find(line => /^(npm ci|npm install|rustup )/.test(line));
@@ -447,8 +462,8 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
     'not always': [text.replace('    if: ${{ always() }}\n', '    if: ${{ success() }}\n'), "the job ci-passed has if: '${{ success() }}'"],
     'needs one job': [text.replace(/ {4}needs: \[[^\]]*\]\n/, '    needs: [release]\n'), 'the job ci-passed needs [release], not every other job'],
     'another runner': [`${head}${job.replace('runs-on: ubuntu-24.04', 'runs-on: ubuntu-26.04')}`, "the job ci-passed runs on 'ubuntu-26.04'"],
-    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), 'the job ci-passed runs [make install-tools TOOLS=npm, make install-packages, make ci-passed], not the last step'],
-    'no install': [`${head}${job.replace('      - run: make install-packages\n', '')}`, 'the job ci-passed runs [make install-tools TOOLS=npm, make ci-passed RESULTS'],
+    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), `the job ci-passed runs [${CI_PASSED_INSTALL.join(', ')}, make ci-passed], not the last step`],
+    'no install': [`${head}${job.replace('      - run: make install-packages\n', '')}`, 'not the last step make ci-passed RESULTS'],
     'skippable step': [text.replace(`        run: ${CI_PASSED_RUN}\n`, `        if: \${{ !cancelled() }}\n        run: ${CI_PASSED_RUN}\n`), 'without a condition of its own'],
   };
   for (const [name, [brokenText, message]] of Object.entries(broken)) {

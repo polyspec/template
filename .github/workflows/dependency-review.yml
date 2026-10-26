@@ -28,6 +28,12 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages

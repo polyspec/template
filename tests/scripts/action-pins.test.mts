@@ -7,6 +7,7 @@ import test from 'node:test';
 import { pinsOf, WORKFLOWS } from './workflows.mts';
 
 const VERIFIED = [
+  { action: 'actions/download-artifact', version: 'v8.0.2', commit: '9000827ccba6bdab643e8b6fd33ac0654aef8333' },
   { action: 'actions/checkout', version: 'v7.0.1', commit: '3d3c42e5aac5ba805825da76410c181273ba90b1' },
   { action: 'actions/configure-pages', version: 'v6.0.0', commit: '45bfe0192ca1faeb007ade9deae92b16b8254a0d' },
   { action: 'actions/deploy-pages', version: 'v5.0.1', commit: '368f82528645a54fb793d4d04e342629a3f51346' },

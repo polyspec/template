@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- CI prepares the sibling kit source and its packages before make reads the shared bootstrap, and full-install jobs select the declared PHP. The action verification record includes the existing download-artifact v8.0.2 commit. Red: the sibling-kit unit failed on the scripts job; green: the workflow unit tests pass (T26.7-96).
 - The documents name the kit sources that make runs, scripts/kit/<tool>.mts of @polyspec/kit, instead of its dist (T26.7-95).
 - The workflow tests check only the workflows of template, without the workflows of kit, and the install, check and test target tests expect the kit sources that make runs (T26.7-94).
 

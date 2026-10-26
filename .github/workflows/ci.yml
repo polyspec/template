@@ -45,6 +45,12 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -75,6 +81,12 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -103,6 +115,12 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -131,6 +149,12 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -161,6 +185,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -185,6 +219,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -209,6 +253,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -235,6 +289,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -259,6 +323,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -288,6 +362,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -312,6 +396,16 @@ jobs:
         with:
           node-version-file: mise.toml
           cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -345,6 +439,12 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: none
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
         if: ${{ !cancelled() }}
       - run: make install-packages
@@ -375,6 +475,12 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: mise.toml
+      - run: git clone --depth 1 https://github.com/polyspec/kit.git ../kit
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make -k -C ../kit install-packages
+        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS=npm
       - run: make install-packages
       - name: make ci-passed
