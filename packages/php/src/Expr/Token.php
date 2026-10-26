@@ -6,6 +6,7 @@ namespace Polyspec\Template\Expr;
 
 /**
  * Expression token (EXP-1, CNF-13). Offsets are byte indexes into the source.
+ * @internal
  */
 final class Token
 {

@@ -6,6 +6,7 @@ namespace Polyspec\Template\Parser;
 
 /**
  * Standalone line groups (LEX-14, LEX-15).
+ * @internal
  */
 final class Standalone
 {

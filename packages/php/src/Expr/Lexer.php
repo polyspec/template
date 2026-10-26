@@ -11,6 +11,7 @@ use Polyspec\Template\Utf8;
 
 /**
  * Expression tokens as defined in EXP-1 to EXP-6 and CNF-13.
+ * @internal
  */
 final class Lexer
 {

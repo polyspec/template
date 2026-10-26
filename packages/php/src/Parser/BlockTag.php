@@ -13,6 +13,7 @@ use Polyspec\Template\TemplateError;
 
 /**
  * Path tokens (GRM-3) and block tag bodies (GRM-13 to GRM-15).
+ * @internal
  */
 final class BlockTag
 {

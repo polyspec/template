@@ -26,6 +26,16 @@ test(`${entry}: built-in implementation groups are outside the public SDK`, { ti
   assert.deepEqual(helpers, []);
 });
 
+test(`${entry}: scanner and expression implementations are outside the public SDK`, { timeout: 30_000 }, () => {
+  const helpers = extract(entry).filter(symbol =>
+    symbol.startsWith('Polyspec\\Template\\Parser\\') || symbol.startsWith('Polyspec\\Template\\Expr\\'));
+  assert.deepEqual(helpers, []);
+  const found = new Set(extract(entry));
+  for (const name of ['Polyspec\\Template\\AstProgram::parse', 'Polyspec\\Template\\AstProgram::analyze']) {
+    assert.ok(found.has(name), `${name} is not public`);
+  }
+});
+
 test(`${entry}: host registration and compiler-runtime types remain public`, { timeout: 30_000 }, () => {
   const found = new Set(extract(entry));
   for (const name of [

@@ -1564,6 +1564,7 @@ namespace Polyspec\Template\Expr;
 
 /**
  * Expression token (EXP-1, CNF-13). Offsets are byte indexes into the source.
+ * @internal
  */
 final class Token
 {
@@ -1582,6 +1583,7 @@ final class Token
 
 /**
  * Expression tokens as defined in EXP-1 to EXP-6 and CNF-13.
+ * @internal
  */
 final class Lexer
 {
@@ -1637,6 +1639,7 @@ final class Lexer
 /**
  * Expression parser as defined in EXP-7 to EXP-16 and AST-4, AST-5.
  * Nodes are nested arrays with the fields of docs/spec/ast.md.
+ * @internal
  */
 final class Parser
 {
@@ -1703,6 +1706,7 @@ namespace Polyspec\Template\Parser;
 /**
  * Tag start detection (LEX-5, LEX-6, LEX-9, LEX-17, LEX-18) and delimiter validation (LEX-21). The array constants
  * SIGILS and WRAPPERS are declared at module start, since gen_stub does not take an array constant.
+ * @internal
  */
 final class Scanner
 {
@@ -1740,6 +1744,7 @@ final class Scanner
 
 /**
  * Standalone line groups (LEX-14, LEX-15).
+ * @internal
  */
 final class Standalone
 {
@@ -1756,6 +1761,7 @@ final class Standalone
 
 /**
  * The template parser (EDT-8, GRM-*): the AST of a template, and the AST with the accepted tags and their tokens.
+ * @internal
  */
 final class Parser
 {
@@ -1784,6 +1790,7 @@ final class Parser
 
 /**
  * Path tokens (GRM-3) and block tag bodies (GRM-13 to GRM-15).
+ * @internal
  */
 final class BlockTag
 {

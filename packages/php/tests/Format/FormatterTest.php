@@ -1,7 +1,8 @@
 <?php
-// FMT-16: the published formatter accepts options and returns its success/failure result.
 
 declare(strict_types=1);
+
+// FMT-16: the published formatter accepts options and returns its success/failure result.
 
 namespace Polyspec\Template\Tests\Format;
 

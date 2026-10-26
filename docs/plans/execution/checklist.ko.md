@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 90a60ff70673ca403ee43b4a89455beb57973f5ba30c877132f8a97ef74073da -->
+<!-- source-sha256: 90289f535860fed1f191f2e32ccc0ecd106a9e3a4b7bf13f658f4f5caae39b0c -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -396,3 +396,4 @@
 | T27.1-1-14 | 기본 Rust SDK에서 expression·source 구현 모듈을 비공개로 유지한다. 단위·parity target이 선택하는 비기본 harness bridge로 모든 네이티브 expression 벡터를 유지한다 | Rust 모듈 공개 범위·네이티브 bridge·Cargo 및 Make flag·SDK 소비자 검사 | `make build-rust`; `make template-test-rust-clippy`; SDK 소비자 단위; 네이티브 bridge 단위; expression 벡터 target 컴파일; `make parity-declarations-check`; `make docs-check`; CI 전체 벡터 | [o] |
 | T27.1-1-15 | TypeScript core 진입점에 공통 formatter 호출·옵션·결과·오류 계약을 공개하고 language 진입점의 구현을 유지하며 네이티브 formatter API 단위를 선언한다 | 공통 타입 계약·소비자 import·네이티브 formatter 선언 | SDK 선언·소비자 단위; formatter 단위; 타입 검사; `make parity-declarations-check`; `make docs-check` | [o] |
 | T27.1-7 | P0: parser를 internal로 이동한 뒤 네이티브 Go import 순서를 적용한다 | Go renderer import | `make template-lint-go-format` | [o] |
+| T27.1-1-16 | 두 PHP SDK의 scanner·expression 구현 클래스를 내부로 유지하고 공개 parse·analyze와 내부 signature 누출 방지를 검증한다 | 네이티브 PHPDoc 가시성·SDK 회귀·확장 arginfo | PHP SDK 추출 단위; 두 SDK의 선택 parser 단위; `make lint-php`; `make duplication-check`; `make docs-check` | [o] |

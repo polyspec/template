@@ -23,6 +23,7 @@ use Polyspec\Template\TemplateError;
  *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
  *     tokens: list<array{start: int, end: int, kind: string}>,
  * }
+ * @internal
  */
 final class Parser
 {

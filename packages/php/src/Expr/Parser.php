@@ -12,6 +12,7 @@ use Polyspec\Template\TemplateError;
 /**
  * Expression parser as defined in EXP-7 to EXP-16 and AST-4, AST-5.
  * Nodes are nested arrays with the fields of docs/spec/ast.md.
+ * @internal
  */
 final class Parser
 {

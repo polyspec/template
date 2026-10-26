@@ -6,6 +6,7 @@ namespace Polyspec\Template\Parser;
 
 /**
  * Tag start detection (LEX-5, LEX-6, LEX-9, LEX-17, LEX-18) and delimiter validation (LEX-21).
+ * @internal
  */
 final class Scanner
 {
