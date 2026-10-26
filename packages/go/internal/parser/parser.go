@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -122,6 +123,29 @@ type Analysis struct {
 	Tokens []Token
 }
 
+// PrefixAnalysis holds accepted ranges and the first parser error (EDT-11).
+type PrefixAnalysis struct {
+	Tags   []Tag
+	Tokens []Token
+	Error  *errs.Error
+}
+
+func newTemplateParser(source *lexer.Source, delimiters Delimiters) *templateParser {
+	root := []item{}
+	return &templateParser{source: source, delimiters: delimiters, text: source.Text, root: &root, textBeforeFirstTagIsWhitespace: true}
+}
+
+// AnalyzePrefix preserves accepted ranges when the next tag or EOF fails to parse.
+func AnalyzePrefix(source *lexer.Source, delimiters Delimiters) (*PrefixAnalysis, error) {
+	parser := newTemplateParser(source, delimiters)
+	_, err := parser.parse()
+	var failure *errs.Error
+	if err != nil && !errors.As(err, &failure) {
+		return nil, err
+	}
+	return &PrefixAnalysis{Tags: parser.syntaxTags, Tokens: parser.tokens, Error: failure}, nil
+}
+
 // Parse parses a source into a template.
 func Parse(source *lexer.Source, delimiters Delimiters) (*ast.Template, error) {
 	analysis, err := Analyze(source, delimiters)
@@ -133,8 +157,7 @@ func Parse(source *lexer.Source, delimiters Delimiters) (*ast.Template, error) {
 
 // Analyze parses a source once and returns its AST with the parser-owned tag ranges and tokens.
 func Analyze(source *lexer.Source, delimiters Delimiters) (*Analysis, error) {
-	root := []item{}
-	p := &templateParser{source: source, delimiters: delimiters, text: source.Text, root: &root, textBeforeFirstTagIsWhitespace: true}
+	p := newTemplateParser(source, delimiters)
 	tree, err := p.parse()
 	if err != nil {
 		return nil, err

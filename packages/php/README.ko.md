@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-<!-- source-sha256: 7ffd8bd39f04291307e3d0d8e01c92f06bc75acf28dccbf8a54b82bc59494945 -->
+<!-- source-sha256: 2a5d4fd8a666494fe8a11d0a95f515b8cc80dc07df768288bd725ad07166873b -->
 # polyspec/template
 
 [English](README.md).
@@ -50,6 +50,7 @@ $json = Ast::toJson($ast);
 | `AstProgram::parse(string $source, string $name, array $options = [])` | 템플릿 하나를 AST(중첩 배열)로 파싱한다. `$options['delimiters']`가 구분자를 선택한다. |
 | `AstProgram::decodeTemplate(string $json)` | AST JSON 텍스트를 opis/json-schema로 패키지가 `resources/ast.schema.json`으로 가진 `contracts/schema/ast.schema.json`에 대해 검증해 `parse`가 반환하는 배열로 읽는다. 스키마가 거부한 JSON은 `path`가 잘못된 노드의 JSON Pointer인 `AstDecodeError`로, JSON이 아닌 텍스트는 `JsonException`으로 실패한다(AST-10). |
 | `AstProgram::analyze(string $source, string $name, array $options = [])` | 템플릿 하나를 한 번 파싱해 `ast`, 받아들인 `tags`(`kind`, `start`, `end`, `bodyStart`, `bodyEnd`), 태그의 모든 부분에 대한 EDT-8 `tokens`(`start`, `end`, `kind`)를 반환한다. 오프셋은 앞의 바이트 순서 표시를 뺀 UTF-8 바이트 오프셋이다. |
+| `AstProgram::analyzePrefix(string $source, string $name, array $options = [])` | 두 PHP SDK는 받아들인 `tags`·`tokens`와 첫 파서 오류를 `error`로 반환하며 성공하면 null이다. 잘못된 UTF-8과 구분자 옵션은 예외를 던진다. |
 | `Formatter::format(string $source, array $options = [], Analyzer $analyzer = new PackageAnalyzer())` | `Polyspec\Template\Format`: 태그 안의 공백과 줄 들여쓰기를 정리하고, 텍스트를 담은 `FormatResult` 또는 `FormatError`(`reason`은 `parse`, `invariant`, `html`, 그리고 `code`, `line`, `col`, `message`)를 반환한다. 옵션은 `name`, `delimiters`, `range`, `indent`(공백 묶음 또는 탭 하나, 기본은 공백 두 칸, null이면 모든 줄의 들여쓰기를 유지), `templateBlocks`(`indent` 또는 `flat`)이다. 결과는 span을 뺀 AST(줄을 들여쓸 때는 줄 들여쓰기도 뺀 AST)가 같을 때만 반환되며, 다시 포맷해도 바뀌지 않는다. `Analyzer`는 PHP 확장의 파서 같은 다른 파서를 제공한다. |
 | `new AstProgram(?LoaderInterface $loader = null, array $options = [])` | AST program을 생성한다. 옵션: `functions`, `limits`, `delimiters`. |
 | `new Engine(Program $program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |

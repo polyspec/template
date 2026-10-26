@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d857fb24a5335695843bba77fd71db1a65d38d96 */
+ * Stub hash: 0385ed9439d0b79123c992c65dbf7f49836e187a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -359,6 +359,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_AstProgr
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_AstProgram_analyze arginfo_class_Polyspec_Template_AstProgram_parse
+
+#define arginfo_class_Polyspec_Template_AstProgram_analyzePrefix arginfo_class_Polyspec_Template_AstProgram_parse
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_AstProgram_register, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -1009,6 +1011,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, loadArtifact);
 ZEND_METHOD(Polyspec_Template_AstProgram, loadOrRefresh);
 ZEND_METHOD(Polyspec_Template_AstProgram, parse);
 ZEND_METHOD(Polyspec_Template_AstProgram, analyze);
+ZEND_METHOD(Polyspec_Template_AstProgram, analyzePrefix);
 ZEND_METHOD(Polyspec_Template_AstProgram, register);
 ZEND_METHOD(Polyspec_Template_AstProgram, registerClass);
 ZEND_METHOD(Polyspec_Template_AstProgram, hostFunction);
@@ -1341,6 +1344,7 @@ static const zend_function_entry class_Polyspec_Template_AstProgram_methods[] = 
 	ZEND_ME(Polyspec_Template_AstProgram, loadOrRefresh, arginfo_class_Polyspec_Template_AstProgram_loadOrRefresh, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_AstProgram, parse, arginfo_class_Polyspec_Template_AstProgram_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_AstProgram, analyze, arginfo_class_Polyspec_Template_AstProgram_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_AstProgram, analyzePrefix, arginfo_class_Polyspec_Template_AstProgram_analyzePrefix, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_AstProgram, register, arginfo_class_Polyspec_Template_AstProgram_register, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstProgram, registerClass, arginfo_class_Polyspec_Template_AstProgram_registerClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_AstProgram, hostFunction, arginfo_class_Polyspec_Template_AstProgram_hostFunction, ZEND_ACC_PUBLIC)

@@ -38,7 +38,7 @@ test(`${entry}: scanner and expression implementations are outside the public SD
     symbol.startsWith('Polyspec\\Template\\Parser\\') || symbol.startsWith('Polyspec\\Template\\Expr\\'));
   assert.deepEqual(helpers, []);
   const found = new Set(extract(entry));
-  for (const name of ['Polyspec\\Template\\AstProgram::parse', 'Polyspec\\Template\\AstProgram::analyze']) {
+  for (const name of ['Polyspec\\Template\\AstProgram::parse', 'Polyspec\\Template\\AstProgram::analyze', 'Polyspec\\Template\\AstProgram::analyzePrefix']) {
     assert.ok(found.has(name), `${name} is not public`);
   }
 });

@@ -23,6 +23,7 @@ use Polyspec\Template\Value\MapValue;
  *
  * @phpstan-import-type RenderOptions from Program
  * @phpstan-import-type Analysis from Parser
+ * @phpstan-import-type PrefixAnalysis from Parser
  * @phpstan-import-type Limits from RuntimeServices
  */
 final class AstProgram implements Program, RuntimeServices
@@ -166,6 +167,17 @@ final class AstProgram implements Program, RuntimeServices
     public static function analyze(string $source, string $name, array $options = []): array
     {
         return self::parsedWith(Parser::analyze(...), $source, $name, $options);
+    }
+
+    /**
+     * EDT-11: returns accepted ranges before the first parser error, without an AST.
+     *
+     * @param array{delimiters?: string} $options
+     * @return PrefixAnalysis
+     */
+    public static function analyzePrefix(string $source, string $name, array $options = []): array
+    {
+        return self::parsedWith(Parser::analyzePrefix(...), $source, $name, $options);
     }
 
     /**

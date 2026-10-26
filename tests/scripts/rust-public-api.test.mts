@@ -92,3 +92,8 @@ test('a Rust consumer can name every canonical AST literal', { timeout: 30_000 }
   const result = compile('public-ast-literals.rs');
   assert.equal(result.status, 0, result.stderr);
 });
+
+test('a Rust consumer can name the prefix analysis result and its fields', { timeout: 30_000 }, () => {
+  const result = compile('public-prefix-analysis.rs');
+  assert.equal(result.status, 0, result.stderr);
+});

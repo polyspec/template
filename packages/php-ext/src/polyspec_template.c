@@ -1119,12 +1119,14 @@ static bool pt_run_finish(pt_run *run);
  * clobber (-Wclobbered). */
 bool pt_run_work(pt_work work, void *input)
 {
-    pt_run run;
-    pt_run_init(&run);
-    if (setjmp(run.jump) == 0) {
-        work(&run, input);
+    pt_run *run = ecalloc(1, sizeof(*run));
+    pt_run_init(run);
+    if (setjmp(run->jump) == 0) {
+        work(run, input);
     }
-    return pt_run_finish(&run);
+    bool succeeded = pt_run_finish(run);
+    efree(run);
+    return succeeded;
 }
 
 /* Runs the render `work` that writes into `output`, and returns the text; a failed run frees the output and leaves the exception. */
@@ -1425,6 +1427,65 @@ static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS)
         RETURN_THROWS();
     }
     if (!pt_run_work(pt_analyze_into, &input)) {
+        zval_ptr_dtor(return_value);
+        ZVAL_NULL(return_value);
+        RETURN_THROWS();
+    }
+}
+
+typedef struct pt_prefix_request {
+    pt_run run;
+    pt_prefix_parser *parser;
+} pt_prefix_request;
+
+/* EDT-11: parser state is arena-owned, so its accepted ranges survive the
+ * error jump until they are copied into PHP values. Only parser errors become
+ * result data; invalid UTF-8 and native failures keep the normal boundary. */
+ZEND_METHOD(Polyspec_Template_AstProgram, analyzePrefix)
+{
+    zend_string *source, *name;
+    HashTable *options = NULL;
+    ZEND_PARSE_PARAMETERS_START(2, 3)
+        Z_PARAM_STR(source)
+        Z_PARAM_STR(name)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_ARRAY_HT(options)
+    ZEND_PARSE_PARAMETERS_END();
+    char open, close;
+    if (!pt_option_delimiters(options, &open, &close)) {
+        RETURN_THROWS();
+    }
+
+    /* Both mutable run state and the parser pointer live on the heap; the
+     * automatic pointers stay unchanged across setjmp/longjmp. */
+    pt_prefix_request *request = ecalloc(1, sizeof(*request));
+    pt_run *run = &request->run;
+    pt_run_init(run);
+    if (setjmp(run->jump) == 0) {
+        request->parser = pt_prefix_start(run, ZSTR_VAL(name), ZSTR_LEN(name), ZSTR_VAL(source), ZSTR_LEN(source), open, close);
+        pt_prefix_scan(request->parser);
+    }
+    if (request->parser == NULL || run->error.exception != NULL ||
+        (run->error.code != NULL && strncmp(run->error.code, "E_PARSE_", 8) != 0)) {
+        pt_run_finish(run);
+        efree(request);
+        RETURN_THROWS();
+    }
+
+    pt_prefix_to_zval(request->parser, return_value);
+    if (run->error.code != NULL) {
+        const pt_error *failure = &run->error;
+        zval error;
+        ZVAL_OBJ(&error, pt_error_object(failure->code, failure->template, failure->line, failure->col,
+            failure->offset, failure->end, failure->message));
+        add_assoc_zval_ex(return_value, "error", 5, &error);
+        pt_error_clear(&run->error);
+    } else {
+        add_assoc_null_ex(return_value, "error", 5);
+    }
+    bool succeeded = pt_run_finish(run);
+    efree(request);
+    if (!succeeded) {
         zval_ptr_dtor(return_value);
         ZVAL_NULL(return_value);
         RETURN_THROWS();

@@ -37,16 +37,9 @@ func TestPublicAnalysisMatchesSharedContexts(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			tags := make([]map[string]any, 0, len(result.Tags))
-			for _, tag := range result.Tags {
-				tags = append(tags, map[string]any{"kind": tag.Kind, "echo": tag.Echo, "start": tag.Start, "end": tag.End,
-					"bodyStart": tag.BodyStart, "bodyEnd": tag.BodyEnd})
-			}
-			tokens := make([]map[string]any, 0, len(result.Tokens))
-			for _, token := range result.Tokens {
-				tokens = append(tokens, map[string]any{"kind": token.Kind, "start": token.Start, "end": token.End})
-			}
-			encoded, err := json.Marshal(map[string]any{"ast": result.AST, "tags": tags, "tokens": tokens})
+			value := analysisRanges(result.Tags, result.Tokens)
+			value["ast"] = result.AST
+			encoded, err := json.Marshal(value)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -78,4 +71,17 @@ func TestPublicAnalysisRejectsIncompleteSource(t *testing.T) {
 	if !errors.As(err, &got) || got.Code != errs.ParseUnclosedBlock {
 		t.Fatalf("analysis error = %v", err)
 	}
+}
+
+func analysisRanges(tagsInput []template.Tag, tokensInput []template.Token) map[string]any {
+	tags := make([]map[string]any, 0, len(tagsInput))
+	for _, tag := range tagsInput {
+		tags = append(tags, map[string]any{"kind": tag.Kind, "echo": tag.Echo, "start": tag.Start, "end": tag.End,
+			"bodyStart": tag.BodyStart, "bodyEnd": tag.BodyEnd})
+	}
+	tokens := make([]map[string]any, 0, len(tokensInput))
+	for _, token := range tokensInput {
+		tokens = append(tokens, map[string]any{"kind": token.Kind, "start": token.Start, "end": token.End})
+	}
+	return map[string]any{"tags": tags, "tokens": tokens}
 }

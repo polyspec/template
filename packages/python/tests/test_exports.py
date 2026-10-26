@@ -51,9 +51,12 @@ def documented_names() -> set:
 
 
 class ExportTests(unittest.TestCase):
-    def test_the_package_does_not_export_analyze_prefix(self):
-        self.assertNotIn("analyze_prefix", template.__all__)
-        self.assertFalse(hasattr(template, "analyze_prefix"))
+    def test_the_package_exports_the_shared_prefix_analysis(self):
+        # EDT-11: this public operation has the same contract in every SDK.
+        self.assertIn("analyze_prefix", template.__all__)
+        result = template.analyze_prefix("{? x}", "prefix.tpl")
+        self.assertIsInstance(result, template.PrefixAnalysis)
+        self.assertEqual(result.error.code, "E_PARSE_UNCLOSED_BLOCK")
 
     def test_builtin_and_interpreter_implementations_are_not_sdk_exports(self):
         for name in ("BUILTINS", "Evaluator", "Renderer"):

@@ -61,6 +61,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `parse(source, name, { delimiters })` | Parses one template into its AST. `source` is a string or UTF-8 bytes. |
 | `decodeTemplate(json)` | Reads the AST JSON, as text or as its parsed value, into a `Template`, validated against `contracts/schema/ast.schema.json`; an `AstDecodeError` names the JSON Pointer of the invalid node in `path` (AST-10). Also exported by `@polyspec/template/render` and `@polyspec/template/decode`. |
 | `analyze(source, name, { delimiters })` | Parses once and returns the AST plus parser tag ranges and consumed expression-token ranges. |
+| `analyzePrefix(source, name, { delimiters })` | Returns accepted tags/tokens and the first parser error in `PrefixAnalysis.error`, or null on success. Invalid UTF-8 and delimiter options throw. |
 | `new AstProgram({ loader, functions, limits, delimiters })` | Creates an AST program. `loader` defaults to an empty `MapLoader`. |
 | `new Engine(program)` | Creates an engine that delegates to one AST or generated program. |
 | `engine.render(nameOrAst, assign, { define, env })` | Renders a template to a string. `assign` contains variables; `define` supplies template paths or HTML entries. |

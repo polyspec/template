@@ -55,7 +55,7 @@ pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value, ValueTy
 
 pub use sdk_source::Source;
 
-pub use parser::{SyntaxTag, SyntaxToken, TagKind, TemplateAnalysis, TokenKind};
+pub use parser::{PrefixAnalysis, SyntaxTag, SyntaxToken, TagKind, TemplateAnalysis, TokenKind};
 
 use parser::scanner::{DEFAULT_DELIMITERS, Delimiters, parse_delimiters};
 
@@ -83,6 +83,16 @@ pub fn analyze(source: &[u8], name: &str, options: &ParseOptions) -> Result<Temp
     internal_boundary(name, || {
         let parsed = source::Source::from_bytes(name, source)?;
         Ok(parser::analyze_template(&parsed, option_delimiters(options)?)?)
+    })
+}
+
+/// EDT-11: accepted tags and tokens before the first parser error. Invalid
+/// UTF-8 and delimiter options reject the operation at the SDK boundary.
+pub fn analyze_prefix(source: &[u8], name: &str, options: &ParseOptions) -> Result<PrefixAnalysis, RequestError> {
+    internal_boundary(name, || {
+        let delimiters = option_delimiters(options)?;
+        let parsed = source::Source::from_bytes(name, source)?;
+        Ok(parser::analyze_template_prefix(&parsed, delimiters))
     })
 }
 

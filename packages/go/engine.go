@@ -146,6 +146,25 @@ func Analyze(source []byte, name string, options ParseOptions) (*Analysis, error
 	})
 }
 
+// PrefixAnalysis is the accepted prefix and the first parser error (EDT-11).
+type PrefixAnalysis = parser.PrefixAnalysis
+
+// AnalyzePrefix reports accepted tags and tokens before a parser error. Invalid
+// source bytes and delimiter options reject the operation instead (EDT-11).
+func AnalyzePrefix(source []byte, name string, options ParseOptions) (*PrefixAnalysis, error) {
+	delimiters, err := delimitersOf(options.Delimiters)
+	if err != nil {
+		return nil, err
+	}
+	return render.Guard(name, func() (*PrefixAnalysis, error) {
+		parsed, err := lexer.FromBytes(name, source)
+		if err != nil {
+			return nil, err
+		}
+		return parser.AnalyzePrefix(parsed, delimiters)
+	})
+}
+
 // FormatOptions configure Format.
 type FormatOptions = format.Options
 

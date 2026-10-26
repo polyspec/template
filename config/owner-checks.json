@@ -1155,7 +1155,8 @@
     {
       "paths": [
         "tests/fixtures/source-context.json",
-        "tests/fixtures/analysis-context.json"
+        "tests/fixtures/analysis-context.json",
+        "tests/fixtures/prefix-analysis.json"
       ],
       "targets": [
         "template-test-ts-unit",
@@ -1376,6 +1377,7 @@
         "tests/fixtures/ast-decode/**",
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
+        "tests/fixtures/prefix-analysis.json",
         "scripts/json-document.mts"
       ]
     },
@@ -1490,7 +1492,8 @@
         "tests/fixtures/ast-decode/**",
         "config/parity.json",
         "tests/fixtures/source-context.json",
-        "tests/fixtures/analysis-context.json"
+        "tests/fixtures/analysis-context.json",
+        "tests/fixtures/prefix-analysis.json"
       ]
     },
     {
@@ -1507,7 +1510,8 @@
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**",
         "tests/fixtures/source-context.json",
-        "tests/fixtures/analysis-context.json"
+        "tests/fixtures/analysis-context.json",
+        "tests/fixtures/prefix-analysis.json"
       ]
     },
     {
@@ -1647,6 +1651,7 @@
         "packages/php-ext/**",
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
+        "tests/fixtures/prefix-analysis.json",
         "tests/fixtures/ast-decode/**"
       ]
     },

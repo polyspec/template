@@ -359,6 +359,13 @@ pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const
 /* The analysis of a template as the array of Parser::analyze: `ast`, `tags` and `tokens` (EDT-8). */
 void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysis, zval *result);
 
+/* EDT-11: arena-owned parser state remains readable after a parser error. */
+typedef struct pt_tparser pt_prefix_parser;
+pt_prefix_parser *pt_prefix_start(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length,
+    char open, char close);
+void pt_prefix_scan(pt_prefix_parser *parser);
+void pt_prefix_to_zval(const pt_prefix_parser *parser, zval *result);
+
 /* The class BlockTag of Polyspec\Template\Parser: its create_object and handlers (pt_parse.c). */
 void pt_block_tag_register(zend_class_entry *ce);
 

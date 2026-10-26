@@ -23,6 +23,11 @@ use Polyspec\Template\TemplateError;
  *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
  *     tokens: list<array{start: int, end: int, kind: string}>,
  * }
+ * @phpstan-type PrefixAnalysis array{
+ *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
+ *     tokens: list<array{start: int, end: int, kind: string}>,
+ *     error: TemplateError|null,
+ * }
  * @internal
  */
 final class Parser
@@ -112,6 +117,25 @@ final class Parser
         $ast = $parser->run();
 
         return ['ast' => $ast, 'tags' => $parser->tags, 'tokens' => $parser->tokens];
+    }
+
+    /**
+     * EDT-11: returns the accepted prefix and the first parser error.
+     *
+     * @return PrefixAnalysis
+     */
+    public static function analyzePrefix(Source $source, string $open = '{', string $close = '}'): array
+    {
+        self::requireOneByteDelimiters('analyzePrefix', $open, $close);
+        $parser = new self($source, $open, $close);
+        $error = null;
+        try {
+            $parser->run();
+        } catch (TemplateError $failure) {
+            $error = $failure;
+        }
+
+        return ['tags' => $parser->tags, 'tokens' => $parser->tokens, 'error' => $error];
     }
 
     private function fail(string $code, int $start, int $end, string $message): TemplateError

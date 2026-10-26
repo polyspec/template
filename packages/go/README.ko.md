@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-go-readme -->
-<!-- source-sha256: 6bde9dae82598391db118731691ceea327707c482051281432de2302db4b5db4 -->
+<!-- source-sha256: bf45f461f19898210d20c27c6335ab71db2975f4e11a088c8c8aa8b14de21a99 -->
 # github.com/polyspec/template/packages/go
 
 [English](README.md).
@@ -65,6 +65,7 @@ engine := template.NewEngine(program)
 | `Parse(source, name, ParseOptions)` | 템플릿 하나를 AST로 파싱한다. `ParseOptions.Delimiters`는 구분자 쌍을 선택한다. |
 | `ast.DecodeTemplate(json)` | AST JSON 텍스트를 패키지가 embed한 `contracts/schema/ast.schema.json`으로 검증해 `Parse`가 반환하는 AST로 읽는다. 스키마가 거부한 JSON은 `Path`가 잘못된 노드의 JSON Pointer인 `*ast.DecodeError`로 실패한다(AST-10). |
 | `Analyze(source, name, ParseOptions)` | 템플릿을 한 번 파싱해 AST, 받아들인 `Tags`(종류, 범위, 본문 범위)와 그 EDT-8 `Tokens`를 돌려준다. 오프셋은 앞의 바이트 순서 표시를 뺀 UTF-8 바이트 오프셋이다. |
+| `AnalyzePrefix(source, name, ParseOptions)` | 받아들인 `Tags`·`Tokens`와 첫 파서 오류를 `PrefixAnalysis.Error`로 반환한다. 잘못된 소스 바이트나 옵션은 연산 오류를 반환한다. |
 | `Format(source, FormatOptions)` | 태그 안의 공백과 줄 들여쓰기를 정리한다. `FormatOptions`에는 `Name`, `Delimiters`, `Range`, `Indent`(공백 묶음 또는 탭 하나, 기본은 공백 두 개), `KeepIndentation`, `TemplateBlocks`(`indent` 또는 `flat`)가 있다. 정리한 텍스트가 같은 AST로 파싱될 때만 결과를 돌려주고, 아니면 `Reason`이 `parse`, `invariant`, `html`인 `*FormatError`를 돌려준다. |
 | `NewAstProgram(Options)` | `Loader`, `Functions`, `Limits`, `Delimiters`를 가진 AST program을 생성한다. |
 | `NewEngine(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |

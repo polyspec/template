@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 0b56ad1ce7933ea97da410aeb08423c308c08ad83bec153de02a83af2bbaae8d -->
+<!-- source-sha256: 654f932b3843e28d6cc8c6fc043483a66a8a9be86f684a251e389444be45b0fe -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -412,3 +412,4 @@
 | T27.1-1-29 | 정규 AST 연산자와 loop metadata 리터럴을 선언하고 공개 enum 식별자 및 모든 SDK decoder의 전체 리터럴 round-trip을 검증한다 | AST enum declarations and shared decoder fixture | `make parity-declarations-check`; native enum/decoder units; `make docs-check` | [o] |
 | T27.1-1-30 | 공개 readonly 속성을 유지하면서 확인된 PHP Source 속성 추출 실패를 수정하고 두 네이티브 SDK 모델에서 Source metadata 필드 전체를 검증한다 | Explicit Source properties and extraction regression | `node --test tests/scripts/php-public-api.test.mts`; Source SDK units; `make docs-check` | [o] |
 | T27.1-1-31 | 전체 분석 공개 API 선언을 완성하고 공유 fixture로 SDK 6개의 모든 태그·토큰 종류와 범위 및 AST를 검증한다 | Full analysis API, shared fixtures and native SDK units | `make parity-declarations-check`; native analysis units; `make docs-check` | [o] |
+| T27.1-1-32 | 기존 부분 분석 기능을 모든 SDK에 구현하고 받아들인 범위와 파서 오류를 보존하며 경계에서 잘못된 소스·옵션을 거부하고 공유 fixture로 검증한다 | Prefix analysis SDK APIs, native implementations and shared fixtures | `make parity-declarations-check`; prefix SDK units; native lint/build; `make docs-check` | [o] |

@@ -153,6 +153,17 @@ pub struct TemplateAnalysis {
     pub tokens: Vec<SyntaxToken>,
 }
 
+/// Accepted parser ranges and its first parse error (EDT-11).
+#[derive(Debug, Clone)]
+pub struct PrefixAnalysis {
+    /// Tags accepted before the error.
+    pub tags: Vec<SyntaxTag>,
+    /// Classified ranges belonging to the accepted tags.
+    pub tokens: Vec<SyntaxToken>,
+    /// The first parse error, or none for a source that parses.
+    pub error: Option<TemplateError>,
+}
+
 // The EDT-8 class of an expression token, which depends on its neighbours for names.
 fn expression_kind(token: &Token, previous: Option<&Token>, next: Option<&Token>) -> TokenKind {
     match token.kind {
@@ -256,6 +267,17 @@ pub fn analyze_template(source: &Source, delimiters: Delimiters) -> Result<Templ
     TemplateParser::new(source, delimiters).parse()
 }
 
+/// Preserves accepted ranges when the next tag or EOF fails to parse (EDT-11).
+pub fn analyze_template_prefix(source: &Source, delimiters: Delimiters) -> PrefixAnalysis {
+    let mut parser = TemplateParser::new(source, delimiters);
+    let error = parser.scan_complete().err();
+    PrefixAnalysis {
+        tags: parser.tags,
+        tokens: parser.tokens,
+        error,
+    }
+}
+
 struct TemplateParser<'a> {
     source: &'a Source,
     delimiters: Delimiters,
@@ -318,7 +340,7 @@ impl<'a> TemplateParser<'a> {
         self.tag_expressions.extend(expression_tokens(parser));
     }
 
-    fn parse(mut self) -> Result<TemplateAnalysis, TemplateError> {
+    fn scan_complete(&mut self) -> Result<(), TemplateError> {
         self.scan()?;
         if let Some(frame) = self.frames.last() {
             return Err(self.fail(
@@ -328,6 +350,11 @@ impl<'a> TemplateParser<'a> {
                 "block is not closed before the end of the file",
             ));
         }
+        Ok(())
+    }
+
+    fn parse(mut self) -> Result<TemplateAnalysis, TemplateError> {
+        self.scan_complete()?;
         let ranges: Vec<TagRange> = self
             .tags
             .iter()

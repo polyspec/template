@@ -2295,8 +2295,10 @@ static pt_body pt_finalize(pt_tparser *parser, pt_items *items, const pt_ranges 
 /* Entry                                                                                            */
 /* ----------------------------------------------------------------------------------------------- */
 
-/* strip_bom: whether a leading byte order mark of the bytes is removed (LEX-2); a Source has removed its own already. */
-static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length, char open, char close, pt_analysis *analysis, bool strip_bom)
+/* Parser/source state lives in the template arena so an error boundary can
+ * safely inspect the accepted prefix after a parse unwinds. */
+static pt_tparser *pt_parser_new(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length,
+    char open, char close, bool analyze, bool strip_bom)
 {
     size_t invalid = pt_utf8_first_invalid(bytes, length);
     if (invalid < length) {
@@ -2311,49 +2313,76 @@ static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_len
     template->refcount = 1;
     run->parsing = template;
     pt_arena *arena = &template->arena;
-    pt_source source;
-    source.run = run;
-    source.arena = arena;
-    source.name = pt_strdup(arena, name, name_length);
-    template->name = source.name;
+    pt_source *source = pt_alloc(arena, sizeof(pt_source));
+    source->run = run;
+    source->arena = arena;
+    source->name = pt_strdup(arena, name, name_length);
+    template->name = source->name;
     if (strip_bom && length >= 3 && memcmp(bytes, "\xEF\xBB\xBF", 3) == 0) {
         bytes += 3;
         length -= 3;
     }
     pt_s text = pt_strdup(arena, bytes, length);
-    source.text = text.s;
-    source.length = text.n;
+    source->text = text.s;
+    source->length = text.n;
     template->text = text;
-    pt_lines_build(arena, &source.lines, source.text, source.length);
-    template->lines = source.lines;
+    pt_lines_build(arena, &source->lines, source->text, source->length);
+    template->lines = source->lines;
 
-    pt_tparser parser;
-    memset(&parser, 0, sizeof(parser));
-    parser.source = &source;
-    parser.open = open;
-    parser.close = close;
-    parser.root = pt_items_empty(arena);
-    parser.text_before_first_tag_is_whitespace = true;
-    parser.analyze = analysis != NULL;
-    parser.record.arena = arena;
-    pt_scan(&parser);
-    if (parser.frame_count > 0) {
-        size_t at = parser.frames[parser.frame_count - 1].open_start;
-        pt_tfail(&parser, PT_E_PARSE_UNCLOSED_BLOCK, at, at + 1, "block is not closed before the end of the file");
+    pt_tparser *parser = pt_alloc(arena, sizeof(pt_tparser));
+    memset(parser, 0, sizeof(*parser));
+    parser->source = source;
+    parser->open = open;
+    parser->close = close;
+    parser->root = pt_items_empty(arena);
+    parser->text_before_first_tag_is_whitespace = true;
+    parser->analyze = analyze;
+    parser->record.arena = arena;
+    return parser;
+}
+
+/* Shared by full and prefix analysis: EOF still rejects an open block. */
+void pt_prefix_scan(pt_prefix_parser *parser)
+{
+    pt_scan(parser);
+    if (parser->frame_count > 0) {
+        size_t at = parser->frames[parser->frame_count - 1].open_start;
+        pt_tfail(parser, PT_E_PARSE_UNCLOSED_BLOCK, at, at + 1, "block is not closed before the end of the file");
     }
-    pt_ranges removed = pt_standalone(&parser);
-    template->body = pt_finalize(&parser, &parser.root, &removed);
-    template->comments = parser.comments;
-    template->comment_count = parser.comment_count;
+}
+
+static void pt_parser_analysis(const pt_tparser *parser, pt_analysis *analysis)
+{
+    pt_arena *arena = parser->source->arena;
+    analysis->tag_count = parser->tag_count;
+    analysis->tags = pt_alloc(arena, sizeof(pt_syntax_tag) * (parser->tag_count ? parser->tag_count : 1));
+    for (uint32_t index = 0; index < parser->tag_count; index++) {
+        const pt_tag *tag = &parser->tags[index];
+        analysis->tags[index] = (pt_syntax_tag){tag->start, tag->end, tag->body_start, tag->body_end, tag->echo, tag->kind};
+    }
+    analysis->tokens = parser->tokens.v;
+    analysis->token_count = parser->tokens.count;
+}
+
+pt_prefix_parser *pt_prefix_start(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length,
+    char open, char close)
+{
+    return pt_parser_new(run, name, name_length, bytes, length, open, close, true, true);
+}
+
+/* strip_bom is false for an already validated Source object. */
+static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length,
+    char open, char close, pt_analysis *analysis, bool strip_bom)
+{
+    pt_tparser *parser = pt_parser_new(run, name, name_length, bytes, length, open, close, analysis != NULL, strip_bom);
+    pt_prefix_scan(parser);
+    pt_template *template = run->parsing;
+    pt_ranges removed = pt_standalone(parser);
+    template->body = pt_finalize(parser, &parser->root, &removed);
+    template->comments = parser->comments;
+    template->comment_count = parser->comment_count;
     if (analysis != NULL) {
-        analysis->tag_count = parser.tag_count;
-        analysis->tags = pt_alloc(arena, sizeof(pt_syntax_tag) * (parser.tag_count ? parser.tag_count : 1));
-        for (uint32_t t = 0; t < parser.tag_count; t++) {
-            const pt_tag *tag = &parser.tags[t];
-            analysis->tags[t] = (pt_syntax_tag){tag->start, tag->end, tag->body_start, tag->body_end, tag->echo, tag->kind};
-        }
-        analysis->tokens = parser.tokens.v;
-        analysis->token_count = parser.tokens.count;
+        pt_parser_analysis(parser, analysis);
     }
     run->parsing = NULL;
     return template;
@@ -2369,10 +2398,9 @@ pt_template *pt_analyze(pt_run *run, const char *name, size_t name_length, const
     return pt_parse_with(run, name, name_length, bytes, length, open, close, analysis, true);
 }
 
-void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysis, zval *result)
+static void pt_analysis_ranges_to_zval(const pt_analysis *analysis, zval *result)
 {
-    zval ast, tags, tokens;
-    pt_ast_to_zval(template, &ast);
+    zval tags, tokens;
     array_init_size(&tags, analysis->tag_count);
     for (uint32_t t = 0; t < analysis->tag_count; t++) {
         const pt_syntax_tag *tag = &analysis->tags[t];
@@ -2396,10 +2424,25 @@ void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysi
         add_assoc_string_ex(&entry, "kind", 4, token->kind);
         add_next_index_zval(&tokens, &entry);
     }
-    array_init_size(result, 3);
-    add_assoc_zval_ex(result, "ast", 3, &ast);
     add_assoc_zval_ex(result, "tags", 4, &tags);
     add_assoc_zval_ex(result, "tokens", 6, &tokens);
+}
+
+void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysis, zval *result)
+{
+    zval ast;
+    pt_ast_to_zval(template, &ast);
+    array_init_size(result, 3);
+    add_assoc_zval_ex(result, "ast", 3, &ast);
+    pt_analysis_ranges_to_zval(analysis, result);
+}
+
+void pt_prefix_to_zval(const pt_prefix_parser *parser, zval *result)
+{
+    pt_analysis analysis;
+    pt_parser_analysis(parser, &analysis);
+    array_init_size(result, 3);
+    pt_analysis_ranges_to_zval(&analysis, result);
 }
 
 void pt_template_release(pt_template *template)

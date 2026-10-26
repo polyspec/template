@@ -89,6 +89,7 @@ __all__ = [
     "TemplateAnalysis",
     "TemplateError",
     "analyze",
+    "analyze_prefix",
     "analyze_template",
     "analyze_template_prefix",
     "bind",
@@ -146,6 +147,13 @@ def analyze(source: "str | bytes", name: str, options: "ParseOptions | None" = N
         else Source.from_bytes(name, source)
     )
     return internal_boundary(name, lambda: analyze_template(parsed, delimiters))
+
+
+def analyze_prefix(
+    source: "str | bytes", name: str, options: "ParseOptions | None" = None
+) -> PrefixAnalysis:
+    """EDT-11: accepted tags and tokens before the first parser error."""
+    return _analyze_prefix(source, name, options)
 
 
 def _analyze_prefix(
