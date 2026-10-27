@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2a60fd93da0611bdbc255db5ab526b027a09d58746172d54e3467740cee15977 -->
+<!-- source-sha256: ffbc97191959b569513f39335e19a5bed5c463e093a503edec0f977e95568323 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- esbuild 0.28.2가 runtime 테스트·패키지 빌드·반복 가능한 문서 빌드를 포함한 전체 CI 매트릭스를 통과했다. 이전 호환성 예외는 제거된 상태를 유지한다. (T26.7-68).
 - CI 40450000056의 모든 worker와 ci-passed가 통과했다. 실행 8분 06초와 대기 8초로 전체 8분 14초다. scripts 5분 47초와 parity 6분 55초가 독립 실행됐고 가장 긴 worker는 showcase의 7분 24초다. 실행 측정값이며 보장된 단축 시간은 아니다. (T27.1-1-56).
 - 86edcaa1의 전체 공개 API 감사에 R11 미선언 export나 R17 내부 타입 누출이 없다. parity는 binding 253개를 두 번 실행해 사례 5,622개를 통과했다. (T27.1-1).
 - 86edcaa1의 CI 40450000056에서 SDK 공개 범위 수용을 통과했다. 전체 Node 진입점과 보존한 interpreter vector를 포함한 모든 네이티브 API 선언과 binding이 유효하다. (T27.1-1-55).
