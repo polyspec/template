@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 956d4074ce7584ff061e91de6aa299375e6d99044f6ab1415810ba70a6cf5d51 -->
+<!-- source-sha256: a61e1934905c6a1325f1a38e170fabc20ca83f8f01d6ec9c3c493667792f79b4 -->
 # 발행
 
 [English](/operations/publication).
@@ -136,3 +136,5 @@ Composer: 내려받은 zip을 담은 directory인 `artifact` repository,
 ```sh
 VITEPRESS_BASE=/template/ make docs-static-check
 ```
+
+Pages는 선언한 PHP를 선택하고 make가 bootstrap을 읽기 전에 잠긴 도구 패키지를 설치한 뒤 checkout 툴체인을 준비한다. artifact는 같은 커밋의 성공한 CI 실행에서 가져와야 한다.

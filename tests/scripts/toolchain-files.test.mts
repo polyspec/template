@@ -309,7 +309,7 @@ test('every recipe runs cargo, go, npm and Composer offline, so no check reaches
 });
 
 test('every installing job prepares the locked kit before the first make', () => {
-  for (const file of ['.github/workflows/ci.yml', '.github/workflows/dependency-review.yml']) {
+  for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
       const commands = runsOf(job);
       const firstMake = commands.findIndex(command => /^make (?!-k -C )/.test(command));
