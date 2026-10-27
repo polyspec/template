@@ -6,6 +6,7 @@
 ## Unreleased
 
 ## 0.0.12
+- Publish 0.0.12 from accepted main 86edcaa1 after CI 40450000056 and gates 40450000190 passed. Release 40450815462 builds nine archives and proves eight archive consumers, the wheel dependency graph, Rust git installation and the Go module tag before public publication at 2026-10-27 04:40:32 UTC. The Go tag release 40450815549 also passes; publication procedures and feature evidence reflect the verified deployment (T27.1-5).
 - esbuild 0.28.2 passes the complete CI matrix, including runtime tests, package builds and repeatable documentation builds; its former compatibility exception remains removed. (T26.7-68).
 - CI 40450000056 passes every worker and ci-passed: 8m06s execution plus 8s queue, 8m14s total. Scripts take 5m47s and parity 6m55s independently; the longest worker is showcase at 7m24s. These are measured run durations, not a guaranteed speedup. (T27.1-1-56).
 - The complete public API audit passes without R11 undeclared exports or R17 leaked types; parity runs 253 bindings twice and passes 5,622 cases on 86edcaa1. (T27.1-1).

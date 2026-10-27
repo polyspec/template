@@ -19,7 +19,7 @@ The table records the status of each feature. The implementations and the units 
 | showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](operations/showcase) |
 | generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/compiler) |
 | docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/documentation) |
-| release-test-matrix | Release verification matrix | implemented | go: partial<br>php: partial<br>rust: partial<br>typescript: partial<br>python: partial | [Evidence](operations/testing) |
+| release-test-matrix | Release verification matrix | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](operations/testing) |
 | template-function-inventory | Template function inventory | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/template-functions) |
 | template-language | Template language service, formatter and CLI | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/editor-tools) |
 | formatting | Tokens and formatter of every runtime (`tokens`, `format`) | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/formatting) |
@@ -33,8 +33,10 @@ The table records the status of each feature. The implementations and the units 
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
 
-Release candidate 0.0.12 has synchronized manifests and native lock files. The existing nine archive candidates predate the current SDK changes and must be rebuilt and reverified. The candidate is not published.
+Release [0.0.12](https://github.com/polyspec/template/releases/tag/v0.0.12) is public at main commit 86edcaa1, with nine archives published on 2026-10-27 at 04:40:32 UTC. The Go module tag `packages/go/v0.0.12` names the same commit.
 
-CI 40449094247 at main bbf8d1e4 passed all 279 script units and the native Go job. Its parity audit reports only one R10 finding in this status document's partial language list; no API symbol, signature reachability or native binding finding remains. The candidate corrects that statement and requires complete CI of its own commit. CI 40448062183 provides the passing Python bound-map and merge evidence. The recorded dependency review covers 50 registry dependencies and eight locks without unaccepted newer releases or advisories.
+Verification: [CI 40450000056](https://github.com/polyspec/template/actions/runs/40450000056) passed all thirteen workers and ci-passed; [gates 40450000190](https://github.com/polyspec/template/actions/runs/40450000190) passed. Parity ran 253 bindings twice and passed 5,622 cases with no remaining API or binding findings. CI execution took 8m06s plus an 8s queue. The dependency review covers 50 registry dependencies and eight locks without unaccepted newer releases or advisories.
 
-Development verification uses PHP 8.4.27; the library requirement remains >=8.4.0 (written >=8.4), and the Windows installation baseline is 8.4.27-1.
+Deployment: [release 40450815462](https://github.com/polyspec/template/actions/runs/40450815462) built the nine tagged archives, verified their exact asset set, installed eight archive packages with the committed consumer locks, checked the wheel dependency graph, built the Rust git consumer and resolved the Go module tag before making the release public. [Go release 40450815549](https://github.com/polyspec/template/actions/runs/40450815549) also passed. Registry publication remains outside the 0.0.x distribution policy.
+
+The PHP library requirement stays >=8.4.0 (written >=8.4); development verification uses 8.4.27 and the Windows installation baseline is 8.4.27-1.
