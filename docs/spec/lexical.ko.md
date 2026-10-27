@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-lexical -->
-<!-- source-sha256: 7a781ad1ac330de0deb157a2a862cd73b01a1e38767bb849b2f337903d9c55cc -->
+<!-- source-sha256: 4e686118c438830fbf7a88c19ba141b4f67cb5838082b9518574375410a8c729 -->
 # 렉시컬 규칙
 
 [English](/spec/lexical).
@@ -252,3 +252,5 @@ var page = {"id":7};
 - **LEX-24** 모든 SDK는 UTF-8 바이트·Unicode 텍스트에서 생성하는 검증된 source context를 공개한다. 생성 시 입력을 캡처하고 첫 잘못된 바이트에서 UTF-8 오류를 거부하며(LEX-1) 선두 BOM을 정확히 하나 제거한다(LEX-2). 호스트 문자열 타입이 짝 없는 surrogate를 표현할 수 있으면 텍스트 생성자도 이를 거부한다. Context는 이름·정규화한 텍스트·정규화한 UTF-8 바이트·줄 시작 index를 공개한다. Native 길이·index의 바이트 변환·반개구간의 바이트 span 변환은 TypeScript에서 UTF-16 code unit, Python에서 code point, Go·Rust·PHP·PHP 확장에서 byte index를 사용한다. 끝 위치도 유효한 index이며 범위를 벗어난 index·역전된 구간은 네이티브 인자 실패다. Source metadata는 캡처한 입력을 기술하며 호출자는 읽기 전용으로 취급한다. SDK는 줄 index 생성·byte offset의 줄·열 조회(LEX-16)·source 이름과 줄 index를 사용한 byte span의 오류 생성도 공개한다. 오류 span은 EOF 위치를 기술할 수 있다. Source class는 package root 또는 네이티브 subpackage에서 공개할 수 있으며 파서 내부 source 경로는 이 계약에 포함하지 않는다.
 
 네이티브 생성 형식은 TypeScript의 `Source.fromBytes`·`fromText`, Go의 `source.FromBytes`·`FromText`, Rust의 `Source::from_bytes`·`from_text`, PHP·PHP 확장의 `Source::fromBytes`·`fromText`, Python의 `Source.from_bytes`·`from_text` 또는 바이트 생성자다. 잘못된 바이트 생성에서 Go·Rust는 오류 반환을, 나머지 SDK는 네이티브 예외를 사용한다. Native index 실패는 호스트의 인자 실패 방식을 따른다. 모든 SDK는 반복 BOM·잘못된 UTF-8을 포함한 `tests/fixtures/source-context.json`을 공개 context API에서 검증한다.
+
+Source span과 AST span은 바이트 offset 두 개로 이루어진 네이티브 값이다. 오류 코드는 네이티브 타입 문자열·enum 텍스트 접근자·상수 목록에서 catalog 텍스트를 유지한다. 저장한 검증된 줄 시작 sequence는 네이티브 배열·list·slice 형식 또는 Rust의 `LineIndex::from_starts`로 복원하여 같은 바이트 위치 조회에 사용할 수 있다. 이 데이터 형식은 공개 SDK import를 통해 공통 source fixture와 비교한다.

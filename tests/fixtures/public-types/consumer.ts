@@ -1,7 +1,7 @@
 // A consumer can name the AST, loader and runtime types in public signatures
 // without importing an unexported implementation path.
 import type {
-  Formatter, FormatError, FormatOptions, FormatResult, PrefixAnalysis,
+  Formatter, FormatError, FormatOptions, FormatResult, PrefixAnalysis, ErrorCode, Span,
   RenderAstProgram, Output, Binary, BindErrorCode, Block, Call, ClassCall, DefineEntry, Echo,
   For, If, IfBlock, Include, Index, LineIndex, List, Literal, LoadedAst,
   LoadedSource, LoopMetaExpression, MapLiteral, Member, MemberCall,
@@ -42,3 +42,8 @@ export const formatterFailure: FormatResult = { ok: false, error: formatterError
 
 type PublicKeys<T> = T extends unknown ? keyof T : never;
 export const prefixAnalysisFields: Record<PublicKeys<PrefixAnalysis>, true> = { ast: true, error: true, tags: true, tokens: true };
+
+export const locationCode: ErrorCode = 'E_PARSE_UNEXPECTED_TOKEN';
+export const sourceByteSpan: SourceSpan = [1, 4];
+export const astByteSpan: Span = [sourceByteSpan[0], sourceByteSpan[1]];
+export const verifiedLineStarts: LineIndex = [0, 2, 5];

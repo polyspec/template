@@ -6,6 +6,7 @@ namespace Polyspec\Template\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\Source;
+use Polyspec\Template\ErrorCode;
 use Polyspec\Template\TemplateError;
 
 /**
@@ -56,8 +57,13 @@ final class SourceTest extends TestCase
                 }
                 self::assertSame($item['lines'], Source::lineIndex($source->bytes()));
                 $probe = $item['probe'];
-                self::assertSame([$probe['line'], $probe['col']], Source::position($source->lines, $probe['offset']));
-                $error = $source->error('E_PARSE_UNEXPECTED_TOKEN', $probe['offset'], $probe['end'], 'message');
+                self::assertSame([$probe['line'], $probe['col']], Source::position($item['lines'], $probe['offset']));
+                $error = $source->error(
+                    ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+                    $probe['offset'],
+                    $probe['end'],
+                    'message',
+                );
                 self::assertSame([
                     'code' => 'E_PARSE_UNEXPECTED_TOKEN', 'template' => $item['name'],
                     'line' => $probe['line'], 'col' => $probe['col'],

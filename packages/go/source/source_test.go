@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/internal/casetest"
 	"github.com/polyspec/template/packages/go/source"
@@ -91,7 +92,17 @@ func TestPublicSourceContexts(t *testing.T) {
 				if !reflect.DeepEqual([]int(errs.NewLineIndex(context.Bytes())), item.Lines) {
 					t.Fatal("line index differs")
 				}
-				line, col := context.Lines.Position(item.Probe.Offset)
+				restored := errs.LineIndex(append([]int(nil), item.Lines...))
+				span := errs.Span{item.Probe.Offset, item.Probe.End}
+				astSpan := ast.Span(span)
+				if astSpan[0] != item.Probe.Offset || astSpan[1] != item.Probe.End {
+					t.Fatal("span values differ")
+				}
+				code := errs.Code("E_PARSE_UNEXPECTED_TOKEN")
+				if string(code) != "E_PARSE_UNEXPECTED_TOKEN" {
+					t.Fatal("code text differs")
+				}
+				line, col := restored.Position(span[0])
 				if line != item.Probe.Line || col != item.Probe.Col {
 					t.Fatal("position differs")
 				}

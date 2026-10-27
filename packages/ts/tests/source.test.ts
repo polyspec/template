@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
-import { Source, TemplateError } from '@polyspec/template';
+import { Source, TemplateError, type LineIndex, type SourceSpan, type Span, type ErrorCode } from '@polyspec/template';
 import { repoRoot } from './helpers.js';
 import { jsonDocument } from '../../../scripts/json-document.mts';
 
@@ -40,6 +40,13 @@ describe('public source contexts', () => {
         }
       }
       expect(Source.lineIndex(source.bytes)).toEqual(item.lines);
+      const restored: LineIndex = [...item.lines];
+      const bytes: SourceSpan = [item.probe.offset, item.probe.end];
+      const ast: Span = [bytes[0], bytes[1]];
+      expect(ast).toEqual([item.probe.offset, item.probe.end]);
+      expect(Source.position(restored, bytes[0])).toEqual([item.probe.line, item.probe.col]);
+      const code: ErrorCode = 'E_PARSE_UNEXPECTED_TOKEN';
+      expect(source.error(code, bytes[0], bytes[1], 'message').code).toBe(code);
       expect(Source.position(source.lines, item.probe.offset)).toEqual([item.probe.line, item.probe.col]);
       expect(source.error('E_PARSE_UNEXPECTED_TOKEN', item.probe.offset, item.probe.end, 'message').toObject()).toEqual({
         code: 'E_PARSE_UNEXPECTED_TOKEN', template: item.name, line: item.probe.line, col: item.probe.col,

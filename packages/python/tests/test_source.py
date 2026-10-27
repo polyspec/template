@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 from polyspec.template import Source, TemplateError
-from polyspec.template.errors import line_index_of, position_of
+from polyspec.template.errors import LineIndex, Span, line_index_of, position_of
 
 FIXTURE = json.loads(
     (
@@ -40,8 +40,11 @@ class PublicSource(unittest.TestCase):
                             )
                     self.assertEqual(line_index_of(source.bytes), item["lines"])
                     probe = item["probe"]
+                    restored = LineIndex(item["lines"])
+                    span = Span((probe["offset"], probe["end"]))
+                    self.assertEqual(span, (probe["offset"], probe["end"]))
                     self.assertEqual(
-                        position_of(source.lines, probe["offset"]),
+                        position_of(restored, span[0]),
                         (probe["line"], probe["col"]),
                     )
                     error = source.error(

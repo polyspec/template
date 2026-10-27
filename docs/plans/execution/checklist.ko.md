@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 693142138a1f84168b629bded8d96671320c0837ddbe6145b7799ba2bfdd267e -->
+<!-- source-sha256: 6664da81dc8b98f3013c1965afe8cff27ebd69e9db2088338d3ec0d21133bb61 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -415,3 +415,4 @@
 | T27.1-1-32 | 기존 부분 분석 기능을 모든 SDK에 구현하고 받아들인 범위와 파서 오류를 보존하며 경계에서 잘못된 소스·옵션을 거부하고 공유 fixture로 검증한다 | Prefix analysis SDK APIs, native implementations and shared fixtures | `make parity-declarations-check`; prefix SDK units; native lint/build; `make docs-check` | [o] |
 | T27.1-1-33 | formatter 옵션·성공·오류 데이터 필드와 리터럴 모드를 선언하고 공유 fixture로 공개 네이티브 carrier와 SDK 결과를 검증한다 | Formatter data API declarations and native SDK units | `make parity-declarations-check`; formatter SDK units; native lint; `make docs-check` | [o] |
 | T27.1-1-34 | 부분 분석 TypeScript 심볼 종류를 정정하고 기존 성공 AST를 모든 SDK에 보존하며 전체 결과와 선언된 네이티브 모델 참조를 대조한다 | Complete prefix results and native declaration regression | `node --test tests/scripts/typescript-exports.test.mts`; prefix SDK units; native build/lint; `make docs-check` | [o] |
+| T27.1-1-35 | 오류 코드·줄 인덱스·span 공유 데이터 타입과 네이티브 텍스트·복원 형식을 선언하고 공개 타입 값 및 위치를 검증한다 | Public code/location data declarations and SDK probes | `make parity-declarations-check`; Source SDK units; native code-catalog units; `make docs-check` | [o] |

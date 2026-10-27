@@ -1,7 +1,7 @@
 //! LEX-24: the public source context preserves UTF-8 and native byte indexes.
 mod common;
 
-use polyspec_template::{ErrorCode, LineIndex, Source};
+use polyspec_template::{ErrorCode, LineIndex, Source, Span};
 
 #[derive(serde::Deserialize)]
 struct Valid {
@@ -66,7 +66,10 @@ fn public_source_contexts_preserve_the_shared_fixtures() {
                 "{}",
                 item.id
             );
-            assert_eq!(source.lines(), &LineIndex::from_starts(item.lines.clone()));
+            let restored = LineIndex::from_starts(item.lines.clone());
+            assert_eq!(source.lines(), &restored);
+            let span: Span = [item.probe.offset, item.probe.end];
+            assert_eq!(ErrorCode::E_PARSE_UNEXPECTED_TOKEN.as_str(), "E_PARSE_UNEXPECTED_TOKEN");
             assert_eq!(source.length(), item.offsets.byte.len() - 1);
             for (start, offset) in item.offsets.byte.iter().enumerate() {
                 assert_eq!(source.byte_at(start).expect("native index"), *offset);
@@ -75,8 +78,8 @@ fn public_source_contexts_preserve_the_shared_fixtures() {
                 }
             }
             assert_eq!(LineIndex::of(source.bytes()), *source.lines());
-            assert_eq!(source.lines().position(item.probe.offset), (item.probe.line, item.probe.col));
-            let error = source.error(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, item.probe.offset, item.probe.end, "message");
+            assert_eq!(restored.position(span[0]), (item.probe.line, item.probe.col));
+            let error = source.error(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, span[0], span[1], "message");
             assert_eq!(
                 (
                     error.code,
