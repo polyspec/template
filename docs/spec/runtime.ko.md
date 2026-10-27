@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 65bc9351e4312a76bf71a9e18bfbb5870b1dab8b61b64e04e32c31fc7366dc0f -->
+<!-- source-sha256: 4db52a44e21446e49b2cb6553efadc590212153390c3f1557a6e4852223c1774 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -214,6 +214,9 @@ flowchart TB
 - **RT-8** include나 block 태그에 쓴 경로는 그 태그를 포함한 템플릿의 디렉터리를 기준으로 해석한다. 앞에 `/`가 있는 경로는 루트를 기준으로 해석한다. `.`과 `..` 세그먼트는 정규화한다. 정규화 후 루트를 벗어나는 경로는 `E_LOAD_OUTSIDE_ROOT`로 실패한다.
 - **RT-9** 로더는 이름에 대해 소스 텍스트 또는 파싱된 AST와 버전을 반환하거나, 이름이 없음을 보고하거나, 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고한다. 없는 이름은 `E_LOAD_NOT_FOUND`로 실패한다. 실패는 `E_LOAD_FAILED`로 실패하며 오류 메시지는 로더의 메시지를 포함한다. 엔진은 호스트 함수와 마찬가지로(FUN-46) TypeScript나 PHP 로더가 던진 모든 예외를 잡는다. 로더 결과는 소스 텍스트 또는 파싱된 AST와, 빈 문자열이 아닌 문자열인 버전을 가진다. 빈 문자열은 버전이 없는 것이다. 소스 텍스트도 AST도 없거나 버전이 없는 결과는 로더의 실패다. 즉 `E_LOAD_FAILED`로 실패하며, 오류 메시지는 `template <name> cannot be loaded: the loader returned no source text and no AST` 또는 `template <name> cannot be loaded: the loader returned no version`이다. 소스 텍스트도 AST도 없고 버전도 없는 결과는 소스 텍스트의 메시지로 실패한다. 언어의 타입이 그런 결과의 일부를 불가능하게 만드는 언어는 그 일부를 타입으로 보장한다. 이유: 로더는 엔진이 호출하는 호스트 코드이므로 그 실패는 호스트 함수의 실패처럼 코드와 위치를 가진 템플릿 오류이며, 일부 구현에서만 `render` 밖으로 나가는 예외가 아니다. 없는 소스 대신 빈 소스를 렌더링하거나 버전 없이 템플릿을 보관하는 엔진은 로더가 주지 않은 템플릿을 렌더링하며, 바뀐 템플릿과 바뀌지 않은 템플릿을 구별하지 못한다(RT-40).
 - **RT-10** 파일시스템 로더는 `root/name`을 읽고 파일의 수정 시각과 크기를 버전으로 사용한다. `root/name`에서 일반 파일을 찾을 수 없으면, 즉 파일시스템이 경로의 메타데이터를 보고하지 않거나 경로가 디렉터리 또는 일반 파일이 아닌 다른 파일을 가리키면 이름이 없는 것이다. 권한이 읽기를 거부하는 경우처럼 내용을 읽을 수 없는 일반 파일은 실패다(RT-9). 로더는 root 아래 `name`의 각 component를 symbolic link를 따라가지 않고 검사하며, 파일이든 어느 디렉터리든 symbolic link인 component는 실패다(RT-9). link는 따라가지 않는다. 로더는 한 파일에 한 이름을 준다. 파일의 identity는 device와 inode 번호(Windows에서는 volume serial 번호와 file index)이며, 로더가 이미 다른 이름으로 읽은 파일의 이름은 두 이름의 표기와 상관없이 실패다(RT-9). 대소문자를 구분하지 않는 파일시스템이나 hard link가 한 파일에 주는 두 표기도 포함한다. 이유: 따라간 link는 선언된 tree 밖의 파일을 읽고, 한 파일의 두 이름은 그 파일에 cache 항목 두 개를 주며 한 파일을 두 번째 이름으로 include하는 것이 RT-22의 순환 검사를 통과하게 한다. map 로더는 이름과 소스 또는 파싱된 AST를 메모리에 두고 콘텐츠 버전을 사용한다. 컴파일 artifact loader는 파싱된 AST를 보관하고 artifact 해시를 버전으로 사용한다.
+
+네이티브 로더 결과는 소스·AST 중 하나와 비어 있지 않은 버전을 사용한다. TypeScript는 `LoadedSource`·`LoadedAst`, Go는 `loader.Result`(root의 `LoadResult`), Rust는 `Loaded::Source`·`Ast`, PHP는 `LoaderInterface::load`가 반환하는 배열, Python은 `LoadResult` protocol의 `LoadedSource`·`LoadedAst`를 사용한다. 메모리 로더는 생성·소스/AST 교체·조회를 공개하며 TypeScript·Go·Rust·Python에서는 `MapLoader`, PHP에서는 `ArrayLoader`다. Go·Rust는 AST 교체를 `SetAST`·`set_ast`로 구분하고 나머지 SDK는 네이티브 값에 따라 처리한다. 같은 이름의 내용을 변경하면 버전이 달라지고 같은 내용을 반복하면 버전이 유지된다. 버전 텍스트는 불투명하며 SDK 사이에 같을 필요가 없다. 이 계약에서 사용하는 공개 네이티브 subpackage 타입·root 재공개는 같은 데이터 carrier이며 네이티브 대입·identity 검사로 검증한다.
+
 - **RT-75** 파일시스템 로더는 읽은 파일을 `load`가 반환하기 전에 닫으므로, 템플릿을 몇 개 로드하든 로더의 파일이 열린 채 남지 않는다. 이유: 많은 템플릿을 로드하거나 오래 실행되는 process가 자기 file descriptor를 소진해서는 안 된다.
 
 ## 스코프

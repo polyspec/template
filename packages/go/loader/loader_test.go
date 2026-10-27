@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 	"testing/fstest"
 
 	template "github.com/polyspec/template/packages/go"
+	"github.com/polyspec/template/packages/go/ast"
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/loader"
 )
@@ -97,5 +99,40 @@ func TestFSLoaderKeepsNoFileOpen(t *testing.T) {
 	}
 	if after := descriptors(); after > before {
 		t.Fatalf("the loader holds %d descriptors after %d loads", after-before, templates)
+	}
+}
+
+// RT-10, RT-40: versions follow AST contents rather than the template name.
+func TestMapLoaderASTContentVersions(t *testing.T) {
+	if reflect.TypeFor[template.LoadResult]() != reflect.TypeFor[loader.Result]() || reflect.TypeFor[template.Loader]() != reflect.TypeFor[loader.Loader]() {
+		t.Fatal("root loader types differ from their native definitions")
+	}
+	for _, newLoader := range []func(map[string]string) *loader.MapLoader{template.NewMapLoader, loader.NewMapLoader} {
+		if result, ok, err := newLoader(map[string]string{"native.tpl": "value"}).Load("native.tpl"); err != nil || !ok || string(result.Source) != "value" {
+			t.Fatal("root/native constructors differ")
+		}
+	}
+
+	m := loader.NewMapLoader(nil)
+	program, err := template.NewAstProgram(template.Options{Loader: m})
+	if err != nil {
+		t.Fatal(err)
+	}
+	engine := template.NewEngine(program)
+	versions := make([]string, 0, 3)
+	for _, text := range []string{"first", "second", "second"} {
+		tree := &ast.Template{Type: "Template", Body: []ast.Node{&ast.Text{Type: "Text", Value: text, Span: ast.Span{0, len(text)}}}}
+		m.SetAST("a.tpl", tree)
+		result, ok, err := m.Load("a.tpl")
+		if err != nil || !ok || result.AST != tree || result.Source != nil || result.Version == "" {
+			t.Fatalf("AST result differs: %+v %v", result, err)
+		}
+		versions = append(versions, result.Version)
+		if rendered, err := engine.Render("a.tpl", map[string]any{}, template.RenderOptions{}); err != nil || rendered != text {
+			t.Fatalf("AST replacement rendered %q, want %q: %v", rendered, text, err)
+		}
+	}
+	if versions[0] == versions[1] || versions[1] != versions[2] {
+		t.Fatalf("versions must follow content: %v", versions)
 	}
 }

@@ -19,6 +19,27 @@ use Polyspec\Template\TemplateError;
  */
 final class LoaderTest extends TestCase
 {
+    /** RT-9, RT-10, RT-40: native result payloads and versions follow content replacement. */
+    public function testMapLoaderVersionsSourceAndAstContent(): void
+    {
+        $loader = new ArrayLoader();
+        foreach ([false, true] as $ast) {
+            $versions = [];
+            foreach (['first', 'second', 'second'] as $text) {
+                $value = $ast ? AstProgram::parse($text, 'a.tpl') : $text;
+                $loader->set('a.tpl', $value);
+                $result = $loader->load('a.tpl');
+                self::assertNotNull($result);
+                self::assertSame($value, $result[$ast ? 'ast' : 'source']);
+                self::assertArrayNotHasKey($ast ? 'source' : 'ast', $result);
+                self::assertNotSame('', $result['version']);
+                $versions[] = $result['version'];
+            }
+            self::assertNotSame($versions[0], $versions[1]);
+            self::assertSame($versions[1], $versions[2]);
+        }
+    }
+
     /**
      * RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
      */

@@ -5,10 +5,29 @@ import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { AstProgram, Engine, MapLoader, PathError, resolvePath, TemplateError } from '../src/index.js';
+import { AstProgram, Engine, MapLoader, parse, PathError, resolvePath, TemplateError } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
 
 describe('MapLoader', () => {
+  it('versions both source and AST replacement by content (RT-10, RT-40)', () => {
+    const loader = new MapLoader();
+    for (const ast of [false, true]) {
+      const versions: string[] = [];
+      for (const text of ['first', 'second', 'second']) {
+        const value = ast ? parse(text, 'a.tpl') : text;
+        loader.set('a.tpl', value);
+        const result = loader.load('a.tpl');
+        expect(result).not.toBeNull();
+        if (result === null) throw new Error('held template is missing');
+        expect(result).toEqual(ast ? { ast: value, version: result.version } : { source: value, version: result.version });
+        expect(result.version).not.toBe('');
+        versions.push(result.version);
+      }
+      expect(versions[0]).not.toBe(versions[1]);
+      expect(versions[1]).toBe(versions[2]);
+    }
+  });
+
   // RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
   it('returns the source of a name that it holds with a version, and nothing for another name (RT-10)', () => {
     const loaded = new MapLoader({ 'a.tpl': 'x' }).load('a.tpl');

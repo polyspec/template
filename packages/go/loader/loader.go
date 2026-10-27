@@ -2,6 +2,7 @@
 package loader
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"hash/fnv"
@@ -54,7 +55,11 @@ func (l *MapLoader) Set(name, source string) {
 
 // SetAST stores a parsed template.
 func (l *MapLoader) SetAST(name string, template *ast.Template) {
-	l.entries[name] = Result{AST: template, Version: ContentHash([]byte(name))}
+	data, err := json.Marshal(template)
+	if err != nil {
+		panic(fmt.Errorf("cannot serialize parsed template: %w", err))
+	}
+	l.entries[name] = Result{AST: template, Version: ContentHash(data)}
 }
 
 // Load implements Loader.

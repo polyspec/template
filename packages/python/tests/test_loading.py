@@ -12,6 +12,9 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
+from polyspec import template as sdk
+from polyspec.template import loader as native_loader
+
 from polyspec.template import (
     AstProgram,
     BindError,
@@ -21,6 +24,7 @@ from polyspec.template import (
     MapLoader,
     TemplateError,
     parse_json_bytes,
+    parse,
 )
 
 
@@ -53,6 +57,28 @@ class ResultLoader:
 
 
 class Loading(unittest.TestCase):
+    def test_map_loader_versions_source_and_ast_content(self):
+        # RT-9, RT-10, RT-40: native result payloads and versions survive replacement.
+        self.assertIs(sdk.LoadResult, native_loader.LoadResult)
+        self.assertIs(sdk.LoadedSource, native_loader.LoadedSource)
+        self.assertIs(sdk.LoadedAst, native_loader.LoadedAst)
+        self.assertIs(sdk.Loader, native_loader.Loader)
+        self.assertIs(sdk.MapLoader, native_loader.MapLoader)
+        loader = MapLoader()
+        for ast in [False, True]:
+            versions = []
+            for text in ["first", "second", "second"]:
+                value = parse(text, "a.tpl") if ast else text
+                loader.set("a.tpl", value)
+                result = loader.load("a.tpl")
+                self.assertIsNotNone(result)
+                self.assertEqual(result.ast if ast else result.source, value)
+                self.assertFalse(hasattr(result, "source" if ast else "ast"))
+                self.assertNotEqual(result.version, "")
+                versions.append(result.version)
+            self.assertNotEqual(versions[0], versions[1])
+            self.assertEqual(versions[1], versions[2])
+
     def test_artifact_refresh_policies(self):
         # RT-76: under dev a program renders the changed source of a template, and under
         # false it keeps its first parse.

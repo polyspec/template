@@ -1,7 +1,7 @@
 // A consumer can name the AST, loader and runtime types in public signatures
 // without importing an unexported implementation path.
 import type {
-  Formatter, FormatError, FormatOptions, FormatResult, PrefixAnalysis, ErrorCode, Span,
+  Formatter, FormatError, FormatOptions, FormatResult, PrefixAnalysis, ErrorCode, Span, LoadResult,
   RenderAstProgram, Output, Binary, BindErrorCode, Block, Call, ClassCall, DefineEntry, Echo,
   For, If, IfBlock, Include, Index, LineIndex, List, Literal, LoadedAst,
   LoadedSource, LoopMetaExpression, MapLiteral, Member, MemberCall,
@@ -47,3 +47,8 @@ export const locationCode: ErrorCode = 'E_PARSE_UNEXPECTED_TOKEN';
 export const sourceByteSpan: SourceSpan = [1, 4];
 export const astByteSpan: Span = [sourceByteSpan[0], sourceByteSpan[1]];
 export const verifiedLineStarts: LineIndex = [0, 2, 5];
+
+export const loadedSource: LoadedSource = { source: new Uint8Array([97]), version: 'source-v1' };
+export function loadedAst(ast: LoadedAst['ast']): LoadResult {
+  return { ast, version: 'ast-v1' } satisfies LoadedAst;
+}

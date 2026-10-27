@@ -2,7 +2,7 @@
 //! version (RT-10), and a path resolves against the directory of the current template and fails when it leaves the root
 //! (RT-8).
 
-use polyspec_template::{AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, RenderOptions, RenderTarget, resolve_path};
+use polyspec_template::{AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, RenderOptions, RenderTarget, ParseOptions, parse, resolve_path};
 
 /// RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
 #[test]
@@ -43,4 +43,29 @@ fn a_path_resolves_against_the_current_directory_and_fails_outside_the_root() {
         .render(RenderTarget::Name("o.tpl"), &serde_json::json!({}), &RenderOptions::default())
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_LOAD_OUTSIDE_ROOT);
+}
+
+/// RT-10, RT-40: native result variants retain payloads and version content changes.
+#[test]
+fn map_loader_versions_source_and_ast_replacements_by_content() {
+    let mut loader: polyspec_template::loader::MapLoader = MapLoader::new();
+    let _: &dyn polyspec_template::loader::Loader = &loader;
+    for ast in [false, true] {
+        let mut versions = Vec::new();
+        for text in ["first", "second", "second"] {
+            let tree = parse(text.as_bytes(), "a.tpl", &ParseOptions::default()).unwrap();
+            if ast { loader.set_ast("a.tpl", tree.clone()); }
+            else { loader.set("a.tpl", text); }
+            let result: polyspec_template::loader::Loaded = loader.load("a.tpl").unwrap().unwrap();
+            assert!(!result.version().is_empty());
+            versions.push(result.version().to_string());
+            match result {
+                Loaded::Ast { ast: value, .. } if ast => assert_eq!(value, tree),
+                Loaded::Source { bytes, .. } if !ast => assert_eq!(bytes, text.as_bytes()),
+                other => panic!("wrong payload: {other:?}"),
+            }
+        }
+        assert_ne!(versions[0], versions[1]);
+        assert_eq!(versions[1], versions[2]);
+    }
 }
