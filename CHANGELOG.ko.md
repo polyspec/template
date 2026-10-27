@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 764307a411c9a8cff31aa3b71f4b8a77c4a90bdfb6d10fe02957c0826aaece53 -->
+<!-- source-sha256: 5943305731d23070e0ba22657b961ec6eaa594ba126fd2c52d7539617497de38 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- AST API 선언에 네이티브 statement/expression 합 타입·리터럴 값 대안·map 항목/spread carrier를 명명했다. 공통 decoder 데이터에 null·양쪽 boolean·소수·Unicode 텍스트·entry/spread를 함께 가진 map을 추가하고 Rust·TypeScript consumer에서 carrier를 사용한다. Green: 여섯 SDK decoder 단위 검사 38개·계약/네이티브 consumer 검사 55개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-42).
 - 기존 TypeScript model 검사와 함께 Go·PHP·PHP 확장·Python의 모든 API 선언 참조를 새로 추출한 공개 심볼과 네이티브 SDK consumer 단위 검사에서 비교한다. 공통 reader는 parity 설정을 읽고 명시적 owner 입력이 선언·소스 변경에 해당 검사를 선택한다. Green: 네이티브 consumer/model 단위 검사 30개·TypeScript lint·owner·문서 검사가 통과했다(T27.1-1-41).
 - 렌더 context API 선언에 네이티브 생성·상태 필드·위치 오류·순환 진입/나가기·출력 제한 형식을 포함했다. 공개 SDK 단위 검사에서 프로그램을 생성하지 않고 context별 registry/chain/counter/출력 격리·소스 위치·UTF-8 바이트 한도를 검증한다. Green: 여섯 네이티브 context 단위 검사·TypeScript model 검사 5개·테스트 타입 검사·네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-40).
 - Python 페이지 캐시가 단일 키를 삭제하고 다른 항목을 유지하며 없는 키 삭제도 안전하게 처리한다. 모든 SDK에서 빈 문자열 hit·삭제·재저장·전체 비우기를 검증하고 생성·연산·네이티브 TTL 형식을 API로 선언했다. Go 캐시 내부 저장 기록은 비공개다. Red: Python에 삭제 연산이 없었다. Green: 여섯 SDK 캐시 단위 검사 18개·네이티브 model 검사 5개·네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-39).

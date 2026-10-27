@@ -136,3 +136,26 @@ test('the shared enum fixture covers every canonical AST literal', { timeout: 50
     assert.deepEqual([...found].sort(), [...expected].sort(), `${name}.${field}`);
   }
 });
+
+// AST-4: native literal carriers preserve every scalar alternative, including false.
+test('the shared AST value fixture covers scalar carriers and map spread', { timeout: 5000 }, () => {
+  const fixture: unknown = JSON.parse(readFileSync('tests/fixtures/ast-decode/enum-literals.json', 'utf8'));
+  assert.ok(record(fixture) && Array.isArray(fixture.body));
+  const expressions = fixture.body.map((node: unknown) => { assert.ok(record(node) && record(node.expr)); return node.expr; });
+  const scalars = expressions.filter(expr => expr.type === 'Literal');
+  assert.deepEqual(scalars.map(expr => [expr.kind, expr.value]), [
+    ['null', null], ['bool', true], ['number', 12.5], ['string', 'é😀'], ['bool', false],
+  ]);
+  const map = expressions.find(expr => expr.type === 'Map');
+  assert.ok(map && Array.isArray(map.entries));
+  assert.equal(map.entries.length, 2);
+  const entries: unknown[] = map.entries;
+  const [entry, spread] = entries;
+  assert.ok(record(entry) && record(entry.key) && record(entry.value));
+  assert.equal(entry.key.value, 'key');
+  assert.equal(entry.value.value, 12.5);
+  assert.ok(record(spread) && record(spread.expr));
+  assert.equal(spread.type, 'Spread');
+  assert.equal(spread.expr.type, 'Var');
+  assert.equal(spread.expr.name, 'rest');
+});

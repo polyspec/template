@@ -706,6 +706,137 @@
         0,
         1
       ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "null",
+        "value": null,
+        "span": [
+          0,
+          1
+        ]
+      },
+      "span": [
+        0,
+        1
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "bool",
+        "value": true,
+        "span": [
+          0,
+          1
+        ]
+      },
+      "span": [
+        0,
+        1
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 12.5,
+        "span": [
+          0,
+          1
+        ]
+      },
+      "span": [
+        0,
+        1
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "é😀",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "span": [
+        0,
+        1
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Map",
+        "entries": [
+          {
+            "key": {
+              "type": "Literal",
+              "kind": "string",
+              "value": "key",
+              "span": [
+                0,
+                1
+              ]
+            },
+            "value": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 12.5,
+              "span": [
+                0,
+                1
+              ]
+            }
+          },
+          {
+            "type": "Spread",
+            "expr": {
+              "type": "Var",
+              "name": "rest",
+              "span": [
+                0,
+                1
+              ]
+            },
+            "span": [
+              0,
+              1
+            ]
+          }
+        ],
+        "span": [
+          0,
+          1
+        ]
+      },
+      "span": [
+        0,
+        1
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "bool",
+        "value": false,
+        "span": [
+          0,
+          1
+        ]
+      },
+      "span": [
+        0,
+        1
+      ]
     }
   ],
   "comments": []

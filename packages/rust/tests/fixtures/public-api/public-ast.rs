@@ -5,7 +5,8 @@ use polyspec_template::{
 
 pub fn public_ast() -> Template {
     let literal = Expr::Literal { kind: "null".into(), value: LiteralValue::Null, span: [0, 0] };
-    let _: Vec<MapEntry> = Vec::new();
+    let _: [LiteralValue; 5] = [LiteralValue::Null, LiteralValue::Bool(true), LiteralValue::Number(12.5), LiteralValue::String("é😀".into()), LiteralValue::Bool(false)];
+    let _: Vec<MapEntry> = vec![MapEntry::Spread(Expr::Spread { expr: Box::new(literal.clone()), span: [0, 0] })];
     let _: Vec<ScopeItem> = Vec::new();
     let _: Vec<IfBranch> = Vec::new();
     let _: (UnaryOp, BinaryOp, LoopMetaField) = (UnaryOp::Not, BinaryOp::Add, LoopMetaField::Index);

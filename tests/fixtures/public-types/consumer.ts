@@ -1,7 +1,7 @@
 // A consumer can name the AST, loader and runtime types in public signatures
 // without importing an unexported implementation path.
 import type {
-  Formatter, FormatError, FormatOptions, FormatResult, PrefixAnalysis, ErrorCode, Span, LoadResult,
+  Formatter, FormatError, FormatOptions, FormatResult, PrefixAnalysis, ErrorCode, Span, LoadResult, Node, Expr, Spread, MapEntry,
   RenderAstProgram, Output, Binary, BindErrorCode, Block, Call, ClassCall, DefineEntry, Echo,
   For, If, IfBlock, Include, Index, LineIndex, List, Literal, LoadedAst,
   LoadedSource, LoopMetaExpression, MapLiteral, Member, MemberCall,
@@ -52,3 +52,6 @@ export const loadedSource: LoadedSource = { source: new Uint8Array([97]), versio
 export function loadedAst(ast: LoadedAst['ast']): LoadResult {
   return { ast, version: 'ast-v1' } satisfies LoadedAst;
 }
+
+export type AstSumTypes = [Node, Expr, MapEntry | Spread];
+export const literalValues: Literal['value'][] = [null, true, 12.5, 'é😀', false];
