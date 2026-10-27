@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ed4b281beedb6a7ee1e90fb3bc1a2bdc53a4c6f81fa9e9d98cfb61350d44517a -->
+<!-- source-sha256: a710ae5ed5ad510414aeb934aa1378f77a9407c1354a86c7ef71ed1135548e64 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- 릴리스 재검토를 완료했다. 의존성 갱신·esbuild 호환성을 수용했고 철회 행은 완료된 대체 작업으로 연결되며 host Map 사례가 전체 후보 CI에서 통과했다. 0.0.12를 검증한 archive·consumer 설치와 함께 공개했고 릴리스 차단 체크리스트 작업은 남아 있지 않다(T27.1).
 - CI 40450000056과 gates 40450000190이 통과한 main 86edcaa1에서 0.0.12를 공개했다. Release 40450815462는 archive 9개를 빌드하고 archive consumer 8개·wheel 의존성 그래프·Rust git 설치·Go module tag를 검증한 뒤 2026-10-27 04:40:32 UTC에 공개했다. Go tag release 40450815549도 통과했으며 발행 절차와 기능 근거에 검증한 배포를 반영했다(T27.1-5).
 - esbuild 0.28.2가 runtime 테스트·패키지 빌드·반복 가능한 문서 빌드를 포함한 전체 CI 매트릭스를 통과했다. 이전 호환성 예외는 제거된 상태를 유지한다. (T26.7-68).
 - CI 40450000056의 모든 worker와 ci-passed가 통과했다. 실행 8분 06초와 대기 8초로 전체 8분 14초다. scripts 5분 47초와 parity 6분 55초가 독립 실행됐고 가장 긴 worker는 showcase의 7분 24초다. 실행 측정값이며 보장된 단축 시간은 아니다. (T27.1-1-56).
