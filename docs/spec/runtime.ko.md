@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 576d9f9b659f6022d27eacf5a6b10033de311c374dbf088f79311236ce2a1f88 -->
+<!-- source-sha256: 6ec4ab7b3b8f42f36c233efce0960a88b3f84efc02586397da1fe403788a41c6 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -288,6 +288,8 @@ Go parser adapter는 같은 `Open`/`Close` 데이터의 alias인 `template.Delim
 ## 캐싱
 
 - **RT-40** 옵션이 산출물 갱신 정책을 정하지 않은 엔진은 `true`(RT-76)를 쓴다: 템플릿을 `name@version`마다 한 번 파싱하고 로더가 같은 버전을 보고하는 동안 파싱된 템플릿을 재사용한다.
+
+로드한 parsed template은 AST와 소스 줄 인덱스를 담으며 AST에서 직접 로드하면 줄 인덱스가 없다. 네이티브 carrier는 TypeScript·Go·Rust의 `ParsedTemplate`, Python·PHP·PHP 확장의 `ast`/`lines` record이다. AST-program loading은 이 carrier를 반환하며 버전이 같으면 같은 cache artifact를 재사용한다. PHP 배열은 네이티브 값 의미론으로 같은 데이터를 보존한다.
 - **RT-41** 파싱된 템플릿은 AST JSON으로 저장하고 다시 로드할 수 있다. AST 렌더는 소스 렌더와 같은 출력을 만든다.
 
 - **RT-72** package는 API의 공개 진입점(`config/parity.json`의 API unit)을 자기 생태계의 진입 방식으로 노출한다: npm package의 exports, Go package의 exported 이름, crate의 공개 항목, Composer package 또는 PHP extension의 class, Python package의 이름. build되거나 설치된 package의 test가 문서가 이름으로 적는 각 진입점을 해석한다.

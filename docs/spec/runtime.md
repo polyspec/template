@@ -287,6 +287,8 @@ Go parser adapters name their delimiter pair through `template.Delimiters` or `r
 ## Caching
 
 - **RT-40** An engine whose options name no artifact refresh policy uses `true` (RT-76): it parses a template once per `name@version` and reuses the parsed template while the loader reports the same version.
+
+A loaded parsed template contains its AST and a source line index, or no line index when loaded directly as an AST. The native carriers are `ParsedTemplate` in TypeScript, Go and Rust, and `ast`/`lines` records in Python, PHP and the PHP extension. AST-program loading returns this carrier and reuses the same cached artifact under an unchanged version; PHP arrays preserve the same data through native value semantics.
 - **RT-41** A parsed template may be stored and reloaded as its AST JSON. Rendering an AST produces the same output as rendering its source.
 
 - **RT-72** A package exposes the public entry points of the API (the API units of `config/parity.json`) through the entry mechanism of its ecosystem: the exports of an npm package, the exported names of a Go package, the public items of a crate, the classes of a Composer package or of a PHP extension, and the names of a Python package. A test of the built or installed package resolves each entry point that the documents name.

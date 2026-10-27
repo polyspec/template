@@ -9,6 +9,18 @@ import { AstProgram, Engine, MapLoader, parse, PathError, resolvePath, TemplateE
 import { FsLoader } from '../src/node/index.js';
 
 describe('MapLoader', () => {
+  it('publishes source line indexes and source-free AST artifacts (RT-9, RT-40)', () => {
+    const source = 'x\nz';
+    const tree = parse(source, 'a.tpl');
+    for (const value of [source, tree]) {
+      const program = new AstProgram({ loader: new MapLoader({ 'a.tpl': value }) });
+      const artifact = program.loadTemplate('a.tpl', null, null);
+      expect(artifact.ast).toEqual(tree);
+      expect(artifact.lines).toEqual(typeof value === 'string' ? [0, 2] : null);
+      expect(program.loadTemplate('a.tpl', null, null)).toBe(artifact);
+    }
+  });
+
   it('versions both source and AST replacement by content (RT-10, RT-40)', () => {
     const loader = new MapLoader();
     for (const ast of [false, true]) {

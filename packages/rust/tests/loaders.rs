@@ -6,6 +6,40 @@ use polyspec_template::{
     AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, ParseOptions, RenderOptions, RenderTarget, parse, resolve_path,
 };
 
+/// RT-9, RT-40: parsed source carries line indexes; AST input has no source index.
+#[test]
+fn public_parsed_template_data_and_cache_identity() {
+    let source = "x\nz";
+    let tree = parse(source.as_bytes(), "a.tpl", &ParseOptions::default()).unwrap();
+    for from_ast in [false, true] {
+        let mut loader = MapLoader::new();
+        if from_ast {
+            loader.set_ast("a.tpl", tree.clone());
+        } else {
+            loader.set("a.tpl", source);
+        }
+        let program = AstProgram::new(EngineOptions {
+            loader: Some(Box::new(loader)),
+            ..Default::default()
+        })
+        .unwrap();
+        let artifact: std::sync::Arc<polyspec_template::ParsedTemplate> = program.load_template("a.tpl", None, None).unwrap();
+        assert_eq!(artifact.ast, tree);
+        assert_eq!(
+            artifact.lines,
+            if from_ast {
+                None
+            } else {
+                Some(polyspec_template::LineIndex::from_starts(vec![0, 2]))
+            }
+        );
+        assert!(std::sync::Arc::ptr_eq(
+            &artifact,
+            &program.load_template("a.tpl", None, None).unwrap()
+        ));
+    }
+}
+
 /// RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
 #[test]
 fn a_map_loader_returns_a_held_source_with_a_version_and_nothing_for_another_name() {

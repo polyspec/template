@@ -7,8 +7,46 @@ import (
 	"github.com/polyspec/template/packages/go/errs"
 	"github.com/polyspec/template/packages/go/render"
 	"github.com/polyspec/template/packages/go/value"
+	"reflect"
 	"testing"
 )
+
+// RT-9, RT-40: public parsed data retains source positions or an absent index.
+func TestParsedTemplateSDKData(t *testing.T) {
+	source := []byte("x\nz")
+	tree, err := template.Parse(source, "a.tpl", template.ParseOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, fromAST := range []bool{false, true} {
+		loader := template.NewMapLoader(nil)
+		if fromAST {
+			loader.SetAST("a.tpl", tree)
+		} else {
+			loader.Set("a.tpl", string(source))
+		}
+		program, err := template.NewAstProgram(template.Options{Loader: loader})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var artifact *render.ParsedTemplate
+		artifact, err = program.LoadTemplate("a.tpl", nil, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var lines errs.LineIndex
+		if !fromAST {
+			lines = errs.LineIndex{0, 2}
+		}
+		if !reflect.DeepEqual(artifact.AST, tree) || !reflect.DeepEqual(artifact.Lines, lines) {
+			t.Fatalf("unexpected artifact: %+v", artifact)
+		}
+		again, err := program.LoadTemplate("a.tpl", nil, nil)
+		if err != nil || again != artifact {
+			t.Fatalf("cache did not preserve artifact: %v", err)
+		}
+	}
+}
 
 // RT-74, RT-22, RT-35, ERR-2: public render state works without a program.
 func TestContextSDKStateAndFailures(t *testing.T) {

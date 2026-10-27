@@ -5,16 +5,32 @@ declare(strict_types=1);
 namespace Polyspec\Template\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polyspec\Template\AstProgram;
 use Polyspec\Template\ErrorCode;
-use Polyspec\Template\TemplateError;
+use Polyspec\Template\Loader\ArrayLoader;
 use Polyspec\Template\Render\Context;
 use Polyspec\Template\Render\Frame;
 use Polyspec\Template\Render\RuntimeEnvironment;
+use Polyspec\Template\TemplateError;
 use Polyspec\Template\Value\MapValue;
 
 /** RT-74, RT-22, RT-35, ERR-2: public render state works without a program. */
 final class ContextSdkTest extends TestCase
 {
+    /** RT-9, RT-40: source input has a line index; AST input has none. */
+    public function testPublicParsedTemplateData(): void
+    {
+        $source = "x\nz";
+        $tree = AstProgram::parse($source, 'a.tpl');
+        foreach ([$source, $tree] as $value) {
+            $program = new AstProgram(new ArrayLoader(['a.tpl' => $value]));
+            $artifact = $program->loadTemplate('a.tpl', null, null);
+            self::assertSame($tree, $artifact['ast']);
+            self::assertSame(is_string($value) ? [0, 2] : null, $artifact['lines']);
+            self::assertSame($artifact, $program->loadTemplate('a.tpl', null, null));
+        }
+    }
+
     public function testIsolatedStatePositionedErrorsAndBoundedOutput(): void
     {
         $services = new RuntimeEnvironment(['outputBytes' => 2]);

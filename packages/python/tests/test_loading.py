@@ -57,6 +57,19 @@ class ResultLoader:
 
 
 class Loading(unittest.TestCase):
+    def test_public_parsed_template_data_and_cache_identity(self):
+        # RT-9, RT-40: only source input has a source line index.
+        source = "x\nz"
+        tree = parse(source, "a.tpl")
+        for value in [source, tree]:
+            program = AstProgram(EngineOptions(loader=MapLoader({"a.tpl": value})))
+            artifact = program.load_template("a.tpl", None, None)
+            self.assertEqual(artifact["ast"], tree)
+            self.assertEqual(
+                artifact["lines"], [0, 2] if isinstance(value, str) else None
+            )
+            self.assertIs(program.load_template("a.tpl", None, None), artifact)
+
     def test_map_loader_versions_source_and_ast_content(self):
         # RT-9, RT-10, RT-40: native result payloads and versions survive replacement.
         self.assertIs(sdk.LoadResult, native_loader.LoadResult)
