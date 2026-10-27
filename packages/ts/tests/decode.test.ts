@@ -33,6 +33,16 @@ function failure(json: unknown): AstDecodeError {
 }
 
 describe('decodeTemplate', () => {
+  it('constructs native schema errors with a pointer and reason (AST-10)', () => {
+    for (const path of ['', '/body/0/expr/value~1key']) {
+      const error = new AstDecodeError(path, 'expected scalar');
+      expect(error).toBeInstanceOf(Error);
+      expect(error.path).toBe(path);
+      expect(error.message).toContain(path === '' ? 'the root' : path);
+      expect(error.message).toContain('expected scalar');
+    }
+  });
+
   it('reads the expected.ast.json of every conformance case as the AST that parse returns', () => {
     const files = caseIds().map(id => join(casesDir, id, 'expected.ast.json')).filter(existsSync);
     expect(files.length).toBeGreaterThan(0);

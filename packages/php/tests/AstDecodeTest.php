@@ -15,6 +15,18 @@ use Polyspec\Template\Loader\ArrayLoader;
  */
 final class AstDecodeTest extends TestCase
 {
+    /** AST-10: public schema errors retain the supplied pointer and reason. */
+    public function testPublicDecodeErrorPointerAndReason(): void
+    {
+        foreach (['', '/body/0/expr/value~1key'] as $path) {
+            $error = new AstDecodeError($path, 'expected scalar');
+            self::assertInstanceOf(\InvalidArgumentException::class, $error);
+            self::assertSame($path, $error->path);
+            self::assertStringContainsString($path === '' ? 'the root' : $path, $error->getMessage());
+            self::assertStringContainsString('expected scalar', $error->getMessage());
+        }
+    }
+
     private const ECHO = '{"type":"Template","name":"x.tpl","body":[{"type":"Echo","expr":{"type":"Binary","op":"+",'
         . '"left":{"type":"Var","name":"a","span":[3,4]},"right":{"type":"Literal","kind":"number","value":1,'
         . '"span":[7,8]},"span":[3,8]},"span":[0,9]}],"comments":[]}';

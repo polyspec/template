@@ -28,6 +28,19 @@ ECHO = (
 
 
 class DecodeTemplateTest(unittest.TestCase):
+    def test_public_decode_error_pointer_and_reason(self):
+        # AST-10: public schema errors retain the supplied pointer and reason.
+        from polyspec.template import decode as native
+
+        self.assertIs(AstDecodeError, native.AstDecodeError)
+        self.assertIs(decode_template, native.decode_template)
+        for path in ["", "/body/0/expr/value~1key"]:
+            error = AstDecodeError(path, "expected scalar")
+            self.assertIsInstance(error, ValueError)
+            self.assertEqual(error.path, path)
+            self.assertIn("the root" if path == "" else path, str(error))
+            self.assertIn("expected scalar", str(error))
+
     def test_decode_reads_the_ast_of_every_conformance_case(self):
         count = 0
         for directory in case_directories():

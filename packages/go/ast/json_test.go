@@ -283,3 +283,21 @@ func TestPublicASTFieldsMatchTheSchema(t *testing.T) {
 		})
 	}
 }
+
+// AST-10: public schema errors retain the supplied pointer and reason.
+func TestPublicDecodeErrorPointerAndReason(t *testing.T) {
+	for _, path := range []string{"", "/body/0/expr/value~1key"} {
+		failure := &ast.DecodeError{Path: path, Reason: "expected scalar"}
+		var err error = failure
+		if failure.Path != path || failure.Reason != "expected scalar" || !strings.Contains(err.Error(), "expected scalar") {
+			t.Fatalf("error data differs: %+v", failure)
+		}
+		shown := path
+		if shown == "" {
+			shown = "the root"
+		}
+		if !strings.Contains(err.Error(), shown) {
+			t.Fatalf("error omits pointer: %v", err)
+		}
+	}
+}

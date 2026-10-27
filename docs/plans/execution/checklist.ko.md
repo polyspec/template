@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: a9f1c0c7af8f8a8c8feb3ef49ef1aa413112246836307ca9154d90c5879f4d04 -->
+<!-- source-sha256: 81b061f9787e131baf56d1c5915bc82e9f2c6bab064643c90aaa22009270c7b7 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -423,3 +423,4 @@
 | T27.1-1-40 | 공통 렌더 context 상태·연산을 선언하고 AST·생성 프로그램 없이 공개 네이티브 생성·격리·순환 오류·출력 제한을 검증한다 | Runtime context SDK 선언·격리된 네이티브 단위 검사 | Context SDK 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-41 | 기존 TypeScript model 검사에 더해 모든 Go·PHP/확장·Python API 선언 참조를 네이티브 SDK model과 소유 단위 검사에서 비교한다 | 네이티브 참조 consumer 단위 검사·명시적 owner 입력 | 네이티브 API 참조 단위 검사·`make owner-validate`·`make lint-ts`·`make docs-check` | [o] |
 | T27.1-1-42 | 네이티브 AST statement/expression·리터럴 값 carrier를 선언하고 공통 decoder 데이터에 모든 리터럴 값·map spread를 추가하여 Rust·TypeScript 타입 consumer를 검증한다 | AST 합 타입·공통 fixture·SDK probe | 네이티브 decoder 단위 검사·AST 계약/consumer 검사·`make parity-declarations-check`·`make docs-check` | [o] |
+| T27.1-1-43 | 네이티브 AST decoding 실패·JSON pointer 조회·사유 텍스트 생성 형식을 선언하고 네이티브 오류 protocol·root/module identity를 검증한다 | AST decoding 오류 SDK 계약·네이티브 단위 검사 | Decoder 오류 단위 검사·네이티브 consumer/lint·`make parity-declarations-check`·`make docs-check` | [o] |

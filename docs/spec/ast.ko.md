@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-ast -->
-<!-- source-sha256: ccffdd5d89d66d00b881dfdeb81e95ef7827bc9d7ba81a27e691fb933444828e -->
+<!-- source-sha256: 5944772ba007c58c8f9731cbde26f7790a8080e5d744a56966691a9c61d46540 -->
 # AST
 
 [English](/spec/ast).
@@ -116,3 +116,5 @@ AST는 템플릿 파일 하나를 파싱한 결과다. 모든 구현은 같은 �
 공개 shape와 필드는 canonical schema를 따른다. TypeScript interface·Go struct·Rust struct 또는 enum variant가 각 네이티브 표현을 공개한다. PHP 배열과 Python dictionary는 AST-10의 공개 decoder를 통해 같은 필드를 공개한다. API 선언은 독립적인 symbol이 있는 네이티브 property를 식별하고, 암묵적인 enum tag는 variant에, 배열·dictionary 필드는 decoder 계약에 속한다. 등록된 클래스가 없는 class call을 포함해 decoder 왕복 검사가 모든 schema shape와 필드를 다룬다.
 
 네이티브 AST carrier는 statement·expression의 대안을 명명한다. TypeScript는 `Node`·`Expr` union, Go는 닫힌 `ast.Node`·`ast.Expr` interface, Rust는 `Node`·`Expr` enum을 사용한다. PHP·PHP 확장·Python은 공개 decoder에서 같은 판별 가능한 일반 데이터를 공개한다. 리터럴 값은 null·boolean·number·string이며 Rust는 `LiteralValue`로 이 대안을 명명하고 map 항목 carrier는 `MapEntry::Entry`·`MapEntry::Spread`를 구분한다. 네이티브 expression carrier가 list/map 저장을 위해 spread를 포함해도 허용 위치는 canonical schema가 결정한다. 공통 네이티브 decoder 데이터가 모든 scalar 대안·false 값·map entry/spread 보존을 검증한다.
+
+Schema 실패는 JSON pointer 경로를 가진 공개 네이티브 인자 오류다. TypeScript·PHP·PHP 확장·Python은 `AstDecodeError`, Go는 `ast.DecodeError`, Rust는 `AstDecodeError::Invalid`를 사용한다. 네이티브 생성자·record 리터럴이 경로와 schema 사유를 받고 사람이 읽는 오류에 사유를 유지하며 빈 경로는 root로 표시한다. 경로는 네이티브 속성·필드 또는 Rust `path()`로 조회한다. JSON 구문 실패는 네이티브 JSON 읽기 오류를 유지하고 Rust는 pointer 없는 `AstDecodeError::Json` 분기로 전달한다. Python root/module의 decoder·오류 export는 같은 객체다.

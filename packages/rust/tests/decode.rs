@@ -122,3 +122,20 @@ fn public_decoder_preserves_canonical_enum_literals() {
     }
     assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
 }
+
+/// AST-10: public schema errors retain the supplied pointer and reason.
+#[test]
+fn public_decode_error_pointer_and_reason() {
+    for path in ["", "/body/0/expr/value~1key"] {
+        let error = polyspec_template::AstDecodeError::Invalid {
+            path: path.into(),
+            reason: "expected scalar".into(),
+        };
+        assert_eq!(error.path(), Some(path));
+        let native: &dyn std::error::Error = &error;
+        let text = native.to_string();
+        assert!(text.contains(if path.is_empty() { "the root" } else { path }));
+        assert!(text.contains("expected scalar"));
+        assert!(native.source().is_none());
+    }
+}
