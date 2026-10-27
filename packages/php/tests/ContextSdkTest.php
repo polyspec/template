@@ -17,6 +17,27 @@ use Polyspec\Template\Value\MapValue;
 /** RT-74, RT-22, RT-35, ERR-2: public render state works without a program. */
 final class ContextSdkTest extends TestCase
 {
+    /** RT-1, RT-5, RT-6, RT-74: concrete operations implement the same public runtime/program protocols. */
+    public function testAstProgramProtocols(): void
+    {
+        $loader = new ArrayLoader(['a.tpl' => '{= hello()}|{= Box::value()}']);
+        $program = new AstProgram($loader);
+        $hello = static fn (): string => 'host';
+        $value = static fn (): string => 'box';
+        $program->register('hello', $hello);
+        $program->registerClass('Box', 'value', $value);
+        self::assertInstanceOf(\Polyspec\Template\Program::class, $program);
+        self::assertInstanceOf(\Polyspec\Template\Render\RuntimeServices::class, $program);
+        self::assertSame($loader, $program->loader);
+        self::assertSame($hello, $program->hostFunction('hello'));
+        self::assertSame($value, $program->classFunction('Box', 'value'));
+        self::assertSame($program->runtime->limits(), $program->limits());
+        self::assertSame('true', $program->artifactRefresh);
+        self::assertSame(['{', '}'], $program->delimiters);
+        self::assertSame('host|box', $program->prepare('a.tpl', [])->render());
+        self::assertSame('host|box', $program->render('a.tpl', []));
+    }
+
     /** RT-9, RT-40: source input has a line index; AST input has none. */
     public function testPublicParsedTemplateData(): void
     {

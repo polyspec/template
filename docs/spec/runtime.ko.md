@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 6ec4ab7b3b8f42f36c233efce0960a88b3f84efc02586397da1fe403788a41c6 -->
+<!-- source-sha256: 45e8c11f04b14c0eb5390d1dace6efb430d3eaba9ca1cccd0e307a16ad9ebb47 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -296,6 +296,8 @@ Go parser adapter는 같은 `Open`/`Close` 데이터의 alias인 `template.Delim
 
 - **RT-73** API의 연산이 실행 중 읽는 데이터는 자기 생태계가 데이터를 싣는 방식으로 package 안에 실려, 설치된 package가 자기 밖의 파일을 읽지 않는다: AST schema(AST-10)는 npm package의 검증기에 묶이고, Go package(`embed`), crate(`include_str!`), PHP extension에 내장되며, Python 배포물의 package data와 Composer package의 resource로 실린다. package의 test는 repository의 파일이 하나도 없는 곳에서 이 데이터로 decode한다.
 - **RT-74** package의 모든 진입점과 모든 module 형식은 같은 runtime을 공유한다: 그 가운데 하나가 만든 bound map(VAL-22)을 다른 모든 것의 program이 받아들이며, module 형식이 하나인 package(Go와 Python의 루트와 하위 package, crate의 module, Composer package의 class)의 진입점도 runtime의 사본을 두지 않는다. npm package는 전체, render 전용, Node.js 진입점의 ECMAScript module 빌드와 CommonJS 빌드를 가진다.
+
+구체 AST program은 공개 interface와 같은 prepare/render·runtime-service 계약을 구현한다. 같은 소유 runtime과 limit을 통해 등록·callback 조회를 제공한다. TypeScript는 parser를 연결한 생성자와 render-only 생성자를, Go는 parser를 연결한 program과 내장 render engine을 공개하며 Python·PHP·PHP 확장·Rust는 네이티브 구체 program을 공개한다. 공개 loader/runtime/refresh-policy 상태는 네이티브 소유권 표현에 속하며 명명할 수 있는 구분자 상태도 노출한다.
 
 공개 렌더 context는 runtime services·바인딩한 root data·환경·entry 이름으로 직접 생성할 수 있다. 정의 registry·활성 템플릿 chain·반복 횟수·제한된 출력은 context마다 격리된다. 위치 지정/미지정 오류 생성·순환을 검사하는 진입·나가기를 공개한다. 출력은 TypeScript·Python에서 공개 builder, Rust에서 검사하는 writer와 문자열 필드, Go·PHP·PHP 확장에서 검사하는 writer/텍스트 메서드다. TypeScript·Python·PHP·PHP 확장은 쓰기 전 현재 frame/span을 기록하고 Go·Rust는 writer에 frame/span을 전달한다. 네이티브 형식이 달라도 같은 UTF-8 바이트 제한과 위치 오류를 유지한다. AST 프로그램·생성 프로그램을 생성할 필요가 없다.
 

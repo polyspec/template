@@ -11,6 +11,54 @@ import (
 	"testing"
 )
 
+// RT-1, RT-5, RT-6, RT-74: the concrete AST program shares its runtime through public protocols.
+func TestAstProgramSDKProtocols(t *testing.T) {
+	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "{= hello()}|{= Box::value()}"})})
+	if err != nil {
+		t.Fatal(err)
+	}
+	hello := func(_ []template.Value, _ template.FunctionContext) (any, error) { return "host", nil }
+	box := func(_ []template.Value, _ template.FunctionContext) (any, error) { return "box", nil }
+	if err := program.Register("hello", hello); err != nil {
+		t.Fatal(err)
+	}
+	if err := program.RegisterClass("Box", "value", box); err != nil {
+		t.Fatal(err)
+	}
+	var services render.RuntimeServices = program
+	function, ok := services.HostFunction("hello")
+	if !ok {
+		t.Fatal("missing host callback")
+	}
+	result, err := function(nil, template.FunctionContext{})
+	if err != nil || result != "host" {
+		t.Fatalf("host callback: %v %v", result, err)
+	}
+	method, ok := services.ClassFunction("Box", "value")
+	if !ok {
+		t.Fatal("missing class callback")
+	}
+	result, err = method(nil, template.FunctionContext{})
+	if err != nil || result != "box" {
+		t.Fatalf("class callback: %v %v", result, err)
+	}
+	var nativeServices render.RuntimeServices = program.Engine
+	if services.Limits() != nativeServices.Limits() {
+		t.Fatal("runtime limits differ")
+	}
+	var protocol template.Program = program
+	prepared, err := protocol.Prepare("a.tpl", nil, template.RenderOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if output, err := prepared.Render(); err != nil || output != "host|box" {
+		t.Fatalf("prepared: %q %v", output, err)
+	}
+	if output, err := protocol.Render("a.tpl", nil, template.RenderOptions{}); err != nil || output != "host|box" {
+		t.Fatalf("direct: %q %v", output, err)
+	}
+}
+
 // RT-9, RT-40: public parsed data retains source positions or an absent index.
 func TestParsedTemplateSDKData(t *testing.T) {
 	source := []byte("x\nz")

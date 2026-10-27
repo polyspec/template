@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: aedcad6ca578582fef65609027387718081bd811d4c2a2376c595c9b58ecb814 -->
+<!-- source-sha256: 0ad835c76d26dbfd4b404616465f177d722cd9157c545e63ed7fac46b10472f3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- 정확한 API 집합으로 구체 AST-program 생성자·네이티브 상태 소유권·Program/runtime-service facade를 선언했다. SDK 단위 검사에서 host/class callback identity·공유 limit·parser 연결/render-only 생성·prepared/direct rendering을 검증한다. 새 parsed-data·program 단위 검사를 여섯 네이티브 구현에 연결했다. Green: SDK 단위 검사 13개·계약/model/consumer 단위 검사 46개·네이티브 lint/타입/format·선언·owner·문서 검사가 통과했다(T27.1-1-52).
 - 공개 API 선언에 parsed-template AST/줄 인덱스 carrier·parser callback·loading method를 명명했다. 여섯 SDK 단위 검사로 소스 줄 인덱스·직접 AST 입력의 인덱스 부재·같은 버전의 cache 재사용을 검증하고 PHP 값 의미론을 유지한다. Green: 네이티브 loader/context 단위 검사 25개·계약/model/consumer 단위 검사 46개·네이티브 lint/타입/format·선언·owner·문서 검사가 통과했다(T27.1-1-51).
 - Go parser callback이 내부 parser를 import하지 않고 공개 root/render alias로 구분자 쌍을 명명한다. 정확한 API 집합으로 쌍과 네이티브 AST span·연산자·loop-field 변환을 선언하며 decoder 단위 검사로 span 보존·리터럴 변환·필드 목록을 확인한다. Red: 공개 구분자 타입이 없어 외부 callback이 컴파일되지 않았다. Green: Go/Rust decoder 단위 검사 11개·외부 consumer/model 단위 검사 28개·선언·네이티브 format·문서 검사가 통과했다(T27.1-1-50).
 - API consumer reader가 kit 0.0.58의 scalar `symbol`·정확한 `symbols` 목록 형식을 지원한다. 빈 목록·중복·비문자열·혼합 binding을 거부하고 목록의 모든 네이티브 공개 지점을 검증한다. Engine 소유권·prepared-render protocol·runtime 생성자/재공개를 검토한 네이티브 집합으로 선언하며 연산·필드의 정확한 canonical 참조 검사를 유지한다. Red: reader가 네이티브 목록을 거부하고 혼합 binding을 허용했다. Green: codec/네이티브 계약 단위 검사 49개·여섯 SDK runtime 소유권 검사 19개·TypeScript lint·선언/owner/문서 검사가 통과했다(T27.1-1-49).

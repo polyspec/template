@@ -58,7 +58,7 @@ class ResultLoader:
 
 class Loading(unittest.TestCase):
     def test_public_parsed_template_data_and_cache_identity(self):
-        # RT-9, RT-40: only source input has a source line index.
+        # ERR-2, RT-9, RT-40: only source input has a source line index.
         source = "x\nz"
         tree = parse(source, "a.tpl")
         for value in [source, tree]:

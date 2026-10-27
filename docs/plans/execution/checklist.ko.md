@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 27139c398aff6f2e03a7fb111e74333a59bad24d0dd66769b95836a4bf3e207f -->
+<!-- source-sha256: 10a78bd0451f1bc4028a7274be5fabe5615eb741bb4532a54d4e82a4f9bf223d -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -432,3 +432,4 @@
 | T27.1-1-49 | Template API consumer 단위 검사에서 scalar·정확한 비어 있지 않은 고유 심볼 목록을 읽고 연산 검사를 유지하면서 검증한 engine 생성/소유권·네이티브 interface identity를 선언한다 | Kit 0.0.58 심볼 목록·네이티브 model·엄격한 decoder 회귀 | 네이티브 API/계약 단위 검사·`make parity-declarations-check`·`make lint-ts`·`make docs-check` | [o] |
 | T27.1-1-50 | Parser adapter에서 명명할 수 있는 Go 구분자 alias를 공개하고 구분자 alias·네이티브 AST span/리터럴 변환을 정확한 심볼 집합·SDK consumer로 선언한다 | 공개 parser 데이터·AST 변환·네이티브 probe | 외부 Go consumer Red/Green·decoder/model 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-51 | 공개 parsed-template carrier·parser callback·AST-program loading을 정확한 네이티브 API 집합으로 선언하고 모든 SDK에서 소스 줄 인덱스·소스 없는 AST·cache 재사용을 검증한다 | Parsed template 데이터 계약·네이티브 loader 단위 검사 | 여섯 SDK loader 단위 검사·네이티브 model 참조·`make parity-declarations-check`·lint·`make docs-check` | [o] |
+| T27.1-1-52 | AST-program 생성·네이티브 상태 소유권·구체 Program/runtime-service facade를 선언하고 네이티브 SDK에서 등록·callback 조회·limit·prepared/direct rendering을 검증한다 | 구체 AST-program protocol·SDK consumer | SDK 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |

@@ -6,7 +6,7 @@ use polyspec_template::{
     AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, ParseOptions, RenderOptions, RenderTarget, parse, resolve_path,
 };
 
-/// RT-9, RT-40: parsed source carries line indexes; AST input has no source index.
+/// ERR-2, RT-9, RT-40: parsed source carries line indexes; AST input has no source index.
 #[test]
 fn public_parsed_template_data_and_cache_identity() {
     let source = "x\nz";

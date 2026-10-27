@@ -1,3 +1,4 @@
+// ERR-2: parsed-template line indexes preserve source positions.
 // The loaders and the resolution of template paths: a map loader returns the source of a name that it holds with a
 // version (RT-10), a path resolves against the directory of the current template and fails when it leaves the root
 // (RT-8), and the filesystem loader keeps no file open after a load (T23.5).

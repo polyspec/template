@@ -2,9 +2,32 @@
 
 import unittest
 from polyspec.template import RenderContext, RuntimeEnvironment, Frame, TemplateError
+from polyspec import template as sdk
 
 
 class ContextSDK(unittest.TestCase):
+    def test_ast_program_protocols(self):
+        # RT-1, RT-5, RT-6, RT-74: concrete operations share one runtime with the public protocol.
+        loader = sdk.MapLoader({"a.tpl": "{= hello()}|{= Box::value()}"})
+        program = sdk.AstProgram(sdk.EngineOptions(loader=loader))
+
+        def hello(_args, _context):
+            return "host"
+
+        def value(_args, _context):
+            return "box"
+
+        program.register("hello", hello)
+        program.register_class("Box", "value", value)
+        self.assertIsInstance(program, sdk.Program)
+        self.assertIs(program.loader, loader)
+        self.assertIs(program.host_function("hello"), hello)
+        self.assertIs(program.class_function("Box", "value"), value)
+        self.assertEqual(program.limits(), program.runtime.limits())
+        self.assertEqual(program.artifact_refresh, "true")
+        self.assertEqual(program.prepare("a.tpl", {}).render(), "host|box")
+        self.assertEqual(program.render("a.tpl", {}), "host|box")
+
     def test_isolated_state_positioned_errors_and_bounded_output(self):
         services = RuntimeEnvironment({"outputBytes": 2})
         root = {"root": "value"}

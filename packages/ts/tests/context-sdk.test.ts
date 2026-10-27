@@ -1,9 +1,33 @@
-// RT-74, RT-22, RT-35, ERR-2: public render state is usable without constructing a program.
+// RT-1, RT-5, RT-6, RT-74, RT-22, RT-35, ERR-2: public render state is usable without constructing a program.
 import { describe, expect, it } from 'vitest';
 import * as sdk from '@polyspec/template';
 import { RenderContext, RuntimeEnvironment, Frame, TemplateError } from '@polyspec/template';
+import { AstProgram as RenderProgram } from '@polyspec/template/render';
 
 describe('context SDK', () => {
+  it('publishes the concrete AST program through Program and runtime services (RT-1, RT-74)', () => {
+    const loader = new sdk.MapLoader({ 'a.tpl': '{= hello()}|{= Box::value()}' });
+    const program = new sdk.AstProgram({ loader });
+    const hello: sdk.HostFunction = () => 'host';
+    const value: sdk.HostFunction = () => 'box';
+    program.register('hello', hello);
+    program.registerClass('Box', 'value', value);
+    const services: sdk.RuntimeServices = program;
+    expect(services.hostFunction('hello')).toBe(hello);
+    expect(services.classFunction('Box', 'value')).toBe(value);
+    expect(services.limits()).toEqual(program.runtime.limits());
+    expect(program.loader).toBe(loader);
+    expect(program.artifactRefresh).toBe('true');
+    expect(program.delimiters).toEqual({ open: '{', close: '}' });
+    const protocol: sdk.Program = program;
+    expect(protocol.prepare('a.tpl', {}).render()).toBe('host|box');
+    expect(protocol.render('a.tpl', {})).toBe('host|box');
+    const renderOnly: sdk.RenderAstProgram = new RenderProgram({
+      loader: new sdk.MapLoader({ 'a.tpl': sdk.parse('ready', 'a.tpl') }),
+    });
+    expect(renderOnly.render('a.tpl', {})).toBe('ready');
+  });
+
   it('owns isolated state, positioned failures and bounded output', () => {
     expect('Output' in sdk).toBe(false);
     const services = new RuntimeEnvironment({ outputBytes: 2 });

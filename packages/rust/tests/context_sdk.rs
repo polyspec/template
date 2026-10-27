@@ -3,6 +3,56 @@ use polyspec_template::{DefineEntry, Env, ErrorCode, Frame, Limits, LineIndex, O
 use std::collections::HashMap;
 use std::sync::Arc;
 
+/// RT-1, RT-5, RT-6, RT-74: concrete AST operations share the Program/runtime-service contracts.
+#[test]
+fn ast_program_protocols() {
+    use polyspec_template::{ArtifactRefresh, AstProgram, EngineOptions, Program, RenderOptions, RenderTarget, RuntimeServices, Value};
+    let mut loader = polyspec_template::MapLoader::new();
+    loader.set("a.tpl", "{= hello()}|{= Box::value()}");
+    let mut program = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(loader)),
+        ..Default::default()
+    })
+    .unwrap();
+    program.register("hello", Box::new(|_, _| Ok(Value::text("host")))).unwrap();
+    program
+        .register_class("Box", "value", Box::new(|_, _| Ok(Value::text("box"))))
+        .unwrap();
+    let services: &dyn RuntimeServices = &program;
+    assert!(std::ptr::eq(
+        services.host_function("hello").unwrap(),
+        program.runtime.host_function("hello").unwrap()
+    ));
+    assert!(std::ptr::eq(
+        services.class_function("Box", "value").unwrap(),
+        program.runtime.class_function("Box", "value").unwrap()
+    ));
+    assert_eq!(services.limits().output_bytes, program.runtime.limits().output_bytes);
+    assert!(program.loader.load("a.tpl").unwrap().is_some());
+    assert_eq!(program.artifact_refresh, ArtifactRefresh::True);
+    let assign = serde_json::json!({});
+    let options = RenderOptions::default();
+    let protocol: &dyn Program = &program;
+    assert_eq!(
+        protocol
+            .prepare(RenderTarget::Name("a.tpl"), &assign, &options)
+            .unwrap()
+            .render()
+            .unwrap(),
+        "host|box"
+    );
+    assert_eq!(protocol.render(RenderTarget::Name("a.tpl"), &assign, &options).unwrap(), "host|box");
+    assert_eq!(
+        program
+            .prepare(RenderTarget::Name("a.tpl"), &assign, &options)
+            .unwrap()
+            .render()
+            .unwrap(),
+        "host|box"
+    );
+    assert_eq!(program.render(RenderTarget::Name("a.tpl"), &assign, &options).unwrap(), "host|box");
+}
+
 #[test]
 fn isolated_state_positioned_errors_and_bounded_output() {
     let services = RuntimeEnvironment::new(
