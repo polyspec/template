@@ -15,8 +15,11 @@ import (
 	"github.com/polyspec/template/packages/go/value"
 )
 
+// Delimiters names the public opening/closing pair used by parser adapters.
+type Delimiters = parser.Delimiters
+
 // ParseFunc parses source text into a template; nil in a render-only engine.
-type ParseFunc func(source []byte, name string, delimiters parser.Delimiters) (*ParsedTemplate, error)
+type ParseFunc func(source []byte, name string, delimiters Delimiters) (*ParsedTemplate, error)
 
 // ArtifactRefresh controls when compiled template artifacts are refreshed.
 type ArtifactRefresh string

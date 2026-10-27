@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 0def308ef63ff201802683a84bdbac1fae417c53ec28bd44584c64be925876a4 -->
+<!-- source-sha256: 576d9f9b659f6022d27eacf5a6b10033de311c374dbf088f79311236ce2a1f88 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -282,6 +282,8 @@ TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 k
 
 ## 브라우저
 
+
+Go parser adapter는 같은 `Open`/`Close` 데이터의 alias인 `template.Delimiters` 또는 `render.Delimiters`로 구분자 쌍을 명명한다. 공개 `render.ParseFunc`는 이 쌍을 받아 AST와 선택적 소스 줄 인덱스를 담은 `render.ParsedTemplate`을 반환한다. Callback은 내부 parser 패키지를 import할 필요가 없다.
 
 ## 캐싱
 

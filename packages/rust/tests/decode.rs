@@ -101,6 +101,8 @@ fn public_decoder_preserves_class_call_ast_fields() {
     let text = std::fs::read_to_string(path).expect("class-call fixture");
     let decoded = decode_template(&text).expect("decode class call");
     let expected: serde_json::Value = serde_json::from_str(&text).expect("fixture JSON");
+    assert_eq!(polyspec_template::BinaryOp::from_text("unknown"), None);
+    assert_eq!(polyspec_template::LoopMetaField::from_name("unknown"), None);
     assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
 }
 
@@ -112,14 +114,28 @@ fn public_decoder_preserves_canonical_enum_literals() {
     let decoded = decode_template(&text).expect("decode enum literals");
     let expected: serde_json::Value = serde_json::from_str(&text).expect("fixture JSON");
     for (node, expected_node) in decoded.body.iter().zip(expected["body"].as_array().expect("fixture body")) {
+        let span: [usize; 2] = serde_json::from_value(expected_node["span"].clone()).unwrap();
+        assert_eq!(node.span(), span);
+        if let polyspec_template::Node::Echo { expr, .. } = node {
+            let span: [usize; 2] = serde_json::from_value(expected_node["expr"]["span"].clone()).unwrap();
+            assert_eq!(expr.span(), span);
+            if let polyspec_template::Expr::LoopMeta { field, .. } = expr {
+                let name = expected_node["expr"]["field"].as_str().unwrap();
+                assert_eq!(polyspec_template::LoopMetaField::from_name(name), Some(*field));
+            }
+        }
         if let polyspec_template::Node::Echo {
             expr: polyspec_template::Expr::Binary { op, .. },
             ..
         } = node
         {
-            assert_eq!(op.as_str(), expected_node["expr"]["op"].as_str().expect("operator"));
+            let text = expected_node["expr"]["op"].as_str().expect("operator");
+            assert_eq!(op.as_str(), text);
+            assert_eq!(polyspec_template::BinaryOp::from_text(text), Some(*op));
         }
     }
+    assert_eq!(polyspec_template::BinaryOp::from_text("unknown"), None);
+    assert_eq!(polyspec_template::LoopMetaField::from_name("unknown"), None);
     assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
 }
 

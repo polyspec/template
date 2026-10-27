@@ -32,6 +32,7 @@ func TestDecodeTemplateReadsTheCanonicalAST(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: %v", testCase.ID, err)
 		}
+		assertPublicExpressionSpans(t, reflect.ValueOf(decoded))
 		encoded, err := json.Marshal(decoded)
 		if err != nil {
 			t.Fatalf("%s: %v", testCase.ID, err)
@@ -168,6 +169,15 @@ func TestPublicDecoderPreservesClassCallASTFields(t *testing.T) {
 // AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
 func TestPublicDecoderPreservesCanonicalEnumLiterals(t *testing.T) {
 	assertPublicDecoderRoundTrip(t, "enum-literals.json")
+	want := []string{"index_", "key_", "value_", "last_", "first_", "size_"}
+	if len(ast.LoopMetaFields) != len(want) {
+		t.Fatal("loop metadata catalog differs")
+	}
+	for _, name := range want {
+		if !ast.LoopMetaFields[name] {
+			t.Fatalf("missing loop metadata field %s", name)
+		}
+	}
 }
 
 func assertPublicDecoderRoundTrip(t *testing.T, fixture string) {
@@ -180,6 +190,7 @@ func assertPublicDecoderRoundTrip(t *testing.T, fixture string) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	assertPublicExpressionSpans(t, reflect.ValueOf(decoded))
 	encoded, err := json.Marshal(decoded)
 	if err != nil {
 		t.Fatal(err)
@@ -298,6 +309,48 @@ func TestPublicDecodeErrorPointerAndReason(t *testing.T) {
 		}
 		if !strings.Contains(err.Error(), shown) {
 			t.Fatalf("error omits pointer: %v", err)
+		}
+	}
+}
+
+// AST-2: every decoded expression's native projection agrees with its public data.
+func assertPublicExpressionSpans(t *testing.T, v reflect.Value) {
+	t.Helper()
+	if !v.IsValid() {
+		return
+	}
+	if (v.Kind() == reflect.Pointer || v.Kind() == reflect.Interface) && v.IsNil() {
+		return
+	}
+	if v.CanInterface() {
+		if expression, ok := v.Interface().(ast.Expr); ok {
+			data := reflect.ValueOf(expression)
+			for data.Kind() == reflect.Pointer || data.Kind() == reflect.Interface {
+				if data.IsNil() {
+					return
+				}
+				data = data.Elem()
+			}
+			field := data.FieldByName("Span")
+			if !field.IsValid() || !field.CanInterface() {
+				t.Fatalf("%T has no public span", expression)
+			}
+			span, ok := field.Interface().(ast.Span)
+			if !ok || ast.SpanOf(expression) != span {
+				t.Fatalf("%T span projection differs", expression)
+			}
+		}
+	}
+	switch v.Kind() {
+	case reflect.Pointer, reflect.Interface:
+		assertPublicExpressionSpans(t, v.Elem())
+	case reflect.Struct:
+		for i := range v.NumField() {
+			assertPublicExpressionSpans(t, v.Field(i))
+		}
+	case reflect.Slice, reflect.Array:
+		for i := range v.Len() {
+			assertPublicExpressionSpans(t, v.Index(i))
 		}
 	}
 }

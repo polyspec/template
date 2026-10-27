@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: a553a2bc13a569d6605d3d524361c321e2b2b56945b497e2e52692d87e32eb43 -->
+<!-- source-sha256: 4c1108281b07e62f27dde0d4b692c621b0db0b2aebf4fb822ad8e3386e93f2e9 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -430,3 +430,4 @@
 | T27.1-1-47 | 고정한 패키지 관리자로 template에 공개 kit 0.0.58을 설치하고 kit 소유 복사본/hook·검토한 Ruff 0.17.3 patch·잠긴 의존성 review를 갱신한다. Provider checkout은 수정하지 않는다 | 공개 kit 의존성·설치 metadata·복사된 gate | `make kit-check`·소유 스크립트 단위 검사·의존성 audit·`make docs-check`·전체 CI | [o] |
 | T27.1-1-48 | P0: CI 405fb0b6이 거부한 Rust loader/cache SDK 테스트 형식을 수정하고 모든 assertion·테스트를 유지한다 | 네이티브 rustfmt 수정만 적용 | `make template-lint-rust-format`·`make docs-check` | [o] |
 | T27.1-1-49 | Template API consumer 단위 검사에서 scalar·정확한 비어 있지 않은 고유 심볼 목록을 읽고 연산 검사를 유지하면서 검증한 engine 생성/소유권·네이티브 interface identity를 선언한다 | Kit 0.0.58 심볼 목록·네이티브 model·엄격한 decoder 회귀 | 네이티브 API/계약 단위 검사·`make parity-declarations-check`·`make lint-ts`·`make docs-check` | [o] |
+| T27.1-1-50 | Parser adapter에서 명명할 수 있는 Go 구분자 alias를 공개하고 구분자 alias·네이티브 AST span/리터럴 변환을 정확한 심볼 집합·SDK consumer로 선언한다 | 공개 parser 데이터·AST 변환·네이티브 probe | 외부 Go consumer Red/Green·decoder/model 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |

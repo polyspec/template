@@ -282,6 +282,8 @@ TypeScript, PHP, the PHP extension and Python name each limit by its key in the 
 ## Browser
 
 
+Go parser adapters name their delimiter pair through `template.Delimiters` or `render.Delimiters`, aliases of the same `Open`/`Close` data. The public `render.ParseFunc` accepts that pair and returns a `render.ParsedTemplate` containing the AST and its optional source line index. A callback needs no import of an internal parser package.
+
 ## Caching
 
 - **RT-40** An engine whose options name no artifact refresh policy uses `true` (RT-76): it parses a template once per `name@version` and reuses the parsed template while the loader reports the same version.

@@ -58,6 +58,9 @@ type RuntimeEnvironment = render.RuntimeEnvironment
 // NewRuntimeEnvironment creates runtime services shared by AST and generated programs.
 var NewRuntimeEnvironment = render.NewRuntimeEnvironment
 
+// Delimiters names the public opening/closing pair of a parser adapter.
+type Delimiters = render.Delimiters
+
 // Options configure an engine.
 type Options = render.Options
 
