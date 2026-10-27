@@ -1,9 +1,11 @@
 // RT-74, RT-22, RT-35, ERR-2: public render state is usable without constructing a program.
 import { describe, expect, it } from 'vitest';
+import * as sdk from '@polyspec/template';
 import { RenderContext, RuntimeEnvironment, Frame, TemplateError } from '@polyspec/template';
 
 describe('context SDK', () => {
   it('owns isolated state, positioned failures and bounded output', () => {
+    expect('Output' in sdk).toBe(false);
     const services = new RuntimeEnvironment({ outputBytes: 2 });
     const root = new Map([['root', 'value']]);
     const env = { timezone: 'Z', now: 123 };

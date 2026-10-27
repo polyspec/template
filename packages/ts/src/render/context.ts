@@ -2,7 +2,7 @@
 import type { Template } from '../ast.js';
 import { errorAt, errorWithoutPosition, type ErrorCode, type LineIndex, type Span, type TemplateError } from '../errors.js';
 import type { Env, HostFunction } from '../functions/index.js';
-import { Output } from '../output.js';
+import { createOutput, type Output } from '../output.js';
 import type { MapValue, Value } from '../value/value.js';
 
 // The resource limits of one render (RT-33). The engine options override single fields.
@@ -93,7 +93,7 @@ export class RenderContext {
     readonly entryName: string,
   ) {
     const limits = services.limits();
-    this.output = new Output(limits.outputBytes, () => {
+    this.output = createOutput(limits.outputBytes, () => {
       throw this.fail('E_RUNTIME_LIMIT', this.currentFrame, this.currentSpan, `output exceeds ${limits.outputBytes} bytes`);
     });
   }

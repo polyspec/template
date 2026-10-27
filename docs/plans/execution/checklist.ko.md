@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 81b061f9787e131baf56d1c5915bc82e9f2c6bab064643c90aaa22009270c7b7 -->
+<!-- source-sha256: 9b77835bd8d3301d36da402d18067c1124db3f1c054583b99437565f26c54ecf -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -424,3 +424,4 @@
 | T27.1-1-41 | 기존 TypeScript model 검사에 더해 모든 Go·PHP/확장·Python API 선언 참조를 네이티브 SDK model과 소유 단위 검사에서 비교한다 | 네이티브 참조 consumer 단위 검사·명시적 owner 입력 | 네이티브 API 참조 단위 검사·`make owner-validate`·`make lint-ts`·`make docs-check` | [o] |
 | T27.1-1-42 | 네이티브 AST statement/expression·리터럴 값 carrier를 선언하고 공통 decoder 데이터에 모든 리터럴 값·map spread를 추가하여 Rust·TypeScript 타입 consumer를 검증한다 | AST 합 타입·공통 fixture·SDK probe | 네이티브 decoder 단위 검사·AST 계약/consumer 검사·`make parity-declarations-check`·`make docs-check` | [o] |
 | T27.1-1-43 | 네이티브 AST decoding 실패·JSON pointer 조회·사유 텍스트 생성 형식을 선언하고 네이티브 오류 protocol·root/module identity를 검증한다 | AST decoding 오류 SDK 계약·네이티브 단위 검사 | Decoder 오류 단위 검사·네이티브 consumer/lint·`make parity-declarations-check`·`make docs-check` | [o] |
+| T27.1-1-44 | TypeScript 출력 인스턴스 계약을 interface로 공개하고 buffer 생성은 내부에 유지한다. 기존 root 타입 전용 export를 유지하고 제한된 쓰기 SDK 대응을 검증한다 | 출력 인스턴스 경계·네이티브 API model·consumer | TypeScript model/context 단위 검사·`make lint-ts`·`make parity-declarations-check`·`make docs-check` | [o] |

@@ -1,8 +1,16 @@
 // Output builder with a byte size limit (RT-35).
 import { utf8Length } from './escape.js';
 
-// Collects rendered text while enforcing the UTF-8 output byte limit (RT-35).
-export class Output {
+/** The writable output instance exposed by a render context (RT-35). */
+export interface Output {
+  /** Appends text within the context's UTF-8 byte limit. */
+  write(text: string): void;
+  /** Returns text in append order. */
+  toString(): string;
+}
+
+// Buffer construction belongs to the context, not the public instance contract.
+class BufferedOutput implements Output {
   private readonly chunks: string[] = [];
   private bytes = 0;
 
@@ -21,4 +29,9 @@ export class Output {
   toString(): string {
     return this.chunks.join('');
   }
+}
+
+// Internal factory: the package entry exports only the Output instance type.
+export function createOutput(limit: number, onLimit: () => never): Output {
+  return new BufferedOutput(limit, onLimit);
 }

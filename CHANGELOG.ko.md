@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5f2b3a35ed011a15ca0c0cce092bb0e779baccd8e32d93db053cd9fbf0540ce7 -->
+<!-- source-sha256: efaaf1b35a4fb76f1037c05f1aeede06e026fb18e7575baf88fa589137c5bd12 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- TypeScript context 출력은 `write`·`toString` 공개 인스턴스 interface를 사용하고 buffer 생성은 내부에 유지하며 기존 root 타입 전용 export를 보존한다. 네이티브 출력 대응은 검사하는 쓰기·텍스트 수집·바이트 제한을 유지한다. Red: 네이티브 model에 구현 class 생성자가 노출됐다. Green: 출력 model/consumer 회귀·context SDK 단위 검사·네이티브 참조 검사 30개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-44).
 - AST decoding 오류 선언에 schema/구문 대안·pointer 조회·네이티브 생성·사유 텍스트를 포함했다. SDK 단위 검사에서 공개 타입으로 root·중첩 pointer 오류를 생성하고 네이티브 오류 protocol을 검증하며 Python root/module 오류·decoder identity를 확인한다. Green: 여섯 SDK decoder 단위 검사 43개·네이티브 참조/consumer 검사 30개·네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-43).
 - AST API 선언에 네이티브 statement/expression 합 타입·리터럴 값 대안·map 항목/spread carrier를 명명했다. 공통 decoder 데이터에 null·양쪽 boolean·소수·Unicode 텍스트·entry/spread를 함께 가진 map을 추가하고 Rust·TypeScript consumer에서 carrier를 사용한다. Green: 여섯 SDK decoder 단위 검사 38개·계약/네이티브 consumer 검사 55개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-42).
 - 기존 TypeScript model 검사와 함께 Go·PHP·PHP 확장·Python의 모든 API 선언 참조를 새로 추출한 공개 심볼과 네이티브 SDK consumer 단위 검사에서 비교한다. 공통 reader는 parity 설정을 읽고 명시적 owner 입력이 선언·소스 변경에 해당 검사를 선택한다. Green: 네이티브 consumer/model 단위 검사 30개·TypeScript lint·owner·문서 검사가 통과했다(T27.1-1-41).

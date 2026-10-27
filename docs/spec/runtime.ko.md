@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: e8920902c1ec651ee4a71557a68496c254b39d090b018227e74db2590d4e395c -->
+<!-- source-sha256: 0def308ef63ff201802683a84bdbac1fae417c53ec28bd44584c64be925876a4 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -294,3 +294,5 @@ TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 k
 - **RT-74** package의 모든 진입점과 모든 module 형식은 같은 runtime을 공유한다: 그 가운데 하나가 만든 bound map(VAL-22)을 다른 모든 것의 program이 받아들이며, module 형식이 하나인 package(Go와 Python의 루트와 하위 package, crate의 module, Composer package의 class)의 진입점도 runtime의 사본을 두지 않는다. npm package는 전체, render 전용, Node.js 진입점의 ECMAScript module 빌드와 CommonJS 빌드를 가진다.
 
 공개 렌더 context는 runtime services·바인딩한 root data·환경·entry 이름으로 직접 생성할 수 있다. 정의 registry·활성 템플릿 chain·반복 횟수·제한된 출력은 context마다 격리된다. 위치 지정/미지정 오류 생성·순환을 검사하는 진입·나가기를 공개한다. 출력은 TypeScript·Python에서 공개 builder, Rust에서 검사하는 writer와 문자열 필드, Go·PHP·PHP 확장에서 검사하는 writer/텍스트 메서드다. TypeScript·Python·PHP·PHP 확장은 쓰기 전 현재 frame/span을 기록하고 Go·Rust는 writer에 frame/span을 전달한다. 네이티브 형식이 달라도 같은 UTF-8 바이트 제한과 위치 오류를 유지한다. AST 프로그램·생성 프로그램을 생성할 필요가 없다.
+
+TypeScript root는 `Output`을 `write`·`toString`을 가진 인스턴스 타입으로만 공개한다. Buffer 생성자·factory는 구현 세부사항이며 호출자는 렌더 context에서 제한된 출력을 얻는다. 네이티브 출력은 TypeScript의 `Output` 인스턴스 interface, Go·Rust·PHP·PHP 확장의 context 자체, Python context가 제공하는 `Output`을 사용한다. Context SDK 단위 검사가 각 형식에서 같은 추가 순서·격리·UTF-8 제한을 검증한다.

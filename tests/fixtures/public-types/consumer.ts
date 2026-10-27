@@ -55,3 +55,5 @@ export function loadedAst(ast: LoadedAst['ast']): LoadResult {
 
 export type AstSumTypes = [Node, Expr, MapEntry | Spread];
 export const literalValues: Literal['value'][] = [null, true, 12.5, 'é😀', false];
+
+export const outputFields: Record<keyof Output, true> = { write: true, toString: true };

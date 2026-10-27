@@ -34,6 +34,8 @@ test('the public declaration model has no inaccessible signature types', { timeo
     for (const member of item.members ?? []) visit(member);
   }
   visit(model);
+  assert.ok(references.has('@polyspec/template!Output:interface'), 'the type-only output export names its instance contract');
+  assert.ok(!references.has('@polyspec/template!Output:constructor(1)'), 'the SDK does not publish buffer construction');
   const config = jsonDocument<{ units: { symbols?: { implementation: string; symbol: string }[] }[] }>('native API declarations', {
     type: 'object', required: ['units'], properties: { units: { type: 'array', items: {
       type: 'object', properties: { symbols: { type: 'array', items: {
