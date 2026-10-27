@@ -3,6 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
+import { jsonDocument } from '../../scripts/json-document.mts';
 import { typescriptExports } from '../../scripts/typescript-exports.mts';
 
 test('a package consumer can name the types in public signatures', { timeout: 30_000 }, () => {
@@ -22,6 +23,29 @@ function declarationModel(config: string) {
 test('the public declaration model has no inaccessible signature types', { timeout: 30_000 }, () => {
   const result = declarationModel('packages/ts/api-extractor.json');
   assert.equal(result.status, 0, result.stdout + result.stderr);
+  interface Item { canonicalReference?: string; members?: Item[] }
+  const model = jsonDocument<Item>('native API model', {
+    type: 'object', properties: { canonicalReference: { type: 'string' },
+      members: { type: 'array', items: { $ref: '#' } } },
+  }).read('var/report/public-types.api.json');
+  const references = new Set<string>();
+  function visit(item: Item): void {
+    if (item.canonicalReference !== undefined) references.add(item.canonicalReference);
+    for (const member of item.members ?? []) visit(member);
+  }
+  visit(model);
+  const config = jsonDocument<{ units: { symbols?: { implementation: string; symbol: string }[] }[] }>('native API declarations', {
+    type: 'object', required: ['units'], properties: { units: { type: 'array', items: {
+      type: 'object', properties: { symbols: { type: 'array', items: {
+        type: 'object', required: ['implementation', 'symbol'], properties: {
+          implementation: { type: 'string' }, symbol: { type: 'string' },
+        },
+      } } },
+    } } },
+  }).read('config/parity.json');
+  for (const symbol of config.units.flatMap(unit => unit.symbols ?? [])) {
+    if (symbol.implementation === 'ts') assert.ok(references.has(symbol.symbol), `${symbol.symbol} is absent from the native model`);
+  }
 });
 
 test('the declaration check rejects a public class with a private implementation base', { timeout: 30_000 }, () => {

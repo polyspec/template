@@ -7,6 +7,8 @@ namespace Polyspec\Template\Tests;
 use PHPUnit\Framework\TestCase;
 use Polyspec\Template\AstProgram;
 use Polyspec\Template\TemplateError;
+use Polyspec\Template\Source;
+use Polyspec\Template\Parser\Parser;
 
 /** EDT-11: prefix analysis preserves accepted ranges and the first parser error. */
 final class PrefixAnalysisTest extends TestCase
@@ -22,15 +24,22 @@ final class PrefixAnalysisTest extends TestCase
         self::assertNotEmpty($fixture['cases']);
         foreach ($fixture['cases'] as $item) {
             $options = isset($item['delimiters']) ? ['delimiters' => $item['delimiters']] : [];
-            $result = AstProgram::analyzePrefix($item['source'], $item['name'], $options);
-            if ($result['error'] !== null) {
-                self::assertInstanceOf(TemplateError::class, $result['error']);
-                $error = $result['error']->toArray();
-                self::assertNotSame('', $error['message']);
-                unset($error['message']); // ERR-1: message is free English text.
-                $result['error'] = $error;
+            $delimiters = $item['delimiters'] ?? '{}';
+            $source = Source::fromText($item['name'], $item['source']);
+            $results = [
+                AstProgram::analyzePrefix($item['source'], $item['name'], $options),
+                Parser::analyzePrefix($source, $delimiters[0], $delimiters[1]),
+            ];
+            foreach ($results as $result) {
+                if ($result['error'] !== null) {
+                    self::assertInstanceOf(TemplateError::class, $result['error']);
+                    $error = $result['error']->toArray();
+                    self::assertNotSame('', $error['message']);
+                    unset($error['message']); // ERR-1: message is free English text.
+                    $result['error'] = $error;
+                }
+                self::assertEquals($item['expected'], $result, $item['id']);
             }
-            self::assertEquals($item['expected'], $result, $item['id']);
         }
     }
 

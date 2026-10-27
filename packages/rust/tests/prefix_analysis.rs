@@ -21,6 +21,7 @@ struct Token {
 }
 #[derive(serde::Deserialize)]
 struct Expected {
+    ast: serde_json::Value,
     tags: Vec<Tag>,
     tokens: Vec<Token>,
     error: serde_json::Value,
@@ -73,6 +74,12 @@ fn public_prefix_analysis_preserves_shared_contexts() {
                 kind: t.kind.as_str().into(),
             })
             .collect();
+        assert_eq!(
+            serde_json::to_value(&result.ast).expect("native AST"),
+            item.expected.ast,
+            "{}",
+            item.id
+        );
         assert_eq!(tags, item.expected.tags, "{}", item.id);
         assert_eq!(tokens, item.expected.tokens, "{}", item.id);
         let error=result.error.map_or(serde_json::Value::Null,|error|{

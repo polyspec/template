@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0385ed9439d0b79123c992c65dbf7f49836e187a */
+ * Stub hash: 0e54c73affd72e44964bc44b99df04989d7c7240 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -931,6 +931,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Parser_Parser_analyze arginfo_class_Polyspec_Template_Parser_Parser_parse
 
+#define arginfo_class_Polyspec_Template_Parser_Parser_analyzePrefix arginfo_class_Polyspec_Template_Parser_Parser_parse
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Parser_BlockTag___construct, 0, 0, 4)
 	ZEND_ARG_OBJ_INFO(0, source, Polyspec\\Template\\Source, 0)
 	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
@@ -1157,6 +1159,7 @@ ZEND_METHOD(Polyspec_Template_Parser_Standalone, ranges);
 ZEND_METHOD(Polyspec_Template_Parser_Parser, __construct);
 ZEND_METHOD(Polyspec_Template_Parser_Parser, parse);
 ZEND_METHOD(Polyspec_Template_Parser_Parser, analyze);
+ZEND_METHOD(Polyspec_Template_Parser_Parser, analyzePrefix);
 ZEND_METHOD(Polyspec_Template_Parser_BlockTag, __construct);
 ZEND_METHOD(Polyspec_Template_Parser_BlockTag, readIncludePath);
 ZEND_METHOD(Polyspec_Template_Parser_BlockTag, readBlockBody);
@@ -1661,6 +1664,7 @@ static const zend_function_entry class_Polyspec_Template_Parser_Parser_methods[]
 	ZEND_ME(Polyspec_Template_Parser_Parser, __construct, arginfo_class_Polyspec_Template_Parser_Parser___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Polyspec_Template_Parser_Parser, parse, arginfo_class_Polyspec_Template_Parser_Parser_parse, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Polyspec_Template_Parser_Parser, analyze, arginfo_class_Polyspec_Template_Parser_Parser_analyze, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Polyspec_Template_Parser_Parser, analyzePrefix, arginfo_class_Polyspec_Template_Parser_Parser_analyzePrefix, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 

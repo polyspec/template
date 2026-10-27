@@ -156,6 +156,8 @@ pub struct TemplateAnalysis {
 /// Accepted parser ranges and its first parse error (EDT-11).
 #[derive(Debug, Clone)]
 pub struct PrefixAnalysis {
+    /// Complete AST on success, or none after a parse error.
+    pub ast: Option<Template>,
     /// Tags accepted before the error.
     pub tags: Vec<SyntaxTag>,
     /// Classified ranges belonging to the accepted tags.
@@ -269,13 +271,7 @@ pub fn analyze_template(source: &Source, delimiters: Delimiters) -> Result<Templ
 
 /// Preserves accepted ranges when the next tag or EOF fails to parse (EDT-11).
 pub fn analyze_template_prefix(source: &Source, delimiters: Delimiters) -> PrefixAnalysis {
-    let mut parser = TemplateParser::new(source, delimiters);
-    let error = parser.scan_complete().err();
-    PrefixAnalysis {
-        tags: parser.tags,
-        tokens: parser.tokens,
-        error,
-    }
+    TemplateParser::new(source, delimiters).prefix()
 }
 
 struct TemplateParser<'a> {
@@ -353,8 +349,32 @@ impl<'a> TemplateParser<'a> {
         Ok(())
     }
 
+    fn prefix(mut self) -> PrefixAnalysis {
+        match self.scan_complete() {
+            Ok(()) => {
+                let analysis = self.complete();
+                PrefixAnalysis {
+                    ast: Some(analysis.ast),
+                    tags: analysis.tags,
+                    tokens: analysis.tokens,
+                    error: None,
+                }
+            }
+            Err(error) => PrefixAnalysis {
+                ast: None,
+                tags: self.tags,
+                tokens: self.tokens,
+                error: Some(error),
+            },
+        }
+    }
+
     fn parse(mut self) -> Result<TemplateAnalysis, TemplateError> {
         self.scan_complete()?;
+        Ok(self.complete())
+    }
+
+    fn complete(mut self) -> TemplateAnalysis {
         let ranges: Vec<TagRange> = self
             .tags
             .iter()
@@ -366,7 +386,7 @@ impl<'a> TemplateParser<'a> {
             .collect();
         let removed = standalone_ranges(self.bytes(), &ranges);
         let root = std::mem::take(&mut self.root);
-        Ok(TemplateAnalysis {
+        TemplateAnalysis {
             ast: Template {
                 name: self.source.name.clone(),
                 body: finalize(root, &removed),
@@ -374,7 +394,7 @@ impl<'a> TemplateParser<'a> {
             },
             tags: self.tags,
             tokens: self.tokens,
-        })
+        }
     }
 
     fn scan(&mut self) -> Result<(), TemplateError> {

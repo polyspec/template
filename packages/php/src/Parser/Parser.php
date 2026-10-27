@@ -24,6 +24,7 @@ use Polyspec\Template\TemplateError;
  *     tokens: list<array{start: int, end: int, kind: string}>,
  * }
  * @phpstan-type PrefixAnalysis array{
+ *     ast: array<string, mixed>|null,
  *     tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
  *     tokens: list<array{start: int, end: int, kind: string}>,
  *     error: TemplateError|null,
@@ -129,13 +130,14 @@ final class Parser
         self::requireOneByteDelimiters('analyzePrefix', $open, $close);
         $parser = new self($source, $open, $close);
         $error = null;
+        $ast = null;
         try {
-            $parser->run();
+            $ast = $parser->run();
         } catch (TemplateError $failure) {
             $error = $failure;
         }
 
-        return ['tags' => $parser->tags, 'tokens' => $parser->tokens, 'error' => $error];
+        return ['ast' => $ast, 'tags' => $parser->tags, 'tokens' => $parser->tokens, 'error' => $error];
     }
 
     private function fail(string $code, int $start, int $end, string $message): TemplateError

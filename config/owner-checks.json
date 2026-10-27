@@ -1067,7 +1067,11 @@
     {
       "paths": [
         "tests/fixtures/public-types/**",
-        "packages/ts/api-extractor.json"
+        "packages/ts/api-extractor.json",
+        "config/parity.json",
+        "packages/ts/src/**",
+        "packages/ts/package.json",
+        "packages/ts/tsconfig.json"
       ],
       "targets": [
         "template-test-scripts"
@@ -1881,7 +1885,10 @@
         "packages/ts/src/ast.ts",
         "tests/runner/case-list.mts",
         "tests/cases/**",
-        "tests/fixtures/ast-decode/**"
+        "tests/fixtures/ast-decode/**",
+        "packages/ts/src/**",
+        "packages/ts/package.json",
+        "packages/ts/tsconfig.json"
       ]
     }
   ]

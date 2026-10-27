@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-editor -->
-<!-- source-sha256: 1a7e3dcb813add812a7e518a1dcbbce8f5f3211f2bd01eedf2bc3a7d68fc0a09 -->
+<!-- source-sha256: 599e2c890c65a3daf923619fda98b5e7e5e6725a66aff1593c25de13fd39b310 -->
 # 에디터 지원
 
 [English](/spec/editor).
@@ -29,4 +29,4 @@
 
 - **EDT-10** 공개 전체 분석 연산은 `parse`와 같은 AST, 파서의 원시 태그 record, 분류된 토큰 record를 반환한다. 파싱 오류가 나면 연산을 거부한다. 원시 태그마다 네이티브 필드 표기로 `kind`, `echo`, `start`, `end`, `bodyStart`, `bodyEnd`를 기록한다. 원시 record에는 주석 태그도 포함하며 EDT-9의 에디터 변환에서 이를 제외한다. 태그 종류는 `assignment`, `block`, `close`, `comment`, `directive`, `echo`, `else`, `elseif`, `for`, `if`, `ifblock`, `include`다. 토큰마다 EDT-8의 종류로 `kind`, `start`, `end`를 기록한다. TypeScript 범위는 UTF-16 인덱스, Python 범위는 코드 포인트 인덱스이며 Go·Rust·PHP·PHP 확장은 UTF-8 바이트 인덱스를 사용한다. 모든 범위는 맨 앞 BOM 하나를 제거한 텍스트를 기준으로 하며 공개 Source context가 네이티브 인덱스를 바이트 오프셋으로 변환한다(LEX-24).
 
-- **EDT-11** 공개 부분 분석 연산은 EDT-10 형식의 원시 `tags`와 `tokens`, 첫 파서 오류 또는 null인 `error`를 반환한다. 올바른 소스는 전체 분석과 같은 범위를 반환한다. 실패한 태그의 태그 record와 토큰은 포함하지 않으며, EOF에서 블록이 닫히지 않았을 때의 여는 태그를 포함해 앞서 받아들인 태그는 보존한다. 결과에는 AST가 없다. 오류는 바이트 위치가 있는 ERR-1의 네이티브 템플릿 오류이고 메시지는 자유로운 영어 텍스트다. 잘못된 UTF-8과 구분자 옵션은 부분 결과가 되지 않고 SDK 경계에서 연산을 거부한다. TypeScript는 `analyzePrefix`, Go는 `AnalyzePrefix`, Rust와 Python은 `analyze_prefix`, PHP와 PHP 확장은 `AstProgram::analyzePrefix`를 사용한다.
+- **EDT-11** 공개 부분 분석 연산은 EDT-10 형식의 원시 `tags`와 `tokens`, 첫 파서 오류 또는 null인 `error`를 반환한다. 올바른 소스는 전체 분석과 같은 범위를 반환한다. 실패한 태그의 태그 record와 토큰은 포함하지 않으며, EOF에서 블록이 닫히지 않았을 때의 여는 태그를 포함해 앞서 받아들인 태그는 보존한다. 결과에는 `ast`가 있다. 성공하면 전체 분석과 같은 완전한 AST이며 파서 오류가 있으면 null이다. 오류는 바이트 위치가 있는 ERR-1의 네이티브 템플릿 오류이고 메시지는 자유로운 영어 텍스트다. 잘못된 UTF-8과 구분자 옵션은 부분 결과가 되지 않고 SDK 경계에서 연산을 거부한다. TypeScript는 `analyzePrefix`, Go는 `AnalyzePrefix`, Rust와 Python은 `analyze_prefix`, PHP와 PHP 확장은 `AstProgram::analyzePrefix`를 사용한다.

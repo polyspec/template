@@ -743,12 +743,13 @@ final class AstProgram implements Program, \Polyspec\Template\Render\RuntimeServ
     public static function analyze(string $source, string $name, array $options = []): array {}
 
     /**
-     * EDT-11: accepted ranges before the first parser error, without an AST.
+     * EDT-11: accepted ranges, a complete AST on success and the first parser error.
      *
      * @param array $options
      * @phpstan-param array{delimiters?: string} $options
      * @return array
      * @phpstan-return array{
+     *   ast: array<string, mixed>|null,
      *   tags: list<array{start: int, end: int, echo: bool, kind: string, bodyStart: int, bodyEnd: int}>,
      *   tokens: list<array{start: int, end: int, kind: string}>, error: TemplateError|null
      * }
@@ -1832,6 +1833,13 @@ final class Parser
      * }
      */
     public static function analyze(\Polyspec\Template\Source $source, string $open = '{', string $close = '}'): array {}
+
+    /**
+     * EDT-11: complete success AST or the accepted prefix with its parser error.
+     * @return array
+     */
+    public static function analyzePrefix(\Polyspec\Template\Source $source, string $open = '{', string $close = '}'): array {}
+
 }
 
 /**

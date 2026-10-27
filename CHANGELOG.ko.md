@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c1abacc801993f44ecafa20c7bee6976bdaeeaf855bff0b630c7b221ce31d679 -->
+<!-- source-sha256: e815c161b3f56e1efaf05dd0a73e14658eee994c6d9cedf4dca3e92c200ac4bf -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,8 +8,9 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
-- formatter API 선언에 네이티브 옵션·범위 필드·성공 데이터·오류 필드·오류 이유 세 개·블록 모드 두 개를 명시한다. 공유 SDK fixture로 옵션 필드 다섯 개·들여쓰기 보존·범위 선택·변경 없는 결과·파싱 및 HTML 실패를 검증한다. Go 루트·네이티브 호출과 carrier 대입 호환성, Python 재수출 동일성, TypeScript 공개 데이터 형태를 명시적으로 검사한다. Green: TypeScript 단위 9개·Go case 10개·Rust 단위 2개·각 PHP SDK 단위 2개·Python 단위 2개·TypeScript 소비자 및 모델 단위 5개·네이티브 lint·중복 및 선언·문서 검사를 통과한다 (T27.1-1-33).
-- 모든 SDK가 AST 없이 받아들인 태그·토큰과 첫 파서 오류를 반환하는 부분 분석을 제공한다. Go·Rust·PHP 구현은 파서 상태를 보존하고 PHP 확장은 오류 jump 전후의 가변 실행·파서 상태를 heap 또는 arena에 유지한다. 잘못된 UTF-8과 구분자 옵션은 계속 연산 오류다. Red: 0f994e84의 Go·Rust·PHP·Python SDK 검사에 연산이 없다. Green: SDK마다 공유 context 8개·경계 회귀 검사·TypeScript 단위 14개·Go case 15개·Rust 단위 4개·Python 단위 20개·확장 회귀 단위 15개(assertion 730개)·소비자 및 추출 단위 39개·네이티브 빌드와 lint·중복 및 선언 검사를 통과한다 (T27.1-1-32).
+- 부분 결과는 모든 SDK에서 기존 TypeScript의 성공 AST를 보존하며 파서 오류가 있으면 null을 제공한다. 공유 fixture는 BOM 두 개의 Source 진입점을 포함해 전체 결과를 대조하고 TypeScript 네이티브 모델 참조와 소비자의 전체 필드를 검사한다. 확장은 Source 기반 파서 진입점을 정규화 한 번으로 구현하고 인수 reader를 공유하며 생성 상수로 파서 오류를 분류한다. 테스트의 없는 구분자 옵션은 생략하고 Go facade 동일성 검사는 lint를 준수한다. Red: 네이티브 모델·AST 누락 회귀 검사·3f430efc의 CI가 누락을 드러낸다. Green: TypeScript 단위 15개·Go case 26개·Rust 단위 4개·Python 단위 20개·PHP 단위 4개·확장 단위 15개(assertion 748개)·소비자 및 모델 단위 39개·코드 catalog 단위 8개·테스트 타입 검사·네이티브 빌드와 lint·중복 및 선언·문서 검사를 통과한다 (T27.1-1-34).
+- formatter API 선언에 네이티브 옵션·범위 필드·성공 데이터·오류 필드·오류 이유 세 개·블록 모드 두 개를 명시한다. 공유 SDK fixture로 옵션 필드 다섯 개·들여쓰기 보존·범위 선택·변경 없는 결과·파싱 및 HTML 실패를 검증한다. Go 루트·네이티브 호출과 carrier 대입 호환성, Python 재수출 동일성, TypeScript 공개 데이터 형태를 명시적으로 검사한다. Green: TypeScript 단위 9개·Go case 10개·Rust 단위 2개·각 PHP SDK 단위 2개·Python 단위 2개·TypeScript 소비자 및 모델 단위 5개·중복 및 선언·문서 검사를 통과한다. Go alias 검사에는 T27.1-1-34에 기록한 lint 정정이 남아 있다 (T27.1-1-33).
+- 모든 SDK가 받아들인 태그·토큰과 첫 파서 오류를 반환하는 부분 분석을 제공한다. Go·Rust·PHP 구현은 파서 상태를 보존하고 PHP 확장은 오류 jump 전후의 가변 실행·파서 상태를 heap 또는 arena에 유지한다. 잘못된 UTF-8과 구분자 옵션은 계속 연산 오류다. Red: 0f994e84의 Go·Rust·PHP·Python SDK 검사에 연산이 없다. Green: SDK마다 공유 context 8개·경계 회귀 검사·TypeScript 단위 14개·Go case 15개·Rust 단위 4개·Python 단위 20개·확장 회귀 단위 15개(assertion 730개)·소비자 및 추출 단위 39개·네이티브 빌드와 lint·중복 및 선언 검사를 통과한다 (T27.1-1-32).
 - 전체 분석 API 선언에 반환 AST·원시 태그·토큰 범위·태그 및 토큰 종류 전체를 포함한다. TypeScript는 기존 분석 결과 타입을 SDK 루트에 공개한다. 공유 fixture로 SDK 전체의 태그 종류 12개·토큰 종류 10개·구분자 변경·BOM 및 Unicode 바이트 변환·파서 오류 거부를 검증한다. Green: TypeScript 단위 5개·Go case 5개·Rust 단위 2개·각 PHP SDK 단위 2개·Python 분석 단위 9개 전체(기존 단위 7개 포함) 및 네이티브 lint·선언·문서 검사를 통과한다 (T27.1-1-31).
 - PHP Source는 공개 readonly name/text 속성을 private 생성자와 별도로 선언해 네이티브 SDK 모델에 모두 포함한다. 생성자는 private으로 유지하며 두 PHP SDK 모델에서 metadata와 factory 메서드를 검증한다. Red: 5e2f7e75의 CI와 강화된 속성 검사가 누락된 선언을 거부한다. Green: 추출 단위 14개·네이티브 Source 단위 2개(assertion 674개)·PHP 및 TypeScript lint를 통과한다 (T27.1-1-30).
 - AST 연산자와 loop metadata API 선언에 정규 리터럴 타입과 값을 포함한다. 공유 decoder fixture 하나로 SDK 6개의 모든 이항·단항 연산자와 loop metadata 필드를 검증한다. 계약 단위는 누락된 리터럴을 거부하며 Rust 소비자는 공개 enum variant 전체를 참조한다. 네이티브 Rust 연산자 텍스트는 직렬화된 AST 텍스트와 같다. Green: SDK 6개의 decoder 단위(TypeScript 7개·Go 2개·Rust 2개)·AST 계약 단위 4개·Rust 소비자 단위 19개·네이티브 lint를 통과한다 (T27.1-1-29).

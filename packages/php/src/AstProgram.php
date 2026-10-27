@@ -170,7 +170,7 @@ final class AstProgram implements Program, RuntimeServices
     }
 
     /**
-     * EDT-11: returns accepted ranges before the first parser error, without an AST.
+     * EDT-11: returns accepted ranges, a complete AST on success and the first parser error.
      *
      * @param array{delimiters?: string} $options
      * @return PrefixAnalysis

@@ -43,7 +43,13 @@ class SharedPrefixAnalysis(unittest.TestCase):
                 if error is not None:
                     self.assertNotEqual(error.pop("message"), "")
                 self.assertEqual(
-                    dict(tags=tags, tokens=tokens, error=error), item["expected"]
+                    dict(
+                        ast=json.loads(json.dumps(result.ast)),
+                        tags=tags,
+                        tokens=tokens,
+                        error=error,
+                    ),
+                    item["expected"],
                 )
 
     def test_rejects_invalid_source_and_options(self):

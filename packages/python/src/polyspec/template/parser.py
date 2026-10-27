@@ -64,17 +64,24 @@ class TemplateAnalysis:
 
 
 class PrefixAnalysis:
-    """The tags a parse accepted before its first error, their tokens, and that
-    error. Ranges are those of `TemplateAnalysis`."""
+    """Accepted ranges, the complete AST on success and the first parse error.
 
-    __slots__ = ("tags", "tokens", "error")
+    A failed parse has no AST. Ranges are those of `TemplateAnalysis`.
+    """
+
+    __slots__ = ("tags", "tokens", "error", "ast")
 
     def __init__(
-        self, tags: list[dict], tokens: list[dict], error: "TemplateError | None"
+        self,
+        tags: list[dict],
+        tokens: list[dict],
+        error: "TemplateError | None",
+        ast: "dict | None" = None,
     ):
         self.tags = tags
         self.tokens = tokens
         self.error = error
+        self.ast = ast
 
 
 def parse_template(
@@ -97,7 +104,7 @@ def analyze_template_prefix(
     parser = _TemplateParser(source, delimiters)
     try:
         analysis = parser.parse()
-        return PrefixAnalysis(analysis.tags, analysis.tokens, None)
+        return PrefixAnalysis(analysis.tags, analysis.tokens, None, analysis.ast)
     except TemplateError as error:
         return PrefixAnalysis(parser._tags, parser._tokens, error)
 

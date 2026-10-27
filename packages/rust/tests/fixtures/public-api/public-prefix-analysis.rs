@@ -1,9 +1,11 @@
-use polyspec_template::{ParseOptions, PrefixAnalysis, RequestError, SyntaxTag, SyntaxToken, TemplateError, analyze_prefix};
+use polyspec_template::{ParseOptions, PrefixAnalysis, RequestError, SyntaxTag, SyntaxToken, Template, TemplateError, analyze_prefix};
 
 pub fn prefix_analysis() -> Result<PrefixAnalysis, RequestError> {
     let result = analyze_prefix(b"{? x}", "prefix.tpl", &ParseOptions::default())?;
-    let _: &[SyntaxTag] = &result.tags;
-    let _: &[SyntaxToken] = &result.tokens;
-    let _: Option<&TemplateError> = result.error.as_ref();
-    Ok(result)
+    let PrefixAnalysis { ast, tags, tokens, error } = result;
+    let _: Option<&Template> = ast.as_ref();
+    let _: &[SyntaxTag] = &tags;
+    let _: &[SyntaxToken] = &tokens;
+    let _: Option<&TemplateError> = error.as_ref();
+    Ok(PrefixAnalysis { ast, tags, tokens, error })
 }

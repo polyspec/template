@@ -125,6 +125,7 @@ type Analysis struct {
 
 // PrefixAnalysis holds accepted ranges and the first parser error (EDT-11).
 type PrefixAnalysis struct {
+	AST    *ast.Template
 	Tags   []Tag
 	Tokens []Token
 	Error  *errs.Error
@@ -138,12 +139,12 @@ func newTemplateParser(source *lexer.Source, delimiters Delimiters) *templatePar
 // AnalyzePrefix preserves accepted ranges when the next tag or EOF fails to parse.
 func AnalyzePrefix(source *lexer.Source, delimiters Delimiters) (*PrefixAnalysis, error) {
 	parser := newTemplateParser(source, delimiters)
-	_, err := parser.parse()
+	tree, err := parser.parse()
 	var failure *errs.Error
 	if err != nil && !errors.As(err, &failure) {
 		return nil, err
 	}
-	return &PrefixAnalysis{Tags: parser.syntaxTags, Tokens: parser.tokens, Error: failure}, nil
+	return &PrefixAnalysis{AST: tree, Tags: parser.syntaxTags, Tokens: parser.tokens, Error: failure}, nil
 }
 
 // Parse parses a source into a template.

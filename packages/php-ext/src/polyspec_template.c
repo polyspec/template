@@ -1411,7 +1411,7 @@ static void pt_analyze_into(pt_run *run, void *context)
 }
 
 /* AstProgram::analyze: the AST, tags and tokens of a template source. */
-static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS)
+static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS, bool prefix)
 {
     zend_string *source, *name;
     HashTable *options = NULL;
@@ -1426,6 +1426,12 @@ static void pt_method_analyze(INTERNAL_FUNCTION_PARAMETERS)
     if (!pt_option_delimiters(options, &input.open, &input.close)) {
         RETURN_THROWS();
     }
+    if (prefix) {
+        if (!pt_analyze_prefix_result(source, name, input.open, input.close, true, return_value)) {
+            RETURN_THROWS();
+        }
+        return;
+    }
     if (!pt_run_work(pt_analyze_into, &input)) {
         zval_ptr_dtor(return_value);
         ZVAL_NULL(return_value);
@@ -1438,41 +1444,56 @@ typedef struct pt_prefix_request {
     pt_prefix_parser *parser;
 } pt_prefix_request;
 
-/* EDT-11: parser state is arena-owned, so its accepted ranges survive the
- * error jump until they are copied into PHP values. Only parser errors become
- * result data; invalid UTF-8 and native failures keep the normal boundary. */
-ZEND_METHOD(Polyspec_Template_AstProgram, analyzePrefix)
+/* Parser failures are selected from the generated catalog, not code literals. */
+static bool pt_prefix_parser_error(const char *code)
 {
-    zend_string *source, *name;
-    HashTable *options = NULL;
-    ZEND_PARSE_PARAMETERS_START(2, 3)
-        Z_PARAM_STR(source)
-        Z_PARAM_STR(name)
-        Z_PARAM_OPTIONAL
-        Z_PARAM_ARRAY_HT(options)
-    ZEND_PARSE_PARAMETERS_END();
-    char open, close;
-    if (!pt_option_delimiters(options, &open, &close)) {
-        RETURN_THROWS();
+    static const char *const codes[] = {
+        PT_E_PARSE_UNTERMINATED_TAG,
+        PT_E_PARSE_UNTERMINATED_COMMENT,
+        PT_E_PARSE_UNTERMINATED_STRING,
+        PT_E_PARSE_UNEXPECTED_TOKEN,
+        PT_E_PARSE_INVALID_NUMBER,
+        PT_E_PARSE_INVALID_ESCAPE,
+        PT_E_PARSE_UNEXPECTED_CLOSE,
+        PT_E_PARSE_UNCLOSED_BLOCK,
+        PT_E_PARSE_ELSE_OUTSIDE_BLOCK,
+        PT_E_PARSE_DUPLICATE_ELSE,
+        PT_E_PARSE_ELSEIF_AFTER_ELSE,
+        PT_E_PARSE_ELSEIF_NOT_IN_IF,
+        PT_E_PARSE_RESERVED_NAME,
+        PT_E_PARSE_INVALID_PATH,
+        PT_E_PARSE_INVALID_BLOCK_TAG,
+        PT_E_PARSE_INVALID_WRAPPER,
+        PT_E_PARSE_INVALID_DIRECTIVE,
+    };
+    for (size_t index = 0; index < sizeof(codes) / sizeof(codes[0]); index++) {
+        if (strcmp(code, codes[index]) == 0) {
+            return true;
+        }
     }
+    return false;
+}
 
+/* EDT-11: shared by raw SDK input and the already normalized Source entry. */
+bool pt_analyze_prefix_result(zend_string *source, zend_string *name, char open, char close, bool strip_bom, zval *return_value)
+{
     /* Both mutable run state and the parser pointer live on the heap; the
      * automatic pointers stay unchanged across setjmp/longjmp. */
     pt_prefix_request *request = ecalloc(1, sizeof(*request));
     pt_run *run = &request->run;
     pt_run_init(run);
     if (setjmp(run->jump) == 0) {
-        request->parser = pt_prefix_start(run, ZSTR_VAL(name), ZSTR_LEN(name), ZSTR_VAL(source), ZSTR_LEN(source), open, close);
+        request->parser = pt_prefix_start(run, ZSTR_VAL(name), ZSTR_LEN(name), ZSTR_VAL(source), ZSTR_LEN(source), open, close, strip_bom);
         pt_prefix_scan(request->parser);
     }
     if (request->parser == NULL || run->error.exception != NULL ||
-        (run->error.code != NULL && strncmp(run->error.code, "E_PARSE_", 8) != 0)) {
+        (run->error.code != NULL && !pt_prefix_parser_error(run->error.code))) {
         pt_run_finish(run);
         efree(request);
-        RETURN_THROWS();
+        return false;
     }
 
-    pt_prefix_to_zval(request->parser, return_value);
+    pt_prefix_to_zval(request->parser, run->error.code == NULL, return_value);
     if (run->error.code != NULL) {
         const pt_error *failure = &run->error;
         zval error;
@@ -1488,8 +1509,14 @@ ZEND_METHOD(Polyspec_Template_AstProgram, analyzePrefix)
     if (!succeeded) {
         zval_ptr_dtor(return_value);
         ZVAL_NULL(return_value);
-        RETURN_THROWS();
+        return false;
     }
+    return true;
+}
+
+ZEND_METHOD(Polyspec_Template_AstProgram, analyzePrefix)
+{
+    pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
 /* ----------------------------------------------------------------------------------------------- */
@@ -2296,7 +2323,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, parse)
 
 ZEND_METHOD(Polyspec_Template_AstProgram, analyze)
 {
-    pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+    pt_method_analyze(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
 /* AST-10: the decode of AstProgram is the decode of AstDecoder, which validates the JSON against the contract schema. */

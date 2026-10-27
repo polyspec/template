@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-ts-readme -->
-<!-- source-sha256: d8f523555fa11bbac1dda0af358b6111fe79da5a19c34fae8e4ba83491ca8806 -->
+<!-- source-sha256: 8de9bc9567e3287e8fb131562570a8145e9cc39423befcdd6d4196c82bec9d72 -->
 # @polyspec/template
 
 [English](README.md).
@@ -62,7 +62,7 @@ const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': c
 | `parse(source, name, { delimiters })` | 템플릿 하나를 AST로 파싱한다. `source`는 문자열 또는 UTF-8 바이트다. |
 | `decodeTemplate(json)` | 텍스트 또는 파싱된 값인 AST JSON을 `contracts/schema/ast.schema.json`으로 검사해 `Template`으로 읽는다. `AstDecodeError`는 `path`에 잘못된 노드의 JSON Pointer를 담는다(AST-10). `@polyspec/template/render`와 `@polyspec/template/decode`도 내보낸다. |
 | `analyze(source, name, { delimiters })` | 한 번 파싱해 AST, 파서 태그 범위, 읽은 표현식 token 범위를 반환한다. |
-| `analyzePrefix(source, name, { delimiters })` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환하며 성공하면 null이다. 잘못된 UTF-8과 구분자 옵션은 예외를 던진다. |
+| `analyzePrefix(source, name, { delimiters })` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환하며 성공하면 null이다. 잘못된 UTF-8과 구분자 옵션은 예외를 던진다. 성공한 부분 분석 결과는 `ast`(Go는 `AST`)에 완전한 AST도 제공하며 파서 오류가 있으면 해당 필드는 null 또는 네이티브 부재 값이다. |
 | `new AstProgram({ loader, functions, limits, delimiters })` | AST program을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
 | `new Engine(program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
 | `engine.render(nameOrAst, assign, { define, env })` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 경로나 HTML 항목을 제공한다. |

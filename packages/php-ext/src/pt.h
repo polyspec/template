@@ -362,9 +362,10 @@ void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysi
 /* EDT-11: arena-owned parser state remains readable after a parser error. */
 typedef struct pt_tparser pt_prefix_parser;
 pt_prefix_parser *pt_prefix_start(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length,
-    char open, char close);
+    char open, char close, bool strip_bom);
 void pt_prefix_scan(pt_prefix_parser *parser);
-void pt_prefix_to_zval(const pt_prefix_parser *parser, zval *result);
+void pt_prefix_to_zval(pt_prefix_parser *parser, bool complete, zval *result);
+bool pt_analyze_prefix_result(zend_string *source, zend_string *name, char open, char close, bool strip_bom, zval *result);
 
 /* The class BlockTag of Polyspec\Template\Parser: its create_object and handlers (pt_parse.c). */
 void pt_block_tag_register(zend_class_entry *ce);

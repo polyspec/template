@@ -51,9 +51,19 @@ func formatterSDKData(t *testing.T) formatterSDKFixture {
 
 // FMT-16: root and native formatter entries share the public options/result data.
 func TestFormatterSDKPreservesSharedResults(t *testing.T) {
+	for _, pair := range [][2]reflect.Type{
+		{reflect.TypeFor[template.FormatOptions](), reflect.TypeFor[format.Options]()},
+		{reflect.TypeFor[template.FormatResult](), reflect.TypeFor[format.Result]()},
+		{reflect.TypeFor[template.FormatError](), reflect.TypeFor[format.Error]()},
+		{reflect.TypeFor[template.FormatRange](), reflect.TypeFor[format.Range]()},
+	} {
+		if pair[0] != pair[1] {
+			t.Fatalf("SDK facade %v differs from native %v", pair[0], pair[1])
+		}
+	}
 	for _, item := range formatterSDKData(t).Cases {
 		t.Run(item.ID, func(t *testing.T) {
-			var options format.Options = template.FormatOptions{Name: item.Options.Name, Delimiters: item.Options.Delimiters,
+			options := template.FormatOptions{Name: item.Options.Name, Delimiters: item.Options.Delimiters,
 				Range: item.Options.Range, TemplateBlocks: item.Options.TemplateBlocks}
 			if string(item.Options.Indent) == "null" {
 				options.KeepIndentation = true
@@ -109,14 +119,14 @@ func TestFormatterSDKConstructsSharedErrorData(t *testing.T) {
 			code = errs.Code(*data.Code)
 		}
 		native := format.Error{Reason: format.Reason(data.Reason), Code: code, Line: data.Line, Col: data.Col, Message: data.Message}
-		var public *template.FormatError = &native
+		public := &native
 		if string(public.Reason) != data.Reason || public.Code != code || public.Line != data.Line || public.Col != data.Col || public.Message != data.Message {
 			t.Fatalf("error fields changed: %+v", public)
 		}
 		if !strings.Contains(public.Error(), data.Message) {
 			t.Fatal("native diagnostic lost its message")
 		}
-		var value template.FormatResult = format.Result{Text: "text", Changed: false}
+		value := template.FormatResult{Text: "text", Changed: false}
 		if value.Text != "text" || value.Changed {
 			t.Fatalf("result fields changed: %+v", value)
 		}

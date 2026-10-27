@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"testing"
 
 	template "github.com/polyspec/template/packages/go"
@@ -15,6 +16,18 @@ import (
 
 // EDT-11: prefix analysis preserves accepted ranges and the first parser error.
 func TestPublicPrefixAnalysisMatchesSharedContexts(t *testing.T) {
+	typ := reflect.TypeFor[template.PrefixAnalysis]()
+	fields := []string{}
+	for index := range typ.NumField() {
+		field := typ.Field(index)
+		if field.IsExported() {
+			fields = append(fields, field.Name)
+		}
+	}
+	sort.Strings(fields)
+	if !reflect.DeepEqual(fields, []string{"AST", "Error", "Tags", "Tokens"}) {
+		t.Fatalf("unexpected public prefix fields: %v", fields)
+	}
 	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "fixtures", "prefix-analysis.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -38,6 +51,7 @@ func TestPublicPrefixAnalysisMatchesSharedContexts(t *testing.T) {
 				t.Fatal(err)
 			}
 			value := analysisRanges(result.Tags, result.Tokens)
+			value["ast"] = result.AST
 			value["error"] = nil
 			if failure := result.Error; failure != nil {
 				if failure.Message == "" {

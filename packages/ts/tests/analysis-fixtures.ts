@@ -5,7 +5,7 @@ import { jsonDocument } from '../../../scripts/json-document.mts';
 
 interface Range { kind: string; start: number; end: number }
 interface Tag extends Range { echo: boolean; bodyStart: number; bodyEnd: number }
-interface Expected { ast?: unknown; tags: Tag[]; tokens: Range[]; error?: unknown }
+interface Expected { ast: unknown; tags: Tag[]; tokens: Range[]; error?: unknown }
 interface Case { id: string; name: string; source: string; delimiters?: string; expected: Expected }
 
 export function analysisFixtures(file: string, kind: 'full' | 'prefix'): Case[] {
@@ -21,8 +21,8 @@ export function analysisFixtures(file: string, kind: 'full' | 'prefix'): Case[] 
     }, properties: { cases: { type: 'array', minItems: 1, items: {
       type: 'object', required: ['id', 'name', 'source', 'expected'], properties: {
         id: { type: 'string' }, name: { type: 'string' }, source: { type: 'string' }, delimiters: { type: 'string' },
-        expected: { type: 'object', required: [kind === 'full' ? 'ast' : 'error', 'tags', 'tokens'], properties: {
-          ast: { type: 'object' }, tags: { type: 'array', items: { $ref: '#/$defs/tag' } },
+        expected: { type: 'object', required: ['ast', 'tags', 'tokens', ...(kind === 'prefix' ? ['error'] : [])], properties: {
+          ast: { type: kind === 'full' ? 'object' : ['object', 'null'] }, tags: { type: 'array', items: { $ref: '#/$defs/tag' } },
           tokens: { type: 'array', items: { $ref: '#/$defs/token' } },
           error: { anyOf: [{ type: 'null' }, { type: 'object', required: ['code', 'template', 'line', 'col', 'offset', 'end'], properties: {
             code: { type: 'string' }, template: { type: 'string' }, line: { type: 'integer' }, col: { type: 'integer' },

@@ -2365,9 +2365,20 @@ static void pt_parser_analysis(const pt_tparser *parser, pt_analysis *analysis)
 }
 
 pt_prefix_parser *pt_prefix_start(pt_run *run, const char *name, size_t name_length, const char *bytes, size_t length,
-    char open, char close)
+    char open, char close, bool strip_bom)
 {
-    return pt_parser_new(run, name, name_length, bytes, length, open, close, true, true);
+    return pt_parser_new(run, name, name_length, bytes, length, open, close, true, strip_bom);
+}
+
+/* Full and successful-prefix analysis finalize the same AST exactly once. */
+static pt_template *pt_parser_complete(pt_tparser *parser)
+{
+    pt_template *template = parser->source->run->parsing;
+    pt_ranges removed = pt_standalone(parser);
+    template->body = pt_finalize(parser, &parser->root, &removed);
+    template->comments = parser->comments;
+    template->comment_count = parser->comment_count;
+    return template;
 }
 
 /* strip_bom is false for an already validated Source object. */
@@ -2376,11 +2387,7 @@ static pt_template *pt_parse_with(pt_run *run, const char *name, size_t name_len
 {
     pt_tparser *parser = pt_parser_new(run, name, name_length, bytes, length, open, close, analysis != NULL, strip_bom);
     pt_prefix_scan(parser);
-    pt_template *template = run->parsing;
-    pt_ranges removed = pt_standalone(parser);
-    template->body = pt_finalize(parser, &parser->root, &removed);
-    template->comments = parser->comments;
-    template->comment_count = parser->comment_count;
+    pt_template *template = pt_parser_complete(parser);
     if (analysis != NULL) {
         pt_parser_analysis(parser, analysis);
     }
@@ -2437,11 +2444,18 @@ void pt_analysis_to_zval(const pt_template *template, const pt_analysis *analysi
     pt_analysis_ranges_to_zval(analysis, result);
 }
 
-void pt_prefix_to_zval(const pt_prefix_parser *parser, zval *result)
+void pt_prefix_to_zval(pt_prefix_parser *parser, bool complete, zval *result)
 {
+    array_init_size(result, 4);
+    if (complete) {
+        zval ast;
+        pt_ast_to_zval(pt_parser_complete(parser), &ast);
+        add_assoc_zval_ex(result, "ast", 3, &ast);
+    } else {
+        add_assoc_null_ex(result, "ast", 3);
+    }
     pt_analysis analysis;
     pt_parser_analysis(parser, &analysis);
-    array_init_size(result, 3);
     pt_analysis_ranges_to_zval(&analysis, result);
 }
 
@@ -3136,8 +3150,12 @@ static void pt_parser_into(pt_run *run, void *context)
     pt_template_release(template);
 }
 
-/* Parser::parse and Parser::analyze: the source is the Source object; the name is its name. */
-static void pt_parser_entry(INTERNAL_FUNCTION_PARAMETERS, bool analyze)
+typedef enum pt_parser_operation {
+    PT_PARSER_PARSE, PT_PARSER_ANALYZE, PT_PARSER_PREFIX
+} pt_parser_operation;
+
+/* All parser entries read an already normalized Source object. */
+static void pt_parser_entry(INTERNAL_FUNCTION_PARAMETERS, pt_parser_operation operation)
 {
     zval *source;
     zend_string *open = NULL, *close = NULL;
@@ -3151,7 +3169,14 @@ static void pt_parser_entry(INTERNAL_FUNCTION_PARAMETERS, bool analyze)
     if (!pt_parser_delimiters(open, close, &open_byte, &close_byte)) {
         RETURN_THROWS();
     }
-    pt_parser_input input = {pt_source_text(Z_OBJ_P(source)), pt_source_name(Z_OBJ_P(source)), open_byte, close_byte, analyze, return_value};
+    if (operation == PT_PARSER_PREFIX) {
+        if (!pt_analyze_prefix_result(pt_source_text(Z_OBJ_P(source)), pt_source_name(Z_OBJ_P(source)),
+            open_byte, close_byte, false, return_value)) {
+            RETURN_THROWS();
+        }
+        return;
+    }
+    pt_parser_input input = {pt_source_text(Z_OBJ_P(source)), pt_source_name(Z_OBJ_P(source)), open_byte, close_byte, operation == PT_PARSER_ANALYZE, return_value};
     if (!pt_run_work(pt_parser_into, &input)) {
         RETURN_THROWS();
     }
@@ -3176,13 +3201,19 @@ ZEND_METHOD(Polyspec_Template_Parser_Parser, __construct)
 
 ZEND_METHOD(Polyspec_Template_Parser_Parser, parse)
 {
-    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, PT_PARSER_PARSE);
 }
 
 ZEND_METHOD(Polyspec_Template_Parser_Parser, analyze)
 {
-    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, PT_PARSER_ANALYZE);
 }
+
+ZEND_METHOD(Polyspec_Template_Parser_Parser, analyzePrefix)
+{
+    pt_parser_entry(INTERNAL_FUNCTION_PARAM_PASSTHRU, PT_PARSER_PREFIX);
+}
+
 
 /* ---- BlockTag ---- */
 

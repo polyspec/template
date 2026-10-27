@@ -7,7 +7,9 @@ const cases = analysisFixtures('prefix-analysis.json', 'prefix');
 
 describe('public prefix analysis', () => {
   it.each(cases)('preserves $id', item => {
-    const result: PrefixAnalysis = analyzePrefix(item.source, item.name, { delimiters: item.delimiters });
+    const options = item.delimiters === undefined ? {} : { delimiters: item.delimiters };
+    const result: PrefixAnalysis = analyzePrefix(item.source, item.name, options);
+    expect(Object.keys(result).sort()).toEqual(['ast', 'error', 'tags', 'tokens']);
     const source = Source.fromText(item.name, item.source);
     let error: Omit<ErrorObject, 'message'> | null = null;
     if (result.error) {
@@ -15,7 +17,7 @@ describe('public prefix analysis', () => {
       expect(message).not.toBe(''); // ERR-1: message is free English text.
       error = fields;
     }
-    expect({ ...projectRanges(source, result), error }).toEqual(item.expected);
+    expect({ ast: result.ast, ...projectRanges(source, result), error }).toEqual(item.expected);
   });
   it('rejects invalid source and options at the SDK boundary', () => {
     try {
