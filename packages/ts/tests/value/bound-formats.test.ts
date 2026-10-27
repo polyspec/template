@@ -21,17 +21,17 @@ for (const name of ['index', 'render', 'node']) {
 const page = loaded['index.mjs'].parse('{= a}{@ x = list}{= x}{/}', 'page.tpl');
 const results = [];
 for (const [creator, entry] of Object.entries(loaded)) {
-  if (typeof entry.bind !== 'function') continue;
   const bound = entry.bind({ a: 'x', list: [1, 2] });
   for (const [renderer, other] of Object.entries(loaded)) {
-    if (typeof other.AstProgram !== 'function') continue;
     const program = new other.AstProgram();
     const merged = other.merge(bound, other.bind({ b: 1 }));
     results.push([creator, renderer, program.render(page, bound), program.render(page, merged)]);
   }
 }
-const exported = ['index.mjs', 'index.cjs', 'render.mjs', 'render.cjs'].map(name => [name, typeof loaded[name].bind, typeof loaded[name].merge]);
-process.stdout.write(JSON.stringify({ results, exported }));
+const exported = ['index.mjs', 'index.cjs', 'render.mjs', 'render.cjs', 'node.mjs', 'node.cjs'].map(name => [name, typeof loaded[name].bind, typeof loaded[name].merge]);
+const fullKeys = Object.keys(loaded['index.mjs']);
+const fullNode = ['node.mjs', 'node.cjs'].map(name => [name, fullKeys.filter(key => !(key in loaded[name]))]);
+process.stdout.write(JSON.stringify({ results, exported, fullNode }));
 `;
 
 describe('bound maps across entry points and module formats (RT-74, VAL-22)', () => {
@@ -39,10 +39,11 @@ describe('bound maps across entry points and module formats (RT-74, VAL-22)', ()
     const run = spawnSync(process.execPath, ['--input-type=module', '-e', script], { encoding: 'utf8' });
     expect(run.stderr).toBe('');
     expect(run.status).toBe(0);
-    const creators = ['index.mjs', 'index.cjs', 'render.mjs', 'render.cjs'];
+    const creators = ['index.mjs', 'index.cjs', 'render.mjs', 'render.cjs', 'node.mjs', 'node.cjs'];
     expect(JSON.parse(run.stdout)).toEqual({
       results: creators.flatMap(creator => creators.map(renderer => [creator, renderer, 'x12', 'x12'])),
       exported: creators.map(name => [name, 'function', 'function']),
+      fullNode: [['node.mjs', []], ['node.cjs', []]],
     });
   });
 });

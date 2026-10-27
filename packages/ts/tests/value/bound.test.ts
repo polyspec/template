@@ -183,12 +183,14 @@ describe('bound data (VAL-22)', () => {
     it('cannot be created with new', () => {
       expect(Object.getPrototypeOf(bind({}))).toBe(type.prototype);
       expect(() => { Reflect.construct(type, []); }).toThrow(TypeError);
-      expect(() => new type(Symbol('token'), new Map())).toThrow(TypeError);
+      expect(() => { Reflect.construct(type, [Symbol('token'), new Map()]); }).toThrow(TypeError);
     });
 
     it('cannot be subclassed', () => {
-      class Derived extends type {}
-      expect(() => new Derived(Symbol('token'), new Map())).toThrow(TypeError);
+      function Derived() {}
+      Object.setPrototypeOf(Derived, type);
+      Object.setPrototypeOf(Derived.prototype, type.prototype);
+      expect(() => { Reflect.construct(type, [Symbol('token'), new Map()], Derived); }).toThrow(TypeError);
     });
 
     it('treats an object that only inherits its prototype as a class instance (VAL-19)', () => {

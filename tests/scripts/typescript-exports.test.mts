@@ -37,6 +37,7 @@ test('the public declaration model has no inaccessible signature types', { timeo
   visit(model);
   assert.ok(references.has('@polyspec/template!Output:interface'), 'the type-only output export names its instance contract');
   assert.ok(!references.has('@polyspec/template!Output:constructor(1)'), 'the SDK does not publish buffer construction');
+  assert.ok(!references.has('@polyspec/template!BoundMap:constructor(1)'), 'bound maps are created only by bind and merge');
   for (const symbol of declaredApiSymbols('ts')) {
     assert.ok(references.has(symbol), `${symbol} is absent from the native model`);
   }

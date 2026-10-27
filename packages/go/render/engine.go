@@ -262,7 +262,7 @@ func (p *astPreparedExecution) render() (string, error) {
 	if err := context.Enter(p.targetName, nil, nil); err != nil {
 		return "", err
 	}
-	if err := NewRenderer(context, p.engine).RenderNodes(p.template.AST.Body, NewFrame(p.template.AST.Name, p.template.Lines, p.root), NewScope()); err != nil {
+	if err := newRenderer(context, p.engine).renderNodes(p.template.AST.Body, NewFrame(p.template.AST.Name, p.template.Lines, p.root), NewScope()); err != nil {
 		return "", err
 	}
 	return context.Output(), nil

@@ -61,3 +61,7 @@ def first_invalid_utf8(data: bytes) -> int:
             return index
         index += need + 1
     return -1
+
+
+# These helpers implement runtime operations or the console entry point.
+__all__ = []

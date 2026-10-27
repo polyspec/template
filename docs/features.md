@@ -32,6 +32,6 @@ The table records the status of each feature. The implementations and the units 
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
 
-Release candidate 0.0.12 has synchronized manifests, native lock files and nine locally built archive candidates, including the PHP CLI. Version coverage, selected tooling and Python API units, type checks and documentation checks pass locally. The candidate is integrated on main; clean CI verification of the exact locked dependency graph and its complete release matrix remains pending. Candidate archives are preparation artifacts, not published releases.
+Release candidate 0.0.12 has synchronized manifests and native lock files. The existing nine archive candidates predate the current SDK changes and must be rebuilt and reverified. The candidate is not published.
 
-CI 40321448224 failed: shared installation errors affect multiple jobs, and template script tests and public API declarations also have failures. These template failures are not external-only waiting conditions.
+Remote main fcca660d completed CI 40439038565 with eleven worker jobs passed and scripts failed only at parity-check; gates 40439038438 reported 424 undeclared-public API findings. The current SDK contract/visibility corrections require fresh complete CI on their own commit. Development verification uses PHP 8.4.27; the library requirement remains >=8.4.0 (written >=8.4), and the Windows installation baseline is 8.4.27-1. These template release conditions are not external-only waits.

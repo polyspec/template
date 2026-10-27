@@ -10,7 +10,10 @@ use Polyspec\Template\Render\Renderer;
 use Polyspec\Template\Render\Scope;
 use Polyspec\Template\Value\MapValue;
 
-/** Prepared AST interpreter execution. */
+/**
+ * Prepared AST interpreter execution.
+ * @internal
+ */
 final class AstPreparedExecution implements PreparedExecution
 {
     /** Creates an AST execution from normalized request state. */

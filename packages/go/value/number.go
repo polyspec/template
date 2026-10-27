@@ -18,7 +18,7 @@ func NumberToString(x float64) string {
 	if negative {
 		x = -x
 	}
-	digits, n := ShortestDigits(x)
+	digits, n := shortestDigits(x)
 	k := len(digits)
 	var out string
 	switch {
@@ -47,9 +47,9 @@ func NumberToString(x float64) string {
 	return out
 }
 
-// ShortestDigits returns the shortest round-trip digits of a positive number and the exponent n
+// shortestDigits returns the shortest round-trip digits of a positive number and the exponent n
 // such that x = 0.digits × 10^n (VAL-9 step 3).
-func ShortestDigits(x float64) (digits string, n int) {
+func shortestDigits(x float64) (digits string, n int) {
 	text := strconv.FormatFloat(x, 'e', -1, 64)
 	mantissa, exp, _ := strings.Cut(text, "e")
 	e, _ := strconv.Atoi(exp) //nolint:errcheck // exp is the exponent that FormatFloat writes in the 'e' format: an integer Atoi always reads
@@ -61,13 +61,13 @@ func ShortestDigits(x float64) (digits string, n int) {
 	return digits, e + 1
 }
 
-// Positional returns the decimal expansion of a number without exponent.
-func Positional(x float64) (negative bool, integer, fraction string) {
+// positional returns the decimal expansion of a number without exponent.
+func positional(x float64) (negative bool, integer, fraction string) {
 	if x == 0 {
 		return false, "0", ""
 	}
 	negative = x < 0 || math.Signbit(x)
-	digits, n := ShortestDigits(math.Abs(x))
+	digits, n := shortestDigits(math.Abs(x))
 	switch {
 	case n <= 0:
 		return negative, "0", strings.Repeat("0", -n) + digits
@@ -78,9 +78,9 @@ func Positional(x float64) (negative bool, integer, fraction string) {
 	}
 }
 
-// RoundDecimal rounds the positional digits half away from zero (FUN-22).
-func RoundDecimal(x float64, decimals int) (negative bool, integer, fraction string) {
-	negative, integer, fraction = Positional(x)
+// roundDecimal rounds the positional digits half away from zero (FUN-22).
+func roundDecimal(x float64, decimals int) (negative bool, integer, fraction string) {
+	negative, integer, fraction = positional(x)
 	if len(fraction) <= decimals {
 		return negative, integer, fraction + strings.Repeat("0", decimals-len(fraction))
 	}
@@ -112,7 +112,7 @@ func incrementDigits(digits string) string {
 
 // FormatNumber implements FUN-20 to FUN-24.
 func FormatNumber(x float64, decimals int, dec, thousands string) string {
-	negative, integer, fraction := RoundDecimal(x, decimals)
+	negative, integer, fraction := roundDecimal(x, decimals)
 	var groups []string
 	for len(integer) > 3 {
 		groups = append([]string{integer[len(integer)-3:]}, groups...)
@@ -132,7 +132,7 @@ func FormatNumber(x float64, decimals int, dec, thousands string) string {
 
 // RoundNumber implements FUN-25.
 func RoundNumber(x float64, decimals int) float64 {
-	negative, integer, fraction := RoundDecimal(x, decimals)
+	negative, integer, fraction := roundDecimal(x, decimals)
 	text := integer
 	if fraction != "" {
 		text += "." + fraction

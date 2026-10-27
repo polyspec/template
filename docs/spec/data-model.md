@@ -105,6 +105,8 @@ A text that is not one JSON document is E_DATA_INVALID_JSON: a syntax error, an 
 
 - **VAL-13** Each implementation converts a host value into a template value by the binding table of its own language, given below for TypeScript and JavaScript, PHP and the PHP extension, Go, Rust and Python.
 
+The SDK contract names exact native value, binding, error, collection and callback members in TypeScript, Go, Rust, PHP, the PHP extension and Python. Canonical runtime operations remain bound directly to the public `RuntimeBindings` protocol; native helpers implement the same value semantics through the representations of their host. Generated-value adapters convert already produced template values rather than applying host binding again. JSON input adapters and native JSON transport conversions retain their distinct input/output forms. Native binding failures publish their data code and message through the error mechanism of the host.
+
 | Input | Value |
 | --- | --- |
 | `null`, `undefined` | null |

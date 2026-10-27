@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 3711966b91bfb9731bd9908a6a9cd739addaa259e3538d37a7daf726ad3041cc -->
+<!-- source-sha256: dd44f3074e395d41abf78ec122b8c882fe951c2a123267708ff79a9596f1da25 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -105,6 +105,8 @@ VAL-20의 제한보다 깊게 중첩된 배열과 객체는 E_DATA_DEPTH이다. 
 하나의 JSON 문서가 아닌 텍스트는 E_DATA_INVALID_JSON이다. 문법 오류, 빈 텍스트, 문서 뒤에 공백이 아닌 내용이 있는 텍스트가 이에 해당한다. 파서는 문서 순서에서 첫 위반을 보고하므로 문법 오류보다 앞에 있는 깊이 오류나 숫자 오류는 그 오류 코드로 보고된다. 이 규칙은 구현이 데이터로 받는 모든 JSON 텍스트, 즉 assign 데이터, 템플릿 정의와 환경에 적용되며 명령줄 인터페이스의 파일(CNF-4)과 PHP 확장의 JSON 메서드도 포함한다. 이유: JSON 텍스트는 데이터의 기준 형태이므로 잘못된 문서는 같은 입력의 데이터 오류다. 따라서 모든 구현은 구현마다 다른 예외가 아니라 ERR-5의 데이터 오류 객체로 이를 보고한다.
 
 - **VAL-13** 각 구현은 자기 언어의 바인딩 표로 호스트 값을 템플릿 값으로 변환한다. 표는 TypeScript와 JavaScript, PHP와 PHP 확장, Go, Rust, Python에 대해 아래에 있다.
+
+SDK 계약은 TypeScript·Go·Rust·PHP·PHP 확장·Python의 정확한 네이티브 value·binding·오류·collection·callback 멤버를 명명한다. Canonical runtime 연산은 공개 `RuntimeBindings` protocol에 직접 연결되며 네이티브 helper는 host 표현으로 같은 값 의미론을 구현한다. Generated-value adapter는 host binding을 다시 적용하지 않고 이미 생성한 template 값을 변환한다. JSON 입력 adapter와 네이티브 JSON transport 변환은 서로 다른 입출력 형식을 유지한다. 네이티브 binding 실패는 host 오류 메커니즘으로 데이터 code·message를 공개한다.
 
 | 입력 | 값 |
 | --- | --- |

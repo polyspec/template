@@ -19,7 +19,7 @@ func ParseJSON(text []byte) (Value, error) {
 	if !utf8.Valid(text) {
 		return nil, bindError(errs.DataInvalidUTF8, "invalid UTF-8 in JSON text")
 	}
-	if offset, err := CheckJSON(text); err != nil {
+	if offset, err := checkJSON(text); err != nil {
 		// The check stops at the start of the first violating token; a syntax error before that
 		// token is the earlier violation.
 		if syntax := syntaxError(text[:offset]); syntax != nil {
@@ -137,22 +137,22 @@ func numberOf(literal string) (Value, error) {
 	if err != nil && !errors.Is(err, strconv.ErrRange) {
 		return nil, bindError(errs.DataUnsupportedType, "number %s is not valid", literal)
 	}
-	return CheckFloat(f)
+	return checkFloat(f)
 }
 
-// CheckJSON applies the checks of VAL-2, VAL-12 and VAL-20 that encoding/json does not make, in
+// checkJSON applies the checks of VAL-2, VAL-12 and VAL-20 that encoding/json does not make, in
 // document order: a number outside the binding range, a \u escape that leaves a surrogate unpaired
 // and arrays or objects nested deeper than the limit fail at the first occurrence. It returns the
 // byte offset of the token that fails with the error. The checks run before the decoder reads the
 // text, so the decoder never sees a document deeper than the limit, and an unpaired surrogate is
 // reported instead of being replaced with U+FFFD.
-func CheckJSON(text []byte) (int, error) {
+func checkJSON(text []byte) (int, error) {
 	level := 0
 	for index := 0; index < len(text); index++ {
 		switch text[index] {
 		case '[', '{':
 			level++
-			if err := CheckLevel(level); err != nil {
+			if err := checkLevel(level); err != nil {
 				return index, err
 			}
 		case ']', '}':
@@ -172,7 +172,7 @@ func CheckJSON(text []byte) (int, error) {
 			}
 			// A malformed token is left to the decoder, which reports the syntax error.
 			if f, err := strconv.ParseFloat(string(text[start:index+1]), 64); err == nil || errors.Is(err, strconv.ErrRange) {
-				if _, err := CheckFloat(f); err != nil {
+				if _, err := checkFloat(f); err != nil {
 					return start, err
 				}
 			}

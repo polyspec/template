@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-ts-readme -->
-<!-- source-sha256: 8de9bc9567e3287e8fb131562570a8145e9cc39423befcdd6d4196c82bec9d72 -->
+<!-- source-sha256: d0ce992d12f43ddef103aade7def7bf55a95a3b10ededce6a77db983b001b740 -->
 # @polyspec/template
 
 [English](README.md).
@@ -14,9 +14,10 @@ npm install @polyspec/template
 
 ## 서버에서 렌더
 
+Node 진입점은 전체 SDK를 재공개하고 파일시스템·artifact 서비스를 더한다. 두 module 형식에서 전체·render-only 진입점과 runtime·불투명한 bound-map identity를 공유한다.
+
 ```ts
-import { AstProgram, Engine } from '@polyspec/template';
-import { FsLoader } from '@polyspec/template/node';
+import { AstProgram, Engine, FsLoader } from '@polyspec/template/node';
 
 const program = new AstProgram({ loader: new FsLoader('templates') });
 program.register('greet', ([name]) => `Hello, ${name}`);

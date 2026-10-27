@@ -5,19 +5,21 @@ import type { MapValue } from './value.js';
 const token = Symbol('BoundMap');
 
 let entriesOf: (value: unknown) => MapValue | undefined;
+let construct: (entries: MapValue) => BoundMap;
 
 /** A map that passed host binding (VAL-22). `bind` and `merge` create it. */
 export class BoundMap {
   readonly #entries: MapValue;
 
   /** Fails unless the package calls it, so `new` and a subclass cannot create a bound map. */
-  constructor(key: symbol, entries: MapValue) {
+  private constructor(key: symbol, entries: MapValue) {
     if (key !== token || new.target !== BoundMap) throw new TypeError('a bound map is created by bind and merge');
     this.#entries = entries;
   }
 
   static {
     entriesOf = value => (typeof value === 'object' && value !== null && #entries in value ? value.#entries : undefined);
+    construct = entries => new BoundMap(token, entries);
   }
 }
 
@@ -33,5 +35,5 @@ export function isBound(value: unknown): value is BoundMap {
 
 /** Creates a bound map from entries that host binding produced. */
 export function createBound(entries: MapValue): BoundMap {
-  return new BoundMap(token, entries);
+  return construct(entries);
 }

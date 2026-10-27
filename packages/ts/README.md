@@ -13,9 +13,10 @@ npm install @polyspec/template
 
 ## Render on a server
 
+The Node entry re-exports the complete SDK and adds filesystem and artifact services. It shares the runtime and opaque bound-map identities with the full and render-only entries in both module formats.
+
 ```ts
-import { AstProgram, Engine } from '@polyspec/template';
-import { FsLoader } from '@polyspec/template/node';
+import { AstProgram, Engine, FsLoader } from '@polyspec/template/node';
 
 const program = new AstProgram({ loader: new FsLoader('templates') });
 program.register('greet', ([name]) => `Hello, ${name}`);

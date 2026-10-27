@@ -3,6 +3,10 @@
 
 [한국어](/ko/operations/development).
 
+Standalone PHP inspection tools use the installed `var/tools/bin/php` wrapper and verify its release against `config/toolchain.json`; they do not select PHP from the incoming shell path. PHP extension generation/building and native tests use the same installed tool set. A shell inspection of a different system PHP is no evidence for the interpreter used by these targets.
+
+The PHP library requirement stays at `>=8.4` (equivalent to `>=8.4.0`). The development/verification baseline is PHP `8.4.27`; the Windows installation baseline is `8.4.27-1`. Raising the development patch does not raise the minimum supported library version.
+
 ## Toolchain
 
 | Tool | Version | Source |

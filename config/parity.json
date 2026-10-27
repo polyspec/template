@@ -5,8 +5,8 @@
   },
   "comment": "The implementations of the template language and the shared units that each holds, checked by make parity-declarations-check and make parity-check of kit (T24.7). The API units are the operations and types that the specification defines as public API (T22.6-14, T22.6-18), read by the symbol extractor of each implementation; every public symbol must have a verified shared contract, and implementation details stay private. The conformance cases of tests/cases, their tokens and format results and the expression vectors of tests/fixtures/expr/cases.json are the shared suites; the editor packages, the compiler and the repository tools are single-language tools; every other test file of an implementation is the native test of a feature unit (T24.8, T24.11).",
   "implementations": [
-    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "internal": [{ "glob": "packages/language/tests/format-errors.test.ts", "reason": "test: the formatter throws an internal failure of a mocked analyzer instead of reporting it as an error of the source, an internal path that no case of the suite reaches" }, { "glob": "packages/ts/tests/cli.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/command.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/cli.test.ts", "reason": "ecosystem: the test of the npm command template-fmt, the packaging form of the formatter in the TypeScript ecosystem" }, { "glob": "packages/language/tests/editor.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/lexical-tables.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/root.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/document.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/index.d.ts" } },
-    { "name": "go", "runner": "go", "prose": ["Go"], "internal": [{ "glob": "packages/go/internal/expr/fixture_path_test.go", "reason": "harness: verifies expression vector discovery from the module root after a test package moves, independently of executing the shared vectors" }, { "glob": "packages/go/internal/casetest/casetest_test.go", "reason": "harness: options of the canonical case loader used by the Go test packages" }, { "glob": "packages/go/cmd/template/main_test.go", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" }, "symbols": { "extractor": "go", "entry": "packages/go" } },
+    { "name": "ts", "runner": "vitest", "prose": ["TypeScript"], "internal": [{ "glob": "packages/language/tests/format-errors.test.ts", "reason": "test: the formatter throws an internal failure of a mocked analyzer instead of reporting it as an error of the source, an internal path that no case of the suite reaches" }, { "glob": "packages/ts/tests/cli.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/command.test.ts", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }, { "glob": "packages/language/tests/cli.test.ts", "reason": "ecosystem: the test of the npm command template-fmt, the packaging form of the formatter in the TypeScript ecosystem" }, { "glob": "packages/language/tests/editor.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/lexical-tables.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/root.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }, { "glob": "packages/language/tests/document.test.ts", "reason": "ecosystem: the test of an editor rule that docs/operations/editor-tools.md defines; a tool of the editors, not a rule of the language" }], "roots": ["packages/ts", "packages/language"], "tests": ["packages/ts/tests/**/*.test.ts", "packages/language/tests/**/*.test.ts"], "errors": { "file": "packages/ts/src/errors.ts", "pattern": "^  \\| '(E_[A-Z0-9_]+)'" }, "symbols": { "extractor": "ts", "entry": "packages/ts/dist/node/index.d.ts" } },
+    { "name": "go", "runner": "go", "prose": ["Go"], "internal": [{ "glob": "packages/go/render/fixture_path_test.go", "reason": "harness: verifies expression vector discovery from the module root after a test package moves, independently of executing the shared vectors" }, { "glob": "packages/go/internal/casetest/casetest_test.go", "reason": "harness: options of the canonical case loader used by the Go test packages" }, { "glob": "packages/go/cmd/template/main_test.go", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/go"], "tests": ["packages/go/**/*_test.go"], "errors": { "file": "packages/go/errs/errs.go", "pattern": "^\\t\\w+\\s+Code = \"(E_[A-Z0-9_]+)\"$" }, "symbols": { "extractor": "go", "entry": "packages/go" } },
     { "name": "rust", "runner": "cargo", "args": ["--features", "__test_support"], "prose": ["Rust"], "internal": [{ "glob": "packages/rust/tests/formatter_bridge.rs", "reason": "harness: checks the non-default native formatter invariant bridge; every formatter case remains in the feature-enabled unit/parity target" }, { "glob": "packages/rust/tests/expression_bridge.rs", "reason": "harness: checks the non-default native expression-vector bridge against the runtime types; the complete vectors remain in the expressions suite" }, { "glob": "packages/rust/tests/json_value.rs", "reason": "test: to_json_value, a public helper of the crate that the suite does not call, fails on a native object instead of writing null" }, { "glob": "packages/rust/src/sha256.rs", "reason": "test: the standard SHA-256 vectors of the digest that the artifact loader checks; a helper of this implementation, of no requirement." }, { "glob": "packages/rust/tests/cli.rs", "reason": "harness: the test of the conformance command line of this implementation (docs/operations/conformance.md), a tool of the conformance suite" }], "roots": ["packages/rust"], "tests": ["packages/rust/tests/*.rs", "packages/rust/src/functions/tests/mod.rs", "packages/rust/src/value/tests/mod.rs"], "support": ["packages/rust/tests/common/*.rs", "packages/rust/tests/fixtures/public-api/*.rs"], "errors": { "file": "packages/rust/src/error.rs", "pattern": "^    (E_[A-Z0-9_]+),$" }, "symbols": { "extractor": "rust", "entry": "packages/rust/Cargo.toml" } },
     { "name": "php", "runner": "php", "prose": ["PHP"], "internal": [{ "glob": "packages/php/tests/CliPackageTest.php", "reason": "test: the command line is a package of its own (K433), so this test checks the layout of that package and no requirement of the library." }, { "glob": "packages/php/tests/Utf8Test.php", "reason": "test: the test of the UTF-8 helper Utf8 of this implementation, which checks that isValid agrees with firstInvalid; the contract of invalid text is the unit invalid-text" }], "roots": ["packages/php"], "tests": ["packages/php/tests/**/*Test.php"], "errors": { "file": "packages/php/src/ErrorCode.php", "pattern": "^    public const (E_[A-Z0-9_]+) = '" }, "symbols": { "extractor": "php", "entry": "packages/php/src" } },
     { "name": "php-ext", "runner": "php", "shares": "php", "prose": ["PHP extension", "PHP 확장"], "internal": [{ "glob": "packages/php-ext/tests/PreparedRenderTest.php", "reason": "test: the extension registers Program and PreparedRender of the library as classes of the extension (S10); the behaviour of a render is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/LoaderClassesTest.php", "reason": "test: the extension registers the loaders of the library as classes of the extension (S10); the behaviour of a loader is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/AstProgramTest.php", "reason": "test: the extension registers AstProgram, PreparedExecution and AstPreparedExecution of the library as classes of the extension (S10) and reads an AST array and a loader result only as they are given; the behaviour of a render is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/ProgramEngineTest.php", "reason": "test: the extension registers Engine of the library as a class of the extension (S10), which hands each request to its program unchanged; the behaviour of a render is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/ValueClassesTest.php", "reason": "test: the extension registers SafeString and BindError of the library as classes of the extension (S10); the behaviour of a binding is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/MapValueTest.php", "reason": "test: the extension registers MapValue of the library as a class of the extension (S10); the behaviour of a map is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/BindTest.php", "reason": "test: the extension registers Bind of the library as a class of the extension (S10); the behaviour of a binding is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/JsonTest.php", "reason": "test: the extension registers Json of the library as a class of the extension (S10); the behaviour of a parse is held by the units that run the tests of the library with the extension" }, { "glob": "packages/php-ext/tests/RuntimeEnvironmentTest.php", "reason": "test: the extension registers RuntimeServices and RuntimeEnvironment of the library as classes of the extension (S10), and AstProgram holds its environment as runtime; the behaviour of a render is held by the units that run the tests of the library with the extension" },
@@ -87,7 +87,7 @@
       "cases": "$[*].name",
       "bindings": [
         { "implementation": "ts", "test": "packages/ts/tests/expr/fixtures.test.ts" },
-        { "implementation": "go", "test": "packages/go/internal/expr/fixtures_test.go", "symbol": "TestExpressionFixtures" },
+        { "implementation": "go", "test": "packages/go/render/expr_fixtures_test.go", "symbol": "TestExpressionFixtures" },
         { "implementation": "rust", "test": "packages/rust/tests/expr_fixtures.rs", "symbol": "expressions" },
         { "implementation": "php", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
         { "implementation": "php-ext", "test": "packages/php/tests/ExprFixturesTest.php", "symbol": "Polyspec\\Template\\Tests\\ExprFixturesTest::testCase" },
@@ -890,15 +890,80 @@
     },
     {
       "id": "api-parse",
-      "requirements": ["AST-1", "AST-2", "AST-3", "AST-4", "AST-5", "AST-6", "AST-7", "AST-8", "AST-9", "AST-10", "GRM-1", "GRM-2", "GRM-3", "GRM-4", "GRM-5", "GRM-6", "GRM-7", "GRM-8", "GRM-9", "GRM-10", "GRM-11", "GRM-12", "GRM-13", "GRM-14", "GRM-15", "GRM-16", "GRM-17", "GRM-18", "GRM-19", "GRM-20", "GRM-21", "GRM-22", "GRM-23", "GRM-24"],
+      "requirements": [
+        "AST-1",
+        "AST-2",
+        "AST-3",
+        "AST-4",
+        "AST-5",
+        "AST-6",
+        "AST-7",
+        "AST-8",
+        "AST-9",
+        "AST-10",
+        "GRM-1",
+        "GRM-2",
+        "GRM-3",
+        "GRM-4",
+        "GRM-5",
+        "GRM-6",
+        "GRM-7",
+        "GRM-8",
+        "GRM-9",
+        "GRM-10",
+        "GRM-11",
+        "GRM-12",
+        "GRM-13",
+        "GRM-14",
+        "GRM-15",
+        "GRM-16",
+        "GRM-17",
+        "GRM-18",
+        "GRM-19",
+        "GRM-20",
+        "GRM-21",
+        "GRM-22",
+        "GRM-23",
+        "GRM-24"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!parse:function(1)" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Parse" },
-        { "implementation": "rust", "symbol": "polyspec_template::parse" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse" },
-        { "implementation": "python", "symbol": "template.parse" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!parse:function(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go.Parse"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::parse"
+        },
+        {
+          "implementation": "php",
+          "symbols": [
+            "Polyspec\\Template\\AstProgram::parse",
+            "Polyspec\\Template\\Format\\Analyzer::parse",
+            "Polyspec\\Template\\Format\\PackageAnalyzer::parse"
+          ]
+        },
+        {
+          "implementation": "php-ext",
+          "symbols": [
+            "Polyspec\\Template\\AstProgram::parse",
+            "Polyspec\\Template\\Format\\Analyzer::parse",
+            "Polyspec\\Template\\Format\\PackageAnalyzer::parse"
+          ]
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.parse",
+            "template.parse_template",
+            "template.parser.parse_template"
+          ]
+        }
       ]
     },
     {
@@ -1068,54 +1133,231 @@
     },
     {
       "id": "api-bound-map",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
+      "requirements": [
+        "VAL-1",
+        "VAL-2",
+        "VAL-3",
+        "VAL-4",
+        "VAL-5",
+        "VAL-6",
+        "VAL-7",
+        "VAL-8",
+        "VAL-9",
+        "VAL-10",
+        "VAL-11",
+        "VAL-12",
+        "VAL-13",
+        "VAL-17",
+        "VAL-18",
+        "VAL-19",
+        "VAL-20",
+        "VAL-21",
+        "VAL-22"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!BoundMap:class" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.BoundMap" },
-        { "implementation": "rust", "symbol": "polyspec_template::BoundMap" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\BoundMap" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\BoundMap" },
-        { "implementation": "python", "symbol": "template.BoundMap" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!BoundMap:class"
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go.BoundMap",
+            "github.com/polyspec/template/packages/go/value.BoundMap"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::BoundMap"
+        },
+        {
+          "implementation": "php",
+          "symbols": [
+            "Polyspec\\Template\\BoundMap",
+            "Polyspec\\Template\\BoundMap::__unserialize"
+          ]
+        },
+        {
+          "implementation": "php-ext",
+          "symbols": [
+            "Polyspec\\Template\\BoundMap",
+            "Polyspec\\Template\\BoundMap::__unserialize"
+          ]
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.BoundMap",
+            "template.bind.BoundMap"
+          ]
+        }
       ]
     },
     {
       "id": "api-bind",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
+      "requirements": [
+        "VAL-1",
+        "VAL-2",
+        "VAL-3",
+        "VAL-4",
+        "VAL-5",
+        "VAL-6",
+        "VAL-7",
+        "VAL-8",
+        "VAL-9",
+        "VAL-10",
+        "VAL-11",
+        "VAL-12",
+        "VAL-13",
+        "VAL-17",
+        "VAL-18",
+        "VAL-19",
+        "VAL-20",
+        "VAL-21",
+        "VAL-22"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!bind:function(1)" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Bind" },
-        { "implementation": "rust", "symbol": "polyspec_template::bind" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\BoundMap::bind" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\BoundMap::bind" },
-        { "implementation": "python", "symbol": "template.bind" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!bind:function(1)"
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go.Bind",
+            "github.com/polyspec/template/packages/go/value.Bind"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbols": [
+            "polyspec_template::bind",
+            "polyspec_template::BindInput"
+          ]
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\BoundMap::bind"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\BoundMap::bind"
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.bind",
+            "template.bind_operations.bind"
+          ]
+        }
       ]
     },
     {
       "id": "api-merge",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
+      "requirements": [
+        "VAL-1",
+        "VAL-2",
+        "VAL-3",
+        "VAL-4",
+        "VAL-5",
+        "VAL-6",
+        "VAL-7",
+        "VAL-8",
+        "VAL-9",
+        "VAL-10",
+        "VAL-11",
+        "VAL-12",
+        "VAL-13",
+        "VAL-17",
+        "VAL-18",
+        "VAL-19",
+        "VAL-20",
+        "VAL-21",
+        "VAL-22"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!merge:function(1)" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Merge" },
-        { "implementation": "rust", "symbol": "polyspec_template::merge" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\BoundMap::merge" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\BoundMap::merge" },
-        { "implementation": "python", "symbol": "template.merge" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!merge:function(1)"
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go.Merge",
+            "github.com/polyspec/template/packages/go/value.Merge"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::merge"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\BoundMap::merge"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\BoundMap::merge"
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.merge",
+            "template.bind_operations.merge"
+          ]
+        }
       ]
     },
     {
       "id": "api-template-error",
-      "requirements": ["ERR-1", "ERR-2", "ERR-3", "ERR-4", "ERR-5", "ERR-6", "ERR-7", "ERR-8", "ERR-9", "ERR-10", "ERR-11", "ERR-12", "ERR-13", "ERR-14"],
+      "requirements": [
+        "ERR-1",
+        "ERR-2",
+        "ERR-3",
+        "ERR-4",
+        "ERR-5",
+        "ERR-6",
+        "ERR-7",
+        "ERR-8",
+        "ERR-9",
+        "ERR-10",
+        "ERR-11",
+        "ERR-12",
+        "ERR-13",
+        "ERR-14"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!TemplateError:class" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Error" },
-        { "implementation": "rust", "symbol": "polyspec_template::TemplateError" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\TemplateError" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\TemplateError" },
-        { "implementation": "python", "symbol": "template.TemplateError" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!TemplateError:class"
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go.Error",
+            "github.com/polyspec/template/packages/go/errs.Error.Error"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::TemplateError"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\TemplateError"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\TemplateError"
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.TemplateError"
+        }
       ]
     },
     {
@@ -1159,41 +1401,176 @@
     },
     {
       "id": "api-parse-json",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
+      "requirements": [
+        "VAL-1",
+        "VAL-2",
+        "VAL-3",
+        "VAL-4",
+        "VAL-5",
+        "VAL-6",
+        "VAL-7",
+        "VAL-8",
+        "VAL-9",
+        "VAL-10",
+        "VAL-11",
+        "VAL-12",
+        "VAL-13",
+        "VAL-17",
+        "VAL-18",
+        "VAL-19",
+        "VAL-20",
+        "VAL-21",
+        "VAL-22"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!parseJson:function(1)" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseJSON" },
-        { "implementation": "rust", "symbol": "polyspec_template::parse_json" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Value\\Json::parse" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Json::parse" },
-        { "implementation": "python", "symbol": "template.parse_json" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!parseJson:function(1)"
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go.ParseJSON",
+            "github.com/polyspec/template/packages/go/value.ParseJSON"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::parse_json"
+        },
+        {
+          "implementation": "php",
+          "symbols": [
+            "Polyspec\\Template\\Value\\Json::parse",
+            "Polyspec\\Template\\Value\\Json"
+          ]
+        },
+        {
+          "implementation": "php-ext",
+          "symbols": [
+            "Polyspec\\Template\\Value\\Json::parse",
+            "Polyspec\\Template\\Value\\Json"
+          ]
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.parse_json",
+            "template.json_parse.parse_json"
+          ]
+        }
       ]
     },
     {
       "id": "api-bind-map",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
+      "requirements": [
+        "VAL-1",
+        "VAL-2",
+        "VAL-3",
+        "VAL-4",
+        "VAL-5",
+        "VAL-6",
+        "VAL-7",
+        "VAL-8",
+        "VAL-9",
+        "VAL-10",
+        "VAL-11",
+        "VAL-12",
+        "VAL-13",
+        "VAL-17",
+        "VAL-18",
+        "VAL-19",
+        "VAL-20",
+        "VAL-21",
+        "VAL-22"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!bindMap:function(1)" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/value.BindMap" },
-        { "implementation": "rust", "symbol": "polyspec_template::bind_map" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Value\\Bind::map" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Bind::map" },
-        { "implementation": "python", "symbol": "template.bind_map" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!bindMap:function(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/value.BindMap"
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::bind_map"
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Value\\Bind::map"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Value\\Bind::map"
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.bind_map",
+            "template.bind.bind_map"
+          ]
+        }
       ]
     },
     {
       "id": "api-bind-data",
-      "requirements": ["VAL-1", "VAL-2", "VAL-3", "VAL-4", "VAL-5", "VAL-6", "VAL-7", "VAL-8", "VAL-9", "VAL-10", "VAL-11", "VAL-12", "VAL-13", "VAL-17", "VAL-18", "VAL-19", "VAL-20", "VAL-21", "VAL-22"],
+      "requirements": [
+        "VAL-1",
+        "VAL-2",
+        "VAL-3",
+        "VAL-4",
+        "VAL-5",
+        "VAL-6",
+        "VAL-7",
+        "VAL-8",
+        "VAL-9",
+        "VAL-10",
+        "VAL-11",
+        "VAL-12",
+        "VAL-13",
+        "VAL-17",
+        "VAL-18",
+        "VAL-19",
+        "VAL-20",
+        "VAL-21",
+        "VAL-22"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!bindData:function(1)" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/value.BindData" },
-        { "implementation": "rust", "symbol": "polyspec_template::bind_data" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Value\\Bind::data" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Bind::data" },
-        { "implementation": "python", "symbol": "template.bind_data" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!bindData:function(1)"
+        },
+        {
+          "implementation": "go",
+          "symbol": "github.com/polyspec/template/packages/go/value.BindData"
+        },
+        {
+          "implementation": "rust",
+          "symbols": [
+            "polyspec_template::bind_data",
+            "polyspec_template::bound_root"
+          ]
+        },
+        {
+          "implementation": "php",
+          "symbol": "Polyspec\\Template\\Value\\Bind::data"
+        },
+        {
+          "implementation": "php-ext",
+          "symbol": "Polyspec\\Template\\Value\\Bind::data"
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.bind_data",
+            "template.bind.bind_data"
+          ]
+        }
       ]
     },
     {
@@ -1211,15 +1588,120 @@
     },
     {
       "id": "api-runtime-environment",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
+      "requirements": [
+        "RT-1",
+        "RT-2",
+        "RT-3",
+        "RT-4",
+        "RT-5",
+        "RT-6",
+        "RT-7",
+        "RT-8",
+        "RT-9",
+        "RT-10",
+        "RT-11",
+        "RT-12",
+        "RT-13",
+        "RT-14",
+        "RT-15",
+        "RT-16",
+        "RT-17",
+        "RT-18",
+        "RT-19",
+        "RT-20",
+        "RT-21",
+        "RT-22",
+        "RT-23",
+        "RT-24",
+        "RT-25",
+        "RT-26",
+        "RT-27",
+        "RT-28",
+        "RT-29",
+        "RT-30",
+        "RT-31",
+        "RT-32",
+        "RT-33",
+        "RT-34",
+        "RT-35",
+        "RT-36",
+        "RT-37",
+        "RT-40",
+        "RT-41",
+        "RT-42",
+        "RT-44",
+        "RT-55",
+        "RT-56",
+        "RT-59",
+        "RT-60",
+        "RT-61",
+        "RT-62",
+        "RT-65",
+        "RT-66",
+        "RT-67",
+        "RT-69",
+        "RT-70"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbols": ["@polyspec/template!RuntimeEnvironment:class", "@polyspec/template!RuntimeEnvironment:constructor(1)", "@polyspec/template!RuntimeEnvironment#hostFunction:member(1)", "@polyspec/template!RuntimeEnvironment#classFunction:member(1)"] },
-        { "implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.RuntimeEnvironment", "github.com/polyspec/template/packages/go.NewRuntimeEnvironment", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment", "github.com/polyspec/template/packages/go/render.NewRuntimeEnvironment", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.HostFunction", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.ClassFunction", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.Limits"] },
-        { "implementation": "rust", "symbols": ["polyspec_template::RuntimeEnvironment", "polyspec_template::RuntimeEnvironment::new"] },
-        { "implementation": "php", "symbols": ["Polyspec\\Template\\Render\\RuntimeEnvironment", "Polyspec\\Template\\Render\\RuntimeEnvironment::__construct", "Polyspec\\Template\\Render\\RuntimeEnvironment::hostFunction", "Polyspec\\Template\\Render\\RuntimeEnvironment::classFunction"] },
-        { "implementation": "php-ext", "symbols": ["Polyspec\\Template\\Render\\RuntimeEnvironment", "Polyspec\\Template\\Render\\RuntimeEnvironment::__construct", "Polyspec\\Template\\Render\\RuntimeEnvironment::hostFunction", "Polyspec\\Template\\Render\\RuntimeEnvironment::classFunction"] },
-        { "implementation": "python", "symbols": ["template.RuntimeEnvironment", "template.runtime_environment.RuntimeEnvironment"] }
+        {
+          "implementation": "ts",
+          "symbols": [
+            "@polyspec/template!RuntimeEnvironment:class",
+            "@polyspec/template!RuntimeEnvironment:constructor(1)",
+            "@polyspec/template!RuntimeEnvironment#hostFunction:member(1)",
+            "@polyspec/template!RuntimeEnvironment#classFunction:member(1)"
+          ]
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go.RuntimeEnvironment",
+            "github.com/polyspec/template/packages/go.NewRuntimeEnvironment",
+            "github.com/polyspec/template/packages/go/render.RuntimeEnvironment",
+            "github.com/polyspec/template/packages/go/render.NewRuntimeEnvironment",
+            "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.HostFunction",
+            "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.ClassFunction",
+            "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.Limits"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbols": [
+            "polyspec_template::RuntimeEnvironment",
+            "polyspec_template::RuntimeEnvironment::new",
+            "polyspec_template::RuntimeEnvironment::limits",
+            "polyspec_template::RuntimeEnvironment::host_functions",
+            "polyspec_template::RuntimeEnvironment::class_functions"
+          ]
+        },
+        {
+          "implementation": "php",
+          "symbols": [
+            "Polyspec\\Template\\Render\\RuntimeEnvironment",
+            "Polyspec\\Template\\Render\\RuntimeEnvironment::__construct",
+            "Polyspec\\Template\\Render\\RuntimeEnvironment::hostFunction",
+            "Polyspec\\Template\\Render\\RuntimeEnvironment::classFunction"
+          ]
+        },
+        {
+          "implementation": "php-ext",
+          "symbols": [
+            "Polyspec\\Template\\Render\\RuntimeEnvironment",
+            "Polyspec\\Template\\Render\\RuntimeEnvironment::__construct",
+            "Polyspec\\Template\\Render\\RuntimeEnvironment::hostFunction",
+            "Polyspec\\Template\\Render\\RuntimeEnvironment::classFunction"
+          ]
+        },
+        {
+          "implementation": "python",
+          "symbols": [
+            "template.RuntimeEnvironment",
+            "template.runtime_environment.RuntimeEnvironment",
+            "template.runtime_environment.RuntimeEnvironment.host_function",
+            "template.runtime_environment.RuntimeEnvironment.class_function"
+          ]
+        }
       ]
     },
     {
@@ -1250,15 +1732,95 @@
     },
     {
       "id": "api-render-scope",
-      "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
+      "requirements": [
+        "RT-1",
+        "RT-2",
+        "RT-3",
+        "RT-4",
+        "RT-5",
+        "RT-6",
+        "RT-7",
+        "RT-8",
+        "RT-9",
+        "RT-10",
+        "RT-11",
+        "RT-12",
+        "RT-13",
+        "RT-14",
+        "RT-15",
+        "RT-16",
+        "RT-17",
+        "RT-18",
+        "RT-19",
+        "RT-20",
+        "RT-21",
+        "RT-22",
+        "RT-23",
+        "RT-24",
+        "RT-25",
+        "RT-26",
+        "RT-27",
+        "RT-28",
+        "RT-29",
+        "RT-30",
+        "RT-31",
+        "RT-32",
+        "RT-33",
+        "RT-34",
+        "RT-35",
+        "RT-36",
+        "RT-37",
+        "RT-40",
+        "RT-41",
+        "RT-42",
+        "RT-44",
+        "RT-55",
+        "RT-56",
+        "RT-59",
+        "RT-60",
+        "RT-61",
+        "RT-62",
+        "RT-65",
+        "RT-66",
+        "RT-67",
+        "RT-69",
+        "RT-70"
+      ],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!Scope:class" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Scope" },
-        { "implementation": "rust", "symbol": "polyspec_template::Scope" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope" },
-        { "implementation": "python", "symbol": "template.Scope" }
+        {
+          "implementation": "ts",
+          "symbol": "@polyspec/template!Scope:class"
+        },
+        {
+          "implementation": "go",
+          "symbols": [
+            "github.com/polyspec/template/packages/go/render.Scope",
+            "github.com/polyspec/template/packages/go/render.NewScope"
+          ]
+        },
+        {
+          "implementation": "rust",
+          "symbol": "polyspec_template::Scope"
+        },
+        {
+          "implementation": "php",
+          "symbols": [
+            "Polyspec\\Template\\Render\\Scope",
+            "Polyspec\\Template\\Render\\Scope::__construct"
+          ]
+        },
+        {
+          "implementation": "php-ext",
+          "symbols": [
+            "Polyspec\\Template\\Render\\Scope",
+            "Polyspec\\Template\\Render\\Scope::__construct"
+          ]
+        },
+        {
+          "implementation": "python",
+          "symbol": "template.Scope"
+        }
       ]
     },
     {
@@ -2375,11 +2937,21 @@
         },
         {
           "implementation": "php",
-          "symbol": "Polyspec\\Template\\Format\\FormatResult"
+          "symbols": [
+            "Polyspec\\Template\\Format\\FormatResult",
+            "Polyspec\\Template\\Format\\FormatResult::__construct",
+            "Polyspec\\Template\\Format\\FormatResult::text",
+            "Polyspec\\Template\\Format\\FormatResult::error"
+          ]
         },
         {
           "implementation": "php-ext",
-          "symbol": "Polyspec\\Template\\Format\\FormatResult"
+          "symbols": [
+            "Polyspec\\Template\\Format\\FormatResult",
+            "Polyspec\\Template\\Format\\FormatResult::__construct",
+            "Polyspec\\Template\\Format\\FormatResult::text",
+            "Polyspec\\Template\\Format\\FormatResult::error"
+          ]
         },
         {
           "implementation": "python",
@@ -2400,7 +2972,10 @@
         },
         {
           "implementation": "go",
-          "symbol": "github.com/polyspec/template/packages/go.FormatError"
+          "symbols": [
+            "github.com/polyspec/template/packages/go.FormatError",
+            "github.com/polyspec/template/packages/go/format.Error.Error"
+          ]
         },
         {
           "implementation": "rust",
@@ -2408,11 +2983,19 @@
         },
         {
           "implementation": "php",
-          "symbol": "Polyspec\\Template\\Format\\FormatError"
+          "symbols": [
+            "Polyspec\\Template\\Format\\FormatError",
+            "Polyspec\\Template\\Format\\FormatError::__construct",
+            "Polyspec\\Template\\Format\\FormatError::toArray"
+          ]
         },
         {
           "implementation": "php-ext",
-          "symbol": "Polyspec\\Template\\Format\\FormatError"
+          "symbols": [
+            "Polyspec\\Template\\Format\\FormatError",
+            "Polyspec\\Template\\Format\\FormatError::__construct",
+            "Polyspec\\Template\\Format\\FormatError::toArray"
+          ]
         },
         {
           "implementation": "python",
@@ -7314,7 +7897,7 @@
     {"id": "api-limit-depth", "requirements": ["RT-6", "RT-33"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Limits#depth:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Limits.Depth"}, {"implementation": "rust", "symbol": "polyspec_template::Limits::depth"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"}, {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.limits"}]},
     {"id": "api-limit-output-bytes", "requirements": ["RT-6", "RT-33"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Limits#outputBytes:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Limits.OutputBytes"}, {"implementation": "rust", "symbol": "polyspec_template::Limits::output_bytes"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"}, {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.limits"}]},
     {"id": "api-limit-expression-depth", "requirements": ["RT-6", "RT-33"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Limits#expressionDepth:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Limits.ExpressionDepth"}, {"implementation": "rust", "symbol": "polyspec_template::Limits::expression_depth"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices::limits"}, {"implementation": "python", "symbol": "template.runtime_environment.RuntimeServices.limits"}]},
-    {"id": "api-limits-defaults", "requirements": ["RT-6", "RT-33"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!RuntimeEnvironment#limits:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.DefaultLimits"}, {"implementation": "rust", "symbol": "polyspec_template::Limits"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::limits"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::limits"}, {"implementation": "python", "symbol": "template.context.DEFAULT_LIMITS"}]},
+    {"id": "api-limits-defaults", "requirements": ["RT-6", "RT-33"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!RuntimeEnvironment#limits:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.DefaultLimits"}, {"implementation": "rust", "symbol": "polyspec_template::Limits"}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Render\\RuntimeEnvironment::limits", "Polyspec\\Template\\Render\\RuntimeEnvironment::DEFAULT_LIMITS"]}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment::limits"}, {"implementation": "python", "symbol": "template.context.DEFAULT_LIMITS"}]},
     {"id": "api-ast-binary-operator", "requirements": ["AST-4", "AST-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!BinaryOp:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Binary"}, {"implementation": "rust", "symbols": ["polyspec_template::BinaryOp", "polyspec_template::BinaryOp::from_text"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.decode_template"}]},
     {"id": "api-ast-binary-operator-add", "requirements": ["AST-4", "AST-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!BinaryOp:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Op"}, {"implementation": "rust", "symbol": "polyspec_template::BinaryOp::Add"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.decode_template"}]},
     {"id": "api-ast-binary-operator-subtract", "requirements": ["AST-4", "AST-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!BinaryOp:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Op"}, {"implementation": "rust", "symbol": "polyspec_template::BinaryOp::Subtract"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.decode_template"}]},
@@ -7345,8 +7928,8 @@
     {"id": "api-ast-loop-metadata-field-size", "requirements": ["AST-4", "AST-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!LoopMetaField:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.LoopMeta.Field"}, {"implementation": "rust", "symbol": "polyspec_template::LoopMetaField::Size"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.decode_template"}]},
     {"id": "api-ast-binary-operator-text", "requirements": ["AST-4", "AST-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Binary#op:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Binary.Op"}, {"implementation": "rust", "symbol": "polyspec_template::BinaryOp::as_str"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.decode_template"}]},
     {"id": "ast-enum-literals", "requirements": ["AST-4", "AST-10"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/ts/tests/decode.test.ts", "id": "preserves canonical enum literals through the public decoder (AST-10)"}, {"implementation": "go", "test": "packages/go/ast/json_test.go", "id": "TestPublicDecoderPreservesCanonicalEnumLiterals"}, {"implementation": "rust", "test": "packages/rust/tests/decode.rs", "id": "public_decoder_preserves_canonical_enum_literals"}, {"implementation": "php", "test": "packages/php/tests/AstDecodeTest.php", "id": "testPublicDecoderPreservesCanonicalEnumLiterals"}, {"implementation": "php-ext", "test": "packages/php/tests/AstDecodeTest.php", "id": "testPublicDecoderPreservesCanonicalEnumLiterals"}, {"implementation": "python", "test": "packages/python/tests/test_decode.py", "id": "test_public_decoder_preserves_canonical_enum_literals"}]},
-    {"id": "api-analyze", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!analyze:function(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analyze"}, {"implementation": "rust", "symbol": "polyspec_template::analyze"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbol": "template.analyze"}]},
-    {"id": "api-analysis-result", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!TemplateAnalysis:interface"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analysis"}, {"implementation": "rust", "symbol": "polyspec_template::TemplateAnalysis"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbol": "template.TemplateAnalysis"}]},
+    {"id": "api-analyze", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!analyze:function(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analyze"}, {"implementation": "rust", "symbol": "polyspec_template::analyze"}, {"implementation": "php", "symbols": ["Polyspec\\Template\\AstProgram::analyze", "Polyspec\\Template\\Format\\Analyzer", "Polyspec\\Template\\Format\\PackageAnalyzer", "Polyspec\\Template\\Format\\Analyzer::analyze", "Polyspec\\Template\\Format\\PackageAnalyzer::analyze"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\AstProgram::analyze", "Polyspec\\Template\\Format\\Analyzer", "Polyspec\\Template\\Format\\PackageAnalyzer", "Polyspec\\Template\\Format\\Analyzer::analyze", "Polyspec\\Template\\Format\\PackageAnalyzer::analyze"]}, {"implementation": "python", "symbols": ["template.analyze", "template.analyze_template", "template.parser.analyze_template"]}]},
+    {"id": "api-analysis-result", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!TemplateAnalysis:interface"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analysis"}, {"implementation": "rust", "symbol": "polyspec_template::TemplateAnalysis"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbols": ["template.TemplateAnalysis", "template.parser.TemplateAnalysis"]}]},
     {"id": "api-analysis-result-ast", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!TemplateAnalysis#ast:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analysis"}, {"implementation": "rust", "symbol": "polyspec_template::TemplateAnalysis::ast"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbol": "template.TemplateAnalysis"}]},
     {"id": "api-analysis-result-tags", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!TemplateAnalysis#tags:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analysis"}, {"implementation": "rust", "symbol": "polyspec_template::TemplateAnalysis::tags"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbol": "template.TemplateAnalysis"}]},
     {"id": "api-analysis-result-tokens", "requirements": ["EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!TemplateAnalysis#tokens:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Analysis"}, {"implementation": "rust", "symbol": "polyspec_template::TemplateAnalysis::tokens"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbol": "template.TemplateAnalysis"}]},
@@ -7390,7 +7973,7 @@
     {"id": "api-analysis-token-kind-text", "requirements": ["EDT-8", "EDT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!SyntaxToken#kind:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.TokenKind"}, {"implementation": "rust", "symbol": "polyspec_template::TokenKind::as_str"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyze"}, {"implementation": "python", "symbol": "template.TemplateAnalysis"}]},
     {"id": "full-analysis-contexts", "requirements": ["EDT-10"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/ts/tests/analysis.test.ts", "id": "public analysis \u203a preserves syntax-1"}, {"implementation": "go", "test": "packages/go/analysis_test.go", "id": "TestPublicAnalysisMatchesSharedContexts"}, {"implementation": "rust", "test": "packages/rust/tests/analysis.rs", "id": "public_analysis_preserves_shared_contexts"}, {"implementation": "php", "test": "packages/php/tests/AnalysisTest.php", "id": "testPreservesSharedAnalysisContexts"}, {"implementation": "php-ext", "test": "packages/php/tests/AnalysisTest.php", "id": "testPreservesSharedAnalysisContexts"}, {"implementation": "python", "test": "packages/python/tests/test_analysis.py", "id": "test_preserves_shared_analysis_contexts"}]},
     {"id": "full-analysis-invalid-source", "requirements": ["EDT-10"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/ts/tests/analysis.test.ts", "id": "public analysis \u203a rejects an incomplete source with the parser error"}, {"implementation": "go", "test": "packages/go/analysis_test.go", "id": "TestPublicAnalysisRejectsIncompleteSource"}, {"implementation": "rust", "test": "packages/rust/tests/analysis.rs", "id": "public_analysis_rejects_incomplete_source"}, {"implementation": "php", "test": "packages/php/tests/AnalysisTest.php", "id": "testRejectsIncompleteSource"}, {"implementation": "php-ext", "test": "packages/php/tests/AnalysisTest.php", "id": "testRejectsIncompleteSource"}, {"implementation": "python", "test": "packages/python/tests/test_analysis.py", "id": "test_rejects_incomplete_source"}]},
-    {"id": "api-analyze-prefix", "requirements": ["EDT-11"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!analyzePrefix:function(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.AnalyzePrefix"}, {"implementation": "rust", "symbol": "polyspec_template::analyze_prefix"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "python", "symbol": "template.analyze_prefix"}]},
+    {"id": "api-analyze-prefix", "requirements": ["EDT-11"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!analyzePrefix:function(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.AnalyzePrefix"}, {"implementation": "rust", "symbol": "polyspec_template::analyze_prefix"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "python", "symbols": ["template.analyze_prefix", "template.analyze_template_prefix", "template.parser.analyze_template_prefix"]}]},
     {"id": "api-prefix-analysis", "requirements": ["EDT-11"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!PrefixAnalysis:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.PrefixAnalysis"}, {"implementation": "rust", "symbol": "polyspec_template::PrefixAnalysis"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "python", "symbol": "template.PrefixAnalysis"}]},
     {"id": "api-prefix-analysis-tags", "requirements": ["EDT-11"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!PrefixAnalysis:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.PrefixAnalysis"}, {"implementation": "rust", "symbol": "polyspec_template::PrefixAnalysis::tags"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "python", "symbol": "template.parser.PrefixAnalysis"}]},
     {"id": "api-prefix-analysis-tokens", "requirements": ["EDT-11"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!PrefixAnalysis:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.PrefixAnalysis"}, {"implementation": "rust", "symbol": "polyspec_template::PrefixAnalysis::tokens"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "python", "symbol": "template.parser.PrefixAnalysis"}]},
@@ -7426,9 +8009,9 @@
     {"id": "api-format-range-end", "requirements": ["FMT-16"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!FormatOptions#range:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/format.Range.End"}, {"implementation": "rust", "symbol": "polyspec_template::FormatOptions::range"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Format\\Formatter::format"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Format\\Formatter::format"}, {"implementation": "python", "symbol": "template.formatter.FormatOptions"}]},
     {"id": "formatter-sdk-results", "requirements": ["FMT-16"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/language/tests/formatter-sdk.test.ts", "id": "formatter SDK data \u203a preserves configured"}, {"implementation": "go", "test": "packages/go/formatter_sdk_test.go", "id": "TestFormatterSDKPreservesSharedResults"}, {"implementation": "rust", "test": "packages/rust/tests/formatter_sdk.rs", "id": "public_formatter_preserves_shared_results"}, {"implementation": "php", "test": "packages/php/tests/Format/SdkTest.php", "id": "testPreservesSharedFormatterResults"}, {"implementation": "php-ext", "test": "packages/php/tests/Format/SdkTest.php", "id": "testPreservesSharedFormatterResults"}, {"implementation": "python", "test": "packages/python/tests/test_formatter_sdk.py", "id": "test_preserves_shared_formatter_results"}]},
     {"id": "formatter-sdk-error-data", "requirements": ["FMT-16"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/language/tests/formatter-sdk.test.ts", "id": "formatter SDK data \u203a covers all public error reasons"}, {"implementation": "go", "test": "packages/go/formatter_sdk_test.go", "id": "TestFormatterSDKConstructsSharedErrorData"}, {"implementation": "rust", "test": "packages/rust/tests/formatter_sdk.rs", "id": "public_formatter_constructs_shared_error_data"}, {"implementation": "php", "test": "packages/php/tests/Format/SdkTest.php", "id": "testConstructsSharedErrorData"}, {"implementation": "php-ext", "test": "packages/php/tests/Format/SdkTest.php", "id": "testConstructsSharedErrorData"}, {"implementation": "python", "test": "packages/python/tests/test_formatter_sdk.py", "id": "test_constructs_shared_error_data"}]},
-    {"id": "api-format-native-implementation", "requirements": ["FMT-16"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Formatter:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/format.Format"}, {"implementation": "rust", "symbol": "polyspec_template::format"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Format\\Formatter"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Format\\Formatter"}, {"implementation": "python", "symbol": "template.formatter.format_template"}]},
+    {"id": "api-format-native-implementation", "requirements": ["FMT-16"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Formatter:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/format.Format"}, {"implementation": "rust", "symbols": ["polyspec_template::format", "polyspec_template::format_bytes"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\Format\\Formatter"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Format\\Formatter"}, {"implementation": "python", "symbol": "template.formatter.format_template"}]},
     {"id": "api-prefix-analysis-ast", "requirements": ["EDT-11"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!PrefixAnalysis:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.PrefixAnalysis"}, {"implementation": "rust", "symbol": "polyspec_template::PrefixAnalysis::ast"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::analyzePrefix"}, {"implementation": "python", "symbol": "template.parser.PrefixAnalysis"}]},
-    {"id": "api-error-code-type", "requirements": ["ERR-1"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!ErrorCode:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/errs.Code"}, {"implementation": "rust", "symbol": "polyspec_template::ErrorCode"}, {"implementation": "php", "symbol": "Polyspec\\Template\\ErrorCode"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\ErrorCode"}, {"implementation": "python", "symbol": "template.ERROR_CODES"}]},
+    {"id": "api-error-code-type", "requirements": ["ERR-1"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!ErrorCode:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/errs.Code"}, {"implementation": "rust", "symbol": "polyspec_template::ErrorCode"}, {"implementation": "php", "symbol": "Polyspec\\Template\\ErrorCode"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\ErrorCode"}, {"implementation": "python", "symbols": ["template.ERROR_CODES", "template.errors.ERROR_CODES"]}]},
     {"id": "api-error-code-text", "requirements": ["ERR-1"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!ErrorCode:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/errs.Code"}, {"implementation": "rust", "symbol": "polyspec_template::ErrorCode::as_str"}, {"implementation": "php", "symbol": "Polyspec\\Template\\ErrorCode"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\ErrorCode"}, {"implementation": "python", "symbol": "template.ERROR_CODES"}]},
     {"id": "api-source-span-type", "requirements": ["LEX-24", "ERR-2"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!SourceSpan:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/errs.Span"}, {"implementation": "rust", "symbol": "polyspec_template::Span"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Source::span"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Source::span"}, {"implementation": "python", "symbol": "template.errors.Span"}]},
     {"id": "api-ast-span-type", "requirements": ["AST-2"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Span:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Span"}, {"implementation": "rust", "symbol": "polyspec_template::Span"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.errors.Span"}]},
@@ -7451,7 +8034,7 @@
     {"id": "api-loader-native-source", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!LoadedSource:interface"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.Result"}, {"implementation": "rust", "symbol": "polyspec_template::loader::Loaded::Source"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "python", "symbol": "template.loader.LoadedSource"}]},
     {"id": "api-loader-native-ast", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!LoadedAst:interface"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.Result"}, {"implementation": "rust", "symbol": "polyspec_template::loader::Loaded::Ast"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "python", "symbol": "template.loader.LoadedAst"}]},
     {"id": "api-loader-native-version", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!LoadedSource#version:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.Result.Version"}, {"implementation": "rust", "symbol": "polyspec_template::loader::Loaded::version"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "python", "symbol": "template.loader.LoadedSource"}]},
-    {"id": "api-loader-native-interface", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Loader#load:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.Loader"}, {"implementation": "rust", "symbol": "polyspec_template::loader::Loader"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "python", "symbol": "template.loader.Loader"}]},
+    {"id": "api-loader-native-interface", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Loader#load:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.Loader"}, {"implementation": "rust", "symbols": ["polyspec_template::loader::Loader", "polyspec_template::loader", "polyspec_template::loader::Loader::load"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\LoaderInterface::load"}, {"implementation": "python", "symbol": "template.loader.Loader"}]},
     {"id": "api-memory-native-loader", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!MapLoader:class"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.MapLoader"}, {"implementation": "rust", "symbol": "polyspec_template::loader::MapLoader"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader"}, {"implementation": "python", "symbol": "template.loader.MapLoader"}]},
     {"id": "api-memory-native-construction", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!MapLoader:constructor(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.NewMapLoader"}, {"implementation": "rust", "symbol": "polyspec_template::loader::MapLoader::new"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader::__construct"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader::__construct"}, {"implementation": "python", "symbol": "template.loader.MapLoader"}]},
     {"id": "api-memory-native-set-source", "requirements": ["RT-9", "RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!MapLoader#set:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.MapLoader.Set"}, {"implementation": "rust", "symbol": "polyspec_template::loader::MapLoader::set"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader::set"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader::set"}, {"implementation": "python", "symbol": "template.loader.MapLoader.set"}]},
@@ -7504,9 +8087,9 @@
     {"id": "api-bounded-output-text", "requirements": ["RT-35", "RT-74"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Output#toString:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.Context.Output"}, {"implementation": "rust", "symbol": "polyspec_template::RenderContext::output"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Context::output"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Context::output"}, {"implementation": "python", "symbol": "template.output.Output.text"}]},
     {"id": "api-parse-options-type", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!ParseOptions:interface"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseOptions"}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.ParseOptions"}]},
     {"id": "api-parse-option-delimiters", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!ParseOptions#delimiters:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseOptions.Delimiters"}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions::delimiters"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.ParseOptions"}]},
-    {"id": "api-delimiter-pair-type", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Delimiters:interface"}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.ParseOptions.Delimiters", "github.com/polyspec/template/packages/go.Delimiters", "github.com/polyspec/template/packages/go/render.Delimiters"]}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions::delimiters"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.DEFAULT_DELIMITERS"}]},
+    {"id": "api-delimiter-pair-type", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Delimiters:interface"}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.ParseOptions.Delimiters", "github.com/polyspec/template/packages/go.Delimiters", "github.com/polyspec/template/packages/go/render.Delimiters"]}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions::delimiters"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbols": ["template.DEFAULT_DELIMITERS", "template.parse_delimiters", "template.scanner.parse_delimiters"]}]},
     {"id": "api-delimiter-pair-open", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Delimiters#open:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseOptions.Delimiters"}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions::delimiters"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.scanner.DEFAULT_DELIMITERS"}]},
-    {"id": "api-delimiter-pair-close", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Delimiters#close:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseOptions.Delimiters"}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions::delimiters"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.DEFAULT_DELIMITERS"}]},
+    {"id": "api-delimiter-pair-close", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Delimiters#close:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.ParseOptions.Delimiters"}, {"implementation": "rust", "symbol": "polyspec_template::ParseOptions::delimiters"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbols": ["template.DEFAULT_DELIMITERS", "template.parse_delimiters", "template.scanner.parse_delimiters"]}]},
     {"id": "api-request-error-type", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!parse:function(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Parse"}, {"implementation": "rust", "symbol": "polyspec_template::RequestError"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.parse"}]},
     {"id": "api-request-template-error", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!parse:function(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Parse"}, {"implementation": "rust", "symbol": "polyspec_template::RequestError::Template"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.parse"}]},
     {"id": "api-request-argument-error", "requirements": ["LEX-21", "LEX-22", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!DelimiterOptionError:class"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Parse"}, {"implementation": "rust", "symbol": "polyspec_template::RequestError::Argument"}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::parse"}, {"implementation": "python", "symbol": "template.parse"}]},
@@ -7521,6 +8104,26 @@
     {"id": "api-native-value-carrier", "requirements": ["VAL-1", "VAL-4", "VAL-6", "VAL-18"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!Value:type", "@polyspec/template!ListValue:type", "@polyspec/template!MapValue:type"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.Value", "github.com/polyspec/template/packages/go/value.Value", "github.com/polyspec/template/packages/go/value.List"]}, {"implementation": "rust", "symbols": ["polyspec_template::Value", "polyspec_template::Value::Null", "polyspec_template::Value::Bool", "polyspec_template::Value::Number", "polyspec_template::Value::Str", "polyspec_template::Value::Safe", "polyspec_template::Value::List", "polyspec_template::Value::Map", "polyspec_template::Value::Object", "polyspec_template::Value::text", "polyspec_template::Value::list", "polyspec_template::Value::map"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\Value\\Bind::value"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Value\\Bind::value"}, {"implementation": "python", "symbol": "template.values.Value"}]},
     {"id": "api-safe-string-carrier", "requirements": ["VAL-6", "VAL-8"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!SafeString:class", "@polyspec/template!SafeString:constructor(1)", "@polyspec/template!SafeString#text:member"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.SafeString", "github.com/polyspec/template/packages/go/value.SafeString", "github.com/polyspec/template/packages/go/value.SafeString.Text"]}, {"implementation": "rust", "symbols": ["polyspec_template::Value::Safe", "polyspec_template::Value::safe_text", "polyspec_template::Value::as_text"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\SafeString", "Polyspec\\Template\\Value\\SafeString::__construct", "Polyspec\\Template\\Value\\SafeString::$text"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\SafeString", "Polyspec\\Template\\Value\\SafeString::__construct", "Polyspec\\Template\\Value\\SafeString::$text"]}, {"implementation": "python", "symbols": ["template.SafeString", "template.values.SafeString"]}]},
     {"id": "api-ordered-map-carrier", "requirements": ["VAL-1", "VAL-4"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!MapValue:type"}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.OrderedMap", "github.com/polyspec/template/packages/go.NewOrderedMap", "github.com/polyspec/template/packages/go/value.OrderedMap", "github.com/polyspec/template/packages/go/value.NewOrderedMap", "github.com/polyspec/template/packages/go/value.OrderedMap.Set", "github.com/polyspec/template/packages/go/value.OrderedMap.Get", "github.com/polyspec/template/packages/go/value.OrderedMap.MustGet", "github.com/polyspec/template/packages/go/value.OrderedMap.Has", "github.com/polyspec/template/packages/go/value.OrderedMap.Keys", "github.com/polyspec/template/packages/go/value.OrderedMap.Len", "github.com/polyspec/template/packages/go/value.OrderedMap.Clone"]}, {"implementation": "rust", "symbols": ["polyspec_template::OrderedMap", "polyspec_template::OrderedMap::new", "polyspec_template::OrderedMap::with_capacity", "polyspec_template::OrderedMap::insert", "polyspec_template::OrderedMap::get", "polyspec_template::OrderedMap::contains_key", "polyspec_template::OrderedMap::len", "polyspec_template::OrderedMap::is_empty", "polyspec_template::OrderedMap::iter", "polyspec_template::OrderedMap::keys", "polyspec_template::OrderedMap::values", "polyspec_template::OrderedMap::remove"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\MapValue", "Polyspec\\Template\\Value\\MapValue::set", "Polyspec\\Template\\Value\\MapValue::has", "Polyspec\\Template\\Value\\MapValue::get", "Polyspec\\Template\\Value\\MapValue::remove", "Polyspec\\Template\\Value\\MapValue::count", "Polyspec\\Template\\Value\\MapValue::keys", "Polyspec\\Template\\Value\\MapValue::values", "Polyspec\\Template\\Value\\MapValue::entries", "Polyspec\\Template\\Value\\MapValue::copy"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\MapValue", "Polyspec\\Template\\Value\\MapValue::set", "Polyspec\\Template\\Value\\MapValue::has", "Polyspec\\Template\\Value\\MapValue::get", "Polyspec\\Template\\Value\\MapValue::remove", "Polyspec\\Template\\Value\\MapValue::count", "Polyspec\\Template\\Value\\MapValue::keys", "Polyspec\\Template\\Value\\MapValue::values", "Polyspec\\Template\\Value\\MapValue::entries", "Polyspec\\Template\\Value\\MapValue::copy"]}, {"implementation": "python", "symbols": ["template.bind_map", "template.bind.bind_map"]}]},
-    {"id": "ordered-value-sdk-carriers", "requirements": ["VAL-1", "VAL-4", "VAL-6"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/ts/tests/context-sdk.test.ts", "id": "context SDK › preserves ordered value carriers and safe-text payloads"}, {"implementation": "go", "test": "packages/go/context_sdk_test.go", "id": "TestOrderedValueSDKCarriers"}, {"implementation": "rust", "test": "packages/rust/tests/context_sdk.rs", "id": "ordered_value_sdk_carriers"}, {"implementation": "php", "test": "packages/php/tests/ContextSdkTest.php", "id": "testOrderedValueSdkCarriers"}, {"implementation": "php-ext", "test": "packages/php/tests/ContextSdkTest.php", "id": "testOrderedValueSdkCarriers"}, {"implementation": "python", "test": "packages/python/tests/test_context_sdk.py", "id": "test_ordered_value_sdk_carriers"}]}
+    {"id": "ordered-value-sdk-carriers", "requirements": ["VAL-1", "VAL-4", "VAL-6"], "kind": "feature", "bindings": [{"implementation": "ts", "test": "packages/ts/tests/context-sdk.test.ts", "id": "context SDK › preserves ordered value carriers and safe-text payloads"}, {"implementation": "go", "test": "packages/go/context_sdk_test.go", "id": "TestOrderedValueSDKCarriers"}, {"implementation": "rust", "test": "packages/rust/tests/context_sdk.rs", "id": "ordered_value_sdk_carriers"}, {"implementation": "php", "test": "packages/php/tests/ContextSdkTest.php", "id": "testOrderedValueSdkCarriers"}, {"implementation": "php-ext", "test": "packages/php/tests/ContextSdkTest.php", "id": "testOrderedValueSdkCarriers"}, {"implementation": "python", "test": "packages/python/tests/test_context_sdk.py", "id": "test_ordered_value_sdk_carriers"}]},
+    {"id": "api-filesystem-loader", "requirements": ["RT-9", "RT-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!FsLoader:class", "@polyspec/template!FsLoader:constructor(1)", "@polyspec/template!FsLoader#load:member(1)", "@polyspec/template!FsLoader#pathOf:member(1)", "@polyspec/template!FsLoader#root:member"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.NewFSLoader", "github.com/polyspec/template/packages/go/loader.FSLoader", "github.com/polyspec/template/packages/go/loader.NewFSLoader", "github.com/polyspec/template/packages/go/loader.FSLoader.Load"]}, {"implementation": "rust", "symbols": ["polyspec_template::FsLoader", "polyspec_template::FsLoader::new", "polyspec_template::FsLoader::path_of", "polyspec_template::loader::FsLoader", "polyspec_template::loader::FsLoader::new", "polyspec_template::loader::FsLoader::path_of"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Loader\\FilesystemLoader", "Polyspec\\Template\\Loader\\FilesystemLoader::__construct", "Polyspec\\Template\\Loader\\FilesystemLoader::$root", "Polyspec\\Template\\Loader\\FilesystemLoader::load"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Loader\\FilesystemLoader", "Polyspec\\Template\\Loader\\FilesystemLoader::__construct", "Polyspec\\Template\\Loader\\FilesystemLoader::$root", "Polyspec\\Template\\Loader\\FilesystemLoader::load"]}, {"implementation": "python", "symbols": ["template.FsLoader", "template.node_loader.FsLoader", "template.node_loader.FsLoader.load"]}]},
+    {"id": "api-path-resolution", "requirements": ["RT-8"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!resolvePath:function(1)", "@polyspec/template!PathError:class", "@polyspec/template!PathError:constructor(1)"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/loader.ResolvePath", "github.com/polyspec/template/packages/go/loader.ErrOutsideRoot"]}, {"implementation": "rust", "symbols": ["polyspec_template::resolve_path", "polyspec_template::loader::resolve_path", "polyspec_template::loader::PathError"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Loader\\Path", "Polyspec\\Template\\Loader\\Path::resolve"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Loader\\Path", "Polyspec\\Template\\Loader\\Path::resolve"]}, {"implementation": "python", "symbols": ["template.resolve_path", "template.loader.resolve_path", "template.PathError", "template.loader.PathError"]}]},
+    {"id": "api-loader-content-versioning", "requirements": ["RT-10", "RT-40"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!MapLoader#set:member(1)"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/loader.ContentHash"}, {"implementation": "rust", "symbol": "polyspec_template::loader::content_hash"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader::set"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Loader\\ArrayLoader::set"}, {"implementation": "python", "symbol": "template.loader.content_hash"}]},
+    {"id": "api-artifact-runtime", "requirements": ["RT-56", "RT-76"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!loadArtifact:function(1)", "@polyspec/template!loadOrRefresh:function(1)", "@polyspec/template!ArtifactRefreshPolicy:type", "@polyspec/template!ArtifactStaleError:class", "@polyspec/template!ArtifactStaleError#name:member"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.LoadArtifact", "github.com/polyspec/template/packages/go.LoadOrRefresh", "github.com/polyspec/template/packages/go.ErrArtifactStale"]}, {"implementation": "rust", "symbols": ["polyspec_template::artifact", "polyspec_template::artifact::load_artifact", "polyspec_template::artifact::load_or_refresh", "polyspec_template::artifact::ArtifactError", "polyspec_template::artifact::ArtifactError::Stale", "polyspec_template::artifact::ArtifactError::Failed"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\AstProgram::loadArtifact", "Polyspec\\Template\\AstProgram::loadOrRefresh", "Polyspec\\Template\\Loader\\ArtifactStaleException", "Polyspec\\Template\\Loader\\ArtifactLoader", "Polyspec\\Template\\Loader\\ArtifactLoader::fromDirectory", "Polyspec\\Template\\Loader\\ArtifactLoader::load"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\AstProgram::loadArtifact", "Polyspec\\Template\\AstProgram::loadOrRefresh", "Polyspec\\Template\\Loader\\ArtifactStaleException"]}, {"implementation": "python", "symbols": ["template.load_artifact", "template.load_or_refresh", "template.ArtifactStaleError", "template.artifact.load_artifact", "template.artifact.load_or_refresh", "template.artifact.ArtifactStaleError", "template.artifact.ArtifactLoader", "template.artifact.ArtifactLoader.load"]}]},
+    {"id": "api-render-definition-data", "requirements": ["RT-24", "RT-26", "VAL-22"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!DefineEntry:type", "@polyspec/template!DefineInput:type"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.DefineInput", "github.com/polyspec/template/packages/go/render.DefineEntry", "github.com/polyspec/template/packages/go/render.DefineEntry.Template", "github.com/polyspec/template/packages/go/render.DefineEntry.Data", "github.com/polyspec/template/packages/go/render.DefineEntry.HTML", "github.com/polyspec/template/packages/go/render.DefineInput", "github.com/polyspec/template/packages/go/render.DefineInput.Template", "github.com/polyspec/template/packages/go/render.DefineInput.Data", "github.com/polyspec/template/packages/go/render.DefineInput.HTML"]}, {"implementation": "rust", "symbols": ["polyspec_template::DefineEntry", "polyspec_template::DefineEntry::Template", "polyspec_template::DefineEntry::Html", "polyspec_template::DefineInput", "polyspec_template::DefineInput::template", "polyspec_template::DefineInput::data", "polyspec_template::DefineInput::html", "polyspec_template::DefineData", "polyspec_template::DefineData::Value", "polyspec_template::DefineData::Bound", "polyspec_template::defines_from_json"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Program::prepare", "Polyspec\\Template\\Render\\Context::$registry"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Program::prepare", "Polyspec\\Template\\Render\\Context::$registry"]}, {"implementation": "python", "symbols": ["template.engine.RenderOptions", "template.context.RenderContext"]}]},
+    {"id": "api-runtime-loop-data", "requirements": ["RT-16", "EXP-21"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!RuntimeLoopMeta:interface", "@polyspec/template!RuntimeLoopMeta#index:member", "@polyspec/template!RuntimeLoopMeta#key:member", "@polyspec/template!RuntimeLoopMeta#value:member", "@polyspec/template!RuntimeLoopMeta#first:member", "@polyspec/template!RuntimeLoopMeta#last:member", "@polyspec/template!RuntimeLoopMeta#size:member"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/render.LoopMeta", "github.com/polyspec/template/packages/go/render.LoopMeta.Index", "github.com/polyspec/template/packages/go/render.LoopMeta.Key", "github.com/polyspec/template/packages/go/render.LoopMeta.Value", "github.com/polyspec/template/packages/go/render.LoopMeta.First", "github.com/polyspec/template/packages/go/render.LoopMeta.Last", "github.com/polyspec/template/packages/go/render.LoopMeta.Size"]}, {"implementation": "rust", "symbols": ["polyspec_template::LoopMeta", "polyspec_template::LoopMeta::index", "polyspec_template::LoopMeta::key", "polyspec_template::LoopMeta::value", "polyspec_template::LoopMeta::first", "polyspec_template::LoopMeta::last", "polyspec_template::LoopMeta::size"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\Scope::loopMeta"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\Scope::loopMeta"}, {"implementation": "python", "symbol": "template.context.LoopMeta"}]},
+    {"id": "api-runtime-entry-data", "requirements": ["RT-16", "VAL-4"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings#entries:member(1)"}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/render.RuntimeEntry", "github.com/polyspec/template/packages/go/render.RuntimeEntry.Key", "github.com/polyspec/template/packages/go/render.RuntimeEntry.Value"]}, {"implementation": "rust", "symbol": "polyspec_template::RuntimeEntry"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::entries"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::entries"}, {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.entries"}]},
+    {"id": "api-render-target-data", "requirements": ["RT-3", "RT-41"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!Program#prepare:member(1)", "@polyspec/template!Template:interface"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.Program.Prepare", "github.com/polyspec/template/packages/go/ast.Template"]}, {"implementation": "rust", "symbols": ["polyspec_template::RenderTarget", "polyspec_template::RenderTarget::Name", "polyspec_template::RenderTarget::Ast"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\Program::prepare"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Program::prepare"}, {"implementation": "python", "symbol": "template.engine.Program.prepare"}]},
+    {"id": "api-native-indent-unit", "requirements": ["FMT-16"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!FormatOptions#indent:member"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/format.Options.Indent"}, {"implementation": "rust", "symbols": ["polyspec_template::IndentUnit", "polyspec_template::IndentUnit::new", "polyspec_template::IndentUnit::as_str"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\Format\\Formatter::format"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Format\\Formatter::format"}, {"implementation": "python", "symbol": "template.formatter.FormatOptions"}]},
+    {"id": "api-ast-literal-kind-catalog", "requirements": ["AST-4", "AST-10"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!LiteralKind:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Literal.Kind"}, {"implementation": "rust", "symbols": ["polyspec_template::LiteralValue", "polyspec_template::LiteralValue::Null", "polyspec_template::LiteralValue::Bool", "polyspec_template::LiteralValue::Number", "polyspec_template::LiteralValue::Str"]}, {"implementation": "php", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\AstProgram::decodeTemplate"}, {"implementation": "python", "symbol": "template.decode_template"}]},
+    {"id": "api-ast-json-representation", "requirements": ["AST-10", "RT-41"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!Template:interface"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/ast.Template"}, {"implementation": "rust", "symbol": "polyspec_template::Template"}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Ast", "Polyspec\\Template\\Ast::toJson"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Ast", "Polyspec\\Template\\Ast::toJson"]}, {"implementation": "python", "symbol": "template.decode_template"}]},
+    {"id": "api-native-value-binding", "requirements": ["VAL-2", "VAL-3", "VAL-7", "VAL-11", "VAL-13", "VAL-17", "VAL-20"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!bindValue:function(1)", "@polyspec/template!checkText:function(1)"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/value.BindValue", "github.com/polyspec/template/packages/go/value.MaxDepth", "github.com/polyspec/template/packages/go/value.MaxSafe"]}, {"implementation": "rust", "symbols": ["polyspec_template::bind_value", "polyspec_template::bind_json", "polyspec_template::bind_values", "polyspec_template::MAX_DEPTH"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\Bind", "Polyspec\\Template\\Value\\Bind::value", "Polyspec\\Template\\Value\\Bind::checkFloat", "Polyspec\\Template\\Value\\Bind::checkLevel", "Polyspec\\Template\\Value\\Bind::depthWithin", "Polyspec\\Template\\Value\\Bind::publicProperties", "Polyspec\\Template\\Value\\Bind::MAX_DEPTH"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\Bind", "Polyspec\\Template\\Value\\Bind::value", "Polyspec\\Template\\Value\\Bind::checkFloat", "Polyspec\\Template\\Value\\Bind::checkLevel", "Polyspec\\Template\\Value\\Bind::depthWithin", "Polyspec\\Template\\Value\\Bind::publicProperties", "Polyspec\\Template\\Value\\Bind::MAX_DEPTH"]}, {"implementation": "python", "symbols": ["template.bind_value", "template.bind.bind_value", "template.check_text", "template.bind.check_text", "template.MAX_SAFE", "template.number.MAX_SAFE"]}]},
+    {"id": "api-native-binding-failure", "requirements": ["VAL-2", "VAL-3", "VAL-17", "VAL-20", "ERR-14"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!BindError:class", "@polyspec/template!BindError:constructor(1)", "@polyspec/template!BindError#code:member", "@polyspec/template!BindErrorCode:type"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/value.BindError", "github.com/polyspec/template/packages/go/value.BindError.Code", "github.com/polyspec/template/packages/go/value.BindError.Message", "github.com/polyspec/template/packages/go/value.BindError.Error"]}, {"implementation": "rust", "symbols": ["polyspec_template::BindError", "polyspec_template::BindError::code", "polyspec_template::BindError::message"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\BindError", "Polyspec\\Template\\Value\\BindError::__construct", "Polyspec\\Template\\Value\\BindError::$errorCode"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\BindError", "Polyspec\\Template\\Value\\BindError::__construct", "Polyspec\\Template\\Value\\BindError::$errorCode"]}, {"implementation": "python", "symbols": ["template.BindError", "template.bind.BindError"]}]},
+    {"id": "api-json-input-adapters", "requirements": ["VAL-12", "VAL-17", "VAL-20"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!parseJson:function(1)", "@polyspec/template!parseJsonBytes:function(1)"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.ParseJSON", "github.com/polyspec/template/packages/go/value.ParseJSON"]}, {"implementation": "rust", "symbols": ["polyspec_template::parse_json", "polyspec_template::parse_json_bytes", "polyspec_template::read_json"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\Json", "Polyspec\\Template\\Value\\Json::parse"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\Json", "Polyspec\\Template\\Value\\Json::parse"]}, {"implementation": "python", "symbols": ["template.parse_json", "template.parse_json_bytes", "template.json_parse.parse_json", "template.json_parse.parse_json_bytes"]}]},
+    {"id": "api-native-host-values", "requirements": ["VAL-18", "VAL-19", "VAL-21", "FUN-43", "FUN-46"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!NativeObject:class", "@polyspec/template!NativeObject:constructor(1)", "@polyspec/template!NativeObject#target:member", "@polyspec/template!HostFunction:type"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.HostFunction", "github.com/polyspec/template/packages/go/value.HostArgument", "github.com/polyspec/template/packages/go/value.HostArguments"]}, {"implementation": "rust", "symbols": ["polyspec_template::HostFunction", "polyspec_template::TemplateObject", "polyspec_template::TemplateObject::member", "polyspec_template::TemplateObject::call", "polyspec_template::TemplateObject::identity", "polyspec_template::Value::object", "polyspec_template::Value::downcast_object", "polyspec_template::Value::host_argument", "polyspec_template::HostError", "polyspec_template::HostError::Data", "polyspec_template::HostError::Failed"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\Bind::value", "Polyspec\\Template\\Render\\RuntimeBindings::member", "Polyspec\\Template\\Render\\RuntimeBindings::memberCall", "Polyspec\\Template\\Render\\RuntimeBindings::call"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\Bind::value", "Polyspec\\Template\\Render\\RuntimeBindings::member", "Polyspec\\Template\\Render\\RuntimeBindings::memberCall", "Polyspec\\Template\\Render\\RuntimeBindings::call"]}, {"implementation": "python", "symbols": ["template.NativeObject", "template.values.NativeObject", "template.HostFunction"]}]},
+    {"id": "api-generated-value-representation", "requirements": ["VAL-21", "RT-61"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!Value:type", "@polyspec/template!MapValue:type"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/value.Convert", "github.com/polyspec/template/packages/go/value.Source", "github.com/polyspec/template/packages/go/value.Source.TemplateValue"]}, {"implementation": "rust", "symbols": ["polyspec_template::value_from_json", "polyspec_template::to_json_value"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Value\\MapValue", "Polyspec\\Template\\Value\\MapValue::set"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Value\\MapValue", "Polyspec\\Template\\Value\\MapValue::set"]}, {"implementation": "python", "symbol": "template.values.Value"}]},
+    {"id": "api-native-program-request-adapters", "requirements": ["RT-3", "RT-4", "RT-61", "RT-62", "VAL-22"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!Program#prepare:member(1)", "@polyspec/template!Program#render:member(1)"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.Program.Prepare", "github.com/polyspec/template/packages/go.Program.Render"]}, {"implementation": "rust", "symbols": ["polyspec_template::Program::prepare_bound", "polyspec_template::Program::render_bound", "polyspec_template::Engine::prepare_bound", "polyspec_template::Engine::render_bound", "polyspec_template::AstProgram::prepare_bound", "polyspec_template::AstProgram::render_bound", "polyspec_template::AstProgram::render_values", "polyspec_template::env_from_json"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Program::prepare", "Polyspec\\Template\\Program::render"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Program::prepare", "Polyspec\\Template\\Program::render"]}, {"implementation": "python", "symbols": ["template.engine.Program.prepare", "template.engine.Program.render"]}]},
+    {"id": "api-native-value-semantics", "requirements": ["VAL-1", "VAL-6", "VAL-8", "VAL-9", "VAL-20", "EXP-33", "EXP-36", "EXP-37", "EXP-38", "FUN-1", "FUN-5", "FUN-21", "FUN-22", "FUN-25"], "kind": "api", "symbols": [{"implementation": "ts", "symbols": ["@polyspec/template!RuntimeBindings#truthy:member(1)", "@polyspec/template!RuntimeBindings#stringify:member(1)", "@polyspec/template!RuntimeBindings#number:member(1)", "@polyspec/template!RuntimeBindings#equal:member(1)", "@polyspec/template!RuntimeBindings#compare:member(1)", "@polyspec/template!RuntimeBindings#depth:member(1)", "@polyspec/template!RuntimeBindings#call:member(1)"]}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/value.CodePointLength", "github.com/polyspec/template/packages/go/value.Compare", "github.com/polyspec/template/packages/go/value.DepthWithin", "github.com/polyspec/template/packages/go/value.ErrStringify", "github.com/polyspec/template/packages/go/value.FormatNumber", "github.com/polyspec/template/packages/go/value.IsString", "github.com/polyspec/template/packages/go/value.IsTruthy", "github.com/polyspec/template/packages/go/value.LooseEquals", "github.com/polyspec/template/packages/go/value.NumberToString", "github.com/polyspec/template/packages/go/value.ParseNumericString", "github.com/polyspec/template/packages/go/value.RoundNumber", "github.com/polyspec/template/packages/go/value.StrictEquals", "github.com/polyspec/template/packages/go/value.Stringify", "github.com/polyspec/template/packages/go/value.TextOf", "github.com/polyspec/template/packages/go/value.Type", "github.com/polyspec/template/packages/go/value.TypeOf", "github.com/polyspec/template/packages/go/value.TypeNull", "github.com/polyspec/template/packages/go/value.TypeBool", "github.com/polyspec/template/packages/go/value.TypeNumber", "github.com/polyspec/template/packages/go/value.TypeString", "github.com/polyspec/template/packages/go/value.TypeList", "github.com/polyspec/template/packages/go/value.TypeMap", "github.com/polyspec/template/packages/go/value.TypeObject"]}, {"implementation": "rust", "symbols": ["polyspec_template::Value::depth_within", "polyspec_template::Value::value_type", "polyspec_template::Value::is_string", "polyspec_template::Value::is_truthy", "polyspec_template::ValueType", "polyspec_template::ValueType::Null", "polyspec_template::ValueType::Bool", "polyspec_template::ValueType::Number", "polyspec_template::ValueType::String", "polyspec_template::ValueType::List", "polyspec_template::ValueType::Map", "polyspec_template::ValueType::Object", "polyspec_template::ValueType::name", "polyspec_template::RuntimeBindings::truthy", "polyspec_template::RuntimeBindings::stringify", "polyspec_template::RuntimeBindings::number", "polyspec_template::RuntimeBindings::equal", "polyspec_template::RuntimeBindings::compare", "polyspec_template::RuntimeBindings::depth", "polyspec_template::RuntimeBindings::call"]}, {"implementation": "php", "symbols": ["Polyspec\\Template\\Render\\RuntimeBindings::truthy", "Polyspec\\Template\\Render\\RuntimeBindings::stringify", "Polyspec\\Template\\Render\\RuntimeBindings::number", "Polyspec\\Template\\Render\\RuntimeBindings::equal", "Polyspec\\Template\\Render\\RuntimeBindings::compare", "Polyspec\\Template\\Render\\RuntimeBindings::depth", "Polyspec\\Template\\Render\\RuntimeBindings::call"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\Render\\RuntimeBindings::truthy", "Polyspec\\Template\\Render\\RuntimeBindings::stringify", "Polyspec\\Template\\Render\\RuntimeBindings::number", "Polyspec\\Template\\Render\\RuntimeBindings::equal", "Polyspec\\Template\\Render\\RuntimeBindings::compare", "Polyspec\\Template\\Render\\RuntimeBindings::depth", "Polyspec\\Template\\Render\\RuntimeBindings::call"]}, {"implementation": "python", "symbols": ["template.runtime_bindings.RuntimeBindings.truthy", "template.runtime_bindings.RuntimeBindings.stringify", "template.runtime_bindings.RuntimeBindings.number", "template.runtime_bindings.RuntimeBindings.equal", "template.runtime_bindings.RuntimeBindings.compare", "template.runtime_bindings.RuntimeBindings.depth", "template.runtime_bindings.RuntimeBindings.call"]}]},
+    {"id": "api-internal-error-boundary", "requirements": ["ERR-12", "ERR-13"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!internalBoundary:function(1)"}, {"implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/render.Guard", "github.com/polyspec/template/packages/go/render.Internal", "github.com/polyspec/template/packages/go/errs.FromPanic"]}, {"implementation": "rust", "symbol": "polyspec_template::internal_boundary"}, {"implementation": "php", "symbols": ["Polyspec\\Template\\InternalBoundary", "Polyspec\\Template\\InternalBoundary::run"]}, {"implementation": "php-ext", "symbols": ["Polyspec\\Template\\InternalBoundary", "Polyspec\\Template\\InternalBoundary::run"]}, {"implementation": "python", "symbols": ["template.internal_boundary", "template.errors.internal_boundary"]}]},
+    {"id": "api-runtime-counter-kind", "requirements": ["RT-35"], "kind": "api", "symbols": [{"implementation": "ts", "symbol": "@polyspec/template!RuntimeLimit:type"}, {"implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings.Limit"}, {"implementation": "rust", "symbol": "polyspec_template::RuntimeBindings::limit"}, {"implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::limit"}, {"implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings::limit"}, {"implementation": "python", "symbol": "template.runtime_bindings.RuntimeBindings.limit"}]}
   ]
 }

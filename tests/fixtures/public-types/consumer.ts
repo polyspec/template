@@ -80,3 +80,6 @@ export const safePayload: string = safeText.text;
 export const nativeValues: ListValue = [null, true, 12.5, 'é😀', safeText, [], new Map(), new NativeObject({ field: 'value' })];
 export const orderedValues: MapValue = new Map<string, Value>([['first', nativeValues], ['second', false]]);
 export const collectionValue: Value = orderedValues;
+
+import * as nodeSDK from "@polyspec/template/node";
+export const completeNodeSDK: typeof import("@polyspec/template") = nodeSDK;

@@ -25,17 +25,17 @@ func bindError(code errs.Code, format string, args ...any) *BindError {
 	return &BindError{Code: code, Message: fmt.Sprintf(format, args...)}
 }
 
-// CheckInteger rejects an integer whose magnitude is greater than 2^53 - 1 (VAL-2).
-func CheckInteger(i int64) (float64, error) {
+// checkInteger rejects an integer whose magnitude is greater than 2^53 - 1 (VAL-2).
+func checkInteger(i int64) (float64, error) {
 	if i > MaxSafe || i < -MaxSafe {
 		return 0, bindError(errs.DataNumberRange, "integer %d is outside the safe range", i)
 	}
 	return float64(i), nil
 }
 
-// CheckFloat rejects a number that is not finite (VAL-3) or whose magnitude is greater than
+// checkFloat rejects a number that is not finite (VAL-3) or whose magnitude is greater than
 // 2^53 - 1 (VAL-2).
-func CheckFloat(f float64) (float64, error) {
+func checkFloat(f float64) (float64, error) {
 	if math.IsNaN(f) || math.IsInf(f, 0) {
 		return 0, bindError(errs.DataNumberNotFinite, "number is not finite")
 	}
@@ -45,9 +45,9 @@ func CheckFloat(f float64) (float64, error) {
 	return f, nil
 }
 
-// CheckLevel rejects a list or map entered at a level greater than the limit (VAL-20). The level
+// checkLevel rejects a list or map entered at a level greater than the limit (VAL-20). The level
 // counts the enclosing lists and maps, including the one being entered.
-func CheckLevel(level int) error {
+func checkLevel(level int) error {
 	if level > MaxDepth {
 		return bindError(errs.DataDepth, "lists and maps nest deeper than %d levels", MaxDepth)
 	}
@@ -81,15 +81,15 @@ func bindAt(input any, level int) (Value, error) {
 	case bool:
 		return x, nil
 	case int:
-		return CheckInteger(int64(x))
+		return checkInteger(int64(x))
 	case int8:
-		return CheckInteger(int64(x))
+		return checkInteger(int64(x))
 	case int16:
-		return CheckInteger(int64(x))
+		return checkInteger(int64(x))
 	case int32:
-		return CheckInteger(int64(x))
+		return checkInteger(int64(x))
 	case int64:
-		return CheckInteger(x)
+		return checkInteger(x)
 	case uint:
 		if uint64(x) > MaxSafe {
 			return nil, bindError(errs.DataNumberRange, "integer %d is outside the safe range", x)
@@ -107,15 +107,15 @@ func bindAt(input any, level int) (Value, error) {
 		}
 		return float64(x), nil
 	case float32:
-		return CheckFloat(float64(x))
+		return checkFloat(float64(x))
 	case float64:
-		return CheckFloat(x)
+		return checkFloat(x)
 	case string:
 		return checkText(x)
 	case SafeString:
 		return checkText(x.Text)
 	case *OrderedMap:
-		if err := CheckLevel(level + 1); err != nil {
+		if err := checkLevel(level + 1); err != nil {
 			return nil, err
 		}
 		out := NewOrderedMap()
@@ -149,7 +149,7 @@ func bindAt(input any, level int) (Value, error) {
 		if rv.Type().Key().Kind() != reflect.String {
 			return nil, bindError(errs.DataUnsupportedType, "map key is not a string")
 		}
-		if err := CheckLevel(level + 1); err != nil {
+		if err := checkLevel(level + 1); err != nil {
 			return nil, err
 		}
 		keys := rv.MapKeys()
@@ -183,7 +183,7 @@ func bindAt(input any, level int) (Value, error) {
 		}
 		// A pointer to another kind binds the value it points to; the dereference counts as one
 		// level, so a pointer that leads back to itself stops at the depth limit (VAL-20).
-		if err := CheckLevel(level + 1); err != nil {
+		if err := checkLevel(level + 1); err != nil {
 			return nil, err
 		}
 		return bindAt(rv.Elem().Interface(), level+1)
@@ -192,7 +192,7 @@ func bindAt(input any, level int) (Value, error) {
 }
 
 func bindSlice(rv reflect.Value, level int) (Value, error) {
-	if err := CheckLevel(level + 1); err != nil {
+	if err := checkLevel(level + 1); err != nil {
 		return nil, err
 	}
 	out := make(List, rv.Len())

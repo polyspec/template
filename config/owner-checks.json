@@ -1129,7 +1129,9 @@
         "packages/php/src/**",
         "packages/php-ext/src/polyspec_template.stub.php",
         "config/parity.json",
-        "tests/scripts/public-api-declarations.mts"
+        "tests/scripts/public-api-declarations.mts",
+        "scripts/php-toolchain.mts",
+        "config/toolchain.json"
       ],
       "targets": [
         "template-test-scripts"
@@ -1228,6 +1230,22 @@
       ],
       "tests": [
         "tests/scripts/public-api-declarations.test.mts"
+      ]
+    },
+    {
+      "paths": [
+        "scripts/php-toolchain.mts",
+        "tests/scripts/php-toolchain.test.mts",
+        "config/toolchain.json"
+      ],
+      "targets": [
+        "template-test-scripts",
+        "function-contract-check"
+      ],
+      "tests": [
+        "tests/scripts/php-toolchain.test.mts",
+        "tests/scripts/php-public-api.test.mts",
+        "tests/scripts/function-contract-registries.test.mts"
       ]
     }
   ],
@@ -1338,7 +1356,9 @@
       "check": "make function-contract-registries-check",
       "paths": [
         "packages/compiler/functions.json",
-        "scripts/check-function-contract.mts"
+        "scripts/check-function-contract.mts",
+        "scripts/php-toolchain.mts",
+        "config/toolchain.json"
       ]
     },
     {
@@ -1926,7 +1946,10 @@
         "tests/scripts/public-api-declarations.mts",
         "tests/scripts/python-public-api.test.mts",
         "packages/python/src/**",
-        "tests/scripts/public-api-declarations.test.mts"
+        "tests/scripts/public-api-declarations.test.mts",
+        "scripts/php-toolchain.mts",
+        "config/toolchain.json",
+        "tests/scripts/php-toolchain.test.mts"
       ]
     }
   ]

@@ -1,4 +1,4 @@
-package expr_test
+package render
 
 import (
 	"encoding/json"
@@ -13,7 +13,6 @@ import (
 	"github.com/polyspec/template/packages/go/internal/expr"
 	"github.com/polyspec/template/packages/go/internal/functions"
 	"github.com/polyspec/template/packages/go/internal/lexer"
-	"github.com/polyspec/template/packages/go/render"
 	"github.com/polyspec/template/packages/go/value"
 )
 
@@ -86,7 +85,7 @@ func expressionFixtures(t testing.TB) []exprCase {
 
 func TestExpressionFixtures(t *testing.T) {
 	cases := expressionFixtures(t)
-	engine, err := render.NewEngine(render.Options{}, func() float64 { return 0 })
+	engine, err := NewEngine(Options{}, func() float64 { return 0 })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,9 +135,9 @@ func TestExpressionFixtures(t *testing.T) {
 				if err != nil {
 					t.Fatal(err)
 				}
-				context := render.NewContext(engine, root, functions.Env{Timezone: "Z"}, "expression")
-				frame := render.NewFrame("expression", nil, root)
-				result, err := render.NewEvaluator(context).EvaluateIn(tree, frame, render.NewScope())
+				context := NewContext(engine, root, functions.Env{Timezone: "Z"}, "expression")
+				frame := NewFrame("expression", nil, root)
+				result, err := newEvaluator(context).evaluateIn(tree, frame, NewScope())
 				if err != nil {
 					t.Fatalf("case %d: %v", i, err)
 				}

@@ -33,7 +33,7 @@ test('a Go consumer can name parser analysis types through the SDK', { timeout: 
   assert.equal(result.status, 0, result.stderr);
 });
 
-for (const file of ['private-builtins.go', 'internal-builtins.go', 'private-lexer.go', 'private-parser.go', 'private-expression.go']) {
+for (const file of ['private-builtins.go', 'internal-builtins.go', 'private-lexer.go', 'private-parser.go', 'private-expression.go', 'private-evaluator.go', 'private-renderer.go']) {
   test(`a Go consumer cannot import an implementation through ${file}`, { timeout: 30_000 }, () => {
     const result = compile(file);
     assert.equal(result.error, undefined);
@@ -47,4 +47,7 @@ test('every declared Go API reference exists in the native model', { timeout: 30
   assert.equal(result.status, 0, result.error?.message ?? result.stderr);
   const found = new Set(jsonDocument<string[]>('Go SDK model', { type: 'array', items: { type: 'string' } }).parse(result.stdout, 'Go symbols'));
   assert.deepEqual(declaredApiSymbols('go').filter(symbol => !found.has(symbol)), []);
+  for (const name of ['CheckFloat', 'CheckInteger', 'CheckLevel', 'CheckJSON', 'CompareCodePoints', 'ShortestDigits', 'Positional', 'RoundDecimal']) {
+    assert.equal(found.has(`github.com/polyspec/template/packages/go/value.${name}`), false, `${name} is private conversion machinery`);
+  }
 });

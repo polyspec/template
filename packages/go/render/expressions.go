@@ -8,34 +8,34 @@ import (
 	"github.com/polyspec/template/packages/go/value"
 )
 
-// Evaluator evaluates expressions (docs/spec/expressions.md).
-type Evaluator struct {
+// evaluator evaluates expressions (docs/spec/expressions.md).
+type evaluator struct {
 	context *Context
 	runtime *RuntimeBindings
 	depth   int
 	scope   *Scope
 }
 
-// NewEvaluator creates an evaluator.
-func NewEvaluator(context *Context) *Evaluator {
-	return &Evaluator{context: context, runtime: NewRuntimeBindings(context), scope: NewScope()}
+// newEvaluator creates an evaluator.
+func newEvaluator(context *Context) *evaluator {
+	return &evaluator{context: context, runtime: NewRuntimeBindings(context), scope: NewScope()}
 }
 
-// EvaluateIn evaluates with an explicit local and loop scope.
-func (e *Evaluator) EvaluateIn(expr ast.Expr, frame *Frame, scope *Scope) (value.Value, error) {
+// evaluateIn evaluates with an explicit local and loop scope.
+func (e *evaluator) evaluateIn(expr ast.Expr, frame *Frame, scope *Scope) (value.Value, error) {
 	e.scope = scope
-	return e.Evaluate(expr, frame)
+	return e.evaluate(expr, frame)
 }
 
-func (e *Evaluator) fail(frame *Frame, span ast.Span, code errs.Code, message string) error {
+func (e *evaluator) fail(frame *Frame, span ast.Span, code errs.Code, message string) error {
 	return e.runtime.Error(frame, span, code, message)
 }
 
 // evaluateAll evaluates the argument expressions of a call in order.
-func (e *Evaluator) evaluateAll(exprs []ast.Expr, frame *Frame) ([]value.Value, error) {
+func (e *evaluator) evaluateAll(exprs []ast.Expr, frame *Frame) ([]value.Value, error) {
 	args := make([]value.Value, len(exprs))
 	for i, expr := range exprs {
-		v, err := e.Evaluate(expr, frame)
+		v, err := e.evaluate(expr, frame)
 		if err != nil {
 			return nil, err
 		}
@@ -44,8 +44,8 @@ func (e *Evaluator) evaluateAll(exprs []ast.Expr, frame *Frame) ([]value.Value, 
 	return args, nil
 }
 
-// Evaluate evaluates an expression in a frame.
-func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
+// evaluate evaluates an expression in a frame.
+func (e *evaluator) evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	e.depth++
 	defer func() { e.depth-- }()
 	if err := e.runtime.Limit("expression", e.depth, frame, ast.SpanOf(expr)); err != nil {
@@ -77,13 +77,13 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		}
 		return nil, nil
 	case *ast.Member:
-		object, err := e.Evaluate(n.Object, frame)
+		object, err := e.evaluate(n.Object, frame)
 		if err != nil {
 			return nil, err
 		}
 		return e.runtime.Member(object, n.Key, frame, n.Span)
 	case *ast.MemberCall:
-		object, err := e.Evaluate(n.Object, frame)
+		object, err := e.evaluate(n.Object, frame)
 		if err != nil {
 			return nil, err
 		}
@@ -99,11 +99,11 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		}
 		return e.runtime.ClassCall(n.ClassName, n.Method, args, frame, n.Span)
 	case *ast.Index:
-		object, err := e.Evaluate(n.Object, frame)
+		object, err := e.evaluate(n.Object, frame)
 		if err != nil {
 			return nil, err
 		}
-		key, err := e.Evaluate(n.Index, frame)
+		key, err := e.evaluate(n.Index, frame)
 		if err != nil {
 			return nil, err
 		}
@@ -115,7 +115,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		}
 		return e.runtime.Call(n.Name, args, frame, n.Span)
 	case *ast.Unary:
-		operand, err := e.Evaluate(n.Operand, frame)
+		operand, err := e.evaluate(n.Operand, frame)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	case *ast.Binary:
 		return e.binary(n, frame)
 	case *ast.Ternary:
-		test, err := e.Evaluate(n.Test, frame)
+		test, err := e.evaluate(n.Test, frame)
 		if err != nil {
 			return nil, err
 		}
@@ -131,14 +131,14 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			if n.Then == nil {
 				return test, nil
 			}
-			return e.Evaluate(n.Then, frame)
+			return e.evaluate(n.Then, frame)
 		}
-		return e.Evaluate(n.Else, frame)
+		return e.evaluate(n.Else, frame)
 	case *ast.List:
 		list := value.List{}
 		for _, item := range n.Items {
 			if spread, ok := item.(*ast.Spread); ok {
-				v, err := e.Evaluate(spread.Expr, frame)
+				v, err := e.evaluate(spread.Expr, frame)
 				if err != nil {
 					return nil, err
 				}
@@ -153,7 +153,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			if !ok {
 				return nil, fmt.Errorf("list item of type %T is not an expression", item)
 			}
-			v, err := e.Evaluate(itemExpr, frame)
+			v, err := e.evaluate(itemExpr, frame)
 			if err != nil {
 				return nil, err
 			}
@@ -164,7 +164,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 		m := value.NewOrderedMap()
 		for _, entry := range n.Entries {
 			if spread, ok := entry.(*ast.Spread); ok {
-				v, err := e.Evaluate(spread.Expr, frame)
+				v, err := e.evaluate(spread.Expr, frame)
 				if err != nil {
 					return nil, err
 				}
@@ -181,7 +181,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			if !ok {
 				return nil, fmt.Errorf("map entry of type %T is not a key and value", entry)
 			}
-			keyValue, err := e.Evaluate(pair.Key, frame)
+			keyValue, err := e.evaluate(pair.Key, frame)
 			if err != nil {
 				return nil, err
 			}
@@ -189,7 +189,7 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 			if err != nil {
 				return nil, err
 			}
-			v, err := e.Evaluate(pair.Value, frame)
+			v, err := e.evaluate(pair.Value, frame)
 			if err != nil {
 				return nil, err
 			}
@@ -200,49 +200,49 @@ func (e *Evaluator) Evaluate(expr ast.Expr, frame *Frame) (value.Value, error) {
 	return nil, e.fail(frame, ast.SpanOf(expr), errs.RuntimeType, "unknown expression node")
 }
 
-func (e *Evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
+func (e *evaluator) binary(n *ast.Binary, frame *Frame) (value.Value, error) {
 	switch n.Op {
 	case "&&":
-		left, err := e.Evaluate(n.Left, frame)
+		left, err := e.evaluate(n.Left, frame)
 		if err != nil {
 			return nil, err
 		}
 		if !e.runtime.Truthy(left) {
 			return false, nil
 		}
-		right, err := e.Evaluate(n.Right, frame)
+		right, err := e.evaluate(n.Right, frame)
 		if err != nil {
 			return nil, err
 		}
 		return e.runtime.Truthy(right), nil
 	case "||":
-		left, err := e.Evaluate(n.Left, frame)
+		left, err := e.evaluate(n.Left, frame)
 		if err != nil {
 			return nil, err
 		}
 		if e.runtime.Truthy(left) {
 			return true, nil
 		}
-		right, err := e.Evaluate(n.Right, frame)
+		right, err := e.evaluate(n.Right, frame)
 		if err != nil {
 			return nil, err
 		}
 		return e.runtime.Truthy(right), nil
 	case "??":
-		left, err := e.Evaluate(n.Left, frame)
+		left, err := e.evaluate(n.Left, frame)
 		if err != nil {
 			return nil, err
 		}
 		if left != nil {
 			return left, nil
 		}
-		return e.Evaluate(n.Right, frame)
+		return e.evaluate(n.Right, frame)
 	}
-	left, err := e.Evaluate(n.Left, frame)
+	left, err := e.evaluate(n.Left, frame)
 	if err != nil {
 		return nil, err
 	}
-	right, err := e.Evaluate(n.Right, frame)
+	right, err := e.evaluate(n.Right, frame)
 	if err != nil {
 		return nil, err
 	}

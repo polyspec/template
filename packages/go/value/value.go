@@ -93,8 +93,8 @@ func CodePointLength(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
-// CompareCodePoints compares two strings by code point sequence (VAL-5).
-func CompareCodePoints(a, b string) int {
+// compareCodePoints compares two strings by code point sequence (VAL-5).
+func compareCodePoints(a, b string) int {
 	return strings.Compare(a, b)
 }
 
@@ -220,7 +220,7 @@ func Compare(a, b Value) (order int, ok bool) {
 	}
 	if x, isStr := TextOf(a); isStr {
 		if y, isStr2 := TextOf(b); isStr2 {
-			return CompareCodePoints(x, y), true
+			return compareCodePoints(x, y), true
 		}
 	}
 	return 0, false

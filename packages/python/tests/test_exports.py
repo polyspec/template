@@ -25,6 +25,9 @@ from polyspec.template import (
     format_indent,
     format_invariant,
     statements,
+    escape,
+    stringify,
+    cli,
     block_tag,
     scanner,
     standalone,
@@ -83,6 +86,9 @@ class ExportTests(unittest.TestCase):
             format_indent,
             format_invariant,
             statements,
+            escape,
+            stringify,
+            cli,
         )
         for module in internal:
             with self.subTest(module.__name__):

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 054f11098db31e7ff079b78ce3deca58059ccfb80bec04a46c93963fba491b62 -->
+<!-- source-sha256: 3c01742e578f3f5bb8a91af0ccb9bff086ff010db0ec6307f02a70a14e262a77 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -299,6 +299,8 @@ Go parser adapter는 같은 `Open`/`Close` 데이터의 alias인 `template.Delim
 
 - **RT-73** API의 연산이 실행 중 읽는 데이터는 자기 생태계가 데이터를 싣는 방식으로 package 안에 실려, 설치된 package가 자기 밖의 파일을 읽지 않는다: AST schema(AST-10)는 npm package의 검증기에 묶이고, Go package(`embed`), crate(`include_str!`), PHP extension에 내장되며, Python 배포물의 package data와 Composer package의 resource로 실린다. package의 test는 repository의 파일이 하나도 없는 곳에서 이 데이터로 decode한다.
 - **RT-74** package의 모든 진입점과 모든 module 형식은 같은 runtime을 공유한다: 그 가운데 하나가 만든 bound map(VAL-22)을 다른 모든 것의 program이 받아들이며, module 형식이 하나인 package(Go와 Python의 루트와 하위 package, crate의 module, Composer package의 class)의 진입점도 runtime의 사본을 두지 않는다. npm package는 전체, render 전용, Node.js 진입점의 ECMAScript module 빌드와 CommonJS 빌드를 가진다.
+
+Node.js 진입점은 전체 SDK를 재공개하고 파일시스템/artifact 서비스를 더한다. 공개 선언은 같은 runtime 타입을 포함하여 consumer가 시그니처의 모든 타입을 명명할 수 있다. 공개 API 추출은 이 완전한 공개 진입점을 읽으며 root·render-only 직접 consumer도 컴파일하고 여섯 runtime 진입점/module 형식 조합이 runtime을 복제하지 않고 bound map을 교환한다.
 
 구체 AST program은 공개 interface와 같은 prepare/render·runtime-service 계약을 구현한다. 같은 소유 runtime과 limit을 통해 등록·callback 조회를 제공한다. TypeScript는 parser를 연결한 생성자와 render-only 생성자를, Go는 parser를 연결한 program과 내장 render engine을 공개하며 Python·PHP·PHP 확장·Rust는 네이티브 구체 program을 공개한다. 공개 loader/runtime/refresh-policy 상태는 네이티브 소유권 표현에 속하며 명명할 수 있는 구분자 상태도 노출한다.
 

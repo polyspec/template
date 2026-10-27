@@ -647,7 +647,10 @@ interface PreparedExecution
     public function render(): string;
 }
 
-/** Prepared AST interpreter execution. */
+/**
+ * Prepared AST interpreter execution.
+ * @internal
+ */
 final class AstPreparedExecution implements PreparedExecution
 {
     /** Creates an AST execution from normalized request state. */

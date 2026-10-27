@@ -1,8 +1,12 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: a33cfe42423d29892eb06d714fbfc62da889f1ab413b6e1bcea2788fe1879391 -->
+<!-- source-sha256: bae63c29d86956ce1868b595b02347b64394eea0dd7c244b3f1acacec1422fb4 -->
 # 개발
 
 [English](/operations/development).
+
+독립 PHP 검사 도구는 설치한 `var/tools/bin/php` 래퍼를 사용하고 릴리즈를 `config/toolchain.json`과 비교하며 들어온 셸 경로에서 PHP를 선택하지 않는다. PHP 확장 생성/빌드·네이티브 테스트는 같은 설치 도구 세트를 사용한다. 다른 시스템 PHP에 대한 셸 조회는 이 target이 사용한 인터프리터의 증거가 아니다.
+
+PHP 라이브러리 요구사항은 `>=8.4`(`>=8.4.0`과 동등)로 유지한다. 개발/검증 기준은 PHP `8.4.27`이며 Windows 설치 기준은 `8.4.27-1`이다. 개발 patch를 올려도 라이브러리의 최소 지원 버전을 올리지 않는다.
 
 ## 툴체인
 
