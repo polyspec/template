@@ -23,3 +23,17 @@ pub fn configurations() -> (polyspec_template::EngineOptions, polyspec_template:
     };
     (engine, request)
 }
+
+pub fn values(object: std::sync::Arc<dyn polyspec_template::TemplateObject>) -> Vec<Value> {
+    use polyspec_template::OrderedMap;
+    let mut map = OrderedMap::with_capacity(2);
+    map.insert("first".into(), Value::Null);
+    map.insert("second".into(), Value::Bool(false));
+    let _ = (map.get("first"), map.contains_key("first"), map.len(), map.is_empty());
+    let _ = (map.iter().count(), map.keys().count(), map.values().count());
+    let _ = map.remove("missing");
+    vec![Value::Null, Value::Bool(true), Value::Number(12.5), Value::Str("é😀".into()),
+        Value::Safe("<i>".into()), Value::List(std::sync::Arc::new(vec![])),
+        Value::Map(std::sync::Arc::new(map)), Value::Object(object),
+        Value::text("plain"), Value::safe_text("<i>"), Value::list(vec![]), Value::map(OrderedMap::new())]
+}

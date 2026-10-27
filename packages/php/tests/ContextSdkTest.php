@@ -17,6 +17,29 @@ use Polyspec\Template\Value\MapValue;
 /** RT-74, RT-22, RT-35, ERR-2: public render state works without a program. */
 final class ContextSdkTest extends TestCase
 {
+    /** VAL-1, VAL-4, VAL-6: native carrier snapshots keep insertion order and shared payloads. */
+    public function testOrderedValueSdkCarriers(): void
+    {
+        $safe = new \Polyspec\Template\Value\SafeString('<i>');
+        $values = new MapValue();
+        $values->set('first', $safe);
+        $values->set('second', false);
+        $values->set('first', $safe);
+        $copy = $values->copy();
+        $copy->set('third', null);
+        $keys = $values->keys();
+        $keys[0] = 'changed';
+        self::assertSame(['first', 'second'], $values->keys());
+        self::assertSame(2, $values->count());
+        self::assertTrue($values->has('first'));
+        self::assertNull($values->get('missing'));
+        self::assertSame($safe, $copy->get('first'));
+        self::assertSame('<i>', $safe->text);
+        $copy->remove('second');
+        self::assertSame([$safe, null], $copy->values());
+        self::assertSame([['first', $safe], ['third', null]], $copy->entries());
+    }
+
     /** RT-1, RT-5, RT-6, RT-74: concrete operations implement the same public runtime/program protocols. */
     public function testAstProgramProtocols(): void
     {

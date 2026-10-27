@@ -3,6 +3,34 @@ use polyspec_template::{DefineEntry, Env, ErrorCode, Frame, Limits, LineIndex, O
 use std::collections::HashMap;
 use std::sync::Arc;
 
+/// VAL-1, VAL-4, VAL-6: insertion order, shallow copies and safe payloads are public data.
+#[test]
+fn ordered_value_sdk_carriers() {
+    use polyspec_template::Value;
+    let safe = Value::safe_text("<i>");
+    let mut values = OrderedMap::with_capacity(2);
+    assert!(values.is_empty());
+    values.insert("first".into(), safe.clone());
+    values.insert("second".into(), Value::Bool(false));
+    values.insert("first".into(), safe.clone());
+    let mut copy = values.clone();
+    copy.insert("third".into(), Value::Null);
+    let mut keys = values.keys().cloned().collect::<Vec<_>>();
+    keys[0] = "changed".into();
+    assert_eq!(values.keys().cloned().collect::<Vec<_>>(), vec!["first", "second"]);
+    assert_eq!(values.len(), 2);
+    assert!(values.contains_key("first"));
+    assert!(values.get("missing").is_none());
+    assert_eq!(copy.get("first"), Some(&safe));
+    assert_eq!(safe.as_text(), Some("<i>"));
+    assert_eq!(copy.remove("second"), Some(Value::Bool(false)));
+    assert_eq!(copy.values().cloned().collect::<Vec<_>>(), vec![safe.clone(), Value::Null]);
+    assert_eq!(
+        copy.iter().map(|(key, value)| (key.as_str(), value.clone())).collect::<Vec<_>>(),
+        vec![("first", safe), ("third", Value::Null)]
+    );
+}
+
 /// RT-1, RT-5, RT-6, RT-74: concrete AST operations share the Program/runtime-service contracts.
 #[test]
 fn ast_program_protocols() {

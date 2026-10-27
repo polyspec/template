@@ -24,11 +24,17 @@ This document defines the value types that templates operate on, the safe string
 
 - **VAL-4** A map preserves the insertion order of its entries in every implementation. Iteration, `keys`, `values` and `json` follow that order.
 
+Native SDK values use the `Value`/list/map types of TypeScript, Go and Rust, ordinary Python values, and the validated host values of PHP and the PHP extension. Ordered maps are a TypeScript `Map`, a Go or Rust `OrderedMap`, a `MapValue` in PHP and the PHP extension, or a Python `dict` returned by map binding. Native factories and container protocols retain insertion order; replacing a key retains its position. A shallow copy has independent keys and retains its value payloads. Editing a materialized key list cannot change the source map.
+
+
 - **VAL-5** A string is measured, indexed and sliced by Unicode code points. Two strings are ordered by comparing their code point sequences element by element; a shorter string that is a prefix of a longer string orders first.
 
 ## Safe string
 
 - **VAL-6** A safe string is a string that carries a safe mark. The functions `raw` and `escape` return safe strings. An echo tag writes a safe string without escaping. In every other position a safe string behaves as a string: functions, operators, `==` and `in` read its text and ignore the mark, and a function that returns a string returns a plain string.
+
+The native safe-text carrier is `SafeString` with its text payload in TypeScript, Go, Python, PHP and the PHP extension; Rust uses `Value::Safe`, `Value::safe_text` and the native text projection. These carriers describe runtime values; constructing one does not change the host-binding rule of VAL-7.
+
 
 - **VAL-7** Host binding never produces a safe string. A host function that returns a string returns a plain string, as defined in [Functions](functions.md).
 

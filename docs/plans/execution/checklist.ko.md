@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 71730e2f89adbf1d087ed3b15dd2dde3f56bc494e06a89f2b911c7c023f111c8 -->
+<!-- source-sha256: 0d6fd0c2cecf7583bd530214a561897d1db7c4508b569c32b9f2f8759b2973f6 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -434,3 +434,4 @@
 | T27.1-1-51 | 공개 parsed-template carrier·parser callback·AST-program loading을 정확한 네이티브 API 집합으로 선언하고 모든 SDK에서 소스 줄 인덱스·소스 없는 AST·cache 재사용을 검증한다 | Parsed template 데이터 계약·네이티브 loader 단위 검사 | 여섯 SDK loader 단위 검사·네이티브 model 참조·`make parity-declarations-check`·lint·`make docs-check` | [o] |
 | T27.1-1-52 | AST-program 생성·네이티브 상태 소유권·구체 Program/runtime-service facade를 선언하고 네이티브 SDK에서 등록·callback 조회·limit·prepared/direct rendering을 검증한다 | 구체 AST-program protocol·SDK consumer | SDK 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-53 | 네이티브 engine/render option record·refresh-policy 값·callback 환경 시그니처를 선언하고 공개 설정 consumer를 컴파일하며 기존 option 검증을 유지한다 | 설정 carrier·callback host 형식 | SDK/option 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
+| T27.1-1-54 | 공개 value/safe-string·삽입 순서 map carrier와 네이티브 factory·container protocol을 선언하고 Go 키 조회가 map 상태를 변경하지 않도록 하고 외부 타입 consumer·네이티브 value 단위 검사로 검증한다 | 네이티브 값 표현·삽입 순서 보존 | 공개 consumer/value 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |

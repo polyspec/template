@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 65c564342936b252a3fc74ba4f1962112bcc9fcef8e375970d620bfafbbdabb1 -->
+<!-- source-sha256: 3711966b91bfb9731bd9908a6a9cd739addaa259e3538d37a7daf726ad3041cc -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -25,11 +25,17 @@
 
 - **VAL-4** map은 모든 구현에서 항목의 삽입 순서를 유지한다. 반복, `keys`, `values`, `json`은 그 순서를 따른다.
 
+네이티브 SDK 값은 TypeScript·Go·Rust의 `Value`/list/map 타입, 일반 Python 값, 검증한 PHP/PHP 확장 host 값으로 표현한다. 순서 있는 map은 TypeScript `Map`, Go·Rust `OrderedMap`, PHP·PHP 확장 `MapValue`, map binding이 반환하는 Python `dict`이다. 네이티브 factory·container protocol은 삽입 순서를 보존하고 기존 키의 값을 바꾸어도 위치를 유지한다. 얕은 복사는 키가 독립적이며 값 payload를 유지한다. 구체화한 키 목록을 수정해도 원본 map이 바뀌지 않는다.
+
+
 - **VAL-5** string은 유니코드 코드포인트 단위로 길이를 재고, 인덱싱하고, 자른다. 두 string은 코드포인트 열을 원소별로 비교해 순서를 정한다. 더 긴 string의 접두사인 더 짧은 string이 앞선다.
 
 ## safe 문자열
 
 - **VAL-6** safe 문자열은 safe 표시를 가진 string이다. 함수 `raw`와 `escape`는 safe 문자열을 반환한다. echo 태그는 safe 문자열을 이스케이프하지 않고 쓴다. 그 외 모든 위치에서 safe 문자열은 string으로 동작한다: 함수, 연산자, `==`, `in`은 그 텍스트를 읽고 표시를 무시하며, string을 반환하는 함수는 일반 string을 반환한다.
+
+네이티브 safe-text carrier는 TypeScript·Go·Python·PHP·PHP 확장에서 text payload를 가진 `SafeString`이며 Rust에서는 `Value::Safe`·`Value::safe_text`·네이티브 text projection을 사용한다. 이 carrier는 runtime 값을 표현하며 이를 생성해도 VAL-7의 host-binding 규칙은 바뀌지 않는다.
+
 
 - **VAL-7** 호스트 바인딩은 safe 문자열을 생성하지 않는다. string을 반환하는 호스트 함수는 [함수](/ko/spec/functions)에 정의된 대로 일반 string을 반환한다.
 

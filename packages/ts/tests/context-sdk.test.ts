@@ -5,6 +5,26 @@ import { RenderContext, RuntimeEnvironment, Frame, TemplateError } from '@polysp
 import { AstProgram as RenderProgram } from '@polyspec/template/render';
 
 describe('context SDK', () => {
+  // VAL-1, VAL-4, VAL-6: native carriers preserve key order and shallow-copy isolation.
+  it('preserves ordered value carriers and safe-text payloads', () => {
+    const safe = new sdk.SafeString('<i>');
+    const values: sdk.MapValue = new Map<string, sdk.Value>([['first', safe], ['second', false]]);
+    values.set('first', safe);
+    const copy = new Map(values);
+    copy.set('third', null);
+    const keys = [...values.keys()];
+    keys[0] = 'changed';
+    expect([...values.keys()]).toEqual(['first', 'second']);
+    expect(values.size).toBe(2);
+    expect(values.has('first')).toBe(true);
+    expect(values.get('missing')).toBeUndefined();
+    expect(copy.get('first')).toBe(safe);
+    expect(safe.text).toBe('<i>');
+    expect(copy.delete('second')).toBe(true);
+    expect([...copy.values()]).toEqual([safe, null]);
+    expect([...copy.entries()]).toEqual([['first', safe], ['third', null]]);
+  });
+
   it('publishes the concrete AST program through Program and runtime services (RT-1, RT-74)', () => {
     const loader = new sdk.MapLoader({ 'a.tpl': '{= hello()}|{= Box::value()}' });
     const program = new sdk.AstProgram({ loader });

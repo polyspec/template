@@ -11,6 +11,31 @@ import (
 	"testing"
 )
 
+// VAL-1, VAL-4, VAL-6: public map carriers retain key order and independent snapshots.
+func TestOrderedValueSDKCarriers(t *testing.T) {
+	safe := template.SafeString{Text: "<i>"}
+	values := template.NewOrderedMap()
+	values.Set("first", safe)
+	values.Set("second", false)
+	values.Set("first", safe)
+	copy := values.Clone()
+	copy.Set("third", nil)
+	keys := values.Keys()
+	keys[0] = "changed"
+	if !reflect.DeepEqual(values.Keys(), []string{"first", "second"}) {
+		t.Fatal("key snapshot changed its map")
+	}
+	if values.Len() != 2 || !values.Has("first") {
+		t.Fatal("map changed")
+	}
+	if _, ok := values.Get("missing"); ok {
+		t.Fatal("missing key exists")
+	}
+	if copy.MustGet("first") != safe || safe.Text != "<i>" || !reflect.DeepEqual(copy.Keys(), []string{"first", "second", "third"}) {
+		t.Fatal("copy or safe value changed")
+	}
+}
+
 // RT-1, RT-5, RT-6, RT-74: the concrete AST program shares its runtime through public protocols.
 func TestAstProgramSDKProtocols(t *testing.T) {
 	program, err := template.NewAstProgram(template.Options{Loader: template.NewMapLoader(map[string]string{"a.tpl": "{= hello()}|{= Box::value()}"})})

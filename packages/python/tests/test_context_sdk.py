@@ -6,6 +6,25 @@ from polyspec import template as sdk
 
 
 class ContextSDK(unittest.TestCase):
+    def test_ordered_value_sdk_carriers(self):
+        # VAL-1, VAL-4, VAL-6: native dict snapshots preserve ordered SDK values.
+        safe = sdk.SafeString("<i>")
+        values = {"first": safe, "second": False}
+        values["first"] = safe
+        copy = values.copy()
+        copy["third"] = None
+        keys = list(values)
+        keys[0] = "changed"
+        self.assertEqual(list(values), ["first", "second"])
+        self.assertEqual(len(values), 2)
+        self.assertIn("first", values)
+        self.assertIsNone(values.get("missing"))
+        self.assertIs(copy["first"], safe)
+        self.assertEqual(safe.text, "<i>")
+        del copy["second"]
+        self.assertEqual(list(copy.values()), [safe, None])
+        self.assertEqual(list(copy.items()), [("first", safe), ("third", None)])
+
     def test_ast_program_protocols(self):
         # RT-1, RT-5, RT-6, RT-74: concrete operations share one runtime with the public protocol.
         loader = sdk.MapLoader({"a.tpl": "{= hello()}|{= Box::value()}"})

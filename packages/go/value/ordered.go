@@ -36,9 +36,9 @@ func (m *OrderedMap) Has(key string) bool {
 	return ok
 }
 
-// Keys returns the keys in insertion order.
+// Keys returns an independent snapshot of the keys in insertion order.
 func (m *OrderedMap) Keys() []string {
-	return m.keys
+	return append([]string(nil), m.keys...)
 }
 
 // Len returns the number of entries.

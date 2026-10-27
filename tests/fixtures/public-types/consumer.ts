@@ -73,3 +73,10 @@ export const engineConfiguration: EngineOptions = {
   parse: (_source, name) => ({ ast: { type: 'Template', name, body: [], comments: [] }, lines: null }),
 };
 export const renderConfiguration: RenderOptions = { env: callbackEnvironment, define: { layout: { html: 'ready' } } };
+
+import { NativeObject, SafeString, type Value, type ListValue, type MapValue } from '@polyspec/template';
+export const safeText = new SafeString('<i>');
+export const safePayload: string = safeText.text;
+export const nativeValues: ListValue = [null, true, 12.5, 'é😀', safeText, [], new Map(), new NativeObject({ field: 'value' })];
+export const orderedValues: MapValue = new Map<string, Value>([['first', nativeValues], ['second', false]]);
+export const collectionValue: Value = orderedValues;
