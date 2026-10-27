@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 9b77835bd8d3301d36da402d18067c1124db3f1c054583b99437565f26c54ecf -->
+<!-- source-sha256: 99cfb4f870550abbe71dda268d41dc7217fd33191c1b7e255abe9e816fc1dead -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -425,3 +425,4 @@
 | T27.1-1-42 | 네이티브 AST statement/expression·리터럴 값 carrier를 선언하고 공통 decoder 데이터에 모든 리터럴 값·map spread를 추가하여 Rust·TypeScript 타입 consumer를 검증한다 | AST 합 타입·공통 fixture·SDK probe | 네이티브 decoder 단위 검사·AST 계약/consumer 검사·`make parity-declarations-check`·`make docs-check` | [o] |
 | T27.1-1-43 | 네이티브 AST decoding 실패·JSON pointer 조회·사유 텍스트 생성 형식을 선언하고 네이티브 오류 protocol·root/module identity를 검증한다 | AST decoding 오류 SDK 계약·네이티브 단위 검사 | Decoder 오류 단위 검사·네이티브 consumer/lint·`make parity-declarations-check`·`make docs-check` | [o] |
 | T27.1-1-44 | TypeScript 출력 인스턴스 계약을 interface로 공개하고 buffer 생성은 내부에 유지한다. 기존 root 타입 전용 export를 유지하고 제한된 쓰기 SDK 대응을 검증한다 | 출력 인스턴스 경계·네이티브 API model·consumer | TypeScript model/context 단위 검사·`make lint-ts`·`make parity-declarations-check`·`make docs-check` | [o] |
+| T27.1-1-45 | 공개 parse 옵션·네이티브 구분자 쌍 데이터·인자/템플릿 요청 오류 대안을 선언하고 타입 consumer·네이티브 잘못된 옵션 경계를 검증한다 | Parse 설정·요청 오류 SDK 계약 | Parser 경계/consumer 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |

@@ -8,5 +8,5 @@ func Analyze() (*template.Analysis, error) {
 	var token template.Token
 	var _ template.TagKind = tag.Kind
 	var _ template.TokenKind = token.Kind
-	return template.Analyze([]byte("hello"), "page.tpl", template.ParseOptions{})
+	return template.Analyze([]byte("[= value]"), "page.tpl", template.ParseOptions{Delimiters: "[]"})
 }

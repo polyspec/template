@@ -1,7 +1,7 @@
 // EDT-9: the tags of the analysis are the accepted tags that the editors paint.
 // Parser behavior that the fixtures do not cover directly.
 import { describe, expect, it } from 'vitest';
-import { analyze, analyzePrefix, AstProgram, parse, TemplateError } from '../../src/index.js';
+import { DelimiterOptionError, analyze, analyzePrefix, AstProgram, parse, TemplateError } from '../../src/index.js';
 
 function codeOf(fn: () => unknown): string | null {
   try {
@@ -38,6 +38,13 @@ describe('delimiters', () => {
   });
   // LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
   it('rejects a delimiter option that is not a delimiter pair with an argument error (ERR-13)', () => {
+    try { parse('x', 't.tpl', { delimiters: '[' }); throw new Error('invalid delimiters were accepted'); }
+    catch (error) {
+      expect(error).toBeInstanceOf(DelimiterOptionError);
+      if (!(error instanceof DelimiterOptionError)) throw error;
+      expect(error.name).toBe('DelimiterOptionError');
+      expect(error.message).not.toBe('');
+    }
     for (const run of [() => parse('x', 't.tpl', { delimiters: '[' }), () => new AstProgram({ delimiters: '[[[' })]) {
       expect(run).toThrow(/is not a delimiter pair/);
       expect(run).toThrow(Error);

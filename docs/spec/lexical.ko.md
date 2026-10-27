@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-lexical -->
-<!-- source-sha256: 4e686118c438830fbf7a88c19ba141b4f67cb5838082b9518574375410a8c729 -->
+<!-- source-sha256: d543e0a5161a177117306fcc0e8782a0b391d0895699308022bc569d2b56833f -->
 # 렉시컬 규칙
 
 [English](/spec/lexical).
@@ -254,3 +254,5 @@ var page = {"id":7};
 네이티브 생성 형식은 TypeScript의 `Source.fromBytes`·`fromText`, Go의 `source.FromBytes`·`FromText`, Rust의 `Source::from_bytes`·`from_text`, PHP·PHP 확장의 `Source::fromBytes`·`fromText`, Python의 `Source.from_bytes`·`from_text` 또는 바이트 생성자다. 잘못된 바이트 생성에서 Go·Rust는 오류 반환을, 나머지 SDK는 네이티브 예외를 사용한다. Native index 실패는 호스트의 인자 실패 방식을 따른다. 모든 SDK는 반복 BOM·잘못된 UTF-8을 포함한 `tests/fixtures/source-context.json`을 공개 context API에서 검증한다.
 
 Source span과 AST span은 바이트 offset 두 개로 이루어진 네이티브 값이다. 오류 코드는 네이티브 타입 문자열·enum 텍스트 접근자·상수 목록에서 catalog 텍스트를 유지한다. 저장한 검증된 줄 시작 sequence는 네이티브 배열·list·slice 형식 또는 Rust의 `LineIndex::from_starts`로 복원하여 같은 바이트 위치 조회에 사용할 수 있다. 이 데이터 형식은 공개 SDK import를 통해 공통 source fixture와 비교한다.
+
+네이티브 parse 설정은 TypeScript·Go·Rust·Python의 `ParseOptions`와 PHP·PHP 확장의 선택적 parse 인자로 구분자 설정을 명명한다. 구분자 쌍 데이터는 TypeScript의 `{open, close}`, Go·Rust·PHP·PHP 확장의 두 문자로 인코딩한 설정, Python의 기본 구분자 tuple이다. 각 형식은 같은 여는 문자·닫는 문자를 뜻하며 parsing 시 LEX-21/22에 따라 설정을 검증한다. 요청 실패는 템플릿 오류(ERR-1)와 네이티브 인자 실패(ERR-13)를 구분한다. Rust는 합 타입 `RequestError::Template`·`Argument`로 명명하고 Go는 네이티브 오류를 반환하며 TypeScript·PHP·PHP 확장·Python은 네이티브 예외를 던진다. TypeScript는 잘못된 parse 구분자를 `DelimiterOptionError`로 명명하고 Rust 인자 실패는 `ArgumentError.message`를 공개한다. 이 identity는 네이티브 형식을 유지하며 템플릿 오류 코드는 아니다.
