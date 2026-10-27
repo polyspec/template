@@ -6,6 +6,7 @@
 ## Unreleased
 
 ## 0.0.12
+- SDK surface acceptance passes CI 40450000056 at 86edcaa1: every native API declaration and binding holds, including the complete Node entry and retained interpreter vectors. (T27.1-1-55).
 - Release completion requirements follow the declared toolchains and the complete SDK/CI matrix, while keeping historical test evidence separate. Partial CI status is recorded without an incomplete implementation list. Parity declaration and documentation checks pass (T27.1-5).
 - Correct the Rust literal catalog to its actual String variant and reject invented scalar names with a declaration regression. Keep expression parser precedence/error tests in its native package after interpreter vectors move, and register the standalone PHP checker in the tool classification. Refresh oxc-parser to 0.156.0 and PHPUnit to 13.4.4; the recorded review covers 50 registry dependencies and eight locks without unexcepted newer releases or advisories. Green: 42 SDK/contract units, two native parser units, four PHP SDK units per implementation, native lint and policy checks; complete candidate CI remains required (T27.1-5).
 - Run parity in an independent CI job required by ci-passed, preserving exact-once suite coverage and failure reports. setup-node and npm installations share the lock-keyed checkout download cache. Workflow, suite, deadline and action-pin units pass; fresh CI must establish the resulting timing (T27.1-1-56).

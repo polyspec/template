@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 20e5971354ca5ea5b9db9e6841dae545fa2ed56cf2f00c24b96fdd625e78b3aa -->
+<!-- source-sha256: 0dd5cf21ae5f3a3887be62ae4ef072273dfe65b4c55923f0d19b7a5a194ec8a1 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -435,5 +435,5 @@
 | T27.1-1-52 | AST-program 생성·네이티브 상태 소유권·구체 Program/runtime-service facade를 선언하고 네이티브 SDK에서 등록·callback 조회·limit·prepared/direct rendering을 검증한다 | 구체 AST-program protocol·SDK consumer | SDK 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-53 | 네이티브 engine/render option record·refresh-policy 값·callback 환경 시그니처를 선언하고 공개 설정 consumer를 컴파일하며 기존 option 검증을 유지한다 | 설정 carrier·callback host 형식 | SDK/option 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-54 | 공개 value/safe-string·삽입 순서 map carrier와 네이티브 factory·container protocol을 선언하고 Go 키 조회가 map 상태를 변경하지 않도록 하고 외부 타입 consumer·네이티브 value 단위 검사로 검증한다 | 네이티브 값 표현·삽입 순서 보존 | 공개 consumer/value 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
-| T27.1-1-55 | P0: 남은 공개 SDK 계약 검토를 릴리즈 차단 작업 한 묶음으로 완료한다. Interpreter 구현과 SDK 경계를 정리하고 유지하는 모든 네이티브 carrier/연산을 선언하며 소유 네이티브 단위 검사·예외 없는 전체 CI gate를 검증한다 | 전체 공개 API·가시성 경계·릴리즈 CI 증거 | 네이티브 consumer/소유 단위 검사·`make parity-declarations-check`·`make docs-check`·전체 CI gate | [!] cause: 구현·소유 검사는 통과했으며 새 exact-main CI 대기; retry: 예외 없는 전체 API/parity gate 확인 |
+| T27.1-1-55 | P0: 남은 공개 SDK 계약 검토를 릴리즈 차단 작업 한 묶음으로 완료한다. Interpreter 구현과 SDK 경계를 정리하고 유지하는 모든 네이티브 carrier/연산을 선언하며 소유 네이티브 단위 검사·예외 없는 전체 CI gate를 검증한다 | 전체 공개 API·가시성 경계·릴리즈 CI 증거 | 네이티브 consumer/소유 단위 검사·`make parity-declarations-check`·`make docs-check`·전체 CI gate | [o] |
 | T27.1-1-56 | P1: CI 대기·설치·target 시간을 측정하고 모든 검사·전체 실패 report·suite의 정확히 한 번 실행 규칙을 유지하면서 독립 job 배치·정확한 의존성 cache 재사용으로 임계 경로를 줄인다 | CI 실행시간 증거·검증한 실행 전략 | Workflow/suite 단위 검사·`make docs-check`·전체 CI 시간·동일 target 포함 범위 | [!] 원인: workflow와 담당 단위 검사는 통과했으나 새 CI 시간 측정 대기; 재시도: 전체 검사 범위를 유지하고 대기/실행 시간 측정 |
