@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: df268100885a2ba4a96eb1fbd56dd275c787ca6eace8934cc382b85d4e569d59 -->
+<!-- source-sha256: e9d9ec617f573900b756f6678fdfad032c203f1ff3b63b8dbc91b70119a3d89d -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -428,3 +428,4 @@
 | T27.1-1-45 | 공개 parse 옵션·네이티브 구분자 쌍 데이터·인자/템플릿 요청 오류 대안을 선언하고 타입 consumer·네이티브 잘못된 옵션 경계를 검증한다 | Parse 설정·요청 오류 SDK 계약 | Parser 경계/consumer 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-46 | Python value/binding/error/engine 모듈 export를 명시하여 SDK carrier·binding 함수를 유지하고 숫자·분류·parser adapter 구현을 내부에 유지한다 | 네이티브 모듈 export 경계·숫자/runtime 검사 보존 | Python export/value 단위 검사·네이티브 API 참조 검사·`make lint-python`·`make docs-check` | [o] |
 | T27.1-1-47 | 고정한 패키지 관리자로 template에 공개 kit 0.0.58을 설치하고 kit 소유 복사본/hook·검토한 Ruff 0.17.3 patch·잠긴 의존성 review를 갱신한다. Provider checkout은 수정하지 않는다 | 공개 kit 의존성·설치 metadata·복사된 gate | `make kit-check`·소유 스크립트 단위 검사·의존성 audit·`make docs-check`·전체 CI | [o] |
+| T27.1-1-48 | P0: CI 405fb0b6이 거부한 Rust loader/cache SDK 테스트 형식을 수정하고 모든 assertion·테스트를 유지한다 | 네이티브 rustfmt 수정만 적용 | `make template-lint-rust-format`·`make docs-check` | [o] |

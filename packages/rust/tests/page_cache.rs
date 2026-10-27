@@ -58,7 +58,10 @@ fn delete_preserves_other_keys_and_clear_removes_every_page() {
     let mut cache = PageCache::new();
     cache.set("empty", "", None, 100.0).unwrap();
     cache.set("other", "other", None, 100.0).unwrap();
-    assert_eq!(cache.get_or_set("empty", None, 100.0, || panic!("empty page is a hit")).unwrap(), "");
+    assert_eq!(
+        cache.get_or_set("empty", None, 100.0, || panic!("empty page is a hit")).unwrap(),
+        ""
+    );
     cache.delete("empty");
     cache.delete("absent");
     assert_eq!(cache.get("empty", 100.0), None);

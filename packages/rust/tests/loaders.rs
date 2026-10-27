@@ -2,7 +2,9 @@
 //! version (RT-10), and a path resolves against the directory of the current template and fails when it leaves the root
 //! (RT-8).
 
-use polyspec_template::{AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, RenderOptions, RenderTarget, ParseOptions, parse, resolve_path};
+use polyspec_template::{
+    AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, ParseOptions, RenderOptions, RenderTarget, parse, resolve_path,
+};
 
 /// RT-9, RT-10: a map loader returns a held source with its version, and nothing for another name.
 #[test]
@@ -54,8 +56,11 @@ fn map_loader_versions_source_and_ast_replacements_by_content() {
         let mut versions = Vec::new();
         for text in ["first", "second", "second"] {
             let tree = parse(text.as_bytes(), "a.tpl", &ParseOptions::default()).unwrap();
-            if ast { loader.set_ast("a.tpl", tree.clone()); }
-            else { loader.set("a.tpl", text); }
+            if ast {
+                loader.set_ast("a.tpl", tree.clone());
+            } else {
+                loader.set("a.tpl", text);
+            }
             let result: polyspec_template::loader::Loaded = loader.load("a.tpl").unwrap().unwrap();
             assert!(!result.version().is_empty());
             versions.push(result.version().to_string());
