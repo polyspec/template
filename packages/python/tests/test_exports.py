@@ -25,6 +25,10 @@ from polyspec.template import (
     format_indent,
     format_invariant,
     statements,
+    block_tag,
+    scanner,
+    standalone,
+    parser,
 )
 from polyspec.template.bind import BoundMap
 
@@ -79,6 +83,29 @@ class ExportTests(unittest.TestCase):
         )
         for name in functions.__all__:
             self.assertIs(getattr(functions, name), getattr(template, name))
+
+    def test_parser_helpers_are_not_sdk_exports(self):
+        # LEX-24 / EDT-10/11 publish Source and analysis, not parser machinery.
+        self.assertEqual(getattr(block_tag, "__all__", None), [])
+        self.assertEqual(getattr(standalone, "__all__", None), [])
+        self.assertEqual(
+            set(getattr(scanner, "__all__", [])),
+            {"DEFAULT_DELIMITERS", "parse_delimiters"},
+        )
+        self.assertEqual(
+            set(getattr(parser, "__all__", [])),
+            {
+                "TemplateAnalysis",
+                "PrefixAnalysis",
+                "parse_template",
+                "analyze_template",
+                "analyze_template_prefix",
+            },
+        )
+        self.assertIs(template.Source, parser.Source)
+        self.assertIs(template.parse_delimiters, scanner.parse_delimiters)
+        self.assertEqual(template.parse_delimiters("[]"), ("[", "]"))
+        self.assertEqual(template.DEFAULT_DELIMITERS, ("{", "}"))
 
     def test_export_list_has_no_repeated_name(self):
         repeated = sorted(

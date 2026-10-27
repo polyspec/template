@@ -7,6 +7,15 @@ docs/spec/ast.md.
 
 from __future__ import annotations
 
+# Parser machinery stays internal; these are the public module contracts.
+__all__ = [
+    "TemplateAnalysis",
+    "PrefixAnalysis",
+    "parse_template",
+    "analyze_template",
+    "analyze_template_prefix",
+]
+
 import re
 
 from .errors import TemplateError, error_at

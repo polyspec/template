@@ -3,6 +3,9 @@ validation (LEX-21)."""
 
 from __future__ import annotations
 
+# Parser machinery stays internal; these are the public module contracts.
+__all__ = ["DEFAULT_DELIMITERS", "parse_delimiters"]
+
 import re
 
 # The characters that open and close a tag (LEX-20); the default pair is `{` and `}`.

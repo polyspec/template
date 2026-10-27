@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2e6e4746beb581f7d6eccb4c6fd5477aabd0ee1a1a25b113896ac8a0adc8031a -->
+<!-- source-sha256: 602294cca545fa87bc9ba5a4f66aaf3052c698da0660875efa2fc6d4600984c1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Python 모듈 export 목록은 source/분석·구분자 API를 유지하고 태그 reader 기록·scanner 감지 표/helper·standalone 제거·파서 JSON 메시지 helper를 제외한다. 구현 검사를 유지한 상태에서 네이티브 symbol 추출로 경계를 확인했다. Red: export 회귀 검사가 암묵적 helper 공개를 거부했다. Green: export/분석/파서 단위 검사 35개·Python lint·owner·문서 검사가 통과했다(T27.1-1-38).
 - 깨끗한 checkout에서 네이티브 parity binding이 공개 formatter export를 import하기 전에 패키지를 빌드한다. Red: Make 실행 계획에서 해당 빌드가 누락됐다. Green: suite/누적 실행 단위 검사 11개·root runner의 formatter SDK 단위 검사 9개·TypeScript lint·owner·문서 검사가 통과했다. 전체 parity 검사는 CI에서 수행한다(T27.1-1-37).
 - Go 메모리 로더 AST 버전을 템플릿 이름 대신 직렬화한 내용으로 계산하여 AST 변경 시 기존 프로그램 캐시가 갱신된다. 로더 결과·버전·생성·교체·조회 SDK 선언과 root/subpackage carrier identity 검증을 추가했다. Red: 수정 전 AST를 바꿔도 같은 버전이 유지됐다. Green: 반복 렌더링을 포함한 Go 2개·TypeScript 4개·Rust 3개·Python 10개·PHP SDK별 4개(106 assertions)·consumer/model 25개 단위 검사와 네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-36).
 - 공개 API 선언에 네이티브 오류 코드 텍스트·바이트 span 타입·저장한 줄 index를 포함했다. 여섯 SDK의 Source fixture가 복원한 위치와 타입 span을 검증하고 TypeScript·Rust 공개 consumer가 해당 데이터 타입을 사용한다. Green: 여섯 SDK Source 단위 검사·consumer/catalog 33개·네이티브 lint·선언·테스트 타입·owner·문서 검사가 통과했다(T27.1-1-35).

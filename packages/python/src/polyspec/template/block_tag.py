@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+# Parser machinery stays internal; these are the public module contracts.
+__all__ = []
+
 import re
 
 from .expr_lexer import lex_string_literal

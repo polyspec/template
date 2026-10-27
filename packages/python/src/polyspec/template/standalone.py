@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+# Parser machinery stays internal; these are the public module contracts.
+__all__ = []
+
 
 def standalone_ranges(text: str, tags: list[dict]) -> list[tuple[int, int]]:
     """The code point index ranges that standalone line groups remove from the output."""
