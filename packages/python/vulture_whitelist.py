@@ -47,3 +47,6 @@ load_tests
 _.label
 _.status_label
 _._private
+
+# unittest discovers this public runtime-context regression.
+ContextSDK

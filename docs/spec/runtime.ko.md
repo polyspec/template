@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: c5d52b907d5fdeced717b868a015e15780aedbce989ed815be3f70b760695049 -->
+<!-- source-sha256: e8920902c1ec651ee4a71557a68496c254b39d090b018227e74db2590d4e395c -->
 # 런타임
 
 [English](/spec/runtime).
@@ -292,3 +292,5 @@ TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 k
 
 - **RT-73** API의 연산이 실행 중 읽는 데이터는 자기 생태계가 데이터를 싣는 방식으로 package 안에 실려, 설치된 package가 자기 밖의 파일을 읽지 않는다: AST schema(AST-10)는 npm package의 검증기에 묶이고, Go package(`embed`), crate(`include_str!`), PHP extension에 내장되며, Python 배포물의 package data와 Composer package의 resource로 실린다. package의 test는 repository의 파일이 하나도 없는 곳에서 이 데이터로 decode한다.
 - **RT-74** package의 모든 진입점과 모든 module 형식은 같은 runtime을 공유한다: 그 가운데 하나가 만든 bound map(VAL-22)을 다른 모든 것의 program이 받아들이며, module 형식이 하나인 package(Go와 Python의 루트와 하위 package, crate의 module, Composer package의 class)의 진입점도 runtime의 사본을 두지 않는다. npm package는 전체, render 전용, Node.js 진입점의 ECMAScript module 빌드와 CommonJS 빌드를 가진다.
+
+공개 렌더 context는 runtime services·바인딩한 root data·환경·entry 이름으로 직접 생성할 수 있다. 정의 registry·활성 템플릿 chain·반복 횟수·제한된 출력은 context마다 격리된다. 위치 지정/미지정 오류 생성·순환을 검사하는 진입·나가기를 공개한다. 출력은 TypeScript·Python에서 공개 builder, Rust에서 검사하는 writer와 문자열 필드, Go·PHP·PHP 확장에서 검사하는 writer/텍스트 메서드다. TypeScript·Python·PHP·PHP 확장은 쓰기 전 현재 frame/span을 기록하고 Go·Rust는 writer에 frame/span을 전달한다. 네이티브 형식이 달라도 같은 UTF-8 바이트 제한과 위치 오류를 유지한다. AST 프로그램·생성 프로그램을 생성할 필요가 없다.

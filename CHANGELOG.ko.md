@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 639a889fbc923730f3ce8a319be1c928f14f69f3a3fc7978f60fa6343db702a6 -->
+<!-- source-sha256: 40a0650d3819896c924c2ac4165b9278fe87be25c5126fe60427f1545cdf531e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- 렌더 context API 선언에 네이티브 생성·상태 필드·위치 오류·순환 진입/나가기·출력 제한 형식을 포함했다. 공개 SDK 단위 검사에서 프로그램을 생성하지 않고 context별 registry/chain/counter/출력 격리·소스 위치·UTF-8 바이트 한도를 검증한다. Green: 여섯 네이티브 context 단위 검사·TypeScript model 검사 5개·테스트 타입 검사·네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-40).
 - Python 페이지 캐시가 단일 키를 삭제하고 다른 항목을 유지하며 없는 키 삭제도 안전하게 처리한다. 모든 SDK에서 빈 문자열 hit·삭제·재저장·전체 비우기를 검증하고 생성·연산·네이티브 TTL 형식을 API로 선언했다. Go 캐시 내부 저장 기록은 비공개다. Red: Python에 삭제 연산이 없었다. Green: 여섯 SDK 캐시 단위 검사 18개·네이티브 model 검사 5개·네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-39).
 - Python 모듈 export 목록은 source/분석·구분자 API를 유지하고 태그 reader 기록·scanner 감지 표/helper·standalone 제거·파서 JSON 메시지 helper를 제외한다. 구현 검사를 유지한 상태에서 네이티브 symbol 추출로 경계를 확인했다. Red: export 회귀 검사가 암묵적 helper 공개를 거부했다. Green: export/분석/파서 단위 검사 35개·Python lint·owner·문서 검사가 통과했다(T27.1-1-38).
 - 깨끗한 checkout에서 네이티브 parity binding이 공개 formatter export를 import하기 전에 패키지를 빌드한다. Red: Make 실행 계획에서 해당 빌드가 누락됐다. Green: suite/누적 실행 단위 검사 11개·root runner의 formatter SDK 단위 검사 9개·TypeScript lint·owner·문서 검사가 통과했다. 전체 parity 검사는 CI에서 수행한다(T27.1-1-37).
