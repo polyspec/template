@@ -9,6 +9,8 @@ The PHP library requirement stays at `>=8.4` (equivalent to `>=8.4.0`). The deve
 
 The parity job runs `parity-check` independently of the script-unit job; both install the locked graph in their own checkout, and `ci-passed` requires both. All suite targets still run exactly once. CI uses `var/bootstrap/npm-cache` for setup-node cache discovery, bootstrap and subsequent npm installations; the cache stores downloads, never installed packages or build output, and the package lock remains authoritative. In CI run 40439038565, scripts took 12m23s after a 7m04s queue; script units took 230.7s and parity took 240.1s sequentially. Splitting those targets removes that sequencing; a fresh run must measure the resulting duration and queue separately.
 
+CI 40450000056 at 86edcaa1 passes all workers and ci-passed. It takes 8m06s from the first worker start to aggregation completion, with 8s queue time (8m14s total). Scripts take 5m47s and parity 6m55s independently; showcase is the longest worker at 7m24s. Network and installation times vary between runs, so these measurements establish the observed result rather than a fixed speedup.
+
 ## Toolchain
 
 | Tool | Version | Source |
