@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: bae63c29d86956ce1868b595b02347b64394eea0dd7c244b3f1acacec1422fb4 -->
+<!-- source-sha256: c6bf5fa7cf107c97a9a9e04759dbc3acbc4c37e96e3222bb5cd9eeeda0672850 -->
 # 개발
 
 [English](/operations/development).
@@ -7,6 +7,8 @@
 독립 PHP 검사 도구는 설치한 `var/tools/bin/php` 래퍼를 사용하고 릴리즈를 `config/toolchain.json`과 비교하며 들어온 셸 경로에서 PHP를 선택하지 않는다. PHP 확장 생성/빌드·네이티브 테스트는 같은 설치 도구 세트를 사용한다. 다른 시스템 PHP에 대한 셸 조회는 이 target이 사용한 인터프리터의 증거가 아니다.
 
 PHP 라이브러리 요구사항은 `>=8.4`(`>=8.4.0`과 동등)로 유지한다. 개발/검증 기준은 PHP `8.4.27`이며 Windows 설치 기준은 `8.4.27-1`이다. 개발 patch를 올려도 라이브러리의 최소 지원 버전을 올리지 않는다.
+
+parity job은 script 단위 테스트 job과 독립적으로 `parity-check`를 실행한다. 둘은 각 checkout에 고정 의존성을 설치하며 `ci-passed`는 둘 다 요구한다. 모든 suite target은 여전히 정확히 한 번 실행된다. CI의 setup-node cache 조회, bootstrap과 이후 npm 설치는 `var/bootstrap/npm-cache`를 사용한다. cache는 설치 패키지나 빌드 출력이 아닌 다운로드만 저장하며 package lock이 기준이다. CI 40439038565에서 scripts는 7분 04초 대기 후 12분 23초 실행됐고, script 단위 테스트 230.7초와 parity 240.1초가 순차 실행됐다. target을 분리해 이 순서를 제거하며, 새 실행에서 결과 시간과 대기 시간을 따로 측정해야 한다.
 
 ## 툴체인
 

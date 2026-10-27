@@ -7,6 +7,8 @@ Standalone PHP inspection tools use the installed `var/tools/bin/php` wrapper an
 
 The PHP library requirement stays at `>=8.4` (equivalent to `>=8.4.0`). The development/verification baseline is PHP `8.4.27`; the Windows installation baseline is `8.4.27-1`. Raising the development patch does not raise the minimum supported library version.
 
+The parity job runs `parity-check` independently of the script-unit job; both install the locked graph in their own checkout, and `ci-passed` requires both. All suite targets still run exactly once. CI uses `var/bootstrap/npm-cache` for setup-node cache discovery, bootstrap and subsequent npm installations; the cache stores downloads, never installed packages or build output, and the package lock remains authoritative. In CI run 40439038565, scripts took 12m23s after a 7m04s queue; script units took 230.7s and parity took 240.1s sequentially. Splitting those targets removes that sequencing; a fresh run must measure the resulting duration and queue separately.
+
 ## Toolchain
 
 | Tool | Version | Source |

@@ -30,6 +30,8 @@ permissions:
 # rustup installs no toolchain on the first cargo; a job that uses Rust installs it first (T18.7-1).
 env:
   RUSTUP_AUTO_INSTALL: '0'
+  # setup-node and every npm install restore/read the same lock-keyed download cache.
+  npm_config_cache: ${{ github.workspace }}/var/bootstrap/npm-cache
 
 jobs:
   scripts:
@@ -58,12 +60,45 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-browsers
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-test-scripts template-install-check dependency-audit parity-declarations-check parity-check function-contract-check function-inventory-check benchmark-check lint-go lint-rust template-lint-go-format template-lint-rust-format"
+      - run: make ci-targets TARGETS="template-test-scripts template-install-check dependency-audit parity-declarations-check function-contract-check function-inventory-check benchmark-check lint-go lint-rust template-lint-go-format template-lint-rust-format"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: report-scripts
+          path: var/report/ci-targets/
+          if-no-files-found: error
+
+  parity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: mise.toml
+          cache: npm
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - name: Bootstrap locked kit package
+        run: >-
+          npm_config_cache="$PWD/var/bootstrap/npm-cache" npm exec --yes --package="$(node -p 'require("./package.json").packageManager.split("+")[0]')" -- npm ci --ignore-scripts --allow-remote=root
+        if: ${{ !cancelled() }}
+      - run: make install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make install-packages
+        if: ${{ !cancelled() }}
+      - run: make install
+        if: ${{ !cancelled() }}
+      - run: make ci-targets TARGETS="parity-check"
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-parity
           path: var/report/ci-targets/
           if-no-files-found: error
 
@@ -455,7 +490,7 @@ jobs:
   # job installs the npm, mise and node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php]
+    needs: [scripts, parity, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
