@@ -1,7 +1,7 @@
 // A consumer can name the AST, loader and runtime types in public signatures
 // without importing an unexported implementation path.
 import type {
-  Formatter, FormatOptions, FormatResult,
+  Formatter, FormatError, FormatOptions, FormatResult,
   RenderAstProgram, Output, Binary, BindErrorCode, Block, Call, ClassCall, DefineEntry, Echo,
   For, If, IfBlock, Include, Index, LineIndex, List, Literal, LoadedAst,
   LoadedSource, LoopMetaExpression, MapLiteral, Member, MemberCall,
@@ -12,7 +12,7 @@ import { format } from '@polyspec/template-language';
 
 // The language service's published callable implements the shared SDK contract.
 export const formatter: Formatter = format;
-export const formatterOptions: FormatOptions = { indent: null };
+export const formatterOptions: FormatOptions = { name: 'sdk.tpl', delimiters: '[]', range: { start: 0, end: 4 }, indent: null, templateBlocks: 'flat' };
 export const formatterResult: FormatResult = formatter('text', formatterOptions);
 
 export type SignatureTypes = [
@@ -34,3 +34,8 @@ export function sourceContext() {
   const position = Source.position(lines, offset);
   return { metadata, span, position, error: text.error('E_PARSE_UNEXPECTED_TOKEN', 0, 1, 'example') };
 }
+
+export const formatterError: FormatError = { reason: 'invariant', code: null, line: 2, col: 3, message: 'message' };
+export const formatterReasons: FormatError['reason'][] = ['parse', 'invariant', 'html'];
+export const formatterSuccess: FormatResult = { ok: true, text: 'text', changed: false };
+export const formatterFailure: FormatResult = { ok: false, error: formatterError };

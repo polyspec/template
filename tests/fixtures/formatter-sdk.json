@@ -1,0 +1,131 @@
+{
+  "cases": [
+    {
+      "id": "changed",
+      "source": "{=a+1}",
+      "options": {},
+      "expected": {
+        "ok": true,
+        "text": "{= a + 1}",
+        "changed": true
+      }
+    },
+    {
+      "id": "unchanged",
+      "source": "{= a}",
+      "options": {},
+      "expected": {
+        "ok": true,
+        "text": "{= a}",
+        "changed": false
+      }
+    },
+    {
+      "id": "configured",
+      "source": "<main>\n[? ok]\n<p>[=x+1]</p>\n[/]\n</main>",
+      "options": {
+        "name": "sdk.tpl",
+        "delimiters": "[]",
+        "indent": "\t",
+        "templateBlocks": "flat"
+      },
+      "expected": {
+        "ok": true,
+        "text": "<main>\n\t[? ok]\n\t<p>[= x + 1]</p>\n\t[/]\n</main>",
+        "changed": true
+      }
+    },
+    {
+      "id": "indented-blocks",
+      "source": "<main>\n{? ok}\n<p>{=x}</p>\n{/}\n</main>",
+      "options": {
+        "templateBlocks": "indent"
+      },
+      "expected": {
+        "ok": true,
+        "text": "<main>\n  {? ok}\n    <p>{= x}</p>\n  {/}\n</main>",
+        "changed": true
+      }
+    },
+    {
+      "id": "keep-indentation",
+      "source": "<main>\n  {? ok}\n    {=x}\n  {/}\n</main>",
+      "options": {
+        "indent": null
+      },
+      "expected": {
+        "ok": true,
+        "text": "<main>\n  {? ok}\n    {= x}\n  {/}\n</main>",
+        "changed": true
+      }
+    },
+    {
+      "id": "range",
+      "source": "{=a} {=b}",
+      "options": {
+        "range": {
+          "start": 0,
+          "end": 4
+        }
+      },
+      "expected": {
+        "ok": true,
+        "text": "{= a} {=b}",
+        "changed": true
+      }
+    },
+    {
+      "id": "parse-error",
+      "source": "{? x}",
+      "options": {
+        "name": "sdk.tpl"
+      },
+      "expected": {
+        "ok": false,
+        "error": {
+          "reason": "parse",
+          "code": "E_PARSE_UNCLOSED_BLOCK",
+          "line": 1,
+          "col": 1
+        }
+      }
+    },
+    {
+      "id": "html-error",
+      "source": "<div>\n<span>\n</div>",
+      "options": {},
+      "expected": {
+        "ok": false,
+        "error": {
+          "reason": "html",
+          "code": null,
+          "line": 3,
+          "col": 1
+        }
+      }
+    }
+  ],
+  "errors": [
+    {
+      "reason": "parse",
+      "code": "E_PARSE_UNCLOSED_BLOCK",
+      "line": 2,
+      "col": 3,
+      "message": "message"
+    },
+    {
+      "reason": "invariant",
+      "code": null,
+      "line": 2,
+      "col": 3,
+      "message": "message"
+    },
+    {
+      "reason": "html",
+      "code": null,
+      "line": 2,
+      "col": 3,
+      "message": "message"
+    }
+  ]
+}

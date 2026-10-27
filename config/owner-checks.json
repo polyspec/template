@@ -1173,7 +1173,22 @@
         "scripts/json-document.mts"
       ],
       "targets": [
-        "template-test-ts-unit"
+        "template-test-ts-unit",
+        "template-test-language-unit"
+      ],
+      "tests": []
+    },
+    {
+      "paths": [
+        "tests/fixtures/formatter-sdk.json"
+      ],
+      "targets": [
+        "template-test-language-unit",
+        "template-test-go-unit",
+        "template-test-rust-unit",
+        "template-test-php",
+        "test-php-ext",
+        "template-test-python"
       ],
       "tests": []
     }
@@ -1396,6 +1411,8 @@
     {
       "check": "make template-test-language-unit",
       "paths": [
+        "tests/fixtures/formatter-sdk.json",
+        "scripts/json-document.mts",
         "packages/language/**",
         "packages/ts/src/**",
         "scripts/editor-fixtures.mts"
@@ -1493,7 +1510,8 @@
         "config/parity.json",
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
-        "tests/fixtures/prefix-analysis.json"
+        "tests/fixtures/prefix-analysis.json",
+        "tests/fixtures/formatter-sdk.json"
       ]
     },
     {
@@ -1511,7 +1529,8 @@
         "tests/fixtures/ast-decode/**",
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
-        "tests/fixtures/prefix-analysis.json"
+        "tests/fixtures/prefix-analysis.json",
+        "tests/fixtures/formatter-sdk.json"
       ]
     },
     {
@@ -1652,6 +1671,7 @@
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
         "tests/fixtures/prefix-analysis.json",
+        "tests/fixtures/formatter-sdk.json",
         "tests/fixtures/ast-decode/**"
       ]
     },

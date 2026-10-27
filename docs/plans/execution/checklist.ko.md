@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 654f932b3843e28d6cc8c6fc043483a66a8a9be86f684a251e389444be45b0fe -->
+<!-- source-sha256: aba4a59e1c92c0b8b10ca816ff0814401a2da267267509aab9f4d92a7d9be6ac -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -413,3 +413,4 @@
 | T27.1-1-30 | 공개 readonly 속성을 유지하면서 확인된 PHP Source 속성 추출 실패를 수정하고 두 네이티브 SDK 모델에서 Source metadata 필드 전체를 검증한다 | Explicit Source properties and extraction regression | `node --test tests/scripts/php-public-api.test.mts`; Source SDK units; `make docs-check` | [o] |
 | T27.1-1-31 | 전체 분석 공개 API 선언을 완성하고 공유 fixture로 SDK 6개의 모든 태그·토큰 종류와 범위 및 AST를 검증한다 | Full analysis API, shared fixtures and native SDK units | `make parity-declarations-check`; native analysis units; `make docs-check` | [o] |
 | T27.1-1-32 | 기존 부분 분석 기능을 모든 SDK에 구현하고 받아들인 범위와 파서 오류를 보존하며 경계에서 잘못된 소스·옵션을 거부하고 공유 fixture로 검증한다 | Prefix analysis SDK APIs, native implementations and shared fixtures | `make parity-declarations-check`; prefix SDK units; native lint/build; `make docs-check` | [o] |
+| T27.1-1-33 | formatter 옵션·성공·오류 데이터 필드와 리터럴 모드를 선언하고 공유 fixture로 공개 네이티브 carrier와 SDK 결과를 검증한다 | Formatter data API declarations and native SDK units | `make parity-declarations-check`; formatter SDK units; native lint; `make docs-check` | [o] |
