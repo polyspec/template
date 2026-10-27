@@ -3,6 +3,9 @@ and docs/spec/functions.md (FUN-20 to FUN-25)."""
 
 from __future__ import annotations
 
+# Public module contracts; implementation helpers are used through runtime bindings.
+__all__ = ["MAX_SAFE"]
+
 import math
 
 MAX_SAFE = 9007199254740991.0

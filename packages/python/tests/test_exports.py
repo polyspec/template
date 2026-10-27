@@ -30,7 +30,16 @@ from polyspec.template import (
     standalone,
     parser,
 )
-from polyspec.template.bind import BoundMap
+from polyspec.template import values, number, errors
+from polyspec.template.bind import (
+    __all__ as binding_exports,
+    BindError as NativeBindError,
+    BoundMap,
+    bind_value as native_bind_value,
+    bind_map as native_bind_map,
+    bind_data as native_bind_data,
+    check_text as native_check_text,
+)
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -106,6 +115,65 @@ class ExportTests(unittest.TestCase):
         self.assertIs(template.parse_delimiters, scanner.parse_delimiters)
         self.assertEqual(template.parse_delimiters("[]"), ("[", "]"))
         self.assertEqual(template.DEFAULT_DELIMITERS, ("{", "}"))
+
+    def test_value_and_engine_helpers_are_not_sdk_exports(self):
+        # RT-74 / VAL-1: stable carriers remain public; numeric machinery is internal.
+        modules = {
+            "values": values,
+            "number": number,
+            "errors": errors,
+            "engine": engine,
+        }
+        self.assertIsInstance(binding_exports, list)
+        for module in modules.values():
+            self.assertIsInstance(getattr(module, "__all__", None), list)
+        for name in (
+            "type_of",
+            "is_number",
+            "is_string",
+            "text_of",
+            "code_points",
+            "compare_code_points",
+            "combine_surrogate_pairs",
+            "is_truthy",
+            "parse_numeric_string",
+            "loose_equals",
+            "strict_equals",
+            "compare_values",
+        ):
+            self.assertNotIn(name, modules["values"].__all__)
+        for name in (
+            "number_to_string",
+            "positional",
+            "round_decimal",
+            "format_number",
+            "round_number",
+        ):
+            self.assertNotIn(name, modules["number"].__all__)
+        for name in (
+            "check_number",
+            "check_level",
+            "depth_within",
+            "host_argument",
+            "number_to_text",
+        ):
+            self.assertNotIn(name, binding_exports)
+        for name in ("parse_with_lines", "math_floor"):
+            self.assertNotIn(name, modules["engine"].__all__)
+        self.assertNotIn("RUNTIME_ERRORS", modules["errors"].__all__)
+        for name in ("SafeString", "NativeObject"):
+            self.assertIs(getattr(template, name), getattr(modules["values"], name))
+        for name, native in (
+            ("BindError", NativeBindError),
+            ("BoundMap", BoundMap),
+            ("bind_value", native_bind_value),
+            ("bind_map", native_bind_map),
+            ("bind_data", native_bind_data),
+            ("check_text", native_check_text),
+        ):
+            self.assertIs(getattr(template, name), native)
+        self.assertIs(template.MAX_SAFE, modules["number"].MAX_SAFE)
+        self.assertIs(template.TemplateError, modules["errors"].TemplateError)
 
     def test_export_list_has_no_repeated_name(self):
         repeated = sorted(

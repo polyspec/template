@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: dc053c97a0d60b2ec0006c4aaec58c36bd18c84d0cda50e00a2cf6ca2587fc6b -->
+<!-- source-sha256: abddd6866ac013b4255cbbb6e9beb8ed88874c04952093cd79aa747b4990dfa6 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Python value·binding·error·numeric·engine 모듈의 export 목록을 명시했다. SDK value carrier·root binding 함수·위치 오류·program interface·안전한 숫자 범위 상수의 identity를 유지하고 숫자/분류·parser adapter 구현은 내부에 유지한다. Red: export 회귀 검사가 암묵적 helper 공개를 거부했다. Green: export/value/runtime 단위 검사 46개·네이티브 Python API 참조 검사·Python lint·선언·owner·문서 검사가 통과했다(T27.1-1-46).
 - Parse API 선언에 선택적 구분자 설정·네이티브 쌍 표현·템플릿/인자 요청 실패를 명명했다. Rust·TypeScript 공개 consumer가 설정·오류 대안을 생성하고 TypeScript 경계에서 잘못된 구분자의 네이티브 identity를 확인한다. Green: 네이티브 parser/경계 단위 검사 46개·외부 consumer/참조 검사 50개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-45).
 - TypeScript context 출력은 `write`·`toString` 공개 인스턴스 interface를 사용하고 buffer 생성은 내부에 유지하며 기존 root 타입 전용 export를 보존한다. 네이티브 출력 대응은 검사하는 쓰기·텍스트 수집·바이트 제한을 유지한다. Red: 네이티브 model에 구현 class 생성자가 노출됐다. Green: 출력 model/consumer 회귀·context SDK 단위 검사·네이티브 참조 검사 30개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-44).
 - AST decoding 오류 선언에 schema/구문 대안·pointer 조회·네이티브 생성·사유 텍스트를 포함했다. SDK 단위 검사에서 공개 타입으로 root·중첩 pointer 오류를 생성하고 네이티브 오류 protocol을 검증하며 Python root/module 오류·decoder identity를 확인한다. Green: 여섯 SDK decoder 단위 검사 43개·네이티브 참조/consumer 검사 30개·네이티브 lint·선언·owner·문서 검사가 통과했다(T27.1-1-43).

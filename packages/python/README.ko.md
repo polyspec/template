@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-python-readme -->
-<!-- source-sha256: a79c3b94e9e9cf247ef5192266b91c87419f161d61a84e07ce74b70af7cdfdc8 -->
+<!-- source-sha256: 4505049eb93e28cea6700bc6d2b19b8c2aa133872406963287a64de3acdd7946 -->
 # polyspec-template
 
 [English](README.md)
@@ -84,3 +84,5 @@ python -m polyspec.template.cli format [--indent none|tab|N] [--delimiters OC] F
 [언어 문서](https://github.com/polyspec/template/blob/main/docs/spec/lexical.md)가 공유 동작을 정의하고 [conformance 문서](https://github.com/polyspec/template/blob/main/docs/operations/conformance.md)가 명령줄을 정의합니다. source는 이 저장소가 제공하며 registry 게시는 검증하지 않습니다.
 
 `Source.from_bytes`, `Source.from_text`와 바이트 생성자는 맨 앞 BOM 하나를 제거한 검증된 UTF-8을 복사해 보관한다. 소스는 `name`, `text`, `bytes`, `lines`, `length`를 제공하며 `byte_at`과 `span`은 코드 포인트 인덱스를 UTF-8 바이트 오프셋으로 변환한다. `error`는 바이트 오프셋으로 위치가 있는 템플릿 오류를 만든다. 잘못된 UTF-8과 짝이 없는 텍스트 서로게이트는 거부한다.
+
+Package root·공개 submodule 이름은 명시적 `__all__` 목록을 따른다. Value carrier·binding 진입점·위치 오류·program/loader interface는 SDK 계약을 유지한다. 숫자 변환/분류·parser adapter helper는 구현 코드이며 runtime 연산은 `RuntimeBindings`로 공개한다.

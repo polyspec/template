@@ -3,6 +3,9 @@ docs/spec/data-model.md and docs/spec/expressions.md."""
 
 from __future__ import annotations
 
+# Public module contracts; implementation helpers are used through runtime bindings.
+__all__ = ["Value", "SafeString", "NativeObject"]
+
 import math
 import re
 from typing import Any

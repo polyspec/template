@@ -2,6 +2,19 @@
 
 from __future__ import annotations
 
+# Public module contracts; implementation helpers are used through runtime bindings.
+__all__ = [
+    "ERROR_CODES",
+    "LineIndex",
+    "Span",
+    "line_index_of",
+    "position_of",
+    "TemplateError",
+    "error_at",
+    "error_without_position",
+    "internal_boundary",
+]
+
 from typing import Optional
 
 # Every code is listed with its condition and position in ERR-7 to ERR-12.

@@ -3,6 +3,16 @@
 
 from __future__ import annotations
 
+# Public module contracts; implementation helpers are used through runtime bindings.
+__all__ = [
+    "EngineOptions",
+    "RenderOptions",
+    "PreparedRender",
+    "Program",
+    "Engine",
+    "AstProgram",
+]
+
 import re
 import threading
 import time

@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 99cfb4f870550abbe71dda268d41dc7217fd33191c1b7e255abe9e816fc1dead -->
+<!-- source-sha256: 653c4cd32800928fa8b73568c29feccd6f91ac55dffc022cb038e115cb1e67ee -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -426,3 +426,4 @@
 | T27.1-1-43 | 네이티브 AST decoding 실패·JSON pointer 조회·사유 텍스트 생성 형식을 선언하고 네이티브 오류 protocol·root/module identity를 검증한다 | AST decoding 오류 SDK 계약·네이티브 단위 검사 | Decoder 오류 단위 검사·네이티브 consumer/lint·`make parity-declarations-check`·`make docs-check` | [o] |
 | T27.1-1-44 | TypeScript 출력 인스턴스 계약을 interface로 공개하고 buffer 생성은 내부에 유지한다. 기존 root 타입 전용 export를 유지하고 제한된 쓰기 SDK 대응을 검증한다 | 출력 인스턴스 경계·네이티브 API model·consumer | TypeScript model/context 단위 검사·`make lint-ts`·`make parity-declarations-check`·`make docs-check` | [o] |
 | T27.1-1-45 | 공개 parse 옵션·네이티브 구분자 쌍 데이터·인자/템플릿 요청 오류 대안을 선언하고 타입 consumer·네이티브 잘못된 옵션 경계를 검증한다 | Parse 설정·요청 오류 SDK 계약 | Parser 경계/consumer 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
+| T27.1-1-46 | Python value/binding/error/engine 모듈 export를 명시하여 SDK carrier·binding 함수를 유지하고 숫자·분류·parser adapter 구현을 내부에 유지한다 | 네이티브 모듈 export 경계·숫자/runtime 검사 보존 | Python export/value 단위 검사·네이티브 API 참조 검사·`make lint-python`·`make docs-check` | [o] |

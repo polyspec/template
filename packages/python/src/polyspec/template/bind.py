@@ -3,6 +3,9 @@ depth limit (VAL-20)."""
 
 from __future__ import annotations
 
+# Public module contracts; implementation helpers are used through runtime bindings.
+__all__ = ["BindError", "BoundMap", "bind_value", "bind_map", "bind_data", "check_text"]
+
 import math
 import types
 from typing import Any

@@ -83,3 +83,5 @@ The options come before FILE. `parse` writes the AST as JSON and `tokens` the ED
 The [language documentation](https://github.com/polyspec/template/blob/main/docs/spec/lexical.md) defines the shared behavior; the [conformance document](https://github.com/polyspec/template/blob/main/docs/operations/conformance.md) defines the command line. Source is provided by this repository; registry publication is not verified.
 
 `Source.from_bytes`, `Source.from_text` and the byte constructor capture validated UTF-8 after exactly one leading BOM is removed. A source exposes `name`, `text`, `bytes`, `lines` and `length`; `byte_at` and `span` convert code point indexes to UTF-8 byte offsets. `error` creates a positioned template error from byte offsets. Invalid UTF-8 and unpaired text surrogates are rejected.
+
+The package root and public submodule names follow their explicit `__all__` lists. Value carriers, binding entry points, positioned errors and program/loader interfaces remain SDK contracts. Numeric conversion/classification and parser-adapter helpers are implementation code; runtime operations are exposed through `RuntimeBindings`.
