@@ -62,6 +62,9 @@ The program diagrams are generated from the single product manifest:
 The compiler manifest also fixes the public `Program`, `Engine`, `AstProgram` and generated-program declaration structure. The interface gate reads TypeScript through oxc-parser, Go through `go/parser`, Rust through `syn` and PHP through Reflection. A missing or additional operation, changed argument count, changed owner or absent concrete AST program fails the build.
 - **RT-42** `delimiters` in the engine options and in `parse` selects the tag delimiters as defined in the lexical document. The default is `{}`. A delimiter directive in a template file overrides the option for that file.
 
+Engine configuration carries a loader, registered functions, limits, delimiters and an artifact refresh policy. TypeScript and Go additionally expose a parser-adapter slot on the render-engine configuration; their parser-attached constructors supply that adapter. Rust and Python use their native option records; PHP and the PHP extension take option arrays at construction. Render configuration carries definitions and the environment. The native refresh policies are exactly `dev`, `true` and `false`, represented by strings or the corresponding named constants/enum alternatives.
+
+
 ## Cross-language render contract
 
 The executable showcase adapter boundary is part of the shared [compiler interface manifest](https://github.com/polyspec/template/blob/main/packages/compiler/interface.json). It declares the types, field order, nullability, required fields, ownership, constructor, operations, errors, preconditions, state transitions and language name mappings. Native types express that contract in each language; they do not redefine it.

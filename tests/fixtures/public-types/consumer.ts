@@ -60,3 +60,16 @@ export const outputFields: Record<keyof Output, true> = { write: true, toString:
 
 export const parseConfiguration: ParseOptions = { delimiters: '[]' };
 export const delimiterPair: Delimiters = { open: '[', close: ']' };
+
+import type { EngineOptions, RenderOptions, Env, FunctionContext, HostFunction, ArtifactRefresh } from '@polyspec/template';
+import { MapLoader } from '@polyspec/template';
+export const callbackEnvironment: Env = { timezone: '+09:00', now: 123 };
+export const callbackContext: FunctionContext = { env: callbackEnvironment };
+export const hostCallback: HostFunction = (_args, context) => context.env.now;
+export const refreshPolicies: ArtifactRefresh[] = ['dev', 'true', 'false'];
+export const engineConfiguration: EngineOptions = {
+  loader: new MapLoader(), functions: { custom: hostCallback }, classFunctions: { 'Box::value': hostCallback },
+  limits: { outputBytes: 128 }, delimiters: '[]', artifactRefresh: 'false',
+  parse: (_source, name) => ({ ast: { type: 'Template', name, body: [], comments: [] }, lines: null }),
+};
+export const renderConfiguration: RenderOptions = { env: callbackEnvironment, define: { layout: { html: 'ready' } } };

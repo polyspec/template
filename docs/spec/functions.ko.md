@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-functions -->
-<!-- source-sha256: 87c47675dba7821a2e77a294f36d9afbed17f3ab57810f99cbc8f1552c3efebb -->
+<!-- source-sha256: 1128704c4f3730a3f53c1caf60c6d13605ac2286e88eda3bb1cacab839e35085 -->
 # 함수
 
 [English](/spec/functions).
@@ -178,6 +178,9 @@
 ## 호스트 함수
 
 - **FUN-43** 호스트는 `register(name, fn)`으로 함수를 등록한다. `name`은 식별자다. `fn`은 인자 목록을 VAL-21 형태의 호스트 값으로 받고 값을 반환한다.
+
+Host callback은 렌더 환경도 받는다. TypeScript·Go·Rust·Python은 `HostFunction`과 `env`가 `timezone`·`now`를 담는 `FunctionContext`를 명명하며 PHP·PHP 확장은 callable의 두 번째 인자로 환경 배열을 직접 전달한다. 이 네이티브 시그니처는 구현 모듈을 import하지 않고 같은 고정 offset과 렌더 시각을 공개한다.
+
 - **FUN-44** 내장 함수 이름의 등록은 등록 시점에 실패한다. 같은 이름을 두 번 등록하면 앞의 함수를 교체한다.
 - **FUN-45** 반환값은 데이터 모델의 호스트 바인딩 규칙으로 변환한다. 변환할 수 없는 값은 해당 `E_DATA_*` 코드로 실패한다.
 - **FUN-46** `fn`이 호스트 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 보고한 오류는 템플릿 안 호출 위치와 함께 `E_RUNTIME_HOST_FUNCTION`으로 렌더를 실패시킨다. Go나 Rust에서 `fn`의 panic은 `E_INTERNAL`이다(ERR-13). Native object 인자는 원본 호스트 객체로 도착한다(VAL-18).
