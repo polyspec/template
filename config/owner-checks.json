@@ -1109,7 +1109,9 @@
     {
       "paths": [
         "tests/scripts/go-public-api.test.mts",
-        "packages/go/**"
+        "packages/go/**",
+        "config/parity.json",
+        "tests/scripts/public-api-declarations.mts"
       ],
       "targets": [
         "template-test-scripts"
@@ -1122,7 +1124,9 @@
       "paths": [
         "tests/scripts/php-public-api.test.mts",
         "packages/php/src/**",
-        "packages/php-ext/src/polyspec_template.stub.php"
+        "packages/php-ext/src/polyspec_template.stub.php",
+        "config/parity.json",
+        "tests/scripts/public-api-declarations.mts"
       ],
       "targets": [
         "template-test-scripts"
@@ -1195,6 +1199,20 @@
         "template-test-python"
       ],
       "tests": []
+    },
+    {
+      "paths": [
+        "tests/scripts/python-public-api.test.mts",
+        "tests/scripts/public-api-declarations.mts",
+        "config/parity.json",
+        "packages/python/src/**"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/python-public-api.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1888,7 +1906,10 @@
         "tests/fixtures/ast-decode/**",
         "packages/ts/src/**",
         "packages/ts/package.json",
-        "packages/ts/tsconfig.json"
+        "packages/ts/tsconfig.json",
+        "tests/scripts/public-api-declarations.mts",
+        "tests/scripts/python-public-api.test.mts",
+        "packages/python/src/**"
       ]
     }
   ]

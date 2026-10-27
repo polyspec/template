@@ -4,6 +4,8 @@ import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import test from 'node:test';
+import { jsonDocument } from '../../scripts/json-document.mts';
+import { declaredApiSymbols } from './public-api-declarations.mts';
 
 function compile(file: string) {
   // The importer must live outside the module: Go permits internal imports
@@ -39,3 +41,10 @@ for (const file of ['private-builtins.go', 'internal-builtins.go', 'private-lexe
     assert.notEqual(result.status, 0, 'an implementation package is publicly accessible');
   });
 }
+
+test('every declared Go API reference exists in the native model', { timeout: 30_000 }, () => {
+  const result = spawnSync(resolve('var/tools/symbols-go/bin/kit-symbols-go'), ['packages/go'], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.error?.message ?? result.stderr);
+  const found = new Set(jsonDocument<string[]>('Go SDK model', { type: 'array', items: { type: 'string' } }).parse(result.stdout, 'Go symbols'));
+  assert.deepEqual(declaredApiSymbols('go').filter(symbol => !found.has(symbol)), []);
+});

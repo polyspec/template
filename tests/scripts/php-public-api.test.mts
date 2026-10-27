@@ -7,6 +7,7 @@ import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { jsonDocument } from '../../scripts/json-document.mts';
+import { declaredApiSymbols } from './public-api-declarations.mts';
 
 const symbols = jsonDocument<string[]>('PHP SDK symbols', { type: 'array', items: { type: 'string' } });
 const tools = dirname(fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')));
@@ -28,6 +29,12 @@ function classSymbols(found: string[], classes: string[]): string[] {
 }
 
 for (const entry of ['packages/php/src', 'packages/php-ext/src/polyspec_template.stub.php']) {
+test(`${entry}: every declared API reference exists in the native model`, { timeout: 30_000 }, () => {
+  const found = new Set(extract(entry));
+  const implementation = entry === 'packages/php/src' ? 'php' : 'php-ext';
+  assert.deepEqual(declaredApiSymbols(implementation).filter(symbol => !found.has(symbol)), []);
+});
+
 test(`${entry}: built-in implementation groups are outside the public SDK`, { timeout: 30_000 }, () => {
   const helpers = extract(entry).filter(symbol => symbol.startsWith('Polyspec\\Template\\Functions\\'));
   assert.deepEqual(helpers, []);

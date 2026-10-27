@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 11de051f27af61e2796a5b5e58fef620e47ef2d475ce2f2438a72595ee0736f3 -->
+<!-- source-sha256: d941ce03a4e39d8a51bac69c2405cf3b4090dd034b79b8580f7da3230e0f44e3 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -421,3 +421,4 @@
 | T27.1-1-38 | Python 태그 읽기·scanner 표/감지·standalone 제거·파서 JSON 메시지 helper를 SDK export에서 제외하고 Source·구분자 해석·분석 연산을 유지한다 | 명시적 네이티브 모듈 export 목록·회귀 검사 | Python export/분석 단위 검사·`make lint-python`·`make docs-check` | [o] |
 | T27.1-1-39 | Python 페이지 캐시 삭제를 완성하고 캐시 연산·네이티브 TTL 형식을 선언하며 Go 캐시 저장 기록을 비공개로 유지한다. 모든 SDK에서 삭제·빈 문자열 hit·전체 비우기를 검증한다 | 캐시 SDK 완성·선언·네이티브 단위 검사 | 캐시 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-40 | 공통 렌더 context 상태·연산을 선언하고 AST·생성 프로그램 없이 공개 네이티브 생성·격리·순환 오류·출력 제한을 검증한다 | Runtime context SDK 선언·격리된 네이티브 단위 검사 | Context SDK 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |
+| T27.1-1-41 | 기존 TypeScript model 검사에 더해 모든 Go·PHP/확장·Python API 선언 참조를 네이티브 SDK model과 소유 단위 검사에서 비교한다 | 네이티브 참조 consumer 단위 검사·명시적 owner 입력 | 네이티브 API 참조 단위 검사·`make owner-validate`·`make lint-ts`·`make docs-check` | [o] |
