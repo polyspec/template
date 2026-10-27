@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3b2df0676e8cdc1f598b56d0531455e211cd78e014e50c327cc437f2ea674855 -->
+<!-- source-sha256: 8239376b5dbcf958a456d9bc6d09b8ce22c464dc7675b8abdb114f67bdef56c7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.12
+- 86edcaa1의 전체 공개 API 감사에 R11 미선언 export나 R17 내부 타입 누출이 없다. parity는 binding 253개를 두 번 실행해 사례 5,622개를 통과했다. (T27.1-1).
 - 86edcaa1의 CI 40450000056에서 SDK 공개 범위 수용을 통과했다. 전체 Node 진입점과 보존한 interpreter vector를 포함한 모든 네이티브 API 선언과 binding이 유효하다. (T27.1-1-55).
 - 릴리스 완료 조건을 선언한 툴체인과 전체 SDK·CI 매트릭스에 맞추고 과거 검사 근거는 분리해 유지한다. 일부 CI 결과는 불완전한 구현 목록 없이 기록한다. parity 선언·문서 검사가 통과했다(T27.1-5).
 - Rust 리터럴 목록을 실제 String variant로 정정하고 존재하지 않는 scalar 이름을 선언 회귀 검사로 거부한다. interpreter vector 이동 뒤에도 expression 파서의 우선순위·오류 검사를 네이티브 패키지에 유지하며 독립 PHP 검사 도구를 분류에 등록한다. oxc-parser를 0.156.0, PHPUnit을 13.4.4로 갱신하고 레지스트리 의존성 50개와 lock 8개에 예외 없는 최신 버전 미달이나 취약점 권고가 없는 검토를 기록한다. Green: SDK·contract 단위 검사 42개, 네이티브 파서 검사 2개, PHP 구현별 SDK 검사 4개와 네이티브 lint·정책 검사가 통과했다. 전체 후보 CI는 여전히 필요하다(T27.1-5).
