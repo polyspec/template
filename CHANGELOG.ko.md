@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: abddd6866ac013b4255cbbb6e9beb8ed88874c04952093cd79aa747b4990dfa6 -->
+<!-- source-sha256: 5cbee24a8dbac1e254ee3424f63c4e8628084ceff5d7a08c243a92d8fefdaaee -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Template가 정확한 릴리즈 archive·npm이 기록한 integrity로 kit 0.0.58을 사용한다. Kit 복사본/hook을 동기화하고 검토한 Ruff patch를 0.17.3으로 갱신하여 mise로 네 플랫폼 digest를 기록했다. 새 review는 registry 의존성 50개·lock 8개를 검토했으며 기존 예외 외 advisory·더 새 stable 릴리즈가 없다. Green: 스크립트/consumer 48개·toolchain 33개 단위 검사·Python lint·toolchain/kit/hooks 검사·현재 lock 의존성 gate·선언/owner/문서 검사가 통과했다. 전체 릴리즈 CI는 계속 필요하다(T27.1-1-47).
 - Python value·binding·error·numeric·engine 모듈의 export 목록을 명시했다. SDK value carrier·root binding 함수·위치 오류·program interface·안전한 숫자 범위 상수의 identity를 유지하고 숫자/분류·parser adapter 구현은 내부에 유지한다. Red: export 회귀 검사가 암묵적 helper 공개를 거부했다. Green: export/value/runtime 단위 검사 46개·네이티브 Python API 참조 검사·Python lint·선언·owner·문서 검사가 통과했다(T27.1-1-46).
 - Parse API 선언에 선택적 구분자 설정·네이티브 쌍 표현·템플릿/인자 요청 실패를 명명했다. Rust·TypeScript 공개 consumer가 설정·오류 대안을 생성하고 TypeScript 경계에서 잘못된 구분자의 네이티브 identity를 확인한다. Green: 네이티브 parser/경계 단위 검사 46개·외부 consumer/참조 검사 50개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-45).
 - TypeScript context 출력은 `write`·`toString` 공개 인스턴스 interface를 사용하고 buffer 생성은 내부에 유지하며 기존 root 타입 전용 export를 보존한다. 네이티브 출력 대응은 검사하는 쓰기·텍스트 수집·바이트 제한을 유지한다. Red: 네이티브 model에 구현 class 생성자가 노출됐다. Green: 출력 model/consumer 회귀·context SDK 단위 검사·네이티브 참조 검사 30개·TypeScript lint/타입 검사·선언·owner·문서 검사가 통과했다(T27.1-1-44).

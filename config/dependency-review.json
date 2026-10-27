@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-26T20:34:14.886Z",
+  "reviewed": "2026-10-27T01:00:57.471Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "5f409e1d35ee0e8676e987e19e3b57fc41ffd343d69cb229641a5a2a58cd586b",
+      "sha256": "67e8d9f2b83717783a10e175022f4759c7e839681a9b9838bc870b158f779878",
       "advisories": []
     },
     {
@@ -378,8 +378,8 @@
       "ecosystem": "pypi",
       "manifest": "mise.toml",
       "package": "ruff",
-      "version": "0.17.2",
-      "latest": "0.17.2"
+      "version": "0.17.3",
+      "latest": "0.17.3"
     },
     {
       "ecosystem": "go",
