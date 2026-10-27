@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type Entry struct {
+type entry struct {
 	HTML      string
 	ExpiresAt *time.Time
 }
@@ -15,14 +15,14 @@ type Entry struct {
 type PageCache struct {
 	mu         sync.Mutex
 	now        func() time.Time
-	mapEntries map[string]Entry
+	mapEntries map[string]entry
 }
 
 func NewPageCache(now func() time.Time) *PageCache {
 	if now == nil {
 		now = time.Now
 	}
-	return &PageCache{now: now, mapEntries: map[string]Entry{}}
+	return &PageCache{now: now, mapEntries: map[string]entry{}}
 }
 
 func (c *PageCache) Get(key string) (string, bool) {
@@ -49,7 +49,7 @@ func (c *PageCache) Set(key, html string, ttl *time.Duration) error {
 		expires = &value
 	}
 	c.mu.Lock()
-	c.mapEntries[key] = Entry{HTML: html, ExpiresAt: expires}
+	c.mapEntries[key] = entry{HTML: html, ExpiresAt: expires}
 	c.mu.Unlock()
 	return nil
 }

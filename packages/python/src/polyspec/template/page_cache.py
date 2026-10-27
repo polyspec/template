@@ -43,5 +43,9 @@ class PageCache:
         self.set(key, html, ttl)
         return html
 
+    def delete(self, key: str) -> None:
+        """Removes one page; an absent key stays absent."""
+        self._entries.pop(key, None)
+
     def clear(self) -> None:
         self._entries.clear()

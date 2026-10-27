@@ -2,6 +2,21 @@ import { describe, expect, it } from 'vitest';
 import { PageCache } from '../src/index.js';
 
 describe('PageCache', () => {
+  it('deletes one key, preserves empty hits and clears every key (RT-65, RT-66)', () => {
+    const cache = new PageCache(() => 100);
+    cache.set('empty', '', null);
+    cache.set('other', 'other', null);
+    expect(cache.getOrSet('empty', null, () => { throw new Error('empty page is a hit'); })).toBe('');
+    cache.delete('empty');
+    cache.delete('absent');
+    expect(cache.get('empty')).toBeNull();
+    expect(cache.get('other')).toBe('other');
+    expect(cache.getOrSet('empty', null, () => 'new')).toBe('new');
+    cache.clear();
+    expect(cache.get('empty')).toBeNull();
+    expect(cache.get('other')).toBeNull();
+  });
+
   // RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.
   it('expires positive TTLs and keeps zero and null forever', () => {
     let now = 100;

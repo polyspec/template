@@ -51,3 +51,20 @@ fn get_or_set_calls_render_once_and_stores_with_the_ttl() {
     );
     assert_eq!(calls, 2);
 }
+
+/// RT-65/66: empty pages are hits; deletion affects one key and clear all.
+#[test]
+fn delete_preserves_other_keys_and_clear_removes_every_page() {
+    let mut cache = PageCache::new();
+    cache.set("empty", "", None, 100.0).unwrap();
+    cache.set("other", "other", None, 100.0).unwrap();
+    assert_eq!(cache.get_or_set("empty", None, 100.0, || panic!("empty page is a hit")).unwrap(), "");
+    cache.delete("empty");
+    cache.delete("absent");
+    assert_eq!(cache.get("empty", 100.0), None);
+    assert_eq!(cache.get("other", 100.0).as_deref(), Some("other"));
+    assert_eq!(cache.get_or_set("empty", None, 100.0, || Ok("new".into())).unwrap(), "new");
+    cache.clear();
+    assert_eq!(cache.get("empty", 100.0), None);
+    assert_eq!(cache.get("other", 100.0), None);
+}

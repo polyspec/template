@@ -9,6 +9,25 @@ use Polyspec\Template\PageCache;
 
 final class PageCacheTest extends TestCase
 {
+    /** RT-65/66: empty pages are hits; deletion affects one key and clear all. */
+    public function testDeletePreservesOtherKeysAndClearRemovesEveryPage(): void
+    {
+        $cache = new PageCache(static fn (): float => 100.0);
+        $cache->set('empty', '', null);
+        $cache->set('other', 'other', null);
+        self::assertSame('', $cache->getOrSet('empty', null, static function (): string {
+            self::fail('empty page is a hit');
+        }));
+        $cache->delete('empty');
+        $cache->delete('absent');
+        self::assertNull($cache->get('empty'));
+        self::assertSame('other', $cache->get('other'));
+        self::assertSame('new', $cache->getOrSet('empty', null, static fn (): string => 'new'));
+        $cache->clear();
+        self::assertNull($cache->get('empty'));
+        self::assertNull($cache->get('other'));
+    }
+
     /** RT-65: a positive TTL expires after that many seconds; 0 and null mean forever. */
     public function testPositiveTtlExpiresAndZeroOrNullArePermanent(): void
     {

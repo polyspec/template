@@ -580,6 +580,24 @@ class ValuesAndErrors(unittest.TestCase):
             Engine(program).render("o.tpl", {})
         self.assertEqual(caught.exception.code, "E_LOAD_OUTSIDE_ROOT")
 
+    def test_page_cache_delete_and_clear(self):
+        # RT-65/66: empty pages are hits; deletion affects one key and clear all.
+        cache = PageCache(now=lambda: 100.0)
+        cache.set("empty", "", None)
+        cache.set("other", "other", None)
+        self.assertEqual(
+            cache.get_or_set("empty", None, lambda: self.fail("empty page is a hit")),
+            "",
+        )
+        cache.delete("empty")
+        cache.delete("absent")
+        self.assertIsNone(cache.get("empty"))
+        self.assertEqual(cache.get("other"), "other")
+        self.assertEqual(cache.get_or_set("empty", None, lambda: "new"), "new")
+        cache.clear()
+        self.assertIsNone(cache.get("empty"))
+        self.assertIsNone(cache.get("other"))
+
     def test_page_cache(self):
         # RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.
         clock = {"now": 100.0}

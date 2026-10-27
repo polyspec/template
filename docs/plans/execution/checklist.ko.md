@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 07bfa8adef2f193bf0dba43b6faa913a3a957d656d549c4fed8070c382d71334 -->
+<!-- source-sha256: c12900bd2a88e7f367d8d2b420f877b4f36f60d8bb03415be24e9b7e3ee93ba1 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -419,3 +419,4 @@
 | T27.1-1-36 | Go 메모리 로더의 AST 내용 버전을 수정하고 네이티브 로더 결과·메모리 로더 연산을 선언하며 모든 SDK에서 교체 회귀를 검증한다 | 로더 SDK 선언·네이티브 내용 버전 단위 검사 | `make parity-declarations-check`·로더 단위 검사·네이티브 lint·`make docs-check` | [o] |
 | T27.1-1-37 | 깨끗한 checkout의 네이티브 parity binding이 공개 formatter 패키지를 import하기 전에 빌드하도록 수정하고 Make 실행 계획·SDK 단위 검사를 검증한다 | Parity 빌드 선행 의존성·회귀 검사 | `node --test tests/scripts/suite-parity.test.mts`·formatter SDK 단위 검사·`make docs-check` | [o] |
 | T27.1-1-38 | Python 태그 읽기·scanner 표/감지·standalone 제거·파서 JSON 메시지 helper를 SDK export에서 제외하고 Source·구분자 해석·분석 연산을 유지한다 | 명시적 네이티브 모듈 export 목록·회귀 검사 | Python export/분석 단위 검사·`make lint-python`·`make docs-check` | [o] |
+| T27.1-1-39 | Python 페이지 캐시 삭제를 완성하고 캐시 연산·네이티브 TTL 형식을 선언하며 Go 캐시 저장 기록을 비공개로 유지한다. 모든 SDK에서 삭제·빈 문자열 hit·전체 비우기를 검증한다 | 캐시 SDK 완성·선언·네이티브 단위 검사 | 캐시 단위 검사·`make parity-declarations-check`·네이티브 lint·`make docs-check` | [o] |

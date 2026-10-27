@@ -65,6 +65,19 @@ func TestPageCacheGetOrSetCallsRenderOnceAndStoresWithTheTTL(t *testing.T) {
 
 // TestPageCacheDeleteAndClear: Delete removes one entry and Clear every entry.
 func TestPageCacheDeleteAndClear(t *testing.T) {
+	emptyCache := NewPageCache(func() time.Time { return time.Unix(100, 0) })
+	if err := emptyCache.Set("empty", "", nil); err != nil {
+		t.Fatal(err)
+	}
+	if html, err := emptyCache.GetOrSet("empty", nil, func() (string, error) { t.Fatal("empty page is a hit"); return "", nil }); html != "" || err != nil {
+		t.Fatalf("empty hit: %q %v", html, err)
+	}
+	emptyCache.Delete("empty")
+	emptyCache.Delete("absent")
+	if html, err := emptyCache.GetOrSet("empty", nil, func() (string, error) { return "new", nil }); html != "new" || err != nil {
+		t.Fatalf("deleted miss: %q %v", html, err)
+	}
+
 	cache := NewPageCache(func() time.Time { return time.Unix(100, 0) })
 	for _, key := range []string{"a", "b", "c"} {
 		if err := cache.Set(key, key, nil); err != nil {
