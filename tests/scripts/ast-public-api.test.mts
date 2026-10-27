@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { parseSync } from 'oxc-parser';
 import { jsonDocument } from '../../scripts/json-document.mts';
+import { apiBindingSchema } from './public-api-declarations.mts';
 import { caseIds, casesDir } from '../runner/case-list.mts';
 
 interface Definition { properties?: Record<string, unknown> }
@@ -73,7 +74,7 @@ interface ApiUnit {
   id: string;
   kind: string;
   requirements: string[];
-  symbols?: { implementation: string; symbol: string }[];
+  symbols?: { implementation: string; symbol?: string; symbols?: string[] }[];
 }
 
 test('every schema shape and field names its native public representation', { timeout: 30_000 }, () => {
@@ -81,9 +82,7 @@ test('every schema shape and field names its native public representation', { ti
     type: 'object', required: ['units'], properties: { units: { type: 'array', items: {
       type: 'object', required: ['id', 'kind', 'requirements'], properties: {
         id: { type: 'string' }, kind: { type: 'string' }, requirements: { type: 'array', items: { type: 'string' } },
-        symbols: { type: 'array', items: { type: 'object', required: ['implementation', 'symbol'], properties: {
-          implementation: { type: 'string' }, symbol: { type: 'string' },
-        } } },
+        symbols: { type: 'array', items: apiBindingSchema },
       },
     } } },
   }).read('config/parity.json');

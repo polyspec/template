@@ -1047,7 +1047,8 @@
     },
     {
       "paths": [
-        "scripts/typescript-exports.mts"
+        "scripts/typescript-exports.mts",
+        "tests/scripts/public-api-declarations.mts"
       ],
       "targets": [
         "compiler-interface-check"
@@ -1071,7 +1072,8 @@
         "config/parity.json",
         "packages/ts/src/**",
         "packages/ts/package.json",
-        "packages/ts/tsconfig.json"
+        "packages/ts/tsconfig.json",
+        "tests/scripts/public-api-declarations.mts"
       ],
       "targets": [
         "template-test-scripts"
@@ -1084,7 +1086,8 @@
       "paths": [
         "tests/scripts/api-contract-declarations.test.mts",
         "config/parity.json",
-        "packages/compiler/interface.json"
+        "packages/compiler/interface.json",
+        "tests/scripts/public-api-declarations.mts"
       ],
       "targets": [
         "template-test-scripts"
@@ -1142,7 +1145,8 @@
         "packages/ts/src/ast.ts",
         "tests/runner/case-list.mts",
         "tests/cases/**",
-        "tests/fixtures/ast-decode/**"
+        "tests/fixtures/ast-decode/**",
+        "tests/scripts/public-api-declarations.mts"
       ],
       "targets": [
         "template-test-scripts"
@@ -1212,6 +1216,18 @@
       ],
       "tests": [
         "tests/scripts/python-public-api.test.mts"
+      ]
+    },
+    {
+      "paths": [
+        "tests/scripts/public-api-declarations.test.mts",
+        "tests/scripts/public-api-declarations.mts"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/public-api-declarations.test.mts"
       ]
     }
   ],
@@ -1909,7 +1925,8 @@
         "packages/ts/tsconfig.json",
         "tests/scripts/public-api-declarations.mts",
         "tests/scripts/python-public-api.test.mts",
-        "packages/python/src/**"
+        "packages/python/src/**",
+        "tests/scripts/public-api-declarations.test.mts"
       ]
     }
   ]

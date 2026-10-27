@@ -906,12 +906,12 @@
       "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!Engine:class" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Engine" },
-        { "implementation": "rust", "symbol": "polyspec_template::Engine" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Engine" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Engine" },
-        { "implementation": "python", "symbol": "template.Engine" }
+        { "implementation": "ts", "symbols": ["@polyspec/template!Engine:class", "@polyspec/template!Engine:constructor(1)", "@polyspec/template!Engine#program:member"] },
+        { "implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.Engine", "github.com/polyspec/template/packages/go.NewEngine"] },
+        { "implementation": "rust", "symbols": ["polyspec_template::Engine", "polyspec_template::Engine::new"] },
+        { "implementation": "php", "symbols": ["Polyspec\\Template\\Engine", "Polyspec\\Template\\Engine::__construct"] },
+        { "implementation": "php-ext", "symbols": ["Polyspec\\Template\\Engine", "Polyspec\\Template\\Engine::__construct"] },
+        { "implementation": "python", "symbols": ["template.Engine", "template.engine.Engine"] }
       ]
     },
     {
@@ -924,7 +924,7 @@
         { "implementation": "rust", "symbol": "polyspec_template::Program" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Program" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Program" },
-        { "implementation": "python", "symbol": "template.Program" }
+        { "implementation": "python", "symbols": ["template.Program", "template.engine.Program"] }
       ]
     },
     {
@@ -945,12 +945,12 @@
       "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!PreparedRender:interface" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.Prepared" },
-        { "implementation": "rust", "symbol": "polyspec_template::PreparedRender" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\PreparedRender" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\PreparedRender" },
-        { "implementation": "python", "symbol": "template.PreparedRender" }
+        { "implementation": "ts", "symbols": ["@polyspec/template!PreparedRender:interface", "@polyspec/template!PreparedRender#render:member(1)"] },
+        { "implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.Prepared", "github.com/polyspec/template/packages/go/render.Prepared", "github.com/polyspec/template/packages/go/render.Prepared.Render", "github.com/polyspec/template/packages/go/render.PreparedRender", "github.com/polyspec/template/packages/go/render.PreparedRender.Render"] },
+        { "implementation": "rust", "symbols": ["polyspec_template::PreparedRender", "polyspec_template::PreparedRender::new", "polyspec_template::PreparedRender::render"] },
+        { "implementation": "php", "symbols": ["Polyspec\\Template\\PreparedRender", "Polyspec\\Template\\PreparedRender::__construct", "Polyspec\\Template\\PreparedRender::render", "Polyspec\\Template\\PreparedExecution", "Polyspec\\Template\\PreparedExecution::render"] },
+        { "implementation": "php-ext", "symbols": ["Polyspec\\Template\\PreparedRender", "Polyspec\\Template\\PreparedRender::__construct", "Polyspec\\Template\\PreparedRender::render", "Polyspec\\Template\\PreparedExecution", "Polyspec\\Template\\PreparedExecution::render"] },
+        { "implementation": "python", "symbols": ["template.PreparedRender", "template.engine.PreparedRender", "template.engine.PreparedRender.render"] }
       ]
     },
     {
@@ -1093,7 +1093,7 @@
         { "implementation": "rust", "symbol": "polyspec_template::RuntimeServices" },
         { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeServices" },
         { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeServices" },
-        { "implementation": "python", "symbol": "template.RuntimeServices" }
+        { "implementation": "python", "symbols": ["template.RuntimeServices", "template.runtime_environment.RuntimeServices"] }
       ]
     },
     {
@@ -1101,12 +1101,12 @@
       "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!RuntimeEnvironment:class" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go.RuntimeEnvironment" },
-        { "implementation": "rust", "symbol": "polyspec_template::RuntimeEnvironment" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeEnvironment" },
-        { "implementation": "python", "symbol": "template.RuntimeEnvironment" }
+        { "implementation": "ts", "symbols": ["@polyspec/template!RuntimeEnvironment:class", "@polyspec/template!RuntimeEnvironment:constructor(1)", "@polyspec/template!RuntimeEnvironment#hostFunction:member(1)", "@polyspec/template!RuntimeEnvironment#classFunction:member(1)"] },
+        { "implementation": "go", "symbols": ["github.com/polyspec/template/packages/go.RuntimeEnvironment", "github.com/polyspec/template/packages/go.NewRuntimeEnvironment", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment", "github.com/polyspec/template/packages/go/render.NewRuntimeEnvironment", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.HostFunction", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.ClassFunction", "github.com/polyspec/template/packages/go/render.RuntimeEnvironment.Limits"] },
+        { "implementation": "rust", "symbols": ["polyspec_template::RuntimeEnvironment", "polyspec_template::RuntimeEnvironment::new"] },
+        { "implementation": "php", "symbols": ["Polyspec\\Template\\Render\\RuntimeEnvironment", "Polyspec\\Template\\Render\\RuntimeEnvironment::__construct", "Polyspec\\Template\\Render\\RuntimeEnvironment::hostFunction", "Polyspec\\Template\\Render\\RuntimeEnvironment::classFunction"] },
+        { "implementation": "php-ext", "symbols": ["Polyspec\\Template\\Render\\RuntimeEnvironment", "Polyspec\\Template\\Render\\RuntimeEnvironment::__construct", "Polyspec\\Template\\Render\\RuntimeEnvironment::hostFunction", "Polyspec\\Template\\Render\\RuntimeEnvironment::classFunction"] },
+        { "implementation": "python", "symbols": ["template.RuntimeEnvironment", "template.runtime_environment.RuntimeEnvironment"] }
       ]
     },
     {
@@ -1114,12 +1114,12 @@
       "requirements": ["RT-1", "RT-2", "RT-3", "RT-4", "RT-5", "RT-6", "RT-7", "RT-8", "RT-9", "RT-10", "RT-11", "RT-12", "RT-13", "RT-14", "RT-15", "RT-16", "RT-17", "RT-18", "RT-19", "RT-20", "RT-21", "RT-22", "RT-23", "RT-24", "RT-25", "RT-26", "RT-27", "RT-28", "RT-29", "RT-30", "RT-31", "RT-32", "RT-33", "RT-34", "RT-35", "RT-36", "RT-37", "RT-40", "RT-41", "RT-42", "RT-44", "RT-55", "RT-56", "RT-59", "RT-60", "RT-61", "RT-62", "RT-65", "RT-66", "RT-67", "RT-69", "RT-70"],
       "kind": "api",
       "symbols": [
-        { "implementation": "ts", "symbol": "@polyspec/template!RuntimeBindings:class" },
-        { "implementation": "go", "symbol": "github.com/polyspec/template/packages/go/render.RuntimeBindings" },
-        { "implementation": "rust", "symbol": "polyspec_template::RuntimeBindings" },
-        { "implementation": "php", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings" },
-        { "implementation": "php-ext", "symbol": "Polyspec\\Template\\Render\\RuntimeBindings" },
-        { "implementation": "python", "symbol": "template.RuntimeBindings" }
+        { "implementation": "ts", "symbols": ["@polyspec/template!RuntimeBindings:class", "@polyspec/template!RuntimeBindings:constructor(1)"] },
+        { "implementation": "go", "symbols": ["github.com/polyspec/template/packages/go/render.RuntimeBindings", "github.com/polyspec/template/packages/go/render.NewRuntimeBindings"] },
+        { "implementation": "rust", "symbols": ["polyspec_template::RuntimeBindings", "polyspec_template::RuntimeBindings::new"] },
+        { "implementation": "php", "symbols": ["Polyspec\\Template\\Render\\RuntimeBindings", "Polyspec\\Template\\Render\\RuntimeBindings::__construct"] },
+        { "implementation": "php-ext", "symbols": ["Polyspec\\Template\\Render\\RuntimeBindings", "Polyspec\\Template\\Render\\RuntimeBindings::__construct"] },
+        { "implementation": "python", "symbols": ["template.RuntimeBindings", "template.runtime_bindings.RuntimeBindings"] }
       ]
     },
     {

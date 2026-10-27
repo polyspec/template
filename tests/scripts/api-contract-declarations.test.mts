@@ -6,30 +6,28 @@ import test from 'node:test';
 import { compilerManifestDocument } from '../../scripts/compiler-manifest.mts';
 import { CATALOG, goName, parseCatalog } from '../../scripts/generate-error-codes.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
+import { apiBindingSchema } from './public-api-declarations.mts';
 import { readParityConfig } from '../../scripts/parity-config.mts';
 
 interface Unit {
   id: string;
   kind: string;
   requirements: string[];
-  symbols?: { implementation: string; symbol: string }[];
+  symbols?: { implementation: string; symbol?: string; symbols?: string[] }[];
 }
 
 
 
 const parity = jsonDocument<{ units: Unit[] }>('API units', {
-  type: 'object', required: ['units'],
-  properties: { units: { type: 'array', items: {
-    type: 'object', required: ['id', 'kind', 'requirements'],
-    properties: {
-      id: { type: 'string' }, kind: { type: 'string' },
-      requirements: { type: 'array', items: { type: 'string' } },
-      symbols: { type: 'array', items: {
-        type: 'object', required: ['implementation', 'symbol'],
-        properties: { implementation: { type: 'string' }, symbol: { type: 'string' } },
-      } },
-    },
-  } } },
+  type: 'object', required: ['units'], properties: {
+    units: { type: 'array', items: {
+      type: 'object', required: ['id', 'kind', 'requirements'], properties: {
+        id: { type: 'string' }, kind: { type: 'string' },
+        requirements: { type: 'array', items: { type: 'string' } },
+        symbols: { type: 'array', items: apiBindingSchema },
+      },
+    } },
+  },
 }).read('config/parity.json');
 const manifest = compilerManifestDocument.read('packages/compiler/interface.json');
 

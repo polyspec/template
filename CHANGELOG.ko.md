@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 13046f534f3449f0f91156e7dcfd6575d749ea6d05d00805aaee5f5120428e62 -->
+<!-- source-sha256: ea5ddf73bcd101b628ae279824e5ca4c79eda03248d08de6d532e3a2e71e3680 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 - 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- API consumer reader가 kit 0.0.58의 scalar `symbol`·정확한 `symbols` 목록 형식을 지원한다. 빈 목록·중복·비문자열·혼합 binding을 거부하고 목록의 모든 네이티브 공개 지점을 검증한다. Engine 소유권·prepared-render protocol·runtime 생성자/재공개를 검토한 네이티브 집합으로 선언하며 연산·필드의 정확한 canonical 참조 검사를 유지한다. Red: reader가 네이티브 목록을 거부하고 혼합 binding을 허용했다. Green: codec/네이티브 계약 단위 검사 49개·여섯 SDK runtime 소유권 검사 19개·TypeScript lint·선언/owner/문서 검사가 통과했다(T27.1-1-49).
 - Rust loader/cache SDK 테스트를 네이티브 rustfmt 형식으로 맞추고 assertion을 유지했다. Red: CI 405fb0b6·소유 format target이 두 파일을 거부했다. Green: `make template-lint-rust-format`이 통과했다(T27.1-1-48).
 - Template가 정확한 릴리즈 archive·npm이 기록한 integrity로 kit 0.0.58을 사용한다. Kit 복사본/hook을 동기화하고 검토한 Ruff patch를 0.17.3으로 갱신하여 mise로 네 플랫폼 digest를 기록했다. 새 review는 registry 의존성 50개·lock 8개를 검토했으며 기존 예외 외 advisory·더 새 stable 릴리즈가 없다. Green: 스크립트/consumer 48개·toolchain 33개 단위 검사·Python lint·toolchain/kit/hooks 검사·현재 lock 의존성 gate·선언/owner/문서 검사가 통과했다. 전체 릴리즈 CI는 계속 필요하다(T27.1-1-47).
 - Python value·binding·error·numeric·engine 모듈의 export 목록을 명시했다. SDK value carrier·root binding 함수·위치 오류·program interface·안전한 숫자 범위 상수의 identity를 유지하고 숫자/분류·parser adapter 구현은 내부에 유지한다. Red: export 회귀 검사가 암묵적 helper 공개를 거부했다. Green: export/value/runtime 단위 검사 46개·네이티브 Python API 참조 검사·Python lint·선언·owner·문서 검사가 통과했다(T27.1-1-46).

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 0eeab5b94fa7ceb127fa8308b75bcdad8a94baaa25fbb91d07bbad644637863f -->
+<!-- source-sha256: a33cfe42423d29892eb06d714fbfc62da889f1ab413b6e1bcea2788fe1879391 -->
 # 개발
 
 [English](/operations/development).
@@ -83,3 +83,5 @@ make parity-check
 4. `docs/features.md`, `docs/features.ko.md`, `CHANGELOG.md`, `CHANGELOG.ko.md`를 갱신한다.
 5. 변경을 소유한 Red와 Green test와 `make docs-check`를 실행한다.
 6. 동작, 주체, 대상을 명시한 메시지로 커밋한다.
+
+`config/parity.json`의 구현별 API binding은 scalar `symbol` 또는 비어 있지 않은 고유 `symbols` 목록을 사용한다. 목록은 engine 타입·생성자·소유 program처럼 같은 검증된 계약의 정확한 공개 지점을 명명한다. Prefix·wildcard 확장은 사용하지 않는다. 선언 gate가 잘못된 binding을 거부하고 네이티브 SDK consumer 단위 검사가 목록의 모든 이름을 검증한다. 기존 연산·필드 단위 검사는 `packages/compiler/interface.json`의 canonical 공개 지점 검사를 유지한다.
