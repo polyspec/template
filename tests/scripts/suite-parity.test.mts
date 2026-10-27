@@ -134,3 +134,15 @@ test('a verifying CI job runs every later step after a failing step, and a make 
     }
   }
 });
+
+// FMT-16: a binding imports the public formatter export, which needs its build
+// even when no earlier target has populated dist in a clean checkout.
+test('native formatter parity bindings build the published formatter before execution', () => {
+  const run = spawnSync('make', ['--no-print-directory', '-n', 'parity-check', 'UNITS=formatter-sdk-results'], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  const commands = run.stdout.split('\n');
+  const build = commands.findIndex(line => line.includes('scripts/build-package.mts --package language'));
+  const binding = commands.findIndex(line => line.includes('/parity.') && line.includes('--unit formatter-sdk-results'));
+  assert.ok(build >= 0, 'the formatter binding requires its published package build');
+  assert.ok(binding > build, 'the native binding executes after the package build');
+});

@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: b04489e8b1cfe24de23b1a16f42515b50b88cef3da4e4ed46dec56641c02ee41 -->
+<!-- source-sha256: 81d8d9c1a0998c3c236fe2cc8a5625262bc43d28adc3ef74b3a8544a166103bd -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -417,3 +417,4 @@
 | T27.1-1-34 | 부분 분석 TypeScript 심볼 종류를 정정하고 기존 성공 AST를 모든 SDK에 보존하며 전체 결과와 선언된 네이티브 모델 참조를 대조한다 | Complete prefix results and native declaration regression | `node --test tests/scripts/typescript-exports.test.mts`; prefix SDK units; native build/lint; `make docs-check` | [o] |
 | T27.1-1-35 | 오류 코드·줄 인덱스·span 공유 데이터 타입과 네이티브 텍스트·복원 형식을 선언하고 공개 타입 값 및 위치를 검증한다 | Public code/location data declarations and SDK probes | `make parity-declarations-check`; Source SDK units; native code-catalog units; `make docs-check` | [o] |
 | T27.1-1-36 | Go 메모리 로더의 AST 내용 버전을 수정하고 네이티브 로더 결과·메모리 로더 연산을 선언하며 모든 SDK에서 교체 회귀를 검증한다 | 로더 SDK 선언·네이티브 내용 버전 단위 검사 | `make parity-declarations-check`·로더 단위 검사·네이티브 lint·`make docs-check` | [o] |
+| T27.1-1-37 | 깨끗한 checkout의 네이티브 parity binding이 공개 formatter 패키지를 import하기 전에 빌드하도록 수정하고 Make 실행 계획·SDK 단위 검사를 검증한다 | Parity 빌드 선행 의존성·회귀 검사 | `node --test tests/scripts/suite-parity.test.mts`·formatter SDK 단위 검사·`make docs-check` | [o] |
