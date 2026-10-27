@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: ffd0fa3ac25d790efa82d0c2f14b32db6d5a95f631afc25c0e56f4dccb5040ed -->
+<!-- source-sha256: 8e0766577d5eda2cd1b2027464ec00aba59ce53a9023b4b647bed51a78a91f39 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -188,14 +188,14 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 ## 완료 정의
 
-- W0–W11의 모든 작업이 `done`.
-- Node 26.8.1, Go 1.27.1, Rust 1.98.1, PHP 8.5의 깨끗한 체크아웃에서 `make check` 통과.
-- `node tests/runner/parity.mjs`가 `ts`, `go`, `rust`, `php`, 그리고 빌드된 경우 `php-ext` 사이에 분기 0건을 보고.
-- `make test-browser` 통과.
-- `make conformance-all-modes`가 TypeScript·Go·Rust·PHP의 모든 mode·언어·케이스 조합(mode 두 개 × 언어 네 개 × 모든 정규 케이스. T9.1의 246개 케이스로 1,968개)을 통과하고 generated 실행에서 AST로 fallback하지 않음.
-- `make release-test-matrix`가 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 설치, browser DOM 출력, 성능 동일성의 각 release 계층을 독립적으로 증명.
-- 깨끗한 checkout에서 `make install-check`, `make showcase-check`, `make docs-verify-idempotent`, `make release-check` 통과.
-- `docs/features.md`와 `docs/features.ko.md`가 모든 행에 동일한 상태 필드와 근거 링크를 가짐.
+- 보류·철회 작업 재검토를 포함한 모든 릴리스 차단 작업을 현재 근거로 완료한다.
+- 정확한 main 후보가 checkout에서 선언한 툴체인으로 CI의 `CHECK_TARGETS` 전체를 통과한다. 각 target은 정확히 한 번 실행되고 모든 worker와 `ci-passed`가 성공한다.
+- 전체 parity 매트릭스에서 TypeScript·Go·Rust·PHP·PHP 확장·Python 사이의 분기, 미선언 공개 심볼과 내부 타입 누출이 없다.
+- browser 검사와 지원하는 모든 AST/generated 언어·케이스 조합이 generated에서 AST로 fallback하지 않고 통과한다. 현재 case 파일이 매트릭스 크기를 정한다.
+- 릴리스 매트릭스는 단위, generated source compile, 적합성, 위치 오류와 실패 복구, mutation 거부, 격리 설치, browser 출력과 성능 동일성을 검증한다. 깨끗한 CI checkout에서 설치·showcase·문서 검사를 통과한다.
+- 고정 의존성 그래프의 현재 검토에 수용하지 않은 취약점 권고나 새 안정 버전 미달이 없다. PHP 라이브러리 최소 요구사항은 `>=8.4`이며 개발 검증은 8.4.27, Windows 설치는 8.4.27-1이다.
+- 메인테이너는 수용된 main 커밋에 태그를 붙이고 archive를 빌드하며 draft asset·정확한 consumer 설치·Rust git 의존성과 Go module tag를 검증한 뒤에만 공개한다.
+- 기능 상태 쌍은 같은 필드와 현재 근거를 담고 checklist·변경 기록·발행 기록은 검증과 배포를 구분한다.
 
 2026-10-02의 증거. Node 26.8.1, Go 1.27.1(`go.mod`의 toolchain 줄로 받음), Rust 1.98.1, PHP 8.5.10에서 실행했다.
 
@@ -206,7 +206,7 @@ T11.1~T11.6을 완료했다. 2026-10-02에 브랜치 `feat/language-T11.2`의 �
 
 ## Wave 27 — 릴리스 완료
 
-의존성: T22.6과 철회한 의존성 작업의 릴리스 시점 재검토. 고정한 의존성 그래프·보안 권고·esbuild 빌드 호환성·manifest·소비자·후보 CI 실패를 처리한다. T27.1은 현재 의존성 검토, 정확한 main 후보의 전체 CI 성공, 릴리스 태그, 발행, 공개 자산·소비자 검증까지 완료하면 끝난다. 로컬에서는 소유 단위 테스트와 문서 검사를 실행하고 태그는 정확한 main CI 성공 뒤에 생성한다. 공개 도구의 bootstrap·설치는 후보 CI에서 통과했으며 공개 API 감사는 아직 미완료다.
+의존성: T22.6과 철회한 의존성 작업의 릴리스 시점 재검토. 고정한 의존성 그래프·보안 권고·esbuild 빌드 호환성·manifest·소비자·후보 CI 실패를 처리한다. T27.1은 현재 의존성 검토, 정확한 main 후보의 전체 CI 성공, 릴리스 태그, 발행, 공개 자산·소비자 검증까지 완료하면 끝난다. 로컬에서는 소유 단위 테스트와 문서 검사를 실행하고 태그는 정확한 main CI 성공 뒤에 생성한다. 도구 bootstrap·SDK 계약·설치·발행은 수용할 정확한 후보의 근거를 요구하며 일부 CI 성공으로 이 wave를 완료하지 않는다.
 
 CI 40321448224에서 공개 API 검토의 미완료도 드러났다(T27.1-1). R11은 미선언 공개 심볼 2,741개, R17은 내부 타입 노출 35건을 보고한다. 클래스 멤버, 데이터 표현, helper를 공유 계약과 대조한 뒤 export나 API 선언을 바꿔야 한다. 일괄 별칭, native-only 예외, 검증하지 않은 심볼 대응으로 수만 줄이는 것은 통과 근거가 아니다. 정확한 후보의 전체 CI 매트릭스가 통과해야 이 릴리스 wave를 마친다.
 

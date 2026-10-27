@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 9676ed8181c02072352002a580aaf77fa346c416caf11913ae3de00e2442fc08 -->
+<!-- source-sha256: 411bb29f02d163ff9c5408b059b6aa03f7fd5d33fff640abec372994ca4b31ed -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -36,4 +36,6 @@ implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요�
 
 릴리스 후보 0.0.12의 매니페스트와 네이티브 lock 파일은 동기화했다. 기존 배포 파일 후보 9개는 현재 SDK 수정 이전의 산출물이므로 다시 빌드하고 검증해야 한다. 후보는 공개하지 않았다.
 
-main 232028be의 TypeScript·Rust·PHP·Python·browser·generated program·showcase·delimiter CI job과 Python bound-map·merge 사례는 통과했다. CI 40448062183과 gates 40448062181은 도구 분류 누락, vector 이동 뒤 테스트가 없는 네이티브 패키지, Rust 리터럴 이름 오타 한 곳을 거부했다. 후보는 세 원인을 정정하고 의존성 검토를 갱신했으며 변경 커밋의 전체 CI가 필요하다. 공개 API 감사는 기존 미선언 424건이나 signature type 누출을 더 이상 보고하지 않는다. 개발 검증은 PHP 8.4.27을 사용하고 라이브러리 요구사항은 >=8.4.0(표기 >=8.4), Windows 설치 기준은 8.4.27-1로 유지한다.
+main bbf8d1e4의 CI 40449094247에서 script 단위 검사 279개와 Go 네이티브 job이 통과했다. parity 감사는 이 상태 문서의 일부 언어 목록에 대한 R10 한 건만 보고하며 API 심볼·signature 도달성·네이티브 binding 지적은 남아 있지 않다. 후보는 해당 문장을 정정했고 자기 커밋의 전체 CI를 요구한다. CI 40448062183은 Python bound-map·merge 통과 근거다. 기록한 의존성 검토는 레지스트리 의존성 50개와 lock 8개에 수용하지 않은 새 안정 버전 미달이나 취약점 권고가 없음을 확인했다.
+
+개발 검증은 PHP 8.4.27을 사용하고 라이브러리 요구사항은 >=8.4.0(표기 >=8.4), Windows 설치 기준은 8.4.27-1로 유지한다.

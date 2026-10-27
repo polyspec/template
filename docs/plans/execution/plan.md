@@ -187,14 +187,14 @@ Dependencies: T24.1 waits for the release of `@polyspec/kit` that turns kit into
 
 ## Definition of done
 
-- Every task in W0–W11 is `done`.
-- `make check` passes on a clean checkout with Node 26.8.1, Go 1.27.1, Rust 1.98.1 and PHP 8.5.
-- `node tests/runner/parity.mjs` reports zero divergence across `ts`, `go`, `rust`, `php` and, when built, `php-ext`.
-- `make test-browser` passes.
-- `make conformance-all-modes` passes every TypeScript, Go, Rust and PHP mode-language-case cell (two modes × four languages × every canonical case: 1,968 cells with the 246 cases of T9.1) without a fallback from generated execution to AST execution.
-- `make release-test-matrix` proves each release layer independently: units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated install projects, browser DOM output and performance parity.
-- `make install-check`, `make showcase-check`, `make docs-verify-idempotent` and `make release-check` pass in a clean checkout.
-- `docs/features.md` and `docs/features.ko.md` carry identical status fields with evidence links for every row.
+- Every release-blocking task, including reassessed held or withdrawn work, is complete with current evidence.
+- The exact main candidate passes every target of `CHECK_TARGETS` in CI using the toolchains declared by the checkout. Every target runs exactly once, every worker passes, and `ci-passed` succeeds.
+- The complete parity matrix reports no divergence, undeclared public symbols or leaked types across TypeScript, Go, Rust, PHP, the PHP extension and Python.
+- Browser checks and every supported AST/generated language-case cell pass without a fallback from generated execution to AST execution; the current case files determine the matrix size.
+- The release matrix proves units, generated-source compilation, conformance, positioned errors and failure recovery, mutation rejection, isolated installation, browser output and performance parity. The installation, showcase and documentation checks pass in clean CI checkouts.
+- The locked dependency graph has a current review with no unaccepted advisories or newer stable releases; the PHP library floor remains `>=8.4`, with development verification at 8.4.27 and Windows installation at 8.4.27-1.
+- The maintainer tags the accepted main commit, builds its archives, proves the draft's assets and exact consumer installs, Rust git dependency and Go module tags, and publishes only after that proof succeeds.
+- The feature-status twins carry identical fields and current evidence; the checklist, changelog and publication record distinguish verification from deployment.
 
 Evidence of 2026-10-02, with Node 26.8.1, Go 1.27.1 (from the `go.mod` toolchain line), Rust 1.98.1 and PHP 8.5.10:
 
@@ -205,7 +205,7 @@ Evidence of 2026-10-02, with Node 26.8.1, Go 1.27.1 (from the `go.mod` toolchain
 
 ## Wave 27 — Release completion
 
-Dependencies: T22.6 and the release-time reassessment of the withdrawn dependency tasks. Release work covers the locked dependency graph and its advisories, esbuild build compatibility, manifests, consumers and candidate CI failures. T27.1 ends after current dependency review, successful complete CI of the exact main candidate, release tags, publication and verification of the published assets and consumers. Local verification uses owning unit tests and documentation checks; tags follow successful exact-main CI. The released-tool bootstrap and installation have passed candidate CI; the public API audit remains unfinished.
+Dependencies: T22.6 and the release-time reassessment of the withdrawn dependency tasks. Release work covers the locked dependency graph and its advisories, esbuild build compatibility, manifests, consumers and candidate CI failures. T27.1 ends after current dependency review, successful complete CI of the exact main candidate, release tags, publication and verification of the published assets and consumers. Local verification uses owning unit tests and documentation checks; tags follow successful exact-main CI. The tool bootstrap, SDK contract, installation and publication require evidence from the exact accepted candidate; partial CI success does not complete this wave.
 
 CI 40321448224 also exposes an unfinished public API audit (T27.1-1): R11 reports 2,741 undeclared public symbols and R17 reports 35 leaked types. Class members, data representations and helpers must be reviewed against the shared contract before changing exports or API declarations. A count reduced by blanket aliases, native-only exceptions or unchecked symbol mappings is no acceptance evidence. The release exits this wave only after the exact candidate passes the complete CI matrix.
 
