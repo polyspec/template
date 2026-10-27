@@ -1,11 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 975b347351dc76ae7712f1a94d913e4c38bacf2c17451308c95dcf6b546fb442 -->
+<!-- source-sha256: 98d8b39a5edbd861c0a7aa789b5b872aac2aa661d634882e0df8129932ae427c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
-- Pages가 첫 make 전에 잠긴 도구 패키지를 설치하고 선언한 PHP와 checkout 검사에 필요한 history를 준비한다. bootstrap 회귀 검사는 템플릿이 소유한 모든 설치 workflow를 검증한다. Red: 86edcaa1의 Pages가 설치된 bootstrap을 읽지 못한다. Green: workflow·툴체인 단위 검사 36개가 통과했다. 전체 CI와 실제 사이트 배포는 여전히 필요하다(T27.1-8).
+- Pages가 첫 make 전에 잠긴 도구 패키지·선언한 PHP·checkout history를 준비한다. bootstrap 회귀 검사는 템플릿이 소유한 모든 설치 workflow를 검증한다. Green: workflow·툴체인 단위 검사 36개와 action pin 검증, ae6f7173의 전체 CI 40451767762와 gates 40451767516이 통과했다. Pages 40453338233은 같은 CI의 artifact를 성공적으로 배포했다(T27.1-8).
 
 ## 0.0.12
 - 릴리스 재검토를 완료했다. 의존성 갱신·esbuild 호환성을 수용했고 철회 행은 완료된 대체 작업으로 연결되며 host Map 사례가 전체 후보 CI에서 통과했다. 0.0.12를 검증한 archive·consumer 설치와 함께 공개했고 릴리스 차단 체크리스트 작업은 남아 있지 않다(T27.1).

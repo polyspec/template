@@ -4,7 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
-- Pages installs the locked tool package before its first make, selects the declared PHP and fetches the history needed by checkout checks. The bootstrap regression covers every template-owned installing workflow. Red: Pages at 86edcaa1 cannot read the installed bootstrap; Green: 36 workflow/toolchain units pass. Complete CI and actual site deployment remain required (T27.1-8).
+- Pages installs the locked tool package before its first make, selects the declared PHP and fetches checkout history. The bootstrap regression covers every template-owned installing workflow. Green: 36 workflow/toolchain units, action-pin verification, full CI 40451767762 and gates 40451767516 pass at ae6f7173. Pages 40453338233 deploys the matching CI artifact successfully (T27.1-8).
 
 ## 0.0.12
 - Complete the release reassessment: dependency upgrades and esbuild compatibility are accepted, withdrawn rows retain completed replacements, and the host Map case passes the complete candidate CI. Version 0.0.12 is published with verified archives and consumer installs; no release-blocking checklist item remains (T27.1).

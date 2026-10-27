@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: ad43986559485f9d7b7ca8ed8a59a0259d84ae07530c96772a45bed4e7d00cfe -->
+<!-- source-sha256: 1005ce268455db248189c5528bb75aa5bd1095d769351d0bc17cc9087ebaaa99 -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -41,3 +41,5 @@ implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요�
 배포: [release 40450815462](https://github.com/polyspec/template/actions/runs/40450815462)는 tag archive 9개를 빌드하고 정확한 asset 목록을 검증했으며, commit된 consumer lock으로 archive 패키지 8개를 설치하고 wheel 의존성 그래프·Rust git consumer 빌드·Go module tag 해석을 검증한 뒤 공개했다. [Go release 40450815549](https://github.com/polyspec/template/actions/runs/40450815549)도 통과했다. 0.0.x 배포 정책상 registry에는 발행하지 않는다.
 
 PHP 라이브러리 요구사항은 >=8.4.0(표기 >=8.4)을 유지하고 개발 검증은 8.4.27, Windows 설치 기준은 8.4.27-1이다.
+
+문서 배포: [Pages 40453338233](https://github.com/polyspec/template/actions/runs/40453338233)이 ae6f7173의 [CI 40451767762](https://github.com/polyspec/template/actions/runs/40451767762) artifact를 [문서 사이트](https://polyspec.github.io/template/)에 성공적으로 배포했다. 첫 make 전에 설치 패키지 bootstrap과 선언한 PHP를 준비하며 모든 설치 workflow를 회귀 검사로 검증한다.
