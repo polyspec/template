@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { parseSync } from 'oxc-parser';
 import { jsonDocument } from '../../scripts/json-document.mts';
-import { apiBindingSchema } from './public-api-declarations.mts';
+import { apiBindingSchema, declaredApiSymbols } from './public-api-declarations.mts';
 import { caseIds, casesDir } from '../runner/case-list.mts';
 
 interface Definition { properties?: Record<string, unknown> }
@@ -76,6 +76,12 @@ interface ApiUnit {
   requirements: string[];
   symbols?: { implementation: string; symbol?: string; symbols?: string[] }[];
 }
+
+test('the Rust literal catalog names only the published scalar variants', { timeout: 5000 }, () => {
+  const prefix = 'polyspec_template::LiteralValue::';
+  const variants = declaredApiSymbols('rust').filter(symbol => symbol.startsWith(prefix));
+  assert.deepEqual(variants.sort(), ['Null', 'Bool', 'Number', 'String'].map(name => `${prefix}${name}`).sort());
+});
 
 test('every schema shape and field names its native public representation', { timeout: 30_000 }, () => {
   const config = jsonDocument<{ units: ApiUnit[] }>('API declarations', {

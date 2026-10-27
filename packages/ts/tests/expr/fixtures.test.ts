@@ -1,3 +1,4 @@
+// EXP-9: arithmetic-precedence verifies multiplicative precedence in the parsed tree and value.
 // Expression fixtures: tokens, AST and evaluation (CNF-14).
 import { expect, it } from 'vitest';
 import { evaluateExpression, parseExpression, tokenizeExpression } from '../../src/expr/index.js';

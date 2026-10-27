@@ -19,6 +19,7 @@ use Polyspec\Template\Value\Bind;
 
 /**
  * Expression fixtures: tokens, AST and evaluation (CNF-12 to CNF-14).
+ * EXP-9: arithmetic-precedence verifies multiplicative precedence in the parsed tree and value.
  */
 final class ExprFixturesTest extends TestCase
 {

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: c6bf5fa7cf107c97a9a9e04759dbc3acbc4c37e96e3222bb5cd9eeeda0672850 -->
+<!-- source-sha256: 8aa35391e8e6d89aa79393f3709e85b30d9116b2ae077e577f804849ca56cf93 -->
 # 개발
 
 [English](/operations/development).
@@ -19,7 +19,7 @@ parity job은 script 단위 테스트 job과 독립적으로 `parity-check`를 �
 | mise | 2026.10.8 | 플랫폼별 archive의 sha256을 포함한 `config/toolchain.json`의 `mise`; `make install-tools TOOLS=npm`이 npm 다음에 `var/tools`에 설치 |
 | Go | 1.27.3 | 모든 `go.mod`의 go directive가 toolchain 줄 없이 같아야 하는 kit의 pin인 `mise.toml`의 `go`; `make install-tools`가 mise로 `mise.lock`의 digest에 맞춰 설치 |
 | Rust | rustfmt와 clippy를 포함한 1.99.0 | 모든 Cargo package의 `rust-version`이 같아야 하는 kit의 pin인 `rust-toolchain.toml`; rustup으로 설치, Makefile이 `~/.cargo/bin`을 `PATH`에 추가 |
-| PHP | 8.4 | kit의 pin인 `config/toolchain.json`의 minor version; 모든 `composer.json`의 `require.php`는 `>=8.4`, `config.platform.php`는 `8.4.0`; 각 실행의 patch는 각 CI job의 report에 기록 |
+| PHP | 8.4 | kit의 pin인 `config/toolchain.json`의 minor version; 모든 `composer.json`의 `require.php`는 `>=8.4`, 의존성 해석용 `config.platform.php`는 `8.4.1`; 각 실행의 patch는 각 CI job의 report에 기록 |
 | Composer | 2.10.3 | `composer.phar`의 sha256을 포함한 `mise.toml`의 `http:composer` |
 | Python | 3.14.8 | kit의 pin인 `mise.toml`의 `python`; `make install`이 mise로 `mise.lock`의 digest에 맞춰 설치하고, Python을 실행하는 모든 검사는 그 shim `var/tools/mise/shims/python3`(`scripts/python-toolchain.mts`)를 실행하며, `PATH`의 `python3`는 실행하지 않음; CI job은 자체 Python을 설정하지 않고, CI job `python`은 그 minor만 실행하며 이는 `requires-python`이 명시 |
 | uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit | `mise.toml`의 release | 모든 플랫폼의 digest를 `mise.lock`에 둔 `mise.toml`(vulture는 `.mise/locks` 아래의 uv lock 포함); kit 패키지의 `ruff.toml`이 ruff의 규칙과 target version을 선언하고, 어떤 저장소나 package도 자기 ruff 설정을 갖지 않음(T24.5, K514) |

@@ -14,8 +14,9 @@ The table records the status of each feature. The implementations and the units 
 | template-rust | Rust runtime | implemented | go: unsupported<br>php: unsupported<br>rust: pass<br>typescript: unsupported<br>python: unsupported | [Evidence](spec/compiler) |
 | template-php | PHP runtime | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported<br>python: unsupported | [Evidence](spec/compiler) |
 | template-php-ext | PHP native extension in C | implemented | go: unsupported<br>php: pass<br>rust: unsupported<br>typescript: unsupported<br>python: unsupported | [Evidence](operations/testing) |
+| template-python | Python runtime | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: unsupported<br>python: pass | [Evidence](spec/compiler) |
 | performance-measurements | Performance measurements | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](operations/benchmark) |
-| showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](operations/showcase) |
+| showcase | Executable example site | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](operations/showcase) |
 | generated-mode | Generated compiler mode | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/compiler) |
 | docs-check | Documentation and generated contract checks | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/documentation) |
 | release-test-matrix | Release verification matrix | implemented | go: partial<br>php: partial<br>rust: partial<br>typescript: partial<br>python: partial | [Evidence](operations/testing) |
@@ -25,13 +26,13 @@ The table records the status of each feature. The implementations and the units 
 | template-vscode | VS Code extension | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](operations/editor-tools) |
 | template-lsp | Template language server | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](spec/editor) |
 | template-codemirror | CodeMirror 6 adapter | implemented | go: unsupported<br>php: unsupported<br>rust: unsupported<br>typescript: pass<br>python: unsupported | [Evidence](spec/editor) |
-| dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: unsupported | [Evidence](operations/dependencies) |
+| dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](operations/dependencies) |
 | template-function-contract | Canonical template function contract | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/functions) |
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/ast) |
-| bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: partial | [Evidence](spec/data-model) |
+| bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/data-model) |
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
 
 Release candidate 0.0.12 has synchronized manifests and native lock files. The existing nine archive candidates predate the current SDK changes and must be rebuilt and reverified. The candidate is not published.
 
-Remote main fcca660d completed CI 40439038565 with eleven worker jobs passed and scripts failed only at parity-check; gates 40439038438 reported 424 undeclared-public API findings. The current SDK contract/visibility corrections require fresh complete CI on their own commit. Development verification uses PHP 8.4.27; the library requirement remains >=8.4.0 (written >=8.4), and the Windows installation baseline is 8.4.27-1. These template release conditions are not external-only waits.
+Main 232028be passed the TypeScript, Rust, PHP, Python, browser, generated-program, showcase and delimiter CI jobs; its Python bound-map and merge cases passed. CI 40448062183 and gates 40448062181 rejected a missing tool classification, a native package with no tests after its vectors moved, and one misspelled Rust literal symbol. The candidate corrects all three and refreshes its dependency review; complete CI on that changed commit remains required. The public API audit no longer reports the previous 424 undeclared symbols or leaked signature types. Development verification uses PHP 8.4.27; the library requirement remains >=8.4.0 (written >=8.4), and the Windows installation baseline is 8.4.27-1.

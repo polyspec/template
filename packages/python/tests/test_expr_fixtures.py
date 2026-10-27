@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# EXP-9: arithmetic-precedence verifies multiplicative precedence in the parsed tree and value.
 """The expression fixtures that every language shares (tests/fixtures/expr/cases.json):
 tokens, canonical AST with spans, parse errors and evaluated values."""
 

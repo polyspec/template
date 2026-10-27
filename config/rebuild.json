@@ -290,6 +290,10 @@
       "kind": "ecosystem",
       "tool": "composer PSR-4 autoload (vendor/autoload.php) loads the one-class-per-file PHP program that the compiler returns"
     },
+    "scripts/php-toolchain.mts": {
+      "kind": "policy",
+      "reason": "selects the installed PHP wrapper and checks the configured PHP minor for standalone template verification tools"
+    },
     "scripts/process-group.mts": {
       "kind": "ecosystem",
       "tool": "process.kill and ps stop a process group and wait until no process of it is left"

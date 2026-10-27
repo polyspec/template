@@ -1,3 +1,4 @@
+// EXP-9: arithmetic-precedence verifies multiplicative precedence in the parsed tree and value.
 //! Expression fixtures: tokens, AST and evaluation (CNF-12 to CNF-14). Each vector is the trial `expressions::<name>`, as
 //! the suite unit expressions of config/parity.json reads the results; libtest has no tests made at run time, so the
 //! target runs with libtest-mimic (`harness = false`).

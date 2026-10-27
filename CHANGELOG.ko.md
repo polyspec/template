@@ -1,13 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 320cd70e53713adba1d981285421143a51fb9e474614e6c3300bec2e14d1406e -->
+<!-- source-sha256: 77026118c3f0bb23c55040e3e5f4ecdb9534493ce2a953b119a28a50a712e145 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
-- 릴리스 준비의 검증 셀에 실행 가능한 단위·문서 검사 명령을 명시했다(T27.1).
 
 ## 0.0.12
+- Rust 리터럴 목록을 실제 String variant로 정정하고 존재하지 않는 scalar 이름을 선언 회귀 검사로 거부한다. interpreter vector 이동 뒤에도 expression 파서의 우선순위·오류 검사를 네이티브 패키지에 유지하며 독립 PHP 검사 도구를 분류에 등록한다. oxc-parser를 0.156.0, PHPUnit을 13.4.4로 갱신하고 레지스트리 의존성 50개와 lock 8개에 예외 없는 최신 버전 미달이나 취약점 권고가 없는 검토를 기록한다. Green: SDK·contract 단위 검사 42개, 네이티브 파서 검사 2개, PHP 구현별 SDK 검사 4개와 네이티브 lint·정책 검사가 통과했다. 전체 후보 CI는 여전히 필요하다(T27.1-5).
 - parity를 ci-passed가 요구하는 독립 CI job에서 실행하고 모든 검사의 정확히 한 번 실행과 실패 보고를 유지한다. setup-node와 npm 설치가 lock 기반 checkout 다운로드 cache를 공유한다. workflow·suite·deadline·action pin 단위 검사는 통과했으며 새 CI에서 결과 시간을 확인해야 한다(T27.1-1-56).
 - 엄격한 canonical 연산 binding을 유지하면서 네이티브 value/binding·callback·loader·artifact·formatting·runtime 데이터 adapter의 SDK 계약 선언을 완료했다. Go interpreter 구현·package 내부 숫자 변환 helper를 비공개로 유지하고 vector/탐색 검사를 소유 package로 보존했으며 준비한 PHP interpreter 실행을 내부로 명시했다. Node 진입점이 전체 SDK를 재공개하여 여섯 진입점/module 형식이 bound map을 공유하고 TypeScript bound-map 생성자를 비공개로 하면서 runtime 위조 거부를 유지한다. 독립 PHP 검사는 설치한 인터프리터 래퍼를 사용한다. Green: 선언·owner·문서·네이티브 lint/format/타입·중복 검사, SDK/consumer 단위 검사, PHP 8.4.27 라이브러리/확장 단위 검사 각 54개·확장 protocol 10개가 통과했다. 새 전체 CI 검증은 남아 있다(T27.1-1-55).
 - Go 순서 map의 키 조회가 독립적인 슬라이스를 반환하여 받은 키 목록을 수정해도 원본 순서가 손상되지 않는다. API 집합에 네이티브 value/safe-text carrier·factory·순서 map container protocol을 명명하고 여섯 SDK에서 삽입 순서·기존 값 변경·얕은 복사·키 목록 격리를 검증한다. Red: 외부 Go SDK 단위 검사가 `Keys()`를 통해 원본 map을 변경했다. Green: 네이티브 value/SDK 단위 검사 62개·consumer/model 단위 검사 50개·네이티브 lint/타입/format·선언·owner·문서 검사가 통과했다(T27.1-1-54).

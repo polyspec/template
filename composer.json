@@ -10,7 +10,7 @@
     "require-dev": {
         "laravel/pint": "^1.0",
         "opis/json-schema": "2.6.0-p1",
-        "phpunit/phpunit": "13.4.3"
+        "phpunit/phpunit": "13.4.4"
     },
     "autoload-dev": {
         "psr-4": {
