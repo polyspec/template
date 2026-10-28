@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 5e32c49ccf8f041cf4a4d88c601945d2aa34a36562a020e45f75bf4c5a772d41 -->
+<!-- source-sha256: cd384ebc5589f0f8f13fe6179b471d10633b301af8d0c27349e941ff55dfd29b -->
 # 개발
 
 [English](/operations/development).
@@ -17,6 +17,8 @@ parity job은 script 단위 테스트 job과 독립적으로 `parity-check`를 �
 현재 도구 공급자는 무결성이 잠긴 Kit 0.0.60 릴리즈다. 후속 릴리즈는 공통 `make install-tools TOOLS="go python"` 인터페이스를 제공한다. 선택한 도구의 필수 의존성을 함께 설치하고, 이미 맞는 버전은 재사용하며, 기존 버전·해시 선언을 유지한다. 템플릿은 worker별 도구 목록을 선언하고 이 인터페이스를 재사용하며 설치 코드를 복사하지 않는다. 온라인 준비와 오프라인 검사는 계속 분리한다. 해당 릴리즈 연동 전까지 공통 전체 도구 bootstrap을 명시적으로 유지한다.
 
 `make template-dependency-review-php-cli`는 `var/composer-cli-review`의 로컬 runtime 경로 저장소 설정으로 Composer를 통해 CLI 테스트 잠금 파일을 갱신한다. 저장소는 CLI 프로젝트에 대한 상대 경로이며 공개 manifest에는 들어가지 않는다. 이 명령은 CI 검사가 아닌 의존성 유지보수다.
+
+언어별 의존성 설치 분리 후 c634ec15의 CI [40671820218](https://github.com/polyspec/template/actions/runs/40671820218)은 모든 worker와 ci-passed를 통과했다. gates 40671820222와 갱신된 그래프의 의존성 검토 40670361859도 통과했다. parity는 바인딩 253개를 두 번 실행해 5,622개 케이스를 통과했다. 실행은 10분 04초, 대기 4초로 전체 10분 08초이며 가장 긴 worker는 PHP의 9분 20초다. 분리한 의존성 단계는 npm 전용 0초, Go·Python 1초, PHP 3초인 반면 전체 도구 단계는 여전히 64–69초이며 parity 의존성 단계는 7초다. 네트워크·bootstrap과 테스트 시간은 실행마다 달라 전체 시간 단축을 입증하지 않는다. T27.1-9-1은 공급자 릴리즈 후에만 선택 설치를 연동한다.
 
 ## 툴체인
 

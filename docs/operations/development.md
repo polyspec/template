@@ -17,6 +17,8 @@ The current tool provider is the integrity-locked Kit 0.0.60 release. Its succes
 
 `make template-dependency-review-php-cli` refreshes the CLI test lock through Composer with a local runtime path repository in `var/composer-cli-review`; the repository is relative to the CLI project and never enters its published manifest. This is dependency maintenance, not a CI check.
 
+CI [40671820218](https://github.com/polyspec/template/actions/runs/40671820218) at c634ec15 passes every worker and ci-passed after language dependency isolation; gates 40671820222 and the updated-graph dependency review 40670361859 also pass. Parity executes 253 bindings twice and passes 5,622 cases. The run takes 10m04s execution and 4s queue (10m08s total); PHP is the longest worker at 9m20s. The scoped dependency steps take 0s for npm-only, 1s for Go/Python and 3s for PHP, while the full tool steps still take 64–69s and the parity dependency step takes 7s. Network/bootstrap and test durations differ between runs, so this does not establish a total speedup. T27.1-9-1 integrates selected tools only after the provider release.
+
 ## Toolchain
 
 | Tool | Version | Source |

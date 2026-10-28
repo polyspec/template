@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e47d0141dd4f27d20f0d7a0ad2b639a3963e81fd1fd8e89f5610db0439773822 -->
+<!-- source-sha256: e0e3e71873255dd8f8a266d17a4c8d06adf8efa8320549c98ea6f2883d1611db -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- c634ec15의 언어별 의존성 설치를 승인한다. CI 40671820218의 worker 13개와 ci-passed, gates 40671820222가 통과하고 의존성 검토 40670361859도 갱신된 잠금 그래프를 통과한다. parity는 바인딩 253개를 두 번 실행해 5,622개 케이스를 통과한다. CI 실행은 10분 04초, 대기 4초로 전체 10분 08초이며 고정된 시간 단축의 증거가 아닌 관측값이다. 도구 선택 설치 연동은 공급자 릴리즈를 기다리는 별도 항목 T27.1-9-1로 남는다(T27.1-9).
 - Python API 참조 단위 검사는 Kit 비공개 추출기를 직접 실행하는 대신 선언된 패키지 인터프리터에서 설치된 SDK 소비자로 실행한다. CI 40669827267의 나머지 worker 12개, gates 40669827209와 의존성 검토 40670361859는 통과했으나 이 단위 검사는 공급자 갱신 후 setuptools 준비 누락을 드러낸다. Red: 기존 단위 검사가 선언된 인터프리터에서 실패한다. Green: 존재하지 않는 SDK 참조 거부를 포함한 SDK·인터프리터·workflow 단위 검사 45개가 통과하며 전체 parity 심볼 검사는 그대로 유지한다(T27.1-9).
 - CI 40668375641에서 드러난 TypeScript·Go·PHP·Python·PHP 확장 conformance target의 불필요한 Cargo 의존성을 수정하고 Rust 검사의 다운로드 검증은 유지한다. 무결성이 잠긴 Kit 0.0.60 공개 자산과 동기화한 기준을 적용한다. 예약 검토의 보안 공지와 테스트 최신 버전 발견에 따라 qs를 6.17.0으로, 두 개발 잠금 파일의 PHPUnit을 13.4.5로 갱신한다. CLI 잠금 파일은 checkout 내부 검토 설정을 통해 Composer가 갱신하며 공개 manifest에는 저장소를 넣지 않는다. Red: 수정 전 비 Rust conformance 의존성 계획 회귀 검사가 실패한다. Green: workflow·toolchain·Cargo·release-config 단위 검사 45개가 통과하며 정확한 후보의 전체 CI 검증은 남아 있다(T27.1-9).
 - 언어별 의존성 설치를 재사용 가능한 Make target으로 분리하고 Go·Rust·PHP·Python 및 npm 전용 CI worker에 연결한다. parity는 모든 네이티브 그래프를 독립적으로 설치하며 ci-passed의 필수 조건을 유지한다. Red: 기존 공통 설치에서 worker 격리 회귀 검사가 실패한다. Green: workflow·toolchain 단위 검사와 의존성 계획 격리 검사가 통과하며 변경 후보의 전체 CI 검증은 남아 있다. 도구 선택 설치는 공급자의 범위별 설치 지원이 필요하다(T27.1-9).
