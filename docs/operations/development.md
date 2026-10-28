@@ -13,6 +13,10 @@ CI 40450000056 at 86edcaa1 passes all workers and ci-passed. It takes 8m06s from
 
 Language workers bootstrap the locked npm workspaces and tools, then run their own `template-install-node`, `template-install-go`, `template-install-rust`, `template-install-php` or `template-install-python`. The parity worker uses `template-install-parity`, composed from the same language targets in its own checkout, with no job dependencies. Cross-language workers retain the complete install. Tool installation is still shared: the installed Kit release supports only the complete tool set. Selective tool installation remains a provider integration requirement; these targets separate package dependency installation without claiming tool isolation.
 
+The current tool provider is the integrity-locked Kit 0.0.60 release. Its successor will expose the common `make install-tools TOOLS="go python"` interface: selected tools include their required dependencies, reuse installed matching versions and keep the existing version/hash declarations. Template will declare tool lists per worker and reuse that interface; it must not copy installers. Online preparation and offline checks remain separate. Until that release is integrated, the shared complete tool bootstrap stays explicit.
+
+`make template-dependency-review-php-cli` refreshes the CLI test lock through Composer with a local runtime path repository in `var/composer-cli-review`; the repository is relative to the CLI project and never enters its published manifest. This is dependency maintenance, not a CI check.
+
 ## Toolchain
 
 | Tool | Version | Source |

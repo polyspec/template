@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: d37a70cb9c1a2462cf0c1f75d7266394ce82e530411f299f0c7a95042cf591d9 -->
+<!-- source-sha256: 5e32c49ccf8f041cf4a4d88c601945d2aa34a36562a020e45f75bf4c5a772d41 -->
 # 개발
 
 [English](/operations/development).
@@ -13,6 +13,10 @@ parity job은 script 단위 테스트 job과 독립적으로 `parity-check`를 �
 86edcaa1의 CI 40450000056은 모든 worker와 ci-passed를 통과했다. 첫 worker 시작부터 집계 완료까지 8분 06초, 대기 8초로 전체 8분 14초다. scripts 5분 47초와 parity 6분 55초가 독립 실행됐고 가장 긴 worker는 showcase의 7분 24초다. 네트워크·설치 시간은 실행마다 달라 이 값은 관측 결과이며 고정된 단축 시간을 뜻하지 않는다.
 
 언어별 worker는 고정 npm workspace와 도구를 준비한 다음 해당 `template-install-node`, `template-install-go`, `template-install-rust`, `template-install-php` 또는 `template-install-python`을 실행한다. parity worker는 같은 언어별 target을 조합한 `template-install-parity`를 자체 checkout에서 실행하며 다른 job에 의존하지 않는다. 여러 언어를 검증하는 worker는 전체 설치를 유지한다. 도구 설치는 아직 공통이다. 설치된 Kit 릴리즈는 전체 도구 설치만 지원한다. 선택적 도구 설치는 공급자 연동 요구사항으로 남으며, 이 target들은 패키지 의존성 설치를 분리하고 도구 격리를 주장하지 않는다.
+
+현재 도구 공급자는 무결성이 잠긴 Kit 0.0.60 릴리즈다. 후속 릴리즈는 공통 `make install-tools TOOLS="go python"` 인터페이스를 제공한다. 선택한 도구의 필수 의존성을 함께 설치하고, 이미 맞는 버전은 재사용하며, 기존 버전·해시 선언을 유지한다. 템플릿은 worker별 도구 목록을 선언하고 이 인터페이스를 재사용하며 설치 코드를 복사하지 않는다. 온라인 준비와 오프라인 검사는 계속 분리한다. 해당 릴리즈 연동 전까지 공통 전체 도구 bootstrap을 명시적으로 유지한다.
+
+`make template-dependency-review-php-cli`는 `var/composer-cli-review`의 로컬 runtime 경로 저장소 설정으로 Composer를 통해 CLI 테스트 잠금 파일을 갱신한다. 저장소는 CLI 프로젝트에 대한 상대 경로이며 공개 manifest에는 들어가지 않는다. 이 명령은 CI 검사가 아닌 의존성 유지보수다.
 
 ## 툴체인
 

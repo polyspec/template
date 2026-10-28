@@ -212,6 +212,13 @@ template-install-python: ## Download the hashed wheel build requirements and ins
 
 template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
 
+# Refresh the CLI lock with its local runtime provider without adding development repositories to its published manifest.
+.PHONY: template-dependency-review-php-cli
+template-dependency-review-php-cli: export COMPOSER_HOME := $(CURDIR)/var/composer-cli-review
+template-dependency-review-php-cli:
+	$(ONLINE) $(CURDIR)/var/tools/mise/shims/composer config --global repositories.template path ../../php
+	$(ONLINE) $(CURDIR)/var/tools/mise/shims/composer update --working-dir=packages/cli/php --with-dependencies --no-interaction phpunit/phpunit
+
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
 template-install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
@@ -400,13 +407,13 @@ conformance: cargo-downloads-check build-ts build-go build-rust build-php build-
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
 .PHONY: conformance-ts conformance-go conformance-rust conformance-php conformance-python
-conformance-ts: cargo-downloads-check build-ts ## Conformance suite of TypeScript
+conformance-ts: build-ts ## Conformance suite of TypeScript
 	$(NODE) tests/runner/conformance.mts --langs ts
-conformance-go: cargo-downloads-check build-ts build-go ## Conformance suite of TypeScript and Go
+conformance-go: build-ts build-go ## Conformance suite of TypeScript and Go
 	$(NODE) tests/runner/conformance.mts --langs ts,go
 conformance-rust: cargo-downloads-check build-ts build-rust ## Conformance suite of TypeScript and Rust
 	$(NODE) tests/runner/conformance.mts --langs ts,rust
-conformance-php: cargo-downloads-check build-ts build-php ## Conformance suite of TypeScript and PHP
+conformance-php: build-ts build-php ## Conformance suite of TypeScript and PHP
 	$(NODE) tests/runner/conformance.mts --langs ts,php
 
 delimiter-matrix: cargo-downloads-check build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
@@ -424,7 +431,7 @@ conformance-generated-rust: cargo-downloads-check build-ts ## Rust generated com
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-php.mts
 
-conformance-python: cargo-downloads-check build-ts ## Conformance suite of TypeScript and Python
+conformance-python: build-ts ## Conformance suite of TypeScript and Python
 	$(NODE) tests/runner/conformance.mts --langs ts,python
 
 # The Python package is installed, editable, into the virtual environment PYTHON_VENV, the environment of the command of
@@ -505,7 +512,7 @@ template-test-browser: build-ts ## Browser rendering test
 template-test-ext: template-test-ext-conformance ## Test the PHP extension
 
 .PHONY: template-test-ext-conformance
-template-test-ext-conformance: cargo-downloads-check build-php-ext build-php
+template-test-ext-conformance: build-php-ext build-php
 	$(NODE) tests/runner/conformance.mts --langs php-ext
 
 rules-check: template-rules-check ## Check the stage of every case.json

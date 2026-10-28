@@ -181,3 +181,10 @@ test('language dependency install targets do not reach unrelated native package 
     assert.ok(all.includes(required), `parity installation lacks ${required}`);
   }
 });
+
+test('non-Rust conformance does not require Rust downloads while Rust retains its guard', () => {
+  for (const target of ['conformance-ts', 'conformance-go', 'conformance-php', 'conformance-python', 'template-test-ext-conformance']) {
+    assert.doesNotMatch(dryRun(target).join('\n'), /check-cargo-downloads/, target);
+  }
+  assert.match(dryRun('conformance-rust').join('\n'), /check-cargo-downloads/);
+});
