@@ -148,7 +148,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-check parity-bindings-go parity-bindings-rust parity-bindings-php parity-bindings-php-ext parity-bindings-python dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	$(NODE) $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -493,28 +493,7 @@ package-installs-check: cargo-downloads-check typed-generator
 # The ts symbol extractor reads the declarations that the build of the TypeScript package emits (packages/ts/dist/index.d.ts),
 # which both checks need to exist (symbols of config/parity.json, T22.6-14).
 # Formatter SDK bindings import the published package, which must exist in a clean checkout.
-parity-check: cargo-downloads-check build-php python-package template-build-language
-ifeq ($(strip $(IMPLEMENTATIONS)),)
-parity-check: build-php-ext
-else ifneq ($(filter php-ext,$(IMPLEMENTATIONS)),)
-parity-check: build-php-ext
-endif
-# Public API checks stay global; each binding shard executes its selected native implementation twice.
-.PHONY: parity-api-check parity-bindings-ts parity-bindings-go parity-bindings-rust parity-bindings-php parity-bindings-php-ext parity-bindings-python
-parity-api-check: cargo-downloads-check build-ts build-php python-package template-build-language error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase api
-parity-bindings-ts: build-ts template-build-language error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation ts
-parity-bindings-go: build-ts template-build-language error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation go
-parity-bindings-rust: cargo-downloads-check build-ts template-build-language error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation rust
-parity-bindings-php: build-ts template-build-language build-php error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation php
-parity-bindings-php-ext: build-ts template-build-language build-php build-php-ext error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation php-ext
-parity-bindings-python: build-ts template-build-language python-package error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation python
+parity-check: cargo-downloads-check build-php build-php-ext python-package template-build-language
 
 parity-check parity-declarations-check: build-ts
 
@@ -702,3 +681,12 @@ generated-lint-check: cargo-downloads-check build-php typed-generator ## Lint th
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
+
+# Provider-owned phases retain their recipes; template supplies only build prerequisites.
+parity-api-check: cargo-downloads-check build-ts build-php python-package template-build-language error-codes-check
+parity-bindings-ts-check: build-ts template-build-language error-codes-check
+parity-bindings-go-check: build-ts template-build-language error-codes-check
+parity-bindings-rust-check: build-ts template-build-language error-codes-check cargo-downloads-check
+parity-bindings-php-check: build-ts template-build-language error-codes-check build-php
+parity-bindings-php-ext-check: build-ts template-build-language error-codes-check build-php-ext
+parity-bindings-python-check: build-ts template-build-language error-codes-check python-package

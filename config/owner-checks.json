@@ -800,6 +800,7 @@
       "paths": [
         ".github/workflows/*.yml",
         "config/toolchain.json",
+        "config/ci.json",
         ".php-version"
       ],
       "tests": [

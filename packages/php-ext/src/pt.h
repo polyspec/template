@@ -536,6 +536,7 @@ pt_s pt_format_date(pt_arena *arena, zend_long seconds, pt_s format, zend_long o
 typedef struct pt_bind_error {
     const char *code;
     zend_string *message;
+    zend_object *previous; /* owned until transferred to the reported exception */
 } pt_bind_error;
 
 bool pt_json_parse(pt_arena *arena, const char *text, size_t length, pt_value *result, pt_bind_error *error);
@@ -580,6 +581,12 @@ bool pt_bind_map(pt_arena *arena, zval *input, pt_map **result, pt_bind_error *e
 /* The PHP value of a library value (VAL-17), and the exceptions that a failure throws: each one takes the code and
  * the message of the failure and releases the message (polyspec_template.c). */
 void pt_library_value(pt_value value, zval *result);
+void pt_error_previous(zend_object *object, zend_object *previous);
+zend_object *pt_bind_error_object(const char *code, zend_string *message, zend_object *previous);
+zend_object *pt_function_error_object(const char *code, zend_string *message);
+void pt_throw_bind_error_cause(const char *code, zend_string *message, zend_object *previous);
+ZEND_NORETURN void pt_fail_at_cause(pt_run *run, const char *code, pt_s template, const pt_lines *lines, size_t start, size_t end, zend_string *message, zend_object *previous);
+
 void pt_throw_bind_error(const char *code, zend_string *message);
 void pt_throw_function_error(const char *code, zend_string *message);
 /* VAL-21: the host form of a value. */
@@ -591,6 +598,7 @@ bool pt_object_property(pt_arena *arena, zend_object *object, pt_s name, pt_valu
 
 /* Takes the pending exception of host code: its message, or the exception itself when it is a native
  * TemplateError, which passes unchanged. */
+zend_object *pt_capture_exception(void);
 zend_string *pt_take_exception(zend_object **passthrough);
 
 /* The arity message of a built-in call (E_RUNTIME_ARITY), or NULL when count is within min..max. */

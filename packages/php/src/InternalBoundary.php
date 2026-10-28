@@ -26,6 +26,7 @@ final class InternalBoundary
                 ErrorCode::E_INTERNAL,
                 $template,
                 'internal failure: ' . $error->getMessage(),
+                $error,
             );
         }
     }

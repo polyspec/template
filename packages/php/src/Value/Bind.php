@@ -136,6 +136,7 @@ final class Bind
                 throw new BindError(
                     ErrorCode::E_RUNTIME_HOST_FUNCTION,
                     'jsonSerialize() failed: ' . $error->getMessage(),
+                    $error,
                 );
             }
 

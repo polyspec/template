@@ -215,7 +215,7 @@ static pt_error *pt_begin_failure(pt_run *run, const char *code, pt_s template, 
     return error;
 }
 
-ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, const pt_lines *lines, size_t start, size_t end, zend_string *message)
+ZEND_NORETURN void pt_fail_at_cause(pt_run *run, const char *code, pt_s template, const pt_lines *lines, size_t start, size_t end, zend_string *message, zend_object *previous)
 {
     pt_error *error = pt_begin_failure(run, code, template, message);
     error->offset = (zend_long)start;
@@ -223,7 +223,16 @@ ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, cons
     if (lines != NULL) {
         pt_position(lines, start, &error->line, &error->col);
     }
+    if (previous != NULL) {
+        error->exception = pt_error_object(code, error->template, error->line, error->col, error->offset, error->end, message);
+        pt_error_previous(error->exception, previous);
+    }
     longjmp(run->jump, 1);
+}
+
+ZEND_NORETURN void pt_fail_at(pt_run *run, const char *code, pt_s template, const pt_lines *lines, size_t start, size_t end, zend_string *message)
+{
+    pt_fail_at_cause(run, code, template, lines, start, end, message, NULL);
 }
 
 ZEND_NORETURN void pt_fail_bare(pt_run *run, const char *code, pt_s template, zend_string *message)

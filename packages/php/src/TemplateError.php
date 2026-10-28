@@ -20,8 +20,9 @@ final class TemplateError extends \RuntimeException
         public readonly int $offset,
         public readonly int $end,
         string $message,
+        ?\Throwable $previous = null,
     ) {
-        parent::__construct($message);
+        parent::__construct($message, 0, $previous);
     }
 
     /**
@@ -36,21 +37,26 @@ final class TemplateError extends \RuntimeException
         int $start,
         int $end,
         string $message,
+        ?\Throwable $previous = null,
     ): TemplateError {
         if ($lines === null) {
-            return new self($code, $template, 0, 0, $start, $end, $message);
+            return new self($code, $template, 0, 0, $start, $end, $message, $previous);
         }
         [$line, $col] = Source::position($lines, $start);
 
-        return new self($code, $template, $line, $col, $start, $end, $message);
+        return new self($code, $template, $line, $col, $start, $end, $message, $previous);
     }
 
     /**
      * Creates an error with no source position.
      */
-    public static function withoutPosition(string $code, string $template, string $message): TemplateError
-    {
-        return new self($code, $template, 0, 0, 0, 0, $message);
+    public static function withoutPosition(
+        string $code,
+        string $template,
+        string $message,
+        ?\Throwable $previous = null,
+    ): TemplateError {
+        return new self($code, $template, 0, 0, 0, 0, $message, $previous);
     }
 
     /**

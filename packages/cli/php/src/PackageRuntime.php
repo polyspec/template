@@ -44,7 +44,7 @@ final class PackageRuntime implements Runtime
                 $renderOptions['env'] = self::plain(Json::parse($env));
             }
         } catch (BindError $error) {
-            throw TemplateError::withoutPosition($error->errorCode, $name, $error->getMessage());
+            throw TemplateError::withoutPosition($error->errorCode, $name, $error->getMessage(), $error);
         }
 
         return $engine->render($name, $assign, $renderOptions);

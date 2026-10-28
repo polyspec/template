@@ -74,9 +74,9 @@ static void pt_group_run(zend_string *name, zval *return_value, zval *input, con
         if (index == passed) {
             break;
         }
-        pt_bind_error error = {NULL, NULL};
+        pt_bind_error error = {0};
         if (!pt_bind_value(&arena, item, &args[index], &error)) {
-            pt_throw_bind_error(error.code, error.message);
+            pt_throw_bind_error_cause(error.code, error.message, error.previous);
             pt_arena_free(&arena);
             RETURN_THROWS();
         }

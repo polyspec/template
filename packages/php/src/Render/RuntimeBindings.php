@@ -177,7 +177,7 @@ final class RuntimeBindings
         try {
             return $operation();
         } catch (FunctionError | BindError $error) {
-            throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
+            throw self::caused($this->error($frame, $span, $error->errorCode, $error->getMessage()), $error);
         }
     }
 
@@ -413,7 +413,7 @@ final class RuntimeBindings
             try {
                 return ($builtin['call'])($args, $this->context->env);
             } catch (FunctionError $error) {
-                throw $this->error($frame, $span, $error->errorCode, $error->getMessage());
+                throw self::caused($this->error($frame, $span, $error->errorCode, $error->getMessage()), $error);
             }
         }
         $host = $this->context->services->hostFunction($name);
@@ -440,11 +440,14 @@ final class RuntimeBindings
         } catch (TemplateError $error) {
             throw $error;
         } catch (\Throwable $error) {
-            throw $this->error(
-                $frame,
-                $span,
-                ErrorCode::E_RUNTIME_HOST_FUNCTION,
-                "{$name} failed: " . $error->getMessage(),
+            throw self::caused(
+                $this->error(
+                    $frame,
+                    $span,
+                    ErrorCode::E_RUNTIME_HOST_FUNCTION,
+                    "{$name} failed: " . $error->getMessage(),
+                ),
+                $error,
             );
         }
 
@@ -471,6 +474,20 @@ final class RuntimeBindings
         }
         $message = $kind === 'expression' ? 'expression nesting exceeds ' : 'loop iterations exceed ';
         throw $this->error($frame, $span, ErrorCode::E_RUNTIME_LIMIT, $message . $maximum);
+    }
+
+    private static function caused(TemplateError $failure, \Throwable $previous): TemplateError
+    {
+        return new TemplateError(
+            $failure->errorCode,
+            $failure->template,
+            $failure->errorLine,
+            $failure->errorCol,
+            $failure->offset,
+            $failure->end,
+            $failure->getMessage(),
+            $previous,
+        );
     }
 
     /** @param Span $span */

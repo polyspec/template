@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 96c890b4986bad5824a4a2b5480ef496cf852e64 */
+ * Stub hash: 9aec6d0205680dd2879af21510a701d98d309b23 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -267,6 +267,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_TemplateError___construct
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_TemplateError_at, 0, 6, Polyspec\\Template\\TemplateError, 0)
@@ -276,12 +277,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_TemplateE
 	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_TemplateError_withoutPosition, 0, 3, Polyspec\\Template\\TemplateError, 0)
 	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_TemplateError_toArray arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
@@ -464,6 +467,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Source_er
 	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Source_lineIndex, 0, 1, IS_ARRAY, 0)
@@ -512,6 +516,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Value_BindError___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, errorCode, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_MapValue_set, 0, 2, IS_VOID, 0)
@@ -651,7 +656,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Value_Ho
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_Functions_FunctionError___construct arginfo_class_Polyspec_Template_Value_BindError___construct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Functions_FunctionError___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, errorCode, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_Polyspec_Template_Functions_FunctionGroup_table arginfo_class_Polyspec_Template_Render_RuntimeServices_limits
 
@@ -825,7 +833,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer___construct, 0
 	ZEND_ARG_TYPE_INFO(0, template, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Polyspec_Template_Expr_Lexer_error arginfo_class_Polyspec_Template_Source_error
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_error, 0, 4, Polyspec\\Template\\TemplateError, 0)
+	ZEND_ARG_TYPE_INFO(0, code, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, start, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, end, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Polyspec_Template_Expr_Lexer_peek, 0, 0, Polyspec\\Template\\Expr\\Token, 0)
 ZEND_END_ARG_INFO()

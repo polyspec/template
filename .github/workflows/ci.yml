@@ -69,7 +69,7 @@ jobs:
           path: var/report/ci-targets/
           if-no-files-found: error
 
-  parity:
+  parity-api:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -93,16 +93,49 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="go rust php composer python uv"
         if: ${{ !cancelled() }}
+      - run: make kit-install-php-arginfo
+        if: ${{ !cancelled() }}
       - run: make kit-install-symbols EXTRACTORS="go php"
         if: ${{ !cancelled() }}
       - run: make template-install-parity
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-check" IMPLEMENTATIONS=ts
+      - run: make ci-targets TARGETS="parity-api-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
-          name: report-parity
+          name: report-parity-api
+          path: var/report/ci-targets/
+          if-no-files-found: error
+
+  parity-ts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: mise.toml
+          cache: npm
+      - name: Bootstrap locked kit package
+        run: >-
+          npm_config_cache="$PWD/var/bootstrap/npm-cache" npm exec --yes --package="$(node -p 'require("./package.json").packageManager.split("+")[0]')" -- npm ci --ignore-scripts --allow-remote=root
+        if: ${{ !cancelled() }}
+      - run: make install-tools TOOLS=npm
+        if: ${{ !cancelled() }}
+      - run: make install-packages
+        if: ${{ !cancelled() }}
+      - run: make install-tools TOOLS="node"
+        if: ${{ !cancelled() }}
+      - run: make template-install-node
+        if: ${{ !cancelled() }}
+      - run: make ci-targets TARGETS="parity-bindings-ts-check"
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-parity-ts
           path: var/report/ci-targets/
           if-no-files-found: error
 
@@ -128,7 +161,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-go
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-bindings-go"
+      - run: make ci-targets TARGETS="parity-bindings-go-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -159,7 +192,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-rust
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-bindings-rust"
+      - run: make ci-targets TARGETS="parity-bindings-rust-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -194,7 +227,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-php
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-bindings-php"
+      - run: make ci-targets TARGETS="parity-bindings-php-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -233,7 +266,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-php
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-bindings-php-ext"
+      - run: make ci-targets TARGETS="parity-bindings-php-ext-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -264,7 +297,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-python
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-bindings-python"
+      - run: make ci-targets TARGETS="parity-bindings-python-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -695,7 +728,7 @@ jobs:
   # job installs the npm, mise and node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [scripts, parity, parity-go, parity-rust, parity-php, parity-php-ext, parity-python, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
+    needs: [scripts, parity-api, parity-ts, parity-go, parity-rust, parity-php, parity-php-ext, parity-python, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -51,7 +51,7 @@ final class BoundMap
             try {
                 $bound = Bind::value($value);
             } catch (BindError $error) {
-                throw TemplateError::withoutPosition($error->errorCode, '', $error->getMessage());
+                throw TemplateError::withoutPosition($error->errorCode, '', $error->getMessage(), $error);
             }
             if ($bound === []) {
                 return new self(new MapValue());

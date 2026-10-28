@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 674b83017639f008beb392d8d5db7b29f8ed7dd04aa62cadd4875bce1f4918f5 -->
+<!-- source-sha256: 5bcb76b3e5de1481d0c9a5eeb7541f649b94c4933c8d495b72a26b44095d6c4c -->
 # 개발
 
 ## 문서
@@ -8,10 +8,13 @@
   Enforced by: none, which document is authoritative is a judgement.
 - Own: 테스트 결과와 배포를 따로 기록한다. 이전 코드의 결과를 변경된 코드의 근거로 사용하지 않는다.
   Enforced by: none, the separation of results is a judgement.
-- Own: `make docs-check`는 기본 검사에 포함된다. 링크, 번역 쌍, 동일한 코드 블록, 상태 필드를 검사한다(`config/documents.json`). 모든 쌍은 같은 `<!-- doc-id: <id> -->`를 한 번 가지고, 한글 파일은 `<!-- source-sha256: 674b83017639f008beb392d8d5db7b29f8ed7dd04aa62cadd4875bce1f4918f5 -->`를 가지며, 이 값은 번역을 검토한 뒤에 갱신한다. 내용의 정확성은 코드와 테스트를 읽어 확인한다.
+- Own: `make docs-check`는 기본 검사에 포함된다. 링크, 번역 쌍, 동일한 코드 블록, 상태 필드를 검사한다(`config/documents.json`). 모든 쌍은 같은 `<!-- doc-id: <id> -->`를 한 번 가지고, 한글 파일은 `<!-- source-sha256: 5bcb76b3e5de1481d0c9a5eeb7541f649b94c4933c8d495b72a26b44095d6c4c -->`를 가지며, 이 값은 번역을 검토한 뒤에 갱신한다. 내용의 정확성은 코드와 테스트를 읽어 확인한다.
   Enforced by: `make docs-check`
 
 ## 구현
+
+- Own: `@polyspec/kit` 변경이 필요하면 `polyspec/kit` GitHub 이슈로 요청한다. 공급자 저장소나 설치 패키지 소스를 수정하거나 소비자 전용 대체 검사로 검증을 우회하지 않는다. 공개된 릴리즈를 적용하고 `make kit-sync`로 공급자가 소유한 복사본을 갱신한다.
+  Enforced by: none, provider ownership is a review judgement.
 
 - Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치한 package의 `node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk`를 include한다. bootstrap은 그 package의 `kit.mk`를 include하고 native 개발 link에서는 source 도구를, release 설치에서는 컴파일한 도구를 선택하며, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `PRINCIPLES.md`, 그 짝, `.editorconfig`, `.claude/settings.json`은 `make kit-sync`가 쓰는 일반 파일 복사본이다. `make kit-check`는 복사본을 package와, `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`dependency-policy`, `dependency-review`, `owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
   Enforced by: `make kit-check`

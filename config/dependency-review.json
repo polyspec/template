@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-28T12:13:43.477Z",
+  "reviewed": "2026-10-28T17:25:00.433Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "b0d1f2f2548bc74116381e3665c56ab176b4fe61bbb025f97056c0443f45d14d",
+      "sha256": "95803f8c23e0731dd680200bb7851b57fd84f8c1e7f038a7861022bc6ef848da",
       "advisories": []
     },
     {
@@ -281,7 +281,7 @@
       "manifest": "packages/vscode/package.json",
       "package": "@vscode/vsce",
       "version": "4.0.0",
-      "latest": "4.0.0"
+      "latest": "4.1.0"
     },
     {
       "ecosystem": "composer",

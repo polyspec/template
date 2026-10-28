@@ -117,6 +117,12 @@ ZEND_NORETURN static void pt_ctx_fail(pt_ctx *ctx, const char *code, const pt_fr
     pt_fail_at(ctx->run, code, frame->name, frame->lines, start, end, message);
 }
 
+ZEND_NORETURN static void pt_ctx_fail_cause(pt_ctx *ctx, const char *code, const pt_frame *frame, size_t start, size_t end, zend_string *message, zend_object *previous)
+{
+    pt_fail_at_cause(ctx->run, code, frame != NULL ? frame->name : ctx->entry,
+        frame != NULL ? frame->lines : NULL, frame != NULL ? start : 0, frame != NULL ? end : 0, message, previous);
+}
+
 #define PT_FAIL_AT(ctx, code, frame, expr, ...) pt_ctx_fail((ctx), (code), (frame), (expr)->start, (expr)->end, zend_strpprintf(0, __VA_ARGS__))
 
 static void pt_hold(pt_run *run, pt_template *template)
@@ -168,8 +174,11 @@ static pt_template *pt_load_template(pt_ctx *ctx, pt_s name, const pt_frame *fro
         zval_ptr_dtor(&argument);
         if (EG(exception)) {
             /* Every exception of the loader is a load failure of the requested name. */
+            zend_object *previous = pt_capture_exception();
             zend_string *reason = pt_take_exception(NULL);
-            PT_LOAD_FAIL(PT_E_LOAD_FAILED, "template %s cannot be loaded: %s", name.s, ZSTR_VAL(reason));
+            zend_string *message = zend_strpprintf(0, "template %s cannot be loaded: %s", name.s, ZSTR_VAL(reason));
+            zend_string_release(reason);
+            pt_fail_at_cause(run, PT_E_LOAD_FAILED, from != NULL ? from->name : name, from != NULL ? from->lines : NULL, from != NULL ? start : 0, from != NULL ? end : 0, message, previous);
         }
         pt_arena_keep(ctx->arena, &loaded);
         zval_ptr_dtor(&loaded);
@@ -373,21 +382,23 @@ static pt_value pt_host_result(pt_ctx *ctx, const char *name, zval *result, cons
 {
     if (EG(exception)) {
         zval_ptr_dtor(result);
+        zend_object *previous = pt_capture_exception();
         zend_object *passthrough = NULL;
         zend_string *text = pt_host_failure(name, &passthrough);
         if (passthrough != NULL) {
+            OBJ_RELEASE(previous);
             pt_error_clear(&ctx->run->error);
             ctx->run->error.exception = passthrough;
             longjmp(ctx->run->jump, 1);
         }
-        pt_ctx_fail(ctx, PT_E_RUNTIME_HOST_FUNCTION, frame, expr->start, expr->end, text);
+        pt_ctx_fail_cause(ctx, PT_E_RUNTIME_HOST_FUNCTION, frame, expr->start, expr->end, text, previous);
     }
     pt_value value = {0};
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     bool bound = pt_bind_value(ctx->arena, result, &value, &error);
     zval_ptr_dtor(result);
     if (!bound) {
-        pt_ctx_fail(ctx, error.code, frame, expr->start, expr->end, error.message);
+        pt_ctx_fail_cause(ctx, error.code, frame, expr->start, expr->end, error.message, pt_bind_error_object(error.code, error.message, error.previous));
     }
     return value;
 }
@@ -527,9 +538,9 @@ static pt_value pt_index(pt_ctx *ctx, pt_value container, pt_value key, const pt
     if (container.type == PT_OBJECT && pt_is_string(key)) {
         pt_value value = {0};
         bool found;
-        pt_bind_error error = {NULL, NULL};
+        pt_bind_error error = {0};
         if (!pt_object_property(ctx->arena, container.u.object, key.u.str, &value, &found, &error)) {
-            pt_ctx_fail(ctx, error.code, frame, expr->start, expr->end, error.message);
+            pt_ctx_fail_cause(ctx, error.code, frame, expr->start, expr->end, error.message, pt_bind_error_object(error.code, error.message, error.previous));
         }
         return found ? value : pt_null();
     }
@@ -565,7 +576,7 @@ static pt_value pt_call(pt_ctx *ctx, const pt_expr *expr, pt_value *args, const 
         pt_value result = {0};
         pt_function_error error = {NULL, NULL};
         if (!builtin->call(ctx->arena, &ctx->request->env, args, count, &result, &error)) {
-            pt_ctx_fail(ctx, error.code, frame, expr->start, expr->end, error.message);
+            pt_ctx_fail_cause(ctx, error.code, frame, expr->start, expr->end, error.message, pt_function_error_object(error.code, error.message));
         }
         return result;
     }

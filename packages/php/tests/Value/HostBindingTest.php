@@ -328,4 +328,154 @@ final class HostBindingTest extends TestCase
 
         return $value;
     }
+    public function testCauseFactoriesPreserveNativeThrowableAndWireFields(): void
+    {
+        $cause = new \RuntimeException('original');
+        $errors = [
+            new TemplateError('E_INTERNAL', 'x.tpl', 1, 2, 1, 2, 'wrapped', $cause),
+            TemplateError::at('E_INTERNAL', 'x.tpl', [0], 1, 2, 'wrapped', $cause),
+            TemplateError::withoutPosition('E_INTERNAL', 'x.tpl', 'wrapped', $cause),
+        ];
+        foreach ($errors as $error) {
+            $this->assertSame($cause, $error->getPrevious());
+            $this->assertSame(
+                ['code', 'template', 'line', 'col', 'offset', 'end', 'message'],
+                array_keys($error->toArray()),
+            );
+        }
+    }
+
+    public function testCauseOfJsonBindingIsPreserved(): void
+    {
+        $cause = new \RuntimeException('serializer failed');
+        $value = new class ($cause) implements \JsonSerializable {
+            public function __construct(private readonly \Throwable $cause)
+            {
+            }
+            public function jsonSerialize(): mixed
+            {
+                throw $this->cause;
+            }
+        };
+        try {
+            \Polyspec\Template\Value\Bind::value($value);
+            $this->fail('binding must fail');
+        } catch (\Polyspec\Template\Value\BindError $error) {
+            $this->assertSame($cause, $error->getPrevious());
+        }
+        $error = $this->failure('keys.tpl', ['m' => $value]);
+        $previous = $error->getPrevious();
+        $this->assertInstanceOf(\Polyspec\Template\Value\BindError::class, $previous);
+        $this->assertSame($cause, $previous->getPrevious());
+    }
+
+    public function testCauseOfHostFunctionIsPreserved(): void
+    {
+        $cause = new \RuntimeException('host failed');
+        $this->program->register('twice', static function (array $args) use ($cause): never {
+            throw $cause;
+        });
+        $error = $this->failure('host-function.tpl', ['n' => 1]);
+        $this->assertSame($cause, $error->getPrevious());
+    }
+
+    public function testCauseOfLoaderIsPreserved(): void
+    {
+        $cause = new \RuntimeException('loader failed');
+        $loader = new class ($cause) implements LoaderInterface {
+            public function __construct(private readonly \Throwable $cause)
+            {
+            }
+            public function load(string $name): ?array
+            {
+                throw $this->cause;
+            }
+        };
+        try {
+            (new AstProgram($loader))->render('x.tpl', []);
+            $this->fail('loading must fail');
+        } catch (TemplateError $error) {
+            $this->assertSame($cause, $error->getPrevious());
+        }
+    }
+
+    public function testCauseOfInternalErrorIsPreserved(): void
+    {
+        $cause = new \TypeError('internal failure');
+        try {
+            \Polyspec\Template\InternalBoundary::run('x.tpl', static function () use ($cause): never {
+                throw $cause;
+            });
+            $this->fail('operation must fail');
+        } catch (TemplateError $error) {
+            $this->assertSame($cause, $error->getPrevious());
+        }
+    }
+
+    public function testCauseLifetimeFollowsItsWrappingException(): void
+    {
+        $cause = new \RuntimeException('lifetime');
+        $reference = \WeakReference::create($cause);
+        $wrapped = TemplateError::withoutPosition('E_INTERNAL', 'x.tpl', 'wrapped', $cause);
+        unset($cause);
+        $this->assertNotNull($reference->get());
+        unset($wrapped);
+        gc_collect_cycles();
+        $this->assertNull($reference->get());
+    }
+
+    public function testCauseOfGeneratedRuntimeHostFunctionIsPreserved(): void
+    {
+        $cause = new \RuntimeException('generated host failed');
+        $this->program->register('twice', static function (array $args) use ($cause): never {
+            throw $cause;
+        });
+        $data = new \Polyspec\Template\Value\MapValue();
+        $context = new \Polyspec\Template\Render\Context(
+            $this->program,
+            $data,
+            ['timezone' => 'UTC', 'now' => 0.0],
+            'x.tpl',
+        );
+        $runtime = new \Polyspec\Template\Render\RuntimeBindings($context);
+        $frame = new \Polyspec\Template\Render\Frame('x.tpl', [0], $data);
+        try {
+            $runtime->call('twice', [1.0], $frame, [0, 1]);
+            $this->fail('host operation must fail');
+        } catch (TemplateError $error) {
+            $this->assertSame($cause, $error->getPrevious());
+        }
+    }
+
+    public function testCauseOfHostResultBindingIsPreserved(): void
+    {
+        $cause = new \RuntimeException('returned serializer failed');
+        $value = new class ($cause) implements \JsonSerializable {
+            public function __construct(private readonly \Throwable $cause)
+            {
+            }
+            public function jsonSerialize(): mixed
+            {
+                throw $this->cause;
+            }
+        };
+        $this->program->register('twice', static fn (array $args): mixed => $value);
+        $error = $this->failure('host-function.tpl', ['n' => 1]);
+        $previous = $error->getPrevious();
+        $this->assertInstanceOf(\Polyspec\Template\Value\BindError::class, $previous);
+        $this->assertSame($cause, $previous->getPrevious());
+    }
+
+    public function testCauseOfBuiltinFailureIsPreserved(): void
+    {
+        $program = new AstProgram(new ArrayLoader(['x.tpl' => '{= upper([])}']));
+        try {
+            $program->render('x.tpl', []);
+            $this->fail('builtin operation must fail');
+        } catch (TemplateError $error) {
+            $previous = $error->getPrevious();
+            $this->assertInstanceOf(\Polyspec\Template\Functions\FunctionError::class, $previous);
+            $this->assertSame($error->errorCode, $previous->errorCode);
+        }
+    }
 }

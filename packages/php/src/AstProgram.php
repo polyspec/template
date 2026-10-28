@@ -243,14 +243,18 @@ final class AstProgram implements Program, RuntimeServices
      */
     public function loadTemplate(string $name, ?Frame $from, ?array $span): array
     {
-        $fail = static fn (string $code, string $message): TemplateError => $from !== null && $span !== null
-            ? TemplateError::at($code, $from->name, $from->lines, $span[0], $span[1], $message)
-            : TemplateError::withoutPosition($code, $name, $message);
+        $fail = static fn (
+            string $code,
+            string $message,
+            ?\Throwable $previous = null,
+        ): TemplateError => $from !== null && $span !== null
+            ? TemplateError::at($code, $from->name, $from->lines, $span[0], $span[1], $message, $previous)
+            : TemplateError::withoutPosition($code, $name, $message, $previous);
         try {
             $loaded = $this->loader->load($name);
         } catch (\Throwable $error) {
             // RT-9: every exception of the loader is a load failure of the requested name.
-            throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: " . $error->getMessage());
+            throw $fail(ErrorCode::E_LOAD_FAILED, "template {$name} cannot be loaded: " . $error->getMessage(), $error);
         }
         if ($loaded === null) {
             throw $fail(ErrorCode::E_LOAD_NOT_FOUND, "template {$name} does not exist");
@@ -324,7 +328,7 @@ final class AstProgram implements Program, RuntimeServices
             }
             $env = $this->bindEnv($envOption);
         } catch (BindError $error) {
-            throw TemplateError::withoutPosition($error->errorCode, $name, $error->getMessage());
+            throw TemplateError::withoutPosition($error->errorCode, $name, $error->getMessage(), $error);
         }
         $targetEntry = is_string($target) ? ($registry[$target] ?? null) : null;
         $targetName = is_array($targetEntry) && isset($targetEntry['template']) ? $targetEntry['template'] : $name;

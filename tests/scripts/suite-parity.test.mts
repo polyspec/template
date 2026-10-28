@@ -157,12 +157,12 @@ test('language workers install their own dependency graph and parity starts inde
     assert.ok(runsOf(job).includes(`make template-install-${target}`), `${language} installs ${target} dependencies`);
     assert.ok(!runsOf(job).includes('make install'), `${language} must not install every dependency graph`);
   }
-  const parity = ci.find(job => job.name === 'parity');
+  const parity = ci.find(job => job.name === 'parity-api');
   assert.ok(parity);
   assert.equal(parity.value.needs, undefined, 'parity must not wait for another worker');
   assert.ok(runsOf(parity).includes('make template-install-parity'));
   const aggregate = ci.find(job => job.name === 'ci-passed');
-  assert.ok(aggregate && Array.isArray(aggregate.value.needs) && aggregate.value.needs.includes('parity'));
+  assert.ok(aggregate && Array.isArray(aggregate.value.needs) && aggregate.value.needs.includes('parity-api'));
 });
 
 test('language dependency install targets do not reach unrelated native package managers', () => {
@@ -189,25 +189,19 @@ test('non-Rust conformance does not require Rust downloads while Rust retains it
   assert.match(dryRun('conformance-rust').join('\n'), /check-cargo-downloads/);
 });
 
-// T27.1-9-1: native parity execution is partitioned independently from global public API checks.
-test('CI partitions every parity implementation exactly once without worker dependencies', () => {
-  const ci = jobs('.github/workflows/ci.yml');
-  const implementations = ['go', 'rust', 'php', 'php-ext', 'python'];
-  const aggregate = ci.find(job => job.name === 'ci-passed');
-  assert.ok(aggregate && Array.isArray(aggregate.value.needs));
-  for (const implementation of implementations) {
-    const job = ci.find(job => job.name === `parity-${implementation}`);
-    assert.ok(job, implementation);
-    assert.equal(job.value.needs, undefined, implementation);
-    assert.ok(runsOf(job).includes(`make ci-targets TARGETS="parity-bindings-${implementation}"`));
-    assert.ok(aggregate.value.needs.includes(job.name));
-    const plan = dryRun(`parity-bindings-${implementation}`).join('\n');
-    assert.match(plan, new RegExp(`--phase bindings --implementation ${implementation}(?:\\s|$)`));
+// T27.1-9-1: Kit owns every phase recipe and validates complete phase coverage.
+test('CI partitions every official provider parity phase exactly once', () => {
+  const implementations = JSON.parse(read('config/parity.json')).implementations as { name: string }[];
+  const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
+  assert.equal(JSON.parse(read('config/ci.json')).parityMode, 'phases');
+  assert.ok(!CHECK_TARGETS.includes('parity-check'));
+  for (const target of phases) {
+    assert.equal(CHECK_TARGETS.filter(value => value === target).length, 1, target);
+    const owner = jobs('.github/workflows/ci.yml').filter(job => runsOf(job).includes(`make ci-targets TARGETS="${target}"`));
+    assert.equal(owner.length, 1, target);
+    assert.equal(owner[0]?.value.needs, undefined);
+    assert.doesNotMatch(read('Makefile'), new RegExp(`^${target}:.*\\n\\t`, 'm'), 'provider recipes are never replaced');
   }
-  const api = ci.find(job => job.name === 'parity');
-  assert.ok(api && runsOf(api).includes('make ci-targets TARGETS="parity-check" IMPLEMENTATIONS=ts'));
-  assert.ok(CHECK_TARGETS.includes('parity-check'));
-  assert.ok(!CHECK_TARGETS.includes('parity-bindings-ts'), 'TypeScript bindings execute once in the required parity gate');
 });
 
 test('native CI workers own their language lint and select their tool groups', () => {

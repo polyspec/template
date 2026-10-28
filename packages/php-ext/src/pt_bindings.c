@@ -65,10 +65,20 @@ void pt_bindings_register(zend_class_entry *ce)
 /* ----------------------------------------------------------------------------------------------- */
 
 /* Throws the TemplateError of a failure at a node (`throw $this->error(...)`); the message is released. */
-static void pt_throw_at(zval *self, const char *code, zval *frame, zval *span, zend_string *message)
+static void pt_throw_at_cause(zval *self, const char *code, zval *frame, zval *span, zend_string *message, zend_object *previous)
 {
     pt_context_throw(PT_CONTEXT(self), code, frame, span, message);
     zend_string_release(message);
+    if (EG(exception) != NULL) {
+        pt_error_previous(EG(exception), previous);
+    } else if (previous != NULL) {
+        OBJ_RELEASE(previous);
+    }
+}
+
+static void pt_throw_at(zval *self, const char *code, zval *frame, zval *span, zend_string *message)
+{
+    pt_throw_at_cause(self, code, frame, span, message, NULL);
 }
 
 /* `$this->context->services-><method>(...)`: the services are RuntimeServices, which host code may implement itself,
@@ -99,8 +109,9 @@ static void pt_guard(zval *self, zval *frame, zval *span)
     zval rv;
     zval *code = zend_read_property(exception->ce, exception, ZEND_STRL("errorCode"), 1, &rv);
     zend_string *code_text = zval_get_string(code);
+    zend_object *previous = pt_capture_exception();
     zend_string *message = pt_take_exception(NULL);
-    pt_throw_at(self, ZSTR_VAL(code_text), frame, span, message);
+    pt_throw_at_cause(self, ZSTR_VAL(code_text), frame, span, message, previous);
     zend_string_release(code_text);
 }
 
@@ -172,11 +183,11 @@ static bool pt_bind_at(zval *self, zval *input, zval *frame, zval *span, zval *r
 {
     pt_arena arena;
     pt_value value = {0};
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     pt_arena_init(&arena);
     if (!pt_bind_value(&arena, input, &value, &error)) {
         pt_arena_free(&arena);
-        pt_throw_at(self, error.code, frame, span, error.message);
+        pt_throw_at_cause(self, error.code, frame, span, error.message, pt_bind_error_object(error.code, error.message, error.previous));
         return false;
     }
     pt_library_value(value, result);
@@ -191,15 +202,17 @@ static bool pt_host_outcome(zval *self, zend_string *name, zval *outcome, zval *
 {
     if (EG(exception)) {
         zval_ptr_dtor(outcome);
+        zend_object *previous = pt_capture_exception();
         zend_object *passthrough = NULL;
         zend_string *text = pt_host_failure(ZSTR_VAL(name), &passthrough);
         if (passthrough != NULL) {
+            OBJ_RELEASE(previous);
             zval error;
             ZVAL_OBJ(&error, passthrough);
             zend_throw_exception_object(&error);
             return false;
         }
-        pt_throw_at(self, PT_E_RUNTIME_HOST_FUNCTION, frame, span, text);
+        pt_throw_at_cause(self, PT_E_RUNTIME_HOST_FUNCTION, frame, span, text, previous);
         return false;
     }
     bool bound = pt_bind_at(self, outcome, frame, span, result);
@@ -483,11 +496,11 @@ static bool pt_index_at(zval *self, zval *container, zval *key, zval *frame, zva
         pt_arena arena;
         pt_value value = {0};
         bool found = false;
-        pt_bind_error error = {NULL, NULL};
+        pt_bind_error error = {0};
         pt_arena_init(&arena);
         if (!pt_object_property(&arena, Z_OBJ_P(container), (pt_s){ZSTR_VAL(name), ZSTR_LEN(name)}, &value, &found, &error)) {
             pt_arena_free(&arena);
-            pt_throw_at(self, error.code, frame, span, error.message);
+            pt_throw_at_cause(self, error.code, frame, span, error.message, pt_bind_error_object(error.code, error.message, error.previous));
             return false;
         }
         if (found) {
@@ -578,10 +591,10 @@ static bool pt_builtin_at(zval *self, const pt_builtin *builtin, zend_string *na
     uint32_t index = 0;
     zval *item;
     ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), item) {
-        pt_bind_error error = {NULL, NULL};
+        pt_bind_error error = {0};
         if (!pt_bind_value(&arena, item, &values[index], &error)) {
             pt_arena_free(&arena);
-            pt_throw_at(self, error.code, frame, span, error.message);
+            pt_throw_at_cause(self, error.code, frame, span, error.message, pt_bind_error_object(error.code, error.message, error.previous));
             return false;
         }
         index++;
@@ -600,7 +613,7 @@ static bool pt_builtin_at(zval *self, const pt_builtin *builtin, zend_string *na
     zend_string_release(zone);
     if (!ok) {
         pt_arena_free(&arena);
-        pt_throw_at(self, error.code, frame, span, error.message);
+        pt_throw_at_cause(self, error.code, frame, span, error.message, pt_function_error_object(error.code, error.message));
         return false;
     }
     pt_library_value(output, result);

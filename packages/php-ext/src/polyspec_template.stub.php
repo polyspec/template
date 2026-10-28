@@ -529,6 +529,7 @@ final class TemplateError extends \RuntimeException
         int $offset,
         int $end,
         string $message,
+        ?\Throwable $previous = null,
     ) {}
 
     /**
@@ -537,12 +538,12 @@ final class TemplateError extends \RuntimeException
      * @param array|null $lines
      * @phpstan-param list<int>|null $lines
      */
-    public static function at(string $code, string $template, ?array $lines, int $start, int $end, string $message): TemplateError {}
+    public static function at(string $code, string $template, ?array $lines, int $start, int $end, string $message, ?\Throwable $previous = null): TemplateError {}
 
     /**
      * Creates an error with no source position.
      */
-    public static function withoutPosition(string $code, string $template, string $message): TemplateError {}
+    public static function withoutPosition(string $code, string $template, string $message, ?\Throwable $previous = null): TemplateError {}
 
     /**
      * @return array
@@ -921,7 +922,7 @@ final class Source
     public function span(int $start, int $end): array {}
 
     /** Creates a template error at a supplied byte span, including an EOF span. */
-    public function error(string $code, int $start, int $end, string $message): TemplateError {}
+    public function error(string $code, int $start, int $end, string $message, ?\Throwable $previous = null): TemplateError {}
 
     /**
      * @return list<int>
@@ -1012,7 +1013,7 @@ final class BindError extends \RuntimeException
 {
     public readonly string $errorCode;
 
-    public function __construct(string $errorCode, string $message) {}
+    public function __construct(string $errorCode, string $message, ?\Throwable $previous = null) {}
 }
 
 /**

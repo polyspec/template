@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "parityMode": "phases",
+  "setup": {
+    "shared": [
+      "build-ts"
+    ],
+    "parity": [
+      "kit-install-php-arginfo"
+    ],
+    "runtimes": {
+      "go": [
+        "template-install-go",
+        "typed-generator"
+      ],
+      "php": [
+        "template-install-php",
+        "typed-generator"
+      ],
+      "php-ext": [
+        "template-install-php"
+      ],
+      "python": [
+        "template-install-python",
+        "typed-generator"
+      ],
+      "rust": [
+        "template-install-rust",
+        "typed-generator"
+      ],
+      "ts": [
+        "template-install-node",
+        "typed-generator"
+      ]
+    }
+  }
+}

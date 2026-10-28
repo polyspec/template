@@ -55,11 +55,19 @@ zend_object *pt_error_object(const char *code, zend_string *template, zend_long 
     return Z_OBJ(exception);
 }
 
+void pt_error_previous(zend_object *object, zend_object *previous)
+{
+    if (previous != NULL) {
+        zend_exception_set_previous(object, previous);
+    }
+}
+
 ZEND_METHOD(Polyspec_Template_TemplateError, __construct)
 {
+    zval *previous = NULL;
     zend_string *code, *template, *message;
     zend_long line, col, offset, end;
-    ZEND_PARSE_PARAMETERS_START(7, 7)
+    ZEND_PARSE_PARAMETERS_START(7, 8)
         Z_PARAM_STR(code)
         Z_PARAM_STR(template)
         Z_PARAM_LONG(line)
@@ -67,8 +75,14 @@ ZEND_METHOD(Polyspec_Template_TemplateError, __construct)
         Z_PARAM_LONG(offset)
         Z_PARAM_LONG(end)
         Z_PARAM_STR(message)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
     ZEND_PARSE_PARAMETERS_END();
     pt_error_fill(Z_OBJ_P(ZEND_THIS), code, template, line, col, offset, end, message);
+    if (previous != NULL && Z_TYPE_P(previous) == IS_OBJECT) {
+        GC_ADDREF(Z_OBJ_P(previous));
+        pt_error_previous(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(previous));
+    }
 }
 
 ZEND_METHOD(Polyspec_Template_Value_SafeString, __construct)
@@ -82,13 +96,20 @@ ZEND_METHOD(Polyspec_Template_Value_SafeString, __construct)
 
 ZEND_METHOD(Polyspec_Template_Value_BindError, __construct)
 {
+    zval *previous = NULL;
     zend_string *code, *message;
-    ZEND_PARSE_PARAMETERS_START(2, 2)
+    ZEND_PARSE_PARAMETERS_START(2, 3)
         Z_PARAM_STR(code)
         Z_PARAM_STR(message)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
     ZEND_PARSE_PARAMETERS_END();
     zend_update_property_str(pt_bind_error_ce, Z_OBJ_P(ZEND_THIS), ZEND_STRL("errorCode"), code);
     zend_update_property_str(zend_ce_exception, Z_OBJ_P(ZEND_THIS), ZEND_STRL("message"), message);
+    if (previous != NULL && Z_TYPE_P(previous) == IS_OBJECT) {
+        GC_ADDREF(Z_OBJ_P(previous));
+        pt_error_previous(Z_OBJ_P(ZEND_THIS), Z_OBJ_P(previous));
+    }
 }
 
 ZEND_METHOD(Polyspec_Template_Functions_FunctionError, __construct)
@@ -182,7 +203,7 @@ ZEND_METHOD(Polyspec_Template_Functions_Dates, format)
 /* ----------------------------------------------------------------------------------------------- */
 
 /* A FunctionError object with its code and message, as its constructor sets them. */
-static zend_object *pt_function_error_object(const char *code, zend_string *message)
+zend_object *pt_function_error_object(const char *code, zend_string *message)
 {
     zval error;
     object_init_ex(&error, pt_function_error_ce);
@@ -512,14 +533,27 @@ void pt_library_value(pt_value value, zval *result)
 }
 
 /* Throws a BindError with its code and message; the message is released. */
-void pt_throw_bind_error(const char *code, zend_string *message)
+zend_object *pt_bind_error_object(const char *code, zend_string *message, zend_object *previous)
 {
     zval exception;
     object_init_ex(&exception, pt_bind_error_ce);
     zend_update_property_string(pt_bind_error_ce, Z_OBJ(exception), ZEND_STRL("errorCode"), code);
     zend_update_property_str(zend_ce_exception, Z_OBJ(exception), ZEND_STRL("message"), message);
+    pt_error_previous(Z_OBJ(exception), previous);
+    return Z_OBJ(exception);
+}
+
+void pt_throw_bind_error_cause(const char *code, zend_string *message, zend_object *previous)
+{
+    zval exception;
+    ZVAL_OBJ(&exception, pt_bind_error_object(code, message, previous));
     zend_string_release(message);
     zend_throw_exception_object(&exception);
+}
+
+void pt_throw_bind_error(const char *code, zend_string *message)
+{
+    pt_throw_bind_error_cause(code, message, NULL);
 }
 
 /* Binds a host value into the PHP value of the library; false after a BindError is thrown. */
@@ -528,9 +562,9 @@ static bool pt_bind_library(zval *input, zval *result)
     pt_arena arena;
     pt_arena_init(&arena);
     pt_value value = {0};
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     if (!pt_bind_value(&arena, input, &value, &error)) {
-        pt_throw_bind_error(error.code, error.message);
+        pt_throw_bind_error_cause(error.code, error.message, error.previous);
         pt_arena_free(&arena);
         return false;
     }
@@ -996,9 +1030,9 @@ ZEND_METHOD(Polyspec_Template_Value_Json, parse)
     pt_arena arena;
     pt_arena_init(&arena);
     pt_value value = {0};
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     if (!pt_json_parse(&arena, ZSTR_VAL(bytes), ZSTR_LEN(bytes), &value, &error)) {
-        pt_throw_bind_error(error.code, error.message);
+        pt_throw_bind_error_cause(error.code, error.message, error.previous);
         pt_arena_free(&arena);
         RETURN_THROWS();
     }
@@ -1026,16 +1060,19 @@ void pt_error_position(HashTable *lines, zend_long offset, zend_long *line, zend
 
 ZEND_METHOD(Polyspec_Template_TemplateError, at)
 {
+    zval *previous = NULL;
     zend_string *code, *template, *message;
     HashTable *lines;
     zend_long start, end;
-    ZEND_PARSE_PARAMETERS_START(6, 6)
+    ZEND_PARSE_PARAMETERS_START(6, 7)
         Z_PARAM_STR(code)
         Z_PARAM_STR(template)
         Z_PARAM_ARRAY_HT_OR_NULL(lines)
         Z_PARAM_LONG(start)
         Z_PARAM_LONG(end)
         Z_PARAM_STR(message)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
     ZEND_PARSE_PARAMETERS_END();
     zend_long line = 0, col = 0;
     if (lines != NULL) {
@@ -1043,18 +1080,29 @@ ZEND_METHOD(Polyspec_Template_TemplateError, at)
     }
     object_init_ex(return_value, pt_error_ce);
     pt_error_fill(Z_OBJ_P(return_value), code, template, line, col, start, end, message);
+    if (previous != NULL && Z_TYPE_P(previous) == IS_OBJECT) {
+        GC_ADDREF(Z_OBJ_P(previous));
+        pt_error_previous(Z_OBJ_P(return_value), Z_OBJ_P(previous));
+    }
 }
 
 ZEND_METHOD(Polyspec_Template_TemplateError, withoutPosition)
 {
+    zval *previous = NULL;
     zend_string *code, *template, *message;
-    ZEND_PARSE_PARAMETERS_START(3, 3)
+    ZEND_PARSE_PARAMETERS_START(3, 4)
         Z_PARAM_STR(code)
         Z_PARAM_STR(template)
         Z_PARAM_STR(message)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_OBJECT_OF_CLASS_OR_NULL(previous, zend_ce_throwable)
     ZEND_PARSE_PARAMETERS_END();
     object_init_ex(return_value, pt_error_ce);
     pt_error_fill(Z_OBJ_P(return_value), code, template, 0, 0, 0, 0, message);
+    if (previous != NULL && Z_TYPE_P(previous) == IS_OBJECT) {
+        GC_ADDREF(Z_OBJ_P(previous));
+        pt_error_previous(Z_OBJ_P(return_value), Z_OBJ_P(previous));
+    }
 }
 
 ZEND_METHOD(Polyspec_Template_TemplateError, toArray)
@@ -1526,7 +1574,7 @@ ZEND_METHOD(Polyspec_Template_AstProgram, analyzePrefix)
 /* A failure while binding the request has the entry template and no position (ERR-5). */
 ZEND_NORETURN static void pt_request_fail(pt_run *run, pt_s name, const char *code, zend_string *message)
 {
-    pt_fail_bare(run, code, name, message);
+    pt_fail_at_cause(run, code, name, NULL, 0, 0, message, pt_bind_error_object(code, message, NULL));
 }
 
 static HashTable *pt_defines_new(pt_run *run)
@@ -1622,14 +1670,15 @@ static void pt_method_register_class(pt_runtime *runtime, INTERNAL_FUNCTION_PARA
 
 ZEND_NORETURN static void pt_bind_fail_run(pt_run *run, pt_s name, pt_bind_error *error)
 {
-    pt_request_fail(run, name, error->code, error->message);
+    zend_object *previous = pt_bind_error_object(error->code, error->message, error->previous);
+    pt_fail_at_cause(run, error->code, name, NULL, 0, 0, error->message, previous);
 }
 
 /* The data of a definition: a bound map of the extension is not bound again (VAL-22); every other
  * value is bound as its own value, and the empty array is the empty map. */
 static pt_map *pt_define_data(pt_run *run, pt_s name, pt_s id, zval *input)
 {
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     pt_map *map;
     if (pt_bound_of(input) != NULL) {
         if (!pt_bind_map(&run->arena, input, &map, &error)) {
@@ -1755,7 +1804,7 @@ static void pt_render_php_into(pt_run *run, void *context)
     pt_request request;
     memset(&request, 0, sizeof(request));
     request.name = pt_strdup(&run->arena, ZSTR_VAL(name), ZSTR_LEN(name));
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     if (assign == NULL) {
         request.data = pt_map_new(&run->arena, 0);
     } else if (!pt_bind_map(&run->arena, assign, &request.data, &error)) {
@@ -2084,10 +2133,12 @@ ZEND_METHOD(Polyspec_Template_BoundMap, bind)
     ZVAL_DEREF(value);
     if (Z_TYPE_P(value) != IS_NULL) {
         pt_value result = {0};
-        pt_bind_error error = {NULL, NULL};
+        pt_bind_error error = {0};
         if (!pt_bind_value(&bound->arena, value, &result, &error)) {
             OBJ_RELEASE(object);
+            zend_object *previous = pt_bind_error_object(error.code, error.message, error.previous);
             pt_throw_bare(error.code, error.message);
+            pt_error_previous(EG(exception), previous);
             RETURN_THROWS();
         }
         if (result.type == PT_MAP) {
@@ -3030,7 +3081,7 @@ static void pt_prepare_into_run(pt_run *run, void *context)
     pt_request request;
     memset(&request, 0, sizeof(request));
     request.name = pt_strdup(&run->arena, ZSTR_VAL(input->name), ZSTR_LEN(input->name));
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     if (!pt_bind_map(&run->arena, input->assign, &request.data, &error)) {
         pt_bind_fail_run(run, request.name, &error);
     }
@@ -3048,11 +3099,12 @@ static bool pt_bind_assign_once(zend_string *name, zval *assign, zval *result)
 {
     zend_object *bound_object = pt_bound_create(pt_bound_ce);
     pt_bound *bound = pt_bound_from(bound_object);
-    pt_bind_error error = {NULL, NULL};
+    pt_bind_error error = {0};
     if (!pt_bind_map(&bound->arena, assign, &bound->map, &error)) {
         OBJ_RELEASE(bound_object);
         zval exception;
         ZVAL_OBJ(&exception, pt_error_object(error.code, name, 0, 0, 0, 0, error.message));
+        pt_error_previous(Z_OBJ(exception), pt_bind_error_object(error.code, error.message, error.previous));
         zend_string_release(error.message);
         zend_throw_exception_object(&exception);
         return false;

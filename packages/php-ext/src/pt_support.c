@@ -307,9 +307,9 @@ ZEND_METHOD(Polyspec_Template_InternalBoundary, run)
     zval_ptr_dtor(&rv);
     zend_string *message = zend_string_concat2(ZEND_STRL("internal failure: "), ZSTR_VAL(detail), ZSTR_LEN(detail));
     zend_string_release(detail);
-    OBJ_RELEASE(error);
     zval exception;
     ZVAL_OBJ(&exception, pt_error_object(PT_E_INTERNAL, template, 0, 0, 0, 0, message));
+    pt_error_previous(Z_OBJ(exception), error);
     zend_string_release(message);
     zend_throw_exception_object(&exception);
 }

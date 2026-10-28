@@ -44,6 +44,15 @@ pt_bound *pt_bound_of(zval *value)
     return NULL;
 }
 
+zend_object *pt_capture_exception(void)
+{
+    zend_object *exception = EG(exception);
+    if (exception != NULL) {
+        GC_ADDREF(exception);
+    }
+    return exception;
+}
+
 zend_string *pt_take_exception(zend_object **passthrough)
 {
     zend_object *exception = EG(exception);
@@ -133,6 +142,7 @@ static bool pt_bind_map_value(pt_arena *arena, zend_object *object, int level, p
     }
     if (EG(exception) || Z_TYPE(keys) != IS_ARRAY || Z_TYPE(values) != IS_ARRAY
         || zend_hash_num_elements(Z_ARRVAL(keys)) != zend_hash_num_elements(Z_ARRVAL(values))) {
+        error->previous = pt_capture_exception();
         zend_string *reason = EG(exception) ? pt_take_exception(NULL) : zend_string_init(ZEND_STRL("its keys and values differ"), 0);
         zval_ptr_dtor(&keys);
         zval_ptr_dtor(&values);
@@ -262,6 +272,7 @@ static bool pt_bind_at(pt_arena *arena, zval *input, int level, pt_value *result
                 zval serialized;
                 zend_call_method_with_0_params(object, ce, NULL, "jsonserialize", &serialized);
                 if (EG(exception)) {
+                    error->previous = pt_capture_exception();
                     zend_string *message = pt_take_exception(NULL);
                     zval_ptr_dtor(&serialized);
                     pt_bind_fail(error, PT_E_RUNTIME_HOST_FUNCTION, zend_strpprintf(0, "jsonSerialize() failed: %s", ZSTR_VAL(message)));
