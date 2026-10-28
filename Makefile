@@ -226,6 +226,7 @@ template-install-vscode: ## Install the VS Code of the integration test into var
 
 # The release steps and the consumer locks are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built
 # from the built npm packages, so the targets that build or lock them run those builds first.
+release-candidate-assets: build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler
 release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler)
 release-consumer release-consumer-lock: build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler
 
