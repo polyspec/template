@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 93af4fffa0cdb98bc5a406c393584f4536889efdd927ee80b64518de38f07057 -->
+<!-- source-sha256: 2b4c7902e6aef7e31b64d782af07cf77488fb6b7ac89654da08a063433afd55b -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -440,3 +440,4 @@
 | T27.1-8 | P0: 설치 패키지 전환 뒤 문서 배포를 복구한다. Pages의 첫 make 전에 잠긴 도구 패키지를 설치하고 선언한 PHP를 선택하며 모든 설치 workflow를 bootstrap 회귀 검사로 검증한다 | Pages bootstrap과 실제 사이트 배포 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts tests/scripts/php-version.test.mts`; `make docs-check`; CI와 Pages 배포 | [o] |
 | T27.1-9 | P1: CI 작업이 재사용 가능한 언어별 대상으로 해당 언어의 의존성 그래프만 설치하도록 분리하고, 동등 검사의 독립 실행과 잠긴 도구·전체 검사·보고서를 유지한다 | Makefile, CI and installation regressions | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts tests/scripts/python-public-api.test.mts`; `make docs-check`; full CI | [o] |
 | T27.1-9-1 | P1: 선택 설치 Kit 릴리즈 공개 후 공통 TOOLS 인터페이스로 CI worker별 도구 목록을 선언하고, 설치 코드 복제 없이 필수 전이 도구·고정 버전과 해시·반복 설치 재사용·오프라인 검사를 검증한다 | .github/workflows/ci.yml package.json package-lock.json tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts`; full CI after the provider release | [ ] |
+| T27.1-9-2 | P1: 격리 모드는 PYTHON 환경 설정을 무시하므로 Python SDK 소비자 검사에서 바이트코드 생성을 명시적으로 비활성화한다 | tests/scripts/python-public-api.test.mts | `var/tools/bin/node --test tests/scripts/python-public-api.test.mts` | [ ] |
