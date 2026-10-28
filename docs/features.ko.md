@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 1005ce268455db248189c5528bb75aa5bd1095d769351d0bc17cc9087ebaaa99 -->
+<!-- source-sha256: 2aeaf7567e8220d4e195333ed668ed02c3ff75b64d9d44856f7d20abeec3d25d -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -43,3 +43,7 @@ implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요�
 PHP 라이브러리 요구사항은 >=8.4.0(표기 >=8.4)을 유지하고 개발 검증은 8.4.27, Windows 설치 기준은 8.4.27-1이다.
 
 문서 배포: [Pages 40453338233](https://github.com/polyspec/template/actions/runs/40453338233)이 ae6f7173의 [CI 40451767762](https://github.com/polyspec/template/actions/runs/40451767762) artifact를 [문서 사이트](https://polyspec.github.io/template/)에 성공적으로 배포했다. 첫 make 전에 설치 패키지 bootstrap과 선언한 PHP를 준비하며 모든 설치 workflow를 회귀 검사로 검증한다.
+
+후보 0.0.13은 Kit 0.0.62 공식 parity 단계와 동기화한 manifest·네이티브 소비자 잠금 파일을 준비했다. 관련 PHP 예외 단위 검사는 두 구현에서 통과하고 workflow·설정 검사는 로컬에서 통과했다. 전체 후보 [CI 40735651886](https://github.com/polyspec/template/actions/runs/40735651886)과 [gates 40735651946](https://github.com/polyspec/template/actions/runs/40735651946)는 검사 시작 전에 실패한다. Make가 bootstrap에서 checkout Node를 만들기 전에 이 Node로 parity target을 열거한다. [Kit 이슈 15](https://github.com/polyspec/kit/issues/15)가 공급자 수정을 추적한다. 0.0.13 릴리즈 태그와 배포는 없으며 정확한 main의 전체 CI와 공개 proof 성공이 필요하다.
+
+준비한 Composer manifest는 Kit 자산이 요구하는 명시적 버전을 유지한다. 이는 저장소의 태그 기반 버전 규칙과 충돌하며 [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)이 릴리즈 수용 전에 필요한 자산·소비자 계약 수정을 추적한다.

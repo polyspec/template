@@ -137,6 +137,6 @@
     "package:vsix": "vsce package --no-dependencies --skip-license --out dist/polyspec-template.vsix"
   },
   "devDependencies": {
-    "@vscode/vsce": "^4.0.0"
+    "@vscode/vsce": "^4.1.0"
   }
 }

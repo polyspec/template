@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 7659cdac380a27c88a3caad1c1b939727c1a544892948e96f3281bb22f26420c -->
+<!-- source-sha256: de1134c4ed7ca836989a2bc5f24600592433bf7170fae707791f3dc4ab40448c -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -441,4 +441,4 @@
 | T27.1-9 | P1: CI 작업이 재사용 가능한 언어별 대상으로 해당 언어의 의존성 그래프만 설치하도록 분리하고, 동등 검사의 독립 실행과 잠긴 도구·전체 검사·보고서를 유지한다 | Makefile, CI and installation regressions | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts tests/scripts/python-public-api.test.mts`; `make docs-check`; full CI | [o] |
 | T27.1-9-1 | P1: 선택 설치 Kit 릴리즈 공개 후 공통 TOOLS 인터페이스로 CI worker별 도구 목록을 선언하고, 설치 코드 복제 없이 필수 전이 도구·고정 버전과 해시·반복 설치 재사용·오프라인 검사를 검증한다 | .github/workflows/ci.yml package.json package-lock.json tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts`; full CI after the provider release | [v] |
 | T27.1-9-2 | P1: 격리 모드는 PYTHON 환경 설정을 무시하므로 Python SDK 소비자 검사에서 바이트코드 생성을 명시적으로 비활성화한다 | tests/scripts/python-public-api.test.mts | `var/tools/bin/node --test tests/scripts/python-public-api.test.mts` | [o] |
-| T27.1-10 | P0: Kit 0.0.61 적용 후 template 0.0.13을 준비한다. 릴리즈 manifest·변경 기록을 동기화하고 패키지 관리자로 후보 소비자 잠금 파일을 생성하며 태그 전에 정확한 main의 전체 CI를 승인한다 | package.json package-lock.json config/release.json tests/fixtures/release-consumer CHANGELOG.md CHANGELOG.ko.md | `var/tools/bin/node --test tests/scripts/release-config.test.mts`; `make release-versions TAG=v0.0.13`; full CI before tags | [~] |
+| T27.1-10 | P0: Kit 0.0.61 적용 후 template 0.0.13을 준비한다. 릴리즈 manifest·변경 기록을 동기화하고 패키지 관리자로 후보 소비자 잠금 파일을 생성하며 태그 전에 정확한 main의 전체 CI를 승인한다 | package.json package-lock.json config/release.json tests/fixtures/release-consumer CHANGELOG.md CHANGELOG.ko.md | `var/tools/bin/node --test tests/scripts/release-config.test.mts`; `make release-versions TAG=v0.0.13`; full CI before tags | [v] |

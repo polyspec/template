@@ -136,4 +136,4 @@ To reproduce the published artifact locally:
 VITEPRESS_BASE=/template/ make docs-static-check
 ```
 
-Pages selects the declared PHP and installs the locked tool package before make reads its bootstrap, then installs the checkout toolchain. Its artifact must come from the successful CI run of the same commit.
+Pages installs the locked tool package before make reads its bootstrap, then selects only Node tools. Its artifact must come from the successful CI run of the same commit.
