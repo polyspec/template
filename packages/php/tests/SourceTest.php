@@ -32,6 +32,13 @@ final class SourceTest extends TestCase
         return $fixture;
     }
 
+    public function testPublicSourceErrorRetainsFourParameterContract(): void
+    {
+        $method = new \ReflectionMethod(Source::class, 'error');
+        self::assertSame(4, $method->getNumberOfParameters());
+        self::assertSame(4, $method->getNumberOfRequiredParameters());
+    }
+
     public function testPublicSourceContextsPreserveTheSharedFixtures(): void
     {
         foreach (self::fixture()['valid'] as $item) {

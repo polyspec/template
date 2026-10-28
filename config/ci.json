@@ -33,5 +33,11 @@
         "typed-generator"
       ]
     }
+  },
+  "tools": {
+    "shared": [
+      "go",
+      "python"
+    ]
   }
 }

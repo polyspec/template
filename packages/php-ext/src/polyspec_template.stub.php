@@ -922,7 +922,7 @@ final class Source
     public function span(int $start, int $end): array {}
 
     /** Creates a template error at a supplied byte span, including an EOF span. */
-    public function error(string $code, int $start, int $end, string $message, ?\Throwable $previous = null): TemplateError {}
+    public function error(string $code, int $start, int $end, string $message): TemplateError {}
 
     /**
      * @return list<int>

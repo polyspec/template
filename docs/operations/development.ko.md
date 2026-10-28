@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 2551fea86cd520a2334ca5197d3d7b7a556da568e14764dc22e8f032928e3b47 -->
+<!-- source-sha256: 3fae2012a7f84c7ec5a882721d310f27ed94ae700b9af001e12dc5688a61a554 -->
 # 개발
 
 [English](/operations/development).
@@ -101,3 +101,5 @@ make parity-check
 6. 동작, 주체, 대상을 명시한 메시지로 커밋한다.
 
 `config/parity.json`의 구현별 API binding은 scalar `symbol` 또는 비어 있지 않은 고유 `symbols` 목록을 사용한다. 목록은 engine 타입·생성자·소유 program처럼 같은 검증된 계약의 정확한 공개 지점을 명명한다. Prefix·wildcard 확장은 사용하지 않는다. 선언 gate가 잘못된 binding을 거부하고 네이티브 SDK consumer 단위 검사가 목록의 모든 이름을 검증한다. 기존 연산·필드 단위 검사는 `packages/compiler/interface.json`의 canonical 공개 지점 검사를 유지한다.
+
+공급자 공통 게이트는 Go workspace를 읽는 dependency-policy와 Python 소스를 파싱하는 test-marker 검사를 위해 `config/ci.json`의 `tools.shared`에 Go·Python을 선언한다. 이는 네이티브 런타임 worker와 별개로 공통 정적 검사에 필요한 도구다.

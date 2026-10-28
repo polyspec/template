@@ -100,3 +100,5 @@ make parity-check
 6. Commit with a message that names the action, the subject and the object.
 
 Each implementation binding of `config/parity.json` uses either a scalar `symbol` or a nonempty unique `symbols` list. A list names the exact publication points of the same verified contract, such as an engine type, its constructor and its owned program. Lists use no prefix or wildcard expansion. The declaration gate rejects invalid bindings and the native SDK consumer units verify every listed name. Existing operation/field units still assert their canonical publication points from `packages/compiler/interface.json`.
+
+The shared provider gate declares Go and Python in `config/ci.json` under `tools.shared`: dependency-policy reads the Go workspace and test-marker validation parses Python source. These tools are needed by those shared static checks independently of native runtime workers.

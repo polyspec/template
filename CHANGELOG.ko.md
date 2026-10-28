@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 45558ac5314c7514294d4f754b4357bf6acc4b7e7f299636dcec2874ac66f036 -->
+<!-- source-sha256: 7a57730c1a7c023f524c46d3639489139396bddf9c140f2f6c2b324f44000f0f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.13
+- 확장의 Source.error 선언을 네 개 매개변수로 복구하고 공식 고정 generator로 arginfo를 다시 생성한다. Go workspace와 Python 테스트 marker를 읽는 공통 정적 검사에 Go·Python 도구를 선언한다. Red: 확장 계약 단위 검사는 매개변수가 다섯 개임을 보고한다. Green: 두 PHP 구현 각각에서 관련 단위 검사 11개와 공식 PHP·확장 린트가 통과한다(T27.1-9-1).
 - parity 구현 이름을 읽기 전에 CI JSON 입력을 검증하고 네이티브 Go·Rust 탐색 전에 showcase import를 생성한다. CI 40741569142에서 안전하지 않은 타입 단정과 빌드 선행 조건 누락이 드러났다. Red: 네이티브 빌드 순서 단위 검사 두 개가 실패한다. Green: 관련 workflow·릴리즈 단위 검사와 공식 TypeScript 린트가 통과한다(T27.1-9-1).
 - Cargo로 showcase Rust 소비자 잠금을 런타임 0.0.13에 맞춘다. Red: 추적된 잠금 버전 단위 검사는 남아 있던 0.0.12 항목을 거부한다. Green: 모든 Cargo 잠금 파일의 버전이 일치하고 공식 오프라인 다운로드 검증이 통과한다(T27.1-10).
 - 공개한 Kit 0.0.63의 bootstrap·런타임 링크 수정과 무결성 잠금을 적용하고 공급자 workflow를 동기화한다. 모든 공식 parity 단계와 전체 CI 범위를 유지하며 Composer 자산 이슈 16은 미해결 릴리즈 수용 조건으로 남는다(T27.1-9-1).
