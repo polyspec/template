@@ -1211,7 +1211,12 @@
         "tests/scripts/python-public-api.test.mts",
         "tests/scripts/public-api-declarations.mts",
         "config/parity.json",
-        "packages/python/src/**"
+        "packages/python/src/**",
+        "scripts/python-toolchain.mts",
+        "scripts/python-venv.mts",
+        "scripts/parity-config.mts",
+        "scripts/toml.mts",
+        "mise.toml"
       ],
       "targets": [
         "template-test-scripts"
@@ -1949,7 +1954,12 @@
         "tests/scripts/public-api-declarations.test.mts",
         "scripts/php-toolchain.mts",
         "config/toolchain.json",
-        "tests/scripts/php-toolchain.test.mts"
+        "tests/scripts/php-toolchain.test.mts",
+        "scripts/python-toolchain.mts",
+        "scripts/python-venv.mts",
+        "scripts/parity-config.mts",
+        "scripts/toml.mts",
+        "mise.toml"
       ]
     }
   ]

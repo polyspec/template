@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 1d9569b8a5ade2e79bc514806312fb7a30f74d7ed71c8105d1f6df73d985563e -->
+<!-- source-sha256: ad6b4cda06fd9e31a3683b440e816d088ca8a1ecadce48ae387b19d476e8a9cd -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -438,5 +438,5 @@
 | T27.1-1-55 | P0: 남은 공개 SDK 계약 검토를 릴리즈 차단 작업 한 묶음으로 완료한다. Interpreter 구현과 SDK 경계를 정리하고 유지하는 모든 네이티브 carrier/연산을 선언하며 소유 네이티브 단위 검사·예외 없는 전체 CI gate를 검증한다 | 전체 공개 API·가시성 경계·릴리즈 CI 증거 | 네이티브 consumer/소유 단위 검사·`make parity-declarations-check`·`make docs-check`·전체 CI gate | [o] |
 | T27.1-1-56 | P1: CI 대기·설치·target 시간을 측정하고 모든 검사·전체 실패 report·suite의 정확히 한 번 실행 규칙을 유지하면서 독립 job 배치·정확한 의존성 cache 재사용으로 임계 경로를 줄인다 | CI 실행시간 증거·검증한 실행 전략 | Workflow/suite 단위 검사·`make docs-check`·전체 CI 시간·동일 target 포함 범위 | [o] |
 | T27.1-8 | P0: 설치 패키지 전환 뒤 문서 배포를 복구한다. Pages의 첫 make 전에 잠긴 도구 패키지를 설치하고 선언한 PHP를 선택하며 모든 설치 workflow를 bootstrap 회귀 검사로 검증한다 | Pages bootstrap과 실제 사이트 배포 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts tests/scripts/php-version.test.mts`; `make docs-check`; CI와 Pages 배포 | [o] |
-| T27.1-9 | P1: CI 작업이 재사용 가능한 언어별 대상으로 해당 언어의 의존성 그래프만 설치하도록 분리하고, 동등 검사의 독립 실행과 잠긴 도구·전체 검사·보고서를 유지한다 | Makefile, CI and installation regressions | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts`; `make docs-check`; full CI | [v] |
+| T27.1-9 | P1: CI 작업이 재사용 가능한 언어별 대상으로 해당 언어의 의존성 그래프만 설치하도록 분리하고, 동등 검사의 독립 실행과 잠긴 도구·전체 검사·보고서를 유지한다 | Makefile, CI and installation regressions | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts tests/scripts/python-public-api.test.mts`; `make docs-check`; full CI | [v] |
 | T27.1-9-1 | P1: 선택 설치 Kit 릴리즈 공개 후 공통 TOOLS 인터페이스로 CI worker별 도구 목록을 선언하고, 설치 코드 복제 없이 필수 전이 도구·고정 버전과 해시·반복 설치 재사용·오프라인 검사를 검증한다 | .github/workflows/ci.yml package.json package-lock.json tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts`; full CI after the provider release | [ ] |
