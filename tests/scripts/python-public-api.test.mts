@@ -35,7 +35,7 @@ print(json.dumps(missing))
 `;
 
 function missingReferences(references: string[]): string[] {
-  const result = spawnSync(pythonPackageCommand(), ['-I', '-c', probe], {
+  const result = spawnSync(pythonPackageCommand(), ['-I', '-B', '-c', probe], {
     input: JSON.stringify(references),
     env: { ...process.env, ...pythonEnvironment() },
     encoding: 'utf8',
