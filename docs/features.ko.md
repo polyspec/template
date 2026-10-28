@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: d606b33fd7e7fab60c30bd636ac6738d66a8f88a61c85b6e4f10cf254a1d8b03 -->
+<!-- source-sha256: 8bb8108579d470fe421416bf4115a0557c14a3c4ee9f062fdba3cf7e50c88afd -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -47,3 +47,5 @@ PHP 라이브러리 요구사항은 >=8.4.0(표기 >=8.4)을 유지하고 개발
 후보 0.0.13은 동기화한 manifest와 후보 자산 아홉 개, 네이티브 소비자 잠금 파일을 준비했다. Kit 0.0.63의 무결성을 잠그고 workflow 복사본을 동기화했다. 이전 0.0.62 후보는 [CI 40735651886](https://github.com/polyspec/template/actions/runs/40735651886)과 [gates 40735651946](https://github.com/polyspec/template/actions/runs/40735651946)에서 검사 전에 실패했다. parity 열거가 bootstrap에서 Node를 만들기 전에 실행했기 때문이다. [Kit 이슈 15](https://github.com/polyspec/kit/issues/15)는 공개한 0.0.63 수정으로 닫혔으며 템플릿은 새 후보의 전체 CI를 통과해야 한다. 0.0.13 릴리즈 태그와 배포는 없다.
 
 준비한 Composer manifest는 Kit 자산이 요구하는 명시적 버전을 유지한다. 이는 저장소의 태그 기반 버전 규칙과 충돌하며 [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)이 릴리즈 수용 전에 필요한 자산·소비자 계약 수정을 추적한다.
+
+새 0.0.63 [CI 40741569142](https://github.com/polyspec/template/actions/runs/40741569142)에서 공식 Go·PHP 바인딩 단계와 브라우저 작업이 통과했다. 템플릿 JSON 타입 단정, 네이티브 생성 순서와 showcase Cargo 잠금 누락이 드러났으며 수정 후 관련 회귀 검사와 공식 린트·다운로드 검증이 통과했다. 수정하지 않은 공급자 [gates 40741569064](https://github.com/polyspec/template/actions/runs/40741569064)는 깨끗한 discover를 통과했지만 따옴표가 포함된 모드 출력 때문에 parity 작업을 전부 건너뛰며 [Kit 이슈 18](https://github.com/polyspec/kit/issues/18)이 이를 추적한다. 표준 Go 탐색은 런타임 테스트가 통과했어도 테스트가 없는 showcase 앱 모듈의 성공을 거부하며 [Kit 이슈 5](https://github.com/polyspec/kit/issues/5)에 다중 모듈 근거를 추가했다. 전체 수용은 대기 중이다.

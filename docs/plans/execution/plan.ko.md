@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: 5561857af45422034ae0a4cf8015f5b1f83683143678a8222e1e810399c54250 -->
+<!-- source-sha256: 4b0098ff6845e84f7d99118b62f53055868c8868279e7bf9bd8eb864e15f3633 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -221,3 +221,5 @@ T27.1-9-1은 Kit 0.0.63의 선택 설치를 적용하고 네이티브 린트·�
 0.0.13 후보는 깨끗한 bootstrap과 런타임별 링크 수정이 포함된 공개 Kit 0.0.63을 적용한다. 이슈 [15](https://github.com/polyspec/kit/issues/15)는 공급자와 새 소비자의 검증 후 닫혔다. 템플릿은 정확한 main의 전체 CI를 직접 검증해야 T27.1-9-1을 수용할 수 있다. 해당 CI와 아래 Composer 계약 수정 전까지 릴리즈 태그는 만들지 않는다.
 
 공개 Composer 자산은 Kit 자산 검증과 네이티브 artifact 소비자 해석이 요구하는 명시적 manifest 버전을 현재 유지한다. 이는 AGENTS.md의 태그 기반 Composer 버전 규칙과 충돌한다. [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)은 공급자가 지원하는 태그 기반 자산 metadata와 소비자 proof를 요청한다. 릴리즈 수용 전에 이 계약 충돌을 해결해야 한다.
+
+새 소비자 bootstrap 수용은 discover 123004244111로 확인했다. 남은 공급자 수용 조건은 GitHub 출력 직렬화에서도 선택한 parity 경로를 유지하는 [이슈 18](https://github.com/polyspec/kit/issues/18)과 실제 테스트가 있는 다중 모듈 suite에서 테스트 없는 앱 모듈의 성공을 처리하는 [이슈 5](https://github.com/polyspec/kit/issues/5)다. 템플릿은 공급자의 표준 탐색과 필수 게이트를 유지한다. JSON 입력 검증, 네이티브 import 생성 선행 조건과 모든 추적 Rust 잠금 버전은 관련 회귀 단위 검사로 검증한다.

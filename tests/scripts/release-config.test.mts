@@ -10,7 +10,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import type { JSONSchemaType } from 'ajv';
 import { jsonDocument } from '../../scripts/json-document.mts';
-import { readToml, tomlString, tomlTable } from '../../scripts/toml.mts';
+import { readToml, tomlArray, tomlString, tomlTable } from '../../scripts/toml.mts';
 import { parsedJsonObject } from '../runner/checked.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -150,5 +150,22 @@ test('the Go module is released by its directory tag with the module path of its
   for (const [directory, module] of Object.entries(CONFIG.goModules)) {
     assert.match(read(`${directory}/go.mod`), new RegExp(`^module ${module.replaceAll('.', '\\.')}$`, 'm'), `${directory}/go.mod declares another module than ${module}`);
     assert.equal(module, `github.com/polyspec/template/${directory}`, 'go get finds the module only in its directory of the repository');
+  }
+});
+
+// A local path crate appears in each consumer lock at the release version.
+test('every tracked Cargo lock agrees with the local runtime version', () => {
+  const name = tomlValue('packages/rust/Cargo.toml', 'package', 'name');
+  const version = tomlValue('packages/rust/Cargo.toml', 'package', 'version');
+  const files = spawnSync('git', ['ls-files', '-z', '**/Cargo.lock'], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(files.status, 0, files.stderr);
+  const locks = files.stdout.split('\0').filter(Boolean);
+  assert.ok(locks.length > 0, 'tracked Rust locks exist');
+  for (const file of locks) {
+    const entries = tomlArray(readToml(path.join(ROOT, file)).package, `${file} package`);
+    for (const value of entries) {
+      const entry = tomlTable(value, `${file} package entry`);
+      if (entry.name === name && entry.source === undefined) assert.equal(entry.version, version, `${file}: local ${name} version`);
+    }
   }
 });

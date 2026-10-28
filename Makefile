@@ -248,12 +248,12 @@ ast-validator: packages/ts/src/ast-validator.mjs ## Generate the AST validator o
 packages/ts/src/ast-validator.mjs: contracts/schema/ast.schema.json scripts/generate-ast-validator.mts
 	$(NODE) scripts/generate-ast-validator.mts
 
-build-go: template-build-go ## Build the Go CLI
+build-go: template-build-go typed-generator ## Build the Go CLI
 
 template-build-go:
 	cd $(GO_DIR) && $(GO) build -o template ./cmd/template && cd $(CURDIR) && $(NODE) scripts/publish-build.mts $(GO_DIR)/template var/build/template-go
 
-build-rust: template-build-rust ## Build the Rust CLI
+build-rust: template-build-rust typed-generator ## Build the Rust CLI
 
 template-build-rust: cargo-downloads-check
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust

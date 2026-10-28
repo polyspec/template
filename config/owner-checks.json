@@ -294,6 +294,7 @@
         "packages/*/package.json",
         "packages/*/composer.json",
         "packages/rust/Cargo.toml",
+        "**/Cargo.lock",
         "packages/go/go.mod",
         "config/release.json",
         "tests/fixtures/release-consumer/**",

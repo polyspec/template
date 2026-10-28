@@ -9,6 +9,8 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { captured } from '../../scripts/required.mts';
+import { jsonDocument } from '../../scripts/json-document.mts';
+import { parsedJsonObject } from '../runner/checked.mts';
 import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -191,9 +193,13 @@ test('non-Rust conformance does not require Rust downloads while Rust retains it
 
 // T27.1-9-1: Kit owns every phase recipe and validates complete phase coverage.
 test('CI partitions every official provider parity phase exactly once', () => {
-  const implementations = JSON.parse(read('config/parity.json')).implementations as { name: string }[];
+  const { implementations } = jsonDocument<{ implementations: { name: string }[] }>('parity implementation names', {
+    type: 'object',
+    required: ['implementations'],
+    properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } } } },
+  }).parse(read('config/parity.json'), 'config/parity.json');
   const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
-  assert.equal(JSON.parse(read('config/ci.json')).parityMode, 'phases');
+  assert.equal(parsedJsonObject(read('config/ci.json'), 'config/ci.json').parityMode, 'phases');
   assert.ok(!CHECK_TARGETS.includes('parity-check'));
   for (const target of phases) {
     assert.equal(CHECK_TARGETS.filter(value => value === target).length, 1, target);
@@ -220,3 +226,14 @@ test('native CI workers own their language lint and select their tool groups', (
     for (const target of targets) assert.ok(commands.some(command => command.includes(`TARGETS="`) && command.split(/[" ]/).includes(target)), `${language} owns ${target}`);
   }
 });
+
+// Native build discovery includes showcase packages whose imports are generated.
+for (const language of ['go', 'rust']) {
+  test(`native ${language} builds generate showcase imports before provider discovery`, () => {
+    const commands = dryRun(`build-${language}`);
+    const generated = commands.findIndex(command => command.includes('examples/showcase/compile-generated.mts'));
+    const native = commands.findIndex(command => command.includes('/runtime-targets.') && command.endsWith(`build ${language}`));
+    assert.ok(generated >= 0, `${language} build must generate showcase imports`);
+    assert.ok(native > generated, `${language} provider builds run after generation`);
+  });
+}
