@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-28T10:07:11.256Z",
+  "reviewed": "2026-10-28T12:13:43.477Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "2fa29e8bddb2b5989e4448363dd4c41aace41b81eaeb4c50265498c91721d368",
+      "sha256": "b0d1f2f2548bc74116381e3665c56ab176b4fe61bbb025f97056c0443f45d14d",
       "advisories": []
     },
     {
@@ -309,14 +309,7 @@
       "manifest": "packages/php/composer.json",
       "package": "opis/json-schema",
       "version": "v2.6.0-p1",
-      "latest": "v2.6.0-p1"
-    },
-    {
-      "ecosystem": "composer",
-      "manifest": "packages/cli/php/composer.json",
-      "package": "polyspec/template",
-      "version": "0.0.12",
-      "latest": "0.0.12"
+      "latest": "2.6.0"
     },
     {
       "ecosystem": "composer",
@@ -331,6 +324,13 @@
       "package": "phpunit/phpunit",
       "version": "13.4.5",
       "latest": "13.4.5"
+    },
+    {
+      "ecosystem": "composer",
+      "manifest": "packages/php/composer.json",
+      "package": "opis/json-schema",
+      "version": "2.6.0",
+      "latest": "2.6.0"
     },
     {
       "ecosystem": "pypi",

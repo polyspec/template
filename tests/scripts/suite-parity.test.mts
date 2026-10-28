@@ -188,3 +188,41 @@ test('non-Rust conformance does not require Rust downloads while Rust retains it
   }
   assert.match(dryRun('conformance-rust').join('\n'), /check-cargo-downloads/);
 });
+
+// T27.1-9-1: native parity execution is partitioned independently from global public API checks.
+test('CI partitions every parity implementation exactly once without worker dependencies', () => {
+  const ci = jobs('.github/workflows/ci.yml');
+  const implementations = ['go', 'rust', 'php', 'php-ext', 'python'];
+  const aggregate = ci.find(job => job.name === 'ci-passed');
+  assert.ok(aggregate && Array.isArray(aggregate.value.needs));
+  for (const implementation of implementations) {
+    const job = ci.find(job => job.name === `parity-${implementation}`);
+    assert.ok(job, implementation);
+    assert.equal(job.value.needs, undefined, implementation);
+    assert.ok(runsOf(job).includes(`make ci-targets TARGETS="parity-bindings-${implementation}"`));
+    assert.ok(aggregate.value.needs.includes(job.name));
+    const plan = dryRun(`parity-bindings-${implementation}`).join('\n');
+    assert.match(plan, new RegExp(`--phase bindings --implementation ${implementation}(?:\\s|$)`));
+  }
+  const api = ci.find(job => job.name === 'parity');
+  assert.ok(api && runsOf(api).includes('make ci-targets TARGETS="parity-check" IMPLEMENTATIONS=ts'));
+  assert.ok(CHECK_TARGETS.includes('parity-check'));
+  assert.ok(!CHECK_TARGETS.includes('parity-bindings-ts'), 'TypeScript bindings execute once in the required parity gate');
+});
+
+test('native CI workers own their language lint and select their tool groups', () => {
+  const expected: Record<string, string[]> = {
+    go: ['lint-go', 'template-lint-go-format'],
+    rust: ['lint-rust', 'template-lint-rust-format'],
+    php: ['lint-php', 'template-lint-php-format'],
+    python: ['lint-python'],
+  };
+  for (const [language, targets] of Object.entries(expected)) {
+    const job = jobs('.github/workflows/ci.yml').find(job => job.name === language);
+    assert.ok(job);
+    const commands = runsOf(job);
+    assert.ok(commands.some(command => command.startsWith('make install-tools TOOLS="')), language);
+    assert.ok(!commands.includes('make install-tools'), language);
+    for (const target of targets) assert.ok(commands.some(command => command.includes(`TARGETS="`) && command.split(/[" ]/).includes(target)), `${language} owns ${target}`);
+  }
+});

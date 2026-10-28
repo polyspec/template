@@ -335,8 +335,10 @@ test('every CI job bootstraps locked tools before its dependency installation, a
       assert.ok(usesOf(job, 'actions/setup-go@').length + usesOf(job, 'actions/setup-python@').length === 0, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
       if (file.endsWith('/ci.yml')) {
         const runs = runsOf(job);
-        const scoped = ['go', 'rust', 'php', 'python', 'typescript', 'browser', 'editor', 'parity'].includes(job.name);
-        const order = ['make install-tools TOOLS=npm', 'make install-packages', scoped ? 'make install-tools' : 'make install'].map(command => runs.indexOf(command));
+        const scoped = ['go', 'rust', 'php', 'php-ext', 'python', 'typescript', 'browser', 'editor', 'parity'].includes(job.name) || job.name.startsWith('parity-');
+        const toolStep = scoped ? runs.find(command => command.startsWith('make install-tools TOOLS=') && command !== 'make install-tools TOOLS=npm') : 'make install';
+        assert.ok(toolStep, `${job.name} declares its selected tools`);
+        const order = ['make install-tools TOOLS=npm', 'make install-packages', toolStep].map(command => runs.indexOf(command));
         assert.ok(order.every((index, position) => index !== -1 && (position === 0 || index > (order[position - 1] ?? -1))), `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
       }
     }
@@ -398,7 +400,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers', 'kit-install-php-arginfo', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
@@ -505,7 +507,7 @@ test('the python job of ci.yml installs the pinned interpreter and Python depend
   const job = jobs('.github/workflows/ci.yml').find(entry => entry.name === 'python');
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
   assert.equal(job.value.strategy, undefined, 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
-  assert.ok(runsOf(job).includes('make install-tools'), 'the Python job installs the pinned interpreter');
+  assert.ok(runsOf(job).includes('make install-tools TOOLS="python uv ruff vulture"'), 'the Python job installs its declared interpreter and lint tools');
   assert.ok(runsOf(job).includes('make template-install-python'), 'the Python job installs its locked dependencies');
   assert.equal(usesOf(job, 'actions/setup-python@').length, 0, 'the python job sets up a Python of PATH; it runs the pinned interpreter');
 });
@@ -534,7 +536,7 @@ test('the job that runs lint-python installs the tools of mise.toml before it, w
     const runs = runsOf(job);
     const lint = runs.findIndex(run => /\bTARGETS="[^"]*\blint-python\b/.test(run));
     if (lint === -1) continue;
-    const install = runs.indexOf('make install');
+    const install = runs.findIndex(run => run === 'make install' || (run.startsWith('make install-tools TOOLS=') && run.includes('vulture') && run.includes('ruff')));
     assert.ok(install !== -1 && install < lint, `job ${job.name} runs lint-python without make install before it`);
     assert.equal(usesOf(job, 'actions/setup-python@').length, 0, `job ${job.name} sets up a Python of PATH for ruff`);
   }

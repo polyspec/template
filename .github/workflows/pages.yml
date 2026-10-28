@@ -49,16 +49,12 @@ jobs:
           node-version-file: mise.toml
           cache: npm
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
-        with:
-          php-version-file: .php-version
-          tools: none
       - name: Bootstrap locked kit package
         run: >-
           npm_config_cache="$PWD/var/bootstrap/npm-cache" npm exec --yes --package="$(node -p 'require("./package.json").packageManager.split("+")[0]')" -- npm ci --ignore-scripts --allow-remote=root
       - run: make install-tools TOOLS=npm
       - run: make install-packages
-      - run: make install
+      - run: make install-tools TOOLS="node"
       - run: make ci-targets TARGETS="docs-static-check build-ts"
         env:
           VITEPRESS_BASE: /${{ github.event.repository.name }}/
