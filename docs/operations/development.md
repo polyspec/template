@@ -11,6 +11,8 @@ The parity job runs `parity-check` independently of the script-unit job; both in
 
 CI 40450000056 at 86edcaa1 passes all workers and ci-passed. It takes 8m06s from the first worker start to aggregation completion, with 8s queue time (8m14s total). Scripts take 5m47s and parity 6m55s independently; showcase is the longest worker at 7m24s. Network and installation times vary between runs, so these measurements establish the observed result rather than a fixed speedup.
 
+Language workers bootstrap the locked npm workspaces and tools, then run their own `template-install-node`, `template-install-go`, `template-install-rust`, `template-install-php` or `template-install-python`. The parity worker uses `template-install-parity`, composed from the same language targets in its own checkout, with no job dependencies. Cross-language workers retain the complete install. Tool installation is still shared: the installed Kit release supports only the complete tool set. Selective tool installation remains a provider integration requirement; these targets separate package dependency installation without claiming tool isolation.
+
 ## Toolchain
 
 | Tool | Version | Source |

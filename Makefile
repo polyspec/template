@@ -189,12 +189,28 @@ template-lint-php-format: build-php
 # runs go with GOPROXY=off (T25.6-1).
 # install runs the bootstrap of kit first (install-kit); the install steps of this repository follow it (K246-2).
 install: template-install ## Install the tools and packages in the bootstrap order, then the steps of the repository; ONLINE
-template-install: install-kit cargo-downloads-fetch ## After make install-tools TOOLS=npm and make install-packages: install the tools of mise.lock, the Rust toolchain of rust-toolchain.toml, the crates of every Cargo.lock, the Go modules of go.work, the Composer packages, the Python build requirements and the environment of the Python package with its locked dependencies
+# Language dependency installs are reusable by independent CI workers after the locked tool bootstrap.
+.PHONY: template-install-node template-install-go template-install-rust template-install-php template-install-python template-install-parity
+template-install: install-kit
+	$(MAKE) template-install-parity
+
+template-install-node: ## npm workspaces were installed by install-packages; no native dependency graph
+	@echo "[install-node] locked npm workspaces are installed by make install-packages"
+
+template-install-go: ## Download only the modules of go.work
 	$(ONLINE) $(GO) mod download
+
+template-install-rust: cargo-downloads-fetch ## Download the locked crates required by offline Rust checks
+
+template-install-php: ## Install the locked PHP library and CLI dependency graphs
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
 	$(ONLINE) $(NODE) scripts/composer-install.mts packages/cli/php
+
+template-install-python: ## Download the hashed wheel build requirements and install the locked Python environment
 	$(ONLINE) $(CURDIR)/var/tools/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r $(PYTHON_PACKAGE)/build-requirements.txt
 	$(MAKE) python-package
+
+template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).

@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Separate language dependency installation into reusable Make targets and use them in the Go, Rust, PHP, Python and npm-only CI workers. Parity installs all native graphs independently and remains required by ci-passed. Red: the worker isolation regression fails on the former shared install. Green: workflow/toolchain units and isolated dependency-plan units pass; complete candidate CI remains required. Tool selection still requires the provider to expose scoped installation (T27.1-9).
 - Pages installs the locked tool package before its first make, selects the declared PHP and fetches checkout history. The bootstrap regression covers every template-owned installing workflow. Green: 36 workflow/toolchain units, action-pin verification, full CI 40451767762 and gates 40451767516 pass at ae6f7173. Pages 40453338233 deploys the matching CI artifact successfully (T27.1-8).
 
 ## 0.0.12

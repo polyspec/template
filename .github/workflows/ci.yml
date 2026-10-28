@@ -91,7 +91,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-parity
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="parity-check"
         if: ${{ !cancelled() }}
@@ -262,7 +264,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-node
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="lint-ts test-ts conformance-ts"
         if: ${{ !cancelled() }}
@@ -295,7 +299,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-node
         if: ${{ !cancelled() }}
       - run: make template-install-browsers
         if: ${{ !cancelled() }}
@@ -330,7 +336,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-python
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="test-python conformance-python conformance-generated-python"
         if: ${{ !cancelled() }}
@@ -363,7 +371,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-node
         if: ${{ !cancelled() }}
       - run: make template-install-browsers
         if: ${{ !cancelled() }}
@@ -401,7 +411,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-go
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="test-go conformance-go"
         if: ${{ !cancelled() }}
@@ -434,7 +446,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-rust
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="test-rust conformance-rust"
         if: ${{ !cancelled() }}
@@ -472,7 +486,9 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install
+      - run: make install-tools
+        if: ${{ !cancelled() }}
+      - run: make template-install-php
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="test-php lint-php-ext test-php-ext conformance-php template-test-ext"
         if: ${{ !cancelled() }}

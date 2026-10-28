@@ -287,7 +287,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.ok(last > fetched, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
   assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.${extension} link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
   const downloads = lines.slice(fetched + 1, last);
-  assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `)), [], 'commands of make install that keep the offline settings of the recipes');
+  assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `) && !/^(?:\S*make(?:\[\d+\])? |echo )/.test(line)), [], 'commands of make install that keep the offline settings of the recipes');
   for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
     assert.ok(downloads.includes(`${online} ${download}`), `make install does not run ${download} online:\n${lines.join('\n')}`);
   }
@@ -325,7 +325,7 @@ test('every installing job prepares the locked kit before the first make', () =>
   }
 });
 
-test('every CI job installs with make install-tools TOOLS=npm, make install-packages and make install, and sets up no Go', () => {
+test('every CI job bootstraps locked tools before its dependency installation, and sets up no Go', () => {
   for (const file of WORKFLOWS) {
     const direct = jobs(file).flatMap(runLines).find(line => /^(npm ci|npm install|rustup )/.test(line));
     assert.equal(direct, undefined, `${file} installs without make install`);
@@ -335,7 +335,8 @@ test('every CI job installs with make install-tools TOOLS=npm, make install-pack
       assert.ok(usesOf(job, 'actions/setup-go@').length + usesOf(job, 'actions/setup-python@').length === 0, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
       if (file.endsWith('/ci.yml')) {
         const runs = runsOf(job);
-        const order = ['make install-tools TOOLS=npm', 'make install-packages', 'make install'].map(command => runs.indexOf(command));
+        const scoped = ['go', 'rust', 'php', 'python', 'typescript', 'browser', 'editor', 'parity'].includes(job.name);
+        const order = ['make install-tools TOOLS=npm', 'make install-packages', scoped ? 'make install-tools' : 'make install'].map(command => runs.indexOf(command));
         assert.ok(order.every((index, position) => index !== -1 && (position === 0 || index > (order[position - 1] ?? -1))), `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
       }
     }
@@ -397,7 +398,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers']);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
@@ -500,11 +501,12 @@ test('every action of a workflow is pinned by its commit and every job runs on u
 // The python job of ci.yml runs one interpreter, the python of mise.toml (T22.4-12, T24.12): requires-python is its minor
 // (python-requires.test.mts), so the job has no matrix and no floor job on another interpreter. The interpreter is the
 // pinned Python that make install installs (T22.5-5), so the job sets up no Python of its own.
-test('the python job of ci.yml runs make install for the pinned interpreter and has no matrix (T22.4-12, T22.5-5)', () => {
+test('the python job of ci.yml installs the pinned interpreter and Python dependencies and has no matrix (T22.4-12, T22.5-5)', () => {
   const job = jobs('.github/workflows/ci.yml').find(entry => entry.name === 'python');
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
   assert.equal(job.value.strategy, undefined, 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
-  assert.ok(runsOf(job).includes('make install'), 'the python job runs make install, which installs the pinned Python');
+  assert.ok(runsOf(job).includes('make install-tools'), 'the Python job installs the pinned interpreter');
+  assert.ok(runsOf(job).includes('make template-install-python'), 'the Python job installs its locked dependencies');
   assert.equal(usesOf(job, 'actions/setup-python@').length, 0, 'the python job sets up a Python of PATH; it runs the pinned interpreter');
 });
 

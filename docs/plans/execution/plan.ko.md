@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: cfe82658f9aa653eabe9d0aa5049b04aa1a5200ba15b0992e00c003ea1b4bd71 -->
+<!-- source-sha256: 962c8ecd6630160ccd900708985d3d80fab67aa7f56519ed54ca56935e968dd0 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -213,3 +213,5 @@ CI 40321448224에서 공개 API 검토의 미완료도 드러났다(T27.1-1). R1
 638b9c61의 CI [40348515848](https://github.com/polyspec/template/actions/runs/40348515848)에서 script 단위 213개, Go 테스트 960개와 Go conformance 검사 540개가 모두 통과했다. 공개 API 감사는 R11 2,513건을 보고하고 R17 보고는 없다. TypeScript fixture의 미사용 파일 문제는 해결됐으며 새로 보고한 Go compiler 실행 파일도 선언했다. 공유 설치·kit 복사본 정합성과 미완료 공개 API 감사로 릴리스 수용은 여전히 불가능하다. 이후 SDK 공개 범위 변경은 해당 커밋의 CI 증거가 필요하다.
 
 공개한 source는 86edcaa1의 CI 40450000056과 gates 40450000190, 이어진 release proof 40450815462의 성공으로 수용됐다. 현재 배포 근거는 [기능 상태](../../features)에 기록한다. 위의 이전 실행 기록은 각각의 커밋을 설명하며 변경한 source의 검증을 대신하지 않는다.
+
+T27.1-9는 재사용 가능한 언어별 target으로 worker의 의존성 설치를 분리한다. 완료 조건은 언어별 의존성 계획의 격리, 독립적인 전체 parity 설치, suite의 정확히 한 번 실행과 변경 후보의 전체 CI 통과다. 설치된 공급자는 전체 도구 설치만 제공한다. 템플릿이 공통 도구 단계를 교체하려면 선택적 도구 그룹과 전이 도구 요구사항 및 설치 후 래퍼를 공급자가 지원해야 한다. 여기서는 공급자 소스를 수정하지 않는다.

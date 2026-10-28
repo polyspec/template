@@ -146,3 +146,38 @@ test('native formatter parity bindings build the published formatter before exec
   assert.ok(build >= 0, 'the formatter binding requires its published package build');
   assert.ok(binding > build, 'the native binding executes after the package build');
 });
+
+// T27.1-9: installation belongs to each worker, while parity owns all native dependencies.
+test('language workers install their own dependency graph and parity starts independently', () => {
+  const ci = jobs('.github/workflows/ci.yml');
+  for (const language of ['go', 'rust', 'php', 'python', 'typescript', 'browser', 'editor']) {
+    const job = ci.find(job => job.name === language);
+    assert.ok(job, language);
+    const target = ['typescript', 'browser', 'editor'].includes(language) ? 'node' : language;
+    assert.ok(runsOf(job).includes(`make template-install-${target}`), `${language} installs ${target} dependencies`);
+    assert.ok(!runsOf(job).includes('make install'), `${language} must not install every dependency graph`);
+  }
+  const parity = ci.find(job => job.name === 'parity');
+  assert.ok(parity);
+  assert.equal(parity.value.needs, undefined, 'parity must not wait for another worker');
+  assert.ok(runsOf(parity).includes('make template-install-parity'));
+  const aggregate = ci.find(job => job.name === 'ci-passed');
+  assert.ok(aggregate && Array.isArray(aggregate.value.needs) && aggregate.value.needs.includes('parity'));
+});
+
+test('language dependency install targets do not reach unrelated native package managers', () => {
+  const forbidden: Record<string, RegExp> = {
+    node: /composer-install|cargo-downloads|go mod download|pip download|python-package/,
+    go: /composer-install|cargo-downloads|pip download|python-package/,
+    rust: /composer-install|go mod download|pip download|python-package/,
+    php: /cargo-downloads|go mod download|pip download|python-package/,
+    python: /composer-install|cargo-downloads|go mod download/,
+  };
+  for (const [language, pattern] of Object.entries(forbidden)) {
+    assert.doesNotMatch(dryRun(`template-install-${language}`).join('\n'), pattern, language);
+  }
+  const all = dryRun('template-install-parity').join('\n');
+  for (const required of ['check-cargo-downloads', 'mod download', 'composer-install', 'pip download', 'python-package']) {
+    assert.ok(all.includes(required), `parity installation lacks ${required}`);
+  }
+});

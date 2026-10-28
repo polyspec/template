@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 98d8b39a5edbd861c0a7aa789b5b872aac2aa661d634882e0df8129932ae427c -->
+<!-- source-sha256: 2afd52e4e00776bf1381693e2c0d2aca74721dd401834b59cd17794b072ff3b9 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 언어별 의존성 설치를 재사용 가능한 Make target으로 분리하고 Go·Rust·PHP·Python 및 npm 전용 CI worker에 연결한다. parity는 모든 네이티브 그래프를 독립적으로 설치하며 ci-passed의 필수 조건을 유지한다. Red: 기존 공통 설치에서 worker 격리 회귀 검사가 실패한다. Green: workflow·toolchain 단위 검사와 의존성 계획 격리 검사가 통과하며 변경 후보의 전체 CI 검증은 남아 있다. 도구 선택 설치는 공급자의 범위별 설치 지원이 필요하다(T27.1-9).
 - Pages가 첫 make 전에 잠긴 도구 패키지·선언한 PHP·checkout history를 준비한다. bootstrap 회귀 검사는 템플릿이 소유한 모든 설치 workflow를 검증한다. Green: workflow·툴체인 단위 검사 36개와 action pin 검증, ae6f7173의 전체 CI 40451767762와 gates 40451767516이 통과했다. Pages 40453338233은 같은 CI의 artifact를 성공적으로 배포했다(T27.1-8).
 
 ## 0.0.12

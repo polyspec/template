@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-development -->
-<!-- source-sha256: 430b68c4aca07dbcccd16d4a7e1f0c5b852326b95d6083e83bb38907df370fca -->
+<!-- source-sha256: d37a70cb9c1a2462cf0c1f75d7266394ce82e530411f299f0c7a95042cf591d9 -->
 # 개발
 
 [English](/operations/development).
@@ -11,6 +11,8 @@ PHP 라이브러리 요구사항은 `>=8.4`(`>=8.4.0`과 동등)로 유지한다
 parity job은 script 단위 테스트 job과 독립적으로 `parity-check`를 실행한다. 둘은 각 checkout에 고정 의존성을 설치하며 `ci-passed`는 둘 다 요구한다. 모든 suite target은 여전히 정확히 한 번 실행된다. CI의 setup-node cache 조회, bootstrap과 이후 npm 설치는 `var/bootstrap/npm-cache`를 사용한다. cache는 설치 패키지나 빌드 출력이 아닌 다운로드만 저장하며 package lock이 기준이다. CI 40439038565에서 scripts는 7분 04초 대기 후 12분 23초 실행됐고, script 단위 테스트 230.7초와 parity 240.1초가 순차 실행됐다. target을 분리해 이 순서를 제거하며, 새 실행에서 결과 시간과 대기 시간을 따로 측정해야 한다.
 
 86edcaa1의 CI 40450000056은 모든 worker와 ci-passed를 통과했다. 첫 worker 시작부터 집계 완료까지 8분 06초, 대기 8초로 전체 8분 14초다. scripts 5분 47초와 parity 6분 55초가 독립 실행됐고 가장 긴 worker는 showcase의 7분 24초다. 네트워크·설치 시간은 실행마다 달라 이 값은 관측 결과이며 고정된 단축 시간을 뜻하지 않는다.
+
+언어별 worker는 고정 npm workspace와 도구를 준비한 다음 해당 `template-install-node`, `template-install-go`, `template-install-rust`, `template-install-php` 또는 `template-install-python`을 실행한다. parity worker는 같은 언어별 target을 조합한 `template-install-parity`를 자체 checkout에서 실행하며 다른 job에 의존하지 않는다. 여러 언어를 검증하는 worker는 전체 설치를 유지한다. 도구 설치는 아직 공통이다. 설치된 Kit 릴리즈는 전체 도구 설치만 지원한다. 선택적 도구 설치는 공급자 연동 요구사항으로 남으며, 이 target들은 패키지 의존성 설치를 분리하고 도구 격리를 주장하지 않는다.
 
 ## 툴체인
 
