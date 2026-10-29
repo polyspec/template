@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 5bcb76b3e5de1481d0c9a5eeb7541f649b94c4933c8d495b72a26b44095d6c4c -->
+<!-- source-sha256: 44828b9336440f122ad6fb09e73729830adbe5a029205d973cda79a5d00ca172 -->
 # 개발
 
 ## 문서
@@ -35,8 +35,8 @@
 
 - Refines S4: Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `mise.toml`(mise가 `var/tools`에 설치하고 `$(NODE)`로 실행, kit K171), npm은 `package.json`의 `packageManager`, Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `packages/go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 kit의 `make build-php-ext`가 실패한다). `make install-tools`(`$(KIT)/install-tools.$(KIT_EXT)`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mts`가 모든 변경에서 version을 검사한다.
   Enforced by: `make toolchain-check`
-- Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. registry에 묻는 review는 따로 있는 명령이고 그 결과를 commit한다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로, `make release-consumer`가 `tests/fixtures/release-consumer`의 commit된 lock으로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`, `dependency-review`, `release-consumer-lock`의 download와 `make release-consumer`의 설치를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). cargo를 실행하는 모든 target은 `cargo-downloads-check`에 의존하며, 이것은 없는 crate에 대해 `make install`을 밝히므로 어떤 검사도 offline mode를 벗어나라는 cargo의 안내를 보이지 않는다.
-  Enforced by: `make dependency-policy-check`
+- Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로, `make release-consumer`가 `tests/fixtures/release-consumer`의 commit된 lock으로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`, `release-consumer-lock`의 download와 `make release-consumer`의 설치를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). cargo를 실행하는 모든 target은 `cargo-downloads-check`에 의존하며, 이것은 없는 crate에 대해 `make install`을 밝히므로 어떤 검사도 offline mode를 벗어나라는 cargo의 안내를 보이지 않는다.
+  Enforced by: `make template-test-scripts`
 - Refines P17: 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
   Enforced by: none, the sharing of runs is a judgement.
 - Own: 한 실행에 모든 실패: make는 계속 진행하고(`MAKEFLAGS += -k`), 전체 suite의 target은 명령 하나를 실행하며 다른 검사는 prerequisite로 적고, 여러 언어의 검사는 모든 언어를 실행하고 실패한 언어를 모두 밝힌다. `make check`와 `make ci-targets`는 target마다의 log와, 실패한 target마다 첫 실패 줄을 담은 summary를 `var/report`에 쓰고, 모든 CI job은 실패한 뒤에도 그 report를 upload한다.
@@ -47,11 +47,6 @@
   Enforced by: `make template-test-scripts`
 - Own: 독립성: test는 도구 출력의 문구나 형식, test를 실행하는 사용자, 자기 timeout을 넘지 않는 소요 시간에 기대지 않는다. 계산할 수 있는 것은 계산하고, test를 실행하는 사용자와 platform에 맞는 결과를 검사한다.
   Enforced by: none, the independence of a test is a judgement.
-
-## 결정과 수용 규칙
-
-- Own: release는 설정된 심각도의 알려진 의존성 취약점을 거부해야 하며, 정확히 잠긴 의존성 graph로 전체 release matrix를 통과해야 한다. review는 모든 lock의 보안 권고를 기록하고, gate는 review 때 보안 권고가 있던 lock을 거부하며, 예약된 dependency review가 나중에 공개된 보안 권고를 찾는다.
-  Enforced by: `make dependency-audit`
 
 ## 변경과 기록
 

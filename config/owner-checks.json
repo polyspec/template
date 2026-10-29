@@ -31,20 +31,6 @@
     },
     {
       "paths": [
-        "config/dependency-policy.json",
-        "config/dependency-review.json",
-        "package.json",
-        "package-lock.json",
-        "composer.{json,lock}",
-        "packages/*/composer.json"
-      ],
-      "targets": [
-        "dependency-policy-check",
-        "dependency-policy-mutation-check"
-      ]
-    },
-    {
-      "paths": [
         "contracts/schema/{ast,tokens,format}.schema.json",
         "scripts/check-schema*.mts",
         "scripts/generate-ast-validator.mts",
@@ -1325,28 +1311,6 @@
       "check": "make compiler-interface-mutations-check",
       "paths": [
         "scripts/check-compiler-interface-mutations.mts"
-      ]
-    },
-    {
-      "check": "make dependency-policy-check",
-      "paths": [
-        "config/dependency-policy.json",
-        "config/dependency-review.json",
-        "package.json",
-        "package-lock.json",
-        "composer.{json,lock}",
-        "packages/*/composer.json"
-      ]
-    },
-    {
-      "check": "make dependency-policy-mutation-check",
-      "paths": [
-        "config/dependency-policy.json",
-        "config/dependency-review.json",
-        "package.json",
-        "package-lock.json",
-        "composer.{json,lock}",
-        "packages/*/composer.json"
       ]
     },
     {

@@ -36,7 +36,6 @@
   },
   "tools": {
     "shared": [
-      "go",
       "python"
     ]
   }

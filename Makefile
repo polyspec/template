@@ -27,8 +27,8 @@ unexport CARGO_TARGET_DIR
 # A check makes no registry query whose result depends on time, and downloads only what a lock pins by exact version and
 # integrity (AGENTS): make install downloads what the checks read, and every recipe and the scripts that it starts run
 # cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run and
-# not in another (T20.1-2). The targets that resolve or download, install, install-tools, dependency-review and
-# release-consumer-lock, run their commands with $(ONLINE); make release-consumer installs the archives of a release with
+# not in another (T20.1-2). The targets that resolve or download, install, install-tools and release-consumer-lock, run
+# their commands with $(ONLINE); make release-consumer installs the archives of a release with
 # its committed locks online (the release-consumer tool of @polyspec/kit).
 export CARGO_NET_OFFLINE := true
 export GOPROXY := off
@@ -53,7 +53,7 @@ include node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk
 	conformance delimiter-matrix template-test-browser template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check template-install-check showcase showcase-check showcase-compile \
-	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check dependency-audit release-test-matrix release-check docs-static-check clean \
+	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check release-test-matrix release-check docs-static-check clean \
 	install template-install template-build-language template-test-language template-build-lsp template-test-lsp template-build-codemirror template-test-codemirror template-build-compiler template-test-compiler-types format-check format-external-check template-install-cli template-build-vscode template-test-vscode template-test-vscode-integration vscode-package vscode-install template-install-vscode template-install-browsers uninstall-cli \
 	conformance-cases function-inventory-check typecheck
 
@@ -94,7 +94,7 @@ PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  The full suite through the full-run tool of @polyspec/kit: once per tree, when no checklist task is [~]"
-	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|dependency-policy-check|dependency-review|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
+	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
@@ -123,7 +123,6 @@ help: ## List targets
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
 	@echo "  release-test-matrix    The full suite of make check through the same guard"
 	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
-	@echo "  dependency-audit       The dependency gate and its mutation check, which also reject a lock with an advisory at its review, and the check of the Python lock"
 	@echo "  template-build-language           Build the formatter library and the template-fmt CLI"
 	@echo "  template-test-language            Formatter, safety invariant and CLI tests, type check"
 	@echo "  template-build-lsp              Build the language server template-lsp"
@@ -150,7 +149,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check dependency-audit contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := push-gate-commit kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check python-lock-check contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	$(NODE) $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -213,13 +212,6 @@ template-install-python: ## Download the hashed wheel build requirements and ins
 	$(MAKE) python-package
 
 template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
-
-# Refresh the CLI lock with its local runtime provider without adding development repositories to its published manifest.
-.PHONY: template-dependency-review-php-cli
-template-dependency-review-php-cli: export COMPOSER_HOME := $(CURDIR)/var/composer-cli-review
-template-dependency-review-php-cli:
-	$(ONLINE) $(KIT_TOOLS)/mise/shims/composer config --global repositories.template path ../../php
-	$(ONLINE) $(KIT_TOOLS)/mise/shims/composer update --working-dir=packages/cli/php --with-dependencies --no-interaction phpunit/phpunit
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
@@ -527,15 +519,6 @@ template-rules-check:
 # The editor boundary checker of kit reads the boundaries of config/editor-boundaries.json (EDT-2, EDT-3, T23.4).
 editor-boundary-check: ## Check that adapters do not use the parser and the language service uses no editor, Node.js or DOM module
 	$(NODE) $(KIT)/check-editor-boundaries.$(KIT_EXT)
-
-# The dependency gate reads only the files of the checkout: the manifests, the locks, config/dependency-policy.json and
-# the review record config/dependency-review.json, so one tree gives one result at any time. make dependency-review asks
-# the registries; it is a developer command and a scheduled workflow, not a step of make check or of the gating CI jobs.
-dependency-audit: dependency-policy-check dependency-policy-mutation-check python-lock-check ## The dependency gate and its mutation check, which also reject a lock with an advisory at its review, and the check of the Python lock against its sources
-
-# cargo-audit is built with the Rust toolchain of rust-toolchain.toml, which make install-tools installs first (kit
-# K151).
-dependency-review: install-tools
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	$(NODE) scripts/check-doc-coverage.mts

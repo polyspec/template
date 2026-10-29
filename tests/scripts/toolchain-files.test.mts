@@ -467,7 +467,6 @@ test('each workflow of template declares exactly its triggers: CI on a push to m
       workflow_run: { workflows: ['CI'], types: ['completed'], branches: ['main'] },
       workflow_dispatch: { inputs: { 'run-id': { description: 'The CI run of main whose example-site artifact is published', required: true } } },
     },
-    '.github/workflows/dependency-review.yml': { schedule: [{ cron: '17 3 * * *' }], workflow_dispatch: null },
   };
   assert.deepEqual([...WORKFLOWS].sort(compareText), Object.keys(triggers).sort(compareText));
   for (const [file, declared] of Object.entries(triggers)) {
@@ -550,19 +549,6 @@ test('the job that runs lint-python installs the tools of mise.toml before it, w
     assert.ok(install !== -1 && install < lint, `job ${job.name} runs lint-python without make install before it`);
     assert.equal(usesOf(job, 'actions/setup-python@').length, 0, `job ${job.name} sets up a Python of PATH for ruff`);
   }
-});
-
-test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {
-  const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review', 'TARGETS='], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
-  if (WORKTREE) {
-    assert.ok(!recipe.some(line => /\/install-tools\.(?:mts|mjs)\b/.test(line)), `make dependency-review of a worktree installs a tool:\n${recipe.join('\n')}`);
-    return;
-  }
-  // install-tools of kit installs the toolchain of rust-toolchain.toml with rustup before cargo-audit runs.
-  assert.ok(recipe[0] !== undefined && recipe[1] !== undefined, 'make -n dependency-review prints its two commands');
-  assert.match(recipe[0], /install-tools\.(?:mts|mjs) $/);
-  assert.match(recipe[1], /dependency-review\.(?:mts|mjs) +$/);
-  assert.ok(!jobs('.github/workflows/dependency-review.yml').some(job => usesOf(job, 'actions/setup-python@').length > 0), 'dependency-review.yml sets up a Python of PATH; install-tools installs the pinned one');
 });
 
 test('the unit tests of the Python package run in packages/python/.venv, which python-venv of kit makes from the python of mise.toml', () => {

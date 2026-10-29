@@ -39,7 +39,7 @@ test('make release-test-matrix runs the targets of make check through the same g
 });
 
 test('the full suite holds the release targets that make check did not run', () => {
-  for (const target of ['dependency-audit', 'benchmark-check', 'benchmark-smoke', 'docs-verify-idempotent', 'docs-static-check', 'template-test-ext']) {
+  for (const target of ['benchmark-check', 'benchmark-smoke', 'docs-verify-idempotent', 'docs-static-check', 'template-test-ext']) {
     assert.ok(CHECK_TARGETS.includes(target), `CHECK_TARGETS does not hold ${target}`);
   }
 });
