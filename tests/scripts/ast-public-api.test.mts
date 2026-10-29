@@ -115,7 +115,7 @@ test('every schema shape and field names its native public representation', { ti
         // Their public decoder and the native round-trip units own each schema field.
         { implementation: 'php', symbol: 'Polyspec\\Template\\AstProgram::decodeTemplate' },
         { implementation: 'php-ext', symbol: 'Polyspec\\Template\\AstProgram::decodeTemplate' },
-        { implementation: 'python', symbol: 'template.decode_template' },
+        { implementation: 'python', symbol: 'polyspec.template.decode_template' },
       ], id);
     }
   }

@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- config/parity.json declares each Python symbol by its import path, polyspec.template.<module>.<name>, which the python extractor of kit reads since kit K788; the tests that name Python symbols use that path. (T27.1-27)
 - make python-package installs the Python package non-editable and links its package folder to the checkout: the python extractor of kit gave no symbols for the editable install (kit K788), and link-state-check found no installed package folder. (T27.1-26)
 - suite-parity finds a tool of a packed kit, the install of CI, in its dist folder: it named every tool of kit that a recipe starts as missing, since a packed kit holds no scripts/kit/<tool>.mts. (T27.1-25)
 - The pre-commit hook test no longer expects make commit-gates-hook in .githooks/pre-commit, which kit deleted (kit K805); the hook runs make staged-generated-hook. (T27.1-24)

@@ -34,39 +34,39 @@ const manifest = compilerManifestDocument.read('packages/compiler/interface.json
 const owners: Record<string, Record<string, string>> = {
   RenderFrame: {
     ts: 'Frame', go: 'github.com/polyspec/template/packages/go/render.Frame', rust: 'polyspec_template::Frame',
-    php: 'Polyspec\\Template\\Render\\Frame', python: 'template.context.Frame',
+    php: 'Polyspec\\Template\\Render\\Frame', python: 'polyspec.template.context.Frame',
   },
   RenderScope: {
     ts: 'Scope', go: 'github.com/polyspec/template/packages/go/render.Scope', rust: 'polyspec_template::Scope',
-    php: 'Polyspec\\Template\\Render\\Scope', python: 'template.context.Scope',
+    php: 'Polyspec\\Template\\Render\\Scope', python: 'polyspec.template.context.Scope',
   },
   RuntimeEnvironment: {
     ts: 'RuntimeEnvironment', go: 'github.com/polyspec/template/packages/go/render.RuntimeEnvironment',
     rust: 'polyspec_template::RuntimeEnvironment',
-    php: 'Polyspec\\Template\\Render\\RuntimeEnvironment', python: 'template.runtime_environment.RuntimeEnvironment',
+    php: 'Polyspec\\Template\\Render\\RuntimeEnvironment', python: 'polyspec.template.runtime_environment.RuntimeEnvironment',
   },
   PreparedRender: {
     ts: 'PreparedRender', go: 'github.com/polyspec/template/packages/go/render.PreparedRender',
     rust: 'polyspec_template::PreparedRender', php: 'Polyspec\\Template\\PreparedRender',
-    python: 'template.engine.PreparedRender',
+    python: 'polyspec.template.engine.PreparedRender',
   },
   RuntimeBindings: {
     ts: 'RuntimeBindings', go: 'github.com/polyspec/template/packages/go/render.RuntimeBindings',
     rust: 'polyspec_template::RuntimeBindings',
-    php: 'Polyspec\\Template\\Render\\RuntimeBindings', python: 'template.runtime_bindings.RuntimeBindings',
+    php: 'Polyspec\\Template\\Render\\RuntimeBindings', python: 'polyspec.template.runtime_bindings.RuntimeBindings',
   },
   RuntimeServices: {
     ts: 'RuntimeServices', go: 'github.com/polyspec/template/packages/go/render.RuntimeServices',
     rust: 'polyspec_template::RuntimeServices',
-    php: 'Polyspec\\Template\\Render\\RuntimeServices', python: 'template.runtime_environment.RuntimeServices',
+    php: 'Polyspec\\Template\\Render\\RuntimeServices', python: 'polyspec.template.runtime_environment.RuntimeServices',
   },
   Program: {
     ts: 'Program', go: 'github.com/polyspec/template/packages/go.Program', rust: 'polyspec_template::Program',
-    php: 'Polyspec\\Template\\Program', python: 'template.engine.Program',
+    php: 'Polyspec\\Template\\Program', python: 'polyspec.template.engine.Program',
   },
   Engine: {
     ts: 'Engine', go: 'github.com/polyspec/template/packages/go.Engine', rust: 'polyspec_template::Engine',
-    php: 'Polyspec\\Template\\Engine', python: 'template.engine.Engine',
+    php: 'Polyspec\\Template\\Engine', python: 'polyspec.template.engine.Engine',
   },
 };
 
@@ -170,7 +170,7 @@ test('each error code publishes its native literal or code type/catalog', { time
       rust: `polyspec_template::ErrorCode::${code}`,
       php: `Polyspec\\Template\\ErrorCode::${code}`,
       'php-ext': `Polyspec\\Template\\ErrorCode::${code}`,
-      python: 'template.ERROR_CODES',
+      python: 'polyspec.template.ERROR_CODES',
     };
     for (const binding of unit.symbols) assert.equal(binding.symbol, expected[binding.implementation], `${id}: ${binding.implementation}`);
   }

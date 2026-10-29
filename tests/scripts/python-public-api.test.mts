@@ -13,7 +13,7 @@ import sys
 
 missing = []
 for reference in json.load(sys.stdin):
-    parts = ("polyspec." + reference).split(".")
+    parts = reference.split(".")
     for length in range(len(parts), 0, -1):
         module = ".".join(parts[:length])
         try:
@@ -49,6 +49,6 @@ test('every declared Python API reference is accessible to an installed SDK cons
 });
 
 test('the Python SDK consumer rejects nonexistent module and class members', { timeout: 30_000 }, () => {
-  const missing = ['template.nonexistent_sdk_module.member', 'template.engine.Engine.nonexistent_sdk_member'];
+  const missing = ['polyspec.template.nonexistent_sdk_module.member', 'polyspec.template.engine.Engine.nonexistent_sdk_member'];
   assert.deepEqual(missingReferences(missing), missing);
 });
