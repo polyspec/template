@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The generated PHP program passes the BindError of its bindings as the previous exception of the TemplateError it throws, and make generated-lint-check runs the PHPStan of kit on the generated PHP programs as the lint of a consumer does. (T27.1-15)
 
 ## 0.0.13
 - A linked worktree runs the tools of its main checkout: the Makefile names KIT_TOOLS of kit.mk, and the toolchain modules of scripts/ and the unit tests name the var/tools of the main checkout through scripts/tools-directory.mts; the install tests assert in a worktree that it installs no tool (T27.1-13-1).

@@ -11,7 +11,8 @@
 // - Python: `ruff format --check` and `ruff check` with the ruff.toml of kit, and vulture at its default confidence on the programs
 //   with the showcase adapter that uses them, so the public GeneratedProgram is used (T25.3).
 // - PHP: `pint --test --preset psr12` and phpcs with the phpcs.xml.dist of kit (PSR-12), whose warnings, such as a line of more
-//   than 120 columns, fail the check as its errors do.
+//   than 120 columns, fail the check as its errors do, and PHPStan with the phpstan.dist.neon of kit, as the lint of kit runs it
+//   on the code of a consumer.
 // The Rust and TypeScript checks also compile tests/fixtures/generated-lint, a program without definitions whose loops
 // read no metadata, as template-benchmark compiles its program (T24.29).
 import { spawnSync } from 'node:child_process';
@@ -117,6 +118,7 @@ function checkPhp() {
   const files = scenarios.flatMap(id => readdirSync(join(root, showcasePhpDirectory(id))).map(name => join(root, showcasePhpDirectory(id), name)));
   run(join(root, 'vendor/bin/pint'), ['--test', '--preset', 'psr12', ...files]);
   run('phpcs', [`--standard=${join(kit, 'phpcs.xml.dist')}`, ...files]);
+  run('phpstan', ['analyse', '--no-progress', '--error-format=raw', '--memory-limit=-1', `--configuration=${join(kit, 'phpstan.dist.neon')}`, `--autoload-file=${join(root, 'vendor/autoload.php')}`, ...files]);
 }
 
 checkLanguages('generated lint', { Go: checkGo, Rust: checkRust, TypeScript: checkTypeScript, Python: checkPython, PHP: checkPhp });

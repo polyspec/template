@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 88b39ce79afde5a4449da73e863471d27d747759382fdd66dbdfde5f92f372df -->
+<!-- source-sha256: f9aaa163a8750d3a5cdea3718a0464ce39eb47f84fc8ad0201f255bab68255dd -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -447,5 +447,5 @@
 | T27.1-13 | P0: kit가 삭제하는 dependency policy와 review target을 dependency-audit, 예약 review workflow, 기록, owner, test, 규칙과 함께 제거한다 | Makefile .github/workflows/ci.yml .github/workflows/dependency-review.yml config/dependency-review.json config/owner-checks.json config/ci.json tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts docs/operations/dependencies.md docs/operations/development.md AGENTS.md | `make owner-validate`; `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-13-1 | P0: worktree는 main checkout의 도구를 실행한다(kit K519): Makefile, scripts/의 toolchain module, unit test는 자기 checkout이 아닌 main checkout의 var/tools를 가리킨다 | Makefile scripts/ tests/scripts/ | `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-14 | kit이 삭제하는 Python build backend pin, dependency policy, python-lock-check를 제거한다(K788, K789) | config/toolchain.json, config/release.json, config/dependency-policy.json, Makefile, .github/workflows/ci.yml, config/owner-checks.json, tests/scripts/release-config.test.mts, docs/operations | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/release-config.test.mts tests/scripts/suite-parity.test.mts` | [ ] |
-| T27.1-15 | 생성된 PHP를 kit의 PHPStan으로 lint하고, binding의 BindError를 TemplateError의 previous exception으로 넘긴다 | packages/compiler/src/backends/php.mts, scripts/check-generated-lint.mts | `make generated-lint-check` | [~] |
+| T27.1-15 | 생성된 PHP를 kit의 PHPStan으로 lint하고, binding의 BindError를 TemplateError의 previous exception으로 넘긴다 | packages/compiler/src/backends/php.mts, scripts/check-generated-lint.mts | `make generated-lint-check` | [o] |
 | T27.1-15-1 | linked worktree는 도구를 실행하듯 main checkout의 wheelhouse를 읽는다 | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [ ] |

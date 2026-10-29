@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d60a8ea322f764aaa0d70d00d84658ffadc35f8a7a90344d0dd0ae6691e61880 -->
+<!-- source-sha256: 877c4da4fc519c326d6029c0ed5236b2bd934e9e0ad7a11f347ddb5d26c3736a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 생성된 PHP program은 binding의 BindError를 던지는 TemplateError의 previous exception으로 넘기며, make generated-lint-check는 consumer의 lint처럼 생성된 PHP program에 kit의 PHPStan을 실행한다. (T27.1-15)
 
 ## 0.0.13
 - dependency-audit, dependency review workflow와 기록, CLI lock review target과 그 owner, test, 규칙을 제거한다. suite는 python-lock-check를 직접 실행하고 공통 gate는 Python만 선언한다 (T27.1-13).

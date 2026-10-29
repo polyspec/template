@@ -626,7 +626,7 @@ export function emitEntry(context: BackendContext): Part[] {
             [$definitions, $targets] = GeneratedRuntime::bindDefinitions($options['define'] ?? []);
             $env = GeneratedRuntime::env($options['env'] ?? []);
         } catch (BindError $error) {
-            throw TemplateError::withoutPosition($error->errorCode, $target, $error->getMessage());
+            throw TemplateError::withoutPosition($error->errorCode, $target, $error->getMessage(), $error);
         }
         $resolved = $targets[$target] ?? null;
         $targetName = $resolved['target'] ?? $target;
