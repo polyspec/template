@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 5e8191d7a4f4df40fc03e86e0f13bbdfb28eefad529d11afdb7565989b2a0b48 -->
+<!-- source-sha256: 5492eb625bec77a54287bd724c995efb301181023c9552aadb55d7b030ec8696 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -454,4 +454,4 @@
 | T27.1-17 | kit이 삭제하는 release의 consumer install과 proof(K798), push gate와 그 pre-push hook(K804)을 제거한다 | config/release.json, tests/fixtures/release-consumer, .githooks/pre-push, config/checklist.json, Makefile, .github/workflows/ci.yml, the copies of kit | `make kit-check`, `make hooks-check` | [o] |
 | T27.1-17-1 | suite는 AGENTS의 hook 규칙을 강제하는 make hooks-check를 실행한다 | Makefile, .github/workflows/ci.yml | `make rules-check` | [o] |
 | T27.1-18 | kit이 삭제하는 commits-check와 pre-merge-commit hook을 제거한다(K805) | .githooks, config/commit-identity.json, Makefile, .github/workflows/ci.yml | `make hooks-check`, `make kit-check` | [o] |
-| T27.1-19 | kit이 삭제한 full-run guard(K240)를 실행하는 make check, release-test-matrix, release-check와 guard를 설명하는 문단을 삭제한다 | Makefile, scripts/check-clean-release.mts, docs/operations/development.md, docs/operations/testing.md, AGENTS.md | `node --test tests/scripts/suite-parity.test.mts`, `make rules-check`, `make docs-check` | [ ] |
+| T27.1-19 | kit이 삭제한 full-run guard(K240)를 실행하는 make check, release-test-matrix, release-check와 guard를 설명하는 문단을 삭제한다 | Makefile, scripts/check-clean-release.mts, docs/operations/development.md, docs/operations/testing.md, AGENTS.md | `node --test tests/scripts/suite-parity.test.mts`, `make rules-check`, `make docs-check` | [~] |
