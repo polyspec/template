@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 9daab4e439e2685ca59cb5791b2e4653129ca085b29bc4c71e50bd036329e62b -->
+<!-- source-sha256: b08ff31caf0c486b37671e460bcebf840f244d08dbfe2d442672a2a261a4726f -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -448,3 +448,4 @@
 | T27.1-13-1 | P0: worktree는 main checkout의 도구를 실행한다(kit K519): Makefile, scripts/의 toolchain module, unit test는 자기 checkout이 아닌 main checkout의 var/tools를 가리킨다 | Makefile scripts/ tests/scripts/ | `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-14 | kit이 삭제하는 Python build backend pin, dependency policy, python-lock-check를 제거한다(K788, K789) | config/toolchain.json, config/release.json, config/dependency-policy.json, Makefile, .github/workflows/ci.yml, config/owner-checks.json, tests/scripts/release-config.test.mts, docs/operations | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/release-config.test.mts tests/scripts/suite-parity.test.mts` | [ ] |
 | T27.1-15 | 생성된 PHP를 kit의 PHPStan으로 lint하고, binding의 BindError를 TemplateError의 previous exception으로 넘긴다 | packages/compiler/src/backends/php.mts, scripts/check-generated-lint.mts | `make generated-lint-check` | [ ] |
+| T27.1-15-1 | linked worktree는 도구를 실행하듯 main checkout의 wheelhouse를 읽는다 | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [ ] |
