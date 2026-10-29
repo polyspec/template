@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 6a58705ec82c8e2df023f87f1d057c5c9eafac14ce0df7866a1ee2176ff9127f -->
+<!-- source-sha256: 0b0ce6cf0de5d06234fdb7a5cc0251a5f5dc760f289a5af0ebc10000701e7e7f -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -466,3 +466,4 @@
 | T27.1-28 | toolchain-files는 make hooks를 CI job의 setup 단계로 센다 | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-29 | Kit 0.0.72를 채택한다 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-30 | P0: packages/php/composer.json과 packages/php-ext/composer.json에 각 archive의 zip URL과 sha1을 더해 만든 packages.json release asset을 게시하여, 소비자가 https://github.com/polyspec/template/releases/download/<tag>/packages.json의 composer repository에서 template package를 읽고 PIE가 그로부터 확장을 설치하게 한다(kit plan kit-harness, Decision 6) | config/release.json, the packages.json generator and its test, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/release-config.test.mts` | [ ] |
+| T27.1-31 | P0: T27.1-30의 packages.json asset을 담은 template 0.0.14를 릴리스한다: release commit, main CI, tag, release workflow | CHANGELOG.md CHANGELOG.ko.md, the manifests of config/release.json | `node --test tests/scripts/release-config.test.mts`; CI of main before the tags | [ ] |
