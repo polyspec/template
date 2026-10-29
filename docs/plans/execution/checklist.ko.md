@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 65a3361b8641b1e9c775abccaa165d8167288f732c215757646ac7875e188f18 -->
+<!-- source-sha256: a06a9e12819d9aca435e625d0ae7c73a6ab1f9046b280446798a1f62eb8912b6 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -451,4 +451,4 @@
 | T27.1-15-1 | linked worktree는 도구를 실행하듯 main checkout의 wheelhouse를 읽는다 | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-16 | kit이 삭제하는 reference-transaction hook을 제거한다(K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
 | T27.1-17 | kit이 삭제하는 release의 consumer install과 proof(K798), push gate와 그 pre-push hook(K804)을 제거한다 | config/release.json, tests/fixtures/release-consumer, .githooks/pre-push, config/checklist.json, Makefile, .github/workflows/ci.yml, the copies of kit | `make kit-check`, `make hooks-check` | [o] |
-| T27.1-17-1 | suite는 AGENTS의 hook 규칙을 강제하는 make hooks-check를 실행한다 | Makefile, .github/workflows/ci.yml | `make rules-check` | [ ] |
+| T27.1-17-1 | suite는 AGENTS의 hook 규칙을 강제하는 make hooks-check를 실행한다 | Makefile, .github/workflows/ci.yml | `make rules-check` | [~] |

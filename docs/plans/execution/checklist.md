@@ -450,4 +450,4 @@
 | T27.1-15-1 | A linked worktree reads the wheelhouse of its main checkout, as it runs its tools | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-16 | Remove the reference-transaction hook that kit deletes (K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
 | T27.1-17 | Remove the consumer install and the proof of a release (K798) and the push gate with its pre-push hook (K804), which kit deletes | config/release.json, tests/fixtures/release-consumer, .githooks/pre-push, config/checklist.json, Makefile, .github/workflows/ci.yml, the copies of kit | `make kit-check`, `make hooks-check` | [o] |
-| T27.1-17-1 | The suite runs make hooks-check, the enforcement of the hook rule of AGENTS | Makefile, .github/workflows/ci.yml | `make rules-check` | [ ] |
+| T27.1-17-1 | The suite runs make hooks-check, the enforcement of the hook rule of AGENTS | Makefile, .github/workflows/ci.yml | `make rules-check` | [~] |
