@@ -410,7 +410,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers', 'kit-install-php-arginfo', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'kit-install-php-arginfo', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {

@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a8098b99e0287516260491ae26cb8dc498aebdffefde0fc5bbbc6da8008caba4 -->
+<!-- source-sha256: bf51aaf77ea6e9acfbf2b015f1ae6a766acee45e4815d721048f4057c05be4b0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- toolchain-files는 make install처럼 make hooks를 CI job의 setup 단계로 센다. hooks-check 전에 make hooks를 실행하는 docs job을 make ci-targets 밖의 검사로 보고 실패시켰다. (T27.1-28)
 - config/parity.json은 각 Python symbol을 import 경로 polyspec.template.<module>.<name>으로 선언한다. kit K788부터 kit의 python extractor가 이 경로를 읽는다. Python symbol을 지정하는 test도 이 경로를 쓴다. (T27.1-27)
 - make python-package는 Python package를 non-editable로 설치하고 그 package 폴더를 checkout에 link한다. editable 설치에서는 kit의 python extractor가 symbol을 내지 않았고(kit K788), link-state-check는 설치된 package 폴더를 찾지 못했다. (T27.1-26)
 - suite-parity는 CI가 설치하는 packed kit의 도구를 dist 폴더에서 찾는다. packed kit에는 scripts/kit/<tool>.mts가 없어서, recipe가 실행하는 kit 도구를 모두 없다고 보고했다. (T27.1-25)
