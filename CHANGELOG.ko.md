@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3dfff9006175e221a916b49357327f9309b5bd0649ee9a56f729d472090c7042 -->
+<!-- source-sha256: 92c9685b7d19b11e53e952dc1c8944429e167aacfe5e5c805750eb3ec820a05a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.13
+- Kit 0.0.64에서 네이티브 CI worker를 수용한다. 전체 후보 CI와 공급자 gates가 각 네이티브 바인딩을 정확히 한 단계에서 실행하며 통과한다(T27.1-9-1).
 - 설치 순서 테스트는 goal 앞에 kit이 해석한 KIT와 KIT_EXT를 적는 하위 make를 찾는다(T27.1-9-3).
 - 공급자 workflow의 따옴표 붙은 parity mode, Go workspace 테스트 탐색, 태그 기반 Composer 자산 버전을 고친 공개 Kit 0.0.64를 무결성으로 잠가 적용하고 공급자 workflow를 동기화한다. Kit 이슈 18, 5, 16, 6의 수용은 소비자 CI 실행을 기다린다(T27.1-9-1).
 - 확장의 Source.error 선언을 네 개 매개변수로 복구하고 공식 고정 generator로 arginfo를 다시 생성한다. Go workspace와 Python 테스트 marker를 읽는 공통 정적 검사에 Go·Python 도구를 선언한다. Red: 확장 계약 단위 검사는 매개변수가 다섯 개임을 보고한다. Green: 두 PHP 구현 각각에서 관련 단위 검사 11개와 공식 PHP·확장 린트가 통과한다(T27.1-9-1).

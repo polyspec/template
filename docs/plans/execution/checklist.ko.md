@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 9008e3d223d1d806318eb4c853b272b90fa57f8745f831c2d9447a83e54f0c17 -->
+<!-- source-sha256: fe8f736a611deaa932a90d8b3671d2635b9bcfd6f0932660f6a99cfe16574ef4 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -439,7 +439,7 @@
 | T27.1-1-56 | P1: CI 대기·설치·target 시간을 측정하고 모든 검사·전체 실패 report·suite의 정확히 한 번 실행 규칙을 유지하면서 독립 job 배치·정확한 의존성 cache 재사용으로 임계 경로를 줄인다 | CI 실행시간 증거·검증한 실행 전략 | Workflow/suite 단위 검사·`make docs-check`·전체 CI 시간·동일 target 포함 범위 | [o] |
 | T27.1-8 | P0: 설치 패키지 전환 뒤 문서 배포를 복구한다. Pages의 첫 make 전에 잠긴 도구 패키지를 설치하고 선언한 PHP를 선택하며 모든 설치 workflow를 bootstrap 회귀 검사로 검증한다 | Pages bootstrap과 실제 사이트 배포 | `node node_modules/@polyspec/kit/dist/run-tests.mjs node -- tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts tests/scripts/php-version.test.mts`; `make docs-check`; CI와 Pages 배포 | [o] |
 | T27.1-9 | P1: CI 작업이 재사용 가능한 언어별 대상으로 해당 언어의 의존성 그래프만 설치하도록 분리하고, 동등 검사의 독립 실행과 잠긴 도구·전체 검사·보고서를 유지한다 | Makefile, CI and installation regressions | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts tests/scripts/python-public-api.test.mts`; `make docs-check`; full CI | [o] |
-| T27.1-9-1 | P1: 선택 설치 Kit 릴리즈 공개 후 공통 TOOLS 인터페이스로 CI worker별 도구 목록을 선언하고, 설치 코드 복제 없이 필수 전이 도구·고정 버전과 해시·반복 설치 재사용·오프라인 검사를 검증한다 | .github/workflows/ci.yml package.json package-lock.json tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts`; full CI after the provider release | [v] |
+| T27.1-9-1 | P1: 선택 설치 Kit 릴리즈 공개 후 공통 TOOLS 인터페이스로 CI worker별 도구 목록을 선언하고, 설치 코드 복제 없이 필수 전이 도구·고정 버전과 해시·반복 설치 재사용·오프라인 검사를 검증한다 | .github/workflows/ci.yml package.json package-lock.json tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts`; full CI after the provider release | [o] |
 | T27.1-9-2 | P1: 격리 모드는 PYTHON 환경 설정을 무시하므로 Python SDK 소비자 검사에서 바이트코드 생성을 명시적으로 비활성화한다 | tests/scripts/python-public-api.test.mts | `var/tools/bin/node --test tests/scripts/python-public-api.test.mts` | [o] |
 | T27.1-9-3 | P1: 설치 순서 테스트는 kit K762의 하위 make를 찾는다. 원인: kit은 자신이 시작하는 모든 make에 해석한 KIT와 KIT_EXT를 넘기므로, make 바로 뒤에 goal을 기대하는 tests/scripts/toolchain-files.test.mts의 패턴이 install-tools, install-packages, python-package, install-link 줄을 찾지 못한다. 수정: 테스트는 goal 앞에 KIT와 KIT_EXT가 있는 하위 make를 찾는다 | tests/scripts/toolchain-files.test.mts | `var/tools/bin/node --test --test-name-pattern='make install installs the tools of the checkout' tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-10 | P0: Kit 0.0.61 적용 후 template 0.0.13을 준비한다. 릴리즈 manifest·변경 기록을 동기화하고 패키지 관리자로 후보 소비자 잠금 파일을 생성하며 태그 전에 정확한 main의 전체 CI를 승인한다 | package.json package-lock.json config/release.json tests/fixtures/release-consumer CHANGELOG.md CHANGELOG.ko.md | `var/tools/bin/node --test tests/scripts/release-config.test.mts`; `make release-versions TAG=v0.0.13`; full CI before tags | [v] |
