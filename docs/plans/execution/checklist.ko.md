@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 3482ae0fe414ca239f3ba15aab928ec393876ee7fb4d5634c1728057851020dc -->
+<!-- source-sha256: 40302ea3f7d51ef26a61bcde9c56959a3a0cdd2f621c1173f6e9a6627f40a51a -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -452,3 +452,4 @@
 | T27.1-16 | kit이 삭제하는 reference-transaction hook을 제거한다(K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
 | T27.1-17 | kit이 삭제하는 release의 consumer install과 proof(K798), push gate와 그 pre-push hook(K804)을 제거한다 | config/release.json, tests/fixtures/release-consumer, .githooks/pre-push, config/checklist.json, Makefile, .github/workflows/ci.yml, the copies of kit | `make kit-check`, `make hooks-check` | [o] |
 | T27.1-17-1 | suite는 AGENTS의 hook 규칙을 강제하는 make hooks-check를 실행한다 | Makefile, .github/workflows/ci.yml | `make rules-check` | [o] |
+| T27.1-18 | kit이 삭제하는 commits-check와 pre-merge-commit hook을 제거한다(K805) | .githooks, config/commit-identity.json, Makefile, .github/workflows/ci.yml | `make hooks-check`, `make kit-check` | [ ] |
