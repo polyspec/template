@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 92c9685b7d19b11e53e952dc1c8944429e167aacfe5e5c805750eb3ec820a05a -->
+<!-- source-sha256: 56d8c698086202a103ab4ac6c65f40d4b307768637d85bf4cc41ec185d07400a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.13
+- gates matrix의 모든 런타임에 닿는 rules check와, 설치된 Python polyspec 패키지 폴더를 checkout에 대한 링크 하나로 만드는 make link를 갖춘 공개 Kit 0.0.65를 무결성으로 잠가 적용하고 그 사본을 동기화한다(T27.1-12).
 - Kit 0.0.64에서 네이티브 CI worker를 수용한다. 전체 후보 CI와 공급자 gates가 각 네이티브 바인딩을 정확히 한 단계에서 실행하며 통과한다(T27.1-9-1).
 - 설치 순서 테스트는 goal 앞에 kit이 해석한 KIT와 KIT_EXT를 적는 하위 make를 찾는다(T27.1-9-3).
 - 공급자 workflow의 따옴표 붙은 parity mode, Go workspace 테스트 탐색, 태그 기반 Composer 자산 버전을 고친 공개 Kit 0.0.64를 무결성으로 잠가 적용하고 공급자 workflow를 동기화한다. Kit 이슈 18, 5, 16, 6의 수용은 소비자 CI 실행을 기다린다(T27.1-9-1).

@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: 5c2718c988ecaaa442b282a21d827ffcd85ece5197a36ba741b88bbe49d2e9a5 -->
+<!-- source-sha256: 7b3afcc39b365eb30ba402c338747e017b92b08ec5194b3106d3f8d3ef3bd153 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -218,7 +218,7 @@ T27.1-9는 재사용 가능한 언어별 target으로 worker의 의존성 설치
 
 T27.1-9-1은 Kit 0.0.64의 선택 설치를 적용하고 네이티브 린트·테스트와 parity 실행을 구현별로 분리한다. 완료 조건은 전체 규칙 범위 유지, 각 네이티브 바인딩의 정확히 한 CI 단계 실행, 작업별 독립 준비, 관련 없는 기존 도구 보존과 전체 후보 CI 통과다. 이후 0.0.13 릴리즈는 manifest와 소비자 잠금 파일을 동기화하고 정확한 main CI를 통과한 뒤 검증된 자산과 Go·Rust 태그 소비 증거를 공개한다.
 
-0.0.13 후보는 공개 Kit 0.0.64를 적용한다. 0.0.64는 0.0.63의 깨끗한 bootstrap과 런타임별 링크 수정을 유지하고 이슈 [18](https://github.com/polyspec/kit/issues/18), [5](https://github.com/polyspec/kit/issues/5), [16](https://github.com/polyspec/kit/issues/16)의 공급자 수정을 더한다. 이슈 [15](https://github.com/polyspec/kit/issues/15)는 공급자와 새 소비자의 검증 후 닫혔다. 템플릿은 정확한 main의 전체 CI를 직접 검증해야 T27.1-9-1을 수용할 수 있다. 해당 CI와 아래 Composer 계약 수정 전까지 릴리즈 태그는 만들지 않는다.
+0.0.13 후보는 공개 Kit 0.0.65를 적용한다(T27.1-12). 0.0.65는 0.0.63의 깨끗한 bootstrap과 런타임별 링크 수정, 그리고 0.0.64가 더한 이슈 [18](https://github.com/polyspec/kit/issues/18), [5](https://github.com/polyspec/kit/issues/5), [16](https://github.com/polyspec/kit/issues/16)의 공급자 수정을 유지한다. 이슈 [15](https://github.com/polyspec/kit/issues/15)는 공급자와 새 소비자의 검증 후 닫혔다. 템플릿은 정확한 main의 전체 CI를 직접 검증해야 T27.1-9-1을 수용할 수 있다. 해당 CI와 아래 Composer 계약 수정 전까지 릴리즈 태그는 만들지 않는다.
 
 공개 Composer 자산은 Kit 자산 검증과 네이티브 artifact 소비자 해석이 요구하는 명시적 manifest 버전을 현재 유지한다. 이는 AGENTS.md의 태그 기반 Composer 버전 규칙과 충돌한다. [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)은 공급자가 지원하는 태그 기반 자산 metadata와 소비자 proof를 요청한다. 릴리즈 수용 전에 이 계약 충돌을 해결해야 한다.
 
