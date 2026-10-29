@@ -1,6 +1,6 @@
 // Tests that config/release.json (scripts/kit/release.mjs) names the packages that a tag releases as the manifests of the
 // tree declare them (T22.4-22): the npm and Composer archives by their package names, the Python package as its wheel, and
-// the Rust crate, which no registry holds, by git tag. The test reads the configuration and the manifests and installs
+// the Rust crate, which no registry holds, by git tag; the Composer packages make up packages.json. The test reads the configuration and the manifests and installs
 // nothing.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -72,6 +72,14 @@ test('the PHP command line is released separately from the runtime library', { t
   });
   assert.equal(CONFIG.manifests[file], 'archive');
   assert.equal(manifest.repositories, undefined, 'the CLI installs from released dependencies');
+});
+
+test('the Composer packages of the release are the packages of its packages.json', { timeout: 1000 }, () => {
+  // Kit writes packages.json, the Composer repository of the release, from the Composer packages of config/release.json
+  // (kit K871); a consumer reads the runtime library, the command line and the extension from it.
+  const composer = CONFIG.packages.filter(item => item.kind === 'composer');
+  assert.deepEqual(composer.map(item => item.name), ['polyspec/template', 'polyspec/template-cli', 'polyspec/template-php-ext']);
+  for (const { directory } of composer) assert.equal(CONFIG.manifests[`${directory}/composer.json`], 'archive', `${directory}: packages.json takes the version of the tag`);
 });
 
 test('the Rust crate is released by git tag', () => {

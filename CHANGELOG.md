@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Kit 0.0.74 is the pinned release: a release also publishes packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext, from the Composer packages of config/release.json (kit K871). (T27.1-30)
 
 ## 0.0.13
 - Kit 0.0.72 is the pinned release: CI links nothing (kit K824), so the gates workflow runs no make link and link-state-check leaves the CI suite; it checks the links of a development checkout. (T27.1-29)

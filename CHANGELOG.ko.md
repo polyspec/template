@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 187dbf7760f5e3c02e3ba61d82e25009024c3b2118466b139b6254f6f66b26ec -->
+<!-- source-sha256: 36fe8179ac270f99d69174dc39551f2b1263df95512ef13443f84139110282df -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 고정한 release는 Kit 0.0.74다. release는 config/release.json의 Composer package에서 polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json도 게시한다(kit K871). (T27.1-30)
 
 ## 0.0.13
 - 고정한 release는 Kit 0.0.72다. CI는 아무것도 link하지 않으므로(kit K824) gates workflow는 make link를 실행하지 않고, link-state-check는 CI suite에서 빠진다. 이 검사는 개발 checkout의 link를 검사한다. (T27.1-29)

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: a252eb1d881b6ea5a8a3e244c59ede0aafb61f8372d5d00cec04bf2669e70c82 -->
+<!-- source-sha256: 0f94400ea900d9515baa484bfddf423ebc43c40d45c643f48e2d66dafc229afd -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -43,7 +43,7 @@ PHP 라이브러리 요구사항은 >=8.4.0(표기 >=8.4)을 유지하고 개발
 
 문서 배포: [Pages 40453338233](https://github.com/polyspec/template/actions/runs/40453338233)이 ae6f7173의 [CI 40451767762](https://github.com/polyspec/template/actions/runs/40451767762) artifact를 [문서 사이트](https://polyspec.github.io/template/)에 성공적으로 배포했다. 첫 make 전에 설치 패키지 bootstrap과 선언한 PHP를 준비하며 모든 설치 workflow를 회귀 검사로 검증한다.
 
-후보 0.0.13은 동기화한 manifest와 후보 자산 아홉 개, 네이티브 소비자 잠금 파일을 준비했다. Kit 0.0.72의 무결성을 잠그고 복사본을 동기화했다. 0.0.72는 [Kit 이슈 18](https://github.com/polyspec/kit/issues/18), [5](https://github.com/polyspec/kit/issues/5), [16](https://github.com/polyspec/kit/issues/16)의 공급자 수정을 포함하며, 그 수용에는 이 버전에서의 소비자 CI 실행이 필요하다. 이전 0.0.62 후보는 [CI 40735651886](https://github.com/polyspec/template/actions/runs/40735651886)과 [gates 40735651946](https://github.com/polyspec/template/actions/runs/40735651946)에서 검사 전에 실패했다. parity 열거가 bootstrap에서 Node를 만들기 전에 실행했기 때문이다. [Kit 이슈 15](https://github.com/polyspec/kit/issues/15)는 공개한 0.0.63 수정으로 닫혔으며 템플릿은 새 후보의 전체 CI를 통과해야 한다. 0.0.13 릴리즈 태그와 배포는 없다.
+[릴리스 0.0.13](https://github.com/polyspec/template/releases/tag/v0.0.13)은 archive 아홉 개로 공개되었다. Kit 0.0.74의 무결성을 잠그고 복사본을 동기화했다. 이 버전부터 release는 polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json도 게시하며(kit K871), 공개된 release 중 이를 가진 것은 아직 없다.
 
 준비한 Composer manifest는 Kit 자산이 요구하는 명시적 버전을 유지한다. 이는 저장소의 태그 기반 버전 규칙과 충돌하며 [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)이 릴리즈 수용 전에 필요한 자산·소비자 계약 수정을 추적한다.
 
