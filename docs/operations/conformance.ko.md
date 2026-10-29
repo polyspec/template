@@ -94,8 +94,8 @@ node scripts/check-rules.mts
 | ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
 | go | `packages/go/template` |
 | rust | `packages/rust/target/release/template` |
-| php | `php packages/cli/php/bin/template.php` |
-| php-ext | `php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php` |
+| php | `php vendor/bin/template.php` |
+| php-ext | `php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php` |
 | python | `packages/python/.venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/python`을 `packages/python/.venv`에 설치한다) |
 
 TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.

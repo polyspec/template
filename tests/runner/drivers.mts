@@ -88,12 +88,11 @@ export const drivers: Record<Language, Driver> = {
     dir: join(packages, 'php'),
     build() {
       build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
-      // The command line package installs its own vendor directory, which its bin runs on.
-      build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), join(root, 'packages', 'cli', 'php')], root);
     },
     command(args) {
-      // The command line is the bin of its own package (packages/cli/php), which runs on the autoloader of that package.
-      return ['php', [join(root, 'packages', 'cli', 'php', 'bin', 'template.php'), ...args]];
+      // The command line is the bin of its own package (packages/cli/php), which the development root requires by its path;
+      // the proxy of vendor/bin runs it on the autoloader of the root.
+      return ['php', [join(root, 'vendor', 'bin', 'template.php'), ...args]];
     },
   },
   // The command is the python of packages/python/.venv, where make python-package installs packages/python and links its

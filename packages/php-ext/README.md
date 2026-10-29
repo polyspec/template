@@ -32,13 +32,13 @@ gen_stub.php of the PHP build generates `src/polyspec_template_arginfo.h` from t
 ## Command line
 
 ```sh
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php parse [--root DIR] [--delimiters OC] FILE
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php parse [--root DIR] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
-`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. The command is `bin/template.php` of the PHP package `polyspec/template`, whose Composer proxy is `packages/cli/php/bin/template.php`: when PHP loads the extension with `-d extension=`, its commands (`Polyspec\Template\Cli\CommandLine`) run on the classes of the extension, which registers them under the names of the library. `format` runs the formatter of the PHP package over the analysis of the extension and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
+`parse` prints the AST JSON. `render` prints the output. `tokens` prints the EDT-8 tokens as `[start, end, type]` JSON. A template error prints the error JSON on stderr and exits with status 2. The command is `bin/template.php` of the command line package `polyspec/template-cli` (`packages/cli/php`), which the development root requires by its path; its Composer proxy is `vendor/bin/template.php`: when PHP loads the extension with `-d extension=`, its commands (`Polyspec\Template\Cli\CommandLine`) run on the classes of the extension, which registers them under the names of the library. `format` runs the formatter of the PHP package over the analysis of the extension and prints the formatted text; a format error prints `{"reason","code","line","col","message"}` on stderr and exits with status 2.
 
 The package is the C extension only: Composer installs no package of the type `php-ext`, and PIE builds and installs only the extension, so the package holds no PHP classes and no command. A project that requires `polyspec/template` with Composer and installs the extension with PIE has both. The package has no lock of its own; in this repository the root `composer.json`, which is not published, maps the tests of `tests/`, and `composer install` at the root installs `polyspec/template` into the root `vendor/`.
 

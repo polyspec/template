@@ -14,11 +14,12 @@ use Polyspec\Template\Cli\PackageRuntime;
 final class CliTest extends TestCase
 {
     /**
-     * The command of bin/ of this package, which runs on the autoloader of its own vendor directory.
+     * The command of bin/ of this package through the proxy of vendor/bin of the development root, which requires this
+     * package by its path and runs the command on the autoloader of the root.
      */
     private static function command(string $name): string
     {
-        return dirname(__DIR__) . '/bin/' . $name;
+        return Support::repoRoot() . '/vendor/bin/' . $name;
     }
 
     /**

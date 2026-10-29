@@ -7,6 +7,7 @@
 
 ## 0.0.14
 - Release 0.0.14: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.14, and the release publishes packages.json beside its archives. (T27.1-31)
+- The archive of polyspec/template-cli holds no composer.lock: the lock of packages/cli/php locked polyspec/template by the path ../../php, so composer install of the unpacked 0.0.13 archive exited 1 with Source path "../../php" is not found. The development root requires polyspec/template-cli by its path, its tests, the PHP conformance driver and the CLI test of the extension run vendor/bin/template.php of the root, make test-php runs the tests of packages/cli/php, which no target ran, and release-config.test.mts requires that no Composer package directory tracks a composer.lock; the lock of packages/php-ext, which locked no package and which kit has not required since K602, is gone too. (T27.1-33)
 - Kit 0.0.74 is the pinned release: a release also publishes packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext, from the Composer packages of config/release.json (kit K871). (T27.1-30)
 
 ## 0.0.13

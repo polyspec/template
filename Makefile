@@ -192,9 +192,8 @@ template-install-go: ## Download only the modules of go.work
 
 template-install-rust: cargo-downloads-fetch ## Download the locked crates required by offline Rust checks
 
-template-install-php: ## Install the locked PHP library and CLI dependency graphs
+template-install-php: ## Install the locked PHP dependency graph of the development root, which requires the library and the command line by their paths
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
-	$(ONLINE) $(NODE) scripts/composer-install.mts packages/cli/php
 
 template-install-python: ## Download the hashed wheel build requirements and install the locked Python environment
 	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest $(WHEELHOUSE) -r $(PYTHON_PACKAGE)/build-requirements.txt
@@ -242,11 +241,7 @@ template-build-rust: cargo-downloads-check
 
 build-php: template-build-php ## Install the Composer packages of the development root composer.json into vendor/
 
-.PHONY: template-build-php-cli
-template-build-php-cli:
-	$(NODE) scripts/composer-install.mts packages/cli/php
-
-template-build-php: template-build-php-cli
+template-build-php:
 	$(NODE) scripts/composer-install.mts .
 
 test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests ## TypeScript unit tests and type check
@@ -282,8 +277,16 @@ template-test-rust-unit: cargo-downloads-check
 
 test-php: template-test-php ## PHP unit tests
 
-template-test-php: build-php
+# The command line package (packages/cli/php) holds no vendor of its own: its tests run on the vendor of the development
+# root, whose autoloader replaces the bootstrap that its phpunit.xml names for an installed project.
+.PHONY: template-test-php-library template-test-php-cli
+template-test-php: template-test-php-library template-test-php-cli
+
+template-test-php-library: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
+
+template-test-php-cli: build-php
+	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd packages/cli/php -- --bootstrap $(CURDIR)/vendor/autoload.php
 
 template-test-scripts: build-rust typed-generator compiler-interface-generate cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/

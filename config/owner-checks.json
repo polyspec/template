@@ -1546,6 +1546,7 @@
       "paths": [
         "composer.{json,lock}",
         "packages/php/**",
+        "packages/cli/php/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "scripts/composer-install.mts",
         "contracts/schema/ast.schema.json",

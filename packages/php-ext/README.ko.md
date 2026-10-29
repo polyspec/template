@@ -33,13 +33,13 @@ PHP build의 gen_stub.php가 stub에서 `src/polyspec_template_arginfo.h`를 만
 ## 명령줄
 
 ```sh
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php parse [--root DIR] [--delimiters OC] FILE
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
-php -d extension=var/php-ext/polyspec_template.so packages/cli/php/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php parse [--root DIR] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php tokens [--root DIR] [--delimiters OC] FILE
+php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php format [--indent none|tab|N] [--delimiters OC] FILE
 ```
 
-`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. 명령은 PHP 패키지 `polyspec/template`의 `bin/template.php`이고, 그 Composer proxy는 `packages/cli/php/bin/template.php`다. PHP가 `-d extension=`으로 확장을 로드하면 그 명령(`Polyspec\Template\Cli\CommandLine`)은 확장이 라이브러리의 이름으로 등록한 class 위에서 실행된다. `format`은 PHP 패키지의 포매터를 확장의 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 EDT-8 토큰을 `[start, end, type]` JSON으로 출력한다. 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다. 명령은 명령줄 패키지 `polyspec/template-cli`(`packages/cli/php`)의 `bin/template.php`이고, 개발 root가 이를 path로 require하며 그 Composer proxy는 `vendor/bin/template.php`다. PHP가 `-d extension=`으로 확장을 로드하면 그 명령(`Polyspec\Template\Cli\CommandLine`)은 확장이 라이브러리의 이름으로 등록한 class 위에서 실행된다. `format`은 PHP 패키지의 포매터를 확장의 분석 위에서 실행해 포맷된 텍스트를 출력한다. 포맷 오류는 stderr에 `{"reason","code","line","col","message"}`를 출력하고 상태 2로 종료한다.
 
 패키지는 C 확장뿐이다. Composer는 `php-ext` type의 패키지를 설치하지 않고 PIE는 확장만 빌드해 설치하므로, 패키지는 PHP class도 명령도 갖지 않는다. Composer로 `polyspec/template`을 요구하고 PIE로 확장을 설치한 프로젝트는 둘 다 갖는다. 패키지는 자기 lock을 갖지 않는다. 이 저장소에서는 발행하지 않는 root `composer.json`이 `tests/`의 test를 map하고, root에서 실행한 `composer install`이 `polyspec/template`을 root `vendor/`에 설치한다.
 

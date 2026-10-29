@@ -82,6 +82,16 @@ test('the Composer packages of the release are the packages of its packages.json
   for (const { directory } of composer) assert.equal(CONFIG.manifests[`${directory}/composer.json`], 'archive', `${directory}: packages.json takes the version of the tag`);
 });
 
+test('no Composer package directory tracks a composer.lock', { timeout: 5000 }, () => {
+  // The archive of a Composer package is its directory at the tagged commit, so a tracked lock ships with it; a lock of the
+  // monorepo locks the other packages by their path in the checkout, which an unpacked archive does not hold. The
+  // development dependencies of every package resolve from the root composer.lock.
+  const directories = CONFIG.packages.filter(item => item.kind === 'composer').map(item => item.directory);
+  const tracked = spawnSync('git', ['ls-files', '--', ...directories.map(directory => `${directory}/composer.lock`)], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(tracked.status, 0, tracked.stderr);
+  assert.deepEqual(tracked.stdout.split('\n').filter(Boolean), []);
+});
+
 test('the Rust crate is released by git tag', () => {
   const file = 'packages/rust/Cargo.toml';
   assert.equal(CONFIG.manifests[file], 'git-tag', `${file}: the supported release installation uses its git tag`);
