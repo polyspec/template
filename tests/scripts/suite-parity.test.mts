@@ -4,7 +4,8 @@
 // and that every tool of kit that a recipe starts is a tool of the installed kit (T27.1-19).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { captured } from '../../scripts/required.mts';
@@ -25,12 +26,35 @@ function dryRun(target: string) {
 
 const CHECK_TARGETS = captured(read('Makefile').match(/^CHECK_TARGETS := (.*)$/m), 1, 'CHECK_TARGETS of the Makefile').split(/\s+/).filter(Boolean);
 
+// The file of the tool `tool` in the installed kit `kit`. A source install, a link to the kit checkout, runs
+// scripts/kit/<tool>.mts; a packed install holds no scripts/kit/kit.mk and runs dist/<tool>.mjs, which its
+// kit-bootstrap.mk selects (T27.1-25).
+export function kitToolFile(kit: string, tool: string) {
+  return existsSync(path.join(kit, 'scripts/kit/kit.mk')) ? path.join(kit, 'scripts/kit', `${tool}.mts`) : path.join(kit, 'dist', `${tool}.mjs`);
+}
+
 // T27.1-19: kit deleted its full-run guard (K240), and make check still started it.
 test('every tool of kit that a recipe of the Makefile starts is a tool of the installed kit', () => {
   const tools = [...read('Makefile').matchAll(/\$\(KIT\)\/([\w-]+)\.\$\(KIT_EXT\)/g)].map(match => captured(match, 1, match[0]));
   assert.ok(tools.length > 0, 'the Makefile starts no tool of kit');
-  const missing = [...new Set(tools)].filter(tool => !existsSync(path.join(ROOT, 'node_modules/@polyspec/kit/scripts/kit', `${tool}.mts`)));
+  const missing = [...new Set(tools)].filter(tool => !existsSync(kitToolFile(path.join(ROOT, 'node_modules/@polyspec/kit'), tool)));
   assert.deepEqual(missing, []);
+});
+
+test('the tool of a source kit is its script and the tool of a packed kit is its dist module', () => {
+  const root = mkdtempSync(path.join(tmpdir(), 'template-kit-tools-'));
+  try {
+    const source = path.join(root, 'source');
+    const packed = path.join(root, 'packed');
+    mkdirSync(path.join(source, 'scripts/kit'), { recursive: true });
+    writeFileSync(path.join(source, 'scripts/kit/kit.mk'), '');
+    mkdirSync(path.join(packed, 'scripts/kit'), { recursive: true });
+    writeFileSync(path.join(packed, 'scripts/kit/kit-bootstrap.mk'), '');
+    assert.equal(kitToolFile(source, 'run-tests'), path.join(source, 'scripts/kit/run-tests.mts'));
+    assert.equal(kitToolFile(packed, 'run-tests'), path.join(packed, 'dist/run-tests.mjs'));
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('the full suite holds the release targets', () => {

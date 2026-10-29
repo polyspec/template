@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- suite-parity finds a tool of a packed kit, the install of CI, in its dist folder: it named every tool of kit that a recipe starts as missing, since a packed kit holds no scripts/kit/<tool>.mts. (T27.1-25)
 - The pre-commit hook test no longer expects make commit-gates-hook in .githooks/pre-commit, which kit deleted (kit K805); the hook runs make staged-generated-hook. (T27.1-24)
 - The docs job of CI runs make hooks before hooks-check, which failed on the fresh checkout of CI that has no hooks installed; suite-parity fails for a job that runs a target without its setup before it. (T27.1-23)
 - Kit 0.0.70 is the pinned release: its gates workflow passes no commit range, and AGENTS states that make docs-check reads each document on its own, with no comparison of the twins (kit K809). (T27.1-22)

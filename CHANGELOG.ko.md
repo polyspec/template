@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5d7df74c1090ef4fbe7b0854cbe8ae73e29cf2dd26d21cbc3d0e79f3548d5506 -->
+<!-- source-sha256: 9149613204cccedcc0cd5e6497607cbe646c5b16a99effc562c9826bff3502b7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- suite-parity는 CI가 설치하는 packed kit의 도구를 dist 폴더에서 찾는다. packed kit에는 scripts/kit/<tool>.mts가 없어서, recipe가 실행하는 kit 도구를 모두 없다고 보고했다. (T27.1-25)
 - pre-commit hook test는 kit이 삭제한 make commit-gates-hook(kit K805)을 .githooks/pre-commit에서 더 이상 기대하지 않는다. hook은 make staged-generated-hook을 실행한다. (T27.1-24)
 - CI의 docs job은 hooks-check 전에 make hooks를 실행한다. hook이 설치되지 않은 CI의 새 checkout에서 hooks-check가 실패했다. suite-parity는 target을 실행하기 전에 그 setup을 실행하지 않는 job에서 실패한다. (T27.1-23)
 - 고정한 release는 Kit 0.0.70이다. 그 gates workflow는 commit 범위를 넘기지 않고, AGENTS는 make docs-check가 각 문서를 따로 읽으며 두 짝을 비교하지 않는다고 적는다(kit K809). (T27.1-22)

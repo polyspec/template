@@ -459,5 +459,5 @@
 | T27.1-22 | Adopt Kit 0.0.70 | package.json, package-lock.json, kit copies, AGENTS.md | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-23 | The CI job of hooks-check installs the hooks before it | .github/workflows/ci.yml, tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-24 | The pre-commit hook test expects no commit-gates-hook (K805) | tests/scripts/pre-commit-hook.test.mts | `node --test tests/scripts/pre-commit-hook.test.mts` | [o] |
-| T27.1-25 | suite-parity finds the tools of a packed kit in dist | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [~] |
+| T27.1-25 | suite-parity finds the tools of a packed kit in dist | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-26 | Install the Python package non-editable for the parity extractor (K788) | Makefile | `make python-package`, `make link-state-check` | [ ] |
