@@ -82,6 +82,13 @@ test('the Composer packages of the release are the packages of its packages.json
   for (const { directory } of composer) assert.equal(CONFIG.manifests[`${directory}/composer.json`], 'archive', `${directory}: packages.json takes the version of the tag`);
 });
 
+test('the PHP extension reports the version of its composer.json', { timeout: 1000 }, () => {
+  const header = 'packages/php-ext/src/php_polyspec_template.h';
+  const manifest = 'packages/php-ext/composer.json';
+  const reported = /^#define PHP_POLYSPEC_TEMPLATE_VERSION "([^"]*)"$/m.exec(read(header))?.[1];
+  assert.equal(reported, parsedJsonObject(read(manifest), manifest).version, `${header}: PHP_POLYSPEC_TEMPLATE_VERSION is not the version of ${manifest}`);
+});
+
 test('no Composer package directory tracks a composer.lock', { timeout: 5000 }, () => {
   // The archive of a Composer package is its directory at the tagged commit, so a tracked lock ships with it; a lock of the
   // monorepo locks the other packages by their path in the checkout, which an unpacked archive does not hold. The

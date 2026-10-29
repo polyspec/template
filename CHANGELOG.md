@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- release-config.test.mts requires that PHP_POLYSPEC_TEMPLATE_VERSION of the PHP extension equals the version of packages/php-ext/composer.json, which version-bump commits set by hand. (T27.1-34)
 
 ## 0.0.14
 - Release 0.0.14: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.14, and the release publishes packages.json beside its archives. (T27.1-31)

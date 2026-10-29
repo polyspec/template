@@ -5,6 +5,7 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+- release-config.test.mts는 PHP 확장의 PHP_POLYSPEC_TEMPLATE_VERSION이 packages/php-ext/composer.json의 version과 같기를 요구한다. version-bump commit은 이를 손으로 맞췄다. (T27.1-34)
 
 ## 0.0.14
 - 릴리스 0.0.14: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.14를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-31)
