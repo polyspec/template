@@ -326,6 +326,10 @@
       "kind": "policy",
       "reason": "the progress lines that every long step prints with its elapsed time (AGENTS, Required checks); kit test-progress.mts prints them for the runners of tests"
     },
+    "scripts/tools-directory.mts": {
+      "kind": "ecosystem",
+      "tool": "git rev-parse --git-common-dir names the main checkout, as KIT_MAIN_CHECKOUT of kit.mk"
+    },
     "scripts/toml.mts": {
       "kind": "ecosystem",
       "tool": "smol-toml reads the TOML files of the scripts"

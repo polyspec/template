@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 980c9c5e743b5c35022475701894506453046c49819e6405d63a32566ccffc84 -->
+<!-- source-sha256: 5e8191d7a4f4df40fc03e86e0f13bbdfb28eefad529d11afdb7565989b2a0b48 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -449,7 +449,7 @@
 | T27.1-14 | kit이 삭제하는 Python build backend pin, dependency policy, python-lock-check를 제거한다(K788, K789) | config/toolchain.json, config/release.json, config/dependency-policy.json, Makefile, .github/workflows/ci.yml, config/owner-checks.json, tests/scripts/release-config.test.mts, docs/operations | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/release-config.test.mts tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-15 | 생성된 PHP를 kit의 PHPStan으로 lint하고, binding의 BindError를 TemplateError의 previous exception으로 넘긴다 | packages/compiler/src/backends/php.mts, scripts/check-generated-lint.mts | `make generated-lint-check` | [o] |
 | T27.1-15-1 | linked worktree는 도구를 실행하듯 main checkout의 wheelhouse를 읽는다 | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [o] |
-| T27.1-15-2 | config/rebuild.json은 scripts/tools-directory.mts의 class를 선언한다 | config/rebuild.json | `make rebuild-check` | [~] |
+| T27.1-15-2 | config/rebuild.json은 scripts/tools-directory.mts의 class를 선언한다 | config/rebuild.json | `make rebuild-check` | [o] |
 | T27.1-16 | kit이 삭제하는 reference-transaction hook을 제거한다(K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
 | T27.1-17 | kit이 삭제하는 release의 consumer install과 proof(K798), push gate와 그 pre-push hook(K804)을 제거한다 | config/release.json, tests/fixtures/release-consumer, .githooks/pre-push, config/checklist.json, Makefile, .github/workflows/ci.yml, the copies of kit | `make kit-check`, `make hooks-check` | [o] |
 | T27.1-17-1 | suite는 AGENTS의 hook 규칙을 강제하는 make hooks-check를 실행한다 | Makefile, .github/workflows/ci.yml | `make rules-check` | [o] |
