@@ -8,7 +8,8 @@
 
 ## 0.0.14
 - 릴리스 0.0.14: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.14를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-31)
-- polyspec/template-cli의 archive는 composer.lock을 담지 않는다. packages/cli/php의 lock이 polyspec/template를 path ../../php로 잠가서, 풀어 놓은 0.0.13 archive의 composer install이 Source path "../../php" is not found로 exit 1 했다. 개발 root가 polyspec/template-cli를 path로 require하고, 그 test, PHP conformance driver, 확장의 CLI test는 root의 vendor/bin/template.php를 실행하며, make test-php는 어떤 target도 실행하지 않던 packages/cli/php의 test를 실행하고, release-config.test.mts는 어떤 Composer 패키지 directory도 composer.lock을 추적하지 않기를 요구한다. 아무 패키지도 잠그지 않았고 kit이 K602 이후 요구하지 않는 packages/php-ext의 lock도 없어졌다. (T27.1-33)
+- polyspec/template-cli의 archive는 composer.lock을 담지 않는다. packages/cli/php의 lock이 polyspec/template를 path ../../php로 잠가서, 풀어 놓은 0.0.13 archive의 composer install이 Source path "../../php" is not found로 exit 1 했다. 개발 root가 polyspec/template-cli를 path로 require하고, 그 test, PHP conformance driver, 확장의 CLI test는 root의 vendor/bin/template.php를 실행하며, release-config.test.mts는 어떤 Composer 패키지 directory도 composer.lock을 추적하지 않기를 요구한다. 아무 패키지도 잠그지 않았고 kit이 K602 이후 요구하지 않는 packages/php-ext의 lock도 없어졌다. (T27.1-33)
+- CLI test와 php-ext conformance driver는 root vendor에서 실행된다. packages/cli/php/phpunit.xml은 packages/php/phpunit.xml처럼 root autoloader를 bootstrap으로 지정하므로 make test-php의 packages/cli/php 실행이 시작되고, php-ext driver는 packages/cli/php에 아무것도 설치하지 않고 root의 vendor/bin/template.php를 실행한다. 916bd456의 CI는 둘 다에서 실패했다: Cannot open bootstrap script packages/cli/php/vendor/autoload.php, 그리고 packages/cli/php의 composer install이 exit 100으로 실패했다. (T27.1-33-1)
 - 고정한 release는 Kit 0.0.74다. release는 config/release.json의 Composer package에서 polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json도 게시한다(kit K871). (T27.1-30)
 
 ## 0.0.13

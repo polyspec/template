@@ -110,14 +110,14 @@ export const drivers: Record<Language, Driver> = {
   'php-ext': {
     dir: join(packages, 'php-ext'),
     build() {
-      // The bin of the command line package runs the library's command line on the classes of the extension.
+      // The bin of the command line package, which the development root requires by its path, runs the library's command
+      // line on the classes of the extension.
       build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
-      build('php-ext', process.execPath, [join(root, 'scripts/composer-install.mts'), join(root, 'packages', 'cli', 'php')], root);
       // The C extension is built by kit's make build-php-ext (S10): phpize, configure and make, publishing its library itself.
       build('php-ext', 'make', ['build-php-ext'], root);
     },
     command(args) {
-      return ['php', [`-dextension=${published['php-ext']}`, join(root, 'packages', 'cli', 'php', 'bin', 'template.php'), ...args]];
+      return ['php', [`-dextension=${published['php-ext']}`, join(root, 'vendor', 'bin', 'template.php'), ...args]];
     },
   },
 };

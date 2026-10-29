@@ -277,16 +277,8 @@ template-test-rust-unit: cargo-downloads-check
 
 test-php: template-test-php ## PHP unit tests
 
-# The command line package (packages/cli/php) holds no vendor of its own: its tests run on the vendor of the development
-# root, whose autoloader replaces the bootstrap that its phpunit.xml names for an installed project.
-.PHONY: template-test-php-library template-test-php-cli
-template-test-php: template-test-php-library template-test-php-cli
-
-template-test-php-library: build-php
+template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
-
-template-test-php-cli: build-php
-	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd packages/cli/php -- --bootstrap $(CURDIR)/vendor/autoload.php
 
 template-test-scripts: build-rust typed-generator compiler-interface-generate cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
