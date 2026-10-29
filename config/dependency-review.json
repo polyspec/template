@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "comment": "Written by make dependency-review RECORD=1 (scripts/kit/dependency-review.mts) from the registries; make dependency-policy-check compares the checkout with it without a network.",
-  "reviewed": "2026-10-28T18:11:43.279Z",
+  "reviewed": "2026-10-29T03:30:30.752Z",
   "locks": [
     {
       "lock": "package-lock.json",
-      "sha256": "72dcb85df10c57a9dd7d81318f8cc784fe5380631d9896a774070f29cd670cab",
+      "sha256": "0d31e643e34e209d17cafbd270d03c13f41489eb8874ce3b2de939b2acd21b17",
       "advisories": []
     },
     {
@@ -57,7 +57,7 @@
       "manifest": "package.json",
       "package": "@types/node",
       "version": "26.6.5",
-      "latest": "26.6.5"
+      "latest": "26.6.6"
     },
     {
       "ecosystem": "npm",
@@ -85,7 +85,7 @@
       "manifest": "package.json",
       "package": "@types/vscode",
       "version": "1.138.0",
-      "latest": "1.140.0"
+      "latest": "1.144.0"
     },
     {
       "ecosystem": "npm",
@@ -316,7 +316,7 @@
       "manifest": "packages/cli/php/composer.json",
       "package": "symfony/console",
       "version": "v8.1.9",
-      "latest": "v8.1.9"
+      "latest": "v8.1.10"
     },
     {
       "ecosystem": "composer",
