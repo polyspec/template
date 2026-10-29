@@ -260,7 +260,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.equal(install.status, 0, install.stderr);
   // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1)
   // with cargo-downloads-fetch of kit, and go mod download the modules of go.work, which go reads with GOPROXY=off
-  // (T25.6-1). The build requirements of the Python package go to var/python/wheelhouse, which the
+  // (T25.6-1). The build requirements of the Python package go to var/python/wheelhouse of the main checkout, which the
   // package install check reads (T22.4-20-5), and make python-package installs the dependencies of
   // packages/python/pylock.toml, which the checks of the Python package read from the uv cache (T25.6-1). Only the
   // commands that download leave the offline settings of the recipes (T20.1-2). npm and the packages of package-lock.json
@@ -298,7 +298,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   assert.ok(at(subMake('--no-print-directory install-link')) > last && lines.at(-1) === `${node} ${kit}/link.${extension} link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
   const downloads = lines.slice(fetched + 1, last);
   assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `) && !/^(?:\S*make(?:\[\d+\])? |echo )/.test(line)), [], 'commands of make install that keep the offline settings of the recipes');
-  for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
+  for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest ${path.join(path.dirname(TOOLS), 'python/wheelhouse')} -r packages/python/build-requirements.txt`]) {
     assert.ok(downloads.includes(`${online} ${download}`), `make install does not run ${download} online:\n${lines.join('\n')}`);
   }
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
@@ -549,6 +549,14 @@ test('the job that runs lint-python installs the tools of mise.toml before it, w
     assert.ok(install !== -1 && install < lint, `job ${job.name} runs lint-python without make install before it`);
     assert.equal(usesOf(job, 'actions/setup-python@').length, 0, `job ${job.name} sets up a Python of PATH for ruff`);
   }
+});
+
+test('make python-package installs the build requirement of the wheel from the wheelhouse of the main checkout, which make install fills', () => {
+  // A linked worktree downloads nothing, so it reads the wheelhouse of its main checkout as it runs its tools (T27.1-15-1).
+  const wheelhouse = path.join(path.dirname(TOOLS), 'python/wheelhouse');
+  const dry = spawnSync('make', ['--no-print-directory', '-n', '-W', 'packages/python/pyproject.toml', 'python-package'], { cwd: ROOT, encoding: 'utf8' });
+  assert.equal(dry.status, 0, dry.stderr);
+  assert.ok(dry.stdout.split('\n').some(line => line.includes(` --find-links ${wheelhouse} `)), `make python-package reads no ${wheelhouse}:\n${dry.stdout}`);
 });
 
 test('the unit tests of the Python package run in packages/python/.venv, which python-venv of kit makes from the python of mise.toml', () => {

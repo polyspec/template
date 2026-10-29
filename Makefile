@@ -208,7 +208,7 @@ template-install-php: ## Install the locked PHP library and CLI dependency graph
 	$(ONLINE) $(NODE) scripts/composer-install.mts packages/cli/php
 
 template-install-python: ## Download the hashed wheel build requirements and install the locked Python environment
-	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r $(PYTHON_PACKAGE)/build-requirements.txt
+	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest $(WHEELHOUSE) -r $(PYTHON_PACKAGE)/build-requirements.txt
 	$(MAKE) python-package
 
 template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
@@ -434,7 +434,8 @@ conformance-python: build-ts ## Conformance suite of TypeScript and Python
 # driver (tests/runner/drivers.mts) and the parity check (config/parity.json) import polyspec.template from the sources of
 # the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs into it the dependencies that packages/python/pylock.toml pins by
-# version and digest, then the package offline, with its build requirement from var/python/wheelhouse (make install).
+# version and digest, then the package offline, with its build requirement from the wheelhouse that make install of the
+# main checkout fills: a linked worktree downloads nothing and reads it as it runs the tools of the main checkout (kit K519).
 # make install makes the environment, so the locked dependencies are downloaded there (AGENTS, Idempotency: Network). The
 # stamp is remade when the project, its lock or its build requirements change; a change of the sources needs no install. The tests are discovered with packages/python as the top level: the directory
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
@@ -448,6 +449,7 @@ ifeq ($(PYTHON_VENV),)
 $(error scripts/python-venv.mts read no environment of the implementation python from config/parity.json)
 endif
 UV := $(KIT_TOOLS)/mise/shims/uv
+WHEELHOUSE := $(or $(KIT_MAIN_CHECKOUT),$(CURDIR))/var/python/wheelhouse
 
 .PHONY: python-package
 python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed editable; offline
@@ -456,7 +458,7 @@ $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/py
 	rm -rf $(PYTHON_VENV)
 	$(MAKE) python-venv DIR=$(PYTHON_VENV)
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --link-mode copy -r $(PYTHON_PACKAGE)/pylock.toml
-	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links var/python/wheelhouse --link-mode copy --no-deps -e $(PYTHON_PACKAGE)
+	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links $(WHEELHOUSE) --link-mode copy --no-deps -e $(PYTHON_PACKAGE)
 	touch $@
 
 test-python: template-test-python ## Unit tests of the Python package

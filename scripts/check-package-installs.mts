@@ -7,7 +7,7 @@
 // archive of the run, by its own composer.json, and resolves its dependencies among the packages of
 // the composer.lock of the development root, not on Packagist, whose archives it takes from the Composer cache that make install
 // filled, with the network disabled; the Python install project builds the wheel of the package with the build requirements of
-// var/python/wheelhouse (pip download --require-hashes in make install), reads no index, and installs the dependencies of
+// the wheelhouse of the main checkout (pip download --require-hashes in make install), reads no index, and installs the dependencies of
 // packages/python/pylock.toml from the uv cache that make install filled, then that wheel.
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
@@ -22,7 +22,7 @@ import { readToml, tomlString, tomlTable } from './toml.mts';
 import { composerLockDocument, composerManifestDocument, npmManifestDocument } from './package-manifests.mts';
 import { checkLanguages } from './language-checks.mts';
 import { runStepSync } from './test-progress/step.mts';
-import { toolsDirectory } from './tools-directory.mts';
+import { toolsDirectory, wheelhouseDirectory } from './tools-directory.mts';
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
 import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mts';
 
@@ -182,7 +182,7 @@ function checkPython() {
   const pip = { ...pythonEnvironment(), PIP_NO_INDEX: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' };
   const version = tomlString(tomlTable(readToml(join(source, 'pyproject.toml')).project, 'the [project] of packages/python/pyproject.toml').version, 'the version of packages/python/pyproject.toml');
   const archive = join(artifacts, `polyspec_template-${version}-py3-none-any.whl`);
-  run(python, ['-m', 'pip', 'wheel', '--no-deps', '--no-index', '--find-links', join(root, 'var/python/wheelhouse'), '--wheel-dir', artifacts, source], { env: pip });
+  run(python, ['-m', 'pip', 'wheel', '--no-deps', '--no-index', '--find-links', wheelhouseDirectory(root), '--wheel-dir', artifacts, source], { env: pip });
   assert.ok(existsSync(archive), `pip wheel wrote no ${archive} into ${artifacts}`);
   const directory = join(temporary, 'python');
   mkdirSync(directory);

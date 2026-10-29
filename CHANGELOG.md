@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- A linked worktree reads the wheelhouse of its main checkout: make python-package and the package install check take the build requirement of the wheel from var/python/wheelhouse of the main checkout, which make install fills. (T27.1-15-1)
 - The generated PHP program passes the BindError of its bindings as the previous exception of the TemplateError it throws, and make generated-lint-check runs the PHPStan of kit on the generated PHP programs as the lint of a consumer does. (T27.1-15)
 
 ## 0.0.13

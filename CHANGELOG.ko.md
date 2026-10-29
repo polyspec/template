@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 877c4da4fc519c326d6029c0ed5236b2bd934e9e0ad7a11f347ddb5d26c3736a -->
+<!-- source-sha256: ee9a3cfc62fc0a87a95910cbc8d329d795ef34edb9abf63ef56395ee45058961 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- linked worktree는 main checkout의 wheelhouse를 읽는다. make python-package와 package install check는 wheel의 build requirement를 make install이 채우는 main checkout의 var/python/wheelhouse에서 가져온다. (T27.1-15-1)
 - 생성된 PHP program은 binding의 BindError를 던지는 TemplateError의 previous exception으로 넘기며, make generated-lint-check는 consumer의 lint처럼 생성된 PHP program에 kit의 PHPStan을 실행한다. (T27.1-15)
 
 ## 0.0.13
