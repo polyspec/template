@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: c5c34ecc90d6f0e891d79b00e1d006667d04d70e20a4c0d1744eaed25554c096 -->
+<!-- source-sha256: 3421134389d37f3e0bc8687da34afbe6d9e280ced03d10cabf118a1bbe8fc437 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -459,6 +459,6 @@
 | T27.1-21 | kit 복사본은 make kit-sync가 갱신한다고 명시한다(K799) | AGENTS.md, tests/scripts/toolchain-files.test.mts | `make rules-check`, `make docs-check` | [o] |
 | T27.1-22 | Kit 0.0.70을 채택한다 | package.json, package-lock.json, kit copies, AGENTS.md | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-23 | hooks-check를 실행하는 CI job은 그 전에 hook을 설치한다 | .github/workflows/ci.yml, tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
-| T27.1-24 | pre-commit hook test는 commit-gates-hook을 기대하지 않는다(K805) | tests/scripts/pre-commit-hook.test.mts | `node --test tests/scripts/pre-commit-hook.test.mts` | [~] |
+| T27.1-24 | pre-commit hook test는 commit-gates-hook을 기대하지 않는다(K805) | tests/scripts/pre-commit-hook.test.mts | `node --test tests/scripts/pre-commit-hook.test.mts` | [o] |
 | T27.1-25 | suite-parity는 packed kit의 도구를 dist에서 찾는다 | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [ ] |
 | T27.1-26 | parity extractor를 위해 Python package를 non-editable로 설치한다(K788) | Makefile | `make python-package`, `make link-state-check` | [ ] |

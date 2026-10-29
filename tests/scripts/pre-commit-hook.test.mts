@@ -24,7 +24,6 @@ test('config/checklist.json lists the pre-commit hook', () => {
 test('.githooks/pre-commit is executable and runs make staged-generated-hook', () => {
   const hook = join(repository, '.githooks/pre-commit');
   assert.ok((statSync(hook).mode & 0o111) !== 0, 'the hook is not executable');
-  assert.match(read('.githooks/pre-commit'), /^make --no-print-directory commit-gates-hook \|\| exit 1$/m);
   assert.match(read('.githooks/pre-commit'), /^make --no-print-directory staged-generated-hook \|\| exit 1$/m);
 });
 
