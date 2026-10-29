@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Kit 0.0.72 is the pinned release: CI links nothing (kit K824), so the gates workflow runs no make link and link-state-check leaves the CI suite; it checks the links of a development checkout. (T27.1-29)
 - toolchain-files counts make hooks as a setup step of a CI job, as make install is: it failed the docs job, which runs make hooks before hooks-check, as a check outside make ci-targets. (T27.1-28)
 - config/parity.json declares each Python symbol by its import path, polyspec.template.<module>.<name>, which the python extractor of kit reads since kit K788; the tests that name Python symbols use that path. (T27.1-27)
 - make python-package installs the Python package non-editable and links its package folder to the checkout: the python extractor of kit gave no symbols for the editable install (kit K788), and link-state-check found no installed package folder. (T27.1-26)
