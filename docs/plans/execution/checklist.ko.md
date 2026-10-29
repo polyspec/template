@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 011205f2044c03f2a57b2b17a3ac49455b8d996c671a8355a1bb5a99b0f4ca98 -->
+<!-- source-sha256: 729ba61a290fe10853f8ccba33ac01c80c7d7c01d09e46052ba6520e1b463010 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -460,3 +460,4 @@
 | T27.1-22 | Kit 0.0.70을 채택한다 | package.json, package-lock.json, kit copies, AGENTS.md | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-23 | hooks-check를 실행하는 CI job은 그 전에 hook을 설치한다 | .github/workflows/ci.yml, tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [ ] |
 | T27.1-24 | pre-commit hook test는 commit-gates-hook을 기대하지 않는다(K805) | tests/scripts/pre-commit-hook.test.mts | `node --test tests/scripts/pre-commit-hook.test.mts` | [ ] |
+| T27.1-25 | suite-parity는 packed kit의 도구를 dist에서 찾는다 | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [ ] |
