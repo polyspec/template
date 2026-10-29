@@ -269,23 +269,25 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const extension = selected[2];
   assert.ok(kit !== undefined, `make install runs no bootstrap of kit:\n${lines.join('\n')}`);
   const at = (pattern: RegExp) => lines.findIndex(line => pattern.test(line));
+  // kit passes its resolved KIT and KIT_EXT to every make it starts (kit K762), so a sub-make names them before its goal.
+  const subMake = (goal: string) => new RegExp(`\\bmake (?:KIT=\\S+ KIT_EXT=\\S+ )?${goal}$`);
   // The bootstrap of kit runs first (T24.1): npm with the node of PATH, then the packages of package-lock.json, then the tools.
   // The downloads of the recipe follow in the order that the Makefile gives them, each online, then make python-package,
   // which installs offline from what the downloads fetched, and the link of kit comes last, after every install (K360-2).
   const bootstrap = [
-    at(/\bmake --no-print-directory install-tools TOOLS=npm$/),
+    at(subMake('--no-print-directory install-tools TOOLS=npm')),
     lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.${extension}`),
-    at(/\bmake --no-print-directory install-packages$/),
+    at(subMake('--no-print-directory install-packages')),
     lines.indexOf(`${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`),
-    at(/\bmake --no-print-directory install-tools$/),
+    at(subMake('--no-print-directory install-tools')),
     lines.indexOf(`${online} ${node} ${kit}/install-tools.${extension}`),
     lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.${extension} --fetch`),
   ];
   assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
   const fetched = bootstrap.at(-1) ?? -1;
-  const last = at(/\bmake python-package$/);
+  const last = at(subMake('python-package'));
   assert.ok(last > fetched, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
-  assert.ok(at(/\bmake --no-print-directory install-link$/) > last && lines.at(-1) === `${node} ${kit}/link.${extension} link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
+  assert.ok(at(subMake('--no-print-directory install-link')) > last && lines.at(-1) === `${node} ${kit}/link.${extension} link --siblings`, `make install does not link last:\n${lines.join('\n')}`);
   const downloads = lines.slice(fetched + 1, last);
   assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `) && !/^(?:\S*make(?:\[\d+\])? |echo )/.test(line)), [], 'commands of make install that keep the offline settings of the recipes');
   for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r packages/python/build-requirements.txt`]) {
