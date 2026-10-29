@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 1bf81290eccf07e11d3a89e900a65a036f92dfbd6c0a2ea588a1ace910fecba5 -->
+<!-- source-sha256: 90ee72e69885f7fad37f2909efb413ec726f0c116a503571bafd5f994a9c3a00 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -458,3 +458,4 @@
 | T27.1-20 | kit이 삭제하는 make release-versions를 제거한다(K812) | .github/workflows/release.yml, AGENTS.md, docs/operations/publication.md | `make rules-check`, `make kit-check` | [o] |
 | T27.1-21 | kit 복사본은 make kit-sync가 갱신한다고 명시한다(K799) | AGENTS.md, tests/scripts/toolchain-files.test.mts | `make rules-check`, `make docs-check` | [o] |
 | T27.1-22 | Kit 0.0.70을 채택한다 | package.json, package-lock.json, kit copies, AGENTS.md | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
+| T27.1-23 | hooks-check를 실행하는 CI job은 그 전에 hook을 설치한다 | .github/workflows/ci.yml, tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [ ] |
