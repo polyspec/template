@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8d6960c2bfec0fd4e2f41fb369de35961fb51eed13a21eb468570cb25fd656d7 -->
+<!-- source-sha256: 0981212c60a9f67534e9d5698a49f07c972e7297e042ee2837d33f25cd874bce -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- CI의 docs job은 hooks-check 전에 make hooks를 실행한다. hook이 설치되지 않은 CI의 새 checkout에서 hooks-check가 실패했다. suite-parity는 target을 실행하기 전에 그 setup을 실행하지 않는 job에서 실패한다. (T27.1-23)
 - 고정한 release는 Kit 0.0.70이다. 그 gates workflow는 commit 범위를 넘기지 않고, AGENTS는 make docs-check가 각 문서를 따로 읽으며 두 짝을 비교하지 않는다고 적는다(kit K809). (T27.1-22)
 - AGENTS와 test 주석은 kit이 삭제한 make kit-check의 kit 복사본 비교(kit K799)를 더 이상 서술하지 않는다. make kit-sync가 설치 package에서 복사본을 갱신한다. (T27.1-21)
 - kit-sync가 쓰는 release workflow에는 make release-versions step이 없고, 문서는 kit이 삭제하는 release의 버전과 manifest 검사(kit K812)를 더 이상 설명하지 않는다. package manager가 버전을 해석한다. (T27.1-20)

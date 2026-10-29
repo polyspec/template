@@ -76,20 +76,26 @@ test('the rule of the CI suite names a missing, a repeated and an extra target',
   ]);
 });
 
-// The targets that open a browser: their job installs the browsers in a step before the step that runs them.
-export const BROWSER_TARGETS = ['template-test-browser', 'template-test-scripts', 'template-test-codemirror'];
+// The setups that a target needs: its job runs the setup in a step before the step that runs the target. A browser target
+// needs the browsers; hooks-check needs the hooks, which a fresh checkout of CI does not have (T27.1-23).
+export const SETUPS = [
+  { targets: ['template-test-browser', 'template-test-scripts', 'template-test-codemirror'], setup: /\bmake (?:-\S+ )*(?:template-)?install-browsers\b/, name: 'make template-install-browsers' },
+  { targets: ['hooks-check'], setup: /\bmake (?:-\S+ )*hooks(?![\w-])/, name: 'make hooks' },
+];
 
-// Each job of the workflow text that runs a target of BROWSER_TARGETS without a `make template-install-browsers` step before it.
-export function browserSetupViolations(text: string) {
+// Each job of the workflow text that runs a target of SETUPS without the step of its setup before it.
+export function setupViolations(text: string) {
   const found: string[] = [];
   for (const job of jobsOf(text)) {
-    let installed = false;
+    const installed = new Set<string>();
     for (const step of job.steps) {
       if (step.run === undefined) continue;
-      if (/\bmake (?:-\S+ )*(?:template-)?install-browsers\b/.test(step.run)) installed = true;
+      for (const { setup, name } of SETUPS) if (setup.test(step.run)) installed.add(name);
       for (const match of step.run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
-        for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/).filter(target => BROWSER_TARGETS.includes(target))) {
-          if (!installed) found.push(`job ${job.name} runs ${target} without make template-install-browsers before it`);
+        for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/)) {
+          for (const { targets, name } of SETUPS) {
+            if (targets.includes(target) && !installed.has(name)) found.push(`job ${job.name} runs ${target} without ${name} before it`);
+          }
         }
       }
     }
@@ -97,12 +103,13 @@ export function browserSetupViolations(text: string) {
   return found;
 }
 
-test('a job that runs a browser target installs the browsers before it', () => {
-  assert.deepEqual(browserSetupViolations(read('.github/workflows/ci.yml')), []);
+test('a job that runs a target installs its setup before it', () => {
+  assert.deepEqual(setupViolations(read('.github/workflows/ci.yml')), []);
   const workflow = (runs: string[]) => `name: CI\njobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n${runs.map(run => `      - run: ${run}\n`).join('')}`;
-  assert.deepEqual(browserSetupViolations(workflow(['make template-install-browsers', 'make ci-targets TARGETS="template-test-scripts lint-go"'])), []);
-  assert.deepEqual(browserSetupViolations(workflow(['make ci-targets TARGETS="template-test-scripts"', 'make template-install-browsers'])), [
+  assert.deepEqual(setupViolations(workflow(['make template-install-browsers', 'make hooks', 'make ci-targets TARGETS="template-test-scripts hooks-check lint-go"'])), []);
+  assert.deepEqual(setupViolations(workflow(['make ci-targets TARGETS="template-test-scripts hooks-check"', 'make template-install-browsers', 'make hooks'])), [
     'job one runs template-test-scripts without make template-install-browsers before it',
+    'job one runs hooks-check without make hooks before it',
   ]);
 });
 
