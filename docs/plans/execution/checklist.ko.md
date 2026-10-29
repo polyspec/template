@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 5a3f80fd6dad79e984b8ea8bd88cd66a4cbe82865ac13bb6fe2cf22017d97df0 -->
+<!-- source-sha256: 4980f47801ec638e3cbbd09ee2204f7b7dfb4ed6f8c475b1f2a6350d9df5706c -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -463,3 +463,4 @@
 | T27.1-25 | suite-parity는 packed kit의 도구를 dist에서 찾는다 | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-26 | parity extractor를 위해 Python package를 non-editable로 설치한다(K788) | Makefile | `make python-package`, `make link-state-check` | [o] |
 | T27.1-27 | Python symbol을 import 경로로 선언한다(K788) | config/parity.json, tests/scripts | `make parity-declarations-check`, `make parity-api-check` | [o] |
+| T27.1-28 | toolchain-files는 make hooks를 CI job의 setup 단계로 센다 | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [ ] |
