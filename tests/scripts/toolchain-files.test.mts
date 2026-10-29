@@ -33,6 +33,7 @@ import { compareText } from '../../scripts/compare-text.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { captured, required } from '../../scripts/required.mts';
 import { isJsonObject, parsedJsonObject } from '../runner/checked.mts';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 import { type Job, jobField, jobs, jobsOf, pinsOf, ROOT, runLines, runsOf, workflowOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -46,7 +47,10 @@ const packageField = (key: string) => {
   if (typeof value !== 'string') throw new Error(`package.json ${key} is no string`);
   return value;
 };
-const SHIMS = path.join(ROOT, 'var/tools/mise/shims');
+const TOOLS = toolsDirectory(ROOT);
+// A linked worktree runs the tools of its main checkout and installs none (kit K519); only the main checkout installs them.
+const WORKTREE = TOOLS !== path.join(ROOT, 'var/tools');
+const SHIMS = path.join(TOOLS, 'mise/shims');
 // The tools of mise.toml, read with a TOML parser.
 const MISE_TOOLS = tableOf(parse(read('mise.toml')).tools, 'the [tools] of mise.toml');
 
@@ -158,8 +162,8 @@ test('npm is the version of packageManager in package.json, from var/tools/bin f
   const expected = /^npm@(\d+\.\d+\.\d+)$/.exec(manager)?.[1];
   assert.ok(expected, `package.json packageManager: expected npm@<major>.<minor>.<patch>, actual ${manager}`);
   const first = recipe('echo "$PATH"').split(':')[0];
-  assert.equal(first, path.join(ROOT, 'var/tools/bin'), `the first entry of PATH of the recipes: expected ${path.join(ROOT, 'var/tools/bin')}, actual ${first}`);
-  assert.equal(recipe('command -v npm || true'), path.join(ROOT, 'var/tools/bin/npm'), 'npm of the recipes is not the one of var/tools/bin; run make install-tools');
+  assert.equal(first, path.join(TOOLS, 'bin'), `the first entry of PATH of the recipes: expected ${path.join(TOOLS, 'bin')}, actual ${first}`);
+  assert.equal(recipe('command -v npm || true'), path.join(TOOLS, 'bin/npm'), 'npm of the recipes is not the one of var/tools/bin; run make install-tools');
   const actual = recipe('$(NPM) --version');
   assert.equal(actual, expected, `npm of the recipes: expected ${expected} (package.json packageManager), actual ${actual}; run make install-tools`);
 });
@@ -249,6 +253,10 @@ test('PHP is a minor version of config/toolchain.json, setup-php installs no too
 
 test('make install installs the tools of the checkout, the Rust toolchain and the crates of every Cargo.lock, and no make or CI job lets rustup install it on the first cargo', () => {
   const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
+  if (WORKTREE) {
+    assert.ok(!install.stdout.split('\n').some(line => /\/(?:bootstrap\/bootstrap|install-tools)\.(?:mts|mjs)\b/.test(line)), `make install of a worktree installs a tool:\n${install.stdout}`);
+    return;
+  }
   assert.equal(install.status, 0, install.stderr);
   // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1)
   // with cargo-downloads-fetch of kit, and go mod download the modules of go.work, which go reads with GOPROXY=off
@@ -258,7 +266,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   // commands that download leave the offline settings of the recipes (T20.1-2). npm and the packages of package-lock.json
   // are installed before, by make install-tools TOOLS=npm and make install-packages, which install @polyspec/kit (T24.1).
   const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
-  const node = path.join(ROOT, 'var/tools/bin/node');
+  const node = path.join(TOOLS, 'bin/node');
   // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
   // python-package, which prints its own recipe after its command line when the environment is out of date.
   const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
@@ -278,7 +286,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
     at(subMake('--no-print-directory install-tools TOOLS=npm')),
     lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.${extension}`),
     at(subMake('--no-print-directory install-packages')),
-    lines.indexOf(`${online} ${path.join(ROOT, 'var/tools/bin/npm')} ci`),
+    lines.indexOf(`${online} ${path.join(TOOLS, 'bin/npm')} ci`),
     at(subMake('--no-print-directory install-tools')),
     lines.indexOf(`${online} ${node} ${kit}/install-tools.${extension}`),
     lines.indexOf(`${online} ${node} ${kit}/check-cargo-downloads.${extension} --fetch`),
@@ -546,6 +554,10 @@ test('the job that runs lint-python installs the tools of mise.toml before it, w
 
 test('make dependency-review installs the Rust toolchain before cargo-audit and its workflow sets up no Python of PATH', () => {
   const recipe = spawnSync('make', ['--no-print-directory', '-n', 'dependency-review', 'TARGETS='], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
+  if (WORKTREE) {
+    assert.ok(!recipe.some(line => /\/install-tools\.(?:mts|mjs)\b/.test(line)), `make dependency-review of a worktree installs a tool:\n${recipe.join('\n')}`);
+    return;
+  }
   // install-tools of kit installs the toolchain of rust-toolchain.toml with rustup before cargo-audit runs.
   assert.ok(recipe[0] !== undefined && recipe[1] !== undefined, 'make -n dependency-review prints its two commands');
   assert.match(recipe[0], /install-tools\.(?:mts|mjs) $/);

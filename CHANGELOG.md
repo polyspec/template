@@ -6,6 +6,7 @@
 ## Unreleased
 
 ## 0.0.13
+- A linked worktree runs the tools of its main checkout: the Makefile names KIT_TOOLS of kit.mk, and the toolchain modules of scripts/ and the unit tests name the var/tools of the main checkout through scripts/tools-directory.mts; the install tests assert in a worktree that it installs no tool (T27.1-13-1).
 - Adopt the published integrity-locked Kit 0.0.65, whose rules check reaches every runtime of the gates matrix and whose make link makes each installed Python polyspec package folder one link to its checkout, and synchronize its copies (T27.1-12).
 - Accept the native CI workers on Kit 0.0.64: the complete candidate CI and the gates of the provider pass with every native binding in exactly one phase (T27.1-9-1).
 - The install order test matches the sub-makes that name the resolved KIT and KIT_EXT of kit before their goal (T27.1-9-3).

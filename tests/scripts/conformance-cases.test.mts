@@ -9,10 +9,11 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { caseIds, RUNNERS } from '../../scripts/conformance-cases.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
-const NODE = path.join(ROOT, 'var/tools/bin/node');
+const NODE = path.join(toolsDirectory(ROOT), 'bin/node');
 const run = (...args: string[]) => spawnSync(process.execPath, ['scripts/conformance-cases.mts', ...args], { cwd: ROOT, encoding: 'utf8' });
 const parityDocument = jsonDocument<{ implementations: { name: string; shares?: string }[] }>('parity declaration', {
   type: 'object',

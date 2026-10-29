@@ -12,6 +12,7 @@ import type { JSONSchemaType } from 'ajv';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { readToml, tomlArray, tomlString, tomlTable } from '../../scripts/toml.mts';
 import { parsedJsonObject } from '../runner/checked.mts';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -132,7 +133,7 @@ test('the Composer smoke commands contain valid PHP source', { timeout: 5000 }, 
     assert.equal(command[1], '-r', name);
     const code = command[2];
     assert.ok(code !== undefined, `${name}: PHP source is missing`);
-    const result = spawnSync(path.join(ROOT, 'var/tools/bin/php'), ['-l'], { input: `<?php\n${code}`, encoding: 'utf8' });
+    const result = spawnSync(path.join(toolsDirectory(ROOT), 'bin/php'), ['-l'], { input: `<?php\n${code}`, encoding: 'utf8' });
     assert.equal(result.status, 0, `${name}: ${result.stdout}${result.stderr}`);
   }
 });

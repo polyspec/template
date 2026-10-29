@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 56d8c698086202a103ab4ac6c65f40d4b307768637d85bf4cc41ec185d07400a -->
+<!-- source-sha256: 5d0fc720cbc98b9df62bb6545373a7aa0db4cf28ee9ca5bcd450fc86b09dee4d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 
 ## 0.0.13
+- linked worktree는 main checkout의 도구를 실행한다. Makefile은 kit.mk의 KIT_TOOLS를, scripts/의 toolchain module과 unit test는 scripts/tools-directory.mts로 main checkout의 var/tools를 가리키며, 설치 test는 worktree에서 도구를 설치하지 않음을 검증한다 (T27.1-13-1).
 - gates matrix의 모든 런타임에 닿는 rules check와, 설치된 Python polyspec 패키지 폴더를 checkout에 대한 링크 하나로 만드는 make link를 갖춘 공개 Kit 0.0.65를 무결성으로 잠가 적용하고 그 사본을 동기화한다(T27.1-12).
 - Kit 0.0.64에서 네이티브 CI worker를 수용한다. 전체 후보 CI와 공급자 gates가 각 네이티브 바인딩을 정확히 한 단계에서 실행하며 통과한다(T27.1-9-1).
 - 설치 순서 테스트는 goal 앞에 kit이 해석한 KIT와 KIT_EXT를 적는 하위 make를 찾는다(T27.1-9-3).

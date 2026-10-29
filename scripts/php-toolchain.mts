@@ -4,9 +4,10 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { jsonDocument } from './json-document.mts';
+import { toolsDirectory } from './tools-directory.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-export const phpInterpreter = join(root, 'var/tools/bin/php');
+export const phpInterpreter = join(toolsDirectory(root), 'bin/php');
 
 /** The declared minor accepts its patch releases, and no other interpreter release. */
 export function phpVersionIsAllowed(allowed: string[], version: string): boolean {

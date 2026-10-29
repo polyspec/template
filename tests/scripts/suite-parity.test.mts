@@ -12,6 +12,7 @@ import { captured } from '../../scripts/required.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { parsedJsonObject } from '../runner/checked.mts';
 import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 
@@ -32,7 +33,7 @@ test('make release-test-matrix runs the targets of make check through the same g
   assert.equal(lines.length, 1, `make check runs one command: ${lines.join('\n')}`);
   const guard = lines[0];
   assert.ok(guard, 'make check prints its command');
-  assert.ok(guard.startsWith(`${path.join(ROOT, 'var/tools/bin/node')} `), guard);
+  assert.ok(guard.startsWith(`${path.join(toolsDirectory(ROOT), 'bin/node')} `), guard);
   assert.ok(['mts', 'mjs'].some(extension => guard.endsWith(`/full-run.${extension} run ${CHECK_TARGETS.join(' ')}`)), guard);
   assert.deepEqual(dryRun('release-test-matrix'), [guard]);
 });

@@ -13,10 +13,11 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
-const NODE = path.join(ROOT, 'var/tools/bin/node');
+const NODE = path.join(toolsDirectory(ROOT), 'bin/node');
 const SCRIPT = path.join(ROOT, 'scripts/install-cli.mts');
 
 function commands(target: string) {

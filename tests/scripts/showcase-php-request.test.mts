@@ -4,11 +4,12 @@ import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 test('the PHP adapter writes request.assign and an empty map as objects', () => {
-  const run = spawnSync(path.join(ROOT, 'var/tools/bin/php'), ['examples/showcase/adapters/php.php', 'examples/site/scenarios/compiler-coverage'], { cwd: ROOT, encoding: 'utf8' });
+  const run = spawnSync(path.join(toolsDirectory(ROOT), 'bin/php'), ['examples/showcase/adapters/php.php', 'examples/site/scenarios/compiler-coverage'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
   const output: unknown = JSON.parse(run.stdout);
   assert.ok(typeof output === 'object' && output !== null && 'request' in output);

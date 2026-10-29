@@ -6,10 +6,11 @@ import { realpathSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
-const NODE = path.join(ROOT, 'var/tools/bin/node');
+const NODE = path.join(toolsDirectory(ROOT), 'bin/node');
 const RUNNER_FILE = fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests'));
 
 // Compare the exported tool's identity and arguments for both linked sources

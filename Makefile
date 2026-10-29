@@ -2,10 +2,11 @@
 
 # make install-tools TOOLS=npm installs the npm of packageManager in package.json and mise into var/tools/bin, and make
 # install-tools (the install-tools tool of @polyspec/kit) installs the tools of mise.toml, Go and Python among them, at the
-# digests of mise.lock into var/tools/mise (T24.12); var/tools/bin and the shims of mise come first, so every recipe uses
-# the tools of the checkout and never the npm, Go or Python of the machine (T19.2).
+# digests of mise.lock into var/tools/mise (T24.12); kit.mk puts var/tools/bin and the shims of mise of the main checkout
+# first on PATH (kit K127, K519), so every recipe uses the tools of the checkout and never the npm, Go or Python of the
+# machine (T19.2).
 # GOTOOLCHAIN=local keeps go from downloading another toolchain at run time.
-export PATH := $(CURDIR)/var/tools/bin:$(HOME)/.cargo/bin:$(PATH)
+export PATH := $(HOME)/.cargo/bin:$(PATH)
 export GOTOOLCHAIN := local
 # go builds into the build cache of the checkout, never into a cache that other checkouts and runs share (T19.14).
 export GOCACHE := $(CURDIR)/var/go/cache
@@ -13,7 +14,8 @@ export GOCACHE := $(CURDIR)/var/go/cache
 # with, not the exported PATH above, also when SHELL names another shell: a line `npm ci` ran the npm of the machine. A
 # recipe therefore starts each tool of the checkout by its absolute path: node and npm by $(NODE) and $(NPM) of kit.mk,
 # the node of mise.toml (kit K171), and go by its shim, $(GO) (T19.2). A script that a recipe starts gets the exported PATH.
-GO := $(CURDIR)/var/tools/mise/shims/go
+# The tools are those of the main checkout, KIT_TOOLS of kit.mk, which the include below defines (kit K519).
+GO = $(KIT_TOOLS)/mise/shims/go
 # make install-tools installs the Rust toolchain of rust-toolchain.toml (kit K151); rustup does not install it on the
 # first cargo, which several processes start at once in one run and whose installs then break each other (T18.7-1). A
 # missing toolchain fails with rustup's message, which names rustup toolchain install.
@@ -77,7 +79,7 @@ VSCODE_DIR := packages/vscode
 CODEMIRROR_DIR := packages/codemirror
 # The VS Code build of the integration test, installed by make template-install-vscode (the VS Code installer of kit) after make
 # install and only read by the test, which never downloads (T20.1-4). Only a run of the test needs it (T20.1-6).
-VSCODE_TOOLS := $(CURDIR)/var/tools/vscode
+VSCODE_TOOLS := $(KIT_TOOLS)/vscode
 VSIX       := $(VSCODE_DIR)/dist/polyspec-template.vsix
 # The prefix of `make template-install-cli`: the formatter copy in $(CLI_PREFIX)/lib and the script in $(CLI_PREFIX)/bin.
 CLI_PREFIX ?= $(HOME)/.local
@@ -207,7 +209,7 @@ template-install-php: ## Install the locked PHP library and CLI dependency graph
 	$(ONLINE) $(NODE) scripts/composer-install.mts packages/cli/php
 
 template-install-python: ## Download the hashed wheel build requirements and install the locked Python environment
-	$(ONLINE) $(CURDIR)/var/tools/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r $(PYTHON_PACKAGE)/build-requirements.txt
+	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest var/python/wheelhouse -r $(PYTHON_PACKAGE)/build-requirements.txt
 	$(MAKE) python-package
 
 template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
@@ -216,8 +218,8 @@ template-install-parity: template-install-node template-install-rust template-in
 .PHONY: template-dependency-review-php-cli
 template-dependency-review-php-cli: export COMPOSER_HOME := $(CURDIR)/var/composer-cli-review
 template-dependency-review-php-cli:
-	$(ONLINE) $(CURDIR)/var/tools/mise/shims/composer config --global repositories.template path ../../php
-	$(ONLINE) $(CURDIR)/var/tools/mise/shims/composer update --working-dir=packages/cli/php --with-dependencies --no-interaction phpunit/phpunit
+	$(ONLINE) $(KIT_TOOLS)/mise/shims/composer config --global repositories.template path ../../php
+	$(ONLINE) $(KIT_TOOLS)/mise/shims/composer update --working-dir=packages/cli/php --with-dependencies --no-interaction phpunit/phpunit
 
 # The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
 # lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
@@ -448,12 +450,12 @@ conformance-python: build-ts ## Conformance suite of TypeScript and Python
 PYTHON_PACKAGE := packages/python
 # make reads the environment when it parses the Makefile, before make install-tools TOOLS=npm has installed the node of
 # the checkout, so the node of the machine that starts the bootstrap reads it (kit K171).
-PYTHON_BOOTSTRAP_NODE := $(if $(wildcard var/tools/bin/node),$(CURDIR)/var/tools/bin/node,node)
+PYTHON_BOOTSTRAP_NODE := $(if $(wildcard $(KIT_TOOLS)/bin/node),$(KIT_TOOLS)/bin/node,node)
 PYTHON_VENV := $(shell $(PYTHON_BOOTSTRAP_NODE) scripts/python-venv.mts)
 ifeq ($(PYTHON_VENV),)
 $(error scripts/python-venv.mts read no environment of the implementation python from config/parity.json)
 endif
-UV := $(CURDIR)/var/tools/mise/shims/uv
+UV := $(KIT_TOOLS)/mise/shims/uv
 
 .PHONY: python-package
 python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed editable; offline

@@ -10,11 +10,12 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readToml, tomlTable } from './toml.mts';
 import { pythonPackageCommandPath } from './python-venv.mts';
+import { toolsDirectory } from './tools-directory.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 /** The pinned interpreter of the checkout: the shim var/tools/mise/shims/python3 of the python of mise.toml. */
-export const pythonInterpreter = join(root, 'var/tools/mise/shims/python3');
+export const pythonInterpreter = join(toolsDirectory(root), 'mise/shims/python3');
 
 /** The python of the environment of config/parity.json, where `make python-package` installs packages/python. */
 export const pythonPackageInterpreter = join(root, pythonPackageCommandPath());

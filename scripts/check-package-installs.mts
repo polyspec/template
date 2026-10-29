@@ -22,6 +22,7 @@ import { readToml, tomlString, tomlTable } from './toml.mts';
 import { composerLockDocument, composerManifestDocument, npmManifestDocument } from './package-manifests.mts';
 import { checkLanguages } from './language-checks.mts';
 import { runStepSync } from './test-progress/step.mts';
+import { toolsDirectory } from './tools-directory.mts';
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
 import { showcasePhpDirectory, showcasePhpNamespace } from '../examples/showcase/php-namespace.mts';
 
@@ -189,7 +190,7 @@ function checkPython() {
   const installed = join(directory, 'venv/bin/python');
   // The dependencies that packages/python/pylock.toml pins, from the uv cache that make install filled (make
   // python-package), then the wheel alone.
-  run(join(root, 'var/tools/mise/shims/uv'), ['pip', 'install', '--python', installed, '--offline', '--link-mode', 'copy', '-r', join(root, 'packages/python/pylock.toml')]);
+  run(join(toolsDirectory(root), 'mise/shims/uv'), ['pip', 'install', '--python', installed, '--offline', '--link-mode', 'copy', '-r', join(root, 'packages/python/pylock.toml')]);
   run(installed, ['-m', 'pip', 'install', '--no-deps', '--no-index', archive], { env: pip });
   stageScenario(directory);
   cpSync(join(root, 'examples/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`), join(directory, 'generated.py'));

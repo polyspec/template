@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { declaredApiSymbols } from './public-api-declarations.mts';
 import { phpCommand } from '../../scripts/php-toolchain.mts';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const symbols = jsonDocument<string[]>('PHP SDK symbols', { type: 'array', items: { type: 'string' } });
 const tools = dirname(fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')));
@@ -16,7 +17,7 @@ const php = phpCommand();
 
 function extract(entry: string, leaks = false): string[] {
   const result = spawnSync(php, [
-    join(tools, 'symbols/php/extract.php'), resolve('var/tools/symbols-php/vendor/autoload.php'),
+    join(tools, 'symbols/php/extract.php'), join(toolsDirectory(resolve('.')), 'symbols-php/vendor/autoload.php'),
     entry, ...(leaks ? ['--leaks'] : []),
   ], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.error?.message ?? result.stderr);
