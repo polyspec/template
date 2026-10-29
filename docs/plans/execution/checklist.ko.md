@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: bb6edf4def714e1057fb643173cb52875bd92156b76c7b4ecc690bca128e7892 -->
+<!-- source-sha256: 4e7d23eae3a1a84fec8609382afd4ebbec0c1b1736d88441f2b5d6479c87d004 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -445,3 +445,4 @@
 | T27.1-10 | P0: Kit 0.0.61 적용 후 template 0.0.13을 준비한다. 릴리즈 manifest·변경 기록을 동기화하고 패키지 관리자로 후보 소비자 잠금 파일을 생성하며 태그 전에 정확한 main의 전체 CI를 승인한다 | package.json package-lock.json config/release.json tests/fixtures/release-consumer CHANGELOG.md CHANGELOG.ko.md | `var/tools/bin/node --test tests/scripts/release-config.test.mts`; `make release-versions TAG=v0.0.13`; full CI before tags | [v] |
 | T27.1-12 | P0: 배포된 Kit 0.0.65를 도입한다. release asset을 integrity와 함께 고정하고 make kit-sync로 소유 사본을 쓰며 dependency review를 갱신한다 | package.json package-lock.json config/dependency-review.json the kit copies | `make kit-check`; `var/tools/bin/node --test tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-13 | P0: kit가 삭제하는 dependency policy와 review target을 dependency-audit, 예약 review workflow, 기록, owner, test, 규칙과 함께 제거한다 | Makefile .github/workflows/dependency-review.yml config/dependency-review.json config/owner-checks.json tests/scripts/toolchain-files.test.mts AGENTS.md | `make owner-validate`; `var/tools/bin/node --test tests/scripts/toolchain-files.test.mts` | [ ] |
+| T27.1-13-1 | P0: worktree는 main checkout의 도구를 실행한다(kit K519): Makefile, scripts/의 toolchain module, unit test는 자기 checkout이 아닌 main checkout의 var/tools를 가리킨다 | Makefile scripts/ tests/scripts/ | `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts` | [ ] |
