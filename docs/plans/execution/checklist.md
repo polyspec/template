@@ -461,4 +461,4 @@
 | T27.1-24 | The pre-commit hook test expects no commit-gates-hook (K805) | tests/scripts/pre-commit-hook.test.mts | `node --test tests/scripts/pre-commit-hook.test.mts` | [o] |
 | T27.1-25 | suite-parity finds the tools of a packed kit in dist | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-26 | Install the Python package non-editable for the parity extractor (K788) | Makefile | `make python-package`, `make link-state-check` | [o] |
-| T27.1-27 | Declare the Python symbols by their import path (K788) | config/parity.json | `make parity-declarations-check` | [ ] |
+| T27.1-27 | Declare the Python symbols by their import path (K788) | config/parity.json | `make parity-declarations-check` | [~] |

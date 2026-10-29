@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: d265b8f9f1fbbe68ed474d831225337d42a0622332aa9161eacb41a4456a7208 -->
+<!-- source-sha256: 00009c32369102e456a6d962de87fe42854e33c9117d7f8476a204accc81a2a5 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -462,4 +462,4 @@
 | T27.1-24 | pre-commit hook test는 commit-gates-hook을 기대하지 않는다(K805) | tests/scripts/pre-commit-hook.test.mts | `node --test tests/scripts/pre-commit-hook.test.mts` | [o] |
 | T27.1-25 | suite-parity는 packed kit의 도구를 dist에서 찾는다 | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-26 | parity extractor를 위해 Python package를 non-editable로 설치한다(K788) | Makefile | `make python-package`, `make link-state-check` | [o] |
-| T27.1-27 | Python symbol을 import 경로로 선언한다(K788) | config/parity.json | `make parity-declarations-check` | [ ] |
+| T27.1-27 | Python symbol을 import 경로로 선언한다(K788) | config/parity.json | `make parity-declarations-check` | [~] |
