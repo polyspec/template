@@ -76,22 +76,6 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
 };
 const CONFIG = jsonDocument<ReleaseConfig>('release configuration', RELEASE_SCHEMA).read(path.join(ROOT, 'config/release.json'));
 
-// The build backend of the wheel, `pythonBackend` of config/toolchain.json (kit K166); the file holds more.
-interface Toolchain { pythonBackend: { requirement: string; sha256: string } }
-const TOOLCHAIN_SCHEMA: JSONSchemaType<Toolchain> = {
-  type: 'object',
-  properties: {
-    pythonBackend: {
-      type: 'object',
-      properties: { requirement: { type: 'string' }, sha256: { type: 'string' } },
-      required: ['requirement', 'sha256'],
-      additionalProperties: false,
-    },
-  },
-  required: ['pythonBackend'],
-};
-const BACKEND = jsonDocument<Toolchain>('toolchain configuration', TOOLCHAIN_SCHEMA).read(path.join(ROOT, 'config/toolchain.json')).pythonBackend;
-
 // The string `key` of the table `table` of a TOML manifest.
 const tomlValue = (file: string, table: string, key: string) => tomlString(tomlTable(readToml(path.join(ROOT, file))[table], `[${table}] of ${file}`)[key], `${table}.${key} of ${file}`);
 
@@ -107,14 +91,13 @@ test('the packages of the release are the names that their manifests declare', (
   }
 });
 
-test('the Python package is released as a wheel named by its pyproject.toml, with a pinned build backend and a smoke import', () => {
+test('the Python package is released as a wheel named by its pyproject.toml, with a smoke import', () => {
   const file = 'packages/python/pyproject.toml';
   const wheel = CONFIG.packages.find(item => item.kind === 'wheel');
   assert.deepEqual(wheel, { kind: 'wheel', directory: 'packages/python', name: tomlValue(file, 'project', 'name') }, `${file}: the wheel package names another project than [project] name`);
   assert.equal(CONFIG.manifests[file], 'archive', `${file}: the wheel is released as an archive, so its version is set by the tag`);
   assert.equal(CONFIG.proof.gitTag[file], undefined, `${file}: the wheel is not installed by git tag`);
   assert.deepEqual(CONFIG.consumers.wheel.smoke, { 'polyspec-template': ['python', '-c', 'import polyspec.template'] }, 'the smoke command imports the package by its import name');
-  assert.ok(read(file).includes(`requires = ["${BACKEND.requirement}"]`), `${file}: build-system.requires is not the pythonBackend ${BACKEND.requirement} of config/toolchain.json`);
 });
 
 test('the PHP command line is released separately from the runtime library', { timeout: 1000 }, () => {

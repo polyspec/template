@@ -1,13 +1,9 @@
 {
   "schema": 1,
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. pythonBackend is the build backend of the Python wheel, which make install-tools installs by the sha256 of its wheel. mise is the release that make install-tools TOOLS=npm installs with the sha256 of each platform; mise.toml declares the tools it installs (Go, Python with uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit and Composer) and mise.lock locks them for every platform of the bootstrap (T24.12). symbolExtractors and the Rust nightly of exceptions are the symbol extractors of the parity check (config/parity.json, T22.6-14).",
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. mise is the release that make install-tools TOOLS=npm installs with the sha256 of each platform; mise.toml declares the tools it installs (Go, Python with uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit and Composer) and mise.lock locks them for every platform of the bootstrap (T24.12). symbolExtractors and the Rust nightly of exceptions are the symbol extractors of the parity check (config/parity.json, T22.6-14).",
   "php": [
     "8.4"
   ],
-  "pythonBackend": {
-    "requirement": "setuptools==84.2.1",
-    "sha256": "ca140b45d5325a9478f880e351484f62fef15f336462e449ca0c03c873d589c2"
-  },
   "symbolExtractors": [
     "go",
     "php"

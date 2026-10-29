@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cb47f846ec841f6a5600efa56394d1614905c721fe96619829bdbc010010833d -->
+<!-- source-sha256: 312c10c63fc4663b95b3b1a7b9fec436ef82c3e7cbf16405006b50cac1d7e418 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- config/toolchain.json의 pythonBackend, config/release.json의 consumers.wheel.polyspec, config/dependency-policy.json, python-lock-check를 suite, CI matrix, owner에서 제거한다. wheel은 build-system.requires의 build backend로 build하며, docs/operations/dependencies.md가 @types/vscode 고정을 기록한다. (T27.1-14)
 - make hooks는 kit의 hook을 다시 쓰고, kit이 삭제하는 reference-transaction hook(K801)은 .githooks에서 빠진다. main은 make land와 hook이 통과한 commit으로 움직인다. (T27.1-16)
 - linked worktree는 main checkout의 wheelhouse를 읽는다. make python-package와 package install check는 wheel의 build requirement를 make install이 채우는 main checkout의 var/python/wheelhouse에서 가져온다. (T27.1-15-1)
 - 생성된 PHP program은 binding의 BindError를 던지는 TemplateError의 previous exception으로 넘기며, make generated-lint-check는 consumer의 lint처럼 생성된 PHP program에 kit의 PHPStan을 실행한다. (T27.1-15)

@@ -141,8 +141,7 @@
       },
       "lock": {
         "polyspec-template": "packages/python/pylock.toml"
-      },
-      "polyspec": {}
+      }
     }
   },
   "proof": {
