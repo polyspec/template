@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 0b0ce6cf0de5d06234fdb7a5cc0251a5f5dc760f289a5af0ebc10000701e7e7f -->
+<!-- source-sha256: a4d69379203f9a4cc8a38de5dad3fc441e652ee24ebfa8c333ebf6c73d56a93a -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -467,3 +467,4 @@
 | T27.1-29 | Kit 0.0.72를 채택한다 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-30 | P0: packages/php/composer.json과 packages/php-ext/composer.json에 각 archive의 zip URL과 sha1을 더해 만든 packages.json release asset을 게시하여, 소비자가 https://github.com/polyspec/template/releases/download/<tag>/packages.json의 composer repository에서 template package를 읽고 PIE가 그로부터 확장을 설치하게 한다(kit plan kit-harness, Decision 6) | config/release.json, the packages.json generator and its test, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/release-config.test.mts` | [ ] |
 | T27.1-31 | P0: T27.1-30의 packages.json asset을 담은 template 0.0.14를 릴리스한다: release commit, main CI, tag, release workflow | CHANGELOG.md CHANGELOG.ko.md, the manifests of config/release.json | `node --test tests/scripts/release-config.test.mts`; CI of main before the tags | [ ] |
+| T27.1-32 | P1: Kit 0.0.74를 채택한다(kit plan kit-harness, Order step 4): toolchain-check, cargo-downloads-check, link-state-check(link-check가 대신함)의 모든 참조를 지우고, ci-setup의 deps-<runtime> target을 정의하고, link 선언 파일을 쓰고 toolchain-files.test.mts의 --siblings 검사를 지우고, ci.yml이 다시 실행하는 kit-gates 선행 target을 지우고, check-editor-boundaries를 template의 script로 가진다 | Makefile, .github/workflows/ci.yml, scripts/, tests/scripts/, the link declaration file, package.json package-lock.json, kit copies, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts`, `make kit-check`, `make rules-check` | [ ] |
