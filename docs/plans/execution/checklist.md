@@ -454,4 +454,4 @@
 | T27.1-17-1 | The suite runs make hooks-check, the enforcement of the hook rule of AGENTS | Makefile, .github/workflows/ci.yml | `make rules-check` | [o] |
 | T27.1-18 | Remove commits-check and the pre-merge-commit hook that kit deletes (K805) | .githooks, config/commit-identity.json, Makefile, .github/workflows/ci.yml | `make hooks-check`, `make kit-check` | [o] |
 | T27.1-19 | Delete make check, release-test-matrix and release-check, which run the full-run guard that kit deleted (K240), and the passages that describe the guard | Makefile, scripts/check-clean-release.mts, tests/scripts/suite-parity.test.mts, docs/operations/development.md, docs/operations/testing.md, AGENTS.md | `node --test tests/scripts/suite-parity.test.mts`, `make rules-check`, `make docs-check` | [o] |
-| T27.1-20 | Remove make release-versions, which kit deletes (K812) | .github/workflows/release.yml, AGENTS.md, docs/operations/publication.md | `make rules-check`, `make kit-check` | [~] |
+| T27.1-20 | Remove make release-versions, which kit deletes (K812) | .github/workflows/release.yml, AGENTS.md, docs/operations/publication.md | `make rules-check`, `make kit-check` | [o] |

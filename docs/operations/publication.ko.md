@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 326d9b86ab6c4ce324b6ccb0a160d2ab93b84a3c9136574395576ef65054fc0f -->
+<!-- source-sha256: a922aaf01aaaae35888f0954aad8e8530b16ffc70f8c034f9eb43b2de04f30c6 -->
 # 발행
 
 [English](/operations/publication).
@@ -54,18 +54,16 @@ pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
 
 ```sh
 make release-verify
-make release-versions
 make release-assets
 make release-publish
 make release-undraft
 ```
 
 1. `make release-verify`는 tag된 commit이 `origin/main`의 조상이고(`git merge-base --is-ancestor`), 같은 commit에 Go module의 tag `packages/go/vX.Y.Z`가 있고, 그 commit의 최신 check run `ci-passed`(`gh api repos/<repository>/commits/<sha>/check-runs`)가 결론 `success`로 완료되었는지 확인한다. 없거나 실패한 check의 이름을 적으며 test를 다시 실행하지 않는다.
-2. `make release-versions`는 `config/release.json`의 `manifests`에 있는 버전 선언이 X.Y.Z이고 `CHANGELOG.md`와 `CHANGELOG.ko.md`에 section `## X.Y.Z`가 있는지 확인하며, 다른 파일마다 그 버전과 tag의 버전을 적는다. Composer manifest는 `version`을 생략하고 tag에서 버전을 얻을 수 있다. `packages/go/vX.Y.Z`에는 `packages/go/go.mod`의 module 경로와 section을 확인한다.
-3. `make release-assets`는 npm 패키지를 build하고 `var/release/assets`를 쓴다. 각 npm 패키지의 `npm pack`(`.tgz`), tag된 commit의 시각으로 만든 각 Composer 패키지 directory의 `git archive`(`.zip`)이다. Python 패키지의 wheel(`.whl`)도 만든다. `uv build --wheel`을 `build-system.requires`의 build backend로 실행하고, `SOURCE_DATE_EPOCH`는 commit의 시각이다. wheel의 METADATA는 패키지 이름과 tag의 버전을 담고 `name==version` Requires-Dist만 담아야 한다. 릴리스 asset은 npm tarball, Composer zip과 wheel이다. archive 이름은 `<package>-<language>-<version>.<ext>`이고 `@scope/`와 `vendor/`는 `scope-`와 `vendor-`로 쓰며 language는 `npm` 또는 `php`다. `polyspec-template-npm-X.Y.Z.tgz`는 `@polyspec/template`, `polyspec-template-language-npm-X.Y.Z.tgz`는 `@polyspec/template-language`, `polyspec-template-php-X.Y.Z.zip`은 `polyspec/template`, `polyspec-template-php-ext-php-X.Y.Z.zip`은 `polyspec/template-php-ext`이다. Go tag는 아무것도 만들거나 첨부하지 않는다. `release-assets`는 `/`가 없는 tag에서만 npm 패키지를 build한다. 각 archive는 패키지의 manifest를 바꾸지 않고 담는다. tree의 발행 manifest가 발행되는 패키지다. 이어서 step은 pack된 모든 manifest가 tag된 commit의 manifest와 같고, 이 저장소의 scope에 속한 각 의존성을 정확한 버전으로, 이 저장소의 패키지를 X.Y.Z로 적으며, `overrides`를 선언하지 않고, 각 `composer.json`이 `repositories`를 선언하지 않을 때만 통과한다(`manifestProblems`). 경로(`file:`, `link:`, `workspace:`), git source(`git`, `github:`, ssh), URL, range, 개발 버전은 저장소 안에서만 설치된다.
-4. `make release-publish`는 GitHub API로 draft를 만들고 archive를 upload한다. 이전 실행의 draft는 교체하지만 공개한 릴리스는 교체하지 않는다. notes는 `CHANGELOG.md`의 section `## X.Y.Z`가 GitHub release body의 한도인 125000자(`NOTES_LIMIT`) 이하이면 그 section이다. 더 긴 section은 한 줄 `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`로 바뀌며, anchor는 점을 뺀 버전이다.
+2. `make release-assets`는 npm 패키지를 build하고 `var/release/assets`를 쓴다. 각 npm 패키지의 `npm pack`(`.tgz`), tag된 commit의 시각으로 만든 각 Composer 패키지 directory의 `git archive`(`.zip`)이다. Python 패키지의 wheel(`.whl`)도 만든다. `uv build --wheel`을 `build-system.requires`의 build backend로 실행하고, `SOURCE_DATE_EPOCH`는 commit의 시각이다. wheel의 METADATA는 패키지 이름과 tag의 버전을 담고 `name==version` Requires-Dist만 담아야 한다. 릴리스 asset은 npm tarball, Composer zip과 wheel이다. archive 이름은 `<package>-<language>-<version>.<ext>`이고 `@scope/`와 `vendor/`는 `scope-`와 `vendor-`로 쓰며 language는 `npm` 또는 `php`다. `polyspec-template-npm-X.Y.Z.tgz`는 `@polyspec/template`, `polyspec-template-language-npm-X.Y.Z.tgz`는 `@polyspec/template-language`, `polyspec-template-php-X.Y.Z.zip`은 `polyspec/template`, `polyspec-template-php-ext-php-X.Y.Z.zip`은 `polyspec/template-php-ext`이다. Go tag는 아무것도 만들거나 첨부하지 않는다. `release-assets`는 `/`가 없는 tag에서만 npm 패키지를 build한다. 각 archive는 패키지의 manifest를 바꾸지 않고 담는다. tree의 발행 manifest가 발행되는 패키지다.
+3. `make release-publish`는 GitHub API로 draft를 만들고 archive를 upload한다. 이전 실행의 draft는 교체하지만 공개한 릴리스는 교체하지 않는다. notes는 `CHANGELOG.md`의 section `## X.Y.Z`가 GitHub release body의 한도인 125000자(`NOTES_LIMIT`) 이하이면 그 section이다. 더 긴 section은 한 줄 `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`로 바뀌며, anchor는 점을 뺀 버전이다.
 
-5. `make release-undraft`가 릴리스를 공개한다. 앞 step이 실패하면 draft 상태로 남는다.
+4. `make release-undraft`가 릴리스를 공개한다. 앞 step이 실패하면 draft 상태로 남는다.
 
 release workflow는 `make release-assets` 전에 `make release-tools`를 실행하며, 이것은 `mise.toml`의 Python을 설치한다. wheel은 그 Python으로 build하기 때문이다.
 

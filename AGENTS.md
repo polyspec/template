@@ -70,7 +70,7 @@ A check gives the same result for the same tree, at any time and on any machine.
 - Own: A release is a tag of a commit of `main` whose CI run succeeded: the job `ci-passed` of `.github/workflows/ci.yml` passes only when every other job of that run passed. Only the maintainer creates, moves or pushes a tag (T22.1-4).
   Enforced by: `make release-verify`
 - Own: The version-bump commit `chore(release): Release X.Y.Z (#task)` sets the version X.Y.Z in every manifest that `config/release.json` lists in `manifests` (the root `package.json`, the npm packages, the VS Code extension, the Rust crate and the Python package (`packages/python/pyproject.toml`), with `package-lock.json` and `packages/rust/Cargo.lock`; a `composer.json` has no `version` field and takes the version from the tag) and renames `## Unreleased` of `CHANGELOG.md` and `CHANGELOG.ko.md` to `## X.Y.Z`, with a new empty `## Unreleased` above it.
-  Enforced by: `make release-versions`
+  Enforced by: none, the version-bump commit is a judgement; the package managers resolve the versions.
 - Own: After the CI run of the push that brought the commit to `main` succeeded, the maintainer tags it `vX.Y.Z`, and `packages/go/vX.Y.Z` for the Go module, and pushes the tag. The tag push runs `.github/workflows/release.yml`, which requires the tagged commit on `main` with the check `ci-passed` passed, the version of the tag in every manifest and the section `## X.Y.Z` in `CHANGELOG.md`, builds the package archives named `<package>-<language>-<version>.<ext>` (`polyspec-template-npm-X.Y.Z.tgz`) and creates the GitHub Release (`docs/operations/publication.md`).
   Enforced by: `make release-verify`
 

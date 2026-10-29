@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: bcf5e7d06323ce4a569d202f46c3728c0cefbddc37b8d2ca069d92ccb9fa9fa7 -->
+<!-- source-sha256: 7d4376f272f80da9b02af4cfe91cab1e4e9c60f8b922f13373b83a91e1388542 -->
 # 개발
 
 ## 문서
@@ -71,7 +71,7 @@
 - Own: 릴리스는 CI 실행이 성공한 `main`의 commit에 붙인 tag이다. `.github/workflows/ci.yml`의 job `ci-passed`는 그 실행의 다른 모든 job이 통과했을 때만 통과한다. tag를 만들고 옮기고 push하는 것은 메인테이너뿐이다(T22.1-4).
   Enforced by: `make release-verify`
 - Own: 버전 올림 commit `chore(release): Release X.Y.Z (#task)`는 `config/release.json`의 `manifests`가 나열한 모든 manifest(루트 `package.json`, npm 패키지, VS Code 확장, Rust crate와 Python 패키지(`packages/python/pyproject.toml`), `package-lock.json`, `packages/rust/Cargo.lock`. `composer.json`에는 `version` field가 없고 버전을 tag에서 받는다)의 버전을 X.Y.Z로 정하고, `CHANGELOG.md`와 `CHANGELOG.ko.md`의 `## Unreleased`를 `## X.Y.Z`로 바꾸며 그 위에 비어 있는 새 `## Unreleased`를 둔다.
-  Enforced by: `make release-versions`
+  Enforced by: none, the version-bump commit is a judgement; the package managers resolve the versions.
 - Own: 그 commit을 `main`으로 가져온 push의 CI 실행이 성공한 뒤, 메인테이너는 그 commit에 `vX.Y.Z` tag를, Go module에는 `packages/go/vX.Y.Z` tag를 붙이고 tag를 push한다. tag push는 `.github/workflows/release.yml`을 실행한다. 이 workflow는 tag된 commit이 `main`에 있고 check `ci-passed`를 통과했는지, 모든 manifest에 tag의 버전이 있고 `CHANGELOG.md`에 section `## X.Y.Z`가 있는지 확인하고, `<package>-<language>-<version>.<ext>`(`polyspec-template-npm-X.Y.Z.tgz`)라는 이름의 패키지 archive를 만들어 GitHub Release를 생성한다(`docs/operations/publication.md`).
   Enforced by: `make release-verify`
 
