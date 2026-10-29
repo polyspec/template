@@ -21,11 +21,10 @@ A template consists of text and tags. A tag starts with `{` followed by one of t
 
 ```sh
 npm ci
-make check
 make showcase
 ```
 
-`make help` lists every target. `make check` runs the document, rule and contract checks, lint, the unit tests of every package, the formatter and editor tests, the cross-language conformance suite in AST and generated modes, and the browser, package install and example site checks.
+`make help` lists every target.
 
 ## Editor support
 

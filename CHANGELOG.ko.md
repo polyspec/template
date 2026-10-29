@@ -1,15 +1,16 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 07091421c5bcc54cf2bf732801c436d259fd6c116531bbfac3f9dbcc24e68928 -->
+<!-- source-sha256: 4caa48a01aedf86a1b3f6d2a12ad3a727c3fc5054ab30553232c2605fca87f98 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- kit이 삭제한 full-run guard(kit K240)를 시작하던 make check, make release-test-matrix, make release-check는 scripts/check-clean-release.mts와 함께 사라졌고, 문서는 더 이상 guard나 make rerun-failed를 설명하지 않는다. 전체 suite는 CI에서 make ci-targets로 실행되며, 설치된 kit에 없는 도구를 시작하는 recipe가 있으면 test가 실패한다. (T27.1-19)
 - config/rebuild.json은 scripts/tools-directory.mts를 ecosystem 도구 git rev-parse --git-common-dir로 선언하므로 make rebuild-check가 통과한다. (T27.1-15-2)
 - make hooks는 kit의 pre-commit hook을 다시 쓰고, kit이 삭제하는 pre-merge-commit hook, config/commit-identity.json, suite의 commits-check(K805)는 사라졌다. (T27.1-18)
 - suite는 AGENTS의 hook 규칙이 강제로 이름 붙인 make hooks-check를 CI의 문서 job에서 실행한다. (T27.1-17-1)
 - release는 consumer install이나 proof 없이 archive를 build하고 게시한다. config/release.json에는 consumers와 proof가 없고, tests/fixtures/release-consumer와 make release-consumer는 사라졌으며, consumer는 자기 package manager로 release를 확인한다(kit K798). push는 검사하지 않는다. .githooks/pre-push, config/checklist.json의 그 hook, suite의 push-gate-commit은 사라졌다(kit K804). (T27.1-17)
-
 - config/toolchain.json의 pythonBackend, config/release.json의 consumers.wheel.polyspec, config/dependency-policy.json, python-lock-check를 suite, CI matrix, owner에서 제거한다. wheel은 build-system.requires의 build backend로 build하며, docs/operations/dependencies.md가 @types/vscode 고정을 기록한다. (T27.1-14)
 - make hooks는 kit의 hook을 다시 쓰고, kit이 삭제하는 reference-transaction hook(K801)은 .githooks에서 빠진다. main은 make land와 hook이 통과한 commit으로 움직인다. (T27.1-16)
 - linked worktree는 main checkout의 wheelhouse를 읽는다. make python-package와 package install check는 wheel의 build requirement를 make install이 채우는 main checkout의 var/python/wheelhouse에서 가져온다. (T27.1-15-1)

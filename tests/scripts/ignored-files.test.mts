@@ -1,5 +1,5 @@
 // Tests `.gitignore` (T13.1-4): it ignores no tracked file, and it ignores every output that the builds, the test
-// runs, the full-run guard and the link write into the checkout.
+// runs and the link write into the checkout.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const git = (...args: string[]) => spawnSync('git', args, { cwd: ROOT, encoding: 'utf8' });
 
-// One path inside each output that a build, a test run, the guard or the link writes.
+// One path inside each output that a build, a test run or the link writes.
 const OUTPUTS = [
   'node_modules/tsup/package.json',
   'packages/ts/dist/index.mjs',
@@ -34,7 +34,6 @@ const OUTPUTS = [
   'docs/.vitepress/cache/deps/_metadata.json',
   '.vscode-test/vscode-darwin-arm64/code',
   '.vscode-test.lock',
-  'var/full-run.json',
 ];
 
 test('.gitignore ignores no tracked file', () => {
@@ -43,7 +42,7 @@ test('.gitignore ignores no tracked file', () => {
   assert.equal(ignored.stdout, '', `tracked files that .gitignore ignores:\n${ignored.stdout}`);
 });
 
-test('.gitignore ignores every output of the builds, the test runs and the guard', () => {
+test('.gitignore ignores every output of the builds and the test runs', () => {
   const result = git('check-ignore', '--no-index', '--verbose', '--non-matching', ...OUTPUTS);
   const notIgnored = result.stdout.split('\n').filter(line => line.startsWith('::')).map(line => line.split('\t')[1]);
   assert.deepEqual(notIgnored, [], `outputs that .gitignore does not ignore: ${notIgnored.join(' ')}`);

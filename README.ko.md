@@ -1,5 +1,5 @@
 <!-- doc-id: readme -->
-<!-- source-sha256: 54a20877c75cb5b99cf8aaa1d7d76b94b67003ff51a3e9698ee86bc0f467d2cc -->
+<!-- source-sha256: c64bb6cc676f31ed9d739cd48296b6f3cbb37e4fe2d748663250e1ea856a3356 -->
 # Template
 
 [English](README.md).
@@ -22,11 +22,10 @@ Template은 하나의 명세로 정의되는 템플릿 언어다. TypeScript, Go
 
 ```sh
 npm ci
-make check
 make showcase
 ```
 
-`make help`가 모든 타겟을 나열한다. `make check`는 문서·규칙·계약 검사, lint, 모든 패키지의 단위 테스트, 포매터와 에디터 테스트, AST와 generated 모드의 교차 언어 적합성 스위트, 브라우저·패키지 설치·예제 사이트 검사를 실행한다.
+`make help`가 모든 타겟을 나열한다.
 
 ## 에디터 지원
 

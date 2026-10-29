@@ -1,5 +1,5 @@
 // Tests that one run reports every failure (T19.8): make keeps going after a failed target (`MAKEFLAGS += -k` in the
-// Makefile, and `make -k` in scripts/kit/full-run.mjs, which tests/kit/full-run.test.mjs checks), every target of the full suite and of its prerequisites runs at
+// Makefile), every target of the full suite and of its prerequisites runs at
 // most one command, so that a failed command does not hide the commands after it, and the check scripts that check
 // each language run every language to its end and name every language that failed.
 import assert from 'node:assert/strict';

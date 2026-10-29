@@ -23,8 +23,8 @@ function normalizedRunner(line: string): string {
   return `${NODE} @polyspec/kit/run-tests${invocation[2] ?? ''}`;
 }
 
-// The commands that make prints for `target` without running them. A make started by another make, as `make check`
-// starts `make template-test-scripts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
+// The commands that make prints for `target` without running them. A make started by another make, as `make lint`
+// starts `make lint-ts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
 // print them, and --no-print-directory removes them, so the lines are the commands on every make.
 function commands(target: string) {
   const run = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });

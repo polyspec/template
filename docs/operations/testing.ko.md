@@ -1,16 +1,8 @@
 <!-- doc-id: docs-operations-testing -->
-<!-- source-sha256: 05c1d01afaaca55f7c3fcf01f6bed6a86c7011a5742a8dedd3c39a6eab5e62f0 -->
+<!-- source-sha256: 9cc76fb5dc413122f818ffe7a82cf1974658b6f2194e83f6fbffbe8a07efbff5 -->
 # 릴리스 테스트
 
 [English](/operations/testing).
-
-릴리스 gate는 다음 명령으로 실행한다.
-
-```sh
-make release-test-matrix
-```
-
-이 명령은 `make check`의 전체 suite를 같은 guard `node_modules/@polyspec/kit/dist/full-run.mjs`로 실행한다. `Makefile`의 `CHECK_TARGETS`에 있는 모든 target을 앞선 target의 실패와 상관없이 각각 `make <target>`으로 끝까지 실행하고, target마다 결과와 걸린 시간을 `var/full-run.json`에 기록한다. `CHECK_TARGETS`는 전체 suite의 유일한 목록이며 `make check`, `make release-test-matrix`, `make release-check`가 이를 실행하고, CI workflow의 job들은 그 target을 각각 정확히 한 job에서 `make ci-targets`로 실행하고 report를 올린다. guard는 tree마다 한 번 실행하므로, 어떤 tree에서 `make check`를 실행한 뒤에는 `make release-test-matrix`가 그 tree를 그 실행을 밝히며 거부한다. `make rerun-failed`는 통과하지 못한 target을 다시 실행한다. target들은 일곱 계층을 다룬다.
 
 | 계층 | 범위 | 실패 근거 |
 | --- | --- | --- |
@@ -33,5 +25,3 @@ Mutation test는 필수 근거다. Interface operation, artifact digest, output 
 Package 설치 검사는 package, 설치 프로젝트, Go module cache와 Cargo target을 시스템 임시 디렉터리의 새 디렉터리 하나에 만들고, 설치 프로젝트가 통과하든 실패하든 검사가 끝날 때 그 디렉터리를 제거한다. Go는 기본적으로 module cache 파일을 읽기 전용으로 만들어 재귀 제거가 그 파일을 제거하지 못하므로, Go는 `-modcacherw`로 module cache를 만든다. 제거가 실패하면 검사는 그 디렉터리의 경로와 함께 실패한다. `scripts/check-install-workspace.mts`가 설치 프로젝트보다 먼저 실행되어 두 조건을 증명한다. 설치 프로젝트는 network의 source를 읽지 않고 checkout의 toolchain을 쓴다. Go 설치 프로젝트는 `GOSUMDB=off`, `GOTOOLCHAIN=local`과 `packages/go/go.mod`의 go 지시문으로 실행의 proxy에서만 module을 해석한다. Rust 설치 프로젝트는 `rust-toolchain.toml`의 사본과 `packages/rust/Cargo.lock`에서 유도한 lock으로 `cargo run --locked`를 실행해 빌드한다. PHP 설치 프로젝트는 실행의 package 외에 어떤 저장소도 읽지 않는다(`tests/scripts/package-installs.test.mts`). 두 script는 `npm pack`, `go mod tidy`, `cargo run`, `composer install` 같은 각 명령을 시간 제한 없는 단계로 실행한다(`scripts/test-progress/step.mts`). 단계는 시작, 명령 출력, 경과 시간이 붙은 결과를 standard error에 출력하고 명령이 0이 아닌 status로 종료하면 실패한다.
 
 짧은 성능 실행은 안정적인 속도 점수가 아니라 정확성 회귀 검사다. 언어·모드마다 새 표본 세 개를 만들고 출력 식별값과 모든 metric field를 검사하며 커밋된 21표본 보고서는 바꾸지 않는다.
-
-발행 전에는 `make release-check`를 실행한다. 이 명령은 source worktree가 깨끗한지 확인하고 `HEAD`의 분리된 임시 worktree를 만든 다음 lock으로 고정한 JavaScript 의존성과 browser를 설치하고 그 안에서 전체 release matrix를 실행한다. 각 target은 lock으로 고정한 PHP 의존성 같은 자기 의존성을 준비한다. 임시 checkout은 성공하거나 실패해도 제거한다.

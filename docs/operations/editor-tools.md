@@ -199,7 +199,7 @@ The integration run never downloads VS Code; without an installed copy it fails 
 
 The CI job `editor` runs `make editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode` and runs `make template-test-vscode-integration` on a virtual X server with `xvfb-run`, because VS Code needs a display.
 
-`make check` runs `template-test-language`, `template-test-lsp`, `template-test-codemirror`, `format-check`, `template-test-vscode` and `template-test-vscode-integration`. `make format-external-check` runs the invariant test also on an explicit external template tree.
+`make format-external-check` runs the invariant test also on an explicit external template tree.
 
 ## Language service rules
 

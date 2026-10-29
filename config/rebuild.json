@@ -110,10 +110,6 @@
       "kind": "policy",
       "reason": "polyspec rule of the mode benchmark: a short run is a correctness regression, not a speed score"
     },
-    "scripts/check-clean-release.mts": {
-      "kind": "ecosystem",
-      "tool": "git status --porcelain lists the files that a build in a clean clone leaves untracked"
-    },
     "scripts/check-compiler-interface-mutations.mts": {
       "kind": "policy",
       "reason": "proves that the compiler interface check of this repository fails on each planted drift (a check that cannot fail proves nothing)"

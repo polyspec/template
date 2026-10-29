@@ -4,11 +4,12 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+- make check, make release-test-matrix and make release-check, which started the full-run guard that kit deleted (kit K240), are gone with scripts/check-clean-release.mts, and the documents no longer describe the guard or make rerun-failed; the full suite runs in CI with make ci-targets, and a test fails for a recipe that starts a tool that the installed kit does not have. (T27.1-19)
 - config/rebuild.json declares scripts/tools-directory.mts as an ecosystem tool, git rev-parse --git-common-dir, so make rebuild-check passes. (T27.1-15-2)
 - make hooks writes the pre-commit hook of kit again, and the pre-merge-commit hook, config/commit-identity.json and commits-check of the suite, which kit deletes (K805), are gone. (T27.1-18)
 - The suite runs make hooks-check, which the hook rule of AGENTS names as its enforcement, in the job of the documents of CI. (T27.1-17-1)
 - A release builds and publishes its archives without a consumer install or a proof: config/release.json has no consumers or proof, tests/fixtures/release-consumer and make release-consumer are gone, and a consumer checks a release with its own package manager (kit K798). A push is not checked: .githooks/pre-push, the hook of config/checklist.json and push-gate-commit of the suite are gone (kit K804). (T27.1-17)
-
 - Remove pythonBackend of config/toolchain.json, consumers.wheel.polyspec of config/release.json, config/dependency-policy.json and python-lock-check from the suite, the CI matrix and the owners; the wheel builds with the build backend of build-system.requires, and docs/operations/dependencies.md records the @types/vscode pin. (T27.1-14)
 - make hooks writes the hooks of kit again and the reference-transaction hook, which kit deletes (K801), leaves .githooks: main moves through make land and through a commit whose hooks passed. (T27.1-16)
 - A linked worktree reads the wheelhouse of its main checkout: make python-package and the package install check take the build requirement of the wheel from var/python/wheelhouse of the main checkout, which make install fills. (T27.1-15-1)

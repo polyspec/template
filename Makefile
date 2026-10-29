@@ -41,18 +41,18 @@ ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_
 # failed command; a prerequisite that fails keeps the targets that depend on it from running.
 MAKEFLAGS += -k
 
-# The shared targets of kit (kit-sync, kit-check, hooks, rerun-failed, docs-check, owner-check,
+# The shared targets of kit (kit-sync, kit-check, hooks, docs-check, owner-check,
 # ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, toolchain-check, layout-check,
 # cargo-downloads-check, lint-*) come from the installed @polyspec/kit package. Its bootstrap includes kit.mk
 # and selects source tools for native development links or compiled tools for a release package. Only config/*.json differ
 # between repositories.
 include node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk
 
-.PHONY: help check lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-build-ts template-build-go template-build-rust template-build-php template-test-php template-test-python template-rules-check template-test-scripts compiler-interface-generate compiler-interface-check \
+.PHONY: help lint build-ts build-go build-rust build-php test-ts test-go test-rust test-php template-build-ts template-build-go template-build-rust template-build-php template-test-php template-test-python template-rules-check template-test-scripts compiler-interface-generate compiler-interface-check \
 	conformance delimiter-matrix template-test-browser template-test-ext rules-check editor-boundary-check schema-check doc-coverage docs-check docs docs-verify-idempotent \
 	conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-all-modes generated-native-check \
 	contract-generate contract-check compiler-ir-check typed-generator typed-generator-check typed-generator-compile-check template-install-check showcase showcase-check showcase-compile \
-	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check release-test-matrix release-check docs-static-check clean \
+	bench benchmark-check benchmark-smoke template-function-inventory function-contract-check docs-static-check clean \
 	install template-install template-build-language template-test-language template-build-lsp template-test-lsp template-build-codemirror template-test-codemirror template-build-compiler template-test-compiler-types format-check format-external-check template-install-cli template-build-vscode template-test-vscode template-test-vscode-integration vscode-package vscode-install template-install-vscode template-install-browsers uninstall-cli \
 	conformance-cases function-inventory-check typecheck
 
@@ -92,8 +92,7 @@ PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  check                  The full suite through the full-run tool of @polyspec/kit: once per tree, when no checklist task is [~]"
-	@echo "  kit-sync|kit-check|hooks|hooks-check|rerun-failed|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
+	@echo "  kit-sync|kit-check|hooks|hooks-check|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
@@ -120,8 +119,6 @@ help: ## List targets
 	@echo "  showcase-check         Verify example artifacts, parity and static HTML structure"
 	@echo "  template-install-check         Install package artifacts and compare AST/generated output"
 	@echo "  bench                  Measure equal-output AST/generated production artifacts"
-	@echo "  release-test-matrix    The full suite of make check through the same guard"
-	@echo "  release-check          Install and test HEAD in an isolated clean worktree"
 	@echo "  template-build-language           Build the formatter library and the template-fmt CLI"
 	@echo "  template-test-language            Formatter, safety invariant and CLI tests, type check"
 	@echo "  template-build-lsp              Build the language server template-lsp"
@@ -141,17 +138,10 @@ help: ## List targets
 	@echo "  vscode-install         Install the .vsix into the local VS Code"
 	@echo "  clean                  Remove build outputs"
 
-# The targets of the full suite, the one list of every runner: `make check`, `make release-test-matrix` and `make
-# release-check` in a clean checkout run them through the guard of the full-run tool of @polyspec/kit, which refuses while a checklist
-# task is [~], while tracked changes are uncommitted or when var/full-run.json records a run of the current tree, runs
-# each target with `make <target>` to its end and records its result; `make rerun-failed` reruns the targets of the
-# current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
+# The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
 CHECK_TARGETS := hooks-check kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
-
-check: ## Full check through the guard: once per tree, when no checklist task is [~]
-	$(NODE) $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
 
 lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
 
@@ -604,11 +594,6 @@ function-contract-registries-check:
 function-contract-runtimes-check:
 	$(NODE) tests/runner/function-contract.mts
 
-release-test-matrix: ## The full suite of make check through the same guard: every target of CHECK_TARGETS to its end
-	$(NODE) $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
-
-release-check: ## Install and run the release matrix in an isolated clean worktree
-	$(NODE) scripts/check-clean-release.mts
 
 showcase-check: typed-generator-compile-check showcase-build-check contract-check showcase-site-check showcase-html-check ## Verify example-site parity, repeatability and browser output
 

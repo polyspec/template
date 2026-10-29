@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: e0c4a97aa86590a457630c209d7a1ad182a44273dc7292484da96265eaf3a1da -->
+<!-- source-sha256: bcf5e7d06323ce4a569d202f46c3728c0cefbddc37b8d2ca069d92ccb9fa9fa7 -->
 # 개발
 
 ## 문서
@@ -39,7 +39,7 @@
   Enforced by: `make template-test-scripts`
 - Refines P17: 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
   Enforced by: none, the sharing of runs is a judgement.
-- Own: 한 실행에 모든 실패: make는 계속 진행하고(`MAKEFLAGS += -k`), 전체 suite의 target은 명령 하나를 실행하며 다른 검사는 prerequisite로 적고, 여러 언어의 검사는 모든 언어를 실행하고 실패한 언어를 모두 밝힌다. `make check`와 `make ci-targets`는 target마다의 log와, 실패한 target마다 첫 실패 줄을 담은 summary를 `var/report`에 쓰고, 모든 CI job은 실패한 뒤에도 그 report를 upload한다.
+- Own: 한 실행에 모든 실패: make는 계속 진행하고(`MAKEFLAGS += -k`), 전체 suite의 target은 명령 하나를 실행하며 다른 검사는 prerequisite로 적고, 여러 언어의 검사는 모든 언어를 실행하고 실패한 언어를 모두 밝힌다. `make ci-targets`는 target마다의 log와, 실패한 target마다 첫 실패 줄을 담은 summary를 `var/report`에 쓰고, 모든 CI job은 실패한 뒤에도 그 report를 upload한다.
   Enforced by: `make ci-targets`
 - Own: Owner: 검사가 읽는 모든 경로는 `config/owner-checks.json`의 `inputs`에 선언되고, 그 검사를 선택하는 규칙을 가진다.
   Enforced by: `make owner-validate`
@@ -55,9 +55,9 @@
 
 ## 필수 검사
 
-- Refines P20: 개발에서는 unit test만 실행한다. 작업이 진행 중일 때는 변경을 소유한 Red와 Green unit test를 실행한다. 개발 중에도, commit이나 push 전에도 전체 검사나 end-to-end 검사를 로컬에서 실행하지 않는다. `make check`, `make rerun-failed`, `make owner-check`, conformance runner, browser test, VS Code integration test가 그렇다. CI가 `main`에 대한 모든 push와 모든 수동 실행에서 이것을 실행하며(`.github/workflows/ci.yml`), job마다의 report(`var/report`)가 모든 실패를 log와 함께 밝힌다. 새 경로는 같은 변경에서 `config/owner-checks.json`에 owner를 얻고, owner check는 CI에서 실행된다.
+- Refines P20: 개발에서는 unit test만 실행한다. 작업이 진행 중일 때는 변경을 소유한 Red와 Green unit test를 실행한다. 개발 중에도, commit이나 push 전에도 전체 검사나 end-to-end 검사를 로컬에서 실행하지 않는다. `make owner-check`, conformance runner, browser test, VS Code integration test가 그렇다. CI가 `main`에 대한 모든 push와 모든 수동 실행에서 이것을 실행하며(`.github/workflows/ci.yml`), job마다의 report(`var/report`)가 모든 실패를 log와 함께 밝힌다. 새 경로는 같은 변경에서 `config/owner-checks.json`에 owner를 얻고, owner check는 CI에서 실행된다.
   Enforced by: none, a local run is not observed by a tool.
-- Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`). `make check`는 같은 suite를 한 checkout에서 tree마다 한 번 실행하며, guard `node_modules/@polyspec/kit/dist/full-run.mjs`가 어떤 단계보다 먼저 이를 강제한다. 작업이 `[~]`이거나, 추적 파일의 변경이 커밋되지 않았거나, `var/full-run.json`이 현재 tree의 전체 실행을 기록하고 있으면 `make check`는 거부된다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행한다(`docs/operations/development.md`).
+- Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`).
   Enforced by: `make template-test-scripts`
 - Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 hook인 `.githooks`로 설정한다. `make hooks`는 hook을 설치하고 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
   Enforced by: `make hooks-check`

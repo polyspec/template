@@ -553,15 +553,6 @@
     },
     {
       "paths": [
-        "scripts/check-clean-release.mts"
-      ],
-      "tests": [
-        "tests/scripts/clean-release.test.mts"
-      ],
-      "targets": []
-    },
-    {
-      "paths": [
         "packages/compiler/backends/go/**"
       ],
       "targets": [

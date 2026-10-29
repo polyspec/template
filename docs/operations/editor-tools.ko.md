@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 029061952e64aa6656d741d3cf239747da19baad554fb65e7a5a11c94cc6aa17 -->
+<!-- source-sha256: 08c6be7b66f8711c112ad9abf3fea778d294fb96ae071433a66f5f9f5bb70bd2 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -200,7 +200,7 @@ integration 실행은 VS Code를 내려받지 않는다. 설치된 사본이 없
 
 CI job `editor`는 `make editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode`를 실행하고, VS Code가 화면을 요구하므로 `make template-test-vscode-integration`을 `xvfb-run`의 가상 X 서버에서 실행한다.
 
-`make check`가 `template-test-language`, `template-test-lsp`, `template-test-codemirror`, `format-check`, `template-test-vscode`, `template-test-vscode-integration`을 실행한다. `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
+`make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
 
 ## 언어 service 규칙
 

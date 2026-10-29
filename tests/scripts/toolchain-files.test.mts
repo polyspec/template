@@ -12,7 +12,7 @@
 // - make install downloads the crates of every Cargo.lock, which the checks resolve with cargo --offline (T20.1-1), and
 //   every other recipe runs cargo, go and npm offline (T20.1-2);
 // - PHP is one of the minor versions of config/toolchain.json: setup-php cannot pin a patch, so the minor is the pin and
-//   var/full-run.json records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
+//   the CI report records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
 //   no tools;
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
 // - the last job of ci.yml is ci-passed, the check of ci.yml that a release requires: it runs after every other
@@ -411,7 +411,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
   const SETUP = new Set(['install', 'install-tools', 'install-packages', 'template-install-vscode', 'template-install-browsers', 'kit-install-php-arginfo', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
-  const REPORTS: Record<string, string> = { check: 'var/report/full-run/', 'ci-targets': 'var/report/ci-targets/' };
+  const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
     const lines = runLines(job);
@@ -419,9 +419,9 @@ test('every CI job runs its targets past failures and uploads their report, also
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
       const [target] = makeTargets(line);
       if (target !== undefined && target in REPORTS) runners.add(target);
-      else if (target === undefined || !SETUP.has(target)) problems.push(`${job.name}: \`${line}\` runs a check without make check or make ci-targets, so it stops at a failure and leaves no report`);
+      else if (target === undefined || !SETUP.has(target)) problems.push(`${job.name}: \`${line}\` runs a check without make ci-targets, so it stops at a failure and leaves no report`);
     }
-    if (runners.size === 0) problems.push(`${job.name}: no step runs make check or make ci-targets`);
+    if (runners.size === 0) problems.push(`${job.name}: no step runs make ci-targets`);
     for (const runner of runners) {
       const report = REPORTS[runner];
       if (report === undefined) throw new Error(`no report directory of make ${runner}`);
