@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6c3d08a4ca522e75a3618de870eb1541ef40e3d1ef48be34bd63d3c23c5a445b -->
+<!-- source-sha256: 187dbf7760f5e3c02e3ba61d82e25009024c3b2118466b139b6254f6f66b26ec -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.13
 - 고정한 release는 Kit 0.0.72다. CI는 아무것도 link하지 않으므로(kit K824) gates workflow는 make link를 실행하지 않고, link-state-check는 CI suite에서 빠진다. 이 검사는 개발 checkout의 link를 검사한다. (T27.1-29)
 - toolchain-files는 make install처럼 make hooks를 CI job의 setup 단계로 센다. hooks-check 전에 make hooks를 실행하는 docs job을 make ci-targets 밖의 검사로 보고 실패시켰다. (T27.1-28)
 - config/parity.json은 각 Python symbol을 import 경로 polyspec.template.<module>.<name>으로 선언한다. kit K788부터 kit의 python extractor가 이 경로를 읽는다. Python symbol을 지정하는 test도 이 경로를 쓴다. (T27.1-27)
@@ -15,7 +17,6 @@
 - 고정한 release는 Kit 0.0.70이다. 그 gates workflow는 commit 범위를 넘기지 않고, AGENTS는 make docs-check가 각 문서를 따로 읽으며 두 짝을 비교하지 않는다고 적는다(kit K809). (T27.1-22)
 - AGENTS와 test 주석은 kit이 삭제한 make kit-check의 kit 복사본 비교(kit K799)를 더 이상 서술하지 않는다. make kit-sync가 설치 package에서 복사본을 갱신한다. (T27.1-21)
 - kit-sync가 쓰는 release workflow에는 make release-versions step이 없고, 문서는 kit이 삭제하는 release의 버전과 manifest 검사(kit K812)를 더 이상 설명하지 않는다. package manager가 버전을 해석한다. (T27.1-20)
-
 - kit이 삭제한 full-run guard(kit K240)를 시작하던 make check, make release-test-matrix, make release-check는 scripts/check-clean-release.mts와 함께 사라졌고, 문서는 더 이상 guard나 make rerun-failed를 설명하지 않는다. 전체 suite는 CI에서 make ci-targets로 실행되며, 설치된 kit에 없는 도구를 시작하는 recipe가 있으면 test가 실패한다. (T27.1-19)
 - config/rebuild.json은 scripts/tools-directory.mts를 ecosystem 도구 git rev-parse --git-common-dir로 선언하므로 make rebuild-check가 통과한다. (T27.1-15-2)
 - make hooks는 kit의 pre-commit hook을 다시 쓰고, kit이 삭제하는 pre-merge-commit hook, config/commit-identity.json, suite의 commits-check(K805)는 사라졌다. (T27.1-18)
@@ -25,8 +26,6 @@
 - make hooks는 kit의 hook을 다시 쓰고, kit이 삭제하는 reference-transaction hook(K801)은 .githooks에서 빠진다. main은 make land와 hook이 통과한 commit으로 움직인다. (T27.1-16)
 - linked worktree는 main checkout의 wheelhouse를 읽는다. make python-package와 package install check는 wheel의 build requirement를 make install이 채우는 main checkout의 var/python/wheelhouse에서 가져온다. (T27.1-15-1)
 - 생성된 PHP program은 binding의 BindError를 던지는 TemplateError의 previous exception으로 넘기며, make generated-lint-check는 consumer의 lint처럼 생성된 PHP program에 kit의 PHPStan을 실행한다. (T27.1-15)
-
-## 0.0.13
 - dependency-audit, dependency review workflow와 기록, CLI lock review target과 그 owner, test, 규칙을 제거한다. suite는 python-lock-check를 직접 실행하고 공통 gate는 Python만 선언한다 (T27.1-13).
 - linked worktree는 main checkout의 도구를 실행한다. Makefile은 kit.mk의 KIT_TOOLS를, scripts/의 toolchain module과 unit test는 scripts/tools-directory.mts로 main checkout의 var/tools를 가리키며, 설치 test는 worktree에서 도구를 설치하지 않음을 검증한다 (T27.1-13-1).
 - gates matrix의 모든 런타임에 닿는 rules check와, 설치된 Python polyspec 패키지 폴더를 checkout에 대한 링크 하나로 만드는 make link를 갖춘 공개 Kit 0.0.65를 무결성으로 잠가 적용하고 그 사본을 동기화한다(T27.1-12).

@@ -4,6 +4,8 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.13
 - Kit 0.0.72 is the pinned release: CI links nothing (kit K824), so the gates workflow runs no make link and link-state-check leaves the CI suite; it checks the links of a development checkout. (T27.1-29)
 - toolchain-files counts make hooks as a setup step of a CI job, as make install is: it failed the docs job, which runs make hooks before hooks-check, as a check outside make ci-targets. (T27.1-28)
 - config/parity.json declares each Python symbol by its import path, polyspec.template.<module>.<name>, which the python extractor of kit reads since kit K788; the tests that name Python symbols use that path. (T27.1-27)
@@ -14,7 +16,6 @@
 - Kit 0.0.70 is the pinned release: its gates workflow passes no commit range, and AGENTS states that make docs-check reads each document on its own, with no comparison of the twins (kit K809). (T27.1-22)
 - AGENTS and a test comment no longer state that make kit-check compares the copies of kit, which kit deleted (kit K799); make kit-sync refreshes the copies from the installed package. (T27.1-21)
 - The release workflow, which kit-sync writes, has no make release-versions step, and the documents no longer describe the version and manifest checks of a release that kit deletes (kit K812); the package managers resolve the versions. (T27.1-20)
-
 - make check, make release-test-matrix and make release-check, which started the full-run guard that kit deleted (kit K240), are gone with scripts/check-clean-release.mts, and the documents no longer describe the guard or make rerun-failed; the full suite runs in CI with make ci-targets, and a test fails for a recipe that starts a tool that the installed kit does not have. (T27.1-19)
 - config/rebuild.json declares scripts/tools-directory.mts as an ecosystem tool, git rev-parse --git-common-dir, so make rebuild-check passes. (T27.1-15-2)
 - make hooks writes the pre-commit hook of kit again, and the pre-merge-commit hook, config/commit-identity.json and commits-check of the suite, which kit deletes (K805), are gone. (T27.1-18)
@@ -24,8 +25,6 @@
 - make hooks writes the hooks of kit again and the reference-transaction hook, which kit deletes (K801), leaves .githooks: main moves through make land and through a commit whose hooks passed. (T27.1-16)
 - A linked worktree reads the wheelhouse of its main checkout: make python-package and the package install check take the build requirement of the wheel from var/python/wheelhouse of the main checkout, which make install fills. (T27.1-15-1)
 - The generated PHP program passes the BindError of its bindings as the previous exception of the TemplateError it throws, and make generated-lint-check runs the PHPStan of kit on the generated PHP programs as the lint of a consumer does. (T27.1-15)
-
-## 0.0.13
 - A linked worktree runs the tools of its main checkout: the Makefile names KIT_TOOLS of kit.mk, and the toolchain modules of scripts/ and the unit tests name the var/tools of the main checkout through scripts/tools-directory.mts; the install tests assert in a worktree that it installs no tool (T27.1-13-1).
 - Remove dependency-audit, the dependency review workflow and record, the CLI lock review target and their owners, tests and rules; the suite runs python-lock-check directly and the shared gate declares Python only (T27.1-13).
 - Adopt the published integrity-locked Kit 0.0.65, whose rules check reaches every runtime of the gates matrix and whose make link makes each installed Python polyspec package folder one link to its checkout, and synchronize its copies (T27.1-12).
