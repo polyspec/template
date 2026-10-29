@@ -18,7 +18,7 @@
 // - the last job of ci.yml is ci-passed, the check of ci.yml that a release requires: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
-// - release.yml is the release workflow that kit copies (T24.1); kit tests it and make kit-check compares the copy.
+// - release.yml is the release workflow that kit copies (T24.1); kit tests it and make kit-sync refreshes the copy.
 // make itself is not pinned: the recipes use no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1
 // print the same commands for every target (T17.1-4).
 import assert from 'node:assert/strict';

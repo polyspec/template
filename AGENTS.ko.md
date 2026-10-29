@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 7d4376f272f80da9b02af4cfe91cab1e4e9c60f8b922f13373b83a91e1388542 -->
+<!-- source-sha256: 473fbd9cb285344cf6ed6918970d5a26cc96f9a592fbca97c43d5e3bb25404c3 -->
 # 개발
 
 ## 문서
@@ -16,7 +16,7 @@
 - Own: `@polyspec/kit` 변경이 필요하면 `polyspec/kit` GitHub 이슈로 요청한다. 공급자 저장소나 설치 패키지 소스를 수정하거나 소비자 전용 대체 검사로 검증을 우회하지 않는다. 공개된 릴리즈를 적용하고 `make kit-sync`로 공급자가 소유한 복사본을 갱신한다.
   Enforced by: none, provider ownership is a review judgement.
 
-- Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치한 package의 `node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk`를 include한다. bootstrap은 그 package의 `kit.mk`를 include하고 native 개발 link에서는 source 도구를, release 설치에서는 컴파일한 도구를 선택하며, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `PRINCIPLES.md`, 그 짝, `.editorconfig`, `.claude/settings.json`은 `make kit-sync`가 쓰는 일반 파일 복사본이다. `make kit-check`는 복사본을 package와, `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
+- Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치한 package의 `node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk`를 include한다. bootstrap은 그 package의 `kit.mk`를 include하고 native 개발 link에서는 source 도구를, release 설치에서는 컴파일한 도구를 선택하며, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `PRINCIPLES.md`, 그 짝, `.editorconfig`, `.claude/settings.json`은 `make kit-sync`가 쓰는 일반 파일 복사본이다. `make kit-sync`가 설치 package에서 복사본을 갱신하고, `make kit-check`는 `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
   Enforced by: `make kit-check`
 - Own: polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며, link는 `node_modules/`에 있는 생성 경로라 commit하지 않는다. `make link-check`는 개발 보조로 그 link를 나열한다.
   Enforced by: `make staged-generated-hook`

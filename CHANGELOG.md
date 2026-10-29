@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- AGENTS and a test comment no longer state that make kit-check compares the copies of kit, which kit deleted (kit K799); make kit-sync refreshes the copies from the installed package. (T27.1-21)
 - The release workflow, which kit-sync writes, has no make release-versions step, and the documents no longer describe the version and manifest checks of a release that kit deletes (kit K812); the package managers resolve the versions. (T27.1-20)
 
 - make check, make release-test-matrix and make release-check, which started the full-run guard that kit deleted (kit K240), are gone with scripts/check-clean-release.mts, and the documents no longer describe the guard or make rerun-failed; the full suite runs in CI with make ci-targets, and a test fails for a recipe that starts a tool that the installed kit does not have. (T27.1-19)

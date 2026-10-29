@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: b8d347b8140ba0666e1f8e4cd144cf0f6b23fbf36e3a73c046c37538981dba66 -->
+<!-- source-sha256: b2551a1605969392c924a5a1301086ad5d8596ae293146dc92267fd13c6f4b6c -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -456,4 +456,4 @@
 | T27.1-18 | kit이 삭제하는 commits-check와 pre-merge-commit hook을 제거한다(K805) | .githooks, config/commit-identity.json, Makefile, .github/workflows/ci.yml | `make hooks-check`, `make kit-check` | [o] |
 | T27.1-19 | kit이 삭제한 full-run guard(K240)를 실행하는 make check, release-test-matrix, release-check와 guard를 설명하는 문단을 삭제한다 | Makefile, scripts/check-clean-release.mts, tests/scripts/suite-parity.test.mts, docs/operations/development.md, docs/operations/testing.md, AGENTS.md | `node --test tests/scripts/suite-parity.test.mts`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-20 | kit이 삭제하는 make release-versions를 제거한다(K812) | .github/workflows/release.yml, AGENTS.md, docs/operations/publication.md | `make rules-check`, `make kit-check` | [o] |
-| T27.1-21 | kit 복사본은 make kit-sync가 갱신한다고 명시한다(K799) | AGENTS.md, tests/scripts/toolchain-files.test.mts | `make rules-check`, `make docs-check` | [~] |
+| T27.1-21 | kit 복사본은 make kit-sync가 갱신한다고 명시한다(K799) | AGENTS.md, tests/scripts/toolchain-files.test.mts | `make rules-check`, `make docs-check` | [o] |

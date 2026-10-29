@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4001da2b8a879736abaca94bfb75deb9a411a43a31f17b2e3d1d9f1b6f8eb822 -->
+<!-- source-sha256: c9eab2d91e4ee8b4c7f63e203d5ae04326240a7a96ed9bcce4819c57956076b1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- AGENTS와 test 주석은 kit이 삭제한 make kit-check의 kit 복사본 비교(kit K799)를 더 이상 서술하지 않는다. make kit-sync가 설치 package에서 복사본을 갱신한다. (T27.1-21)
 - kit-sync가 쓰는 release workflow에는 make release-versions step이 없고, 문서는 kit이 삭제하는 release의 버전과 manifest 검사(kit K812)를 더 이상 설명하지 않는다. package manager가 버전을 해석한다. (T27.1-20)
 
 - kit이 삭제한 full-run guard(kit K240)를 시작하던 make check, make release-test-matrix, make release-check는 scripts/check-clean-release.mts와 함께 사라졌고, 문서는 더 이상 guard나 make rerun-failed를 설명하지 않는다. 전체 suite는 CI에서 make ci-targets로 실행되며, 설치된 kit에 없는 도구를 시작하는 recipe가 있으면 test가 실패한다. (T27.1-19)
