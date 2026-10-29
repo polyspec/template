@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c9eab2d91e4ee8b4c7f63e203d5ae04326240a7a96ed9bcce4819c57956076b1 -->
+<!-- source-sha256: 8d6960c2bfec0fd4e2f41fb369de35961fb51eed13a21eb468570cb25fd656d7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 고정한 release는 Kit 0.0.70이다. 그 gates workflow는 commit 범위를 넘기지 않고, AGENTS는 make docs-check가 각 문서를 따로 읽으며 두 짝을 비교하지 않는다고 적는다(kit K809). (T27.1-22)
 - AGENTS와 test 주석은 kit이 삭제한 make kit-check의 kit 복사본 비교(kit K799)를 더 이상 서술하지 않는다. make kit-sync가 설치 package에서 복사본을 갱신한다. (T27.1-21)
 - kit-sync가 쓰는 release workflow에는 make release-versions step이 없고, 문서는 kit이 삭제하는 release의 버전과 manifest 검사(kit K812)를 더 이상 설명하지 않는다. package manager가 버전을 해석한다. (T27.1-20)
 

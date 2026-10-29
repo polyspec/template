@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Kit 0.0.70 is the pinned release: its gates workflow passes no commit range, and AGENTS states that make docs-check reads each document on its own, with no comparison of the twins (kit K809). (T27.1-22)
 - AGENTS and a test comment no longer state that make kit-check compares the copies of kit, which kit deleted (kit K799); make kit-sync refreshes the copies from the installed package. (T27.1-21)
 - The release workflow, which kit-sync writes, has no make release-versions step, and the documents no longer describe the version and manifest checks of a release that kit deletes (kit K812); the package managers resolve the versions. (T27.1-20)
 

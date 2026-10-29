@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: 473fbd9cb285344cf6ed6918970d5a26cc96f9a592fbca97c43d5e3bb25404c3 -->
+<!-- source-sha256: e6aada769fa054dd3eb0380d7af14987c61a687d8ae7c37f3eaea2b350d9c77a -->
 # 개발
 
 ## 문서
@@ -8,7 +8,7 @@
   Enforced by: none, which document is authoritative is a judgement.
 - Own: 테스트 결과와 배포를 따로 기록한다. 이전 코드의 결과를 변경된 코드의 근거로 사용하지 않는다.
   Enforced by: none, the separation of results is a judgement.
-- Own: `make docs-check`는 기본 검사에 포함된다. 링크, 번역 쌍, 동일한 코드 블록, 상태 필드를 검사한다(`config/documents.json`). 모든 쌍은 같은 `<!-- doc-id: <id> -->`를 한 번 가지고, 한글 파일은 `<!-- source-sha256: 5bcb76b3e5de1481d0c9a5eeb7541f649b94c4933c8d495b72a26b44095d6c4c -->`를 가지며, 이 값은 번역을 검토한 뒤에 갱신한다. 내용의 정확성은 코드와 테스트를 읽어 확인한다.
+- Own: `make docs-check`는 기본 검사에 포함된다. 각 문서를 따로 읽어 링크, anchor, fence, checklist, 상태 필드를 검사한다(`config/documents.json`). 영어 파일과 한글 짝은 같은 `doc-id` 표지를 가지고, 한글 파일은 영어 파일의 sha256인 `source-sha256` 표지를 가지며, `make documents-stamp`가 번역을 검토한 뒤에 그 값을 쓴다. 두 짝을 비교하는 검사는 없다(kit K809). 내용의 정확성은 코드와 테스트를 읽어 확인한다.
   Enforced by: `make docs-check`
 
 ## 구현

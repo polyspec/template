@@ -7,7 +7,7 @@
   Enforced by: none, which document is authoritative is a judgement.
 - Own: Record test results and deployment separately. Do not use results from earlier code as evidence for changed code.
   Enforced by: none, the separation of results is a judgement.
-- Own: `make docs-check` is part of the default checks. It verifies links, translation pairs, identical code blocks and status fields (`config/documents.json`). Every pair holds the same `<!-- doc-id: <id> -->` once, and the Korean file holds `<!-- source-sha256: <sha256 of the English file> -->`, which is updated after the translation is reviewed. Content accuracy is verified by reading the code and the tests.
+- Own: `make docs-check` is part of the default checks. It reads each document on its own and verifies its links, anchors, fences, the checklist and the status fields (`config/documents.json`). The English file and its Korean twin hold the same `doc-id` marker, and the Korean file holds the `source-sha256` marker, the sha256 of the English file, which `make documents-stamp` writes after the translation is reviewed; no check compares the twins (kit K809). Content accuracy is verified by reading the code and the tests.
   Enforced by: `make docs-check`
 
 ## Implementation
