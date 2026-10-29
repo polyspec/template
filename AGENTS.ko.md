@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: bc99c397b2c1a6f60418350eb04a1dacc9fa9f0f078f0802b2ec6625b5b5c5ad -->
+<!-- source-sha256: e0c4a97aa86590a457630c209d7a1ad182a44273dc7292484da96265eaf3a1da -->
 # 개발
 
 ## 문서
@@ -35,7 +35,7 @@
 
 - Refines S4: Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `mise.toml`(mise가 `var/tools`에 설치하고 `$(NODE)`로 실행, kit K171), npm은 `package.json`의 `packageManager`, Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `packages/go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 kit의 `make build-php-ext`가 실패한다). `make install-tools`(`$(KIT)/install-tools.$(KIT_EXT)`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mts`가 모든 변경에서 version을 검사한다.
   Enforced by: `make toolchain-check`
-- Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로, `make release-consumer`가 `tests/fixtures/release-consumer`의 commit된 lock으로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`, `release-consumer-lock`의 download와 `make release-consumer`의 설치를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). cargo를 실행하는 모든 target은 `cargo-downloads-check`에 의존하며, 이것은 없는 crate에 대해 `make install`을 밝히므로 어떤 검사도 offline mode를 벗어나라는 cargo의 안내를 보이지 않는다.
+- Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`의 download를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). cargo를 실행하는 모든 target은 `cargo-downloads-check`에 의존하며, 이것은 없는 crate에 대해 `make install`을 밝히므로 어떤 검사도 offline mode를 벗어나라는 cargo의 안내를 보이지 않는다.
   Enforced by: `make template-test-scripts`
 - Refines P17: 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
   Enforced by: none, the sharing of runs is a judgement.
@@ -59,8 +59,8 @@
   Enforced by: none, a local run is not observed by a tool.
 - Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`). `make check`는 같은 suite를 한 checkout에서 tree마다 한 번 실행하며, guard `node_modules/@polyspec/kit/dist/full-run.mjs`가 어떤 단계보다 먼저 이를 강제한다. 작업이 `[~]`이거나, 추적 파일의 변경이 커밋되지 않았거나, `var/full-run.json`이 현재 tree의 전체 실행을 기록하고 있으면 `make check`는 거부된다. `make rerun-failed`는 현재 tree에서 통과하지 못한 target만 다시 실행한다(`docs/operations/development.md`).
   Enforced by: `make template-test-scripts`
-- Own: push는 push되는 commit에도 working tree에도 `[~]` 작업이 없을 때만 한다. pre-push hook `.githooks/pre-push`는 `make push-gate-hook`으로 push gate를 실행하고, 이 gate는 그런 push를 거부하며 각 작업을 밝힌다. 모든 make 실행은 `core.hooksPath`를 `.githooks`로 설정한다. `make hooks`는 hook을 설치하고 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패하고, guard는 hook이 없으면 `make check`를 거부한다. target `push-gate-commit`은 `.github/workflows/ci.yml`의 job `docs`에서 push된 commit에 같은 gate를 실행한다(`docs/operations/development.md`).
-  Enforced by: `make push-gate-hook`
+- Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 hook인 `.githooks`로 설정한다. `make hooks`는 hook을 설치하고 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
+  Enforced by: `make hooks-check`
 - Own: 모든 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 실행 전체, package, 파일에 시간 제한을 두지 않는다. 수십 분 걸리는 test와 시작과 끝만 출력하는 test는 결함이다.
   Enforced by: none, the output of a test is a judgement.
 - Own: build, `tsc` type check, 설치, download, program 설치나 실행, 실행 전체 같은 오래 걸리는 작업은 단계마다 log 줄을 출력하고 timeout을 두지 않으며, 출력이 없는 시간의 deadline도 두지 않는다. 성공과 실패는 exit status, 결과, 오류로 판단한다. 시간 제한은 예상보다 느린 정상 실행을 실패시키기 때문이다. test case는 짧은 검증 단위이므로 자기 timeout을 유지한다.

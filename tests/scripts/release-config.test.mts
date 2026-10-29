@@ -1,7 +1,7 @@
-// Tests that config/release.json (scripts/kit/release.mjs, release-proof.mjs) names the packages that a tag releases as the
-// manifests of the tree declare them (T22.4-22): the npm and Composer archives by their package names, the Python package as
-// its wheel, and the Rust crate, which no registry holds, by git tag with the install that `make release-proof` runs from the
-// tag. The test reads the configuration and the manifests and installs nothing.
+// Tests that config/release.json (scripts/kit/release.mjs) names the packages that a tag releases as the manifests of the
+// tree declare them (T22.4-22): the npm and Composer archives by their package names, the Python package as its wheel, and
+// the Rust crate, which no registry holds, by git tag. The test reads the configuration and the manifests and installs
+// nothing.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -12,7 +12,6 @@ import type { JSONSchemaType } from 'ajv';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { readToml, tomlArray, tomlString, tomlTable } from '../../scripts/toml.mts';
 import { parsedJsonObject } from '../runner/checked.mts';
-import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -21,8 +20,6 @@ const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 interface ReleaseConfig {
   packages: { kind: string; directory: string; name: string }[];
   manifests: Record<string, string>;
-  consumers: { wheel: { smoke: Record<string, string[]> }; composer: { smoke: Record<string, string[]> } };
-  proof: { gitTag: Record<string, { kind: string; name: string }> };
   goModules: Record<string, string>;
 }
 const STRINGS: JSONSchemaType<Record<string, string>> = { type: 'object', required: [], additionalProperties: { type: 'string' } };
@@ -39,40 +36,9 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
       },
     },
     manifests: STRINGS,
-    consumers: {
-      type: 'object',
-      properties: {
-        composer: {
-          type: 'object',
-          properties: { smoke: { type: 'object', required: [], additionalProperties: { type: 'array', items: { type: 'string' } } } },
-          required: ['smoke'],
-        },
-        wheel: {
-          type: 'object',
-          properties: { smoke: { type: 'object', required: [], additionalProperties: { type: 'array', items: { type: 'string' } } } },
-          required: ['smoke'],
-        },
-      },
-      required: ['wheel', 'composer'],
-    },
-    proof: {
-      type: 'object',
-      properties: {
-        gitTag: {
-          type: 'object',
-          required: [],
-          additionalProperties: {
-            type: 'object',
-            properties: { kind: { type: 'string' }, name: { type: 'string' } },
-            required: ['kind', 'name'],
-          },
-        },
-      },
-      required: ['gitTag'],
-    },
     goModules: STRINGS,
   },
-  required: ['packages', 'manifests', 'consumers', 'proof', 'goModules'],
+  required: ['packages', 'manifests', 'goModules'],
 };
 const CONFIG = jsonDocument<ReleaseConfig>('release configuration', RELEASE_SCHEMA).read(path.join(ROOT, 'config/release.json'));
 
@@ -91,13 +57,11 @@ test('the packages of the release are the names that their manifests declare', (
   }
 });
 
-test('the Python package is released as a wheel named by its pyproject.toml, with a smoke import', () => {
+test('the Python package is released as a wheel named by its pyproject.toml', () => {
   const file = 'packages/python/pyproject.toml';
   const wheel = CONFIG.packages.find(item => item.kind === 'wheel');
   assert.deepEqual(wheel, { kind: 'wheel', directory: 'packages/python', name: tomlValue(file, 'project', 'name') }, `${file}: the wheel package names another project than [project] name`);
   assert.equal(CONFIG.manifests[file], 'archive', `${file}: the wheel is released as an archive, so its version is set by the tag`);
-  assert.equal(CONFIG.proof.gitTag[file], undefined, `${file}: the wheel is not installed by git tag`);
-  assert.deepEqual(CONFIG.consumers.wheel.smoke, { 'polyspec-template': ['python', '-c', 'import polyspec.template'] }, 'the smoke command imports the package by its import name');
 });
 
 test('the PHP command line is released separately from the runtime library', { timeout: 1000 }, () => {
@@ -110,24 +74,9 @@ test('the PHP command line is released separately from the runtime library', { t
   assert.equal(manifest.repositories, undefined, 'the CLI installs from released dependencies');
 });
 
-test('the Composer smoke commands contain valid PHP source', { timeout: 5000 }, () => {
-  for (const [name, command] of Object.entries(CONFIG.consumers.composer.smoke)) {
-    assert.equal(command[0], 'php', name);
-    assert.equal(command[1], '-r', name);
-    const code = command[2];
-    assert.ok(code !== undefined, `${name}: PHP source is missing`);
-    const result = spawnSync(path.join(toolsDirectory(ROOT), 'bin/php'), ['-l'], { input: `<?php\n${code}`, encoding: 'utf8' });
-    assert.equal(result.status, 0, `${name}: ${result.stdout}${result.stderr}`);
-  }
-});
-
-test('the Rust crate is released by git tag with the name of its Cargo.toml', () => {
+test('the Rust crate is released by git tag', () => {
   const file = 'packages/rust/Cargo.toml';
   assert.equal(CONFIG.manifests[file], 'git-tag', `${file}: the supported release installation uses its git tag`);
-  const proof = CONFIG.proof.gitTag[file];
-  assert.ok(proof, `${file}: config/release.json has no proof.gitTag entry`);
-  assert.equal(proof.kind, 'rust');
-  assert.equal(proof.name, tomlValue(file, 'package', 'name'), `${file}: proof.gitTag names another package than [package] name`);
 });
 
 test('the Go module is released by its directory tag with the module path of its go.mod', () => {

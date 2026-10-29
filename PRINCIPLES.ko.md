@@ -1,5 +1,5 @@
 <!-- doc-id: principles -->
-<!-- source-sha256: acbffb28c08f54c80fedda4ec226df9a59d4347fdef1bafeebec660cd065c8b2 -->
+<!-- source-sha256: dd284a3f304b9e20f1c8c325b149db6491ba16195051d7d4638a1f2238421c75 -->
 # 원칙
 
 [English](PRINCIPLES.md)
@@ -49,7 +49,7 @@ vendor하므로, 모든 repository가 같은 text를 가지며 `make kit-check`�
   이동했으면 거부하고, 일치하는 branch와 worktree를 보존합니다. merge될 수 없는 test나
   실험 code는 남길 가치가 있으면 cherry-pick하고 아니면 폐기하며, 항상 commit 전에 합니다; 바로 지울 수 없으면 checklist
   하위 항목에 제거 조건을 적습니다.
-  Enforced by: `.githooks/pre-push`, `.githooks/pre-merge-commit`
+  Enforced by: `.githooks/pre-merge-commit`
 - P11 code 주석, identifier, log, error message, test 이름, commit message는 영어로 씁니다. 문서는 영어이며, 각각 기술 용어를
   영어로 쓰는 한국어 쌍을 가집니다.
   Enforced by: `make commits-check`는 commit message에 대해, `make language-check`는 code에 대해
@@ -217,10 +217,9 @@ owner가 2026-10-13에 이 기준을 승인했습니다. 각 기준은 위반 �
   Reflection으로 library와 비교하되 이름마다 그것을 선언한 library와 비교하며, unit test는 extension을 load하고 library의 source는 하나도 load하지 않고
   (dependency와 autoload-dev는 load하고 library 자신의 autoload는 load하지 않으므로 library에는 extension에 대한 guard가 없다) 실행하는 모든
   library의 PHPUnit 파일과 (있다면) `packages/php-ext`의 것이다. parity implementation은 이 layout으로 library의 test를 공유하며,
-  설정에 상대 경로를 두지 않는다. PHP library는 library code뿐이다: PHP console application처럼 userland framework 위의
-  application은 그 library를 require하는 자기 Composer package이다. 내부 class는 userland class를 확장할 수 없기 때문이다. Composer type이 `project`인 package는 application이다. extension 실행과 S10 library
+  설정에 상대 경로를 두지 않는다. Composer type이 `project`인 package는 application이다. extension 실행과 S10 library
   검사 밖에 있으며, `make test-php`는 그 test를 자기 package로 실행한다.
-  Enforced by: `make lint-php-ext`, `make test-php-ext`, `make layout-check`
+  Enforced by: `make lint-php-ext`, `make test-php-ext`
 - S11 로컬 링크: 개발 중 각 polyspec 패키지의 설치 폴더(node_modules, vendor, site-packages)는 checkout으로 가는 평범한
   디렉터리 심링크 하나입니다. 패키지 매니저의 링크 단계(npm link, Composer path repository, pip/uv editable)는 쓰지 않습니다
   (K591, K761, K765).

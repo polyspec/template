@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 312c10c63fc4663b95b3b1a7b9fec436ef82c3e7cbf16405006b50cac1d7e418 -->
+<!-- source-sha256: 0ab3a10a56de4984061b13fda482590b0a8052802c908c4c08aa1bfc3290fa51 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- release는 consumer install이나 proof 없이 archive를 build하고 게시한다. config/release.json에는 consumers와 proof가 없고, tests/fixtures/release-consumer와 make release-consumer는 사라졌으며, consumer는 자기 package manager로 release를 확인한다(kit K798). push는 검사하지 않는다. .githooks/pre-push, config/checklist.json의 그 hook, suite의 push-gate-commit은 사라졌다(kit K804). (T27.1-17)
 
 - config/toolchain.json의 pythonBackend, config/release.json의 consumers.wheel.polyspec, config/dependency-policy.json, python-lock-check를 suite, CI matrix, owner에서 제거한다. wheel은 build-system.requires의 build backend로 build하며, docs/operations/dependencies.md가 @types/vscode 고정을 기록한다. (T27.1-14)
 - make hooks는 kit의 hook을 다시 쓰고, kit이 삭제하는 reference-transaction hook(K801)은 .githooks에서 빠진다. main은 make land와 hook이 통과한 commit으로 움직인다. (T27.1-16)

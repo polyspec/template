@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- A release builds and publishes its archives without a consumer install or a proof: config/release.json has no consumers or proof, tests/fixtures/release-consumer and make release-consumer are gone, and a consumer checks a release with its own package manager (kit K798). A push is not checked: .githooks/pre-push, the hook of config/checklist.json and push-gate-commit of the suite are gone (kit K804). (T27.1-17)
 
 - Remove pythonBackend of config/toolchain.json, consumers.wheel.polyspec of config/release.json, config/dependency-policy.json and python-lock-check from the suite, the CI matrix and the owners; the wheel builds with the build backend of build-system.requires, and docs/operations/dependencies.md records the @types/vscode pin. (T27.1-14)
 - make hooks writes the hooks of kit again and the reference-transaction hook, which kit deletes (K801), leaves .githooks: main moves through make land and through a commit whose hooks passed. (T27.1-16)

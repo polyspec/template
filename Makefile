@@ -27,9 +27,8 @@ unexport CARGO_TARGET_DIR
 # A check makes no registry query whose result depends on time, and downloads only what a lock pins by exact version and
 # integrity (AGENTS): make install downloads what the checks read, and every recipe and the scripts that it starts run
 # cargo, go, npm and Composer offline, so a missing download fails at once instead of reaching a registry in one run and
-# not in another (T20.1-2). The targets that resolve or download, install, install-tools and release-consumer-lock, run
-# their commands with $(ONLINE); make release-consumer installs the archives of a release with
-# its committed locks online (the release-consumer tool of @polyspec/kit).
+# not in another (T20.1-2). The targets that resolve or download, install and install-tools, run their commands with
+# $(ONLINE).
 export CARGO_NET_OFFLINE := true
 export GOPROXY := off
 export npm_config_offline := true
@@ -42,7 +41,7 @@ ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_
 # failed command; a prerequisite that fails keeps the targets that depend on it from running.
 MAKEFLAGS += -k
 
-# The shared targets of kit (kit-sync, kit-check, hooks, push-gate-commit, rerun-failed, docs-check, owner-check,
+# The shared targets of kit (kit-sync, kit-check, hooks, rerun-failed, docs-check, owner-check,
 # ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, toolchain-check, layout-check,
 # cargo-downloads-check, lint-*) come from the installed @polyspec/kit package. Its bootstrap includes kit.mk
 # and selects source tools for native development links or compiled tools for a release package. Only config/*.json differ
@@ -94,7 +93,7 @@ PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 help: ## List targets
 	@echo "Targets:"
 	@echo "  check                  The full suite through the full-run tool of @polyspec/kit: once per tree, when no checklist task is [~]"
-	@echo "  kit-sync|kit-check|hooks|hooks-check|push-gate-commit|rerun-failed|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
+	@echo "  kit-sync|kit-check|hooks|hooks-check|rerun-failed|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
@@ -149,7 +148,7 @@ help: ## List targets
 # current tree that did not pass. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := push-gate-commit kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check commits-check link-state-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 check: ## Full check through the guard: once per tree, when no checklist task is [~]
 	$(NODE) $(KIT)/full-run.$(KIT_EXT) run $(CHECK_TARGETS)
@@ -218,11 +217,10 @@ template-install-parity: template-install-node template-install-rust template-in
 template-install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) $(NODE) $(KIT)/install-vscode.$(KIT_EXT) $(VSCODE_DIR) $(VSCODE_TOOLS)
 
-# The release steps and the consumer locks are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built
-# from the built npm packages, so the targets that build or lock them run those builds first.
+# The release steps are the targets of the kit.mk of @polyspec/kit (config/release.json). The archives are built from the
+# built npm packages, so the targets that build them run those builds first.
 release-candidate-assets: build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler
 release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler)
-release-consumer release-consumer-lock: build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler
 
 template-install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium

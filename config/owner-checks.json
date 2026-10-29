@@ -258,8 +258,7 @@
         ".githooks/**"
       ],
       "targets": [
-        "hooks-check",
-        "push-gate-commit"
+        "hooks-check"
       ]
     },
     {
@@ -274,7 +273,6 @@
         "**/Cargo.lock",
         "packages/go/go.mod",
         "config/release.json",
-        "tests/fixtures/release-consumer/**",
         "packages/python/pylock.toml"
       ],
       "targets": [

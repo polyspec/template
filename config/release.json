@@ -73,87 +73,9 @@
     "composer.json": "the development root of the Composer packages of packages/, never published",
     "packages/vscode/tests/integration/harness/package.json": "the harness of the VS Code integration test",
     "examples/showcase/adapters/rust/Cargo.toml": "the Rust adapter of the showcase",
-    "examples/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository",
-    "tests/fixtures/release-consumer/npm/package.json": "the npm consumer project of the release archives",
-    "tests/fixtures/release-consumer/composer/composer.json": "the Composer consumer project of the release archives"
+    "examples/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository"
   },
   "goModules": {
     "packages/go": "github.com/polyspec/template/packages/go"
-  },
-  "consumers": {
-    "npm": {
-      "directory": "tests/fixtures/release-consumer/npm",
-      "smoke": {
-        "@polyspec/template": [
-          "node",
-          "--input-type=module",
-          "-e",
-          "await import('@polyspec/template');"
-        ],
-        "@polyspec/template-language": [
-          "node",
-          "--input-type=module",
-          "-e",
-          "await import('@polyspec/template-language');"
-        ],
-        "@polyspec/template-lsp": [
-          "node",
-          "--input-type=module",
-          "-e",
-          "await import('@polyspec/template-lsp');"
-        ],
-        "@polyspec/template-codemirror": [
-          "node",
-          "--input-type=module",
-          "-e",
-          "await import('@polyspec/template-codemirror');"
-        ],
-        "@polyspec/template-compiler": [
-          "node",
-          "--input-type=module",
-          "-e",
-          "const compiler = await import('@polyspec/template-compiler/compiler.mjs');\nconst ast = await import('@polyspec/template-compiler/ast-artifact.mjs');\nconst types = await import('@polyspec/template-compiler/type-manifest.mjs');\nconst { default: functions } = await import('@polyspec/template-compiler/functions.json', { with: { type: 'json' } });\nconst fs = await import('node:fs');\nfs.mkdirSync('templates');\nfs.writeFileSync('templates/page.tpl', '<p>{=title}</p>\\n');\nconst graph = ast.compileAst({ root: 'templates', output: 'compiled', entry: 'page.tpl' });\nif (JSON.stringify([typeof compiler.compileSource, typeof types.deriveTypeManifest, functions.canonical.length > 0, /^[0-9a-f]{64}$/.test(graph.compilerDigest)]) !== '[\"function\",\"function\",true,true]') process.exit(1);"
-        ]
-      }
-    },
-    "composer": {
-      "directory": "tests/fixtures/release-consumer/composer",
-      "smoke": {
-        "polyspec/template": [
-          "php",
-          "-r",
-          "require \"vendor/autoload.php\"; if (!class_exists(\"Polyspec\\\\Template\\\\Engine\")) { exit(1); }"
-        ],
-        "polyspec/template-cli": [
-          "php",
-          "-r",
-          "file_put_contents(\"smoke.tpl\", \"<p>{=title}</p>\\n\"); $process = proc_open([PHP_BINARY, \"vendor/bin/template.php\", \"parse\", \"smoke.tpl\"], [1 => [\"pipe\", \"w\"], 2 => [\"pipe\", \"w\"]], $pipes); $out = stream_get_contents($pipes[1]); $err = stream_get_contents($pipes[2]); $status = proc_close($process); if ($status !== 0 || json_decode($out, true)[\"type\"] !== \"Template\") { fwrite(STDERR, $err); exit(1); }"
-        ]
-      }
-    },
-    "wheel": {
-      "smoke": {
-        "polyspec-template": [
-          "python",
-          "-c",
-          "import polyspec.template"
-        ]
-      },
-      "lock": {
-        "polyspec-template": "packages/python/pylock.toml"
-      }
-    }
-  },
-  "proof": {
-    "gitTag": {
-      "packages/rust/Cargo.toml": {
-        "kind": "rust",
-        "name": "polyspec-template",
-        "smoke": [
-          "cargo",
-          "check"
-        ]
-      }
-    }
   }
 }

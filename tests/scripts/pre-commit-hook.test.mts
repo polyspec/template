@@ -16,9 +16,9 @@ const checklistDocument = jsonDocument<{ hooks: string[] }>('checklist config', 
   properties: { hooks: { type: 'array', items: { type: 'string' } } },
 });
 
-test('config/checklist.json lists the pre-commit hook with the pre-push hook', () => {
+test('config/checklist.json lists the pre-commit hook', () => {
   const config = checklistDocument.parse(read('config/checklist.json'), 'config/checklist.json');
-  assert.deepEqual(config.hooks, ['pre-commit', 'pre-push']);
+  assert.deepEqual(config.hooks, ['pre-commit']);
 });
 
 test('.githooks/pre-commit is executable and runs make staged-generated-hook', () => {

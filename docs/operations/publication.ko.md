@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: b7b94bb4089888d7210d157539e739569bb0497b099c95047a57de99bf1b220c -->
+<!-- source-sha256: 326d9b86ab6c4ce324b6ccb0a160d2ab93b84a3c9136574395576ef65054fc0f -->
 # 발행
 
 [English](/operations/publication).
@@ -46,18 +46,17 @@ pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
 
 ## 버전
 
-릴리스 버전은 `config/release.json`의 manifest 전체에서 일치시킨다. 버전은 모든 패키지, `make release-consumer-lock TAG=vX.Y.Z`가 쓰는 lock과 함께 `tests/fixtures/release-consumer`의 consumer project, `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
+릴리스 버전은 `config/release.json`의 manifest 전체에서 일치시킨다. 버전은 모든 패키지와 `CHANGELOG.md`에서 함께 바뀌며, 릴리스된 버전 위의 section `## Unreleased`가 마지막 릴리스 뒤의 모든 변경 항목을 담는다.
 
 ## Tag 릴리스
 
-릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-cli`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. 이는 `config/release.json`이 선언한 `git-tag` 배포 방식이며 해당 설치를 proof로 검증한다. Python 패키지 `polyspec-template`(`packages/python`, `config/release.json`의 package kind `wheel`)은 버전 X.Y.Z를 가지며 PEP 427 wheel `polyspec_template-X.Y.Z-py3-none-any.whl`로 릴리스한다. wheel은 tag된 commit에서 `packages/python/pyproject.toml`의 `build-system.requires`가 고정한 build backend(`setuptools==84.2.1`)로 build한다. wheel의 metadata는 `packages/python/pyproject.toml`에 고정한 runtime 의존성을 선언하며 전체 의존성 그래프와 hash는 `packages/python/pylock.toml`에 있다. development dependency group은 wheel의 요구가 아니다. tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. bootstrap과 `make release-tools` 뒤에 그 step은 다음 순서로 설치한 release target(패키지, manifest, Go module은 `config/release.json`의 data다)을 실행하고 첫 실패에서 멈춘다.
+릴리스는 `main`의 commit에 붙인 tag다(AGENTS, T22.1-4). `vX.Y.Z`는 npm 패키지 `@polyspec/template`, `@polyspec/template-language`, `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `@polyspec/template-compiler`, Composer 패키지 `polyspec/template`, `polyspec/template-cli`, `polyspec/template-php-ext`를 버전 X.Y.Z로 릴리스하고, `packages/go/vX.Y.Z`는 Go module `github.com/polyspec/template/packages/go`를 릴리스한다. Cargo 패키지 `polyspec-template`는 버전 X.Y.Z를 담지만 archive로 릴리스하지 않고 git tag로 사용한다. `config/release.json`의 `git-tag` manifest가 이를 선언한다. Python 패키지 `polyspec-template`(`packages/python`, `config/release.json`의 package kind `wheel`)은 버전 X.Y.Z를 가지며 PEP 427 wheel `polyspec_template-X.Y.Z-py3-none-any.whl`로 릴리스한다. wheel은 tag된 commit에서 `packages/python/pyproject.toml`의 `build-system.requires`가 고정한 build backend(`setuptools==84.2.1`)로 build한다. wheel의 metadata는 `packages/python/pyproject.toml`에 고정한 runtime 의존성을 선언하며 전체 의존성 그래프와 hash는 `packages/python/pylock.toml`에 있다. development dependency group은 wheel의 요구가 아니다. tag의 push는 `ci.yml`의 job `release`가 아닌 `.github/workflows/release.yml`(`on: push: tags: ['v*', '**/v*']`, 권한 `contents: write`. tag filter에서 `*`는 `/`와 맞지 않으므로 `**/v*`가 어느 깊이의 Go module tag든 포함한다)을 실행한다. bootstrap과 `make release-tools` 뒤에 그 step은 다음 순서로 설치한 release target(패키지, manifest, Go module은 `config/release.json`의 data다)을 실행하고 첫 실패에서 멈춘다.
 
 ```sh
 make release-verify
 make release-versions
 make release-assets
 make release-publish
-make release-proof
 make release-undraft
 ```
 
@@ -66,15 +65,15 @@ make release-undraft
 3. `make release-assets`는 npm 패키지를 build하고 `var/release/assets`를 쓴다. 각 npm 패키지의 `npm pack`(`.tgz`), tag된 commit의 시각으로 만든 각 Composer 패키지 directory의 `git archive`(`.zip`)이다. Python 패키지의 wheel(`.whl`)도 만든다. `uv build --wheel`을 `build-system.requires`의 build backend로 실행하고, `SOURCE_DATE_EPOCH`는 commit의 시각이다. wheel의 METADATA는 패키지 이름과 tag의 버전을 담고 `name==version` Requires-Dist만 담아야 한다. 릴리스 asset은 npm tarball, Composer zip과 wheel이다. archive 이름은 `<package>-<language>-<version>.<ext>`이고 `@scope/`와 `vendor/`는 `scope-`와 `vendor-`로 쓰며 language는 `npm` 또는 `php`다. `polyspec-template-npm-X.Y.Z.tgz`는 `@polyspec/template`, `polyspec-template-language-npm-X.Y.Z.tgz`는 `@polyspec/template-language`, `polyspec-template-php-X.Y.Z.zip`은 `polyspec/template`, `polyspec-template-php-ext-php-X.Y.Z.zip`은 `polyspec/template-php-ext`이다. Go tag는 아무것도 만들거나 첨부하지 않는다. `release-assets`는 `/`가 없는 tag에서만 npm 패키지를 build한다. 각 archive는 패키지의 manifest를 바꾸지 않고 담는다. tree의 발행 manifest가 발행되는 패키지다. 이어서 step은 pack된 모든 manifest가 tag된 commit의 manifest와 같고, 이 저장소의 scope에 속한 각 의존성을 정확한 버전으로, 이 저장소의 패키지를 X.Y.Z로 적으며, `overrides`를 선언하지 않고, 각 `composer.json`이 `repositories`를 선언하지 않을 때만 통과한다(`manifestProblems`). 경로(`file:`, `link:`, `workspace:`), git source(`git`, `github:`, ssh), URL, range, 개발 버전은 저장소 안에서만 설치된다.
 4. `make release-publish`는 GitHub API로 draft를 만들고 archive를 upload한다. 이전 실행의 draft는 교체하지만 공개한 릴리스는 교체하지 않는다. notes는 `CHANGELOG.md`의 section `## X.Y.Z`가 GitHub release body의 한도인 125000자(`NOTES_LIMIT`) 이하이면 그 section이다. 더 긴 section은 한 줄 `The changes of X.Y.Z are listed in [CHANGELOG.md](https://github.com/polyspec/template/blob/<tag>/CHANGELOG.md#XYZ).`로 바뀌며, anchor는 점을 뺀 버전이다.
 
-5. `make release-proof`는 checkout 밖에서 draft asset, 정확한 consumer 설치, Rust git 의존성과 Go module tag를 검증한다. 성공한 뒤에만 `make release-undraft`가 릴리스를 공개한다. 실패하면 draft 상태로 남는다.
+5. `make release-undraft`가 릴리스를 공개한다. 앞 step이 실패하면 draft 상태로 남는다.
 
 release workflow는 `make release-assets` 전에 `make release-tools`를 실행하며, 이것은 `mise.toml`의 Python을 설치한다. wheel은 그 Python으로 build하기 때문이다.
 
-release workflow는 push된 tag마다 한 번 실행된다. tag `vX.Y.Z`의 `make release-verify`는 같은 commit의 tag `packages/go/vX.Y.Z`를 요구하므로, 메인테이너는 Go tag를 tag `vX.Y.Z`보다 먼저, 또는 같은 push로 push한다. Go tag의 실행은 archive를 만들지 않고 asset 없는 draft를 만들고 Go module을 검증한 뒤 릴리스를 공개한다.
+release workflow는 push된 tag마다 한 번 실행된다. tag `vX.Y.Z`의 `make release-verify`는 같은 commit의 tag `packages/go/vX.Y.Z`를 요구하므로, 메인테이너는 Go tag를 tag `vX.Y.Z`보다 먼저, 또는 같은 push로 push한다. Go tag의 실행은 archive를 만들지 않고 asset 없는 draft를 만들고 그 릴리스를 공개한다.
 
-tag는 환경 변수 `TAG`로 step에 전달된다. kit은 자기 저장소에서 fixture 저장소로 자기 step을 test한다. `make release-consumer TAG=vX.Y.Z`는 `var/release/assets`의 archive를 저장소 밖의 directory에 `tests/fixtures/release-consumer`의 consumer project로 설치하고(`node_modules/@polyspec/kit/scripts/kit/release-consumer.mts`, `config/release.json`의 `consumers`: 빈 cache와 연결되지 않는 `@polyspec` scope registry로 모든 npm 패키지의 `npm ci`, 빈 `COMPOSER_HOME`과 cache와 zip의 `artifact` repository로 `polyspec/template`의 `composer install`) 각 패키지의 smoke 명령을 실행한다. commit된 lock은 각 registry 패키지를 정확한 버전과 integrity로 고정하고 매 실행 build하는 test 대상 archive를 `integrity` 없이 또는 빈 `shasum`으로 이름과 버전만 기록하며, `make release-consumer-lock TAG=vX.Y.Z`가 그 tag의 archive로 lock을 쓰므로 lock은 버전이나 의존성과 함께만 바뀐다. `make release-coverage`는 모든 추적 manifest가 tag의 릴리스 방식(`archive`, `version`, Rust crate처럼 git tag로 사용하는 `git-tag`)과 함께 `config/release.json`의 `manifests`에 있거나 이유와 함께 `notReleased`에 있기를 요구하고, `tests/scripts/toolchain-files.test.mts`는 trigger, 권한, step의 순서를 요구한다.
+tag는 환경 변수 `TAG`로 step에 전달된다. kit은 자기 저장소에서 fixture 저장소로 자기 step을 test한다. `make release-coverage`는 모든 추적 manifest가 tag의 릴리스 방식(`archive`, `version`, Rust crate처럼 git tag로 사용하는 `git-tag`)과 함께 `config/release.json`의 `manifests`에 있거나 이유와 함께 `notReleased`에 있기를 요구하고, `tests/scripts/toolchain-files.test.mts`는 trigger, 권한, step의 순서를 요구한다.
 
-draft가 만들어진 뒤 `make release-proof TAG=vX.Y.Z`(online, `node_modules/@polyspec/kit/scripts/kit/release-proof.mts`)가 checkout 밖에서 릴리스를 증명하며, 이 명령은 어떤 검사에도 속하지 않는다. GitHub Release의 asset이 그 버전의 archive와 정확히 같고 consumer project에 함께 설치되며, Python wheel이 `pip install --no-index --require-hashes --no-deps`로 새 virtual environment에 설치되어 (`make release-consumer`가 같은 설치를 var/release/assets에서 실행한다) `python -c "import polyspec.template"`가 통과하고, Rust crate `polyspec-template`가 새 crate의 git 의존성으로 build되며, `go list -m`이 Go module을 그 tag에서 해석한다. `tests/scripts/release-config.test.mts`는 `config/release.json`이 이 패키지들을 manifest가 선언한 대로 적었는지 검사한다.
+consumer는 자기 package manager로 archive를 설치해 릴리스를 확인하며, 릴리스의 어떤 step도 archive를 설치하지 않는다. `tests/scripts/release-config.test.mts`는 `config/release.json`이 패키지들을 manifest가 선언한 대로 적었는지 검사한다.
 
 ## 릴리스 asset 설치
 
