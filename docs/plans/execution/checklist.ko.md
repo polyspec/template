@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: bc0d5c486e113b325877f967a3d6c764f5f4b8cf5efd53be36fd84dd263a31f7 -->
+<!-- source-sha256: 3012dc09dcd6f461e554a6fc93041d395f0fcfeb7b56c7604749185c6018b128 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -464,4 +464,4 @@
 | T27.1-26 | parity extractor를 위해 Python package를 non-editable로 설치한다(K788) | Makefile | `make python-package`, `make link-state-check` | [o] |
 | T27.1-27 | Python symbol을 import 경로로 선언한다(K788) | config/parity.json, tests/scripts | `make parity-declarations-check`, `make parity-api-check` | [o] |
 | T27.1-28 | toolchain-files는 make hooks를 CI job의 setup 단계로 센다 | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [o] |
-| T27.1-29 | Kit 0.0.72를 채택한다 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [ ] |
+| T27.1-29 | Kit 0.0.72를 채택한다 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [~] |

@@ -463,4 +463,4 @@
 | T27.1-26 | Install the Python package non-editable for the parity extractor (K788) | Makefile | `make python-package`, `make link-state-check` | [o] |
 | T27.1-27 | Declare the Python symbols by their import path (K788) | config/parity.json, tests/scripts | `make parity-declarations-check`, `make parity-api-check` | [o] |
 | T27.1-28 | toolchain-files counts make hooks as a setup step of a CI job | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [o] |
-| T27.1-29 | Adopt Kit 0.0.72 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [ ] |
+| T27.1-29 | Adopt Kit 0.0.72 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [~] |
