@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: b2551a1605969392c924a5a1301086ad5d8596ae293146dc92267fd13c6f4b6c -->
+<!-- source-sha256: 9e1a0c3dca79331a21565f1945c57cd24ef95b1ba7a9abc97b7f71e42a0afdf9 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -457,3 +457,4 @@
 | T27.1-19 | kit이 삭제한 full-run guard(K240)를 실행하는 make check, release-test-matrix, release-check와 guard를 설명하는 문단을 삭제한다 | Makefile, scripts/check-clean-release.mts, tests/scripts/suite-parity.test.mts, docs/operations/development.md, docs/operations/testing.md, AGENTS.md | `node --test tests/scripts/suite-parity.test.mts`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-20 | kit이 삭제하는 make release-versions를 제거한다(K812) | .github/workflows/release.yml, AGENTS.md, docs/operations/publication.md | `make rules-check`, `make kit-check` | [o] |
 | T27.1-21 | kit 복사본은 make kit-sync가 갱신한다고 명시한다(K799) | AGENTS.md, tests/scripts/toolchain-files.test.mts | `make rules-check`, `make docs-check` | [o] |
+| T27.1-22 | Kit 0.0.70을 채택한다 | package.json, package-lock.json, kit copies, AGENTS.md | `make kit-check`, `make rules-check`, `make docs-check` | [ ] |

@@ -456,3 +456,4 @@
 | T27.1-19 | Delete make check, release-test-matrix and release-check, which run the full-run guard that kit deleted (K240), and the passages that describe the guard | Makefile, scripts/check-clean-release.mts, tests/scripts/suite-parity.test.mts, docs/operations/development.md, docs/operations/testing.md, AGENTS.md | `node --test tests/scripts/suite-parity.test.mts`, `make rules-check`, `make docs-check` | [o] |
 | T27.1-20 | Remove make release-versions, which kit deletes (K812) | .github/workflows/release.yml, AGENTS.md, docs/operations/publication.md | `make rules-check`, `make kit-check` | [o] |
 | T27.1-21 | State that make kit-sync refreshes the copies of kit (K799) | AGENTS.md, tests/scripts/toolchain-files.test.mts | `make rules-check`, `make docs-check` | [o] |
+| T27.1-22 | Adopt Kit 0.0.70 | package.json, package-lock.json, kit copies, AGENTS.md | `make kit-check`, `make rules-check`, `make docs-check` | [ ] |
