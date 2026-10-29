@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 4760394bdde674e4ebc3fcca9fec16e0e3b6d77dc3ee69eaa51dad86c1256dff -->
+<!-- source-sha256: 6a58705ec82c8e2df023f87f1d057c5c9eafac14ce0df7866a1ee2176ff9127f -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -465,3 +465,4 @@
 | T27.1-27 | Python symbol을 import 경로로 선언한다(K788) | config/parity.json, tests/scripts | `make parity-declarations-check`, `make parity-api-check` | [o] |
 | T27.1-28 | toolchain-files는 make hooks를 CI job의 setup 단계로 센다 | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-29 | Kit 0.0.72를 채택한다 | package.json, package-lock.json, kit copies, .github/workflows/ci.yml, Makefile | `make kit-check`, `make rules-check`, `make docs-check` | [o] |
+| T27.1-30 | P0: packages/php/composer.json과 packages/php-ext/composer.json에 각 archive의 zip URL과 sha1을 더해 만든 packages.json release asset을 게시하여, 소비자가 https://github.com/polyspec/template/releases/download/<tag>/packages.json의 composer repository에서 template package를 읽고 PIE가 그로부터 확장을 설치하게 한다(kit plan kit-harness, Decision 6) | config/release.json, the packages.json generator and its test, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/release-config.test.mts` | [ ] |
