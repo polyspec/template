@@ -1,10 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 36fe8179ac270f99d69174dc39551f2b1263df95512ef13443f84139110282df -->
+<!-- source-sha256: 0fd24b03c053ab7b6dddc958b30fcc8f0d2ba769fe4e93c0dc13810e1a47dede -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.14
+- 릴리스 0.0.14: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.14를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-31)
 - 고정한 release는 Kit 0.0.74다. release는 config/release.json의 Composer package에서 polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json도 게시한다(kit K871). (T27.1-30)
 
 ## 0.0.13

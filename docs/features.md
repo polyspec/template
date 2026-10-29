@@ -42,7 +42,7 @@ The PHP library requirement stays >=8.4.0 (written >=8.4); development verificat
 
 Documentation deployment: [Pages 40453338233](https://github.com/polyspec/template/actions/runs/40453338233) successfully publishes the artifact of [CI 40451767762](https://github.com/polyspec/template/actions/runs/40451767762) at ae6f7173 to the [documentation site](https://polyspec.github.io/template/). The installed-package bootstrap and declared PHP are prepared before the first make; all installing workflows have regression coverage.
 
-[Release 0.0.13](https://github.com/polyspec/template/releases/tag/v0.0.13) is public with nine archives. Kit 0.0.74 is integrity-locked and its copies synchronized; from it a release also publishes packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext (kit K871), which no published release holds yet.
+[Release 0.0.13](https://github.com/polyspec/template/releases/tag/v0.0.13) is public with nine archives. Every manifest of `config/release.json` holds 0.0.14; its tag waits for `ci-passed` of the release commit. Kit 0.0.74 is integrity-locked and its copies synchronized; from it a release also publishes packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext (kit K871), which no published release holds yet.
 
 The prepared Composer manifests retain explicit versions required by Kit archives. This conflicts with the repository tag-derived version rule; [Kit issue 16](https://github.com/polyspec/kit/issues/16) tracks the required archive/consumer contract correction before release acceptance.
 

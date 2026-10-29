@@ -1,13 +1,13 @@
 {
     "name": "polyspec/template-cli",
     "description": "Command line of the template language on the PHP library: an application, not a library (K433)",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "type": "project",
     "license": "MIT",
     "require": {
         "php": ">=8.4",
         "ext-mbstring": "*",
-        "polyspec/template": "0.0.13",
+        "polyspec/template": "0.0.14",
         "symfony/console": "^8.1"
     },
     "require-dev": {

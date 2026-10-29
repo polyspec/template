@@ -4,6 +4,9 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.14
+- Release 0.0.14: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.14, and the release publishes packages.json beside its archives. (T27.1-31)
 - Kit 0.0.74 is the pinned release: a release also publishes packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext, from the Composer packages of config/release.json (kit K871). (T27.1-30)
 
 ## 0.0.13
