@@ -560,8 +560,12 @@ test('make python-package installs the build requirement of the wheel from the w
 });
 
 test('the unit tests of the Python package run in packages/python/.venv, which python-venv of kit makes from the python of mise.toml', () => {
-  // T23.2: the package is installed editable into that environment, so the tests import it with no changed import path (S3).
+  // T23.2: the package is installed into that environment and its package folder linked to the checkout, so the tests
+  // import it with no changed import path (S3). The install is non-editable: the python extractor of kit reads the modules
+  // from the file list of the installed distribution (kit K788, T27.1-26).
   const makefile = read('Makefile');
+  assert.match(makefile, /--no-deps \$\(PYTHON_PACKAGE\)\n\t\$\(MAKE\) --no-print-directory install-link\n/);
+  assert.ok(!/ -e \$\(PYTHON_PACKAGE\)/.test(makefile), 'the Makefile installs the Python package editable');
   assert.match(makefile, /^PYTHON_VENV := \$\(shell \$\(PYTHON_BOOTSTRAP_NODE\) scripts\/python-venv\.mts\)$/m);
   assert.ok(!makefile.includes('packages/python/.venv'), 'the Makefile restates the environment that config/parity.json declares');
   assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);

@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9149613204cccedcc0cd5e6497607cbe646c5b16a99effc562c9826bff3502b7 -->
+<!-- source-sha256: a5f0923e55d4f38246a1a0fdb6f1cb1348b866211e230c94d6ad1adcf2c5319c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- make python-package는 Python package를 non-editable로 설치하고 그 package 폴더를 checkout에 link한다. editable 설치에서는 kit의 python extractor가 symbol을 내지 않았고(kit K788), link-state-check는 설치된 package 폴더를 찾지 못했다. (T27.1-26)
 - suite-parity는 CI가 설치하는 packed kit의 도구를 dist 폴더에서 찾는다. packed kit에는 scripts/kit/<tool>.mts가 없어서, recipe가 실행하는 kit 도구를 모두 없다고 보고했다. (T27.1-25)
 - pre-commit hook test는 kit이 삭제한 make commit-gates-hook(kit K805)을 .githooks/pre-commit에서 더 이상 기대하지 않는다. hook은 make staged-generated-hook을 실행한다. (T27.1-24)
 - CI의 docs job은 hooks-check 전에 make hooks를 실행한다. hook이 설치되지 않은 CI의 새 checkout에서 hooks-check가 실패했다. suite-parity는 target을 실행하기 전에 그 setup을 실행하지 않는 job에서 실패한다. (T27.1-23)

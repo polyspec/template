@@ -96,8 +96,8 @@ export const drivers: Record<Language, Driver> = {
       return ['php', [join(root, 'packages', 'cli', 'php', 'bin', 'template.php'), ...args]];
     },
   },
-  // The command is the python of packages/python/.venv, where make python-package installs packages/python editable, so
-  // it imports polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). The build is make
+  // The command is the python of packages/python/.venv, where make python-package installs packages/python and links its
+  // package folder to the checkout, so it imports polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). The build is make
   // python-package, which makes that environment and does nothing when it is current.
   python: {
     dir: join(packages, 'python'),

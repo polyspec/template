@@ -2,8 +2,8 @@
 // var/tools/mise/shims/python3, the shim of the python of mise.toml, which `make install-tools` installs with mise at the
 // digest of mise.lock (T24.12, kit K127). No check runs the `python3` of PATH or of the machine (AGENTS, Idempotency:
 // Toolchains). A program that imports `polyspec.template` runs the python of packages/python/.venv, where `make python-package`
-// installs packages/python editable, so it imports the package from the sources of the checkout through its
-// environment, with no changed import path (PRINCIPLES S3).
+// installs packages/python and the link of kit makes its package folder a link to the sources of the checkout, so it
+// imports the package from those sources through its environment, with no changed import path (PRINCIPLES S3).
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
@@ -52,7 +52,7 @@ export function pythonPackageCommand(): string {
 
 /**
  * The environment of a Python program. It writes no bytecode, so a run leaves no `__pycache__` in the sources of the
- * checkout, which the editable install imports (AGENTS, Idempotency: Shared state).
+ * checkout, which the linked package folder imports (AGENTS, Idempotency: Shared state).
  */
 export function pythonEnvironment(): { PYTHONDONTWRITEBYTECODE: string } {
   return { PYTHONDONTWRITEBYTECODE: '1' };

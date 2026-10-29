@@ -417,15 +417,18 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: build-ts ## Conformance suite of TypeScript and Python
 	$(NODE) tests/runner/conformance.mts --langs ts,python
 
-# The Python package is installed, editable, into the virtual environment PYTHON_VENV, the environment of the command of
-# the implementation python of config/parity.json (scripts/python-venv.mts), so its tests, the conformance
-# driver (tests/runner/drivers.mts) and the parity check (config/parity.json) import polyspec.template from the sources of
-# the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
+# The Python package is installed, non-editable, into the virtual environment PYTHON_VENV, the environment of the command
+# of the implementation python of config/parity.json (scripts/python-venv.mts): the python extractor of kit reads the
+# modules from the file list of the installed distribution, which an editable install does not hold (kit K788). The link
+# of kit then makes its installed package folder a link to packages/python/src/polyspec/template (kit K765), so its
+# tests, the conformance driver (tests/runner/drivers.mts) and the parity check (config/parity.json) import
+# polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs into it the dependencies that packages/python/pylock.toml pins by
 # version and digest, then the package offline, with its build requirement from the wheelhouse that make install of the
 # main checkout fills: a linked worktree downloads nothing and reads it as it runs the tools of the main checkout (kit K519).
 # make install makes the environment, so the locked dependencies are downloaded there (AGENTS, Idempotency: Network). The
-# stamp is remade when the project, its lock or its build requirements change; a change of the sources needs no install. The tests are discovered with packages/python as the top level: the directory
+# stamp is remade when the project, its lock or its build requirements change; a change of the sources needs no install,
+# since the installed package folder is a link to them. The tests are discovered with packages/python as the top level: the directory
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
 # runs one test file by its path.
 PYTHON_PACKAGE := packages/python
@@ -440,13 +443,14 @@ UV := $(KIT_TOOLS)/mise/shims/uv
 WHEELHOUSE := $(or $(KIT_MAIN_CHECKOUT),$(CURDIR))/var/python/wheelhouse
 
 .PHONY: python-package
-python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed editable; offline
+python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed and its package folder linked to the checkout; offline
 
 $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.txt
 	rm -rf $(PYTHON_VENV)
 	$(MAKE) python-venv DIR=$(PYTHON_VENV)
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --link-mode copy -r $(PYTHON_PACKAGE)/pylock.toml
-	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links $(WHEELHOUSE) --link-mode copy --no-deps -e $(PYTHON_PACKAGE)
+	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links $(WHEELHOUSE) --link-mode copy --no-deps $(PYTHON_PACKAGE)
+	$(MAKE) --no-print-directory install-link
 	touch $@
 
 test-python: template-test-python ## Unit tests of the Python package
