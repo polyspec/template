@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- make hooks writes the pre-commit hook of kit again, and the pre-merge-commit hook, config/commit-identity.json and commits-check of the suite, which kit deletes (K805), are gone. (T27.1-18)
 - The suite runs make hooks-check, which the hook rule of AGENTS names as its enforcement, in the job of the documents of CI. (T27.1-17-1)
 - A release builds and publishes its archives without a consumer install or a proof: config/release.json has no consumers or proof, tests/fixtures/release-consumer and make release-consumer are gone, and a consumer checks a release with its own package manager (kit K798). A push is not checked: .githooks/pre-push, the hook of config/checklist.json and push-gate-commit of the suite are gone (kit K804). (T27.1-17)
 

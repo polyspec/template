@@ -813,7 +813,6 @@
         "config/layout.kit.yml",
         ".editorconfig",
         "config/*.schema.json",
-        "config/commit-identity.json",
         "package.json",
         "package-lock.json"
       ],

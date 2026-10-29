@@ -325,7 +325,7 @@ test('every installing job prepares the locked kit before the first make', () =>
       const firstMake = commands.findIndex(command => /^make (?!-k -C )/.test(command));
       if (firstMake < 0) continue;
       assert.ok(usesOf(job, 'actions/checkout@').some(step => step.with['fetch-depth'] === 0),
-        `${file} job ${job.name} must fetch the commit history that commits-check reads`);
+        `${file} job ${job.name} must fetch the full commit history`);
       const installed = commands.indexOf(LOCKED_KIT_INSTALL);
       assert.ok(installed >= 0 && installed < firstMake,
         `${file} job ${job.name} must install locked packages before make reads the installed bootstrap`);

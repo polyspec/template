@@ -451,4 +451,4 @@
 | T27.1-16 | Remove the reference-transaction hook that kit deletes (K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
 | T27.1-17 | Remove the consumer install and the proof of a release (K798) and the push gate with its pre-push hook (K804), which kit deletes | config/release.json, tests/fixtures/release-consumer, .githooks/pre-push, config/checklist.json, Makefile, .github/workflows/ci.yml, the copies of kit | `make kit-check`, `make hooks-check` | [o] |
 | T27.1-17-1 | The suite runs make hooks-check, the enforcement of the hook rule of AGENTS | Makefile, .github/workflows/ci.yml | `make rules-check` | [o] |
-| T27.1-18 | Remove commits-check and the pre-merge-commit hook that kit deletes (K805) | .githooks, config/commit-identity.json, Makefile, .github/workflows/ci.yml | `make hooks-check`, `make kit-check` | [~] |
+| T27.1-18 | Remove commits-check and the pre-merge-commit hook that kit deletes (K805) | .githooks, config/commit-identity.json, Makefile, .github/workflows/ci.yml | `make hooks-check`, `make kit-check` | [o] |

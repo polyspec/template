@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 226f68386edef69aa5db6f81ec45e2618a356010d38847a9b76b5fb58bccc5d6 -->
+<!-- source-sha256: 92edeab711a4138de793855ec9c281753b25e62de07129f96b72a776b076eb57 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- make hooks는 kit의 pre-commit hook을 다시 쓰고, kit이 삭제하는 pre-merge-commit hook, config/commit-identity.json, suite의 commits-check(K805)는 사라졌다. (T27.1-18)
 - suite는 AGENTS의 hook 규칙이 강제로 이름 붙인 make hooks-check를 CI의 문서 job에서 실행한다. (T27.1-17-1)
 - release는 consumer install이나 proof 없이 archive를 build하고 게시한다. config/release.json에는 consumers와 proof가 없고, tests/fixtures/release-consumer와 make release-consumer는 사라졌으며, consumer는 자기 package manager로 release를 확인한다(kit K798). push는 검사하지 않는다. .githooks/pre-push, config/checklist.json의 그 hook, suite의 push-gate-commit은 사라졌다(kit K804). (T27.1-17)
 
