@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: c009832b9cd6ad5bdebea871f59fd30ca5ff33ec1f666c1db6a9251e5703acbd -->
+<!-- source-sha256: 9bacb656fc586da4f2f493fc8b8043c06c40dab019f40bb127190e9761e1618a -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -450,4 +450,4 @@
 | T27.1-15 | 생성된 PHP를 kit의 PHPStan으로 lint하고, binding의 BindError를 TemplateError의 previous exception으로 넘긴다 | packages/compiler/src/backends/php.mts, scripts/check-generated-lint.mts | `make generated-lint-check` | [o] |
 | T27.1-15-1 | linked worktree는 도구를 실행하듯 main checkout의 wheelhouse를 읽는다 | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-16 | kit이 삭제하는 reference-transaction hook을 제거한다(K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
-| T27.1-17 | kit이 삭제하는 release의 consumer install과 proof를 제거한다(K798) | config/release.json, tests/fixtures/release-consumer, Makefile, the copies of kit | `make kit-check` | [ ] |
+| T27.1-17 | kit이 삭제하는 release의 consumer install과 proof를 제거한다(K798) | config/release.json, tests/fixtures/release-consumer, Makefile, the copies of kit | `make kit-check` | [~] |
