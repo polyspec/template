@@ -462,4 +462,4 @@
 | T27.1-25 | suite-parity finds the tools of a packed kit in dist | tests/scripts/suite-parity.test.mts | `node --test tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-26 | Install the Python package non-editable for the parity extractor (K788) | Makefile | `make python-package`, `make link-state-check` | [o] |
 | T27.1-27 | Declare the Python symbols by their import path (K788) | config/parity.json, tests/scripts | `make parity-declarations-check`, `make parity-api-check` | [o] |
-| T27.1-28 | toolchain-files counts make hooks as a setup step of a CI job | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [ ] |
+| T27.1-28 | toolchain-files counts make hooks as a setup step of a CI job | tests/scripts/toolchain-files.test.mts | `node --test tests/scripts/toolchain-files.test.mts` | [~] |
