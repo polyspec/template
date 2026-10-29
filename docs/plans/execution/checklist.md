@@ -449,3 +449,4 @@
 | T27.1-15 | Lint the generated PHP with the PHPStan of kit, and pass the BindError of the bindings as the previous exception of the TemplateError | packages/compiler/src/backends/php.mts, scripts/check-generated-lint.mts | `make generated-lint-check` | [o] |
 | T27.1-15-1 | A linked worktree reads the wheelhouse of its main checkout, as it runs its tools | Makefile, scripts/check-package-installs.mts | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-16 | Remove the reference-transaction hook that kit deletes (K801) | .githooks/reference-transaction | `make hooks-check` | [o] |
+| T27.1-17 | Remove the consumer install and the proof of a release that kit deletes (K798) | config/release.json, tests/fixtures/release-consumer, Makefile, the copies of kit | `make kit-check` | [ ] |
