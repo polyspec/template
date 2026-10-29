@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 462f19eb3d968e69b4380b0e6c5d8e00d45b9ac36ab5041dd8cfc1756588cc3c -->
+<!-- source-sha256: 168033987d8d0a4ee7ca506752c5f09b27da95023869f1c4d5fc4c3799f20c4a -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -446,3 +446,4 @@
 | T27.1-12 | P0: 배포된 Kit 0.0.65를 도입한다. release asset을 integrity와 함께 고정하고 make kit-sync로 소유 사본을 쓰며 dependency review를 갱신한다 | package.json package-lock.json config/dependency-review.json the kit copies | `make kit-check`; `var/tools/bin/node --test tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-13 | P0: kit가 삭제하는 dependency policy와 review target을 dependency-audit, 예약 review workflow, 기록, owner, test, 규칙과 함께 제거한다 | Makefile .github/workflows/ci.yml .github/workflows/dependency-review.yml config/dependency-review.json config/owner-checks.json config/ci.json tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts docs/operations/dependencies.md docs/operations/development.md AGENTS.md | `make owner-validate`; `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts` | [o] |
 | T27.1-13-1 | P0: worktree는 main checkout의 도구를 실행한다(kit K519): Makefile, scripts/의 toolchain module, unit test는 자기 checkout이 아닌 main checkout의 var/tools를 가리킨다 | Makefile scripts/ tests/scripts/ | `node --test tests/scripts/toolchain-files.test.mts tests/scripts/suite-parity.test.mts` | [o] |
+| T27.1-14 | kit이 삭제하는 Python build backend pin, dependency policy, python-lock-check를 제거한다(K788, K789) | config/toolchain.json, config/release.json, config/dependency-policy.json, Makefile, .github/workflows/ci.yml, config/owner-checks.json, tests/scripts/release-config.test.mts, docs/operations | `node node_modules/@polyspec/kit/scripts/kit/run-tests.mts node -- tests/scripts/release-config.test.mts tests/scripts/suite-parity.test.mts` | [ ] |
