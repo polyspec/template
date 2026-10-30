@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: afb10898d969b41e3d05e6fc4605eb2b97e74b80654b52506fe90a09578ff62a -->
+<!-- source-sha256: 5afffd0f28b729957c3bea25e4f8d7a7831fa9996932783a7e7fa9a050b7aef3 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -472,3 +472,4 @@
 | T27.1-33-1 | P0: T27.1-33이 packages/cli/php의 vendor에 남긴 호출자가 root vendor에서 실행된다. packages/cli/php/phpunit.xml의 bootstrap은 packages/php의 것처럼 root autoloader여서 kit runtime-targets php의 실행이 시작되고, tests/runner/drivers.mts의 php-ext driver는 packages/cli/php에 아무것도 설치하지 않고 root의 vendor/bin/template.php를 실행하며, kit의 실행 옆에서 CLI test를 한 번 더 실행하던 template-test-php-cli는 지운다(red: CI 40964856137, phpunit packages/cli/php: Cannot open bootstrap script packages/cli/php/vendor/autoload.php, 그리고 build php-ext: packages/cli/php의 composer install이 exit 100으로 실패) | packages/cli/php/phpunit.xml, tests/runner/drivers.mts, Makefile, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/release-config.test.mts` | [o] |
 | T27.1-34 | P1: release-config.test.mts는 packages/php-ext/src/php_polyspec_template.h의 PHP_POLYSPEC_TEMPLATE_VERSION이 packages/php-ext/composer.json의 version과 같기를 요구하여, version-bump commit이 확장이 보고하는 버전을 뒤에 남길 수 없게 한다. 0.0.14 bump는 ae053cd9처럼 이를 손으로 맞췄다(red: 다른 버전을 적은 header에 대한 case) | tests/scripts/release-config.test.mts, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/release-config.test.mts` | [o] |
 | T27.1-35 | P1: kit 0.0.77의 문서 검사가 interpolation 문서(config/documents.json의 docs/**/*.md)에서 거부하는 날것 `<word>`를 모두 코드 표기로 쓴다(kit K895, 측정 때 발견 12건). 그래서 T27.1-36이 그 검사를 채택하기 전에 문서가 통과한다 | docs/**/*.md and their Korean twins, CHANGELOG.md CHANGELOG.ko.md | `make docs-check` | [ ] |
+| T27.1-36 | P1: T27.1-35 뒤에 kit 0.0.77(K869, K895)을 채택한다. @polyspec/kit을 그 release asset과 integrity로 pin하고 make kit-sync로 kit 사본을 갱신하며, --siblings 대신 K869의 link 선언 파일을 쓰고 tests/scripts/toolchain-files.test.mts의 --siblings 검사를 그것으로 바꾼다. 다음 template release가 이를 담는다 | package.json package-lock.json, kit copies, the link declaration file, Makefile, tests/scripts/toolchain-files.test.mts, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/toolchain-files.test.mts`, `make kit-check`, `make docs-check` | [ ] |
