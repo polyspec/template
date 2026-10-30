@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ec9b3a48244fcaec44482e6e0b126fd3bac41bf296c3392cc89c1a2c4b67c519 -->
+<!-- source-sha256: d0fb14b2dd244190e7a6cf0b5957a9cdf15739525d5679f8891809a241bc9c85 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -7,6 +7,7 @@
 ## Unreleased
 - Template 0.0.15를 CI 41029017110과 gates 41029017118을 거쳐 c779c6c1에서 릴리스했다. 릴리스 실행 41031280975와 41031277510이 archive 아홉 개와 packages.json을 게시했다. (T27.1-41)
 - 모든 runtime의 CI setup은 `config/ci.json`이 `setup`에 선언한 것이므로 kit의 ci-setup은 기본 `deps-<runtime>` target을 실행하지 않고 Makefile은 그것을 정의하지 않는다 (T27.1-32).
+- Kit 0.0.78이 pin한 release다(T27.1-42). 설치된 kit은 make link --project에서 Claude Code hook을 쓰지 않고(K916) template의 어떤 recipe도 --project를 넘기지 않으므로 template은 이전처럼 동작한다.
 
 ## 0.0.15
 - 릴리스 0.0.15: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.15를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-41)
