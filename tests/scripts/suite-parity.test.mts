@@ -180,8 +180,8 @@ test('native formatter parity bindings build the published formatter before exec
   assert.ok(binding > build, 'the native binding executes after the package build');
 });
 
-// T27.1-9: installation belongs to each worker, while parity owns all native dependencies.
-test('language workers install their own dependency graph and parity starts independently', () => {
+// T27.1-9: installation belongs to each worker.
+test('language workers install their own dependency graph', () => {
   const ci = jobs('.github/workflows/ci.yml');
   for (const language of ['go', 'rust', 'php', 'python', 'typescript', 'browser', 'editor']) {
     const job = ci.find(job => job.name === language);
@@ -190,12 +190,6 @@ test('language workers install their own dependency graph and parity starts inde
     assert.ok(runsOf(job).includes(`make template-install-${target}`), `${language} installs ${target} dependencies`);
     assert.ok(!runsOf(job).includes('make install'), `${language} must not install every dependency graph`);
   }
-  const parity = ci.find(job => job.name === 'parity-api');
-  assert.ok(parity);
-  assert.equal(parity.value.needs, undefined, 'parity must not wait for another worker');
-  assert.ok(runsOf(parity).includes('make template-install-parity'));
-  const aggregate = ci.find(job => job.name === 'ci-passed');
-  assert.ok(aggregate && Array.isArray(aggregate.value.needs) && aggregate.value.needs.includes('parity-api'));
 });
 
 test('language dependency install targets do not reach unrelated native package managers', () => {
@@ -215,8 +209,10 @@ test('language dependency install targets do not reach unrelated native package 
   }
 });
 
-// T27.1-9-1: Kit owns every phase recipe and validates complete phase coverage.
-test('CI partitions every official provider parity phase exactly once', () => {
+// T27.1-9-1, T27.1-44: Kit owns every phase recipe, and gates.yml of kit runs each phase in its jobs parity-api and
+// parity-bindings, whose matrix is the implementations of config/parity.json; a job of ci.yml or an entry of CHECK_TARGETS that
+// named a phase ran it a second time on every push.
+test('gates.yml runs every official provider parity phase, and ci.yml runs none', () => {
   const { implementations } = jsonDocument<{ implementations: { name: string }[] }>('parity implementation names', {
     type: 'object',
     required: ['implementations'],
@@ -224,12 +220,13 @@ test('CI partitions every official provider parity phase exactly once', () => {
   }).parse(read('config/parity.json'), 'config/parity.json');
   const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
   assert.equal(parsedJsonObject(read('config/ci.json'), 'config/ci.json').parityMode, 'phases');
-  assert.ok(!CHECK_TARGETS.includes('parity-check'));
-  for (const target of phases) {
-    assert.equal(CHECK_TARGETS.filter(value => value === target).length, 1, target);
-    const owner = jobs('.github/workflows/ci.yml').filter(job => runsOf(job).includes(`make ci-targets TARGETS="${target}"`));
-    assert.equal(owner.length, 1, target);
-    assert.equal(owner[0]?.value.needs, undefined);
+  const gates = jobs('.github/workflows/gates.yml');
+  assert.ok(gates.find(job => job.name === 'parity-api' && runsOf(job).includes('make -k parity-api-check')), 'gates.yml runs no parity-api-check');
+  assert.ok(gates.find(job => job.name === 'parity-bindings' && runsOf(job).includes('make parity-bindings-${{ matrix.implementation }}-check')), 'gates.yml runs no binding phase');
+  for (const target of ['parity-check', ...phases]) {
+    assert.ok(!CHECK_TARGETS.includes(target), `CHECK_TARGETS names ${target}, which gates.yml runs`);
+    const owners = jobs('.github/workflows/ci.yml').filter(job => runsOf(job).some(command => command.split(/[" ]/).includes(target)));
+    assert.deepEqual(owners.map(job => job.name), [], `ci.yml runs ${target}, which gates.yml runs`);
     assert.doesNotMatch(read('Makefile'), new RegExp(`^${target}:.*\\n\\t`, 'm'), 'provider recipes are never replaced');
   }
 });

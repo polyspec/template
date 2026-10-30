@@ -7,6 +7,7 @@
 - Template 0.0.15 is released at c779c6c1 after CI 41029017110 and gates 41029017118: the release runs 41031280975 and 41031277510 published nine archives and packages.json. (T27.1-41)
 - The CI setup of every runtime is the one that `config/ci.json` declares in `setup`, so kit's ci-setup runs no default `deps-<runtime>` target and the Makefile defines none (T27.1-32).
 - Kit 0.0.78 is the pinned release (T27.1-42): an installed kit writes no Claude Code hook in make link --project (K916), and no recipe of template passes --project, so template behaves as before.
+- Each parity phase runs once per push (T27.1-44): `.github/workflows/ci.yml` no longer has the jobs parity-api, parity-ts, parity-go, parity-rust, parity-php, parity-php-ext and parity-python, which ran `parity-api-check` and `parity-bindings-<implementation>-check` again after the jobs parity-api and parity-bindings of `.github/workflows/gates.yml`, and `CHECK_TARGETS` no longer names those targets.
 
 ## 0.0.15
 - Release 0.0.15: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.15, and the release publishes packages.json beside its archives. (T27.1-41)
