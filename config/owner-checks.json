@@ -395,7 +395,6 @@
         "tests/scripts/toolchain-files.test.mts"
       ],
       "targets": [
-        "toolchain-check",
         "lint-python"
       ]
     },

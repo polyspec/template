@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: cfe1d73c0143f6f9667d1074a4d44b5624bcf89f1429fea828a9afb18420f8d1 -->
+<!-- source-sha256: 121217e30b12f4f573d4c4c1828b4b3d537be057acc64d8c02cf37bc9008d2bc -->
 # 발행
 
 [English](/operations/publication).
@@ -90,11 +90,11 @@ npm: 필요한 모든 tarball을 `file:` 의존성으로 적는다. `@polyspec/t
 
 `npm install`은 polyspec 패키지를 tarball만으로 설치한다. `@polyspec/template-lsp`와 `@polyspec/template-codemirror`의 다른 의존성은 npm registry에서 온다.
 
-Composer: 내려받은 zip을 담은 directory인 `artifact` repository,
+Composer: release가 archive 옆에 게시하는 `packages.json`의 `composer` repository,
 
 ```json
 {
-  "repositories": [{ "type": "artifact", "url": "vendor/polyspec" }],
+  "repositories": [{ "type": "composer", "url": "https://github.com/polyspec/template/releases/download/vX.Y.Z/packages.json" }],
   "require": { "polyspec/template": "X.Y.Z" }
 }
 ```

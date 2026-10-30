@@ -1,5 +1,5 @@
-// The tools of a checkout are the var/tools of its main checkout: a linked worktree installs no tool and runs the tools that
-// the main checkout installed, as KIT_TOOLS of kit.mk (kit K519), and reads the downloads of its main checkout.
+// The tools of a checkout are its own var/tools: a linked worktree installs its tools with its own make install, as KIT_TOOLS
+// of kit.mk (kit K858), and reads the downloads of its main checkout, the wheelhouse of WHEELHOUSE of the Makefile.
 import { spawnSync } from 'node:child_process';
 import { realpathSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
@@ -11,8 +11,8 @@ function mainCheckout(root: string): string {
   return basename(folder) === '.git' ? realpathSync(dirname(folder)) : root;
 }
 
-/** The var/tools of the main checkout of `root`. */
-export const toolsDirectory = (root: string): string => join(mainCheckout(root), 'var/tools');
+/** The var/tools of the checkout `root`. */
+export const toolsDirectory = (root: string): string => join(root, 'var/tools');
 
 /** The wheelhouse of the main checkout of `root`, which make install fills with the build requirements of the wheel. */
 export const wheelhouseDirectory = (root: string): string => join(mainCheckout(root), 'var/python/wheelhouse');

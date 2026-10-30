@@ -89,11 +89,11 @@ npm: list every needed tarball as a `file:` dependency. `@polyspec/template-lang
 
 `npm install` installs the polyspec packages from the tarballs alone; the other dependencies of `@polyspec/template-lsp` and `@polyspec/template-codemirror` come from the npm registry.
 
-Composer: either an `artifact` repository, the directory that holds the downloaded zips,
+Composer: either the `composer` repository of the `packages.json` that the release publishes beside its archives,
 
 ```json
 {
-  "repositories": [{ "type": "artifact", "url": "vendor/polyspec" }],
+  "repositories": [{ "type": "composer", "url": "https://github.com/polyspec/template/releases/download/vX.Y.Z/packages.json" }],
   "require": { "polyspec/template": "X.Y.Z" }
 }
 ```

@@ -60,7 +60,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-browsers
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-test-scripts template-install-check parity-declarations-check function-contract-check function-inventory-check benchmark-check"
+      - run: make ci-targets TARGETS="template-test-scripts template-install-check function-contract-check function-inventory-check benchmark-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -437,7 +437,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make hooks
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="hooks-check docs-check rules-check kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types"
+      - run: make ci-targets TARGETS="hooks-check typecheck template-test-compiler-types"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -468,7 +468,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-node
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-ts test-ts conformance-ts"
+      - run: make ci-targets TARGETS="test-ts conformance-ts"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -532,7 +532,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-python
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-python test-python conformance-python conformance-generated-python"
+      - run: make ci-targets TARGETS="test-python conformance-python conformance-generated-python"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -599,7 +599,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-go
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-go template-lint-go-format test-go conformance-go"
+      - run: make ci-targets TARGETS="template-lint-go-format test-go conformance-go"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -630,7 +630,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-rust
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-rust template-lint-rust-format test-rust conformance-rust"
+      - run: make ci-targets TARGETS="template-lint-rust-format test-rust conformance-rust"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -670,7 +670,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-php
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-php template-lint-php-format test-php conformance-php"
+      - run: make ci-targets TARGETS="template-lint-php-format test-php conformance-php"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -714,7 +714,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-php
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-php-ext test-php-ext template-test-ext"
+      - run: make ci-targets TARGETS="template-test-ext"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}

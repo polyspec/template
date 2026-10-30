@@ -22,6 +22,8 @@ packages/php/.phpunit.result.cache
 .vscode-test.lock
 
 /var/
+# The link declaration of this checkout, its own development state (kit K869)
+/.links
 __pycache__/
 *.pyc
 

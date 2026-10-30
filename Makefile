@@ -14,7 +14,7 @@ export GOCACHE := $(CURDIR)/var/go/cache
 # with, not the exported PATH above, also when SHELL names another shell: a line `npm ci` ran the npm of the machine. A
 # recipe therefore starts each tool of the checkout by its absolute path: node and npm by $(NODE) and $(NPM) of kit.mk,
 # the node of mise.toml (kit K171), and go by its shim, $(GO) (T19.2). A script that a recipe starts gets the exported PATH.
-# The tools are those of the main checkout, KIT_TOOLS of kit.mk, which the include below defines (kit K519).
+# The tools are those of the checkout, KIT_TOOLS of kit.mk, which the include below defines (kit K858).
 GO = $(KIT_TOOLS)/mise/shims/go
 # make install-tools installs the Rust toolchain of rust-toolchain.toml (kit K151); rustup does not install it on the
 # first cargo, which several processes start at once in one run and whose installs then break each other (T18.7-1). A
@@ -42,8 +42,8 @@ ONLINE := env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_
 MAKEFLAGS += -k
 
 # The shared targets of kit (kit-sync, kit-check, hooks, docs-check, owner-check,
-# ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, toolchain-check, layout-check,
-# cargo-downloads-check, lint-*) come from the installed @polyspec/kit package. Its bootstrap includes kit.mk
+# ci-targets, ci-passed, release-*, dependency-*, install-tools, install-packages, layout-check,
+# lint-*) come from the installed @polyspec/kit package. Its bootstrap includes kit.mk
 # and selects source tools for native development links or compiled tools for a release package. Only config/*.json differ
 # between repositories.
 include node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk
@@ -92,7 +92,7 @@ PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  kit-sync|kit-check|hooks|hooks-check|owner-check|owner-validate|docs-check|layout-check|toolchain-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
+	@echo "  kit-sync|kit-check|hooks|hooks-check|owner-check|owner-validate|docs-check|layout-check|ci-targets|install-tools|install-packages|lint-python|release-*   Targets of the kit.mk of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
@@ -141,7 +141,7 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := hooks-check kit-check toolchain-check owner-validate rebuild-check language-check test-markers-check duplication-check bypass-check suppression-check divergence-check layout-check typecheck template-test-compiler-types lint-python docs-check docs-static-check template-test-scripts rules-check editor-boundary-check compiler-interface-check parity-declarations-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check contract-check function-contract-check function-inventory-check benchmark-check lint-ts lint-go lint-rust template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings lint-php template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php lint-php-ext test-php-ext conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
 
@@ -152,7 +152,7 @@ lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format tem
 lint-php: build-php typed-generator
 lint-ts: typed-generator
 lint-python: typed-generator
-lint-rust: cargo-downloads-check typed-generator
+lint-rust: typed-generator
 lint-go: typed-generator
 
 .PHONY: template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format
@@ -162,7 +162,7 @@ template-lint-rust-format:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
 template-lint-showcase-format: typed-generator
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
-template-lint-showcase-warnings: cargo-downloads-check typed-generator
+template-lint-showcase-warnings: typed-generator
 	$(CARGO) rustc --locked --manifest-path $(SHOWCASE_RUST)/Cargo.toml --bin showcase-adapter-rust -- -D warnings
 template-lint-php-format: build-php
 	vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
@@ -201,8 +201,6 @@ template-install-python: ## Download the hashed wheel build requirements and ins
 
 template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
 
-# The recipes run cargo offline, and cargo answers a missing crate with "retry without --offline"; this check names the
-# lock and the fix, make install, and every target that runs cargo depends on it (T20.1-5).
 template-install-vscode: ## Install the VS Code of the integration test into var/tools/vscode, after make install
 	$(ONLINE) $(NODE) $(KIT)/install-vscode.$(KIT_EXT) $(VSCODE_DIR) $(VSCODE_TOOLS)
 
@@ -236,7 +234,7 @@ template-build-go:
 
 build-rust: template-build-rust typed-generator ## Build the Rust CLI
 
-template-build-rust: cargo-downloads-check
+template-build-rust:
 	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
 
 build-php: template-build-php ## Install the Composer packages of the development root composer.json into vendor/
@@ -270,9 +268,9 @@ template-test-go-unit:
 test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and tests
 
 .PHONY: template-test-rust-clippy template-test-rust-unit
-template-test-rust-clippy: cargo-downloads-check
+template-test-rust-clippy:
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
-template-test-rust-unit: cargo-downloads-check
+template-test-rust-unit:
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support
 
 test-php: template-test-php ## PHP unit tests
@@ -280,7 +278,7 @@ test-php: template-test-php ## PHP unit tests
 template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
-template-test-scripts: build-rust typed-generator compiler-interface-generate cargo-downloads-check build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
+template-test-scripts: build-rust typed-generator compiler-interface-generate build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
 
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
@@ -380,7 +378,7 @@ vscode-package: template-build-vscode ## Build the .vsix
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
-conformance: cargo-downloads-check build-ts build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
+conformance: build-ts build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
 	$(NODE) tests/runner/conformance.mts
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
@@ -389,12 +387,12 @@ conformance-ts: build-ts ## Conformance suite of TypeScript
 	$(NODE) tests/runner/conformance.mts --langs ts
 conformance-go: build-ts build-go ## Conformance suite of TypeScript and Go
 	$(NODE) tests/runner/conformance.mts --langs ts,go
-conformance-rust: cargo-downloads-check build-ts build-rust ## Conformance suite of TypeScript and Rust
+conformance-rust: build-ts build-rust ## Conformance suite of TypeScript and Rust
 	$(NODE) tests/runner/conformance.mts --langs ts,rust
 conformance-php: build-ts build-php ## Conformance suite of TypeScript and PHP
 	$(NODE) tests/runner/conformance.mts --langs ts,php
 
-delimiter-matrix: cargo-downloads-check build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
+delimiter-matrix: build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
 	$(NODE) tests/runner/delimiter-matrix.mts
 
 conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
@@ -403,7 +401,7 @@ conformance-generated-ts: build-ts ## TypeScript generated compiler conformance 
 conformance-generated-go: build-ts ## Go generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-go.mts
 
-conformance-generated-rust: cargo-downloads-check build-ts ## Rust generated compiler conformance suite
+conformance-generated-rust: build-ts ## Rust generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-rust.mts
 
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
@@ -458,7 +456,7 @@ conformance-generated-python: build-ts python-package ## Python generated compil
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
 
-conformance-cases: cargo-downloads-check build-ts build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
+conformance-cases: build-ts build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
 	$(NODE) scripts/conformance-cases.mts $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
@@ -469,7 +467,7 @@ template-install-check: template-install-workspace-check package-installs-check 
 .PHONY: template-install-workspace-check package-installs-check
 template-install-workspace-check:
 	$(NODE) scripts/check-install-workspace.mts
-package-installs-check: cargo-downloads-check typed-generator
+package-installs-check: typed-generator
 	$(NODE) scripts/check-package-installs.mts
 
 # parity-check and parity-declarations-check of kit read config/parity.json (T24.7): parity-check runs the native test of each
@@ -477,7 +475,7 @@ package-installs-check: cargo-downloads-check typed-generator
 # The ts symbol extractor reads the declarations that the build of the TypeScript package emits (packages/ts/dist/index.d.ts),
 # which both checks need to exist (symbols of config/parity.json, T22.6-14).
 # Formatter SDK bindings import the published package, which must exist in a clean checkout.
-parity-check: cargo-downloads-check build-php build-php-ext python-package template-build-language
+parity-check: build-php build-php-ext python-package template-build-language
 
 parity-check parity-declarations-check: build-ts
 
@@ -536,9 +534,9 @@ compiler-interface-generate: ## Generate the typed compiler Mermaid diagrams
 compiler-interface-check: compiler-interface-generate compiler-interface-languages-check compiler-interface-mutations-check ## Verify the typed generated module structure in every language
 
 .PHONY: compiler-interface-languages-check compiler-interface-mutations-check
-compiler-interface-languages-check: cargo-downloads-check build-php python-package
+compiler-interface-languages-check: build-php python-package
 	$(NODE) scripts/check-compiler-interface.mts
-compiler-interface-mutations-check: cargo-downloads-check build-php python-package
+compiler-interface-mutations-check: build-php python-package
 	$(NODE) scripts/check-compiler-interface-mutations.mts
 
 docs: compiler-interface-generate ## Build the documentation site
@@ -555,19 +553,19 @@ docs-static-check: docs ## Build the documentation site as static files
 contract-generate: ## Generate the declarations and Mermaid diagrams of the showcase adapters (not tracked)
 	$(NODE) scripts/generate-showcase-contract.mts
 
-contract-check: cargo-downloads-check build-ts build-php python-package typed-generator ## Verify generated declarations, implementations and runtime state recovery
+contract-check: build-ts build-php python-package typed-generator ## Verify generated declarations, implementations and runtime state recovery
 	$(NODE) scripts/check-showcase-contract.mts
 
 # showcase measures the modes into var/showcase and checks that measurement; the committed benchmark and its documents change
 # only through make bench, so a showcase build leaves the tracked tree as it was (T26.7-87).
-showcase: cargo-downloads-check typed-generator build-php python-package ## Build the executable example site and its result artifacts
+showcase: typed-generator build-php python-package ## Build the executable example site and its result artifacts
 	$(NODE) examples/showcase/build.mts --write --langs $(SHOWCASE_LANGS)
 	$(NODE) scripts/check-showcase-contract.mts
 	$(NODE) examples/showcase/benchmark-modes.mts --output var/showcase/mode-benchmark.json
 	$(NODE) scripts/check-benchmark-results.mts var/showcase/mode-benchmark.json
 	$(NODE) examples/showcase/build-site.mts
 
-bench: cargo-downloads-check typed-generator build-php python-package ## Measure production AST and generated artifacts
+bench: typed-generator build-php python-package ## Measure production AST and generated artifacts
 	$(NODE) examples/showcase/benchmark-modes.mts --output examples/site/data/mode-benchmark.json
 	$(NODE) scripts/check-benchmark-results.mts
 	$(NODE) scripts/update-benchmark-docs.mts
@@ -578,7 +576,7 @@ benchmark-check: benchmark-results-check benchmark-docs-check ## Verify committe
 benchmark-results-check:
 	$(NODE) scripts/check-benchmark-results.mts
 
-benchmark-smoke: cargo-downloads-check typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
+benchmark-smoke: typed-generator build-php ## Measure a fresh short equal-output sample without changing committed results
 	$(NODE) scripts/check-benchmark-smoke.mts
 
 template-function-inventory: ## Inventory function-shaped calls in an explicit external template tree
@@ -600,7 +598,7 @@ showcase-check: typed-generator-compile-check showcase-build-check contract-chec
 # The compiled AST artifacts and the generated programs are built by showcase-compile and typed-generator and are not tracked
 # (RT-57): each manifest records the digests of its source, types, contract and compiler, and the build reuses an artifact
 # whose digests match.
-showcase-build-check: cargo-downloads-check typed-generator build-php
+showcase-build-check: typed-generator build-php
 	$(NODE) examples/showcase/build.mts --check --langs $(SHOWCASE_LANGS)
 showcase-site-check: showcase-build-check
 	$(NODE) examples/showcase/build-site.mts
@@ -613,15 +611,15 @@ showcase-compile: build-ts ## Build the canonical AST artifacts of the showcase
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, typed locals that decode once, and typed request argument errors, in every core language
 
 .PHONY: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check
-generated-native-calls-check: cargo-downloads-check build-ts build-php python-package
+generated-native-calls-check: build-ts build-php python-package
 	$(NODE) scripts/check-generated-native-calls.mts
-generated-typed-values-check: cargo-downloads-check build-ts build-php python-package
+generated-typed-values-check: build-ts build-php python-package
 	$(NODE) scripts/check-generated-typed-values.mts
 generated-typed-locals-check: build-ts
 	$(NODE) scripts/check-generated-typed-locals.mts
-generated-arguments-check: cargo-downloads-check build-ts build-php python-package
+generated-arguments-check: build-ts build-php python-package
 	$(NODE) scripts/check-generated-arguments.mts
-generated-bound-data-check: cargo-downloads-check build-ts build-php python-package
+generated-bound-data-check: build-ts build-php python-package
 	$(NODE) scripts/check-generated-bound-data.mts
 
 typed-generator: showcase-compile contract-generate ## Generate type-fixed host source from canonical AST and the contract declarations of the adapters
@@ -642,21 +640,21 @@ compiler-ir-rules-check: build-ts
 conformance-type-manifest-check: build-ts
 	$(NODE) scripts/check-conformance-type-manifest.mts
 
-typed-generator-compile-check: cargo-downloads-check build-php python-package compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
+typed-generator-compile-check: build-php python-package compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
 	$(NODE) scripts/check-typed-generator.mts
 
 .PHONY: generated-lint-check
-generated-lint-check: cargo-downloads-check build-php typed-generator ## Lint the generated Go, Rust, TypeScript and PHP programs as code of a consumer: formatter and unused code
+generated-lint-check: build-php typed-generator ## Lint the generated Go, Rust, TypeScript and PHP programs as code of a consumer: formatter and unused code
 	$(NODE) scripts/check-generated-lint.mts
 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
 # Provider-owned phases retain their recipes; template supplies only build prerequisites.
-parity-api-check: cargo-downloads-check build-ts build-php python-package template-build-language error-codes-check
+parity-api-check: build-ts build-php python-package template-build-language error-codes-check
 parity-bindings-ts-check: build-ts template-build-language error-codes-check
 parity-bindings-go-check: build-ts template-build-language error-codes-check
-parity-bindings-rust-check: build-ts template-build-language error-codes-check cargo-downloads-check
+parity-bindings-rust-check: build-ts template-build-language error-codes-check
 parity-bindings-php-check: build-ts template-build-language error-codes-check build-php
 parity-bindings-php-ext-check: build-ts template-build-language error-codes-check build-php-ext
 parity-bindings-python-check: build-ts template-build-language error-codes-check python-package

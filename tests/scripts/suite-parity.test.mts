@@ -203,16 +203,9 @@ test('language dependency install targets do not reach unrelated native package 
     assert.doesNotMatch(dryRun(`template-install-${language}`).join('\n'), pattern, language);
   }
   const all = dryRun('template-install-parity').join('\n');
-  for (const required of ['check-cargo-downloads', 'mod download', 'composer-install', 'pip download', 'python-package']) {
+  for (const required of ['fetch-cargo-downloads', 'mod download', 'composer-install', 'pip download', 'python-package']) {
     assert.ok(all.includes(required), `parity installation lacks ${required}`);
   }
-});
-
-test('non-Rust conformance does not require Rust downloads while Rust retains its guard', () => {
-  for (const target of ['conformance-ts', 'conformance-go', 'conformance-php', 'conformance-python', 'template-test-ext-conformance']) {
-    assert.doesNotMatch(dryRun(target).join('\n'), /check-cargo-downloads/, target);
-  }
-  assert.match(dryRun('conformance-rust').join('\n'), /check-cargo-downloads/);
 });
 
 // T27.1-9-1: Kit owns every phase recipe and validates complete phase coverage.
@@ -234,20 +227,24 @@ test('CI partitions every official provider parity phase exactly once', () => {
   }
 });
 
-test('native CI workers own their language lint and select their tool groups', () => {
+// The lint of each runtime is a gate of kit that gates.yml runs (kit S12, K870); a language job runs the format check of
+// template and no lint of kit.
+test('native CI workers own the format checks of template, leave the lint of kit to gates.yml and select their tool groups', () => {
   const expected: Record<string, string[]> = {
-    go: ['lint-go', 'template-lint-go-format'],
-    rust: ['lint-rust', 'template-lint-rust-format'],
-    php: ['lint-php', 'template-lint-php-format'],
-    python: ['lint-python'],
+    go: ['template-lint-go-format'],
+    rust: ['template-lint-rust-format'],
+    php: ['template-lint-php-format'],
+    python: [],
   };
   for (const [language, targets] of Object.entries(expected)) {
     const job = jobs('.github/workflows/ci.yml').find(job => job.name === language);
     assert.ok(job);
     const commands = runsOf(job);
+    const owned = commands.filter(command => command.includes('TARGETS="')).flatMap(command => command.split(/[" ]/));
     assert.ok(commands.some(command => command.startsWith('make install-tools TOOLS="')), language);
     assert.ok(!commands.includes('make install-tools'), language);
-    for (const target of targets) assert.ok(commands.some(command => command.includes(`TARGETS="`) && command.split(/[" ]/).includes(target)), `${language} owns ${target}`);
+    for (const target of targets) assert.ok(owned.includes(target), `${language} owns ${target}`);
+    assert.ok(!owned.includes(`lint-${language}`), `${language} runs lint-${language}, a gate of kit that gates.yml runs`);
   }
 });
 
