@@ -36,12 +36,9 @@ final class CliTest extends TestCase
      */
     private function invoke(array $arguments): array
     {
-        // The library that kit's make build-php-ext publishes (S10).
-        $library = Support::repositoryRoot() . '/var/php-ext/polyspec_template.so';
-        $command = array_merge(
-            [PHP_BINARY, '-d', 'extension=' . $library, self::command()],
-            $arguments,
-        );
+        // The child loads the extension of the run from the PHP_INI_SCAN_DIR that it inherits (kit K900);
+        // a -d extension= of its own would load the extension a second time.
+        $command = array_merge([PHP_BINARY, self::command()], $arguments);
         $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
         $process = proc_open($command, $descriptors, $pipes);
         $this->assertIsResource($process);
