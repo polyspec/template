@@ -528,7 +528,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="python uv ruff vulture"
+      - run: make install-tools TOOLS="python uv"
         if: ${{ !cancelled() }}
       - run: make template-install-python
         if: ${{ !cancelled() }}
@@ -595,7 +595,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="go golangciLint deadcode"
+      - run: make install-tools TOOLS="go"
         if: ${{ !cancelled() }}
       - run: make template-install-go
         if: ${{ !cancelled() }}
@@ -666,7 +666,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-packages
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="php composer phpcs phpstan"
+      - run: make install-tools TOOLS="php composer"
         if: ${{ !cancelled() }}
       - run: make template-install-php
         if: ${{ !cancelled() }}

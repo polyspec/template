@@ -510,7 +510,7 @@ test('the python job of ci.yml installs the pinned interpreter and Python depend
   const job = jobs('.github/workflows/ci.yml').find(entry => entry.name === 'python');
   assert.ok(job, 'ci.yml has no python job; the check verified nothing');
   assert.equal(job.value.strategy, undefined, 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
-  assert.ok(runsOf(job).includes('make install-tools TOOLS="python uv ruff vulture"'), 'the Python job installs its declared interpreter and lint tools');
+  assert.ok(runsOf(job).includes('make install-tools TOOLS="python uv"'), 'the Python job installs its declared interpreter and uv');
   assert.ok(runsOf(job).includes('make template-install-python'), 'the Python job installs its locked dependencies');
   assert.equal(usesOf(job, 'actions/setup-python@').length, 0, 'the python job sets up a Python of PATH; it runs the pinned interpreter');
 });

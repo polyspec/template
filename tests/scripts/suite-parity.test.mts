@@ -248,6 +248,20 @@ test('native CI workers own the format checks of template, leave the lint of kit
   }
 });
 
+// The lint tools of kit: the tools that only the lint gates of kit start, from their own scripts. gates.yml runs every lint
+// gate (kit S12, K870), and generated-lint-check, the one target of template that starts them, runs in a job that installs
+// every tool with make install, so a job that selects its tools selects none of them (T27.1-38).
+const KIT_LINT_TOOLS = ['ruff', 'vulture', 'golangciLint', 'deadcode', 'govulncheck', 'phpcs', 'phpstan', 'alint', 'cargoAudit', 'cargoDeny'];
+
+test('a CI job that selects its tools installs no lint tool of kit, which only the gates of gates.yml start', () => {
+  for (const job of jobs('.github/workflows/ci.yml')) {
+    for (const command of runsOf(job)) {
+      const selected = /^make install-tools TOOLS="([^"]*)"/.exec(command)?.[1]?.split(' ') ?? [];
+      assert.deepEqual(selected.filter(tool => KIT_LINT_TOOLS.includes(tool)), [], `job ${job.name} installs lint tools of kit that none of its targets starts`);
+    }
+  }
+});
+
 // Native build discovery includes showcase packages whose imports are generated.
 for (const language of ['go', 'rust']) {
   test(`native ${language} builds generate showcase imports before provider discovery`, () => {
