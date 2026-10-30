@@ -2,7 +2,7 @@
   "name": "polyspec-template",
   "displayName": "Polyspec Template",
   "description": "HTML highlighting with embedded CSS and JavaScript and a client of the bundled template language server: parse diagnostics, semantic tokens of the template tags, matching tags, folding, formatting and typing indentation for the polyspec template language",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "publisher": "polyspec",
   "license": "MIT",
   "private": true,
@@ -130,7 +130,7 @@
     }
   },
   "dependencies": {
-    "@polyspec/template-lsp": "0.0.14",
+    "@polyspec/template-lsp": "0.0.15",
     "vscode-languageclient": "^11.0.0"
   },
   "scripts": {

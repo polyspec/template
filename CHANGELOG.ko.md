@@ -1,10 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f899ccfbd0d74faab2e4bb4c2559befdc5ac8ed3fd7c5b2ec0179fb9a7c22144 -->
+<!-- source-sha256: 1e00c7a67e97de322e5542e303b6edb33896a7c0f9e2220be466dc8d4952bffb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.15
+- 릴리스 0.0.15: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.15를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-41)
 - make test-go는 typed-generator를 먼저 실행한다. kit의 test-go는 go.work의 모든 module을 test하고, `examples/showcase/adapters/go`의 showcase adapter는 git이 무시하는 generated program을 import하는데, 그것을 쓰는 것은 lint-go뿐이었다. lint-go를 더 실행하지 않는 CI의 go job이 `package showcase-adapter-go/generated/compiler-coverage is not in std`로 실패했다. (T27.1-40)
 - packages/php-ext의 CliTest는 자식 PHP를 자기 `-d extension=` 없이 시작한다. 자식은 kit이 실행의 extension을 읽는 PHP_INI_SCAN_DIR을 물려받으므로(kit K900), extension을 두 번 읽어 `PHP Warning: Module "polyspec_template" is already loaded`를 출력하고 test-php-ext를 실패시켰다. (T27.1-39)
 - `.github/workflows/ci.yml`의 python, go, php job은 ruff, vulture, golangci-lint, deadcode, phpcs, PHPStan을 더 설치하지 않는다. 이 도구는 kit의 lint gate만 실행하며, `.github/workflows/gates.yml`이 그 gate를 실행한다(kit K870). suite-parity는 kit의 lint 도구를 고르는 job에서 실패한다. (T27.1-38)

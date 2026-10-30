@@ -1,6 +1,6 @@
 {
     "name": "polyspec/template-php-ext",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "description": "PHP extension, built by PIE, that renders templates with an independent C implementation of the specification",
     "type": "php-ext",
     "license": "MIT",

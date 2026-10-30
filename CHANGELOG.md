@@ -4,6 +4,9 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.15
+- Release 0.0.15: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.15, and the release publishes packages.json beside its archives. (T27.1-41)
 - make test-go runs typed-generator first: test-go of kit tests every module of go.work, and the showcase adapter of `examples/showcase/adapters/go` imports its git-ignored generated programs, which only lint-go wrote; the go job of CI, which no longer runs lint-go, failed with `package showcase-adapter-go/generated/compiler-coverage is not in std`. (T27.1-40)
 - CliTest of packages/php-ext starts its child PHP without a `-d extension=` of its own: the child inherits the PHP_INI_SCAN_DIR through which kit loads the extension of the run (kit K900), so it loaded the extension twice, printed `PHP Warning: Module "polyspec_template" is already loaded` and failed test-php-ext. (T27.1-39)
 - The python, go and php jobs of `.github/workflows/ci.yml` no longer install ruff, vulture, golangci-lint, deadcode, phpcs and PHPStan, which only the lint gates of kit start and `.github/workflows/gates.yml` runs (kit K870); suite-parity fails for a job that selects a lint tool of kit. (T27.1-38)
