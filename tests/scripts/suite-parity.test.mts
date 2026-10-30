@@ -209,10 +209,10 @@ test('language dependency install targets do not reach unrelated native package 
   }
 });
 
-// T27.1-9-1, T27.1-44: Kit owns every phase recipe, and gates.yml of kit runs each phase in its jobs parity-api and
-// parity-bindings, whose matrix is the implementations of config/parity.json; a job of ci.yml or an entry of CHECK_TARGETS that
-// named a phase ran it a second time on every push.
-test('gates.yml runs every official provider parity phase, and ci.yml runs none', () => {
+// T27.1-9-1, T27.1-44, T27.1-43: Kit owns every phase recipe, and ci-pipeline.yml of kit, which the job kit of ci.yml calls,
+// runs each phase in its jobs parity-api and parity-bindings, whose matrix is the implementations of config/parity.json; a job
+// of ci.yml or an entry of CHECK_TARGETS that named a phase ran it a second time on every push.
+test('ci-pipeline.yml runs every official provider parity phase, and ci.yml runs none', () => {
   const { implementations } = jsonDocument<{ implementations: { name: string }[] }>('parity implementation names', {
     type: 'object',
     required: ['implementations'],
@@ -220,20 +220,32 @@ test('gates.yml runs every official provider parity phase, and ci.yml runs none'
   }).parse(read('config/parity.json'), 'config/parity.json');
   const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
   assert.equal(parsedJsonObject(read('config/ci.json'), 'config/ci.json').parityMode, 'phases');
-  const gates = jobs('.github/workflows/gates.yml');
-  assert.ok(gates.find(job => job.name === 'parity-api' && runsOf(job).includes('make -k parity-api-check')), 'gates.yml runs no parity-api-check');
-  assert.ok(gates.find(job => job.name === 'parity-bindings' && runsOf(job).includes('make parity-bindings-${{ matrix.implementation }}-check')), 'gates.yml runs no binding phase');
+  const pipeline = jobs('.github/workflows/ci-pipeline.yml');
+  assert.ok(pipeline.find(job => job.name === 'parity-api' && runsOf(job).some(command => command.startsWith('make ci-targets TARGETS="parity-api-check '))), 'ci-pipeline.yml runs no parity-api-check');
+  assert.ok(pipeline.find(job => job.name === 'parity-bindings' && runsOf(job).includes('make ci-targets TARGETS="parity-bindings-${{ matrix.implementation }}-check"')), 'ci-pipeline.yml runs no binding phase');
   for (const target of ['parity-check', ...phases]) {
-    assert.ok(!CHECK_TARGETS.includes(target), `CHECK_TARGETS names ${target}, which gates.yml runs`);
+    assert.ok(!CHECK_TARGETS.includes(target), `CHECK_TARGETS names ${target}, which ci-pipeline.yml runs`);
     const owners = jobs('.github/workflows/ci.yml').filter(job => runsOf(job).some(command => command.split(/[" ]/).includes(target)));
-    assert.deepEqual(owners.map(job => job.name), [], `ci.yml runs ${target}, which gates.yml runs`);
+    assert.deepEqual(owners.map(job => job.name), [], `ci.yml runs ${target}, which ci-pipeline.yml runs`);
     assert.doesNotMatch(read('Makefile'), new RegExp(`^${target}:.*\\n\\t`, 'm'), 'provider recipes are never replaced');
   }
 });
 
-// The lint of each runtime is a gate of kit that gates.yml runs (kit S12, K870); a language job runs the format check of
-// template and no lint of kit.
-test('native CI workers own the format checks of template, leave the lint of kit to gates.yml and select their tool groups', () => {
+// T27.1-43: the gates of kit run in the job kit of ci.yml, which calls ci-pipeline.yml, so the run of ci.yml that a release
+// takes by its id holds them; ci-passed needs kit like every other job, and no other job needs it, since none reads an output
+// of the pipeline and each runs beside it.
+test('the job kit of ci.yml calls ci-pipeline.yml, and only ci-passed needs it', () => {
+  const ci = jobs('.github/workflows/ci.yml');
+  const kit = ci.find(job => job.name === 'kit');
+  assert.ok(kit, 'ci.yml has no job kit');
+  assert.equal(kit.value.uses, './.github/workflows/ci-pipeline.yml');
+  const needing = ci.filter(job => [job.value.needs].flat().includes('kit')).map(job => job.name);
+  assert.deepEqual(needing, ['ci-passed']);
+});
+
+// The lint of each runtime is a gate of kit that ci-pipeline.yml runs (kit S12, K870); a language job runs the format check
+// of template and no lint of kit.
+test('native CI workers own the format checks of template, leave the lint of kit to ci-pipeline.yml and select their tool groups', () => {
   const expected: Record<string, string[]> = {
     go: ['template-lint-go-format'],
     rust: ['template-lint-rust-format'],
@@ -248,16 +260,16 @@ test('native CI workers own the format checks of template, leave the lint of kit
     assert.ok(commands.some(command => command.startsWith('make install-tools TOOLS="')), language);
     assert.ok(!commands.includes('make install-tools'), language);
     for (const target of targets) assert.ok(owned.includes(target), `${language} owns ${target}`);
-    assert.ok(!owned.includes(`lint-${language}`), `${language} runs lint-${language}, a gate of kit that gates.yml runs`);
+    assert.ok(!owned.includes(`lint-${language}`), `${language} runs lint-${language}, a gate of kit that ci-pipeline.yml runs`);
   }
 });
 
-// The lint tools of kit: the tools that only the lint gates of kit start, from their own scripts. gates.yml runs every lint
+// The lint tools of kit: the tools that only the lint gates of kit start, from their own scripts. ci-pipeline.yml runs every lint
 // gate (kit S12, K870), and generated-lint-check, the one target of template that starts them, runs in a job that installs
 // every tool with make install, so a job that selects its tools selects none of them (T27.1-38).
 const KIT_LINT_TOOLS = ['ruff', 'vulture', 'golangciLint', 'deadcode', 'govulncheck', 'phpcs', 'phpstan', 'alint', 'cargoAudit', 'cargoDeny'];
 
-test('a CI job that selects its tools installs no lint tool of kit, which only the gates of gates.yml start', () => {
+test('a CI job that selects its tools installs no lint tool of kit, which only the gates of ci-pipeline.yml start', () => {
   for (const job of jobs('.github/workflows/ci.yml')) {
     for (const command of runsOf(job)) {
       const selected = /^make install-tools TOOLS="([^"]*)"/.exec(command)?.[1]?.split(' ') ?? [];

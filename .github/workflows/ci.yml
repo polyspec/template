@@ -3,15 +3,15 @@
 # of each target, a summary with the first failure lines of each failed target, which is also the job summary, and the
 # versions of the toolchains of the job. Every job uploads its report under `!cancelled()` (T20.1-9). Every target of
 # CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run no other target
-# (T17.1-10); the parity phases are gates of kit, which .github/workflows/gates.yml runs, so no job here runs one
-# (T27.1-44). A verifying job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04,
+# (T17.1-10); the gates of kit, the parity phases among them, run in the job kit, which calls
+# .github/workflows/ci-pipeline.yml of kit, so no other job here runs one (T27.1-44, T27.1-43). A verifying job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04,
 # pins its actions by commit and installs with `make install-tools TOOLS=npm`, which installs the npm of the checkout and
 # mise into var/tools, and `make install-packages`, which installs package-lock.json with @polyspec/kit. Native workers
 # select their locked tools and dependencies; mixed workers use the complete install. setup-php installs no tools,
 # because Composer is a tool of mise.toml. The workflow runs on every push to main and every manual run
 # (workflow_dispatch): the job ci-passed, the last job, passes only when every other job of this workflow passed
-# (T22.1-3), and a release requires its check run on the tagged commit of main; .github/workflows/release.yml
-# releases a tag. A newer push to a branch does not cancel the run of an earlier push.
+# (T22.1-3), and .github/workflows/release.yml releases the commit of a successful run of this workflow, which the
+# maintainer names by its id. A newer push to a branch does not cancel the run of an earlier push.
 # Builds, downloads and complete jobs report progress and are judged by exit status. Only individual test cases
 # have repository-defined timeouts; a job deadline must not cancel a normal operation or successful tests.
 name: CI
@@ -35,6 +35,11 @@ env:
   npm_config_cache: ${{ github.workspace }}/var/bootstrap/npm-cache
 
 jobs:
+  # The gates of kit (kit S12): ci-pipeline.yml, which kit-sync copies, plans and runs the shared, parity and runtime gates.
+  # No job here needs it: none reads an output of the pipeline, so each runs beside it, and ci-passed needs it.
+  kit:
+    uses: ./.github/workflows/ci-pipeline.yml
+
   scripts:
     runs-on: ubuntu-24.04
     steps:
@@ -443,11 +448,6 @@ jobs:
           path: var/report/ci-targets/
           if-no-files-found: error
 
-  # The check of this workflow that a release requires (T22.1-3). It runs after every other job, also after a
-  # failed, skipped or cancelled one (if: always()), and make ci-passed fails unless every job of needs has the result
-  # success, so a new job of this workflow is required once it is listed in needs. Its step has no condition of its own:
-  # a skipped step would pass the check. make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the
-  # job installs the npm, mise and node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   php-ext:
     runs-on: ubuntu-24.04
     steps:
@@ -487,14 +487,15 @@ jobs:
           path: var/report/ci-targets/
           if-no-files-found: error
 
-  # The check of this workflow that a release requires (T22.1-3). It runs after every other job, also after a
-  # failed, skipped or cancelled one (if: always()), and make ci-passed fails unless every job of needs has the result
-  # success, so a new job of this workflow is required once it is listed in needs. Its step has no condition of its own:
-  # a skipped step would pass the check. make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the
-  # job installs the npm, mise and node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
+  # The job that fails the run when any other job did not pass, so a release, which takes a successful run by its id,
+  # holds every job (T22.1-3). It runs after every other job, also after a failed, skipped or cancelled one (if:
+  # always()), and make ci-passed fails unless every job of needs has the result success, so a new job of this workflow
+  # is required once it is listed in needs. Its step has no condition of its own: a skipped step would pass the check.
+  # make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs the npm, mise and
+  # node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
+    needs: [kit, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

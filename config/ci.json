@@ -5,9 +5,7 @@
     "shared": [
       "build-ts"
     ],
-    "parity": [
-      "kit-install-php-arginfo"
-    ],
+    "parity": [],
     "runtimes": {
       "go": [
         "template-install-go",

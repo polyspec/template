@@ -14,8 +14,9 @@
 // - PHP is one of the minor versions of config/toolchain.json: setup-php cannot pin a patch, so the minor is the pin and
 //   the CI report records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
 //   no tools;
-// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
-// - the last job of ci.yml is ci-passed, the check of ci.yml that a release requires: it runs after every other
+// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04, but the job kit of ci.yml,
+//   which calls ci-pipeline.yml of the checkout;
+// - the last job of ci.yml is ci-passed, which fails the run that a release takes by its id unless every job passed: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
 // - release.yml is the release workflow that kit copies (T24.1); kit tests it and make kit-sync refreshes the copy.
@@ -78,6 +79,8 @@ const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof valu
 // The job ci-passed of ci.yml runs only make ci-passed, which reads the results of the other jobs: it installs nothing,
 // runs no check of the suite and writes no report.
 const CI_PASSED = 'ci-passed';
+// The job kit of ci.yml calls the pipeline of kit, which kit-sync copies and kit tests (T27.1-43).
+const KIT_PIPELINE = './.github/workflows/ci-pipeline.yml';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
 // make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs both first (kit K171).
 const LOCKED_KIT_INSTALL = "npm_config_cache=\"$PWD/var/bootstrap/npm-cache\" npm exec --yes --package=\"$(node -p 'require(\"./package.json\").packageManager.split(\"+\")[0]')\" -- npm ci --ignore-scripts --allow-remote=root";
@@ -99,7 +102,8 @@ export function ciPassedViolations(text: string) {
   if (JSON.stringify([...needs].sort(compareText)) !== JSON.stringify(others.map(entry => entry.name).sort(compareText))) {
     found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
   }
-  const runners = [...new Set(others.map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
+  // The job kit calls ci-pipeline.yml, whose jobs pick their runners, so it has no runner of its own (T27.1-43).
+  const runners = [...new Set(others.filter(entry => entry.value.uses !== KIT_PIPELINE).map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
   const runsOn = shown(jobField(job, 'runs-on'));
   if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = runsOf(job);
@@ -407,7 +411,8 @@ test('every CI job runs its targets past failures and uploads their report, also
   const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'kit-install-php-arginfo', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
-  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
+  // The job kit calls ci-pipeline.yml, whose jobs run make ci-targets and upload their reports; kit tests that workflow.
+  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED && entry.value.uses !== KIT_PIPELINE)) {
     const lines = runLines(job);
     const runners = new Set<string>();
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
@@ -447,8 +452,7 @@ test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
     const workflow = workflowOf(read(file), file);
     const triggers = workflow.on;
     if (!isJsonObject(triggers)) throw new Error(`${file} declares no triggers`);
-    // A tag push runs a release, which no later push replaces.
-    if (!('push' in triggers) || (isJsonObject(triggers.push) && 'tags' in triggers.push)) continue;
+    if (!('push' in triggers)) continue;
     assert.deepEqual(workflow.concurrency, { group: '${{ github.workflow }}-${{ github.ref }}', 'cancel-in-progress': false }, `${file} has no concurrency group of its workflow and ref that cancels no run`);
   }
 });
@@ -492,11 +496,13 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
-    for (const pin of pinsOf(file)) {
+    // The pipeline of kit is a workflow of the checkout, which runs at the commit of the run, so it needs no pin.
+    for (const pin of pinsOf(file).filter(entry => entry.uses !== KIT_PIPELINE)) {
       assert.match(pin.uses, /^[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/, `${file}: ${pin.uses} is not pinned by a commit`);
       assert.match(pin.comment ?? 'no comment', /^v?\d+\.\d+\.\d+$/, `${file}: ${pin.uses} does not name its release in a comment`);
     }
-    for (const job of jobs(file)) {
+    // The job kit has no runner of its own; the jobs of the pipeline choose theirs.
+    for (const job of jobs(file).filter(entry => entry.value.uses !== KIT_PIPELINE)) {
       const runsOn = jobField(job, 'runs-on');
       assert.equal(runsOn, 'ubuntu-24.04', `${file}: runs-on ${shown(runsOn)}, expected ubuntu-24.04`);
     }

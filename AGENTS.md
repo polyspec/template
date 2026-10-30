@@ -67,12 +67,12 @@ A check gives the same result for the same tree, at any time and on any machine.
 
 ## Release
 
-- Own: A release is a tag of a commit of `main` whose CI run succeeded: the job `ci-passed` of `.github/workflows/ci.yml` passes only when every other job of that run passed. Only the maintainer creates, moves or pushes a tag (T22.1-4).
-  Enforced by: `make release-verify`
+- Own: A release is the commit of a successful push or manual run of `.github/workflows/ci.yml` on `main`: the job `ci-passed` passes only when every other job of that run passed, the job `kit` with the gates of kit included. Only the maintainer starts a release, and no tag is created, moved or pushed by hand (T22.1-4).
+  Enforced by: `make release-tag`, which tags only the commit of such a run; who dispatches the release is a permission of GitHub.
 - Own: The version-bump commit `chore(release): Release X.Y.Z (#task)` sets the version X.Y.Z in every manifest that `config/release.json` lists in `manifests` (the root `package.json`, the npm packages, the VS Code extension, the Rust crate and the Python package (`packages/python/pyproject.toml`), with `package-lock.json` and `packages/rust/Cargo.lock`; a `composer.json` has no `version` field and takes the version from the tag) and renames `## Unreleased` of `CHANGELOG.md` and `CHANGELOG.ko.md` to `## X.Y.Z`, with a new empty `## Unreleased` above it.
   Enforced by: none, the version-bump commit is a judgement; the package managers resolve the versions.
-- Own: After the CI run of the push that brought the commit to `main` succeeded, the maintainer tags it `vX.Y.Z`, and `packages/go/vX.Y.Z` for the Go module, and pushes the tag. The tag push runs `.github/workflows/release.yml`, which requires the tagged commit on `main` with the check `ci-passed` passed, the version of the tag in every manifest and the section `## X.Y.Z` in `CHANGELOG.md`, builds the package archives named `<package>-<language>-<version>.<ext>` (`polyspec-template-npm-X.Y.Z.tgz`) and creates the GitHub Release (`docs/operations/publication.md`).
-  Enforced by: `make release-verify`
+- Own: After the CI run of the push that brought the version-bump commit to `main` succeeded, the maintainer runs `gh workflow run release.yml -f run=<id> -f version=X.Y.Z` with the id of that run. Its `make release-tag` requires a completed successful push or manual run of `.github/workflows/ci.yml` on `main` whose commit is on `origin/main`, and creates and pushes the annotated tags `vX.Y.Z` and `packages/go/vX.Y.Z` at that commit; the workflow then builds the package archives named `<package>-<language>-<version>.<ext>` (`polyspec-template-npm-X.Y.Z.tgz`) from the tag and creates the GitHub Release with the section `## X.Y.Z` of `CHANGELOG.md` as its notes (`docs/operations/publication.md`).
+  Enforced by: `make release-tag`
 
 ## Generated files
 
