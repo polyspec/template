@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e9e52f78a15e2aeef7fad277a58957cd21c16c8519f0253821852bd7582cd8ea -->
+<!-- source-sha256: eb9dc980c42f72fbb5eb6e56253507dca17e4f76abe2b3ba3a47905f4a7e3987 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -10,6 +10,7 @@
 - Kit 0.0.78이 pin한 release다(T27.1-42). 설치된 kit은 make link --project에서 Claude Code hook을 쓰지 않고(K916) template의 어떤 recipe도 --project를 넘기지 않으므로 template은 이전처럼 동작한다.
 - 각 parity phase는 push마다 한 번 실행된다(T27.1-44). `.github/workflows/ci.yml`에는 `.github/workflows/gates.yml`의 job parity-api와 parity-bindings 다음에 `parity-api-check`와 `parity-bindings-<implementation>-check`를 다시 실행하던 job parity-api, parity-ts, parity-go, parity-rust, parity-php, parity-php-ext, parity-python이 더는 없고 `CHECK_TARGETS`는 그 target을 적지 않는다.
 - Kit 0.0.79가 pin한 release다(T27.1-43). `.github/workflows/ci.yml`의 job `kit`이 kit-sync가 지운 gates workflow 대신 복사하는 `.github/workflows/ci-pipeline.yml`을 호출하므로, CI 실행 하나가 kit의 gate와 template의 job을 담고 `ci-passed`는 `kit`을 기다린다. `config/release.json`은 `checks`를 선언하지 않으며, 릴리스는 `gh workflow run release.yml -f run=<id> -f version=X.Y.Z`이고 그 `make release-tag`가 그 CI 실행의 commit에 `vX.Y.Z`와 `packages/go/vX.Y.Z`를 만들어 push한다. kit의 parity setup이 arginfo 설치를 직접 실행하므로(K914) `config/ci.json`의 parity setup은 그것을 적지 않는다.
+- action pin 테스트는 로컬 `uses: ./...`를 action pin으로 보지 않는다(T27.1-46). `tests/scripts/action-pins.test.mts`는 같은 commit의 workflow `./.github/workflows/ci-pipeline.yml`을 부르는 `.github/workflows/ci.yml`의 job `kit`에서 "names no action and commit"으로 실패했다. 모든 원격 `uses:`는 여전히 action과 검증 목록의 전체 commit을 지정한다.
 
 ## 0.0.15
 - 릴리스 0.0.15: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.15를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-41)

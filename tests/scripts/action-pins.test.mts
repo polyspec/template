@@ -17,9 +17,10 @@ const VERIFIED = [
   { action: 'shivammathur/setup-php', version: '2.40.0', commit: 'eb7c497e18156a6bbabfef1d3a82760b9eda3962' },
 ];
 
-// Each `uses:` value of every workflow, with its file, line, action, commit and version comment.
+// Each `uses:` value of every workflow that names a remote action, with its file, line, action, commit and version comment. A
+// value that starts with ./ is a workflow or action of the same commit, which has no commit of its own to pin.
 function pins() {
-  return WORKFLOWS.flatMap(pinsOf).map(pin => {
+  return WORKFLOWS.flatMap(pinsOf).filter(pin => !pin.uses.startsWith('./')).map(pin => {
     const at = pin.uses.indexOf('@');
     if (at <= 0) throw new Error(`${pin.file}:${pin.line}: ${pin.uses} names no action and commit`);
     return { file: pin.file, line: pin.line, action: pin.uses.slice(0, at), commit: pin.uses.slice(at + 1), version: pin.comment };
