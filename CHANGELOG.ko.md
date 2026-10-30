@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 78e65ca78c752b2a4ee0d95379dc2bdfd3abad46a0fbef281bff7624c15973a3 -->
+<!-- source-sha256: f899ccfbd0d74faab2e4bb4c2559befdc5ac8ed3fd7c5b2ec0179fb9a7c22144 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- make test-go는 typed-generator를 먼저 실행한다. kit의 test-go는 go.work의 모든 module을 test하고, `examples/showcase/adapters/go`의 showcase adapter는 git이 무시하는 generated program을 import하는데, 그것을 쓰는 것은 lint-go뿐이었다. lint-go를 더 실행하지 않는 CI의 go job이 `package showcase-adapter-go/generated/compiler-coverage is not in std`로 실패했다. (T27.1-40)
 - packages/php-ext의 CliTest는 자식 PHP를 자기 `-d extension=` 없이 시작한다. 자식은 kit이 실행의 extension을 읽는 PHP_INI_SCAN_DIR을 물려받으므로(kit K900), extension을 두 번 읽어 `PHP Warning: Module "polyspec_template" is already loaded`를 출력하고 test-php-ext를 실패시켰다. (T27.1-39)
 - `.github/workflows/ci.yml`의 python, go, php job은 ruff, vulture, golangci-lint, deadcode, phpcs, PHPStan을 더 설치하지 않는다. 이 도구는 kit의 lint gate만 실행하며, `.github/workflows/gates.yml`이 그 gate를 실행한다(kit K870). suite-parity는 kit의 lint 도구를 고르는 job에서 실패한다. (T27.1-38)
 - kit 0.0.77을 채택한다. `.github/workflows/ci.yml`과 `CHECK_TARGETS`는 kit의 gate(정적 gate, `parity-check`, `parity-declarations-check`, 각 runtime의 lint)를 더 실행하지 않으며, `.github/workflows/gates.yml`이 그것을 한 번 실행한다(kit S12, K870). `tests/scripts/suite-parity.test.mts`는 어떤 언어 job도 kit의 lint를 실행하지 않기를 요구한다. `toolchain-check`는 없어졌고, 없는 도구는 그것을 실행하는 target을 실패시킨다(K854). 어떤 target도 `cargo-downloads-check`에 더 의존하지 않는다. kit의 install-kit이 `fetch-cargo-downloads`로 crate를 받고, offline cargo는 없는 crate를 밝힌다(K864). link는 git이 무시하는 link 선언 `.links`를 따르므로(K869) `make install`은 `--siblings` 없는 `link`로 끝나며, kit이 더 쓰지 않는 `.githooks/prepare-commit-msg`는 지워진다(K892). worktree가 자기 `make install`로 도구를 설치하므로 checkout의 도구는 그 자신의 `var/tools`다(`scripts/tools-directory.mts`, K858). `docs/operations/publication.md`의 Composer 예시는 release의 `packages.json`인 `composer` repository를 읽는다(K865). RED: 바뀐 tree에서 `node --test tests/scripts/suite-parity.test.mts`가 `go owns lint-go`와 `parity installation lacks fetch-cargo-downloads`로 실패했다. GREEN: owner test가 kit 0.0.77에서 통과하고, `git grep`은 `toolchain-check`, `cargo-downloads-check`, `check-cargo-downloads`를 changelog와 docs/plans에서만 찾는다. (T27.1-36)

@@ -255,7 +255,8 @@ template-test-ts-types-node: build-ts
 template-test-ts-types-tests: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.tests.json
 
-test-go: template-test-go-vet template-test-go-backend-vet template-test-go-unit ## Go unit tests
+# test-go of kit tests every module of go.work, and the showcase adapter imports the generated programs that typed-generator writes.
+test-go: typed-generator template-test-go-vet template-test-go-backend-vet template-test-go-unit ## Go unit tests
 
 .PHONY: template-test-go-vet template-test-go-backend-vet template-test-go-unit
 template-test-go-vet:

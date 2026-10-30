@@ -33,6 +33,13 @@ export function kitToolFile(kit: string, tool: string) {
   return existsSync(path.join(kit, 'scripts/kit/kit.mk')) ? path.join(kit, 'scripts/kit', `${tool}.mts`) : path.join(kit, 'dist', `${tool}.mjs`);
 }
 
+// T27.1-40: test-go of kit tests every module of go.work, and the showcase adapter imports its generated/, which git
+// ignores and typed-generator writes; only lint-go named typed-generator, so the go job of CI without lint-go failed.
+test('test-go writes the generated programs that the modules of go.work import before it tests them', () => {
+  assert.match(read('go.work'), /^use \.\/examples\/showcase\/adapters\/go$/m, 'go.work no longer uses the showcase adapter; the check verified nothing');
+  assert.ok(dryRun('test-go').some(line => line.includes('examples/showcase/compile-generated.mts --refresh true')), 'make test-go does not run typed-generator');
+});
+
 // T27.1-19: kit deleted its full-run guard (K240), and make check still started it.
 test('every tool of kit that a recipe of the Makefile starts is a tool of the installed kit', () => {
   const tools = [...read('Makefile').matchAll(/\$\(KIT\)\/([\w-]+)\.\$\(KIT_EXT\)/g)].map(match => captured(match, 1, match[0]));
