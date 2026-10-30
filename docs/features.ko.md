@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 47362c27d66453b5d34c1e0d128da1d0ecc0b96b6d539c605bbcb35f79420c39 -->
+<!-- source-sha256: fef581a69325f5cc89e1af80cd1ba8ef6da231087139c2f6efdb5c74e30c0aaa -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
@@ -43,9 +43,7 @@ PHP 라이브러리 요구사항은 >=8.4.0(표기 >=8.4)을 유지하고 개발
 
 문서 배포: [Pages 40453338233](https://github.com/polyspec/template/actions/runs/40453338233)이 ae6f7173의 [CI 40451767762](https://github.com/polyspec/template/actions/runs/40451767762) artifact를 [문서 사이트](https://polyspec.github.io/template/)에 성공적으로 배포했다. 첫 make 전에 설치 패키지 bootstrap과 선언한 PHP를 준비하며 모든 설치 workflow를 회귀 검사로 검증한다.
 
-[릴리스 0.0.14](https://github.com/polyspec/template/releases/tag/v0.0.14)는 CI 40971665637과 gates 40971665670을 거쳐 154f1d15에서 공개되었고, 릴리스 실행은 40975560628과 40975560395다. archive 아홉 개와, polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json을 담는다(kit K871). Kit 0.0.74의 무결성을 잠그고 복사본을 동기화했다.
-
-`config/release.json`의 모든 manifest는 0.0.15를 담는다. 그 tag는 릴리스 commit의 `ci-passed`를 기다린다.
+[릴리스 0.0.15](https://github.com/polyspec/template/releases/tag/v0.0.15)는 CI 41029017110과 gates 41029017118을 거쳐 c779c6c1에서 공개되었고, 릴리스 실행은 41031280975와 41031277510이다. archive 아홉 개와, polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json을 담는다(kit K871). Kit 0.0.77은 integrity로 잠겼고 그 사본은 동기화되었다.
 
 준비한 Composer manifest는 Kit 자산이 요구하는 명시적 버전을 유지한다. 이는 저장소의 태그 기반 버전 규칙과 충돌하며 [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)이 릴리즈 수용 전에 필요한 자산·소비자 계약 수정을 추적한다.
 

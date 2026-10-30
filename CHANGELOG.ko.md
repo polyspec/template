@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1e00c7a67e97de322e5542e303b6edb33896a7c0f9e2220be466dc8d4952bffb -->
+<!-- source-sha256: bcd1bff6513153a6ebf2c7fa6ff789135db4e7e3fcffce3d12d0198bf927cef4 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- Template 0.0.15를 CI 41029017110과 gates 41029017118을 거쳐 c779c6c1에서 릴리스했다. 릴리스 실행 41031280975와 41031277510이 archive 아홉 개와 packages.json을 게시했다. (T27.1-41)
 
 ## 0.0.15
 - 릴리스 0.0.15: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.15를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-41)
