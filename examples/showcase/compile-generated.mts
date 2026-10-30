@@ -8,12 +8,11 @@ import { compileFiles, compileSource } from '../../packages/compiler/src/compile
 import { generatedCompilerDigest } from '../../packages/compiler/src/compiler-digest.mts';
 import { typescriptDeliveryDigest } from './delivery-digest.mts';
 import { compileGeneratedArtifact } from '../../packages/compiler/src/generated-artifact.mts';
-import { showcasePhpDirectory, showcasePhpNamespace } from './php-namespace.mts';
-import { showcasePythonModule } from './python-module.mts';
+import { showcasePhpNamespace } from './php-namespace.mts';
+import { generatedLanguages, generatedOutput } from './generated-output.mts';
 import { scenarioIds } from '../../scripts/showcase-documents.mts';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
-const adapterRoot = join(root, 'examples/showcase/adapters');
 const argv = process.argv.slice(2);
 const refreshAt = argv.indexOf('--refresh');
 const check = argv.includes('--check');
@@ -23,20 +22,11 @@ if (refreshAt < 0 || refresh === undefined || argv.some((value, index) => index 
 }
 const scenarios = scenarioIds(scenariosRoot);
 
-/** The generated artifact of a scenario in a target: a file, or the directory of the PHP files. */
-function generatedOutput(id: string, language: string): string {
-  if (language === 'go') return join(adapterRoot, 'go/generated', id, 'generated.go');
-  if (language === 'js') return join(adapterRoot, 'generated/javascript', `${id}.js`);
-  if (language === 'php') return join(root, showcasePhpDirectory(id));
-  if (language === 'python') return join(adapterRoot, 'generated/typed', `${showcasePythonModule(id)}.py`);
-  return join(adapterRoot, 'generated/typed', `${id}.${language}`);
-}
-
 for (const id of scenarios) {
   const scenario = join(scenariosRoot, id);
   const graph = join(scenario, 'compiled/ast/manifest.json');
   const manifest = join(scenario, 'types.json');
-  for (const language of ['ts', 'go', 'rust', 'php', 'python']) {
+  for (const language of generatedLanguages) {
     const output = generatedOutput(id, language);
     compileGeneratedArtifact({
       graphPath: graph,
@@ -66,4 +56,4 @@ for (const id of scenarios) {
   });
 }
 
-process.stdout.write(`${check ? 'checked' : refresh === 'false' ? 'loaded' : 'compiled'} ${scenarios.length * 6} generated showcase artifacts\n`);
+process.stdout.write(`${check ? 'checked' : refresh === 'false' ? 'loaded' : 'compiled'} ${scenarios.length * (generatedLanguages.length + 1)} generated showcase artifacts\n`);

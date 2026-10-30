@@ -589,13 +589,20 @@ function executionModesDiagram() {
   ].join('\n');
 }
 
+/** The path of the declarations of a language, the `generated` path that its mapping declares. */
+function declarations(language: string): string {
+  const generated = manifest.languages[language]?.generated;
+  if (!generated) fail('language mapping is incomplete for ' + language);
+  return generated;
+}
+
 const outputs = new Map([
-  ['generated/render_adapter.ts', tsDeclarations()],
-  ['generated/render_adapter.mjs', javascriptDeclarations()],
+  [declarations('typescript'), tsDeclarations()],
+  [declarations('javascript'), javascriptDeclarations()],
   ...phpDeclarations(),
-  ['generated/render_adapter.py', pythonDeclarations()],
-  ['go/render_adapter.go', goDeclarations()],
-  ['rust/src/render_adapter.rs', rustDeclarations()],
+  [declarations('python'), pythonDeclarations()],
+  [declarations('go'), goDeclarations()],
+  [declarations('rust'), rustDeclarations()],
   ['generated/render-flow.mmd', flowDiagram()],
   ['generated/render-class.mmd', classDiagram()],
   ['generated/render-state.mmd', stateDiagram()],
@@ -603,6 +610,11 @@ const outputs = new Map([
   ['generated/support-levels.mmd', supportDiagram()],
   ['generated/execution-modes.mmd', executionModesDiagram()],
 ]);
+
+// The PHP declarations are a file per type; the declared path of each language is one of the outputs.
+for (const language of requiredLanguages) {
+  if (!outputs.has(declarations(language))) fail(`${language} declares ${declarations(language)}, which the generator does not write`);
+}
 
 // A file is written only when its bytes change, so the builds that read it see no new modification time.
 for (const [relativePath, content] of outputs) {

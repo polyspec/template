@@ -1046,6 +1046,20 @@
     },
     {
       "paths": [
+        "examples/showcase/adapters/python.py",
+        "examples/showcase/generated-output.mts",
+        "scripts/generate-showcase-contract.mts",
+        "scripts/check-showcase-contract.mts"
+      ],
+      "targets": [
+        "template-test-scripts"
+      ],
+      "tests": [
+        "tests/scripts/python-check-coverage.test.mts"
+      ]
+    },
+    {
+      "paths": [
         "tests/fixtures/public-types/**",
         "packages/ts/api-extractor.json",
         "config/parity.json",
@@ -1742,7 +1756,8 @@
       "check": "make typed-generator-check",
       "paths": [
         "packages/compiler/**",
-        "examples/showcase/compile-generated.mts"
+        "examples/showcase/compile-generated.mts",
+        "examples/showcase/generated-output.mts"
       ]
     },
     {
@@ -1880,6 +1895,10 @@
     {
       "check": "make template-test-scripts",
       "paths": [
+        "examples/showcase/adapters/python.py",
+        "examples/showcase/generated-output.mts",
+        "scripts/generate-showcase-contract.mts",
+        "scripts/check-showcase-contract.mts",
         "tests/fixtures/public-types/**",
         "packages/ts/api-extractor.json",
         "tests/scripts/api-contract-declarations.test.mts",
