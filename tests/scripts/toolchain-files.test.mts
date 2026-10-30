@@ -48,6 +48,13 @@ const packageField = (key: string) => {
   if (typeof value !== 'string') throw new Error(`package.json ${key} is no string`);
   return value;
 };
+// The npm version of packageManager, which kit installs only with the sha512 of its registry tarball (kit K933).
+const declaredNpm = () => {
+  const manager = packageField('packageManager');
+  const version = /^npm@(\d+\.\d+\.\d+)\+sha512\.[0-9a-f]{128}$/.exec(manager)?.[1];
+  if (!version) throw new Error(`package.json packageManager: expected npm@<major>.<minor>.<patch>+sha512.<128 hexadecimal digits>, actual ${manager}`);
+  return version;
+};
 const TOOLS = toolsDirectory(ROOT);
 const SHIMS = path.join(TOOLS, 'mise/shims');
 // The tools of mise.toml, read with a TOML parser.
@@ -159,10 +166,8 @@ test('every CI job that runs Node.js starts the bootstrap with the Node.js of mi
   }
 });
 
-test('npm is the version of packageManager in package.json, from var/tools/bin first on PATH', () => {
-  const manager = packageField('packageManager');
-  const expected = /^npm@(\d+\.\d+\.\d+)$/.exec(manager)?.[1];
-  assert.ok(expected, `package.json packageManager: expected npm@<major>.<minor>.<patch>, actual ${manager}`);
+test('npm is the version of packageManager in package.json with the sha512 of its tarball, from var/tools/bin first on PATH', () => {
+  const expected = declaredNpm();
   const first = recipe('echo "$PATH"').split(':')[0];
   assert.equal(first, path.join(TOOLS, 'bin'), `the first entry of PATH of the recipes: expected ${path.join(TOOLS, 'bin')}, actual ${first}`);
   assert.equal(recipe('command -v npm || true'), path.join(TOOLS, 'bin/npm'), 'npm of the recipes is not the one of var/tools/bin; run make install-tools');
@@ -177,7 +182,7 @@ test('every recipe line runs the npm of var/tools/bin and the go of mise, with e
   // the exported PATH; make kit-check fails a recipe that starts a tool of the checkout by its bare name (kit K171).
   // gmake is GNU Make 4 where it is installed beside make 3.81.
   const makes = ['make', ...(spawnSync('gmake', ['--version']).status === 0 ? ['gmake'] : [])];
-  const npm = packageField('packageManager').replace('npm@', '');
+  const npm = declaredNpm();
   const go = `go${goDirective()}`;
   for (const make of makes) {
     assert.equal(recipe('$(NPM) --version', {}, make), npm, `${make}: the recipe line $(NPM) --version runs another npm than ${npm} of var/tools/bin`);

@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1c5cf5f47066bfd10572a064ef45c07ac9b09f1ac37155e558a05bdcc4fe3742 -->
+<!-- source-sha256: b3491ddb6e486e8b22b663f83fc7ab3ebb929f1241bf4bef80d35b56c2660205 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -12,6 +12,7 @@
 - Kit 0.0.79가 pin한 release다(T27.1-43). `.github/workflows/ci.yml`의 job `kit`이 kit-sync가 지운 gates workflow 대신 복사하는 `.github/workflows/ci-pipeline.yml`을 호출하므로, CI 실행 하나가 kit의 gate와 template의 job을 담고 `ci-passed`는 `kit`을 기다린다. `config/release.json`은 `checks`를 선언하지 않으며, 릴리스는 `gh workflow run release.yml -f run=<id> -f version=X.Y.Z`이고 그 `make release-tag`가 그 CI 실행의 commit에 `vX.Y.Z`와 `packages/go/vX.Y.Z`를 만들어 push한다. kit의 parity setup이 arginfo 설치를 직접 실행하므로(K914) `config/ci.json`의 parity setup은 그것을 적지 않는다.
 - action pin 테스트는 로컬 `uses: ./...`를 action pin으로 보지 않는다(T27.1-46). `tests/scripts/action-pins.test.mts`는 같은 commit의 workflow `./.github/workflows/ci-pipeline.yml`을 부르는 `.github/workflows/ci.yml`의 job `kit`에서 "names no action and commit"으로 실패했다. 모든 원격 `uses:`는 여전히 action과 검증 목록의 전체 commit을 지정한다.
 - Python coverage 테스트는 showcase 생성기가 선언한 출력을 읽는다(T27.1-45). `tests/scripts/python-check-coverage.test.mts`는 추적되지 않는 `examples/showcase/adapters/generated/render_adapter.py`와 `generated/typed/<module>.py`가 있다고 단언해 새 checkout에서 "render_adapter.py is missing"으로 실패했다. 이제 `examples/showcase/adapters/python.py`가 Python mapping의 `generated` 경로의 선언과, `examples/showcase/generated-output.mts`의 경로에 있는 모든 scenario의 Python 프로그램을 import한다고 단언한다. `scripts/generate-showcase-contract.mts`는 각 선언을 그 mapping의 `generated` 경로에 쓰고, 선언된 경로를 쓰지 않으면 실패한다. `examples/showcase/compile-generated.mts`는 언어와 출력을 `examples/showcase/generated-output.mts`에서 가져온다.
+- `package.json`의 `packageManager`가 npm을 registry tarball의 sha512와 함께 `npm@12.2.0+sha512.<digest>`로 선언한다(T27.1-49). kit main의 bootstrap은 그 digest가 있어야만 npm을 설치하며(K933), `tests/scripts/toolchain-files.test.mts`가 그 형식을 요구한다.
 
 ## 0.0.15
 - 릴리스 0.0.15: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.15를 담으며, 릴리스는 archive 옆에 packages.json을 게시한다. (T27.1-41)
