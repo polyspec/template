@@ -5,6 +5,7 @@
 
 ## Unreleased
 - Template 0.0.15 is released at c779c6c1 after CI 41029017110 and gates 41029017118: the release runs 41031280975 and 41031277510 published nine archives and packages.json. (T27.1-41)
+- The CI setup of every runtime is the one that `config/ci.json` declares in `setup`, so kit's ci-setup runs no default `deps-<runtime>` target and the Makefile defines none (T27.1-32).
 
 ## 0.0.15
 - Release 0.0.15: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.15, and the release publishes packages.json beside its archives. (T27.1-41)
