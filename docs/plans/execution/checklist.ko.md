@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 50d964bc9e2d9f03242a9352952878cf11884f3870ce2347320b808839894b61 -->
+<!-- source-sha256: 20bdfae3ca9e92f327b429755fb35ff5eda4a9f858d45102537b085561e51a66 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -477,3 +477,4 @@
 | T27.1-38 | P2: T27.1-36 다음에 .github/workflows/ci.yml의 각 job이 설치하는 도구(make install-tools TOOLS=...)를 그 job의 target까지 하나하나 따라가, job의 어떤 target도 실행하지 않는 도구를 뺀다. gates.yml이 kit의 lint를 맡기 전(K870) lint-python만 쓰던 python job의 ruff와 vulture가 그 예다. tests/scripts/의 test가 어떤 job도 그 target이 쓰지 않는 도구를 설치하지 않음을 검사한다 | .github/workflows/ci.yml, tests/scripts/suite-parity.test.mts, tests/scripts/toolchain-files.test.mts, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/suite-parity.test.mts tests/scripts/toolchain-files.test.mts` | [o] |
 | T27.1-39 | P1: packages/php-ext의 CliTest는 자식 PHP를 library의 -d extension=으로 시작하는데, kit 0.0.77은 자식이 물려받는 PHP_INI_SCAN_DIR로 extension을 읽는다(kit K900). 자식은 extension을 두 번 읽어 PHP Warning: Module "polyspec_template" is already loaded를 출력하고 test-php-ext의 test 셋이 실패한다. 자식은 실행 환경의 extension을 쓴다 | packages/php-ext/tests/CliTest.php, CHANGELOG.md CHANGELOG.ko.md | `make test-php-ext CASES=CliTest` | [o] |
 | T27.1-40 | P1: test-go는 examples/showcase/adapters/go의 showcase adapter를 포함한 go.work의 모든 module을 test하는데, git이 무시하는 그 generated/는 typed-generator만 쓴다. typed-generator를 지정한 것은 lint-go뿐이어서, lint-go를 더 실행하지 않는 CI의 go job이 package showcase-adapter-go/generated/compiler-coverage is not in std로 실패했다. test-go는 typed-generator를 prerequisite로 지정한다 | Makefile, tests/scripts/suite-parity.test.mts, CHANGELOG.md CHANGELOG.ko.md | `node --test tests/scripts/suite-parity.test.mts` | [o] |
+| T27.1-41 | 템플릿 0.0.15 릴리스: 버전 올리기 | CHANGELOG.md CHANGELOG.ko.md, the manifests of config/release.json with package-lock.json, composer.lock, packages/cli/php/composer.lock and the Cargo locks, packages/php-ext/src/php_polyspec_template.h, composer.json, docs/features.md and its twin | node --test tests/scripts/release-config.test.mts | [ ] |
