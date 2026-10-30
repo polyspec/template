@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Template owns the editor boundary checker before kit 0.0.77 deletes it (kit K867). `make editor-boundary-check` runs `scripts/check-editor-boundaries.mts`, which validates `config/editor-boundaries.json` against `config/editor-boundaries.schema.json` with Ajv, reads the imports of each module through `scripts/module-imports.mts` (amaro, acorn and acorn-walk), finds its free references with eslint-scope and matches the globs with `matchesAny` of `@polyspec/kit/glob`; acorn, acorn-walk, amaro and eslint-scope are devDependencies of template. `tests/scripts/editor-boundaries.test.mts` holds the cases of the kit checker. The comment of `config/editor-boundaries.json` and `docs/operations/editor-tools.md` name the script of template. RED: `node --test tests/scripts/editor-boundaries.test.mts` failed with `ERR_MODULE_NOT_FOUND` for `scripts/check-editor-boundaries.mts`. GREEN: the 8 cases pass, and the check reports `4 packages of 2 boundaries passed, 30 files checked`, as the kit checker does on the same tree. (T27.1-37)
 - release-config.test.mts requires that PHP_POLYSPEC_TEMPLATE_VERSION of the PHP extension equals the version of packages/php-ext/composer.json, which version-bump commits set by hand. (T27.1-34)
 
 ## 0.0.14

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 08c6be7b66f8711c112ad9abf3fea778d294fb96ae071433a66f5f9f5bb70bd2 -->
+<!-- source-sha256: a8074b14bd576e5e230660a2b5cb712c9b46b942c946d4462baab5bbb975f5a9 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -212,7 +212,7 @@ CI job `editor`는 `make editor-boundary-check template-test-language format-che
 | 언어 서비스 | `@polyspec/template-language` | 브라우저, Node.js | 문서 텍스트의 함수로 정의한 모든 에디터 규칙, 포매터와 명령 `template-fmt` |
 | 어댑터 | `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `polyspec-template`(VS Code) | Node.js, 브라우저, VS Code | 위치 변환과 기능 등록 |
 
-- 어댑터는 템플릿 규칙을 갖지 않는다. 어댑터는 `@polyspec/template-language`에 의존하고 `@polyspec/template`에는 의존하지 않는다. 어댑터 패키지가 `@polyspec/template`을 선언하거나 import하면 검사가 실패한다(`make editor-boundary-check`, `config/editor-boundaries.json`을 읽는 kit의 editor boundary checker).
+- 어댑터는 템플릿 규칙을 갖지 않는다. 어댑터는 `@polyspec/template-language`에 의존하고 `@polyspec/template`에는 의존하지 않는다. 어댑터 패키지가 `@polyspec/template`을 선언하거나 import하면 검사가 실패한다(`make editor-boundary-check`가 `config/editor-boundaries.json`으로 `scripts/check-editor-boundaries.mts`를 실행한다).
 
 - 언어 서비스는 에디터, Node.js 모듈, DOM에 의존하지 않는다. 예외는 패키지의 별도 진입점인 `src/cli` 아래의 명령 `template-fmt`다. 같은 검사는 `src/cli` 밖의 언어 서비스 소스가 `node:` 모듈, `vscode`, `vscode-` 패키지, CodeMirror 패키지를 import하거나 DOM 객체를 쓰면 실패한다.
 

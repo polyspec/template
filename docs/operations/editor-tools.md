@@ -211,7 +211,7 @@ The CI job `editor` runs `make editor-boundary-check template-test-language form
 | language service | `@polyspec/template-language` | browser, Node.js | every editor rule as functions of the document text; the formatter and the command `template-fmt` |
 | adapters | `@polyspec/template-lsp`, `@polyspec/template-codemirror`, `polyspec-template` (VS Code) | Node.js, browser, VS Code | position conversion and feature registration |
 
-- An adapter contains no template rule. It depends on `@polyspec/template-language` and not on `@polyspec/template`. A check fails when an adapter package declares or imports `@polyspec/template` (`make editor-boundary-check`, the editor boundary checker of kit with `config/editor-boundaries.json`).
+- An adapter contains no template rule. It depends on `@polyspec/template-language` and not on `@polyspec/template`. A check fails when an adapter package declares or imports `@polyspec/template` (`make editor-boundary-check`, which runs `scripts/check-editor-boundaries.mts` on `config/editor-boundaries.json`).
 
 - The language service has no dependency on an editor, on Node.js modules or on the DOM, except the command `template-fmt`, which is a separate entry of the package under `src/cli`. The same check fails when a source of the language service outside `src/cli` imports a `node:` module, `vscode`, a `vscode-` package or a CodeMirror package, or uses a DOM object.
 

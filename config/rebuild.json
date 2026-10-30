@@ -134,6 +134,10 @@
       "kind": "policy",
       "reason": "polyspec rule of the static documentation site: the built VitePress pages link their translations and resolve their links"
     },
+    "scripts/check-editor-boundaries.mts": {
+      "kind": "ecosystem",
+      "tool": "eslint-scope finds the free references of a module and acorn-walk its globalThis properties; scripts/module-imports.mts reads its imports and matchesAny of @polyspec/kit/glob matches the globs of config/editor-boundaries.json"
+    },
     "scripts/check-function-contract.mts": {
       "kind": "policy",
       "reason": "polyspec rule FUN: the registry of each implementation equals packages/compiler/functions.json"
@@ -273,6 +277,10 @@
     "scripts/language-checks.mts": {
       "kind": "policy",
       "reason": "PRINCIPLES.md Idempotency, every failure in one run: a check of several languages runs each language to its end and names every language that failed"
+    },
+    "scripts/module-imports.mts": {
+      "kind": "ecosystem",
+      "tool": "amaro removes the TypeScript of a module, acorn parses it and acorn-walk finds its imports, as Node.js reads it"
     },
     "scripts/package-manifests.mts": {
       "kind": "ecosystem",

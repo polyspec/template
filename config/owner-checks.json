@@ -528,6 +528,19 @@
     },
     {
       "paths": [
+        "config/editor-boundaries.schema.json",
+        "scripts/check-editor-boundaries.mts",
+        "scripts/module-imports.mts"
+      ],
+      "targets": [
+        "editor-boundary-check"
+      ],
+      "tests": [
+        "tests/scripts/editor-boundaries.test.mts"
+      ]
+    },
+    {
+      "paths": [
         "scripts/check-install-workspace.mts",
         "scripts/install-workspace.mts",
         "scripts/check-package-installs.mts"
@@ -1276,6 +1289,9 @@
       "check": "make editor-boundary-check",
       "paths": [
         "config/editor-boundaries.json",
+        "config/editor-boundaries.schema.json",
+        "scripts/check-editor-boundaries.mts",
+        "scripts/module-imports.mts",
         "scripts/editor-fixtures.mts"
       ]
     },

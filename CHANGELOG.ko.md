@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0fd24b03c053ab7b6dddc958b30fcc8f0d2ba769fe4e93c0dc13810e1a47dede -->
+<!-- source-sha256: 06e6df448acb2b2274294967c4384849cf5ca451c41fe1900f347960d73a2320 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- kit 0.0.77이 editor boundary checker를 지우기 전에 template이 그것을 소유한다(kit K867). `make editor-boundary-check`는 `scripts/check-editor-boundaries.mts`를 실행한다. 이 script는 Ajv로 `config/editor-boundaries.json`을 `config/editor-boundaries.schema.json`에 대해 검증하고, `scripts/module-imports.mts`(amaro, acorn, acorn-walk)로 각 module의 import를 읽으며, eslint-scope로 free reference를 찾고, `@polyspec/kit/glob`의 `matchesAny`로 glob을 맞춘다. acorn, acorn-walk, amaro, eslint-scope는 template의 devDependency다. `tests/scripts/editor-boundaries.test.mts`는 kit checker의 case를 담는다. `config/editor-boundaries.json`의 주석과 `docs/operations/editor-tools.md`는 template의 script를 가리킨다. RED: `node --test tests/scripts/editor-boundaries.test.mts`가 `scripts/check-editor-boundaries.mts`에 대해 `ERR_MODULE_NOT_FOUND`로 실패했다. GREEN: 8개 case가 통과하고, 검사는 같은 tree에서 kit checker와 같이 `4 packages of 2 boundaries passed, 30 files checked`를 보고한다. (T27.1-37)
 - release-config.test.mts는 PHP 확장의 PHP_POLYSPEC_TEMPLATE_VERSION이 packages/php-ext/composer.json의 version과 같기를 요구한다. version-bump commit은 이를 손으로 맞췄다. (T27.1-34)
 
 ## 0.0.14

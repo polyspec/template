@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "comment": "The editor layer boundaries of template (docs/operations/editor-tools.md, the rules of the language service), checked by make editor-boundary-check with the editor boundary checker of kit.",
+  "comment": "The editor layer boundaries of template (docs/operations/editor-tools.md, the rules of the language service), checked by make editor-boundary-check with scripts/check-editor-boundaries.mts against config/editor-boundaries.schema.json.",
   "boundaries": [
     {
       "comment": "An adapter depends on @polyspec/template-language and neither declares nor imports the parser @polyspec/template.",

@@ -505,9 +505,9 @@ rules-check: template-rules-check ## Check the stage of every case.json
 template-rules-check:
 	$(NODE) scripts/check-rules.mts
 
-# The editor boundary checker of kit reads the boundaries of config/editor-boundaries.json (EDT-2, EDT-3, T23.4).
+# scripts/check-editor-boundaries.mts reads the boundaries of config/editor-boundaries.json (EDT-2, EDT-3, T23.4, T27.1-37).
 editor-boundary-check: ## Check that adapters do not use the parser and the language service uses no editor, Node.js or DOM module
-	$(NODE) $(KIT)/check-editor-boundaries.$(KIT_EXT)
+	$(NODE) scripts/check-editor-boundaries.mts
 
 doc-coverage: ## Check that public symbols carry documentation comments
 	$(NODE) scripts/check-doc-coverage.mts
