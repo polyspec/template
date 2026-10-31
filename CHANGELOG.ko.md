@@ -5,6 +5,7 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+- T27.1-52가 kit workflow를 읽는 template test를 찾으려고 추가한 test는 다른 test의 source에서 호출 pattern을 맞췄으며, 바뀐 호출이나 helper가 이를 우회한다(T27.1-53). 그 test는 KIT_WORKFLOWS export와 함께 제거되었다: kit의 workflow를 뺀 template의 workflow인 tests/scripts/workflows.mts의 WORKFLOWS가 test에서 kit의 workflow를 뺀다.
 - tests/scripts/suite-parity.test.mts는 make kit-check가 설치된 kit과 같게 유지하는 kit의 사본 .github/workflows/ci-pipeline.yml에서 parity-api, parity-bindings job의 make 명령을 단언했으므로, 그 명령을 바꾸는 kit release가 template의 test를 실패시켰다(T27.1-52). 이제 test는 template의 어떤 workflow와 CHECK_TARGETS의 어떤 항목도 parity phase를 실행하지 않는다는 것만 단언하고, 새 test는 kit workflow의 내용을 읽는 template test를 찾는다.
 - ci.yml의 job ci-passed가 EBADDEVENGINES로 실패했다(T27.1-47). 그 actions/setup-node step이 checkout 안에서 runner의 npm을 실행하는 npm cache를 유지했기 때문이다. step은 package-manager-cache: false를 설정하고, tests/scripts/toolchain-files.test.mts는 그렇지 않은 모든 setup-node step을 실패시킨다.
 - ci.yml의 job php-ext가 kit 0.0.82에서 제거된(K930) make kit-install-php-arginfo를 실행해 실패했다(T27.1-47). 그 step을 제거했고, tests/scripts/toolchain-files.test.mts의 test가 Makefile이 정의하지 않은 make target을 실행하는 workflow step을 실패시킨다.

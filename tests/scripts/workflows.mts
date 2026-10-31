@@ -10,7 +10,7 @@ import { isJsonObject, yamlObject } from '../runner/checked.mts';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 /** The workflows of kit (workflows/ of @polyspec/kit), which the repository takes as kit writes them (kit K270). */
-export const KIT_WORKFLOWS = new Set(readdirSync(path.join(path.dirname(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json'))), 'workflows'))
+const KIT_WORKFLOWS = new Set(readdirSync(path.join(path.dirname(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json'))), 'workflows'))
   .map(name => `.github/workflows/${name}`));
 
 /** The workflows of template, without the ones of kit. */

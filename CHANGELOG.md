@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The test that T27.1-52 added to find any test of template that reads a workflow of kit matched call patterns in the source of the other tests, which a renamed call or a helper defeats (T27.1-53). It is removed with the export of KIT_WORKFLOWS: WORKFLOWS of tests/scripts/workflows.mts, the workflows of template without those of kit, keeps a workflow of kit out of the tests.
 - tests/scripts/suite-parity.test.mts asserted the make commands of the jobs parity-api and parity-bindings of .github/workflows/ci-pipeline.yml, the copy of kit that make kit-check holds equal to the installed kit, so a kit release that changed them failed a test of template (T27.1-52). The test now asserts only that no workflow of template and no entry of CHECK_TARGETS runs a parity phase, and a new test finds any test of template that reads the content of a workflow of kit.
 - The job ci-passed of ci.yml failed with EBADDEVENGINES (T27.1-47): its actions/setup-node step kept the npm cache, which runs the npm of the runner in the checkout. The step sets package-manager-cache: false, and tests/scripts/toolchain-files.test.mts fails every setup-node step that does not.
 - The job php-ext of ci.yml ran make kit-install-php-arginfo, which kit 0.0.82 removed (K930), and failed (T27.1-47); the step is removed, and a test of tests/scripts/toolchain-files.test.mts fails a workflow step whose make target the Makefile does not define.
