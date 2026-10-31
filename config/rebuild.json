@@ -54,6 +54,10 @@
       "kind": "policy",
       "reason": "computes the digest of the delivery compilation that artifact refresh records (RT-57)"
     },
+    "examples/showcase/generated-output.mts": {
+      "kind": "policy",
+      "reason": "names the languages that the typed generator compiles each showcase scenario into and the path of each generated artifact, as compile-generated.mts writes them"
+    },
     "examples/showcase/json.mts": {
       "kind": "policy",
       "reason": "reads the JSON documents of the showcase and fails with the document and the part that is missing instead of a cast (PRINCIPLES.md Standards, no fallback)"
