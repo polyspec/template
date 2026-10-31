@@ -4,14 +4,14 @@
 // and that every tool of kit that a recipe starts is a tool of the installed kit (T27.1-19).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { captured } from '../../scripts/required.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { parsedJsonObject } from '../runner/checked.mts';
-import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
+import { jobs, jobsOf, KIT_WORKFLOWS, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 
@@ -209,10 +209,10 @@ test('language dependency install targets do not reach unrelated native package 
   }
 });
 
-// T27.1-9-1, T27.1-44, T27.1-43: Kit owns every phase recipe, and ci-pipeline.yml of kit, which the job kit of ci.yml calls,
-// runs each phase in its jobs parity-api and parity-bindings, whose matrix is the implementations of config/parity.json; a job
-// of ci.yml or an entry of CHECK_TARGETS that named a phase ran it a second time on every push.
-test('ci-pipeline.yml runs every official provider parity phase, and ci.yml runs none', () => {
+// T27.1-9-1, T27.1-44, T27.1-43, T27.1-52: Kit owns every phase recipe, and ci-pipeline.yml of kit, which the job kit of ci.yml
+// calls, runs each phase, one per implementation of config/parity.json; a workflow of template or an entry of CHECK_TARGETS that
+// named a phase ran it a second time on every push. How the pipeline runs the phases is the contract of kit, which kit tests.
+test('no workflow of template and no entry of CHECK_TARGETS runs a provider parity phase', () => {
   const { implementations } = jsonDocument<{ implementations: { name: string }[] }>('parity implementation names', {
     type: 'object',
     required: ['implementations'],
@@ -220,15 +220,22 @@ test('ci-pipeline.yml runs every official provider parity phase, and ci.yml runs
   }).parse(read('config/parity.json'), 'config/parity.json');
   const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
   assert.equal(parsedJsonObject(read('config/ci.json'), 'config/ci.json').parityMode, 'phases');
-  const pipeline = jobs('.github/workflows/ci-pipeline.yml');
-  assert.ok(pipeline.find(job => job.name === 'parity-api' && runsOf(job).some(command => command.startsWith('make ci-targets TARGETS="parity-api-check '))), 'ci-pipeline.yml runs no parity-api-check');
-  assert.ok(pipeline.find(job => job.name === 'parity-bindings' && runsOf(job).includes('make ci-targets TARGETS="parity-bindings-${{ matrix.implementation }}-check"')), 'ci-pipeline.yml runs no binding phase');
   for (const target of ['parity-check', ...phases]) {
     assert.ok(!CHECK_TARGETS.includes(target), `CHECK_TARGETS names ${target}, which ci-pipeline.yml runs`);
-    const owners = jobs('.github/workflows/ci.yml').filter(job => runsOf(job).some(command => command.split(/[" ]/).includes(target)));
-    assert.deepEqual(owners.map(job => job.name), [], `ci.yml runs ${target}, which ci-pipeline.yml runs`);
+    const owners = WORKFLOWS.flatMap(file => jobs(file).filter(job => runsOf(job).some(command => command.split(/[" ]/).includes(target))).map(job => `${file} ${job.name}`));
+    assert.deepEqual(owners, [], `a workflow of template runs ${target}, which ci-pipeline.yml runs`);
     assert.doesNotMatch(read('Makefile'), new RegExp(`^${target}:.*\\n\\t`, 'm'), 'provider recipes are never replaced');
   }
+});
+
+// T27.1-52: a workflow of kit is the copy that make kit-check holds equal to the installed kit, so its content is the contract
+// of kit, which kit tests; a test of template that read it would fail on a kit release. Template tests only its own side: the
+// workflows of WORKFLOWS, CHECK_TARGETS and the Makefile.
+test('no test of template reads the content of a workflow of kit', () => {
+  const readers = /\b(?:jobs|read|readFileSync|pinsOf)\(\s*['"](\.github\/workflows\/[\w.-]+\.yml)['"]/g;
+  const found = readdirSync(path.join(ROOT, 'tests/scripts')).filter(name => name.endsWith('.mts')).sort().flatMap(name =>
+    [...read(`tests/scripts/${name}`).matchAll(readers)].filter(match => KIT_WORKFLOWS.has(match[1] ?? '')).map(match => `tests/scripts/${name} reads ${match[1]}`));
+  assert.deepEqual(found, []);
 });
 
 // T27.1-43: the gates of kit run in the job kit of ci.yml, which calls ci-pipeline.yml, so the run of ci.yml that a release
