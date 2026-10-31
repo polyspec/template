@@ -4,6 +4,9 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.16
+- Release 0.0.16: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.16, and each archive carries the GitHub label of its product and runtime (T27.1-54).
 - Kit 0.0.85 is the pinned release (T27.1-54), by its asset polyspec-kit-0.0.85.tgz. A release asset keeps the name its packer gives and carries the GitHub label `<vendor>-<product>-<runtime>-<version>` (P39, K980), so config/release.json declares the product and the runtime of each package, tests/scripts/release-config.test.mts reads them, and AGENTS.md and docs/operations/publication.md name the packer names and the labels in place of `<package>-<language>-<version>.<ext>`.
 - The test that T27.1-52 added to find any test of template that reads a workflow of kit matched call patterns in the source of the other tests, which a renamed call or a helper defeats (T27.1-53). It is removed with the export of KIT_WORKFLOWS: WORKFLOWS of tests/scripts/workflows.mts, the workflows of template without those of kit, keeps a workflow of kit out of the tests.
 - tests/scripts/suite-parity.test.mts asserted the make commands of the jobs parity-api and parity-bindings of .github/workflows/ci-pipeline.yml, the copy of kit that make kit-check holds equal to the installed kit, so a kit release that changed them failed a test of template (T27.1-52). The test now asserts only that no workflow of template and no entry of CHECK_TARGETS runs a parity phase, and a new test finds any test of template that reads the content of a workflow of kit.

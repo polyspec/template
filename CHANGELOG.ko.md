@@ -5,6 +5,9 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.16
+- 릴리스 0.0.16: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.16을 담으며, 각 archive는 그 product와 runtime의 GitHub label을 붙인다(T27.1-54).
 - Kit 0.0.85가 고정된 release이며(T27.1-54), 그 asset은 polyspec-kit-0.0.85.tgz이다. release asset은 packer가 주는 이름을 그대로 쓰고 GitHub label `<vendor>-<product>-<runtime>-<version>`을 붙이므로(P39, K980), config/release.json은 각 패키지의 product와 runtime을 선언하고, tests/scripts/release-config.test.mts가 그것을 읽으며, AGENTS.md와 docs/operations/publication.md는 `<package>-<language>-<version>.<ext>` 대신 packer 이름과 label을 말한다.
 - T27.1-52가 kit workflow를 읽는 template test를 찾으려고 추가한 test는 다른 test의 source에서 호출 pattern을 맞췄으며, 바뀐 호출이나 helper가 이를 우회한다(T27.1-53). 그 test는 KIT_WORKFLOWS export와 함께 제거되었다: kit의 workflow를 뺀 template의 workflow인 tests/scripts/workflows.mts의 WORKFLOWS가 test에서 kit의 workflow를 뺀다.
 - tests/scripts/suite-parity.test.mts는 make kit-check가 설치된 kit과 같게 유지하는 kit의 사본 .github/workflows/ci-pipeline.yml에서 parity-api, parity-bindings job의 make 명령을 단언했으므로, 그 명령을 바꾸는 kit release가 template의 test를 실패시켰다(T27.1-52). 이제 test는 template의 어떤 workflow와 CHECK_TARGETS의 어떤 항목도 parity phase를 실행하지 않는다는 것만 단언하고, 새 test는 kit workflow의 내용을 읽는 template test를 찾는다.

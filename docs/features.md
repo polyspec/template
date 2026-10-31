@@ -44,6 +44,8 @@ Documentation deployment: [Pages 40453338233](https://github.com/polyspec/templa
 
 [Release 0.0.15](https://github.com/polyspec/template/releases/tag/v0.0.15) is public at c779c6c1, after CI 41029017110 and gates 41029017118, with the release runs 41031280975 and 41031277510: nine archives and packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext (kit K871). Kit 0.0.77 is integrity-locked and its copies synchronized.
 
+Every manifest of `config/release.json` holds 0.0.16; its tag waits for `ci-passed` of the release commit.
+
 The prepared Composer manifests retain explicit versions required by Kit archives. This conflicts with the repository tag-derived version rule; [Kit issue 16](https://github.com/polyspec/kit/issues/16) tracks the required archive/consumer contract correction before release acceptance.
 
 Fresh 0.0.63 [CI 40741569142](https://github.com/polyspec/template/actions/runs/40741569142) passes the official Go and PHP binding phases and browser job. It exposes template JSON assertion, native generation-order and stale showcase Cargo-lock defects; owning regressions and official lint/download checks pass after their fixes. The unmodified provider [gates 40741569064](https://github.com/polyspec/template/actions/runs/40741569064) passes clean discovery but skips every parity job because its mode output is quoted; [Kit issue 18](https://github.com/polyspec/kit/issues/18) tracks that defect. Standard Go discovery separately rejects the successful testless showcase application module despite the runtime tests passing; [Kit issue 5](https://github.com/polyspec/kit/issues/5) carries this multi-module evidence. Complete acceptance remains pending.
