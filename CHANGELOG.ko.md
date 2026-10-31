@@ -5,6 +5,9 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.17
+- 릴리스 0.0.17: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.17을 담는다. 그 버전 commit은 push의 맨 끝 commit이고 그 green CI가 그것을 릴리스하며, 각 패키지의 Composer zip은 그 label로 이름한다(T27.1-55).
 - Kit 0.0.86이 pin한 release다(T27.1-55). release workflow는 main으로 가는 push의 CI 실행이 성공하면 스스로 시작하고, 그 commit이 변경 기록 맨 위 ## X.Y.Z의 버전 commit, 곧 push의 맨 끝 commit이면 그것을 릴리스한다(K987, K988). 그래서 .github/workflows/ci.yml의 이름은 release.yml이 기다리는 ci이고, pages.yml과 tests/scripts/toolchain-files.test.mts도 ci를 기다린다. Composer가 이름하지 않는 Composer zip은 그 패키지의 label에 .zip을 붙인 이름이며, polyspec/template은 polyspec-template-php-X.Y.Z.zip이고(P39, K985), 소비자는 packages.json의 dist URL로 그것에 닿는다. AGENTS.md와 docs/operations/publication.md가 그 둘을 한국어 사본과 함께 말한다.
 
 ## 0.0.16

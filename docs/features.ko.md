@@ -45,7 +45,7 @@ PHP 라이브러리 요구사항은 >=8.4.0(표기 >=8.4)을 유지하고 개발
 
 [릴리스 0.0.15](https://github.com/polyspec/template/releases/tag/v0.0.15)는 CI 41029017110과 gates 41029017118을 거쳐 c779c6c1에서 공개되었고, 릴리스 실행은 41031280975와 41031277510이다. archive 아홉 개와, polyspec/template, polyspec/template-cli, polyspec/template-php-ext의 Composer repository인 packages.json을 담는다(kit K871). Kit 0.0.77은 integrity로 잠겼고 그 사본은 동기화되었다.
 
-`config/release.json`의 모든 manifest는 0.0.16을 담는다. 그 tag는 릴리스 commit의 `ci-passed`를 기다린다.
+`config/release.json`의 모든 manifest는 0.0.17을 담는다. 그 tag는 릴리스 commit의 `ci-passed`를 기다린다.
 
 준비한 Composer manifest는 Kit 자산이 요구하는 명시적 버전을 유지한다. 이는 저장소의 태그 기반 버전 규칙과 충돌하며 [Kit 이슈 16](https://github.com/polyspec/kit/issues/16)이 릴리즈 수용 전에 필요한 자산·소비자 계약 수정을 추적한다.
 
