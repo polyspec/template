@@ -2,7 +2,7 @@
 // with the expected and the actual version on failure:
 // - Node.js is the node of mise.toml, which `make install-tools TOOLS=npm` installs into var/tools and kit.mk starts as
 //   $(NODE) (kit K171), and every CI job starts the bootstrap with the Node.js of mise.toml;
-// - npm is the version of `packageManager` in package.json, installed by `make install-tools TOOLS=npm` into var/tools/bin,
+// - npm is the npm:npm of mise.toml, which devEngines of package.json names (kit K938), installed by `make install-tools TOOLS=npm` into var/tools/bin,
 //   and Go the go of mise.toml, which the go directive of packages/go/go.mod equals, installed by `make
 //   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
 //   PATH, and the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
@@ -42,18 +42,19 @@ const TOOLCHAIN_SCHEMA: JSONSchemaType<{ php: string[] }> = {
   type: 'object', properties: { php: { type: 'array', items: { type: 'string' } } }, required: ['php'],
 };
 const TOOLCHAIN = jsonDocument<{ php: string[] }>('toolchain configuration', TOOLCHAIN_SCHEMA).read(path.join(ROOT, 'config/toolchain.json'));
-// The string field `key` of package.json.
-const packageField = (key: string) => {
-  const value = parsedJsonObject(read('package.json'), 'package.json')[key];
-  if (typeof value !== 'string') throw new Error(`package.json ${key} is no string`);
-  return value;
-};
-// The npm version of packageManager, which kit installs only with the sha512 of its registry tarball (kit K933).
+// The npm version of devEngines in package.json, which must equal the npm:npm of mise.toml that kit installs with the digest of
+// mise.lock (kit K938); package.json declares no packageManager.
 const declaredNpm = () => {
-  const manager = packageField('packageManager');
-  const version = /^npm@(\d+\.\d+\.\d+)\+sha512\.[0-9a-f]{128}$/.exec(manager)?.[1];
-  if (!version) throw new Error(`package.json packageManager: expected npm@<major>.<minor>.<patch>+sha512.<128 hexadecimal digits>, actual ${manager}`);
-  return version;
+  const manifest = parsedJsonObject(read('package.json'), 'package.json');
+  if ('packageManager' in manifest) throw new Error('package.json declares packageManager; npm is the npm:npm of mise.toml, named by devEngines (kit K938)');
+  const engines = manifest['devEngines'];
+  const manager = isJsonObject(engines) ? engines['packageManager'] : undefined;
+  const declared = JSON.stringify(manager);
+  const tool = MISE_TOOLS['npm:npm'];
+  if (typeof tool !== 'string') throw new Error(`mise.toml declares no npm:npm; declare the npm of devEngines there (kit K938)`);
+  const expected = JSON.stringify({ name: 'npm', version: tool, onFail: 'error' });
+  if (declared !== expected) throw new Error(`package.json devEngines.packageManager: expected ${expected}, the npm:npm of mise.toml, actual ${declared}`);
+  return tool;
 };
 const TOOLS = toolsDirectory(ROOT);
 const SHIMS = path.join(TOOLS, 'mise/shims');
@@ -90,7 +91,13 @@ const CI_PASSED = 'ci-passed';
 const KIT_PIPELINE = './.github/workflows/ci-pipeline.yml';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
 // make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs both first (kit K171).
-const LOCKED_KIT_INSTALL = "npm_config_cache=\"$PWD/var/bootstrap/npm-cache\" npm exec --yes --package=\"$(node -p 'require(\"./package.json\").packageManager.split(\"+\")[0]')\" -- npm ci --ignore-scripts --allow-remote=root";
+// The npm of the runner refuses to run in a folder whose devEngines names another npm (EBADDEVENGINES), so the npm of devEngines
+// runs outside the checkout with --prefix, as in the copies of kit (K938-1).
+const LOCKED_KIT_INSTALL = [
+  'root="$PWD"',
+  "version=\"$(node -p 'require(\"./package.json\").devEngines.packageManager.version')\"",
+  '(cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)',
+].join('\n');
 const CI_PASSED_INSTALL = [LOCKED_KIT_INSTALL, 'make install-tools TOOLS=npm', 'make install-packages'];
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
@@ -166,13 +173,13 @@ test('every CI job that runs Node.js starts the bootstrap with the Node.js of mi
   }
 });
 
-test('npm is the version of packageManager in package.json with the sha512 of its tarball, from var/tools/bin first on PATH', () => {
+test('npm is the npm:npm of mise.toml that devEngines of package.json names, from var/tools/bin first on PATH', () => {
   const expected = declaredNpm();
   const first = recipe('echo "$PATH"').split(':')[0];
   assert.equal(first, path.join(TOOLS, 'bin'), `the first entry of PATH of the recipes: expected ${path.join(TOOLS, 'bin')}, actual ${first}`);
   assert.equal(recipe('command -v npm || true'), path.join(TOOLS, 'bin/npm'), 'npm of the recipes is not the one of var/tools/bin; run make install-tools');
   const actual = recipe('$(NPM) --version');
-  assert.equal(actual, expected, `npm of the recipes: expected ${expected} (package.json packageManager), actual ${actual}; run make install-tools`);
+  assert.equal(actual, expected, `npm of the recipes: expected ${expected} (devEngines of package.json), actual ${actual}; run make install-tools`);
 });
 
 test('every recipe line runs the npm of var/tools/bin and the go of mise, with every make on PATH', { timeout: 240_000 }, () => {

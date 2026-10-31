@@ -1,6 +1,6 @@
 # Build, test and documentation targets. Every target is idempotent.
 
-# make install-tools TOOLS=npm installs the npm of packageManager in package.json and mise into var/tools/bin, and make
+# make install-tools TOOLS=npm installs the npm of mise.toml, which devEngines of package.json names, and mise into var/tools/bin, and make
 # install-tools (the install-tools tool of @polyspec/kit) installs the tools of mise.toml, Go and Python among them, at the
 # digests of mise.lock into var/tools/mise (T24.12); kit.mk puts var/tools/bin and the shims of mise of the main checkout
 # first on PATH (kit K127, K519), so every recipe uses the tools of the checkout and never the npm, Go or Python of the
@@ -167,7 +167,7 @@ template-lint-showcase-warnings: typed-generator
 template-lint-php-format: build-php
 	vendor/bin/pint --test --config $(PHP_DIR)/pint.json $(PHP_DIR) $(EXT_DIR)
 
-# make install-tools TOOLS=npm installs the npm of packageManager and make install-packages installs package-lock.json with
+# make install-tools TOOLS=npm installs the npm of mise.toml and make install-packages installs package-lock.json with
 # it, @polyspec/kit included, whose kit.mk has the other targets (T24.1); make install then installs the rest. It downloads
 # the crates of every Cargo.lock into the registry of CARGO_HOME with cargo-downloads-fetch of kit: the generated checks and
 # runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command

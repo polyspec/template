@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Kit 0.0.82 is the pinned release (T27.1-47), with the npm of mise.toml (K938): package.json declares npm 12.2.0 in devEngines in place of packageManager, mise.toml declares `npm:npm` with its digests in mise.lock and .mise/locks/npm-npm/12.2.0, and the bootstrap step of ci.yml and pages.yml runs the npm of devEngines outside the checkout, with no npm cache of setup-node; the release is `gh workflow run release.yml -f run=<id>`, whose version is the first section `## X.Y.Z` of CHANGELOG.md (K924), as AGENTS.md and publication.md state; .gitignore ignores /.claude/settings.local.json.
 - config/rebuild.json declares examples/showcase/generated-output.mts as policy, so make rebuild-check no longer fails on a tool with no class (T27.1-51).
 - config/toolchain.json declares no exception for node 24.18.1 of packages/vscode, since kit judges no declared version (S4); the extension keeps engines.node `>=24.18.1`, the Node.js of the Electron of its minimum engines.vscode (T27.1-50).
 - Template 0.0.15 is released at c779c6c1 after CI 41029017110 and gates 41029017118: the release runs 41031280975 and 41031277510 published nine archives and packages.json. (T27.1-41)

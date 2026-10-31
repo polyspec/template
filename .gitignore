@@ -70,3 +70,5 @@ examples/showcase/adapters/go/go.work
 examples/showcase/adapters/go/go.work.sum
 packages/go/go.work
 packages/go/go.work.sum
+# The local Claude Code settings of each developer, which the repository never tracks (T27.1-47)
+/.claude/settings.local.json
