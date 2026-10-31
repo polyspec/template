@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- config/toolchain.json declares no exception for node 24.18.1 of packages/vscode, since kit judges no declared version (S4); the extension keeps engines.node `>=24.18.1`, the Node.js of the Electron of its minimum engines.vscode (T27.1-50).
 - Template 0.0.15 is released at c779c6c1 after CI 41029017110 and gates 41029017118: the release runs 41031280975 and 41031277510 published nine archives and packages.json. (T27.1-41)
 - The CI setup of every runtime is the one that `config/ci.json` declares in `setup`, so kit's ci-setup runs no default `deps-<runtime>` target and the Makefile defines none (T27.1-32).
 - Kit 0.0.78 is the pinned release (T27.1-42): an installed kit writes no Claude Code hook in make link --project (K916), and no recipe of template passes --project, so template behaves as before.

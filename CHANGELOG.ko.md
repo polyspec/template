@@ -5,6 +5,7 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+- config/toolchain.json은 packages/vscode의 node 24.18.1 예외를 선언하지 않는다. kit는 선언된 version을 판단하지 않기 때문이다(S4). 확장은 최소 engines.vscode의 Electron이 가진 Node.js인 engines.node `>=24.18.1`을 유지한다 (T27.1-50).
 - Template 0.0.15를 CI 41029017110과 gates 41029017118을 거쳐 c779c6c1에서 릴리스했다. 릴리스 실행 41031280975와 41031277510이 archive 아홉 개와 packages.json을 게시했다. (T27.1-41)
 - 모든 runtime의 CI setup은 `config/ci.json`이 `setup`에 선언한 것이므로 kit의 ci-setup은 기본 `deps-<runtime>` target을 실행하지 않고 Makefile은 그것을 정의하지 않는다 (T27.1-32).
 - Kit 0.0.78이 pin한 release다(T27.1-42). 설치된 kit은 make link --project에서 Claude Code hook을 쓰지 않고(K916) template의 어떤 recipe도 --project를 넘기지 않으므로 template은 이전처럼 동작한다.
