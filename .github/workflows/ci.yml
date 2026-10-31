@@ -498,8 +498,6 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="php composer"
         if: ${{ !cancelled() }}
-      - run: make kit-install-php-arginfo
-        if: ${{ !cancelled() }}
       - run: make kit-install-symbols EXTRACTORS=php
         if: ${{ !cancelled() }}
       - run: make template-install-php

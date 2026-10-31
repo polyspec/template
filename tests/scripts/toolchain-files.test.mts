@@ -370,6 +370,23 @@ function makeTargets(step: string) {
   return step.replace(/^.*\bmake\b/, '').replace(/TARGETS="([^"]*)"/, '$1').split(/\s+/).filter(word => /^[a-z][\w-]*$/.test(word));
 }
 
+test('every make target that a step of a workflow runs is a target of the Makefile', () => {
+  // A step that runs a target which no longer exists fails only in CI: kit 0.0.82 removed kit-install-php-arginfo, and the job
+  // php-ext of ci.yml still ran it. The database that make prints (-pRrq) holds the targets of the Makefile and of the files of
+  // kit that it includes. Its default goal is a target with an empty recipe from standard input, so the read runs no recipe of
+  // the Makefile, also none that calls $(MAKE), which runs even under -q (kit K945).
+  const goal = '.toolchain-database-read';
+  const database = spawnSync('make', ['-pRrq', '-f', 'Makefile', '-f', '-'], {
+    cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28, input: `\n.DEFAULT_GOAL := ${goal}\n${goal}: ;\n`,
+    env: Object.fromEntries(Object.entries(process.env).filter(([name]) => name !== 'MAKELEVEL')),
+  });
+  assert.ok(database.stdout.includes('# Files'), `make printed no database of the Makefile: ${database.stderr}`);
+  const defined = new Set(database.stdout.split('\n').flatMap(line => /^([a-z][\w-]*)::?(?:\s|$)/.exec(line)?.[1] ?? []));
+  const missing = WORKFLOWS.flatMap(file => jobs(file).flatMap(job => runLines(job).filter(line => /^make\b/.test(line))
+    .flatMap(line => makeTargets(line).filter(target => !defined.has(target)).map(target => `${file} job ${job.name}: make ${target}`))));
+  assert.deepEqual(missing, [], 'steps of the workflows that run a make target which the Makefile does not define');
+});
+
 // The targets that `make <targets>` runs: the targets, their prerequisites and, for `check`, the full suite.
 function reached(targets: string[]) {
   const makefile = read('Makefile');
@@ -420,7 +437,7 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'kit-install-php-arginfo', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   // The job kit calls ci-pipeline.yml, whose jobs run make ci-targets and upload their reports; kit tests that workflow.

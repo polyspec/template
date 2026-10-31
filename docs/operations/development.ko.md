@@ -14,7 +14,7 @@ PHP 라이브러리 요구사항은 `>=8.4`(`>=8.4.0`과 동등)로 유지한다
 
 언어별 의존성 설치 분리 후 c634ec15의 CI [40671820218](https://github.com/polyspec/template/actions/runs/40671820218)은 모든 worker와 ci-passed를 통과했다. gates 40671820222와 갱신된 그래프의 의존성 검토 40670361859도 통과했다. parity는 바인딩 253개를 두 번 실행해 5,622개 케이스를 통과했다. 실행은 10분 04초, 대기 4초로 전체 10분 08초이며 가장 긴 worker는 PHP의 9분 20초다. 분리한 의존성 단계는 npm 전용 0초, Go·Python 1초, PHP 3초인 반면 전체 도구 단계는 여전히 64–69초이며 parity 의존성 단계는 7초다. 네트워크·bootstrap과 테스트 시간은 실행마다 달라 전체 시간 단축을 입증하지 않는다. T27.1-9-1은 공급자 릴리즈 후에만 선택 설치를 연동한다.
 
-Kit은 고정 도구 선택 설치를 제공한다. 네이티브 CI worker는 `make install-tools TOOLS="..."`로 필요한 도구를 선언한 뒤 자체 잠금 패키지 그래프를 설치한다. PHP 확장 worker는 `make kit-install-php-arginfo`와 `make kit-install-symbols EXTRACTORS=php`도 사용하며 템플릿에 설치 코드를 복사하지 않는다. 복합 스크립트·생성·구분자·showcase worker는 실행에 필요한 전체 환경을 유지하고 toolchain 감사는 선언된 전체 도구를 검증한다. Pages는 Node만 준비한다. 설치는 온라인이고 검사는 오프라인이다.
+Kit은 고정 도구 선택 설치를 제공한다. 네이티브 CI worker는 `make install-tools TOOLS="..."`로 필요한 도구를 선언한 뒤 자체 잠금 패키지 그래프를 설치한다. PHP 확장 worker는 `make kit-install-symbols EXTRACTORS=php`도 사용하고, kit이 더 이상 다시 만들지 않는 추적된 arginfo header로 build하며(K930), 템플릿에 설치 코드를 복사하지 않는다. 복합 스크립트·생성·구분자·showcase worker는 실행에 필요한 전체 환경을 유지하고 toolchain 감사는 선언된 전체 도구를 검증한다. Pages는 Node만 준비한다. 설치는 온라인이고 검사는 오프라인이다.
 
 Kit은 독립적인 `parity-api-check`와 구현별 `parity-bindings-<implementation>-check` 여섯 개를 소유한다. `.github/workflows/ci.yml`의 job `kit`이 호출하는 kit pipeline `.github/workflows/ci-pipeline.yml`의 job `parity-api`와 `parity-bindings`가 각각 정확히 한 번 실행하고, `.github/workflows/ci.yml`의 다른 어떤 job도 그것을 실행하지 않는다(T27.1-44, T27.1-43). 템플릿은 공급자의 recipe를 교체하지 않고 빌드 선행 조건만 제공한다. `config/ci.json`은 동기화한 kit pipeline의 단계 모드와 네이티브 패키지 준비를 선언하며, Kit이 전체 범위를 검증하고 그 parity setup이 `packages/php-ext`의 arginfo 생성기를 직접 설치한다. 기본 `parity-check`는 공급자의 전체 검사로 유지한다.
 
