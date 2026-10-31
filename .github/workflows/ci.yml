@@ -14,7 +14,7 @@
 # maintainer names by its id. A newer push to a branch does not cancel the run of an earlier push.
 # Builds, downloads and complete jobs report progress and are judged by exit status. Only individual test cases
 # have repository-defined timeouts; a job deadline must not cancel a normal operation or successful tests.
-name: CI
+name: ci
 
 on:
   push:

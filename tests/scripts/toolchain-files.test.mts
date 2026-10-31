@@ -494,7 +494,7 @@ test('each workflow of template declares exactly its triggers: CI on a push to m
     '.github/workflows/ci.yml': { push: { branches: ['main'] }, workflow_dispatch: null },
     // The site publishes the example-site artifact of a CI run of main, so it runs after one, or by hand for the run named.
     '.github/workflows/pages.yml': {
-      workflow_run: { workflows: ['CI'], types: ['completed'], branches: ['main'] },
+      workflow_run: { workflows: ['ci'], types: ['completed'], branches: ['main'] },
       workflow_dispatch: { inputs: { 'run-id': { description: 'The CI run of main whose example-site artifact is published', required: true } } },
     },
   };

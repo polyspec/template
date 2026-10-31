@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Kit 0.0.86 is the pinned release (T27.1-55). The release workflow starts by itself when the CI run of a push to main succeeds and releases its commit when it is the version commit of the top ## X.Y.Z of the change log, the tip of its push (K987, K988), so .github/workflows/ci.yml is named ci, which release.yml waits for, and pages.yml and tests/scripts/toolchain-files.test.mts wait for ci. The Composer zip, which Composer does not name, is the label of its package with .zip, polyspec-template-php-X.Y.Z.zip for polyspec/template (P39, K985), which consumers reach through the dist URL of packages.json. AGENTS.md and docs/operations/publication.md name both, with their Korean twins.
 
 ## 0.0.16
 - Release 0.0.16: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.16, and each archive carries the GitHub label of its product and runtime (T27.1-54).
