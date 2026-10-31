@@ -5,6 +5,7 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+- ci.yml의 job ci-passed가 EBADDEVENGINES로 실패했다(T27.1-47). 그 actions/setup-node step이 checkout 안에서 runner의 npm을 실행하는 npm cache를 유지했기 때문이다. step은 package-manager-cache: false를 설정하고, tests/scripts/toolchain-files.test.mts는 그렇지 않은 모든 setup-node step을 실패시킨다.
 - ci.yml의 job php-ext가 kit 0.0.82에서 제거된(K930) make kit-install-php-arginfo를 실행해 실패했다(T27.1-47). 그 step을 제거했고, tests/scripts/toolchain-files.test.mts의 test가 Makefile이 정의하지 않은 make target을 실행하는 workflow step을 실패시킨다.
 - Kit 0.0.82가 고정된 release이며(T27.1-47), mise.toml의 npm을 함께 채택한다(K938): package.json은 packageManager 대신 devEngines에 npm 12.2.0을 선언하고, mise.toml은 `npm:npm`을 선언하며 그 digest는 mise.lock과 .mise/locks/npm-npm/12.2.0에 있고, ci.yml과 pages.yml의 bootstrap 단계는 setup-node의 npm cache 없이 devEngines의 npm을 checkout 밖에서 실행한다. release는 `gh workflow run release.yml -f run=<id>`이고 그 버전은 CHANGELOG.md의 첫 section `## X.Y.Z`이며(K924), AGENTS.md와 publication.md가 그렇게 적는다. .gitignore는 /.claude/settings.local.json을 무시한다.
 - config/rebuild.json은 examples/showcase/generated-output.mts를 policy로 선언하므로 make rebuild-check가 class 없는 도구로 더는 실패하지 않는다 (T27.1-51).

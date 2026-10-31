@@ -169,6 +169,9 @@ test('every CI job that runs Node.js starts the bootstrap with the Node.js of mi
       if (!runLines(job).some(line => /\b(npm|node|make) /.test(line))) continue;
       assert.ok(usesOf(job, 'actions/setup-node@').some(step => step.with['node-version-file'] === 'mise.toml'), `${file} job ${job.name} does not take Node.js from mise.toml`);
       assert.ok(job.steps.every(step => !('node-version' in step.with)), `${file} job ${job.name} names a Node.js version`);
+      // The npm cache of setup-node runs the npm of the runner in the checkout, which devEngines refuses (EBADDEVENGINES).
+      assert.ok(usesOf(job, 'actions/setup-node@').every(step => step.with['package-manager-cache'] === false && !('cache' in step.with)),
+        `${file} job ${job.name} does not set package-manager-cache: false without cache in actions/setup-node`);
     }
   }
 });
