@@ -9,47 +9,65 @@
     {
       "kind": "npm",
       "directory": "packages/ts",
-      "name": "@polyspec/template"
+      "name": "@polyspec/template",
+      "product": "template",
+      "runtime": "ts"
     },
     {
       "kind": "npm",
       "directory": "packages/language",
-      "name": "@polyspec/template-language"
+      "name": "@polyspec/template-language",
+      "product": "template-language",
+      "runtime": "ts"
     },
     {
       "kind": "npm",
       "directory": "packages/lsp",
-      "name": "@polyspec/template-lsp"
+      "name": "@polyspec/template-lsp",
+      "product": "template-lsp",
+      "runtime": "ts"
     },
     {
       "kind": "npm",
       "directory": "packages/codemirror",
-      "name": "@polyspec/template-codemirror"
+      "name": "@polyspec/template-codemirror",
+      "product": "template-codemirror",
+      "runtime": "ts"
     },
     {
       "kind": "npm",
       "directory": "packages/compiler",
-      "name": "@polyspec/template-compiler"
+      "name": "@polyspec/template-compiler",
+      "product": "template-compiler",
+      "runtime": "ts"
     },
     {
       "kind": "composer",
       "directory": "packages/php",
-      "name": "polyspec/template"
+      "name": "polyspec/template",
+      "product": "template",
+      "runtime": "php"
     },
     {
       "kind": "composer",
       "directory": "packages/cli/php",
-      "name": "polyspec/template-cli"
+      "name": "polyspec/template-cli",
+      "product": "template-cli",
+      "runtime": "php"
     },
     {
       "kind": "composer",
       "directory": "packages/php-ext",
-      "name": "polyspec/template-php-ext"
+      "name": "polyspec/template-php-ext",
+      "product": "template",
+      "runtime": "php-ext"
     },
     {
       "kind": "wheel",
       "directory": "packages/python",
-      "name": "polyspec-template"
+      "name": "polyspec-template",
+      "product": "template",
+      "runtime": "python"
     }
   ],
   "manifests": {

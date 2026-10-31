@@ -18,7 +18,7 @@ const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 
 // The parts of config/release.json that the tests read.
 interface ReleaseConfig {
-  packages: { kind: string; directory: string; name: string }[];
+  packages: { kind: string; directory: string; name: string; product: string; runtime: string }[];
   manifests: Record<string, string>;
   goModules: Record<string, string>;
 }
@@ -30,8 +30,10 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
       type: 'array',
       items: {
         type: 'object',
-        properties: { kind: { type: 'string' }, directory: { type: 'string' }, name: { type: 'string' } },
-        required: ['kind', 'directory', 'name'],
+        properties: {
+          kind: { type: 'string' }, directory: { type: 'string' }, name: { type: 'string' }, product: { type: 'string' }, runtime: { type: 'string' },
+        },
+        required: ['kind', 'directory', 'name', 'product', 'runtime'],
         additionalProperties: false,
       },
     },
@@ -60,7 +62,9 @@ test('the packages of the release are the names that their manifests declare', (
 test('the Python package is released as a wheel named by its pyproject.toml', () => {
   const file = 'packages/python/pyproject.toml';
   const wheel = CONFIG.packages.find(item => item.kind === 'wheel');
-  assert.deepEqual(wheel, { kind: 'wheel', directory: 'packages/python', name: tomlValue(file, 'project', 'name') }, `${file}: the wheel package names another project than [project] name`);
+  assert.deepEqual(wheel, {
+    kind: 'wheel', directory: 'packages/python', name: tomlValue(file, 'project', 'name'), product: 'template', runtime: 'python',
+  }, `${file}: the wheel package names another project than [project] name`);
   assert.equal(CONFIG.manifests[file], 'archive', `${file}: the wheel is released as an archive, so its version is set by the tag`);
 });
 
@@ -68,7 +72,7 @@ test('the PHP command line is released separately from the runtime library', { t
   const file = 'packages/cli/php/composer.json';
   const manifest = parsedJsonObject(read(file), file);
   assert.deepEqual(CONFIG.packages.find(item => item.directory === 'packages/cli/php'), {
-    kind: 'composer', directory: 'packages/cli/php', name: manifest.name,
+    kind: 'composer', directory: 'packages/cli/php', name: manifest.name, product: 'template-cli', runtime: 'php',
   });
   assert.equal(CONFIG.manifests[file], 'archive');
   assert.equal(manifest.repositories, undefined, 'the CLI installs from released dependencies');
