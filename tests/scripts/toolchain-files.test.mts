@@ -269,7 +269,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
   const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(install.status, 0, install.stderr);
   // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1)
-  // with cargo-downloads-fetch, which install-kit of kit runs (K864), and go mod download the modules of go.work, which
+  // with cargo fetch --locked of template-install-rust, and go mod download the modules of go.work, which
   // go reads with GOPROXY=off (T25.6-1). The build requirements of the Python package go to var/python/wheelhouse of the
   // main checkout, which the package install check reads (T22.4-20-5), and make python-package installs the dependencies
   // of packages/python/pylock.toml, which the checks of the Python package read from the uv cache (T25.6-1). Only the
@@ -299,7 +299,7 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
     lines.indexOf(`${online} ${path.join(TOOLS, 'bin/npm')} ci`),
     at(subMake('--no-print-directory install-tools')),
     lines.indexOf(`${online} ${node} ${kit}/install-tools.${extension}`),
-    lines.indexOf(`${online} ${node} ${kit}/fetch-cargo-downloads.${extension}`),
+    at(new RegExp(`^${online} \\S*cargo fetch --locked --manifest-path `)),
   ];
   assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
   const fetched = bootstrap.at(-1) ?? -1;

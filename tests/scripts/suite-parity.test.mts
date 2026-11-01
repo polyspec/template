@@ -194,17 +194,17 @@ test('language workers install their own dependency graph', () => {
 
 test('language dependency install targets do not reach unrelated native package managers', () => {
   const forbidden: Record<string, RegExp> = {
-    node: /composer-install|cargo-downloads|go mod download|pip download|python-package/,
-    go: /composer-install|cargo-downloads|pip download|python-package/,
+    node: /composer-install|cargo fetch|go mod download|pip download|python-package/,
+    go: /composer-install|cargo fetch|pip download|python-package/,
     rust: /composer-install|go mod download|pip download|python-package/,
-    php: /cargo-downloads|go mod download|pip download|python-package/,
-    python: /composer-install|cargo-downloads|go mod download/,
+    php: /cargo fetch|go mod download|pip download|python-package/,
+    python: /composer-install|cargo fetch|go mod download/,
   };
   for (const [language, pattern] of Object.entries(forbidden)) {
     assert.doesNotMatch(dryRun(`template-install-${language}`).join('\n'), pattern, language);
   }
   const all = dryRun('template-install-parity').join('\n');
-  for (const required of ['fetch-cargo-downloads', 'mod download', 'composer-install', 'pip download', 'python-package']) {
+  for (const required of ['cargo fetch --locked', 'mod download', 'composer-install', 'pip download', 'python-package']) {
     assert.ok(all.includes(required), `parity installation lacks ${required}`);
   }
 });

@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cfdffbbd748a6f7657d2ab08528acbcd3e4fb33c90d3d04679e7e75f1ddcc4c1 -->
+<!-- source-sha256: ebe49e6b19dd6a6cb2054a7db552e36149df8691e8df44223c81bcb6c55718eb -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- template은 cargo-downloads-fetch, lock 검사, Rust catch 검사를 삭제하고 make kit-check가 느슨한 결합(S15)을 판단하는 kit 0.0.92를 적용한다. make install은 offline Rust 검사가 해석하는 추적되는 모든 Cargo.lock의 crate를 make template-install-rust에서 cargo fetch --locked로 내려받고, make kit-sync가 PRINCIPLES를 쓴다(T27.1-61).
 - showcase adapter의 Go module인 examples/showcase/adapters/go는 github.com/polyspec/template/packages/go v0.0.0을 require하고 checkout의 소스인 ../../../../packages/go로 replace하며, go mod tidy가 쓰는 indirect require와 go.sum을 가진다(T27.1-60). 이전에는 어떤 module도 require하지 않아, go.work를 무시하는 go mod tidy가 offline에서는 packages/go의 import로 실패하고 online에서는 소스 대신 release된 module을 고정했다. 전체 suite의 새 target make template-lint-go-modules는 ci.yml의 job go가 실행하며, 추적되는 각 go.mod에서 go mod tidy -diff를 offline으로 실행해 다른 module을 모두 밝힌다.
 
 ## 0.0.19

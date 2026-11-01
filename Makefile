@@ -174,9 +174,9 @@ template-lint-php-format: build-php
 
 # make install-tools TOOLS=npm installs the npm of mise.toml and make install-packages installs package-lock.json with
 # it, @polyspec/kit included, whose kit.mk has the other targets (T24.1); make install then installs the rest. It downloads
-# the crates of every Cargo.lock into the registry of CARGO_HOME with cargo-downloads-fetch of kit: the generated checks and
-# runners resolve their temporary crates with cargo --offline, which finds a crate only when an earlier cargo command
-# downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
+# the crates of every tracked Cargo.lock into the registry of CARGO_HOME with cargo fetch --locked (template-install-rust):
+# the generated checks and runners resolve their temporary crates with cargo --offline, which finds a crate only when an
+# earlier cargo command downloaded it, so whether they passed depended on which cargo command ran first (T20.1-1).
 # make install installs every tool of mise.lock with make install-tools: every Python check runs the shim
 # var/tools/mise/shims/python3 of the python of mise.toml, so every job has that interpreter after make install and no job
 # sets up a Python of its own (T24.12).
@@ -195,7 +195,13 @@ template-install-node: ## npm workspaces were installed by install-packages; no 
 template-install-go: ## Download only the modules of go.work
 	$(ONLINE) $(GO) mod download
 
-template-install-rust: cargo-downloads-fetch ## Download the locked crates required by offline Rust checks
+CARGO_LOCKS := $(shell git ls-files -- '*Cargo.lock')
+define newline
+
+
+endef
+template-install-rust: ## Download the crates of every tracked Cargo.lock, which the offline Rust checks resolve
+	$(foreach lock,$(CARGO_LOCKS),$(ONLINE) $(CARGO) fetch --locked --manifest-path $(lock:.lock=.toml)$(newline))
 
 template-install-php: ## Install the locked PHP dependency graph of the development root, which requires the library and the command line by their paths
 	$(ONLINE) $(NODE) scripts/composer-install.mts .
