@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The Go module of the showcase adapter, examples/showcase/adapters/go, requires github.com/polyspec/template/packages/go v0.0.0 and replaces it with ../../../../packages/go, the source of the checkout, with the indirect requires and the go.sum that go mod tidy writes (T27.1-60). It required no module, so go mod tidy, which ignores go.work, failed offline on its imports of packages/go and online would pin the released module in place of the source. The new target make template-lint-go-modules of the full suite, run by the job go of ci.yml, runs go mod tidy -diff offline in each tracked go.mod and names each module that differs.
 
 ## 0.0.19
 - Release 0.0.19: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.19; it is the first release on kit 0.0.88 and the first whose PHP library requires the json-schema fork as min-0-max/json-schema (T27.1-59).

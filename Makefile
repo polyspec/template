@@ -141,9 +141,9 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as lint-ts and conformance-ts. The list
 # stays on one line: the owner-check tool of @polyspec/kit reads it.
-CHECK_TARGETS := hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
-lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
+lint: lint-ts lint-go lint-rust lint-php lint-python template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets of kit and the format checks of template
 
 # The lint targets of kit (lint-ts, lint-go, lint-rust, lint-php, lint-python) run oxlint with oxlint-tsgolint and knip,
 # golangci-lint and deadcode, clippy, phpcs and PHPStan, and ruff and vulture with the configuration of the kit package (T24.6, K514).
@@ -155,9 +155,14 @@ lint-python: typed-generator
 lint-rust: typed-generator
 lint-go: typed-generator
 
-.PHONY: template-lint-go-format template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format
+.PHONY: template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format
 template-lint-go-format:
 	@out=$$(gofmt -l $(GO_DIR) $(GO_BACKEND_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) $(GO_BACKEND_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
+# go mod tidy ignores go.work, so each tracked go.mod requires the modules that its packages import, a module of this
+# repository by its path inside the repository, and go.sum holds their sums; go mod tidy -diff names each module that differs
+# (T27.1-60).
+template-lint-go-modules:
+	@failed=; for module in $$(git ls-files ':(glob)**/go.mod'); do dir=$$(dirname $$module); echo "[go-modules] go mod tidy -diff in $$dir"; (cd $$dir && $(GO) mod tidy -diff) || failed="$$failed $$dir"; done; test -z "$$failed" || { echo "go mod tidy -diff fails in:$$failed"; exit 1; }
 template-lint-rust-format:
 	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
 template-lint-showcase-format: typed-generator

@@ -232,7 +232,7 @@ test('no workflow of template and no entry of CHECK_TARGETS runs a provider pari
 // of template and no lint of kit.
 test('native CI workers own the format checks of template, leave the lint of kit to ci-pipeline.yml and select their tool groups', () => {
   const expected: Record<string, string[]> = {
-    go: ['template-lint-go-format'],
+    go: ['template-lint-go-format', 'template-lint-go-modules'],
     rust: ['template-lint-rust-format'],
     php: ['template-lint-php-format'],
     python: [],

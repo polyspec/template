@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 007e916ddc55acc552f69bff6de05d16e847e6abef5fdeef449895099aaecf1f -->
+<!-- source-sha256: cfdffbbd748a6f7657d2ab08528acbcd3e4fb33c90d3d04679e7e75f1ddcc4c1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- showcase adapter의 Go module인 examples/showcase/adapters/go는 github.com/polyspec/template/packages/go v0.0.0을 require하고 checkout의 소스인 ../../../../packages/go로 replace하며, go mod tidy가 쓰는 indirect require와 go.sum을 가진다(T27.1-60). 이전에는 어떤 module도 require하지 않아, go.work를 무시하는 go mod tidy가 offline에서는 packages/go의 import로 실패하고 online에서는 소스 대신 release된 module을 고정했다. 전체 suite의 새 target make template-lint-go-modules는 ci.yml의 job go가 실행하며, 추적되는 각 go.mod에서 go mod tidy -diff를 offline으로 실행해 다른 module을 모두 밝힌다.
 
 ## 0.0.19
 - Release 0.0.19: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.19를 담는다. kit 0.0.88 위의 첫 release이고, PHP 라이브러리가 json-schema fork를 min-0-max/json-schema로 요구하는 첫 release다(T27.1-59).
