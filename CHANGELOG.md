@@ -4,6 +4,9 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.18
+- Release 0.0.18: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.18; it is the first release whose CI and release jobs run the bootstrap action of kit 0.0.87 (T27.1-56).
 - Kit 0.0.87 is the pinned release (T27.1-56). Every job of .github/workflows/ci.yml and .github/workflows/pages.yml runs the bootstrap action of kit, `uses: ./.github/actions/kit-bootstrap`, which make kit-sync vendors (K992), in place of its own copy of setup-node, the locked kit install, make install-tools TOOLS=npm and make install-packages; tests/scripts/toolchain-files.test.mts requires that action before the first make of a job and no setup-node of a job.
 
 ## 0.0.17

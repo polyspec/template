@@ -5,6 +5,9 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.18
+- 릴리스 0.0.18: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.18을 담는다. CI와 release job이 kit 0.0.87의 bootstrap action을 실행하는 첫 릴리스다(T27.1-56).
 - Kit 0.0.87이 pin한 release다(T27.1-56). .github/workflows/ci.yml과 .github/workflows/pages.yml의 모든 job은 setup-node, 고정한 kit 설치, make install-tools TOOLS=npm, make install-packages의 자기 복사본 대신 make kit-sync가 vendor하는 kit의 bootstrap action `uses: ./.github/actions/kit-bootstrap`을 실행한다(K992). tests/scripts/toolchain-files.test.mts는 job의 첫 make 전에 그 action을, job의 setup-node는 없음을 요구한다.
 
 ## 0.0.17
