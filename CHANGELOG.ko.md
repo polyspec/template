@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b3491ddb6e486e8b22b663f83fc7ab3ebb929f1241bf4bef80d35b56c2660205 -->
+<!-- source-sha256: 1355fd4a2dabdbd4d5f27a7a6dcb76ea2c929727616c46e2a5a6888cae821be2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- polyspec/template은 json-schema fork를 그 자신의 이름으로 받는다(T27.1-57). packages/php는 `opis/json-schema` 대신 `"min-0-max/json-schema": "*"`를 요구하고 namespace `Opis\JsonSchema`는 그대로이며, workspace root는 그것을 기반 upstream 버전을 이름에 담은 fork의 기본 branch `polyspec-origin-2.6.0`으로 묶는다. package가 공개 registry에 없으므로 polyspec/template 또는 polyspec/template-cli의 소비자 root는 `{"type": "vcs", "url": "https://github.com/min-0-max/json-schema", "no-api": true}`를 선언하고 `"min-0-max/json-schema": "dev-polyspec-origin-2.6.0"`을 요구하며 fork가 가진 namespace의 `opis/json-schema` 요구를 지우고, 그것이 없는 root는 설치에서 실패한다. upstream opis/json-schema 2.6.0은 decoder의 collect-all-errors 모드에서 잘못된 AST에 AST-10보다 얕은 pointer를 불렀다.
 
 ## 0.0.18
 - 릴리스 0.0.18: config/release.json의 모든 manifest, PHP 확장의 버전 상수와 네이티브 lock이 0.0.18을 담는다. CI와 release job이 kit 0.0.87의 bootstrap action을 실행하는 첫 릴리스다(T27.1-56).

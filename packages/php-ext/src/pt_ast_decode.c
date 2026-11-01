@@ -1,7 +1,7 @@
 /*
  * The decode of the AST JSON (AST-10): the JSON text is validated against the schema of the contract, which the
  * extension holds as pt_ast_schema, and read as the AST arrays of the parser. The validator follows the keywords of
- * the library's validator (opis/json-schema, draft-07) for the keywords the schema uses, builds the same tree of
+ * the library's validator (min-0-max/json-schema, draft-07) for the keywords the schema uses, builds the same tree of
  * errors, and names the invalid node the way the library does: the deepest instance location, then the least
  * pointer, then the first error without sub-errors. A failure is an AstDecodeError with the same pointer and reason.
  */

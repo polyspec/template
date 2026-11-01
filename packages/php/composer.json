@@ -7,7 +7,7 @@
     "require": {
         "php": ">=8.4",
         "ext-mbstring": "*",
-        "opis/json-schema": "^2.6"
+        "min-0-max/json-schema": "*"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
