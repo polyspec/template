@@ -38,11 +38,12 @@ env:
 
 jobs:
   # The gates of kit (kit S12): ci-pipeline.yml, which kit-sync copies, plans and runs the shared, parity and runtime gates.
-  # No job here needs it: none reads an output of the pipeline, so each runs beside it, and ci-passed needs it.
+  # Every other job needs it (kit S12), so a job of this repository runs only after the gates of kit passed.
   kit:
     uses: ./.github/workflows/ci-pipeline.yml
 
   scripts:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -69,6 +70,7 @@ jobs:
           if-no-files-found: error
 
   generated:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -93,6 +95,7 @@ jobs:
           if-no-files-found: error
 
   delimiters:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -117,6 +120,7 @@ jobs:
           if-no-files-found: error
 
   showcase:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -147,6 +151,7 @@ jobs:
           if-no-files-found: error
 
   docs:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -173,6 +178,7 @@ jobs:
           if-no-files-found: error
 
   typescript:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -195,6 +201,7 @@ jobs:
           if-no-files-found: error
 
   browser:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -219,6 +226,7 @@ jobs:
           if-no-files-found: error
 
   python:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -241,6 +249,7 @@ jobs:
           if-no-files-found: error
 
   editor:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -268,6 +277,7 @@ jobs:
           if-no-files-found: error
 
   go:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -290,6 +300,7 @@ jobs:
           if-no-files-found: error
 
   rust:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -312,6 +323,7 @@ jobs:
           if-no-files-found: error
 
   php:
+    needs: kit
     runs-on: ubuntu-24.04
     # A failure of one PHP version does not cancel the job of the other, so each version reports its own result (T20.1-13).
     strategy:
@@ -343,6 +355,7 @@ jobs:
           if-no-files-found: error
 
   php-ext:
+    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

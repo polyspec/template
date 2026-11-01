@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1355fd4a2dabdbd4d5f27a7a6dcb76ea2c929727616c46e2a5a6888cae821be2 -->
+<!-- source-sha256: 5ea438c3f6c50d1dcd9992fe8713f4fffb07995d20f6ed31783995f6b23a0cd8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- ci.yml에서 kit을 뺀 모든 job은 kit S12가 요구하는 대로 needs: kit으로 job kit을 따르므로, template의 job은 kit의 gate가 통과한 뒤에만 실행된다(T27.1-58). 이것은 kit-check가 판정하므로 suite-parity.test.mts는 더 이상 ci-passed만 kit을 needs한다고 단언하지 않는다.
 - polyspec/template은 json-schema fork를 그 자신의 이름으로 받는다(T27.1-57). packages/php는 `opis/json-schema` 대신 `"min-0-max/json-schema": "*"`를 요구하고 namespace `Opis\JsonSchema`는 그대로이며, workspace root는 그것을 기반 upstream 버전을 이름에 담은 fork의 기본 branch `polyspec-origin-2.6.0`으로 묶는다. package가 공개 registry에 없으므로 polyspec/template 또는 polyspec/template-cli의 소비자 root는 `{"type": "vcs", "url": "https://github.com/min-0-max/json-schema", "no-api": true}`를 선언하고 `"min-0-max/json-schema": "dev-polyspec-origin-2.6.0"`을 요구하며 fork가 가진 namespace의 `opis/json-schema` 요구를 지우고, 그것이 없는 root는 설치에서 실패한다. upstream opis/json-schema 2.6.0은 decoder의 collect-all-errors 모드에서 잘못된 AST에 AST-10보다 얕은 pointer를 불렀다.
 
 ## 0.0.18

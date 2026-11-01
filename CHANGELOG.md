@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- Every job of ci.yml other than kit follows the job kit with needs: kit, as kit S12 requires, so the jobs of template run only after the gates of kit passed (T27.1-58); kit-check judges this, and suite-parity.test.mts no longer asserts that only ci-passed needs kit.
 - polyspec/template takes the json-schema fork under its own name (T27.1-57): packages/php requires `"min-0-max/json-schema": "*"` in place of `opis/json-schema`, with the namespace `Opis\JsonSchema` unchanged, and the workspace root binds it by the branch `polyspec-origin-2.6.0`, the default branch of the fork, named for the upstream version it is based on. The package is on no public registry, so a consumer root of polyspec/template or polyspec/template-cli declares `{"type": "vcs", "url": "https://github.com/min-0-max/json-schema", "no-api": true}`, requires `"min-0-max/json-schema": "dev-polyspec-origin-2.6.0"` and removes any requirement of `opis/json-schema`, whose namespace the fork carries; a root without them fails at install. Upstream opis/json-schema 2.6.0 named a shallower pointer than AST-10 for an invalid AST in the collect-all-errors mode of the decoder.
 
 ## 0.0.18

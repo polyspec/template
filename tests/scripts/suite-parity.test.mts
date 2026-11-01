@@ -228,18 +228,6 @@ test('no workflow of template and no entry of CHECK_TARGETS runs a provider pari
   }
 });
 
-// T27.1-43: the gates of kit run in the job kit of ci.yml, which calls ci-pipeline.yml, so the run of ci.yml that a release
-// takes by its id holds them; ci-passed needs kit like every other job, and no other job needs it, since none reads an output
-// of the pipeline and each runs beside it.
-test('the job kit of ci.yml calls ci-pipeline.yml, and only ci-passed needs it', () => {
-  const ci = jobs('.github/workflows/ci.yml');
-  const kit = ci.find(job => job.name === 'kit');
-  assert.ok(kit, 'ci.yml has no job kit');
-  assert.equal(kit.value.uses, './.github/workflows/ci-pipeline.yml');
-  const needing = ci.filter(job => [job.value.needs].flat().includes('kit')).map(job => job.name);
-  assert.deepEqual(needing, ['ci-passed']);
-});
-
 // The lint of each runtime is a gate of kit that ci-pipeline.yml runs (kit S12, K870); a language job runs the format check
 // of template and no lint of kit.
 test('native CI workers own the format checks of template, leave the lint of kit to ci-pipeline.yml and select their tool groups', () => {
