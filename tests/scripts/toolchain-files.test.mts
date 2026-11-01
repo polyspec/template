@@ -1,7 +1,7 @@
 // Tests that the toolchains of the recipes are the ones that the files of the checkout declare (T13.1-4, T19.2), each
 // with the expected and the actual version on failure:
 // - Node.js is the node of mise.toml, which `make install-tools TOOLS=npm` installs into var/tools and kit.mk starts as
-//   $(NODE) (kit K171), and every CI job starts the bootstrap with the Node.js of mise.toml;
+//   $(NODE) (kit K171), and every CI job runs the bootstrap action of kit, which starts with the Node.js of mise.toml (kit K992);
 // - npm is the npm:npm of mise.toml, which devEngines of package.json names (kit K938), installed by `make install-tools TOOLS=npm` into var/tools/bin,
 //   and Go the go of mise.toml, which the go directive of packages/go/go.mod equals, installed by `make
 //   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
@@ -90,15 +90,13 @@ const CI_PASSED = 'ci-passed';
 // The job kit of ci.yml calls the pipeline of kit, which kit-sync copies and kit tests (T27.1-43).
 const KIT_PIPELINE = './.github/workflows/ci-pipeline.yml';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
-// make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so the job installs both first (kit K171).
-// The npm of the runner refuses to run in a folder whose devEngines names another npm (EBADDEVENGINES), so the npm of devEngines
-// runs outside the checkout with --prefix, as in the copies of kit (K938-1).
-const LOCKED_KIT_INSTALL = [
-  'root="$PWD"',
-  "version=\"$(node -p 'require(\"./package.json\").devEngines.packageManager.version')\"",
-  '(cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)',
-].join('\n');
-const CI_PASSED_INSTALL = [LOCKED_KIT_INSTALL, 'make install-tools TOOLS=npm', 'make install-packages'];
+// The bootstrap of every CI job is the composite action of kit that kit-sync vendors (kit K992): it sets up the Node.js of
+// mise.toml, installs the locked kit package, then runs make install-tools TOOLS=npm and make install-packages. kit tests
+// its steps, and make kit-check fails a workflow that carries a copy of them; it runs at the commit of the run, so it
+// needs no pin. make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so ci-passed runs it too (kit K171).
+const KIT_BOOTSTRAP = './.github/actions/kit-bootstrap';
+// The index of the step of `job` that runs the bootstrap of kit, or -1.
+const bootstrapIndex = (job: Job) => job.steps.findIndex(step => step.uses === KIT_BOOTSTRAP);
 
 // Each broken rule of the job ci-passed of the text of ci.yml (T22.1-3).
 export function ciPassedViolations(text: string) {
@@ -122,9 +120,10 @@ export function ciPassedViolations(text: string) {
   if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = runsOf(job);
   const last = job.steps.at(-1);
-  if (JSON.stringify(runs) !== JSON.stringify([...CI_PASSED_INSTALL, CI_PASSED_RUN]) || last?.run === undefined || last.if !== undefined) {
+  if (JSON.stringify(runs) !== JSON.stringify([CI_PASSED_RUN]) || last?.run === undefined || last.if !== undefined) {
     found.push(`ci.yml: the job ${CI_PASSED} runs [${runs.join(', ')}], not the last step ${CI_PASSED_RUN} without a condition of its own`);
   }
+  if (bootstrapIndex(job) < 0) found.push(`ci.yml: the job ${CI_PASSED} does not run ${KIT_BOOTSTRAP} before make ci-passed`);
   return found;
 }
 
@@ -163,15 +162,13 @@ test('Node.js is the node of mise.toml, which engines.node of package.json names
   assert.equal(actual, `v${version}`, `node of the recipes: expected v${version} (mise.toml), actual ${actual}; run make install-tools TOOLS=npm`);
 });
 
-test('every CI job that runs Node.js starts the bootstrap with the Node.js of mise.toml', () => {
+test('every CI job that runs Node.js runs the bootstrap of kit, which sets up the Node.js of mise.toml (kit K992)', () => {
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
       if (!runLines(job).some(line => /\b(npm|node|make) /.test(line))) continue;
-      assert.ok(usesOf(job, 'actions/setup-node@').some(step => step.with['node-version-file'] === 'mise.toml'), `${file} job ${job.name} does not take Node.js from mise.toml`);
+      assert.ok(bootstrapIndex(job) >= 0, `${file} job ${job.name} does not run ${KIT_BOOTSTRAP}`);
+      assert.equal(usesOf(job, 'actions/setup-node@').length, 0, `${file} job ${job.name} sets up Node.js itself; ${KIT_BOOTSTRAP} sets up the Node.js of mise.toml`);
       assert.ok(job.steps.every(step => !('node-version' in step.with)), `${file} job ${job.name} names a Node.js version`);
-      // The npm cache of setup-node runs the npm of the runner in the checkout, which devEngines refuses (EBADDEVENGINES).
-      assert.ok(usesOf(job, 'actions/setup-node@').every(step => step.with['package-manager-cache'] === false && !('cache' in step.with)),
-        `${file} job ${job.name} does not set package-manager-cache: false without cache in actions/setup-node`);
     }
   }
 });
@@ -339,9 +336,10 @@ test('every installing job prepares the locked kit before the first make', () =>
       if (firstMake < 0) continue;
       assert.ok(usesOf(job, 'actions/checkout@').some(step => step.with['fetch-depth'] === 0),
         `${file} job ${job.name} must fetch the full commit history`);
-      const installed = commands.indexOf(LOCKED_KIT_INSTALL);
-      assert.ok(installed >= 0 && installed < firstMake,
-        `${file} job ${job.name} must install locked packages before make reads the installed bootstrap`);
+      const installed = bootstrapIndex(job);
+      const firstMakeStep = job.steps.findIndex(step => step.run !== undefined && /^make (?!-k -C )/.test(step.run));
+      assert.ok(installed >= 0 && installed < firstMakeStep,
+        `${file} job ${job.name} must run ${KIT_BOOTSTRAP}, which installs the locked packages, before make reads the installed bootstrap`);
       assert.ok(!commands.some(command => command.includes('../kit')),
         `${file} job ${job.name} depends on an unpinned sibling checkout`);
     }
@@ -361,8 +359,9 @@ test('every CI job bootstraps locked tools before its dependency installation, a
         const scoped = ['go', 'rust', 'php', 'php-ext', 'python', 'typescript', 'browser', 'editor', 'parity'].includes(job.name) || job.name.startsWith('parity-');
         const toolStep = scoped ? runs.find(command => command.startsWith('make install-tools TOOLS=') && command !== 'make install-tools TOOLS=npm') : 'make install';
         assert.ok(toolStep, `${job.name} declares its selected tools`);
-        const order = ['make install-tools TOOLS=npm', 'make install-packages', toolStep].map(command => runs.indexOf(command));
-        assert.ok(order.every((index, position) => index !== -1 && (position === 0 || index > (order[position - 1] ?? -1))), `${file} job ${job.name} does not install with make install-tools TOOLS=npm, make install-packages and make install`);
+        // The bootstrap of kit runs make install-tools TOOLS=npm and make install-packages (kit K992).
+        const order = [bootstrapIndex(job), job.steps.findIndex(step => step.run === toolStep)];
+        assert.ok(order.every((index, position) => index !== -1 && (position === 0 || index > (order[position - 1] ?? -1))), `${file} job ${job.name} does not install with ${KIT_BOOTSTRAP} and then ${toolStep}`);
       }
     }
   }
@@ -515,8 +514,8 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
     'not always': [text.replace('    if: ${{ always() }}\n', '    if: ${{ success() }}\n'), "the job ci-passed has if: '${{ success() }}'"],
     'needs one job': [text.replace(/ {4}needs: \[[^\]]*\]\n/, '    needs: [release]\n'), 'the job ci-passed needs [release], not every other job'],
     'another runner': [`${head}${job.replace('runs-on: ubuntu-24.04', 'runs-on: ubuntu-26.04')}`, "the job ci-passed runs on 'ubuntu-26.04'"],
-    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), `the job ci-passed runs [${CI_PASSED_INSTALL.join(', ')}, make ci-passed], not the last step`],
-    'no install': [`${head}${job.replace('      - run: make install-packages\n', '')}`, 'not the last step make ci-passed RESULTS'],
+    'another step': [text.replace(CI_PASSED_RUN, 'make ci-passed'), 'the job ci-passed runs [make ci-passed], not the last step'],
+    'no install': [`${head}${job.replace(/ {6}- name: [^\n]*\n {8}uses: \.\/\.github\/actions\/kit-bootstrap\n/, '')}`, `does not run ${KIT_BOOTSTRAP}`],
     'skippable step': [text.replace(`        run: ${CI_PASSED_RUN}\n`, `        if: \${{ !cancelled() }}\n        run: ${CI_PASSED_RUN}\n`), 'without a condition of its own'],
   };
   for (const [name, [brokenText, message]] of Object.entries(broken)) {
@@ -528,8 +527,8 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
-    // The pipeline of kit is a workflow of the checkout, which runs at the commit of the run, so it needs no pin.
-    for (const pin of pinsOf(file).filter(entry => entry.uses !== KIT_PIPELINE)) {
+    // The pipeline and the bootstrap of kit are files of the checkout, which run at the commit of the run, so they need no pin.
+    for (const pin of pinsOf(file).filter(entry => entry.uses !== KIT_PIPELINE && entry.uses !== KIT_BOOTSTRAP)) {
       assert.match(pin.uses, /^[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/, `${file}: ${pin.uses} is not pinned by a commit`);
       assert.match(pin.comment ?? 'no comment', /^v?\d+\.\d+\.\d+$/, `${file}: ${pin.uses} does not name its release in a comment`);
     }

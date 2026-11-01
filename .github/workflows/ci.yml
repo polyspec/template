@@ -5,8 +5,10 @@
 # CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run no other target
 # (T17.1-10); the gates of kit, the parity phases among them, run in the job kit, which calls
 # .github/workflows/ci-pipeline.yml of kit, so no other job here runs one (T27.1-44, T27.1-43). A verifying job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04,
-# pins its actions by commit and installs with `make install-tools TOOLS=npm`, which installs the npm of the checkout and
-# mise into var/tools, and `make install-packages`, which installs package-lock.json with @polyspec/kit. Native workers
+# pins its actions by commit and installs with the bootstrap action of kit, `./.github/actions/kit-bootstrap`, which
+# kit-sync vendors (kit K992): it sets up the Node.js of mise.toml, installs the locked kit package, then runs
+# `make install-tools TOOLS=npm`, which installs the npm of the checkout and mise into var/tools, and
+# `make install-packages`, which installs package-lock.json with @polyspec/kit. Native workers
 # select their locked tools and dependencies; mixed workers use the complete install. setup-php installs no tools,
 # because Composer is a tool of mise.toml. The workflow runs on every push to main and every manual run
 # (workflow_dispatch): the job ci-passed, the last job, passes only when every other job of this workflow passed
@@ -31,7 +33,7 @@ permissions:
 # rustup installs no toolchain on the first cargo; a job that uses Rust installs it first (T18.7-1).
 env:
   RUSTUP_AUTO_INSTALL: '0'
-  # setup-node and every npm install restore/read the same lock-keyed download cache.
+  # The bootstrap of kit and every npm install read the same lock-keyed download cache.
   npm_config_cache: ${{ github.workspace }}/var/bootstrap/npm-cache
 
 jobs:
@@ -46,24 +48,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version-file: .php-version
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install
         if: ${{ !cancelled() }}
       - run: make template-install-browsers
@@ -83,24 +74,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version-file: .php-version
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php generated-native-check typed-generator-compile-check generated-lint-check"
@@ -118,24 +98,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version-file: .php-version
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="delimiter-matrix"
@@ -153,24 +122,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version-file: .php-version
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install
         if: ${{ !cancelled() }}
       - run: make ci-targets TARGETS="showcase-check contract-check benchmark-smoke template-lint-showcase-format template-lint-showcase-warnings compiler-interface-check docs-static-check docs-verify-idempotent"
@@ -194,24 +152,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version-file: .php-version
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install
         if: ${{ !cancelled() }}
       - run: make hooks
@@ -231,19 +178,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="node"
         if: ${{ !cancelled() }}
@@ -264,19 +200,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="node"
         if: ${{ !cancelled() }}
@@ -299,19 +224,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="python uv"
         if: ${{ !cancelled() }}
@@ -332,19 +246,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="node"
         if: ${{ !cancelled() }}
@@ -370,19 +273,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="go"
         if: ${{ !cancelled() }}
@@ -403,19 +295,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="rust"
         if: ${{ !cancelled() }}
@@ -441,24 +322,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: ${{ matrix.php }}
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="php composer"
         if: ${{ !cancelled() }}
       - run: make template-install-php
@@ -478,24 +348,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version-file: .php-version
           tools: none
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-        if: ${{ !cancelled() }}
-      - run: make install-packages
-        if: ${{ !cancelled() }}
       - run: make install-tools TOOLS="php composer"
         if: ${{ !cancelled() }}
       - run: make kit-install-symbols EXTRACTORS=php
@@ -525,17 +384,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: mise.toml
-          package-manager-cache: false
-      - name: Bootstrap locked kit package
-        run: |-
-          root="$PWD"
-          version="$(node -p 'require("./package.json").devEngines.packageManager.version')"
-          (cd "${RUNNER_TEMP:?RUNNER_TEMP is not set}" && npm_config_cache="$root/var/bootstrap/npm-cache" npm exec --yes --package="npm@$version" -- npm --prefix "$root" ci --ignore-scripts --allow-remote=root)
-        if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS=npm
-      - run: make install-packages
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
       - name: make ci-passed
         run: make ci-passed RESULTS='${{ toJSON(needs) }}'
