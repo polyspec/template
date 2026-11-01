@@ -1,10 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7adcceb467e967a7e594a4d5fef8fcb1d355019e8bfc0b5bfda4595f6f04406c -->
+<!-- source-sha256: 007e916ddc55acc552f69bff6de05d16e847e6abef5fdeef449895099aaecf1f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.19
+- Release 0.0.19: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.19를 담는다. kit 0.0.88 위의 첫 release이고, PHP 라이브러리가 json-schema fork를 min-0-max/json-schema로 요구하는 첫 release다(T27.1-59).
 - template은 kit 0.0.88을 채택한다. 그 make kit-gates-static은 push 전에 모든 공유 gate를 실행하고, 그 kit-check는 하나의 CI pipeline(S12), editable 설치 없음(S11), 저장소 밖을 가리키는 manifest 경로 없음(P30)을 판정한다. make kit-sync가 그 PRINCIPLES를 쓴다(T27.1-59).
 - ci.yml에서 kit을 뺀 모든 job은 kit S12가 요구하는 대로 needs: kit으로 job kit을 따르므로, template의 job은 kit의 gate가 통과한 뒤에만 실행된다(T27.1-58). 이것은 kit-check가 판정하므로 suite-parity.test.mts는 더 이상 ci-passed만 kit을 needs한다고 단언하지 않는다.
 - polyspec/template은 json-schema fork를 그 자신의 이름으로 받는다(T27.1-57). packages/php는 `opis/json-schema` 대신 `"min-0-max/json-schema": "*"`를 요구하고 namespace `Opis\JsonSchema`는 그대로이며, workspace root는 그것을 기반 upstream 버전을 이름에 담은 fork의 기본 branch `polyspec-origin-2.6.0`으로 묶는다. package가 공개 registry에 없으므로 polyspec/template 또는 polyspec/template-cli의 소비자 root는 `{"type": "vcs", "url": "https://github.com/min-0-max/json-schema", "no-api": true}`를 선언하고 `"min-0-max/json-schema": "dev-polyspec-origin-2.6.0"`을 요구하며 fork가 가진 namespace의 `opis/json-schema` 요구를 지우고, 그것이 없는 root는 설치에서 실패한다. upstream opis/json-schema 2.6.0은 decoder의 collect-all-errors 모드에서 잘못된 AST에 AST-10보다 얕은 pointer를 불렀다.
