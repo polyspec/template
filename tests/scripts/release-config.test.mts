@@ -113,7 +113,10 @@ test('the development root requires the json-schema fork by a release and its lo
   assert.equal(typeof required, 'string', 'composer.json requires no min-0-max/json-schema');
   assert.match(String(required), /^\d+\.\d+\.\d+-p\d+$/, 'composer.json: the json-schema fork is required by a release');
   const lock = parsedJsonObject(read('composer.lock'), 'composer.lock');
-  const locked = ['packages', 'packages-dev'].flatMap(key => (Array.isArray(lock[key]) ? lock[key] : [])).filter(isJsonObject).find(item => item.name === 'min-0-max/json-schema');
+  const locked = ['packages', 'packages-dev'].flatMap((key): unknown[] => {
+    const entries: unknown = lock[key];
+    return Array.isArray(entries) ? entries : [];
+  }).filter(isJsonObject).find(item => item.name === 'min-0-max/json-schema');
   assert.ok(locked !== undefined, 'composer.lock has no min-0-max/json-schema');
   assert.equal(locked.version, `v${String(required)}`, 'composer.lock: the lock pins the tag of the release');
 });
