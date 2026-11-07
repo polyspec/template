@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 747093cda9c7aadffafb93712471f30999be9a205f66d0346e8e4d3b75313eda -->
+<!-- source-sha256: 79a0ebf648a0e3d464461b91e35031736f897932a35de0ac0e1e4b1928b162d2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 - Rust 문서가 다시 build된다. packages/rust/src/format/mod.rs의 문서 link는 macro와 이름이 같은 함수 format()을 가리키므로 workspace lint의 warnings = "deny"가 rustdoc을 실패시키지 않는다. generated program lint는 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, clippy.toml을 root에서 읽고, oxlint는 no-unused-vars만 켠 자기 설정으로 생성된 TypeScript를 lint한다(T27.1-66).
+- tests/scripts/pre-commit-hook.test.mts는 config/checklist.json의 두 tracked hook pre-commit과 commit-msg를 검사하고, .githooks/commit-msg가 실행 가능하며 message 파일로 make commit-msg-hook을 실행하는지 검사한다(T27.1-67).
 
 ## 0.0.21
 - Release 0.0.21: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.21을 담는다. kit 0.0.98 위의 첫 release다(T27.1-65).
