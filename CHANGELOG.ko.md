@@ -1,14 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 79a0ebf648a0e3d464461b91e35031736f897932a35de0ac0e1e4b1928b162d2 -->
+<!-- source-sha256: 6de327adbf17a253226a4f8594f5bfef4451cfe89b00e06b66dedcabd5c6da6d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
-- Rust 문서가 다시 build된다. packages/rust/src/format/mod.rs의 문서 link는 macro와 이름이 같은 함수 format()을 가리키므로 workspace lint의 warnings = "deny"가 rustdoc을 실패시키지 않는다. generated program lint는 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, clippy.toml을 root에서 읽고, oxlint는 no-unused-vars만 켠 자기 설정으로 생성된 TypeScript를 lint한다(T27.1-66).
-- tests/scripts/pre-commit-hook.test.mts는 config/checklist.json의 두 tracked hook pre-commit과 commit-msg를 검사하고, .githooks/commit-msg가 실행 가능하며 message 파일로 make commit-msg-hook을 실행하는지 검사한다(T27.1-67).
 
 ## 0.0.21
+- Rust 문서가 다시 build된다. packages/rust/src/format/mod.rs의 문서 link는 macro와 이름이 같은 함수 format()을 가리키므로 workspace lint의 warnings = "deny"가 rustdoc을 실패시키지 않는다. generated program lint는 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, clippy.toml을 root에서 읽고, oxlint는 no-unused-vars만 켠 자기 설정으로 생성된 TypeScript를 lint한다(T27.1-66).
+- tests/scripts/pre-commit-hook.test.mts는 config/checklist.json의 두 tracked hook pre-commit과 commit-msg를 검사하고, .githooks/commit-msg가 실행 가능하며 message 파일로 make commit-msg-hook을 실행하는지 검사한다(T27.1-67).
 - Release 0.0.21: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.21을 담는다. kit 0.0.98 위의 첫 release다(T27.1-65).
 - template은 아무것도 강제하지 않는 utility의 kit 0.0.98을 지원한다(kit docs/spec/utilities-and-recipes.md). Makefile은 kit의 파일을 include하지 않고 자기 target이 명시한 인자로 kit의 utility를 호출한다. .github/workflows/ci.yml은 kit pipeline 대신 자기 job gates, lint, parity에서 gate, lint, parity-check를 실행한다. kit이 강제하던 설정은 .npmrc, mise.toml, Cargo.toml의 lint, pyproject.toml, root의 lint 설정에 있다. ci-pipeline.yml, config/ci.json, config/pyproject.schema.json, config/knip-entries.json, .claude/settings.json은 지운다. PRINCIPLES.md와 그 한국어 짝은 kit 0.0.98의 것이며 그 `Enforced by:` 줄은 template의 검사를 적는다(T27.1-64).
 - 개발 root는 json-schema fork를 branch polyspec-origin-2.6.0 대신 release 2.6.0-p2로 require하고, template은 kit 0.0.95를 채택한다. kit 0.0.95의 PRINCIPLES는 fork 규칙을 각 fork의 FORK.md와 각 root의 manifest와 lock에 맡긴다 (T27.1-63).
