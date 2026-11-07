@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 import type { JSONSchemaType } from 'ajv';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { readToml, tomlArray, tomlString, tomlTable } from '../../scripts/toml.mts';
-import { parsedJsonObject } from '../runner/checked.mts';
+import { isJsonObject, parsedJsonObject } from '../runner/checked.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -101,6 +101,21 @@ test('no Composer package directory tracks a composer.lock', { timeout: 5000 }, 
   const tracked = spawnSync('git', ['ls-files', '--', ...directories.map(directory => `${directory}/composer.lock`)], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(tracked.status, 0, tracked.stderr);
   assert.deepEqual(tracked.stdout.split('\n').filter(Boolean), []);
+});
+
+test('the development root requires the json-schema fork by a release and its lock pins the tag', () => {
+  // A branch of the fork moves, so the root requires a release of the fork, as its FORK.md states, and composer.lock records
+  // the tag of that release (T27.1-63).
+  const manifest = parsedJsonObject(read('composer.json'), 'composer.json');
+  const requireDev = manifest['require-dev'];
+  assert.ok(isJsonObject(requireDev), 'composer.json has no require-dev');
+  const required = requireDev['min-0-max/json-schema'];
+  assert.equal(typeof required, 'string', 'composer.json requires no min-0-max/json-schema');
+  assert.match(String(required), /^\d+\.\d+\.\d+-p\d+$/, 'composer.json: the json-schema fork is required by a release');
+  const lock = parsedJsonObject(read('composer.lock'), 'composer.lock');
+  const locked = ['packages', 'packages-dev'].flatMap(key => (Array.isArray(lock[key]) ? lock[key] : [])).filter(isJsonObject).find(item => item.name === 'min-0-max/json-schema');
+  assert.ok(locked !== undefined, 'composer.lock has no min-0-max/json-schema');
+  assert.equal(locked.version, `v${String(required)}`, 'composer.lock: the lock pins the tag of the release');
 });
 
 test('the Rust crate is released by git tag', () => {
