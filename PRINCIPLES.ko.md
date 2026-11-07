@@ -1,12 +1,13 @@
 <!-- doc-id: principles -->
-<!-- source-sha256: 63d60c3798ecbc8f6e45d76e6a940172826e3c6199a1d513bade2bc3a240ebf1 -->
+<!-- source-sha256: 009b70b7ee4e68911c27c391ed839bcbb8e2e70be301b89ab0790caea01994f9 -->
 # 원칙
 
 [English](PRINCIPLES.md)
 
-이것은 모든 polyspec repository의 작업 원칙입니다. template은 kit이 package에 담아 내보내는 PRINCIPLES.md를 받아 자기 파일로
-둡니다(T27.1-64). kit은 repository의 파일을 쓰지 않습니다. AGENTS.md는 여기로 link하고 template만의 규칙만 적습니다. 원칙은
-owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enforced by:` 줄은 template의 검사를 적습니다.
+이것은 모든 polyspec repository의 작업 원칙입니다. kit은 이 파일을 package에 예시로 담습니다. 이 파일을 받는
+repository는 복사해서 그 사본을 자기 것으로 가지며, kit은 그 사본을 쓰지도 비교하지도 않습니다(K1052). repository의 AGENTS.md는
+여기로 link하고 자기만의 규칙만 적습니다. 원칙은 owner에게서 옵니다. kit은 자기 사본을 근거와 함께 바꾸고,
+repository는 자기 사본을 자기 파일로 바꿉니다(K1055).
 
 ## 책임
 
@@ -26,7 +27,7 @@ owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enfor
 - P5 잘못된 변경은 의도가 아니라 해로움과 옳음으로 판단합니다. 해로운 변경은 즉시 되돌리고, 해롭지 않지만 틀렸거나 불필요한
   변경은 제거하며, 작업과 무관하지만 옳은 변경은 남겨 실제 이유와 함께 따로 commit하고, 속하지 않은 작업의 일부로 기록하지
   않습니다.
-  Enforced by: none, 안내하는 규칙이다: commit-msg hook은 AI footer와 identity, Red 줄, fix의 test만 검사한다 (K805)
+  Enforced by: none, 안내하는 규칙이다: kit은 어떤 명령도 커밋도 거부하지 않는다 (K1053).
 
 ## 기준
 
@@ -35,11 +36,10 @@ owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enfor
   Enforced by: `make test-markers-check`
 - P7 꼼수는 어떤 경우에도 허락하지 않습니다. 비정상적인 방법으로 이룬 목표는 이룬 것이 아닙니다. 요구를 꼼수로만 채울 수
   있다면 그렇게 하지 않고 그 사실을 정확히 적습니다.
-  Enforced by: none, 어떤 방법이 꼼수인지는 어떤 tool도 하지 않는 판단입니다.
+  Enforced by: none, 안내하는 규칙이다: kit은 어떤 명령도 커밋도 거부하지 않는다 (K1053).
 - P8 오류는 숨기지 않습니다: 잘못된 입력을 그럴듯한 입력으로 바꾸는 fallback도, 입력이나 출력을 조용히 버리는 것도, 삼킨
   오류도 없습니다. fallback은 정말 필요한 곳에만 그 필요를 적고 둡니다.
-  Enforced by: `make lint-ts`, `make lint-python`, `make lint-go`, `make lint-php`, `make lint-rust`, `make suppression-check`,
-  catch-check(`make lint-ts`의 한 단계: 문장 없는 catch 금지)
+  Enforced by: `make lint-ts`, `make lint-python`, `make lint-go`, `make lint-php`, `make lint-rust`, `make suppression-check`
 - P9 올바름이 먼저입니다; 빠름은 올바름을 지킬 때만 좇습니다.
   Enforced by: none, 올바름과 빠름의 순서는 판단입니다.
 - P10 main에 작업이 들어가는 길은 둘입니다. main에서 직접 하는 작업은 P38의 commit으로 들어갑니다. 병렬이나 격리된
@@ -71,12 +71,12 @@ owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enfor
   Enforced by: none, 임시방편인지는 설계 판단입니다.
 - P17 복구, 적용, 변환은 멱등입니다; 변경은 polling으로 찾지 않고 event로 게시합니다; 경로는 선언된 root에서 선언적으로
   결정합니다; multi-platform은 필수 요구이며 platform 꼼수 없이 채웁니다.
-  Enforced by: none, 복구, 적용, 변환의 멱등, 변경의 event 게시, 경로의 선언성, platform 꼼수 없음은 어떤 check도 닿지 않는
-  설계 판단입니다.
+  Enforced by: none, 복구, 적용, 변환의 멱등, 변경의 event 게시, 경로의 선언성, platform 꼼수 없음은 모든 저장소가 가진 어떤
+  check도 닿지 않는 설계 판단이다.
 - P18 끝이 정해지지 않은 loop로 주기적으로 살피는 script는 쓰지 않습니다: sleep을 넣은 `until`이나 `while`, `gh run list`를
   감싼 loop, watchdog 모두 쓰지 않습니다. 기다림은 자기 일이 끝을 정하는 명령 하나입니다: `gh run watch <id> --exit-status`,
   완료가 알려지는 background 명령, 또는 그 일을 하는 세션의 메시지.
-  Enforced by: none, 기다림에 정해진 끝이 있는지는 code review의 판단입니다.
+  Enforced by: none, 안내하는 규칙이다: kit은 어떤 명령도 커밋도 거부하지 않는다 (K1053).
 
 ## 검증
 
@@ -84,10 +84,10 @@ owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enfor
   test는 아무것도 증명하지 않으며, 실행되지 않고 통과하는 test는 결함입니다.
   변경으로 낡게 된 주석이나 문서는 그 변경의 commit에서 고칩니다. 행이 끝난 뒤 찾은 것은 Verification이
   `make text-absent FILE=<path> TEXT=<낡은 text>`인 하위 항목으로 두며, 낡은 text가 남아 있는 동안 실패합니다.
-  Enforced by: `.githooks/commit-msg`는 done 행의 Red 줄과 fix의 test에 대해
+  Enforced by: none, 안내하는 규칙이다: kit은 어떤 명령도 커밋도 거부하지 않는다 (K1053).
 - P20 항목은 자기 단위 test의 red, 구현, green으로 완료합니다. 바뀐 것의 소유 검사만 돌리며, 전체 모음은 수정마다, 항목마다,
   마지막에도 돌리지 않습니다. 전체 모음은 conductor의 명령으로만 돕니다.
-  Enforced by: none, session이 어떤 검사를 돌리는지는 tool이 관찰하지 않습니다.
+  Enforced by: none, 안내하는 규칙이다: kit은 어떤 명령도 커밋도 거부하지 않는다 (K1053).
 - P21 어려운 판단이나 새로운 추론은 한 round가 아무것도 찾지 못할 때까지 round마다 적대적으로 검증합니다. 검증의 범위는 첫
   round 전에 정하며, 그 옆의 질문은 자기 항목이 됩니다. 검증에는 반론뿐 아니라 해법도 요구하며, finding은 명제가 틀렸음을
   보이거나, 다른 문서와 모순됨을 보이거나, 명제가 다룬다고 주장하는 case가 빠졌음을 보일 때만 인정합니다.
@@ -124,24 +124,24 @@ owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enfor
   Enforced by: `make docs-check`
 - P27 commit은 최대 한 item을 완료한다. state를 최대 하나 바꾸고, item을 done으로 옮기는 commit은 그것을 CHANGELOG.md와 그
   한국어 짝에 기록한다. commit되지 않은 작업은 최대 한 item이다.
-  Enforced by: none, 안내하는 규칙이다: commit-msg hook은 AI footer와 identity, Red 줄, fix의 test만 검사한다 (K805)
+  Enforced by: none, 안내하는 규칙이다: kit은 어떤 명령도 커밋도 거부하지 않는다 (K1053).
 - P28 commit message는 `type(scope): Subject (#id)`이며, type은 feat, fix, docs, style, refactor, test, chore 중 하나,
-  Subject는 대문자로 시작하고 마침표 없이 끝나는 50자 이하, 그 뒤 빈 줄과 72자로 감싼 body이다. `make commit`이 그것을
-  쓴다. AI 도구의 footer, 곧 그 co-author나 session trailer는 넣지 않는다. author와 committer는 사람이며 AI 도구가 아니다.
-  Enforced by: `.githooks/commit-msg`는 AI footer와 identity에 대해
+  Subject는 대문자로 시작하고 마침표 없이 끝나는 50자 이하, 그 뒤 빈 줄과 72자로 감싼 body이다. kit의 `make commit`은 그것을
+  쓰는 한 방법이다. AI 도구의 footer, 곧 그 co-author나 session trailer는 넣지 않는다. author와 committer는 사람이며 AI 도구가 아니다.
+  Enforced by: `.githooks/commit-msg`가 AI footer와 identity를 검사한다
 - P29 작업의 make target은 고정된 이름을 가진다. `install`, `build`, `test`, `lint`, `docs-check`와 `packages/`의 runtime마다
-  `build-<runtime>`, `test-<runtime>`, `lint-<runtime>`이며, 모두 kit이 정의한다. 저장소는 `build: kit-build`처럼 자기
-  prerequisite로 작업에 합류하고, 작업 이름으로 시작하는 다른 target으로 합류하지 않는다 (K246).
+  `build-<runtime>`, `test-<runtime>`, `lint-<runtime>`이다. 저장소는 `build: site-assets`처럼 자기
+  prerequisite로 작업에 합류하고, 작업 이름으로 시작하는 다른 target으로 합류하지 않는다 (K246, K1055).
   Enforced by: none, 안내하는 규칙이다: 저장소의 target 이름은 저장소의 것이다 (K810).
 - P30 0.0.x 개발 중 앱은 선언된 로컬 provider source를 native package manager의 방식으로 연결한다.
   Package manager가 link, 설치 record, dependency 해석, 생성 metadata를 소유하며 source를 설치된 release version으로 위장하지 않는다.
-  저장소는 provider를 로컬 checkout에 `.links`와 `make link`로만 연결하고, 그것을 위한 자기 선언을 두지 않는다. 즉 package
-  manager의 추적 manifest는 저장소 밖 경로를 적지 않는다(K997). Release 선언과 lock은 배포된 dependency의 기록으로 유지하고,
+  저장소는 provider를 로컬 checkout에 native 로컬 개발 방식으로 연결하며 추적되는 선언으로 연결하지 않는다. 즉 package
+  manager의 추적 manifest는 저장소 밖 경로를 적지 않는다(K997). kit의 `.links`와 `make link`는 한 방법이다(K1055). Release 선언과 lock은 배포된 dependency의 기록으로 유지하고,
   kit은 link manifest, version alias, lock metadata를 합성하지 않으며 추적 lock을 통합 배치까지 기다리게 하지 않는다.
-  Enforced by: none, 추적 manifest는 code review의 판단이다. link는 개발 환경에만 있고 거기서 make link-check가 link 선언 .links에 맞춰 검사하며(K869), CI는 아무것도 link하지 않는다(K824).
+  Enforced by: none, 안내 규칙: link는 개발 환경에만 있고 거기서 make link-check가 link 선언 .links에 맞춰 검사한다(K869). CI는 아무것도 link하지 않는다 (K824)
 - P31 gate는 우회하지 않는다. test, script, Makefile은 workflow 밖에서 CI identity(`GITHUB_ACTIONS`, `CI`)를 설정하지 않고,
-  `make -o`, `--old-file`, `--assume-old`에 전체 suite의 target을 적지 않으며, `--no-verify`를 쓰지 않는다 (K308).
-  Enforced by: none, 우회는 code review의 판단이다.
+  `make -o`, `--old-file`, `--assume-old`에 저장소의 gate를 적지 않으며, `--no-verify`를 쓰지 않는다 (K308).
+  Enforced by: none, 안내 규칙: 저장소의 recipe와 script는 그 저장소의 것이다(K1051).
 - P32 범위: 공유 contract 동작은 모든 구현에 있고(S6, S10) test와 함께 구현한다. 언어나 runtime에 고유한 통합은 docs/spec에
   중립적인 규칙 하나로 쓰고, 적용되는 각 구현이 자기 고유한 형태를 거기에 묶는다. component나 artifact에만 해당하는 requirement는
   기존 coverage part나 release package에서 owner가 도출되는 feature unit만 test한다. scope가 없는 unit은 여전히 모든 구현에 적용한다.
@@ -152,7 +152,7 @@ owner에게서 옵니다; 원칙은 kit에서 근거와 함께 바꾸며, `Enfor
   Enforced by: `make parity-declarations-check`
 - P34 반복된 code는 제외가 아니라 하나의 module로 재구성해서 고친다. tool source는 분류하고, 생성물은 Git에 추적하지 않는다. 다만 consumer가 tagged tree 그 자체로 설치하는 생성 source(Go module, Rust crate)는 추적하고, 그 이유를 config/generated.json에 선언한다.
   배포되는 package가 생성물을 필요로 하면 그 생성 경로마다 그것을 만드는 저장소의 make target을 config/release.json에 선언한다. release는 먼저 tagged commit과 다른 checkout, 변경되었거나 추적되지 않은 경로, 바깥에서 link된 dependency를 거부한다. 그다음 선언된 경로를 지우고 checkout에서 그 target을 실행하며, 선언된 경로가 결과에 없거나 Git에 추적되면 실패한다.
-  Enforced by: `make duplication-check`, `make rebuild-check`, `.githooks/pre-commit`, `make release-assets`.
+  Enforced by: `make duplication-check`, `make rebuild-check`, `make release-assets`.
 - P35 로컬 source 개발은 provider release를 기다리지 않는다. Native source 연결 누락은 파일과 행을 밝혀
   kit 결함으로 보고하며 호환되지 않는 dependency requirement는 앱의 native 선언에서 수정한다.
   Release 설치는 개발 source 상태와 독립적으로 lock의 정확한 배포 graph를 사용한다.
@@ -213,7 +213,7 @@ owner가 2026-10-13에 이 기준을 승인했습니다. 각 기준은 위반 �
   `packages/<component>/`, 그 port는 `packages/<component>/<runtime>/`에 두며, 폴더 이름에 repository prefix를 붙이지
   않습니다. runtime 폴더는 source 언어를 이름으로 가지며(TypeScript는 `ts`), test 폴더는 `tests/`, AGENTS, CHANGELOG,
   Makefile은 root에 두고, `docs/`는 `spec/`, `operations/`, `plans/`, `rebuild/`, `features.md`와 VitePress site의 파일을
-  가집니다(K245). `make layout-check`가 alint로 `config/layout.yml`(kit 공통 rule 위에 레포의 map을 더한 설정)에 맞춰 검사하며,
+  가집니다(K245). `make layout-check`가 alint로 `config/layout.yml`(자기 config/layout.kit.yml 사본의 공통 rule 위에 레포의 map을 더한 설정)에 맞춰 검사하며,
   그 안의 예외는 모두 이유를 가집니다.
   Enforced by: `make layout-check`
 - S6 언어 parity: repository의 모든 구현은 공유 feature unit, vector, API를 같은 수준으로 test하고, docs/spec이 정의하는 각 requirement(list item, 곧 글머리 기호나 번호 목록의 `**<id>**` 또는 heading `<id>`)는 unit이 인용합니다. scope가 없는 unit은 모든 구현에 binding합니다. component나 artifact에만 해당하는 requirement는 `contracts/features.json`의 coverage part 또는 `config/release.json`의 package에서 도출한 owner 하나, 또는 한 feature의 명시적이고 비어 있지 않은 coverage-part owner 집합에만 feature unit을 scope할 수 있습니다. 해석된 각 implementation에는 자체 native binding이 있어야 하고, requirement는 각 owner 또는 그 owner가 test를 명시적으로 공유하는 implementation을 이름으로 말하며, 각 native test는 requirement를 인용합니다. 임의 profile, implementation 허용 목록, exclusion, native-only symbol은 scope가 아닙니다. directory suite의 case는 자신이 test하는 requirement를 `case.json`에 나열합니다.
@@ -244,15 +244,19 @@ owner가 2026-10-13에 이 기준을 승인했습니다. 각 기준은 위반 �
 - S11 로컬 링크: 개발 중 각 polyspec 패키지의 설치 폴더(node_modules, vendor, site-packages)는 checkout으로 가는 평범한
   디렉터리 심링크 하나입니다. 패키지 매니저의 링크 단계(npm link, Composer path repository, pip/uv editable)는 쓰지 않습니다
   (K591, K761, K765).
-  Enforced by: none, recipe의 link 단계는 code review의 판단입니다. link는 개발 환경에만 있고 거기서 make link-check가 link 선언
-  .links에 맞춰 검사하며(K869), CI는 아무것도 link하지 않습니다(K824).
-- S12 저장소의 CI는 workflow 하나, 저장소 자신의 ci.yml입니다. 각 job은 저장소 Makefile의 target을 `make ci-targets`로 실행하고,
-  전체 suite의 각 target은 정확히 한 job에서 실행되며, 독립적인 job은 병렬로 실행하고, 마지막 `ci-passed` job은 다른 모든 job을
-  요구합니다. 앞선 결과를 사용하는 작업만 순서대로 실행합니다.
-  Enforced by: `make template-test-scripts`
+  Enforced by: none, 안내 규칙: kit은 저장소의 recipe나 workflow를 검사하지 않는다(K1051).
+  link는 개발 환경에만 있고 거기서 make link-check가 link 선언 .links에 맞춰 검사하며(K869), CI는 아무것도 link하지 않는다 (K824).
+- S12 저장소의 CI는 자기 파이프라인 하나입니다. run 하나가 commit의 모든 job을 담고, 각 gate는 그 안에서 한 번 실행되며, 독립적인
+  job은 병렬로 실행하고, 앞선 결과를 사용하는 작업만 순서대로 실행하며, 마지막 job이 다른 모든 job을 요구합니다.
+  kit의 `ci-pipeline.yml`은 그런 파이프라인의 한 예시입니다(K910, K1052, K1055).
+  Enforced by: `make template-test-scripts`가 ci.yml의 gate가 각각 한 job에 있고 job ci-passed가 다른 모든 job을 요구하는지 검사한다
+- S13 공유 파일은 예시입니다. kit은 이 파일, ci-pipeline.yml, release.yml, bootstrap action,
+  config/layout.kit.yml을 package에 담습니다. 그중 하나를 받는 저장소는 복사해서 그 사본을 자기 것으로 가지며, kit은 저장소의
+  파일을 쓰지도 비교하지도 않습니다(K1052).
+  Enforced by: none, 저장소가 어떤 예시를 받고 그 사본을 어떻게 바꿀지는 저장소의 선택입니다.
 - S15 느슨한 결합: core, plugin, sidecar, kit, spec, contract는 인터페이스로만 서로를 아는 part입니다. part는 다른 part의 설치된
   manifest가 선언한 인터페이스(npm package라면 package.json의 `exports`)로만 그 part에 닿고, 설치가 놓은 package와 설치 때 기록된
   JSON으로 그 part를 찾습니다. 그 인터페이스 너머의 다른 part 파일을 import, include, 읽기, build, 실행하지 않으며, 다른 checkout의
   경로를 적지 않으므로 형제 checkout, `../<repository>`, 다른 저장소의 source 폴더를 적지 않습니다. part는 다른 part에 필요한 것을
   자기 package의 export나 자기 make target으로 제공합니다(K1002).
-  Enforced by: none, 다른 part의 인터페이스 너머에 닿는지는 code review의 판단입니다.
+  Enforced by: none, 안내 규칙: kit은 저장소의 recipe, workflow, 파일을 검사하지 않는다(K1051).
