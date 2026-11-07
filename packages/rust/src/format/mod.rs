@@ -47,7 +47,7 @@ pub enum TemplateBlocks {
     Flat,
 }
 
-/// Options of [`format`].
+/// Options of [`format()`].
 #[derive(Debug, Clone)]
 pub struct FormatOptions {
     /// Template name used in error results. The default is `template.tpl`.
@@ -83,7 +83,7 @@ pub struct Formatted {
     pub changed: bool,
 }
 
-/// Why [`format`] returned no text.
+/// Why [`format()`] returned no text.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum FormatErrorReason {
@@ -95,7 +95,7 @@ pub enum FormatErrorReason {
     Html,
 }
 
-/// The reason why [`format`] keeps the source.
+/// The reason why [`format()`] keeps the source.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
 pub struct FormatError {
     /// Why the source is kept.
@@ -208,7 +208,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Format
     })
 }
 
-/// Formats a source given as bytes: UTF-8 bytes format as [`format`] does, and other bytes keep the source with the
+/// Formats a source given as bytes: UTF-8 bytes format as [`format()`] does, and other bytes keep the source with the
 /// parse error that the parser reports for them (LEX-1).
 pub fn format_bytes(source: &[u8], options: &FormatOptions) -> Result<Formatted, FormatError> {
     match std::str::from_utf8(source) {

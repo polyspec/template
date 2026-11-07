@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The Rust docs build again: the doc links of packages/rust/src/format/mod.rs name the function format(), which shares its name with the macro, so the warnings = "deny" of the workspace lints no longer fail rustdoc; the generated-program lint reads ruff.toml, phpcs.xml.dist, phpstan.dist.neon and clippy.toml from the root, and oxlint lints the generated TypeScript with a configuration of its own that enables only no-unused-vars (T27.1-66).
 
 ## 0.0.21
 - Release 0.0.21: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.21; it is the first release on kit 0.0.98 (T27.1-65).

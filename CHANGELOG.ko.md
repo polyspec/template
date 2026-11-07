@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5d9d68778270c691e68a8c32c2b52ee5136c170f0615e5f04f3e5a9618e088c7 -->
+<!-- source-sha256: 747093cda9c7aadffafb93712471f30999be9a205f66d0346e8e4d3b75313eda -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- Rust 문서가 다시 build된다. packages/rust/src/format/mod.rs의 문서 link는 macro와 이름이 같은 함수 format()을 가리키므로 workspace lint의 warnings = "deny"가 rustdoc을 실패시키지 않는다. generated program lint는 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, clippy.toml을 root에서 읽고, oxlint는 no-unused-vars만 켠 자기 설정으로 생성된 TypeScript를 lint한다(T27.1-66).
 
 ## 0.0.21
 - Release 0.0.21: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.21을 담는다. kit 0.0.98 위의 첫 release다(T27.1-65).
