@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ad3036216db15ca4a53e4ed0ae66e8ff8aec07ee16faffd295758ebcbd7cbe0b -->
+<!-- source-sha256: 85849b51dd94e92d4dbc4e80d0f77707ac37b340b9fcc23aea28f4d32564b0ea -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- 개발 root는 json-schema fork를 branch polyspec-origin-2.6.0 대신 release 2.6.0-p2로 require하고, template은 kit 0.0.95를 채택한다. kit 0.0.95의 PRINCIPLES는 fork 규칙을 각 fork의 FORK.md와 각 root의 manifest와 lock에 맡긴다 (T27.1-63).
 
 ## 0.0.20
 - Release 0.0.20: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.20을 담는다. kit 0.0.92 위의 첫 release다(T27.1-62).

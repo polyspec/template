@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The development root requires the json-schema fork by its release 2.6.0-p2 in place of its branch polyspec-origin-2.6.0, and template adopts kit 0.0.95, whose PRINCIPLES leave the rule of forks to the FORK.md of each fork and the manifest and lock of each root (T27.1-63).
+
 ## 0.0.20
 - Release 0.0.20: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.20; it is the first release on kit 0.0.92 (T27.1-62).
 - template adopts kit 0.0.92, which deletes cargo-downloads-fetch, the lock checks and the Rust catch check, and whose make kit-check judges loose coupling (S15); make install downloads the crates of every tracked Cargo.lock with cargo fetch --locked in make template-install-rust, which the offline Rust checks resolve, and make kit-sync writes its PRINCIPLES (T27.1-61).
