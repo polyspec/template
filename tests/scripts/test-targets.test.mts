@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-// make -n prints the node of the checkout, $(NODE) of kit.mk, by its absolute path (kit K171).
+// make -n prints the node of the checkout, $(NODE) of the Makefile, by its absolute path (kit K171).
 const NODE = path.join(toolsDirectory(ROOT), 'bin/node');
 const RUNNER_FILE = fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests'));
 

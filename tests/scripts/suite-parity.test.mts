@@ -10,7 +10,6 @@ import path from 'node:path';
 import test from 'node:test';
 import { captured } from '../../scripts/required.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
-import { parsedJsonObject } from '../runner/checked.mts';
 import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -27,10 +26,10 @@ function dryRun(target: string) {
 const CHECK_TARGETS = captured(read('Makefile').match(/^CHECK_TARGETS := (.*)$/m), 1, 'CHECK_TARGETS of the Makefile').split(/\s+/).filter(Boolean);
 
 // The file of the tool `tool` in the installed kit `kit`. A source install, a link to the kit checkout, runs
-// scripts/kit/<tool>.mts; a packed install holds no scripts/kit/kit.mk and runs dist/<tool>.mjs, which its
-// kit-bootstrap.mk selects (T27.1-25).
+// scripts/kit/<tool>.mts; a packed install holds no scripts/kit/land.mts and runs dist/<tool>.mjs, as KIT of the Makefile
+// selects (T27.1-25, T27.1-64).
 export function kitToolFile(kit: string, tool: string) {
-  return existsSync(path.join(kit, 'scripts/kit/kit.mk')) ? path.join(kit, 'scripts/kit', `${tool}.mts`) : path.join(kit, 'dist', `${tool}.mjs`);
+  return existsSync(path.join(kit, 'scripts/kit/land.mts')) ? path.join(kit, 'scripts/kit', `${tool}.mts`) : path.join(kit, 'dist', `${tool}.mjs`);
 }
 
 // T27.1-40: test-go of kit tests every module of go.work, and the showcase adapter imports its generated/, which git
@@ -54,9 +53,9 @@ test('the tool of a source kit is its script and the tool of a packed kit is its
     const source = path.join(root, 'source');
     const packed = path.join(root, 'packed');
     mkdirSync(path.join(source, 'scripts/kit'), { recursive: true });
-    writeFileSync(path.join(source, 'scripts/kit/kit.mk'), '');
-    mkdirSync(path.join(packed, 'scripts/kit'), { recursive: true });
-    writeFileSync(path.join(packed, 'scripts/kit/kit-bootstrap.mk'), '');
+    writeFileSync(path.join(source, 'scripts/kit/land.mts'), '');
+    mkdirSync(path.join(packed, 'scripts/kit/bootstrap'), { recursive: true });
+    writeFileSync(path.join(packed, 'scripts/kit/bootstrap/bootstrap.mts'), '');
     assert.equal(kitToolFile(source, 'run-tests'), path.join(source, 'scripts/kit/run-tests.mts'));
     assert.equal(kitToolFile(packed, 'run-tests'), path.join(packed, 'dist/run-tests.mjs'));
   } finally {
@@ -108,7 +107,7 @@ test('the rule of the CI suite names a missing, a repeated and an extra target',
 });
 
 // The setups that a target needs: its job runs the setup in a step before the step that runs the target. A browser target
-// needs the browsers; hooks-check needs the hooks, which a fresh checkout of CI does not have (T27.1-23).
+// needs the browsers; hooks-check needs core.hooksPath and the merge drivers, which a fresh checkout of CI does not have (T27.1-23).
 export const SETUPS = [
   { targets: ['template-test-browser', 'template-test-scripts', 'template-test-codemirror'], setup: /\bmake (?:-\S+ )*(?:template-)?install-browsers\b/, name: 'make template-install-browsers' },
   { targets: ['hooks-check'], setup: /\bmake (?:-\S+ )*hooks(?![\w-])/, name: 'make hooks' },
@@ -159,7 +158,9 @@ test('a verifying CI job runs every later step after a failing step, and a make 
           // The arguments of make are optional in the pattern: a bare make names no goal.
           const args = make[1];
           if (args === undefined) continue;
-          const goals = args.replace(/\w+=(?:"[^"]*"|'[^']*')/g, '').trim().split(/\s+/).filter(word => word && !word.startsWith('-') && !word.includes('='));
+          // An expression of the workflow, such as ${{ ... && 'AUTO=1' || '' }}, which the pattern cuts at its &&, gives at most one
+          // assignment and no goal (T27.1-64).
+          const goals = args.replace(/\$\{\{.*?(?:\}\}|$)/g, '').replace(/\w+=(?:"[^"]*"|'[^']*')/g, '').trim().split(/\s+/).filter(word => word && !word.startsWith('-') && !word.includes('='));
           // TARGETS="..." of make ci-targets are the targets of its runner, which runs each to its end (T20.1-9).
           if (goals.length > 1) assert.match(make[0], /^make -k /, `${file} job ${job.name}: make ${args.trim()} stops at its first failing target`);
         }
@@ -209,28 +210,29 @@ test('language dependency install targets do not reach unrelated native package 
   }
 });
 
-// T27.1-9-1, T27.1-44, T27.1-43, T27.1-52: Kit owns every phase recipe, and ci-pipeline.yml of kit, which the job kit of ci.yml
-// calls, runs each phase, one per implementation of config/parity.json; a workflow of template or an entry of CHECK_TARGETS that
-// named a phase ran it a second time on every push. How the pipeline runs the phases is the contract of kit, which kit tests.
-test('no workflow of template and no entry of CHECK_TARGETS runs a provider parity phase', () => {
+// T27.1-64: the recipes are template's own; the full parity-check of the Makefile runs the API phase and the binding phase of
+// each implementation of config/parity.json, and the job parity of ci.yml runs it once, in CHECK_TARGETS.
+test('the job parity runs the full parity-check, the API phase and the binding phase of each implementation of config/parity.json', () => {
   const { implementations } = jsonDocument<{ implementations: { name: string }[] }>('parity implementation names', {
     type: 'object',
     required: ['implementations'],
     properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } } } },
   }).parse(read('config/parity.json'), 'config/parity.json');
   const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
-  assert.equal(parsedJsonObject(read('config/ci.json'), 'config/ci.json').parityMode, 'phases');
-  for (const target of ['parity-check', ...phases]) {
-    assert.ok(!CHECK_TARGETS.includes(target), `CHECK_TARGETS names ${target}, which ci-pipeline.yml runs`);
-    const owners = WORKFLOWS.flatMap(file => jobs(file).filter(job => runsOf(job).some(command => command.split(/[" ]/).includes(target))).map(job => `${file} ${job.name}`));
-    assert.deepEqual(owners, [], `a workflow of template runs ${target}, which ci-pipeline.yml runs`);
-    assert.doesNotMatch(read('Makefile'), new RegExp(`^${target}:.*\\n\\t`, 'm'), 'provider recipes are never replaced');
+  const parity = jobs('.github/workflows/ci.yml').find(job => job.name === 'parity');
+  assert.ok(parity, 'ci.yml has no job parity');
+  assert.deepEqual(runsOf(parity).filter(command => command.startsWith('make ci-targets')), ['make ci-targets TARGETS="parity-check"']);
+  assert.ok(CHECK_TARGETS.includes('parity-check'), 'CHECK_TARGETS does not name parity-check');
+  const full = dryRun('parity-check');
+  for (const target of phases) {
+    const phase = target === 'parity-api-check' ? '--phase api' : `--phase bindings --implementation ${target.replace(/^parity-bindings-(.*)-check$/, '$1')}`;
+    assert.ok(full.some(line => line.includes('/parity.') && line.endsWith(phase)), `make parity-check does not run ${phase}`);
   }
 });
 
-// The lint of each runtime is a gate of kit that ci-pipeline.yml runs (kit S12, K870); a language job runs the format check
-// of template and no lint of kit.
-test('native CI workers own the format checks of template, leave the lint of kit to ci-pipeline.yml and select their tool groups', () => {
+// The lint of each language runs in the job lint, which installs every tool with make install; a language job runs the
+// format checks of template and no lint.
+test('native CI workers own the format checks of template, leave the lint to the job lint and select their tool groups', () => {
   const expected: Record<string, string[]> = {
     go: ['template-lint-go-format', 'template-lint-go-modules'],
     rust: ['template-lint-rust-format'],
@@ -245,31 +247,29 @@ test('native CI workers own the format checks of template, leave the lint of kit
     assert.ok(commands.some(command => command.startsWith('make install-tools TOOLS="')), language);
     assert.ok(!commands.includes('make install-tools'), language);
     for (const target of targets) assert.ok(owned.includes(target), `${language} owns ${target}`);
-    assert.ok(!owned.includes(`lint-${language}`), `${language} runs lint-${language}, a gate of kit that ci-pipeline.yml runs`);
+    assert.ok(!owned.includes(`lint-${language}`), `${language} runs lint-${language}, which the job lint runs`);
   }
 });
 
-// The lint tools of kit: the tools that only the lint gates of kit start, from their own scripts. ci-pipeline.yml runs every lint
-// gate (kit S12, K870), and generated-lint-check, the one target of template that starts them, runs in a job that installs
-// every tool with make install, so a job that selects its tools selects none of them (T27.1-38).
-const KIT_LINT_TOOLS = ['ruff', 'vulture', 'golangciLint', 'deadcode', 'govulncheck', 'phpcs', 'phpstan', 'alint', 'cargoAudit', 'cargoDeny'];
+// The lint tools: the tools that only the lint targets start, from the scripts of kit. The job lint runs every lint target,
+// and generated-lint-check, the one other target that starts them, runs in a job that installs every tool with make install,
+// so a job that selects its tools selects none of them (T27.1-38).
+const LINT_TOOLS = ['ruff', 'vulture', 'golangciLint', 'deadcode', 'govulncheck', 'phpcs', 'phpstan', 'alint', 'cargoAudit', 'cargoDeny'];
 
-test('a CI job that selects its tools installs no lint tool of kit, which only the gates of ci-pipeline.yml start', () => {
+test('a CI job that selects its tools installs no lint tool, which only the lint targets start', () => {
   for (const job of jobs('.github/workflows/ci.yml')) {
     for (const command of runsOf(job)) {
       const selected = /^make install-tools TOOLS="([^"]*)"/.exec(command)?.[1]?.split(' ') ?? [];
-      assert.deepEqual(selected.filter(tool => KIT_LINT_TOOLS.includes(tool)), [], `job ${job.name} installs lint tools of kit that none of its targets starts`);
+      assert.deepEqual(selected.filter(tool => LINT_TOOLS.includes(tool)), [], `job ${job.name} installs lint tools that none of its targets starts`);
     }
   }
 });
 
-// Native build discovery includes showcase packages whose imports are generated.
-for (const language of ['go', 'rust']) {
-  test(`native ${language} builds generate showcase imports before provider discovery`, () => {
-    const commands = dryRun(`build-${language}`);
-    const generated = commands.findIndex(command => command.includes('examples/showcase/compile-generated.mts'));
-    const native = commands.findIndex(command => command.includes('/runtime-targets.') && command.endsWith(`build ${language}`));
-    assert.ok(generated >= 0, `${language} build must generate showcase imports`);
-    assert.ok(native > generated, `${language} provider builds run after generation`);
-  });
-}
+// build-go builds every module of go.work, the showcase adapter among them, whose imports are generated.
+test('the build of every Go module generates the showcase imports before it', () => {
+  const commands = dryRun('build-go');
+  const generated = commands.findIndex(command => command.includes('examples/showcase/compile-generated.mts'));
+  const native = commands.findIndex(command => command.includes('/runtime-targets.') && command.endsWith('build go'));
+  assert.ok(generated >= 0, 'the Go build must generate showcase imports');
+  assert.ok(native > generated, 'the build of the modules of go.work runs after generation');
+});

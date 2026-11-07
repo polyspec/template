@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 85849b51dd94e92d4dbc4e80d0f77707ac37b340b9fcc23aea28f4d32564b0ea -->
+<!-- source-sha256: 57690c90bd1fd7609b7ae8ad202c8c721ce7a49c3e627d44c107ecb3b8b6c97f -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- template은 아무것도 강제하지 않는 utility의 kit 0.0.98을 지원한다(kit docs/spec/utilities-and-recipes.md). Makefile은 kit의 파일을 include하지 않고 자기 target이 명시한 인자로 kit의 utility를 호출한다. .github/workflows/ci.yml은 kit pipeline 대신 자기 job gates, lint, parity에서 gate, lint, parity-check를 실행한다. kit이 강제하던 설정은 .npmrc, mise.toml, Cargo.toml의 lint, pyproject.toml, root의 lint 설정에 있다. ci-pipeline.yml, config/ci.json, config/pyproject.schema.json, config/knip-entries.json, .claude/settings.json은 지운다(T27.1-64).
 - 개발 root는 json-schema fork를 branch polyspec-origin-2.6.0 대신 release 2.6.0-p2로 require하고, template은 kit 0.0.95를 채택한다. kit 0.0.95의 PRINCIPLES는 fork 규칙을 각 fork의 FORK.md와 각 root의 manifest와 lock에 맡긴다 (T27.1-63).
 
 ## 0.0.20

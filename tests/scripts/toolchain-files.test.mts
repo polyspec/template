@@ -1,10 +1,10 @@
 // Tests that the toolchains of the recipes are the ones that the files of the checkout declare (T13.1-4, T19.2), each
 // with the expected and the actual version on failure:
-// - Node.js is the node of mise.toml, which `make install-tools TOOLS=npm` installs into var/tools and kit.mk starts as
-//   $(NODE) (kit K171), and every CI job runs the bootstrap action of kit, which starts with the Node.js of mise.toml (kit K992);
+// - Node.js is the node of mise.toml, which `make install-tools TOOLS=npm` installs into var/tools and the Makefile starts as
+//   $(NODE) (kit K171), and every CI job runs the bootstrap action of template, which starts with the Node.js of mise.toml (kit K992);
 // - npm is the npm:npm of mise.toml, which devEngines of package.json names (kit K938), installed by `make install-tools TOOLS=npm` into var/tools/bin,
 //   and Go the go of mise.toml, which the go directive of packages/go/go.mod equals, installed by `make
-//   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); kit.mk puts both directories first on
+//   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); the Makefile puts both directories first on
 //   PATH, and the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
 //   installed by install-tools of kit, never by rustup on the first cargo: several processes that start cargo at once, as
@@ -14,17 +14,17 @@
 // - PHP is one of the minor versions of config/toolchain.json: setup-php cannot pin a patch, so the minor is the pin and
 //   the CI report records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
 //   no tools;
-// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04, but the job kit of ci.yml,
-//   which calls ci-pipeline.yml of the checkout;
+// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
 // - the last job of ci.yml is ci-passed, which fails the run that a release takes by its id unless every job passed: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
-// - release.yml is the release workflow that kit copies (T24.1); kit tests it and make kit-sync refreshes the copy.
+// - release.yml is the release workflow of template (T24.1, T27.1-64), which these rules check as they check ci.yml;
+// - npm allows the URL of the release asset of @polyspec/kit that package.json names through the .npmrc of the root (T27.1-64).
 // make itself is not pinned: the recipes use no construct newer than GNU Make 3.81, and make 3.81 and GNU Make 4.4.1
 // print the same commands for every target (T17.1-4).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -87,13 +87,11 @@ const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof valu
 // The job ci-passed of ci.yml runs only make ci-passed, which reads the results of the other jobs: it installs nothing,
 // runs no check of the suite and writes no report.
 const CI_PASSED = 'ci-passed';
-// The job kit of ci.yml calls the pipeline of kit, which kit-sync copies and kit tests (T27.1-43).
-const KIT_PIPELINE = './.github/workflows/ci-pipeline.yml';
 const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
-// The bootstrap of every CI job is the composite action of kit that kit-sync vendors (kit K992): it sets up the Node.js of
-// mise.toml, installs the locked kit package, then runs make install-tools TOOLS=npm and make install-packages. kit tests
-// its steps, and make kit-check fails a workflow that carries a copy of them; it runs at the commit of the run, so it
-// needs no pin. make ci-passed is a tool of @polyspec/kit that the node of mise.toml runs, so ci-passed runs it too (kit K171).
+// The bootstrap of every CI job is the composite action of template (kit K992, T27.1-64): it sets up the Node.js of
+// mise.toml, installs the locked kit package, then runs make install-tools TOOLS=npm and make install-packages; it runs at
+// the commit of the run, so it needs no pin. make ci-passed is a utility of @polyspec/kit that the node of mise.toml runs,
+// so ci-passed runs it too (kit K171).
 const KIT_BOOTSTRAP = './.github/actions/kit-bootstrap';
 // The index of the step of `job` that runs the bootstrap of kit, or -1.
 const bootstrapIndex = (job: Job) => job.steps.findIndex(step => step.uses === KIT_BOOTSTRAP);
@@ -114,8 +112,7 @@ export function ciPassedViolations(text: string) {
   if (JSON.stringify([...needs].sort(compareText)) !== JSON.stringify(others.map(entry => entry.name).sort(compareText))) {
     found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
   }
-  // The job kit calls ci-pipeline.yml, whose jobs pick their runners, so it has no runner of its own (T27.1-43).
-  const runners = [...new Set(others.filter(entry => entry.value.uses !== KIT_PIPELINE).map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
+  const runners = [...new Set(others.map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
   const runsOn = shown(jobField(job, 'runs-on'));
   if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = runsOf(job);
@@ -145,10 +142,21 @@ function recipe(command: string, env: NodeJS.ProcessEnv = {}, make = 'make') {
   }
 }
 
-test('make reads the installed kit bootstrap without a sibling checkout', () => {
-  const files = recipe('printf "%s\\n" "$(MAKEFILE_LIST)"').split(/\s+/);
-  assert.ok(files.includes('node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk'));
-  assert.ok(!files.some(file => file.startsWith('../kit/')), files.join('\n'));
+// T27.1-64: the recipes are template's own; the Makefile includes no makefile of kit and runs the utilities of the installed
+// package, never of a sibling checkout.
+test('make reads the Makefile alone and runs the utilities of the installed kit', () => {
+  const files = recipe('printf "%s\\n" "$(MAKEFILE_LIST)"').split(/\s+/).filter(file => !file.endsWith('probe.mk'));
+  assert.deepEqual(files, ['Makefile']);
+  const kit = recipe('printf "%s\\n" "$(KIT)"');
+  assert.equal(kit, path.join(realpathSync(path.join(ROOT, 'node_modules/@polyspec/kit')), existsSync(path.join(ROOT, 'node_modules/@polyspec/kit/scripts/kit/land.mts')) ? 'scripts/kit' : 'dist'));
+});
+
+test('npm allows the URL dependencies of the root package.json through .npmrc, and package-lock.json resolves no other URL', () => {
+  assert.match(read('.npmrc'), /^allow-remote=root$/m, '.npmrc does not allow the URL of @polyspec/kit that package.json names; npm 12 refuses npm ci with EALLOWREMOTE');
+  const urls = [...read('package-lock.json').matchAll(/"resolved": "(https:\/\/github\.com\/[^"]+)"/g)].map(match => match[1]);
+  const manifest = parsedJsonObject(read('package.json'), 'package.json');
+  const declared = Object.values(isJsonObject(manifest.devDependencies) ? manifest.devDependencies : {});
+  assert.deepEqual(urls.filter(url => !declared.includes(url)), [], 'package-lock.json resolves a URL that the root package.json does not name, which allow-remote=root refuses');
 });
 
 test('Node.js is the node of mise.toml, which engines.node of package.json names as its floor', () => {
@@ -356,7 +364,7 @@ test('every CI job bootstraps locked tools before its dependency installation, a
       assert.ok(usesOf(job, 'actions/setup-go@').length + usesOf(job, 'actions/setup-python@').length === 0, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
       if (file.endsWith('/ci.yml')) {
         const runs = runsOf(job);
-        const scoped = ['go', 'rust', 'php', 'php-ext', 'python', 'typescript', 'browser', 'editor', 'parity'].includes(job.name) || job.name.startsWith('parity-');
+        const scoped = ['go', 'rust', 'php', 'php-ext', 'python', 'typescript', 'browser', 'editor'].includes(job.name);
         const toolStep = scoped ? runs.find(command => command.startsWith('make install-tools TOOLS=') && command !== 'make install-tools TOOLS=npm') : 'make install';
         assert.ok(toolStep, `${job.name} declares its selected tools`);
         // The bootstrap of kit runs make install-tools TOOLS=npm and make install-packages (kit K992).
@@ -439,11 +447,10 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'kit-install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
-  // The job kit calls ci-pipeline.yml, whose jobs run make ci-targets and upload their reports; kit tests that workflow.
-  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED && entry.value.uses !== KIT_PIPELINE)) {
+  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
     const lines = runLines(job);
     const runners = new Set<string>();
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
@@ -488,13 +495,18 @@ test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
   }
 });
 
-test('each workflow of template declares exactly its triggers: CI on a push to main and on a manual run, the site after a CI run of main and on a manual run for one (T17.1-7, T17.1-9, T26.7-28)', () => {
+test('each workflow of template declares exactly its triggers: CI on a push to main and on a manual run, the site and the release after a CI run of main and on a manual run for one (T17.1-7, T17.1-9, T26.7-28, kit K987)', () => {
   const triggers: Record<string, unknown> = {
     '.github/workflows/ci.yml': { push: { branches: ['main'] }, workflow_dispatch: null },
     // The site publishes the example-site artifact of a CI run of main, so it runs after one, or by hand for the run named.
     '.github/workflows/pages.yml': {
       workflow_run: { workflows: ['ci'], types: ['completed'], branches: ['main'] },
       workflow_dispatch: { inputs: { 'run-id': { description: 'The CI run of main whose example-site artifact is published', required: true } } },
+    },
+    // The release takes the commit of a successful CI run of main, after the run or by hand for the run named.
+    '.github/workflows/release.yml': {
+      workflow_run: { workflows: ['ci'], types: ['completed'], branches: ['main'] },
+      workflow_dispatch: { inputs: { run: { description: 'The id of the successful CI run whose exact commit is released', required: true, type: 'string' } } },
     },
   };
   assert.deepEqual([...WORKFLOWS].sort(compareText), Object.keys(triggers).sort(compareText));
@@ -527,13 +539,12 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
-    // The pipeline and the bootstrap of kit are files of the checkout, which run at the commit of the run, so they need no pin.
-    for (const pin of pinsOf(file).filter(entry => entry.uses !== KIT_PIPELINE && entry.uses !== KIT_BOOTSTRAP)) {
+    // The bootstrap action is a file of the checkout, which runs at the commit of the run, so it needs no pin.
+    for (const pin of pinsOf(file).filter(entry => entry.uses !== KIT_BOOTSTRAP)) {
       assert.match(pin.uses, /^[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/, `${file}: ${pin.uses} is not pinned by a commit`);
       assert.match(pin.comment ?? 'no comment', /^v?\d+\.\d+\.\d+$/, `${file}: ${pin.uses} does not name its release in a comment`);
     }
-    // The job kit has no runner of its own; the jobs of the pipeline choose theirs.
-    for (const job of jobs(file).filter(entry => entry.value.uses !== KIT_PIPELINE)) {
+    for (const job of jobs(file)) {
       const runsOn = jobField(job, 'runs-on');
       assert.equal(runsOn, 'ubuntu-24.04', `${file}: runs-on ${shown(runsOn)}, expected ubuntu-24.04`);
     }

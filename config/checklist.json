@@ -1,7 +1,8 @@
 {
   "schema": 1,
   "hooks": [
-    "pre-commit"
+    "pre-commit",
+    "commit-msg"
   ],
   "idPattern": "T[0-9]+(?:[.][A-Z])?[.][0-9]+(?:-[0-9]+)*"
 }

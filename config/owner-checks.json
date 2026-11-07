@@ -747,6 +747,7 @@
     {
       "paths": [
         "mise.toml",
+        ".github/actions/**",
         "mise.lock",
         ".mise/**",
         "rust-toolchain.toml",
@@ -789,7 +790,6 @@
       "paths": [
         ".github/workflows/*.yml",
         "config/toolchain.json",
-        "config/ci.json",
         ".php-version"
       ],
       "tests": [
@@ -820,17 +820,21 @@
     },
     {
       "paths": [
-        ".github/workflows/release.yml",
-        "PRINCIPLES.md",
-        "PRINCIPLES.ko.md",
-        "config/layout.kit.yml",
-        ".editorconfig",
-        "config/*.schema.json",
-        "package.json",
-        "package-lock.json"
+        "config/*.json",
+        "config/*.schema.json"
       ],
       "targets": [
         "kit-check"
+      ]
+    },
+    {
+      "paths": [
+        "PRINCIPLES.md",
+        "PRINCIPLES.ko.md"
+      ],
+      "targets": [
+        "rules-check",
+        "docs-check"
       ]
     },
     {
@@ -853,7 +857,9 @@
     {
       "paths": [
         "config/layout.yml",
-        "config/layout.kit.yml"
+        "config/layout.kit.yml",
+        "config/composer.schema.json",
+        "config/cargo.schema.json"
       ],
       "targets": [
         "layout-check"
@@ -875,11 +881,56 @@
     },
     {
       "paths": [
-        "config/knip-entries.json"
+        "knip.json",
+        ".oxlintrc.json"
       ],
       "targets": [
         "lint-ts"
       ]
+    },
+    {
+      "paths": [
+        ".golangci.yml"
+      ],
+      "targets": [
+        "lint-go"
+      ]
+    },
+    {
+      "paths": [
+        "clippy.toml"
+      ],
+      "targets": [
+        "lint-rust"
+      ]
+    },
+    {
+      "paths": [
+        "phpcs.xml.dist",
+        "phpstan.dist.neon"
+      ],
+      "targets": [
+        "lint-php"
+      ]
+    },
+    {
+      "paths": [
+        "ruff.toml",
+        "packages/python/pyproject.toml"
+      ],
+      "targets": [
+        "lint-python"
+      ]
+    },
+    {
+      "paths": [
+        ".npmrc",
+        "package-lock.json"
+      ],
+      "tests": [
+        "tests/scripts/toolchain-files.test.mts"
+      ],
+      "targets": []
     },
     {
       "paths": [
@@ -960,14 +1011,6 @@
         "tests/scripts/no-silent-skips.test.mts"
       ],
       "targets": []
-    },
-    {
-      "paths": [
-        ".claude/settings.json"
-      ],
-      "targets": [
-        "kit-check"
-      ]
     },
     {
       "paths": [

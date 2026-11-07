@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: c4783c0ecf4dd891a45618e53a30af20ea76a90c4ba227004cc01b86897f48b1 -->
+<!-- source-sha256: 19798226ef18eb1f307141f9cd1e4c3758dc8b0a282faa56116c47b69dbd5bb6 -->
 # 개발
 
 ## 문서
@@ -13,11 +13,11 @@
 
 ## 구현
 
-- Own: `@polyspec/kit` 변경이 필요하면 `polyspec/kit` GitHub 이슈로 요청한다. 공급자 저장소나 설치 패키지 소스를 수정하거나 소비자 전용 대체 검사로 검증을 우회하지 않는다. 공개된 릴리즈를 적용하고 `make kit-sync`로 공급자가 소유한 복사본을 갱신한다.
+- Own: `@polyspec/kit` 변경이 필요하면 `polyspec/kit` GitHub 이슈로 요청한다. 공급자 저장소나 설치 패키지 소스를 수정하거나 소비자 전용 대체 검사로 검증을 우회하지 않는다. 공개된 릴리즈는 `package.json`의 고정으로 적용하고, 저장소의 자기 target이 그 utility를 호출한다.
   Enforced by: none, provider ownership is a review judgement.
 
-- Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 설치한 package의 `node_modules/@polyspec/kit/scripts/kit/kit-bootstrap.mk`를 include한다. bootstrap은 그 package의 `kit.mk`를 include하고 native 개발 link에서는 source 도구를, release 설치에서는 컴파일한 도구를 선택하며, recipe는 그 도구를 `node $(KIT)/<tool>.$(KIT_EXT)`로 실행한다. package의 `package.json`의 `kit.copies`가 나열하는 파일은 복사본으로 두며, `make kit-sync`가 설치된 package에서 쓰고 이 저장소에서는 고치지 않는다. `PRINCIPLES.md`, 그 짝, `.editorconfig`, `.claude/settings.json`은 `make kit-sync`가 쓰는 일반 파일 복사본이다. `make kit-sync`가 설치 package에서 복사본을 갱신하고, `make kit-check`는 `config/`의 파일을 그 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
-  Enforced by: `make kit-check`
+- Own: 공유 도구는 도구 저장소 `polyspec/kit`의 npm package `@polyspec/kit`에서 온다. 이것은 release asset과 integrity로 고정한 devDependency다. `make install-tools TOOLS=npm`과 `make install-packages`가 그것을 설치한다. Makefile은 kit의 파일을 include하지 않는다. 자기 target이 native 개발 link에서는 source 도구를, release 설치에서는 컴파일한 도구를 선택하고, 그 도구를 명시한 인자와 함께 `$(NODE) $(KIT)/<tool>.$(KIT_EXT)`로 실행한다(kit `docs/spec/utilities-and-recipes.md`, T27.1-64). lint 설정, `PRINCIPLES.md`와 그 짝, `.editorconfig`, `config/layout.kit.yml`, hook, workflow는 kit의 예시에서 가져와 여기서 고치는 이 저장소의 파일이다. `make kit-check`는 `config/`의 파일을 kit의 schema와 비교한다. 이 저장소의 script는 package가 export하는 도구 API(`@polyspec/kit/<tool>`)만 import하고, package의 파일을 경로로 import하지 않는다. 이 저장소가 kit을 쓰는 다른 저장소와 다른 곳은 `config/*.json`(`owner-checks`, `release`, `toolchain`, `checklist`, `documents`)과 `layout.yml`, 그리고 자기 제품 코드뿐이다.
+  Enforced by: `make template-test-scripts`
 - Own: polyspec version이 0.0.x인 동안 개발 checkout은 kit `docs/plans/local-links.md`가 설명하는 대로 설치된 polyspec package를 그 source에 link하며, link는 `node_modules/`에 있는 생성 경로라 commit하지 않는다. `make link-check`는 개발 보조로 그 link를 나열한다.
   Enforced by: `make staged-generated-hook`
 - Own: 임시 스크립트나 임시 폴더를 사용하지 않는다. 모든 검사는 Makefile 타겟, `scripts/` 아래 스크립트, 커밋된 테스트 중 하나이며 멱등하다.
@@ -59,7 +59,7 @@
   Enforced by: none, a local run is not observed by a tool.
 - Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`).
   Enforced by: `make template-test-scripts`
-- Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 hook인 `.githooks`로 설정한다. `make hooks`는 hook을 설치하고 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
+- Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 hook인 `.githooks`로 설정한다. `make hooks`는 그것을 설정하고 추적된 hook을 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
   Enforced by: `make hooks-check`
 - Own: 모든 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 실행 전체, package, 파일에 시간 제한을 두지 않는다. 수십 분 걸리는 test와 시작과 끝만 출력하는 test는 결함이다.
   Enforced by: none, the output of a test is a judgement.
@@ -68,7 +68,7 @@
 
 ## 릴리스
 
-- Own: 릴리스는 `main`에서 성공한 `.github/workflows/ci.yml` push 또는 수동 실행의 commit이다. job `ci-passed`는 kit의 gate를 담은 job `kit`을 포함해 그 실행의 다른 모든 job이 통과했을 때만 통과한다. 릴리스를 시작하는 것은 메인테이너뿐이며, tag를 손으로 만들거나 옮기거나 push하지 않는다(T22.1-4).
+- Own: 릴리스는 `main`에서 성공한 `.github/workflows/ci.yml` push 또는 수동 실행의 commit이다. job `ci-passed`는 job `gates`, `lint`, `parity`를 포함해 그 실행의 다른 모든 job이 통과했을 때만 통과한다. 릴리스를 시작하는 것은 메인테이너뿐이며, tag를 손으로 만들거나 옮기거나 push하지 않는다(T22.1-4).
   Enforced by: `make release-tag`, which tags only the commit of such a run; who dispatches the release is a permission of GitHub.
 - Own: 버전 올림 commit `chore(release): Release X.Y.Z (#task)`는 `config/release.json`의 `manifests`가 나열한 모든 manifest(루트 `package.json`, npm 패키지, VS Code 확장, Rust crate와 Python 패키지(`packages/python/pyproject.toml`), `package-lock.json`, `packages/rust/Cargo.lock`. `composer.json`에는 `version` field가 없고 버전을 tag에서 받는다)의 버전을 X.Y.Z로 정하고, `CHANGELOG.md`와 `CHANGELOG.ko.md`의 `## Unreleased`를 `## X.Y.Z`로 바꾸며 그 위에 비어 있는 새 `## Unreleased`를 둔다.
   Enforced by: none, the version-bump commit is a judgement; the package managers resolve the versions.

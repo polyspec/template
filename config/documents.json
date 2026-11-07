@@ -4,6 +4,7 @@
   "include": [
     "README.md",
     "AGENTS.md",
+    "PRINCIPLES.md",
     "CHANGELOG.md",
     "docs/**/*.md",
     "contracts/schema/**/*.md",

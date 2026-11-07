@@ -1,6 +1,6 @@
-// The workflows of template, parsed with the yaml package, for the tool tests that check them: the files that the
-// repository owns (a workflow of kit, workflows/ of @polyspec/kit, is kit's, and the repository takes it as kit writes it),
-// their jobs with their steps, and the action pins with their version comments.
+// The workflows of template, parsed with the yaml package, for the tool tests that check them: every workflow of
+// .github/workflows, which template owns (T27.1-64), their jobs with their steps, and the action pins with their version
+// comments.
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,13 +9,9 @@ import { isJsonObject, yamlObject } from '../runner/checked.mts';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-/** The workflows of kit (workflows/ of @polyspec/kit), which the repository takes as kit writes them (kit K270). */
-const KIT_WORKFLOWS = new Set(readdirSync(path.join(path.dirname(fileURLToPath(import.meta.resolve('@polyspec/kit/package.json'))), 'workflows'))
-  .map(name => `.github/workflows/${name}`));
-
-/** The workflows of template, without the ones of kit. */
+/** The workflows of template. */
 export const WORKFLOWS = readdirSync(path.join(ROOT, '.github/workflows')).filter(name => name.endsWith('.yml'))
-  .map(name => `.github/workflows/${name}`).filter(file => !KIT_WORKFLOWS.has(file));
+  .map(name => `.github/workflows/${name}`);
 
 /** A step of a job with the fields that the tests read. */
 interface Step {

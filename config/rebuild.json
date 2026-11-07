@@ -336,7 +336,7 @@
     },
     "scripts/tools-directory.mts": {
       "kind": "ecosystem",
-      "tool": "git rev-parse --git-common-dir names the main checkout, as KIT_MAIN_CHECKOUT of kit.mk"
+      "tool": "git rev-parse --git-common-dir names the main checkout, as KIT_MAIN_CHECKOUT of the Makefile"
     },
     "scripts/toml.mts": {
       "kind": "ecosystem",

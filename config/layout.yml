@@ -1,5 +1,5 @@
-# The folder layout of template (S5, S7, S9), checked by make layout-check: the common rules of config/layout.kit.yml, which
-# kit copies, and the map of this repository. The map holds the name of the repository only; each violation of the common
+# The folder layout of template (S5, S7, S9), checked by make layout-check: the common rules of config/layout.kit.yml, the
+# copy of the example of kit that template owns, and the map of this repository. The map holds the name of the repository only; each violation of the common
 # rules is a task of docs/plans/execution/checklist.md until the layout follows them.
 version: 1
 extends:
@@ -38,7 +38,7 @@ rules:
   # vitest.config.ts: the configuration of the root vitest run, which keeps var out of its collection (T26.7-46); vitest
   # reads it from the root of the project.
   - id: layout-root-files
-    vars: { root_files: "{vitest.config.ts}" }
+    vars: { root_files: "{vitest.config.ts,.npmrc}" }
 
   # S7: the cross-language runners, data and tool tests of the root tests/: browser (the comparator that renders the
   # conformance cases in Chromium with the browser build and compares them with the expected files, a Playwright run

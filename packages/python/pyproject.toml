@@ -26,3 +26,8 @@ namespaces = true
 
 [tool.setuptools.package-data]
 "polyspec.template" = ["py.typed", "ast.schema.json"]
+
+# vulture, which make lint-python runs on the package (T27.1-64, kit K1050), reports unused code from its default confidence
+# of 60, the unused functions and classes included.
+[tool.vulture]
+min_confidence = 60

@@ -2,18 +2,18 @@
 # `make ci-targets TARGETS="..."`, which runs every target to its end also after a failure and writes a report: the log
 # of each target, a summary with the first failure lines of each failed target, which is also the job summary, and the
 # versions of the toolchains of the job. Every job uploads its report under `!cancelled()` (T20.1-9). Every target of
-# CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run no other target
-# (T17.1-10); the gates of kit, the parity phases among them, run in the job kit, which calls
-# .github/workflows/ci-pipeline.yml of kit, so no other job here runs one (T27.1-44, T27.1-43). A verifying job runs every step after a failing step (`!cancelled()`). Every job runs on ubuntu-24.04,
-# pins its actions by commit and installs with the bootstrap action of kit, `./.github/actions/kit-bootstrap`, which
-# kit-sync vendors (kit K992): it sets up the Node.js of mise.toml, installs the locked kit package, then runs
+# CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run no other target (T17.1-10); the checks that
+# utilities of kit run are targets of this Makefile like any other (T27.1-64): the job gates runs the checks of the
+# repository, the job lint the lint of every language, and the job parity the full parity check of config/parity.json. A verifying job runs every step after a failing step (`!cancelled()`). Every
+# job runs on ubuntu-24.04, pins its actions by commit and installs with the bootstrap action of template,
+# `./.github/actions/kit-bootstrap`: it sets up the Node.js of mise.toml, installs the locked kit package, then runs
 # `make install-tools TOOLS=npm`, which installs the npm of the checkout and mise into var/tools, and
 # `make install-packages`, which installs package-lock.json with @polyspec/kit. Native workers
 # select their locked tools and dependencies; mixed workers use the complete install. setup-php installs no tools,
-# because Composer is a tool of mise.toml. The workflow runs on every push to main and every manual run
-# (workflow_dispatch): the job ci-passed, the last job, passes only when every other job of this workflow passed
-# (T22.1-3), and .github/workflows/release.yml releases the commit of a successful run of this workflow, which the
-# maintainer names by its id. A newer push to a branch does not cancel the run of an earlier push.
+# because Composer is a tool of mise.toml. The jobs are independent and run concurrently. The workflow runs on every push
+# to main and every manual run (workflow_dispatch): the job ci-passed, the last job, passes only when every other job of
+# this workflow passed (T22.1-3), and .github/workflows/release.yml releases the commit of a successful run of this
+# workflow. A newer push to a branch does not cancel the run of an earlier push.
 # Builds, downloads and complete jobs report progress and are judged by exit status. Only individual test cases
 # have repository-defined timeouts; a job deadline must not cancel a normal operation or successful tests.
 name: ci
@@ -37,13 +37,83 @@ env:
   npm_config_cache: ${{ github.workspace }}/var/bootstrap/npm-cache
 
 jobs:
-  # The gates of kit (kit S12): ci-pipeline.yml, which kit-sync copies, plans and runs the shared, parity and runtime gates.
-  # Every other job needs it (kit S12), so a job of this repository runs only after the gates of kit passed.
-  kit:
-    uses: ./.github/workflows/ci-pipeline.yml
+  # The checks of the repository that utilities of kit run: configuration, layout, documents, rules, owners, rebuild records, code language, test markers, duplication, suppressions, divergence and the parity declarations. divergence-check reads PHP with the PHP symbol extractor, which make install installs with PHP and Composer.
+  gates:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: make install
+        if: ${{ !cancelled() }}
+      - run: make ci-targets TARGETS="kit-check layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check"
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-gates
+          path: var/report/ci-targets/
+          if-no-files-found: error
+
+  # The lint of every language with the configuration files of this repository (kit K1050), and the checks of the PHP extension (S10).
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: make install
+        if: ${{ !cancelled() }}
+      - run: make ci-targets TARGETS="lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext"
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-lint
+          path: var/report/ci-targets/
+          if-no-files-found: error
+
+  # The full parity check of config/parity.json: make parity-check runs the API phase and the binding phase of each
+  # implementation, each past the failures of the others.
+  parity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+      - run: make install
+        if: ${{ !cancelled() }}
+      - run: make ci-targets TARGETS="parity-check"
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-parity
+          path: var/report/ci-targets/
+          if-no-files-found: error
 
   scripts:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -70,7 +140,6 @@ jobs:
           if-no-files-found: error
 
   generated:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -95,7 +164,6 @@ jobs:
           if-no-files-found: error
 
   delimiters:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -120,7 +188,6 @@ jobs:
           if-no-files-found: error
 
   showcase:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -151,7 +218,6 @@ jobs:
           if-no-files-found: error
 
   docs:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -178,7 +244,6 @@ jobs:
           if-no-files-found: error
 
   typescript:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -201,7 +266,6 @@ jobs:
           if-no-files-found: error
 
   browser:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -226,7 +290,6 @@ jobs:
           if-no-files-found: error
 
   python:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -249,7 +312,6 @@ jobs:
           if-no-files-found: error
 
   editor:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -277,7 +339,6 @@ jobs:
           if-no-files-found: error
 
   go:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -300,7 +361,6 @@ jobs:
           if-no-files-found: error
 
   rust:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -323,7 +383,6 @@ jobs:
           if-no-files-found: error
 
   php:
-    needs: kit
     runs-on: ubuntu-24.04
     # A failure of one PHP version does not cancel the job of the other, so each version reports its own result (T20.1-13).
     strategy:
@@ -355,7 +414,6 @@ jobs:
           if-no-files-found: error
 
   php-ext:
-    needs: kit
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -370,7 +428,7 @@ jobs:
           tools: none
       - run: make install-tools TOOLS="php composer"
         if: ${{ !cancelled() }}
-      - run: make kit-install-symbols EXTRACTORS=php
+      - run: make install-symbols EXTRACTORS=php
         if: ${{ !cancelled() }}
       - run: make template-install-php
         if: ${{ !cancelled() }}
@@ -391,7 +449,7 @@ jobs:
   # node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [kit, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
+    needs: [gates, lint, parity, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

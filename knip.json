@@ -1,0 +1,47 @@
+{
+  "node": {
+    "entry": [
+      "**/*.test.{ts,mts,cts,mjs,cjs,js}",
+      "scripts/**/*.{ts,mts,cts,mjs,cjs,js}",
+      "benchmarks/**/*.{ts,mts,cts,mjs,cjs,js}",
+      "tests/fixtures/public-types/consumer.ts",
+      "tests/fixtures/public-types/private-base.d.ts",
+      "docs/.vitepress/config.mts",
+      "examples/showcase/*.mts",
+      "examples/showcase/adapters/typescript.ts",
+      "examples/showcase/adapters/javascript.mjs",
+      "tests/runner/*.mts",
+      "tests/browser/{playwright.config.ts,server.mts}",
+      "examples/showcase/adapters/generated/**/*.{ts,mjs,js}",
+      "examples/site/scenarios/react-boundary/react-host.tsx"
+    ]
+  },
+  "ignoreBinaries": [
+    "go",
+    "gmake",
+    "make",
+    "composer"
+  ],
+  "workspaces": {
+    "packages/ts": {
+      "entry": [
+        "src/index.ts",
+        "src/render.ts",
+        "src/decode.ts",
+        "src/node/index.ts"
+      ]
+    },
+    "packages/codemirror": {
+      "entry": [
+        "tests/browser/page.ts"
+      ]
+    },
+    "packages/vscode": {
+      "entry": [
+        "src/extension.ts",
+        "tests/integration/run.mjs",
+        "tests/integration/suite/index.cjs"
+      ]
+    }
+  }
+}
