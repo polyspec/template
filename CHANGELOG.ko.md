@@ -1,11 +1,13 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: cdcd895e7a8cab4907652341ef059d047ecce1d8e735944757613273c61c6f13 -->
+<!-- source-sha256: 5d9d68778270c691e68a8c32c2b52ee5136c170f0615e5f04f3e5a9618e088c7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+## 0.0.21
+- Release 0.0.21: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.21을 담는다. kit 0.0.98 위의 첫 release다(T27.1-65).
 - template은 아무것도 강제하지 않는 utility의 kit 0.0.98을 지원한다(kit docs/spec/utilities-and-recipes.md). Makefile은 kit의 파일을 include하지 않고 자기 target이 명시한 인자로 kit의 utility를 호출한다. .github/workflows/ci.yml은 kit pipeline 대신 자기 job gates, lint, parity에서 gate, lint, parity-check를 실행한다. kit이 강제하던 설정은 .npmrc, mise.toml, Cargo.toml의 lint, pyproject.toml, root의 lint 설정에 있다. ci-pipeline.yml, config/ci.json, config/pyproject.schema.json, config/knip-entries.json, .claude/settings.json은 지운다. PRINCIPLES.md와 그 한국어 짝은 kit 0.0.98의 것이며 그 `Enforced by:` 줄은 template의 검사를 적는다(T27.1-64).
 - 개발 root는 json-schema fork를 branch polyspec-origin-2.6.0 대신 release 2.6.0-p2로 require하고, template은 kit 0.0.95를 채택한다. kit 0.0.95의 PRINCIPLES는 fork 규칙을 각 fork의 FORK.md와 각 root의 manifest와 lock에 맡긴다 (T27.1-63).
 

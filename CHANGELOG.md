@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.21
+- Release 0.0.21: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.21; it is the first release on kit 0.0.98 (T27.1-65).
 - template supports kit 0.0.98, whose utilities force nothing (kit docs/spec/utilities-and-recipes.md): the Makefile includes no file of kit and its own targets call the utilities of kit with explicit arguments; .github/workflows/ci.yml runs the gates, the lints and parity-check in its own jobs gates, lint and parity in place of the kit pipeline; .npmrc, mise.toml, the Cargo.toml lints, pyproject.toml and the lint configurations of the root hold the settings that kit forced; ci-pipeline.yml, config/ci.json, config/pyproject.schema.json, config/knip-entries.json and .claude/settings.json are deleted; PRINCIPLES.md and its Korean twin are those of kit 0.0.98, whose `Enforced by:` lines name the checks of template (T27.1-64).
 - The development root requires the json-schema fork by its release 2.6.0-p2 in place of its branch polyspec-origin-2.6.0, and template adopts kit 0.0.95, whose PRINCIPLES leave the rule of forks to the FORK.md of each fork and the manifest and lock of each root (T27.1-63).
 
