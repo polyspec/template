@@ -5,13 +5,13 @@
     "license": "MIT",
     "require": {
         "php": ">=8.4",
-        "polyspec/template": "0.0.22"
+        "polyspec/template": "0.0.23"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
         "min-0-max/json-schema": "2.6.0-p2",
         "phpunit/phpunit": "13.4.5",
-        "polyspec/template-cli": "0.0.22"
+        "polyspec/template-cli": "0.0.23"
     },
     "autoload-dev": {
         "psr-4": {

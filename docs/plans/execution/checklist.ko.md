@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 9514d39b6ffdffe48088ad5ab4246d3c876055ba6747e7617c52d9120ca4309c -->
+<!-- source-sha256: 5216670d4ba8f2d2ad64fa04134bc54c5b0055709cf99a57468b3f691c4d7ee8 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -511,3 +511,4 @@
 | T27.1-72 | kit 거부 두 가지만 멈추는 kit 0.0.101을 채택한다: 0.0.101 release asset을 고정하며, recipe 줄은 바뀌지 않는다 | package.json, package-lock.json | `make docs-check` and `make lint-ts` exit 0 | [o] |
 | T27.1-73 | P0: ## Unreleased의 항목(T27.1-68~T27.1-72)으로 0.0.22를 release한다. 인수 조건: config/release.json의 모든 manifest, PHP 확장의 version 상수, root composer.json과 packages/cli/php/composer.json, docs/features.md와 한국어 쌍, lock package-lock.json, composer.lock, packages/rust/Cargo.lock, examples/showcase/adapters/rust/Cargo.lock이 0.0.22를 담는다. CHANGELOG.md와 CHANGELOG.ko.md의 ## Unreleased는 ## 0.0.22가 되고 그 위에 빈 ## Unreleased가 생긴다. version commit의 CI가 통과하면 release workflow가 v0.0.22를 tag한다. | config/release.json의 manifest, 그 lock, packages/php-ext/src/php_polyspec_template.h, docs/features.md(.ko), CHANGELOG.md CHANGELOG.ko.md | `make release-coverage`, `make docs-check`; release workflow가 tag를 검사한다 | [v] |
 | T27.1-74 | 설치가 실패하면 uv-install이 provider 링크를 되돌리는 kit 0.0.102를 채택한다: 0.0.102 release asset을 고정하며, recipe 줄은 바뀌지 않는다 | package.json, package-lock.json | `make docs-check` and `make lint-ts` exit 0 | [o] |
+| T27.1-75 | P0: ## Unreleased의 항목(T27.1-74)으로 0.0.23을 release한다. 인수 조건: config/release.json의 모든 manifest, PHP 확장의 version 상수, root composer.json과 packages/cli/php/composer.json, docs/features.md와 한국어 쌍, lock package-lock.json, composer.lock, packages/rust/Cargo.lock, examples/showcase/adapters/rust/Cargo.lock이 0.0.23을 담는다. CHANGELOG.md와 CHANGELOG.ko.md의 ## Unreleased는 ## 0.0.23이 되고 그 위에 빈 ## Unreleased가 생긴다. version commit의 CI가 통과하면 release workflow가 v0.0.23을 tag한다. | config/release.json의 manifest, 그 lock, packages/php-ext/src/php_polyspec_template.h, docs/features.md(.ko), CHANGELOG.md CHANGELOG.ko.md | `make release-coverage`, `make docs-check`; release workflow가 tag를 검사한다 | [o] |

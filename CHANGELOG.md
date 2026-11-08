@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.23
+- Release 0.0.23: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.23; it runs kit 0.0.102 (T27.1-75).
 - template adopts kit 0.0.102, whose uv-install puts back the provider links when its install fails; no recipe line changes (T27.1-74).
 
 ## 0.0.22

@@ -44,7 +44,7 @@ Documentation deployment: [Pages 40453338233](https://github.com/polyspec/templa
 
 [Release 0.0.15](https://github.com/polyspec/template/releases/tag/v0.0.15) is public at c779c6c1, after CI 41029017110 and gates 41029017118, with the release runs 41031280975 and 41031277510: nine archives and packages.json, the Composer repository of polyspec/template, polyspec/template-cli and polyspec/template-php-ext (kit K871). Kit 0.0.77 is integrity-locked and its copies synchronized.
 
-Every manifest of `config/release.json` holds 0.0.22; its tag waits for `ci-passed` of the release commit.
+Every manifest of `config/release.json` holds 0.0.23; its tag waits for `ci-passed` of the release commit.
 
 The prepared Composer manifests retain explicit versions required by Kit archives. This conflicts with the repository tag-derived version rule; [Kit issue 16](https://github.com/polyspec/kit/issues/16) tracks the required archive/consumer contract correction before release acceptance.
 
