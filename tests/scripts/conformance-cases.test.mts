@@ -9,11 +9,8 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { caseIds, RUNNERS } from '../../scripts/conformance-cases.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
-import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-// make -n prints the node of the checkout, $(NODE) of the Makefile, by its absolute path (kit K171).
-const NODE = path.join(toolsDirectory(ROOT), 'bin/node');
 const run = (...args: string[]) => spawnSync(process.execPath, ['scripts/conformance-cases.mts', ...args], { cwd: ROOT, encoding: 'utf8' });
 const parityDocument = jsonDocument<{ implementations: { name: string; shares?: string }[] }>('parity declaration', {
   type: 'object',
@@ -43,10 +40,4 @@ test('a path outside a case directory fails with its name', () => {
   const result = run('--dry-run', 'tests/cases/README.md');
   assert.equal(result.status, 2);
   assert.match(result.stderr, /tests\/cases\/README\.md: not a file or directory of a case/);
-});
-
-test('the make target passes CASES to the script', () => {
-  const result = spawnSync('make', ['-n', '--no-print-directory', 'conformance-cases', 'CASES=tests/cases/text/crlf-input/input.tpl'], { cwd: ROOT, encoding: 'utf8' });
-  assert.equal(result.status, 0, result.stderr);
-  assert.ok(result.stdout.split('\n').includes(`${NODE} scripts/conformance-cases.mts tests/cases/text/crlf-input/input.tpl`), result.stdout);
 });

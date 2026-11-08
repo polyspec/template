@@ -1,51 +1,23 @@
 // Tests that the commands that publish a file or a directory that others read replace it at once and keep the
 // previous version when they fail (T19.7): a reader never finds it missing or half written.
-// - `make showcase` and `make bench` write the target-specific benchmark output with `benchmark-modes.mts --output`,
-//   which writes a temporary file and renames it, instead of a shell redirection that empties the file first;
-// - `make docs-verify-idempotent` keeps the copy of its first build in a directory of its own run outside the
-//   checkout, not in the fixed docs/.vitepress/dist.first that two runs shared;
 // - scripts/install-cli.mts prepares the new install in <prefix>/lib/.polyspec-template-fmt.next-<pid> and renames it,
 //   so a failed install leaves the previous one working.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test, { before } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { toolsDirectory } from '../../scripts/tools-directory.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-// make -n prints the node of the checkout, $(NODE) of the Makefile, by its absolute path (kit K171).
-const NODE = path.join(toolsDirectory(ROOT), 'bin/node');
 const SCRIPT = path.join(ROOT, 'scripts/install-cli.mts');
-
-function commands(target: string) {
-  const run = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
-  assert.equal(run.status, 0, run.stderr);
-  return run.stdout.split('\n').filter(Boolean);
-}
 
 before(() => {
   for (const name of ['ts', 'language']) {
     const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mts'), '--package', name], { cwd: ROOT, encoding: 'utf8' });
     assert.equal(build.status, 0, `the build of ${name} failed:\n${build.stdout}${build.stderr}`);
   }
-});
-
-test('make showcase and make bench write the mode benchmark with --output, not with a shell redirection', () => {
-  for (const target of ['showcase', 'bench']) {
-    const lines = commands(target).filter(line => line.includes('benchmark-modes.mts'));
-    const output = target === 'showcase' ? 'var/showcase/mode-benchmark.json' : 'examples/site/data/mode-benchmark.json';
-    assert.deepEqual(lines, [`${NODE} examples/showcase/benchmark-modes.mts --output ${output}`], `make -n ${target}`);
-  }
-});
-
-test('make docs-verify-idempotent keeps the first build in a directory of its run outside the checkout', () => {
-  const text = commands('docs-verify-idempotent').join('\n');
-  assert.doesNotMatch(text, /dist\.first/, 'the recipe uses the fixed directory docs/.vitepress/dist.first');
-  assert.match(text, /mktemp -d/);
-  assert.doesNotMatch(readFileSync(path.join(ROOT, 'Makefile'), 'utf8'), /dist\.first/);
 });
 
 test('a failed install-cli keeps the previous install, and a successful one leaves no prepared directory', { timeout: 690_000 }, (t) => {

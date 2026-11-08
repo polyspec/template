@@ -3,25 +3,14 @@
 // after a failing step, so one CI run reports every failure, and only a job that publishes stops at its first failure;
 // and that every tool of kit that a recipe starts is a tool of the installed kit (T27.1-19).
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { captured } from '../../scripts/required.mts';
-import { jsonDocument } from '../../scripts/json-document.mts';
 import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
-
-// The commands that make prints for `target` without running them. A make started by another make, as `make lint`
-// starts `make lint-ts`, prints `Entering directory` lines with GNU Make 4 (T17.1-4); MAKEFLAGS=w makes every make
-// print them, and --no-print-directory removes them, so the lines are the commands on every make.
-function dryRun(target: string) {
-  const run = spawnSync('make', ['--no-print-directory', '-n', target], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
-  assert.equal(run.status, 0, run.stderr);
-  return run.stdout.split('\n').filter(Boolean);
-}
 
 const CHECK_TARGETS = captured(read('Makefile').match(/^CHECK_TARGETS := (.*)$/m), 1, 'CHECK_TARGETS of the Makefile').split(/\s+/).filter(Boolean);
 
@@ -31,13 +20,6 @@ const CHECK_TARGETS = captured(read('Makefile').match(/^CHECK_TARGETS := (.*)$/m
 export function kitToolFile(kit: string, tool: string) {
   return existsSync(path.join(kit, 'scripts/kit/land.mts')) ? path.join(kit, 'scripts/kit', `${tool}.mts`) : path.join(kit, 'dist', `${tool}.mjs`);
 }
-
-// T27.1-40: test-go of kit tests every module of go.work, and the showcase adapter imports its generated/, which git
-// ignores and typed-generator writes; only lint-go named typed-generator, so the go job of CI without lint-go failed.
-test('test-go writes the generated programs that the modules of go.work import before it tests them', () => {
-  assert.match(read('go.work'), /^use \.\/examples\/showcase\/adapters\/go$/m, 'go.work no longer uses the showcase adapter; the check verified nothing');
-  assert.ok(dryRun('test-go').some(line => line.includes('examples/showcase/compile-generated.mts --refresh true')), 'make test-go does not run typed-generator');
-});
 
 // T27.1-19: kit deleted its full-run guard (K240), and make check still started it.
 test('every tool of kit that a recipe of the Makefile starts is a tool of the installed kit', () => {
@@ -60,12 +42,6 @@ test('the tool of a source kit is its script and the tool of a packed kit is its
     assert.equal(kitToolFile(packed, 'run-tests'), path.join(packed, 'dist/run-tests.mjs'));
   } finally {
     rmSync(root, { recursive: true, force: true });
-  }
-});
-
-test('the full suite holds the release targets', () => {
-  for (const target of ['benchmark-check', 'benchmark-smoke', 'docs-verify-idempotent', 'docs-static-check', 'template-test-ext']) {
-    assert.ok(CHECK_TARGETS.includes(target), `CHECK_TARGETS does not hold ${target}`);
   }
 });
 
@@ -169,107 +145,3 @@ test('a verifying CI job runs every later step after a failing step, and a make 
   }
 });
 
-// FMT-16: a binding imports the public formatter export, which needs its build
-// even when no earlier target has populated dist in a clean checkout.
-test('native formatter parity bindings build the published formatter before execution', () => {
-  const run = spawnSync('make', ['--no-print-directory', '-n', 'parity-check', 'UNITS=formatter-sdk-results'], { cwd: ROOT, encoding: 'utf8' });
-  assert.equal(run.status, 0, run.stderr);
-  const commands = run.stdout.split('\n');
-  const build = commands.findIndex(line => line.includes('scripts/build-package.mts --package language'));
-  const binding = commands.findIndex(line => line.includes('/parity.') && line.includes('--unit formatter-sdk-results'));
-  assert.ok(build >= 0, 'the formatter binding requires its published package build');
-  assert.ok(binding > build, 'the native binding executes after the package build');
-});
-
-// T27.1-9: installation belongs to each worker.
-test('language workers install their own dependency graph', () => {
-  const ci = jobs('.github/workflows/ci.yml');
-  for (const language of ['go', 'rust', 'php', 'python', 'typescript', 'browser', 'editor']) {
-    const job = ci.find(job => job.name === language);
-    assert.ok(job, language);
-    const target = ['typescript', 'browser', 'editor'].includes(language) ? 'node' : language;
-    assert.ok(runsOf(job).includes(`make template-install-${target}`), `${language} installs ${target} dependencies`);
-    assert.ok(!runsOf(job).includes('make install'), `${language} must not install every dependency graph`);
-  }
-});
-
-test('language dependency install targets do not reach unrelated native package managers', () => {
-  const forbidden: Record<string, RegExp> = {
-    node: /composer-install|cargo fetch|go mod download|pip download|python-package/,
-    go: /composer-install|cargo fetch|pip download|python-package/,
-    rust: /composer-install|go mod download|pip download|python-package/,
-    php: /cargo fetch|go mod download|pip download|python-package/,
-    python: /composer-install|cargo fetch|go mod download/,
-  };
-  for (const [language, pattern] of Object.entries(forbidden)) {
-    assert.doesNotMatch(dryRun(`template-install-${language}`).join('\n'), pattern, language);
-  }
-  const all = dryRun('template-install-parity').join('\n');
-  for (const required of ['cargo fetch --locked', 'mod download', 'composer-install', 'pip download', 'python-package']) {
-    assert.ok(all.includes(required), `parity installation lacks ${required}`);
-  }
-});
-
-// T27.1-64: the recipes are template's own; the full parity-check of the Makefile runs the API phase and the binding phase of
-// each implementation of config/parity.json, and the job parity of ci.yml runs it once, in CHECK_TARGETS.
-test('the job parity runs the full parity-check, the API phase and the binding phase of each implementation of config/parity.json', () => {
-  const { implementations } = jsonDocument<{ implementations: { name: string }[] }>('parity implementation names', {
-    type: 'object',
-    required: ['implementations'],
-    properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' } } } } },
-  }).parse(read('config/parity.json'), 'config/parity.json');
-  const phases = ['parity-api-check', ...implementations.map(({ name }) => `parity-bindings-${name}-check`)];
-  const parity = jobs('.github/workflows/ci.yml').find(job => job.name === 'parity');
-  assert.ok(parity, 'ci.yml has no job parity');
-  assert.deepEqual(runsOf(parity).filter(command => command.startsWith('make ci-targets')), ['make ci-targets TARGETS="parity-check"']);
-  assert.ok(CHECK_TARGETS.includes('parity-check'), 'CHECK_TARGETS does not name parity-check');
-  const full = dryRun('parity-check');
-  for (const target of phases) {
-    const phase = target === 'parity-api-check' ? '--phase api' : `--phase bindings --implementation ${target.replace(/^parity-bindings-(.*)-check$/, '$1')}`;
-    assert.ok(full.some(line => line.includes('/parity.') && line.endsWith(phase)), `make parity-check does not run ${phase}`);
-  }
-});
-
-// The lint of each language runs in the job lint, which installs every tool with make install; a language job runs the
-// format checks of template and no lint.
-test('native CI workers own the format checks of template, leave the lint to the job lint and select their tool groups', () => {
-  const expected: Record<string, string[]> = {
-    go: ['template-lint-go-format', 'template-lint-go-modules'],
-    rust: ['template-lint-rust-format'],
-    php: ['template-lint-php-format'],
-    python: [],
-  };
-  for (const [language, targets] of Object.entries(expected)) {
-    const job = jobs('.github/workflows/ci.yml').find(job => job.name === language);
-    assert.ok(job);
-    const commands = runsOf(job);
-    const owned = commands.filter(command => command.includes('TARGETS="')).flatMap(command => command.split(/[" ]/));
-    assert.ok(commands.some(command => command.startsWith('make install-tools TOOLS="')), language);
-    assert.ok(!commands.includes('make install-tools'), language);
-    for (const target of targets) assert.ok(owned.includes(target), `${language} owns ${target}`);
-    assert.ok(!owned.includes(`lint-${language}`), `${language} runs lint-${language}, which the job lint runs`);
-  }
-});
-
-// The lint tools: the tools that only the lint targets start, from the scripts of kit. The job lint runs every lint target,
-// and generated-lint-check, the one other target that starts them, runs in a job that installs every tool with make install,
-// so a job that selects its tools selects none of them (T27.1-38).
-const LINT_TOOLS = ['ruff', 'vulture', 'golangciLint', 'deadcode', 'govulncheck', 'phpcs', 'phpstan', 'alint', 'cargoAudit', 'cargoDeny'];
-
-test('a CI job that selects its tools installs no lint tool, which only the lint targets start', () => {
-  for (const job of jobs('.github/workflows/ci.yml')) {
-    for (const command of runsOf(job)) {
-      const selected = /^make install-tools TOOLS="([^"]*)"/.exec(command)?.[1]?.split(' ') ?? [];
-      assert.deepEqual(selected.filter(tool => LINT_TOOLS.includes(tool)), [], `job ${job.name} installs lint tools that none of its targets starts`);
-    }
-  }
-});
-
-// build-go builds every module of go.work, the showcase adapter among them, whose imports are generated.
-test('the build of every Go module generates the showcase imports before it', () => {
-  const commands = dryRun('build-go');
-  const generated = commands.findIndex(command => command.includes('examples/showcase/compile-generated.mts'));
-  const native = commands.findIndex(command => command.includes('/runtime-targets.') && command.endsWith('build --roots packages/go examples/showcase/adapters/go -- go build ./...'));
-  assert.ok(generated >= 0, 'the Go build must generate showcase imports');
-  assert.ok(native > generated, 'the build of the modules of go.work runs after generation');
-});

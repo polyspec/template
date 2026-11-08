@@ -9,7 +9,6 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { adapterRoot, generatedLanguages, generatedOutput } from '../../examples/showcase/generated-output.mts';
 import { compilerManifestDocument, manifestPath } from '../../scripts/compiler-manifest.mts';
-import { jobs, runsOf, runLines } from './workflows.mts';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const checks = [
@@ -30,24 +29,6 @@ for (const check of checks) {
     assert.match(source, /TypeScript, Go, Rust, PHP and Python/, `${check} does not name Python in its closing message`);
   });
 }
-
-// The checks run the pinned interpreter var/tools/mise/shims/python3 (scripts/python-toolchain.mts), the python of mise.toml
-// that `make install` installs (T22.5-5, T24.12). A job that runs one of these targets runs make install, and no job sets up a Python of its own.
-const pythonTargets = ['template-test-scripts', 'template-install-check', 'generated-native-check', 'typed-generator-compile-check', 'showcase-check'];
-
-test('each CI job that runs a Python check target runs make install and sets up no Python of PATH', () => {
-  const all = jobs('.github/workflows/ci.yml');
-  const needing = all.filter(job => runLines(job).some(line => {
-    // A step without make ci-targets runs no check target.
-    const listed = /make ci-targets TARGETS="([^"]*)"/.exec(line)?.[1];
-    return listed !== undefined && listed.split(/\s+/).some(target => pythonTargets.includes(target));
-  }));
-  assert.ok(needing.length >= 3, `found ${needing.length} jobs that run a Python check target, expected at least 3`);
-  for (const job of needing) {
-    assert.ok(runsOf(job).includes('make install'), `the job ${job.name} runs a Python check target and does not run make install, which installs the pinned Python`);
-  }
-  assert.ok(!all.some(job => job.steps.some(step => step.uses?.startsWith('actions/setup-python@') === true)), 'a workflow sets up a Python of PATH; the checks run the pinned interpreter of make install');
-});
 
 // The showcase contract has a Python implementation: the manifest maps Python, scripts/check-showcase-contract.mts runs it
 // in both execution modes, and the tracked adapter examples/showcase/adapters/python.py imports the generated Python

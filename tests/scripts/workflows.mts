@@ -46,7 +46,7 @@ function stepOf(value: unknown, where: string): Step {
 }
 
 /** The workflow YAML `text` as a mapping; `where` names it in an error. */
-export function workflowOf(text: string, where: string): Record<string, unknown> {
+function workflowOf(text: string, where: string): Record<string, unknown> {
   return yamlObject(text, where);
 }
 

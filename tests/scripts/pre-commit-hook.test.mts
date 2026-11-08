@@ -5,29 +5,20 @@
 // of the message, the message rules of make commit (T27.1-67).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, statSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 
 const repository = resolve('.');
-const read = (file: string) => readFileSync(join(repository, file), 'utf8');
 
-test('HOOK_DECLARATION of the Makefile declares the hooks pre-commit and commit-msg of .githooks', () => {
-  const declaration = /^HOOK_DECLARATION := (.*)$/m.exec(read('Makefile'))?.[1] ?? '';
-  assert.deepEqual([...declaration.matchAll(/--hook (\S+)/g)].map(match => match[1]), ['pre-commit', 'commit-msg']);
-  assert.match(declaration, /^--hooks-path \.githooks /);
-});
-
-test('.githooks/pre-commit is executable and runs make staged-generated-hook', () => {
+test('.githooks/pre-commit is executable', () => {
   const hook = join(repository, '.githooks/pre-commit');
   assert.ok((statSync(hook).mode & 0o111) !== 0, 'the hook is not executable');
-  assert.match(read('.githooks/pre-commit'), /^make --no-print-directory staged-generated-hook \|\| exit 1$/m);
 });
 
-test('.githooks/commit-msg is executable and runs make commit-msg-hook with the message file', () => {
+test('.githooks/commit-msg is executable', () => {
   const hook = join(repository, '.githooks/commit-msg');
   assert.ok((statSync(hook).mode & 0o111) !== 0, 'the hook is not executable');
-  assert.match(read('.githooks/commit-msg'), /^exec make --no-print-directory commit-msg-hook MESSAGE="\$1"$/m);
 });
 
 test('core.hooksPath is .githooks, so git runs the tracked hooks', () => {

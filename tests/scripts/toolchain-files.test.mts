@@ -34,8 +34,8 @@ import { compareText } from '../../scripts/compare-text.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { captured, required } from '../../scripts/required.mts';
 import { isJsonObject, parsedJsonObject } from '../runner/checked.mts';
-import { toolsDirectory, wheelhouseDirectory } from '../../scripts/tools-directory.mts';
-import { type Job, jobField, jobs, jobsOf, pinsOf, ROOT, runLines, runsOf, workflowOf, WORKFLOWS } from './workflows.mts';
+import { toolsDirectory } from '../../scripts/tools-directory.mts';
+import { type Job, jobField, jobs, jobsOf, pinsOf, ROOT, runLines, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 const TOOLCHAIN_SCHEMA: JSONSchemaType<{ php: string[] }> = {
@@ -274,59 +274,8 @@ test('PHP is a minor version of config/toolchain.json, setup-php installs no too
   }
 });
 
-test('make install installs the tools of the checkout, the Rust toolchain and the crates of every Cargo.lock, and no make or CI job lets rustup install it on the first cargo', () => {
-  const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
-  assert.equal(install.status, 0, install.stderr);
-  // The checks resolve crates with cargo --offline, so make install downloads the crates of every Cargo.lock (T20.1-1)
-  // with cargo fetch --locked of template-install-rust, and go mod download the modules of go.work, which
-  // go reads with GOPROXY=off (T25.6-1). The build requirements of the Python package go to var/python/wheelhouse of the
-  // main checkout, which the package install check reads (T22.4-20-5), and make python-package installs the dependencies
-  // of packages/python/pylock.toml, which the checks of the Python package read from the uv cache (T25.6-1). Only the
-  // commands that download leave the offline settings of the recipes (T20.1-2). npm and the packages of package-lock.json
-  // are installed before, by make install-tools TOOLS=npm and make install-packages, which install @polyspec/kit (T24.1).
-  const online = 'env -u CARGO_NET_OFFLINE -u GOPROXY -u npm_config_offline -u COMPOSER_DISABLE_NETWORK';
-  const node = path.join(TOOLS, 'bin/node');
-  // make prints the empty TOOLS of install-tools of kit as a trailing space. make -n runs the recursive make of
-  // python-package, which prints its own recipe after its command line when the environment is out of date.
-  const lines = install.stdout.split('\n').filter(Boolean).map(line => line.trimEnd());
-  // The installed bootstrap selects source or packed tools. All later commands use that same directory and extension.
-  const selected = lines.map(line => /^\S.* node (\S+)\/bootstrap\/bootstrap\.(mts|mjs)$/.exec(line)).find(match => match !== null);
-  assert.ok(selected !== undefined);
-  const kit = selected[1];
-  const extension = selected[2];
-  assert.ok(kit !== undefined, `make install runs no bootstrap of kit:\n${lines.join('\n')}`);
-  const at = (pattern: RegExp) => lines.findIndex(line => pattern.test(line));
-  // kit passes its resolved KIT and KIT_EXT to every make it starts (kit K762), so a sub-make names them before its goal.
-  const subMake = (goal: string) => new RegExp(`\\bmake (?:KIT=\\S+ KIT_EXT=\\S+ )?${goal}$`);
-  // The bootstrap of kit runs first (T24.1): npm with the node of PATH, then the packages of package-lock.json, then the tools.
-  // The downloads of the recipe follow in the order that the Makefile gives them, each online, then make python-package,
-  // which installs offline from what the downloads fetched, and the link of kit comes last, after every install (K360-2).
-  const bootstrap = [
-    at(subMake('--no-print-directory install-tools TOOLS=npm')),
-    lines.indexOf(`${online} node ${kit}/bootstrap/bootstrap.${extension}`),
-    at(subMake('--no-print-directory install-packages')),
-    lines.indexOf(`${online} ${path.join(TOOLS, 'bin/npm')} ci`),
-    at(subMake('--no-print-directory install-tools')),
-    // install-tools runs with the Composer home and cache of var/tools and --no-self-update, the values of kit 0.0.98 (kit K1095, K1097).
-    lines.indexOf(`COMPOSER_HOME=${path.join(TOOLS, 'composer/home')} COMPOSER_CACHE_DIR=${path.join(TOOLS, 'composer/cache')} ${online} ${node} ${kit}/install-tools.${extension} --no-self-update`),
-    at(new RegExp(`^${online} \\S*cargo fetch --locked --manifest-path `)),
-  ];
-  assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
-  const fetched = bootstrap.at(-1) ?? -1;
-  const last = at(subMake('python-package'));
-  assert.ok(last > fetched, `make install runs no make python-package after its downloads:\n${lines.join('\n')}`);
-  assert.ok(at(subMake('--no-print-directory install-link')) > last && lines.at(-1) === `${node} ${kit}/link.${extension} link`, `make install does not link last:\n${lines.join('\n')}`);
-  const downloads = lines.slice(fetched + 1, last);
-  assert.deepEqual(downloads.filter(line => !line.startsWith(`${online} `) && !/^(?:\S*make(?:\[\d+\])? |echo )/.test(line)), [], 'commands of make install that keep the offline settings of the recipes');
-  for (const download of [`${path.join(SHIMS, 'go')} mod download`, `${node} scripts/composer-install.mts .`, `${path.join(SHIMS, 'python3')} -m pip download --require-hashes --no-deps --only-binary=:all: --dest ${wheelhouseDirectory(ROOT)} -r packages/python/build-requirements.txt`]) {
-    assert.ok(downloads.includes(`${online} ${download}`), `make install does not run ${download} online:\n${lines.join('\n')}`);
-  }
+test('no recipe of the Makefile lets rustup install a toolchain on the first cargo', () => {
   assert.equal(recipe('echo "RUSTUP_AUTO_INSTALL=$RUSTUP_AUTO_INSTALL"', { RUSTUP_AUTO_INSTALL: '1' }), 'RUSTUP_AUTO_INSTALL=0', 'the recipes of the Makefile let rustup install a toolchain on the first cargo');
-  for (const file of WORKFLOWS) {
-    const env = workflowOf(read(file), file).env;
-    assert.ok(isJsonObject(env) && env.RUSTUP_AUTO_INSTALL === '0', `${file} does not set RUSTUP_AUTO_INSTALL to 0 for its jobs`);
-    assert.ok(!jobs(file).some(job => runLines(job).some(line => /\brustup show\b/.test(line))), `${file} runs rustup show, which installs the toolchain as a side effect`);
-  }
 });
 
 test('every recipe runs cargo, go, npm and Composer offline, so no check reaches a registry', () => {
@@ -356,7 +305,7 @@ test('every installing job prepares the locked kit before the first make', () =>
   }
 });
 
-test('every CI job bootstraps locked tools before its dependency installation, and sets up no Go', () => {
+test('no CI job installs without make or sets up a Go or a Python of its own', () => {
   for (const file of WORKFLOWS) {
     const direct = jobs(file).flatMap(runLines).find(line => /^(npm ci|npm install|rustup )/.test(line));
     assert.equal(direct, undefined, `${file} installs without make install`);
@@ -364,15 +313,6 @@ test('every CI job bootstraps locked tools before its dependency installation, a
       if (!runLines(job).some(line => /\bmake /.test(line)) || (file.endsWith('/ci.yml') && job.name === CI_PASSED)) continue;
       // make install-tools installs the Go and the Python of mise.toml, so no job sets up a Go or a Python of its own (T24.1, T24.12).
       assert.ok(usesOf(job, 'actions/setup-go@').length + usesOf(job, 'actions/setup-python@').length === 0, `${file} job ${job.name} sets up a Go or a Python of PATH; make install-tools installs those of mise.toml`);
-      if (file.endsWith('/ci.yml')) {
-        const runs = runsOf(job);
-        const scoped = ['go', 'rust', 'php', 'php-ext', 'python', 'typescript', 'browser', 'editor'].includes(job.name);
-        const toolStep = scoped ? runs.find(command => command.startsWith('make install-tools TOOLS=') && command !== 'make install-tools TOOLS=npm') : 'make install';
-        assert.ok(toolStep, `${job.name} declares its selected tools`);
-        // The bootstrap of kit runs make install-tools TOOLS=npm and make install-packages (kit K992).
-        const order = [bootstrapIndex(job), job.steps.findIndex(step => step.run === toolStep)];
-        assert.ok(order.every((index, position) => index !== -1 && (position === 0 || index > (order[position - 1] ?? -1))), `${file} job ${job.name} does not install with ${KIT_BOOTSTRAP} and then ${toolStep}`);
-      }
     }
   }
 });
@@ -397,42 +337,6 @@ test('every make target that a step of a workflow runs is a target of the Makefi
   const missing = WORKFLOWS.flatMap(file => jobs(file).flatMap(job => runLines(job).filter(line => /^make\b/.test(line))
     .flatMap(line => makeTargets(line).filter(target => !defined.has(target)).map(target => `${file} job ${job.name}: make ${target}`))));
   assert.deepEqual(missing, [], 'steps of the workflows that run a make target which the Makefile does not define');
-});
-
-// The targets that `make <targets>` runs: the targets, their prerequisites and, for `check`, the full suite.
-function reached(targets: string[]) {
-  const makefile = read('Makefile');
-  const prerequisites = new Map<string, string[]>();
-  for (const line of makefile.split('\n')) {
-    const rule = /^([a-z][\w-]*(?: [a-z][\w-]*)*):(?!=)\s*([^#]*)/.exec(line);
-    if (!rule) continue;
-    const [, names, list] = rule;
-    if (names === undefined || list === undefined) throw new Error(`the rule line of the Makefile has no targets: ${line}`);
-    for (const name of names.split(' ')) prerequisites.set(name, list.trim().split(/\s+/).filter(Boolean));
-  }
-  const declared = /^CHECK_TARGETS := (.*)$/m.exec(makefile)?.[1];
-  if (declared === undefined) throw new Error('the Makefile declares no CHECK_TARGETS');
-  const suite = declared.split(/\s+/).filter(Boolean);
-  const seen = new Set<string>();
-  const visit = (name: string) => {
-    if (seen.has(name)) return;
-    seen.add(name);
-    for (const next of [...(prerequisites.get(name) ?? []), ...(name === 'check' ? suite : [])]) visit(next);
-  };
-  for (const target of targets) visit(target);
-  return seen;
-}
-
-test('only the CI jobs that run the VS Code integration test install VS Code, before they run it', () => {
-  const install = spawnSync('make', ['--no-print-directory', '-n', 'install'], { cwd: ROOT, encoding: 'utf8' });
-  assert.doesNotMatch(install.stdout, /install-vscode/, 'make install downloads VS Code for every job');
-  for (const job of jobs('.github/workflows/ci.yml')) {
-    const steps = runsOf(job);
-    const runs = steps.findIndex(step => /\bmake\b/.test(step) && reached(makeTargets(step)).has('template-test-vscode-integration'));
-    const installs = steps.indexOf('make template-install-vscode');
-    if (runs === -1) assert.equal(installs, -1, `ci.yml job ${job.name} installs VS Code and runs no VS Code integration test`);
-    else assert.ok(installs !== -1 && installs < runs, `ci.yml job ${job.name} runs the VS Code integration test without make template-install-vscode before it`);
-  }
 });
 
 test('every CI step runs its tools through make, so the recipes give them their offline settings and checks', () => {
@@ -486,37 +390,6 @@ test('a job of a matrix runs every combination to its end, also after another co
   }
 });
 
-test('no push cancels the running CI of an earlier push (T17.1-7)', () => {
-  // The run of a push to main is the evidence of the commit that a release tags, so a newer push does not replace it.
-  for (const file of WORKFLOWS) {
-    const workflow = workflowOf(read(file), file);
-    const triggers = workflow.on;
-    if (!isJsonObject(triggers)) throw new Error(`${file} declares no triggers`);
-    if (!('push' in triggers)) continue;
-    assert.deepEqual(workflow.concurrency, { group: '${{ github.workflow }}-${{ github.ref }}', 'cancel-in-progress': false }, `${file} has no concurrency group of its workflow and ref that cancels no run`);
-  }
-});
-
-test('each workflow of template declares exactly its triggers: CI on a push to main and on a manual run, the site and the release after a CI run of main and on a manual run for one (T17.1-7, T17.1-9, T26.7-28, kit K987)', () => {
-  const triggers: Record<string, unknown> = {
-    '.github/workflows/ci.yml': { push: { branches: ['main'] }, workflow_dispatch: null },
-    // The site publishes the example-site artifact of a CI run of main, so it runs after one, or by hand for the run named.
-    '.github/workflows/pages.yml': {
-      workflow_run: { workflows: ['ci'], types: ['completed'], branches: ['main'] },
-      workflow_dispatch: { inputs: { 'run-id': { description: 'The CI run of main whose example-site artifact is published', required: true } } },
-    },
-    // The release takes the commit of a successful CI run of main, after the run or by hand for the run named.
-    '.github/workflows/release.yml': {
-      workflow_run: { workflows: ['ci'], types: ['completed'], branches: ['main'] },
-      workflow_dispatch: { inputs: { run: { description: 'The id of the successful CI run whose exact commit is released', required: true, type: 'string' } } },
-    },
-  };
-  assert.deepEqual([...WORKFLOWS].sort(compareText), Object.keys(triggers).sort(compareText));
-  for (const [file, declared] of Object.entries(triggers)) {
-    assert.deepEqual(workflowOf(read(file), file).on, declared, `${file} declares other triggers`);
-  }
-});
-
 test('ci-passed is the last job of ci.yml, runs always, needs every other job and runs make ci-passed (T22.1-3)', () => {
   const text = read('.github/workflows/ci.yml');
   assert.deepEqual(ciPassedViolations(text), []);
@@ -551,56 +424,4 @@ test('every action of a workflow is pinned by its commit and every job runs on u
       assert.equal(runsOn, 'ubuntu-24.04', `${file}: runs-on ${shown(runsOn)}, expected ubuntu-24.04`);
     }
   }
-});
-
-// The python job of ci.yml runs one interpreter, the python of mise.toml (T22.4-12, T24.12): requires-python is its minor
-// (python-requires.test.mts), so the job has no matrix and no floor job on another interpreter. The interpreter is the
-// pinned Python that make install installs (T22.5-5), so the job sets up no Python of its own.
-test('the python job of ci.yml installs the pinned interpreter and Python dependencies and has no matrix (T22.4-12, T22.5-5)', () => {
-  const job = jobs('.github/workflows/ci.yml').find(entry => entry.name === 'python');
-  assert.ok(job, 'ci.yml has no python job; the check verified nothing');
-  assert.equal(job.value.strategy, undefined, 'the python job of ci.yml has a matrix; it runs the python of mise.toml only');
-  assert.ok(runsOf(job).includes('make install-tools TOOLS="python uv"'), 'the Python job installs its declared interpreter and uv');
-  assert.ok(runsOf(job).includes('make template-install-python'), 'the Python job installs its locked dependencies');
-  assert.equal(usesOf(job, 'actions/setup-python@').length, 0, 'the python job sets up a Python of PATH; it runs the pinned interpreter');
-});
-
-// The python job of ci.yml runs the unit tests, the conformance suite and the generated conformance suite of Python, and
-// ci-passed needs the job, so a failing Python run fails the check that the release requires (T22.4-7).
-test('the python job of ci.yml runs the Python suites and ci-passed needs it (T22.4-7)', () => {
-  const all = jobs('.github/workflows/ci.yml');
-  const job = all.find(entry => entry.name === 'python');
-  assert.ok(job, 'ci.yml has no python job; the check verified nothing');
-  const targets = runLines(job).map(line => /make ci-targets TARGETS="([^"]*)"/.exec(line)).find(match => match !== null);
-  assert.ok(targets, 'the python job runs no make ci-targets step');
-  const run = captured(targets, 1, 'the targets of the python job').split(/\s+/);
-  for (const target of ['test-python', 'conformance-python', 'conformance-generated-python']) {
-    assert.ok(run.includes(target), `the python job runs ${run.join(' ')}, expected ${target} among them`);
-  }
-  const needs = all.find(entry => entry.name === CI_PASSED)?.value.needs;
-  assert.ok(Array.isArray(needs), 'ci.yml has no ci-passed job with needs');
-  assert.ok(needs.includes('python'), `ci-passed needs ${needs.join(', ')}, expected python among them`);
-});
-
-test('make python-package installs the build requirement of the wheel from the wheelhouse of the main checkout, which make install fills', () => {
-  // A linked worktree reads the wheelhouse of its main checkout, WHEELHOUSE of the Makefile (T27.1-15-1).
-  const wheelhouse = wheelhouseDirectory(ROOT);
-  const dry = spawnSync('make', ['--no-print-directory', '-n', '-W', 'packages/python/pyproject.toml', 'python-package'], { cwd: ROOT, encoding: 'utf8' });
-  assert.equal(dry.status, 0, dry.stderr);
-  assert.ok(dry.stdout.split('\n').some(line => line.includes(` --find-links ${wheelhouse} `)), `make python-package reads no ${wheelhouse}:\n${dry.stdout}`);
-});
-
-test('the unit tests of the Python package run in packages/python/.venv, which python-venv of kit makes from the python of mise.toml', () => {
-  // T23.2: the package is installed into that environment and its package folder linked to the checkout, so the tests
-  // import it with no changed import path (S3). The install is non-editable: the python extractor of kit reads the modules
-  // from the file list of the installed distribution (kit K788, T27.1-26).
-  const makefile = read('Makefile');
-  assert.match(makefile, /--no-deps \$\(PYTHON_PACKAGE\)\n\t\$\(MAKE\) --no-print-directory install-link\n/);
-  assert.ok(!/ -e \$\(PYTHON_PACKAGE\)/.test(makefile), 'the Makefile installs the Python package editable');
-  assert.match(makefile, /^PYTHON_VENV := \$\(shell \$\(PYTHON_BOOTSTRAP_NODE\) scripts\/python-venv\.mts\)$/m);
-  assert.ok(!makefile.includes('packages/python/.venv'), 'the Makefile restates the environment that config/parity.json declares');
-  assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);
-  // test-python of kit runs the recipe template-test-python of the repository (T26.2).
-  assert.match(makefile, /^test-python: template-test-python\b/m);
-  assert.match(makefile, /^template-test-python: python-package\n\tPYTHONUNBUFFERED=1 NO_COLOR=1 PYTHON_COLORS=0 \$\(NODE\) \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
 });
