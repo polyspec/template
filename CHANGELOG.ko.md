@@ -1,10 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d03389d0e1e56ed5228068cdea24fd4ff9703a1adbf59215fa34748d7662d898 -->
+<!-- source-sha256: b985b5a4ae75060a0c456e2efc2e50faf301868adbcd985367d8fe52f21737a0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.22
+- Release 0.0.22: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.22를 담는다. kit 0.0.101에서 실행된다(T27.1-73).
+- template은 parity 없이 kit 0.0.101을 실행한다. config/parity.json과 그 target, CI job은 kit 0.0.100과 함께 없어졌고, recipe나 workflow 문구를 단언하던 시험은 지워졌다(T27.1-69~T27.1-72).
 - 검사와 도구가 kit 0.0.98의 동작 그대로 kit 0.0.99에서 실행된다. 각 recipe는 kit 0.0.98이 고정했던 값을 넘기고, config/checklist.json, documents.json, duplication.json, generated.json, release.json은 kit이 기본으로 읽던 것을 선언한다. kit 0.0.99가 지운 make kit-check는 없어졌다(T27.1-68).
 
 ## 0.0.21

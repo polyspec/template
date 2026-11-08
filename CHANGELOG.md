@@ -4,6 +4,10 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.22
+- Release 0.0.22: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.22; it runs kit 0.0.101 (T27.1-73).
+- template runs kit 0.0.101 without parity: config/parity.json, its targets and its CI job are gone with kit 0.0.100, and the tests that asserted recipe or workflow text are deleted (T27.1-69 to T27.1-72).
 - The checks and tools run on kit 0.0.99 with the behaviour of kit 0.0.98: each recipe passes the values that kit 0.0.98 fixed, and config/checklist.json, documents.json, duplication.json, generated.json and release.json declare what kit read by default; make kit-check, which kit 0.0.99 deletes, is gone (T27.1-68).
 
 ## 0.0.21
