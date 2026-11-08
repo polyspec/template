@@ -4,7 +4,7 @@
 # versions of the toolchains of the job. Every job uploads its report under `!cancelled()` (T20.1-9). Every target of
 # CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run no other target (T17.1-10); the checks that
 # utilities of kit run are targets of this Makefile like any other (T27.1-64): the job gates runs the checks of the
-# repository, the job lint the lint of every language, and the job parity the full parity check of config/parity.json. A verifying job runs every step after a failing step (`!cancelled()`). Every
+# repository, and the job lint the lint of every language. A verifying job runs every step after a failing step (`!cancelled()`). Every
 # job runs on ubuntu-24.04, pins its actions by commit and installs with the bootstrap action of template,
 # `./.github/actions/kit-bootstrap`: it sets up the Node.js of mise.toml, installs the locked kit package, then runs
 # `make install-tools TOOLS=npm`, which installs the npm of the checkout and mise into var/tools, and
@@ -37,7 +37,7 @@ env:
   npm_config_cache: ${{ github.workspace }}/var/bootstrap/npm-cache
 
 jobs:
-  # The checks of the repository that utilities of kit run: configuration, layout, documents, rules, owners, rebuild records, code language, test markers, duplication, suppressions, divergence and the parity declarations. divergence-check reads PHP with the PHP symbol extractor, which make install installs with PHP and Composer.
+  # The checks of the repository that utilities of kit run: configuration, layout, documents, rules, owners, rebuild records, code language, duplication and suppressions.
   gates:
     runs-on: ubuntu-24.04
     steps:
@@ -53,7 +53,7 @@ jobs:
           tools: none
       - run: make install
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check"
+      - run: make ci-targets TARGETS="layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -84,32 +84,6 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: report-lint
-          path: var/report/ci-targets/
-          if-no-files-found: error
-
-  # The full parity check of config/parity.json: make parity-check runs the API phase and the binding phase of each
-  # implementation, each past the failures of the others.
-  parity:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
-        uses: ./.github/actions/kit-bootstrap
-        if: ${{ !cancelled() }}
-      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
-        with:
-          php-version-file: .php-version
-          tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="parity-check"
-        if: ${{ !cancelled() }}
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !cancelled() }}
-        with:
-          name: report-parity
           path: var/report/ci-targets/
           if-no-files-found: error
 
@@ -449,7 +423,7 @@ jobs:
   # node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [gates, lint, parity, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
+    needs: [gates, lint, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

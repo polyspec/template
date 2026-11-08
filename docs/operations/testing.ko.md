@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-testing -->
-<!-- source-sha256: 9cc76fb5dc413122f818ffe7a82cf1974658b6f2194e83f6fbffbe8a07efbff5 -->
+<!-- source-sha256: 2b12ea6605111a4548fcf49fbe282bda8affee4d224d132aef3544febbf42269 -->
 # 릴리스 테스트
 
 [English](/operations/testing).
@@ -16,11 +16,11 @@
 
 전체 mode matrix는 모든 canonical case를 compiler mode 두 개, 모든 구현과 곱한다. 성공 case는 정확한 UTF-8 바이트를 비교한다. 실패 case는 오류 code, message, template 이름, source 위치를 비교한다. Generated 실행은 host source를 승인하기 전에 parser, AST interpreter, fallback 참조가 없는지도 검사한다.
 
-구현과 공유 suite는 `config/parity.json`에 선언한다(CNF-11): TypeScript, Go, Rust, PHP, PHP 확장, Python이 적합성 케이스와 표현식 vector를 가진다. `make parity-declarations-check`는 아무것도 실행하지 않고 선언을 검사하며, `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행한다. `make conformance-all-modes`, `make function-contract-check`, `make generated-native-check`가 두 mode의 coverage를 제공한다.
+TypeScript, Go, Rust, PHP, PHP 확장, Python이 적합성 케이스와 표현식 vector를 가지며(CNF-11), 각자 자기 native test로 실행한다. `make conformance-all-modes`, `make function-contract-check`, `make generated-native-check`가 두 mode의 coverage를 제공한다.
 
 Mutation test는 필수 근거다. Interface operation, artifact digest, output hash를 손상시키고 해당 validator가 반드시 실패하게 한다. Validator가 mutation을 받으면 release gate가 실패한다.
 
-모든 명세 requirement는 `config/parity.json`의 unit이 인용하고, 그 unit의 각 구현 test가 requirement를 이름으로 적는다(또는 케이스의 `case.json`이 나열한다). 어떤 unit도 인용하지 않는 requirement, 명세가 정의하지 않은 id, 어떤 test도 적지 않은 인용 id는 `make parity-declarations-check`를 실패시킨다.
+test는 자기가 검사하는 명세 requirement를 이름으로 적거나, 케이스의 `case.json`이 그것을 나열한다.
 
 Package 설치 검사는 package, 설치 프로젝트, Go module cache와 Cargo target을 시스템 임시 디렉터리의 새 디렉터리 하나에 만들고, 설치 프로젝트가 통과하든 실패하든 검사가 끝날 때 그 디렉터리를 제거한다. Go는 기본적으로 module cache 파일을 읽기 전용으로 만들어 재귀 제거가 그 파일을 제거하지 못하므로, Go는 `-modcacherw`로 module cache를 만든다. 제거가 실패하면 검사는 그 디렉터리의 경로와 함께 실패한다. `scripts/check-install-workspace.mts`가 설치 프로젝트보다 먼저 실행되어 두 조건을 증명한다. 설치 프로젝트는 network의 source를 읽지 않고 checkout의 toolchain을 쓴다. Go 설치 프로젝트는 `GOSUMDB=off`, `GOTOOLCHAIN=local`과 `packages/go/go.mod`의 go 지시문으로 실행의 proxy에서만 module을 해석한다. Rust 설치 프로젝트는 `rust-toolchain.toml`의 사본과 `packages/rust/Cargo.lock`에서 유도한 lock으로 `cargo run --locked`를 실행해 빌드한다. PHP 설치 프로젝트는 실행의 package 외에 어떤 저장소도 읽지 않는다(`tests/scripts/package-installs.test.mts`). 두 script는 `npm pack`, `go mod tidy`, `cargo run`, `composer install` 같은 각 명령을 시간 제한 없는 단계로 실행한다(`scripts/test-progress/step.mts`). 단계는 시작, 명령 출력, 경과 시간이 붙은 결과를 standard error에 출력하고 명령이 0이 아닌 status로 종료하면 실패한다.
 

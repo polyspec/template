@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 // Checks the stage of every conformance case: tests/cases/**/case.json holds a stage of 1, 2 or 3 (CNF-2).
-// The requirements that a case lists are checked by `make parity-declarations-check` of kit (R13, R14, R15).
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';

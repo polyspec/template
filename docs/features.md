@@ -1,7 +1,7 @@
 <!-- doc-id: docs-features -->
 # Feature status
 
-The table records the status of each feature. The implementations and the units that each holds are declared in `config/parity.json`, which `make parity-check` checks against the tree (CNF-11).
+The table records the status of each feature.
 
 | ID | Feature | Status | Client support | Evidence |
 |---|---|---|---|---|

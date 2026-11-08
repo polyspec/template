@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 3c01742e578f3f5bb8a91af0ccb9bff086ff010db0ec6307f02a70a14e262a77 -->
+<!-- source-sha256: f48273f62de84e6dba7fe61e9911b1ae50da0f32b6368c78b685dbb36abfed0a -->
 # 런타임
 
 [English](/spec/runtime).
@@ -295,7 +295,7 @@ Go parser adapter는 같은 `Open`/`Close` 데이터의 alias인 `template.Delim
 로드한 parsed template은 AST와 소스 줄 인덱스를 담으며 AST에서 직접 로드하면 줄 인덱스가 없다. 네이티브 carrier는 TypeScript·Go·Rust의 `ParsedTemplate`, Python·PHP·PHP 확장의 `ast`/`lines` record이다. AST-program loading은 이 carrier를 반환하며 버전이 같으면 같은 cache artifact를 재사용한다. PHP 배열은 네이티브 값 의미론으로 같은 데이터를 보존한다.
 - **RT-41** 파싱된 템플릿은 AST JSON으로 저장하고 다시 로드할 수 있다. AST 렌더는 소스 렌더와 같은 출력을 만든다.
 
-- **RT-72** package는 API의 공개 진입점(`config/parity.json`의 API unit)을 자기 생태계의 진입 방식으로 노출한다: npm package의 exports, Go package의 exported 이름, crate의 공개 항목, Composer package 또는 PHP extension의 class, Python package의 이름. build되거나 설치된 package의 test가 문서가 이름으로 적는 각 진입점을 해석한다.
+- **RT-72** package는 API의 공개 진입점을 자기 생태계의 진입 방식으로 노출한다: npm package의 exports, Go package의 exported 이름, crate의 공개 항목, Composer package 또는 PHP extension의 class, Python package의 이름. build되거나 설치된 package의 test가 문서가 이름으로 적는 각 진입점을 해석한다.
 
 - **RT-73** API의 연산이 실행 중 읽는 데이터는 자기 생태계가 데이터를 싣는 방식으로 package 안에 실려, 설치된 package가 자기 밖의 파일을 읽지 않는다: AST schema(AST-10)는 npm package의 검증기에 묶이고, Go package(`embed`), crate(`include_str!`), PHP extension에 내장되며, Python 배포물의 package data와 Composer package의 resource로 실린다. package의 test는 repository의 파일이 하나도 없는 곳에서 이 데이터로 decode한다.
 - **RT-74** package의 모든 진입점과 모든 module 형식은 같은 runtime을 공유한다: 그 가운데 하나가 만든 bound map(VAL-22)을 다른 모든 것의 program이 받아들이며, module 형식이 하나인 package(Go와 Python의 루트와 하위 package, crate의 module, Composer package의 class)의 진입점도 runtime의 사본을 두지 않는다. npm package는 전체, render 전용, Node.js 진입점의 ECMAScript module 빌드와 CommonJS 빌드를 가진다.

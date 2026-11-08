@@ -1,8 +1,8 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 63ee8fab1c3ea60f6d3258cac17bcf5e7174601b287cc4dc5f7546276f5eba40 -->
+<!-- source-sha256: 2a05c12445e866828e8e1e0bdf206a148709e7bb52ccd7ea825f334196930b9a -->
 # 기능 상태
 
-표는 각 기능의 상태를 기록한다. 구현과 각 구현이 가진 unit은 `config/parity.json`에 선언하며, `make parity-check`가 이를 tree에 대해 검사한다(CNF-11).
+표는 각 기능의 상태를 기록한다.
 
 | ID | 기능 | 상태 | Client 지원 | 근거 |
 |---|---|---|---|---|

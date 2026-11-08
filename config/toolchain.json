@@ -1,21 +1,11 @@
 {
   "schema": 1,
-  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. mise is the release that make install-tools TOOLS=npm installs with the sha256 of each platform; mise.toml declares the tools it installs (Go, Python with uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit and Composer) and mise.lock locks them for every platform of the bootstrap (T24.12). symbolExtractors and the Rust nightly of exceptions are the symbol extractors of the parity check (config/parity.json, T22.6-14).",
+  "comment": "The toolchains that no other file of the checkout declares (T19.2). php lists the PHP minor version that the suite runs on, the pin of kit: setup-php installs the latest patch of a minor and cannot pin a patch, so the minor is the pin and each CI run records the patch it ran on in its report. mise is the release that make install-tools TOOLS=npm installs with the sha256 of each platform; mise.toml declares the tools it installs (Go, Python with uv, ruff, vulture, alint, golangci-lint, deadcode, govulncheck, cargo-audit and Composer) and mise.lock locks them for every platform of the bootstrap (T24.12). symbolExtractors names the PHP symbol programs of kit that lint-php and the PHP extension build read.",
   "php": [
     "8.4"
   ],
   "symbolExtractors": [
-    "go",
     "php"
-  ],
-  "exceptions": [
-    {
-      "tool": "rust",
-      "channel": "nightly-2026-10-01",
-      "scope": "packages/rust",
-      "reason": "the rust symbol extractor of the parity check reads the rustdoc JSON of the crate, which only a nightly writes (rust-lang/rust#76578)",
-      "retry": "rustdoc JSON is stable"
-    }
   ],
   "mise": {
     "version": "2026.10.8",

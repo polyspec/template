@@ -290,10 +290,6 @@
       "kind": "ecosystem",
       "tool": "ajv through scripts/json-document.mts validates the JSON Schema of the document it describes"
     },
-    "scripts/parity-config.mts": {
-      "kind": "policy",
-      "reason": "reads the implementations of config/parity.json with node: modules only, because make reads the Python environment before make install-packages installs ajv (bootstrap order)"
-    },
     "scripts/php-program.mts": {
       "kind": "ecosystem",
       "tool": "composer PSR-4 autoload (vendor/autoload.php) loads the one-class-per-file PHP program that the compiler returns"

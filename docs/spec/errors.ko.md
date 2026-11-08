@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 51e70540ec0f4e537ad2c9d85bf39f501786fafe1a878c763b5fb3bf19562d55 -->
+<!-- source-sha256: a8a69760ecb141644f303854ba1eeeb1c0a18694cd001c699a354f3062f5b464 -->
 # 오류
 
 [English](/spec/errors).
@@ -24,7 +24,7 @@ SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 �
 
 ## 코드
 
-ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-codes`가 이 table에서 각 implementation의 code 목록을 쓰고, parity check의 R7(`config/parity.json`의 `errors`)이 각 목록을 table과 비교합니다.
+ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-codes`가 이 table에서 각 implementation의 code 목록을 쓰고, `make error-codes-check`가 각 목록이 table과 같은지 검사합니다.
 
 - **ERR-7** 렉시컬 오류:
 

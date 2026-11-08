@@ -5,7 +5,6 @@ import { join } from 'node:path';
 import test from 'node:test';
 import { parseSync } from 'oxc-parser';
 import { jsonDocument } from '../../scripts/json-document.mts';
-import { apiBindingSchema, declaredApiSymbols } from './public-api-declarations.mts';
 import { caseIds, casesDir } from '../runner/case-list.mts';
 
 interface Definition { properties?: Record<string, unknown> }
@@ -67,57 +66,6 @@ test('TypeScript AST public interfaces expose exactly the schema fields', { time
       return member.key.name;
     });
     assert.deepEqual(fields.sort(), Object.keys(definition.properties ?? {}).sort(), name);
-  }
-});
-
-interface ApiUnit {
-  id: string;
-  kind: string;
-  requirements: string[];
-  symbols?: { implementation: string; symbol?: string; symbols?: string[] }[];
-}
-
-test('the Rust literal catalog names only the published scalar variants', { timeout: 5000 }, () => {
-  const prefix = 'polyspec_template::LiteralValue::';
-  const variants = declaredApiSymbols('rust').filter(symbol => symbol.startsWith(prefix));
-  assert.deepEqual(variants.sort(), ['Null', 'Bool', 'Number', 'String'].map(name => `${prefix}${name}`).sort());
-});
-
-test('every schema shape and field names its native public representation', { timeout: 30_000 }, () => {
-  const config = jsonDocument<{ units: ApiUnit[] }>('API declarations', {
-    type: 'object', required: ['units'], properties: { units: { type: 'array', items: {
-      type: 'object', required: ['id', 'kind', 'requirements'], properties: {
-        id: { type: 'string' }, kind: { type: 'string' }, requirements: { type: 'array', items: { type: 'string' } },
-        symbols: { type: 'array', items: apiBindingSchema },
-      },
-    } } },
-  }).read('config/parity.json');
-  const nodes = new Set(['Text', 'Echo', 'If', 'For', 'Set', 'Include', 'Block', 'IfBlock']);
-  const structs = new Set(['Template', 'Comment', 'IfBranch', 'ScopeItem']);
-  const alias: Record<string, string> = { Set: 'SetNode', LoopMeta: 'LoopMetaExpression', Map: 'MapLiteral' };
-  for (const [name, definition] of shapes) {
-    const native = alias[name] ?? name;
-    const rust = structs.has(name) ? name : name === 'MapEntry' ? 'MapEntry::Entry'
-      : `${nodes.has(name) ? 'Node' : 'Expr'}::${name}`;
-    for (const field of [undefined, ...Object.keys(definition.properties ?? {})]) {
-      const id = `api-ast-shape-${name.toLowerCase()}${field === undefined ? '' : `-${field.toLowerCase()}`}`;
-      const unit = config.units.find(item => item.id === id);
-      assert.ok(unit !== undefined, `${id} has no API declaration`);
-      assert.equal(unit.kind, 'api');
-      assert.ok(unit.requirements.includes('AST-10'), id);
-      const rustField = field !== undefined && field !== 'type' && structs.has(name) ? `::${field}` : '';
-      const goField = field === undefined ? '' : field === 'id' ? '.ID' : `.${field[0]?.toUpperCase()}${field.slice(1)}`;
-      assert.deepEqual(unit.symbols, [
-        { implementation: 'ts', symbol: `@polyspec/template!${native}${field === undefined ? ':interface' : `#${field}:member`}` },
-        { implementation: 'go', symbol: `github.com/polyspec/template/packages/go/ast.${name}${goField}` },
-        { implementation: 'rust', symbol: `polyspec_template::${rust}${rustField}` },
-        // These SDKs publish the AST as native arrays/dictionaries, not per-node classes.
-        // Their public decoder and the native round-trip units own each schema field.
-        { implementation: 'php', symbol: 'Polyspec\\Template\\AstProgram::decodeTemplate' },
-        { implementation: 'php-ext', symbol: 'Polyspec\\Template\\AstProgram::decodeTemplate' },
-        { implementation: 'python', symbol: 'polyspec.template.decode_template' },
-      ], id);
-    }
   }
 });
 

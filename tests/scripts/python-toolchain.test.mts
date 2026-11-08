@@ -4,7 +4,7 @@
 // runs the python of packages/python/.venv, with no changed import path (PRINCIPLES S3).
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -33,7 +33,6 @@ test('the environment of a Python program writes no bytecode and sets no import 
 test('the python that imports the package is the python of packages/python/.venv, which make python-package makes', () => {
   assert.equal(pythonPackageInterpreter, join(pythonInterpreter, '../../../../../packages/python/.venv/bin/python'));
   assert.equal(pythonPackageEnvironment(), 'packages/python/.venv');
-  assert.ok(!readFileSync(new URL('../../scripts/python-toolchain.mts', import.meta.url), 'utf8').includes("'packages/python/.venv"), 'python-toolchain.mjs restates the environment that config/parity.json declares');
   assert.equal(pythonPackageCommand(), pythonPackageInterpreter, 'run make python-package');
 });
 

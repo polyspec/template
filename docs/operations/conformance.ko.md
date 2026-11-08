@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: f8386b97ce77797c0c56b72ab6c2dc0aa18c02888cd484ede3847474db88284f -->
+<!-- source-sha256: 3d150e593b6dd8a16dcd83ba499683cfd488e59e5ccb31500fadc49d5e070363 -->
 # 적합성
 
 [English](/operations/conformance).
@@ -7,7 +7,7 @@
 적합성 스위트는 모든 구현이 `tests/cases/`의 케이스에 대해 같은 AST, 같은 출력, 같은 오류 필드를 만드는지 검증한다.
 
 
-아래 규칙(CNF-n)은 conformance suite 자체의 규칙이다. case의 구조, 모든 구현이 suite에 제공하는 명령줄, 비교, runner를 정한다. 언어의 requirement가 아니므로 `config/parity.json`이 추적하지 않는다.
+아래 규칙(CNF-n)은 conformance suite 자체의 규칙이다. case의 구조, 모든 구현이 suite에 제공하는 명령줄, 비교, runner를 정한다. 언어의 requirement가 아니다.
 
 ## 스위트 실행
 
@@ -15,10 +15,9 @@
 make conformance
 node tests/runner/conformance.mts --langs ts,go
 node tests/runner/conformance.mts --case loop/meta-fields
-make parity-check
 ```
 
-`make conformance`는 모든 패키지를 빌드하고 모든 케이스를 실행하며, 없는 패키지는 실행을 실패시킨다. 러너는 구현 하나에서 케이스가 끝날 때마다 `<case> [<lang>] pass|fail (<ms> ms)`을 출력하고, 그 뒤 케이스와 구현마다 한 행인 요약 표를 출력하며, 비교가 실패하면 상태 1로 종료한다. `make parity-check`는 `config/parity.json`의 공유 suite를 bind하는 각 구현의 native test를 실행한다(CNF-11). 러너는 케이스 전에 각 구현의 CLI를 build한다(`tests/runner/drivers.mts`). binary가 있어도 더 오래된 source로 build되었을 수 있으므로 build하며, 입력이 바뀌지 않았으면 build는 아무것도 하지 않는다. runner는 Go와 Rust CLI를 실행하고 PHP extension을 `var/build`에서 로드하며, `scripts/publish-build.mts`는 build의 byte가 바뀔 때에만 그곳에 게시한다. cargo는 build할 때마다 `target/release`를 다시 link하고, go build는 새 파일을 쓰며, macOS는 새 실행 파일을 처음 실행할 때 검사한다. 부하가 큰 machine에서 이 검사는 Rust CLI에 29.8 s가 걸려 호출의 10 s 제한을 넘겼다. `make build-go`, `make build-rust`, `make build-php-ext`도 같은 파일에 게시한다. build는 시간 제한 없는 단계이고, 이 단계는 시작, build 출력, 경과 시간이 붙은 결과를 standard error에 출력하며 build가 0이 아닌 status로 종료하면 실패한다. CLI 호출마다 10 s timeout이 있다. `make delimiter-matrix`는 모든 유효한 ASCII 구분자 쌍과 따옴표 안 구분자 문자로 template을 모든 언어에서 render하고, 언어 하나에서 쌍이 끝날 때마다 `<pair> [<lang>] pass|fail (<ms> ms)`를 출력하며, 끝에 check 수를 출력한다.
+`make conformance`는 모든 패키지를 빌드하고 모든 케이스를 실행하며, 없는 패키지는 실행을 실패시킨다. 러너는 구현 하나에서 케이스가 끝날 때마다 `<case> [<lang>] pass|fail (<ms> ms)`을 출력하고, 그 뒤 케이스와 구현마다 한 행인 요약 표를 출력하며, 비교가 실패하면 상태 1로 종료한다. 러너는 케이스 전에 각 구현의 CLI를 build한다(`tests/runner/drivers.mts`). binary가 있어도 더 오래된 source로 build되었을 수 있으므로 build하며, 입력이 바뀌지 않았으면 build는 아무것도 하지 않는다. runner는 Go와 Rust CLI를 실행하고 PHP extension을 `var/build`에서 로드하며, `scripts/publish-build.mts`는 build의 byte가 바뀔 때에만 그곳에 게시한다. cargo는 build할 때마다 `target/release`를 다시 link하고, go build는 새 파일을 쓰며, macOS는 새 실행 파일을 처음 실행할 때 검사한다. 부하가 큰 machine에서 이 검사는 Rust CLI에 29.8 s가 걸려 호출의 10 s 제한을 넘겼다. `make build-go`, `make build-rust`, `make build-php-ext`도 같은 파일에 게시한다. build는 시간 제한 없는 단계이고, 이 단계는 시작, build 출력, 경과 시간이 붙은 결과를 standard error에 출력하며 build가 0이 아닌 status로 종료하면 실패한다. CLI 호출마다 10 s timeout이 있다. `make delimiter-matrix`는 모든 유효한 ASCII 구분자 쌍과 따옴표 안 구분자 문자로 template을 모든 언어에서 render하고, 언어 하나에서 쌍이 끝날 때마다 `<pair> [<lang>] pass|fail (<ms> ms)`를 출력하며, 끝에 check 수를 출력한다.
 
 `make conformance-generated-ts`, `make conformance-generated-go`, `make conformance-generated-rust`, `make conformance-generated-php`, `make conformance-generated-python`는 모든 케이스의 generated program을 실행한다. `--case <group>/<name>`이나 `--case <group>`으로 케이스를 고른다. 각 케이스는 시작과 결과를 경과 시간과 함께 출력하고 30 s의 자기 deadline을 가진다. Go와 Rust 러너는 케이스 test를 `node_modules/@polyspec/kit/scripts/kit/run-tests.mts`로 실행한다. Go 케이스는 package `case_<case id>`이고 Rust 케이스는 test `case_<case id>`이며, 문자와 숫자가 아닌 글자가 이어진 부분은 `_` 하나로 쓴다. PHP 러너는 `php -l`과 케이스 process를 deadline에서 멈춘다. Python 러너는 `python3 -m py_compile`과 케이스 process를 deadline에서 멈춘다. TypeScript 러너는 `tsc`를 시간 제한 없는 단계로 한 번 실행하여 시작, 실행 중 5 s마다 한 줄, 경과 시간이 붙은 결과를 출력하고, `tsc`가 0이 아닌 code로 종료하면 실패하며, 각 케이스를 worker에서 render한다.
 
@@ -69,7 +68,7 @@ node scripts/check-rules.mts
 
 - **CNF-16** `tests/fixtures/filesystem/cases.json`은 파일시스템 로더(RT-10)의 filesystem 케이스를 나열한다. checkout은 symbolic link와 hard link를 담지 않으므로 케이스 디렉터리는 이 케이스를 담을 수 없다. 각 케이스는 `name`, `requirements`, `files`(template 이름에서 그 텍스트로의 map, `input.tpl` 포함), 선택적 `symbolicLinks`와 `hardLinks`(이름에서 대상 이름으로의 map), 그리고 `html` 또는 `error`(`{code, template, line, col}`)를 가진 `expected`를 가진다. `tests/runner/conformance.mts`는 각 케이스의 tree를 시스템 임시 디렉터리의 한 디렉터리에 쓰고, 선택된 모든 구현의 `render --root <directory> input.tpl`을 케이스 `filesystem/<name>`으로 실행해 결과를 CNF-7과 CNF-8로 비교한다. `--case filesystem`이 이 케이스들을 선택한다.
 
-- **CNF-3** `scripts/check-rules.mts`는 케이스 디렉터리에 `case.json`이 없거나 `stage`가 1, 2, 3이 아니면 실패한다. `case.json`의 requirement는 kit의 `make parity-declarations-check`가 검사한다: `docs/spec`의 어떤 파일도 정의하지 않은 id(R14), `config/parity.json`의 어떤 unit도 인용하지 않는 requirement(R13), unit의 어떤 케이스도 나열하지 않는 인용 id(R15). `make check`가 둘 다 실행한다.
+- **CNF-3** `scripts/check-rules.mts`는 케이스 디렉터리에 `case.json`이 없거나 `stage`가 1, 2, 3이 아니면 실패한다.
 
 ## 명령줄 계약
 
@@ -125,7 +124,7 @@ TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@poly
 | `--list` | 실행하지 않고 케이스 id와 건수를 출력한다. |
 | `--update ast\|html\|error\|tokens\|format` | 지정한 종류의 기대 파일을 `ts` 구현의 결과로 쓴다. `tokens`와 `format`은 `expected.ast.json`이 있는 케이스의 파일을 쓴다. `ts`가 선택된 구현에 포함되어야 한다. |
 
-- **CNF-11** `config/parity.json`은 구현과 공유 suite를 선언한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST와 렌더 결과를 비교한다), 그 케이스의 토큰(unit `tokens`, CNF-17), 그 포맷 결과(unit `formatting`, CNF-18), `tests/fixtures/expr/cases.json`의 표현식 vector다. kit의 `make parity-check`는 suite를 bind하는 각 구현의 native test를 실행하고, suite의 모든 케이스가 profile의 모든 구현에서 통과하지 않으면 실패한다. exclusion은 그것이 적은 task가 지울 때까지 실패한다. 각 native test는 각 케이스를 그 runner의 이름으로 보고한다: Go는 subtest `TestX/<case>`, cargo는 test `<symbol>::<case>`, vitest는 top-level test `<case>`, PHPUnit은 binding method의 data set `"<case>"`, unittest는 test `<case>`다. PHP extension은 표현식 lexer와 evaluator를 노출하지 않으므로, 표현식 vector의 test는 각 표현식을 echo tag `{=<expr>}`로 parse하고 `{= json(<expr>) | raw}`로 평가하며, token vector는 비교하지 않는다. 구현의 다른 모든 test 파일은 `config/parity.json`의 feature unit, 곧 profile의 각 구현에 native test 하나를 두는 unit의 test다. 모든 구현보다 좁은 profile은 그 차이를 영구적으로 만드는 spec 규칙을 적는다.
+- **CNF-11** 모든 구현은 공유 suite를 자기 native test로 실행한다: `tests/cases`의 적합성 케이스(unit `conformance`, native test가 AST와 렌더 결과를 비교한다), 그 케이스의 토큰(unit `tokens`, CNF-17), 그 포맷 결과(unit `formatting`, CNF-18), `tests/fixtures/expr/cases.json`의 표현식 vector다. 각 native test는 각 케이스를 그 runner의 이름으로 보고한다: Go는 subtest `TestX/<case>`, cargo는 test `<symbol>::<case>`, vitest는 top-level test `<case>`, PHPUnit은 binding method의 data set `"<case>"`, unittest는 test `<case>`다. PHP extension은 표현식 lexer와 evaluator를 노출하지 않으므로, 표현식 vector의 test는 각 표현식을 echo tag `{=<expr>}`로 parse하고 `{= json(<expr>) | raw}`로 평가하며, token vector는 비교하지 않는다.
 
 ## 표현식 픽스처
 

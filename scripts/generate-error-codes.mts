@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 // Generates the error-code list of each implementation from the code tables of docs/spec/errors.md, the catalog of errors
-// in config/parity.json (T22.6-15). Each code is a row `| `E_...` | <condition> | <position> |` of a table of ERR-7 to
+// (T22.6-15). Each code is a row `| `E_...` | <condition> | <position> |` of a table of ERR-7 to
 // ERR-12; the order of the rows is the order of every list. A list in a source file lies between the lines
 // `BEGIN GENERATED ERROR CODES` and `END GENERATED ERROR CODES` in the comment syntax of its language, and the generator
-// writes only the lines between them; the PHP class and the header of the PHP extension are whole generated files. R7 of
-// make parity-declarations-check reads each list with the pattern of its implementation in config/parity.json; this check
-// keeps the lists equal to the catalog before that.
+// writes only the lines between them; the PHP class and the header of the PHP extension are whole generated files. The check
+// keeps the lists equal to the catalog.
 //
 // Usage: node scripts/generate-error-codes.mts [--check]
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';

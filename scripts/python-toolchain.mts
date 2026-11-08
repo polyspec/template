@@ -17,7 +17,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /** The pinned interpreter of the checkout: the shim var/tools/mise/shims/python3 of the python of mise.toml. */
 export const pythonInterpreter = join(toolsDirectory(root), 'mise/shims/python3');
 
-/** The python of the environment of config/parity.json, where `make python-package` installs packages/python. */
+/** The python of the environment of the Python package, where `make python-package` installs packages/python. */
 export const pythonPackageInterpreter = join(root, pythonPackageCommandPath());
 
 /** The minor release of the python of mise.toml, such as `3.14` of `python = "3.14.8"`. */

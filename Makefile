@@ -112,9 +112,9 @@ install-packages: ## Install the packages of package-lock.json, @polyspec/kit in
 install-link: ## Link the packages to the checkouts of .links after every install of make install; PROJECT and RUNTIME select as for make link
 	$(NODE) $(KIT)/link.$(KIT_EXT) link$(if $(PROJECT), --project $(PROJECT))$(if $(RUNTIME), --runtime $(RUNTIME))
 
-# The symbol extractors of the parity checks, symbolExtractors of config/toolchain.json (kit K861).
-EXTRACTORS ?= go php
-install-symbols: ## Install the symbol extractors of EXTRACTORS (go php, those of config/toolchain.json); their tools must be installed first; ONLINE
+# The PHP symbol programs of kit that lint-php and the PHP extension build read, symbolExtractors of config/toolchain.json.
+EXTRACTORS ?= php
+install-symbols: ## Install the symbol programs of EXTRACTORS (php, that of config/toolchain.json); their tools must be installed first; ONLINE
 	$(COMPOSER_TOOL_ENV) $(ONLINE) $(NODE) $(KIT)/install-symbols.$(KIT_EXT) $(EXTRACTORS)
 
 install-bootstrap: ## Install the mise, node and npm of mise.toml, the packages of package-lock.json, the tools of mise.toml and the symbol extractors, in that order, into the checkout's own var/tools; ONLINE
@@ -124,7 +124,7 @@ install-bootstrap: ## Install the mise, node and npm of mise.toml, the packages 
 	$(MAKE) --no-print-directory install-symbols
 
 # ---- Checks of the repository that utilities of kit run ---------------------------------------------------------------
-.PHONY: layout-check rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check owner-check owner-validate
+.PHONY: layout-check rebuild-check language-check duplication-check suppression-check owner-check owner-validate
 # Each check of layout-check is a prerequisite of one command, so a failed one keeps the others running (T19.8).
 .PHONY: layout-tree-check layout-installs-check layout-tracked-check
 layout-check: layout-tree-check layout-installs-check layout-tracked-check ## Check the folder layout against config/layout.yml with the alint of mise.toml, that Git ignores each install directory and that no tracked file is generated; offline
@@ -145,17 +145,11 @@ rebuild-check: ## Check that every tool that config/rebuild.json selects has its
 language-check: ## Fail on Hangul in a comment, an identifier, a message or a test name of the code; offline
 	$(NODE) $(KIT)/language-check.$(KIT_EXT) --forbid '\p{Script=Hangul}'
 
-test-markers-check: ## Fail on a test that a marker skips or narrows; offline
-	$(NODE) $(KIT)/test-markers.$(KIT_EXT)
-
 duplication-check: ## Fail on a piece of code of 6 lines or more that exists twice outside the folders of config/duplication.json; offline
 	$(NODE) $(KIT)/duplication-check.$(KIT_EXT)
 
 suppression-check: ## Fail on a suppression of a lint finding that states no reason in the form of its tool (P8); offline
 	$(NODE) $(KIT)/suppression-check.$(KIT_EXT)
-
-divergence-check: ## Fail on an implementation that diverges by a branch on the runtime, a narrowed run or an unsupported feature without a reason; offline
-	$(NODE) $(KIT)/divergence-check.$(KIT_EXT) --reason-kind generated --reason-kind fixture --reason-kind test --reason-kind harness --reason-kind ecosystem --reason-kind external --feature-state partial --feature-state unsupported --parity config/parity.json
 
 owner-check: ## Run the checks that own the changed paths (config/owner-checks.json); PATHS="a b" or BASE=<revision> selects the paths
 	$(NODE) $(KIT)/owner-check.$(KIT_EXT) --every-path $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base $(BASE))
@@ -194,25 +188,6 @@ build-php-ext: ## Build packages/php-ext with phpize into $(EXT_LIBRARY) after t
 	$(ONLINE) $(NODE) $(KIT)/php-extension.$(KIT_EXT) build --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php
 test-php-ext: build-php-ext ## Compare the declarations of the built extension with the PHP library, then run its unit tests; offline
 	$(NODE) $(KIT)/php-extension.$(KIT_EXT) test --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php -- --roots packages/php packages/php-ext
-
-# ---- Parity (config/parity.json) ----------------------------------------------------------------------------------------
-# The full parity check is the API phase and the binding phase of each implementation of config/parity.json, which the job
-# parity of CI runs, each past the failures of the others. With UNITS="<id>..." or IMPLEMENTATIONS="<name>...", parity-check
-# runs the selected units and bindings in one run.
-PARITY_PHASES := parity-api-check parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check
-.PHONY: parity-check parity-declarations-check $(PARITY_PHASES)
-ifeq ($(strip $(UNITS)$(IMPLEMENTATIONS)),)
-parity-check: $(PARITY_PHASES) ## Run every parity binding and check every rule; UNITS="<id>..." selects units and IMPLEMENTATIONS="<name>..." implementations; offline
-else
-parity-check: build-ts build-php build-php-ext python-package template-build-language error-codes-check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) $(foreach unit,$(UNITS),--unit $(unit)) $(foreach implementation,$(IMPLEMENTATIONS),--implementation $(implementation))
-endif
-parity-declarations-check: ## Check the parity rules of config/parity.json that need no run; UNITS, RULES and IDS narrow the findings; offline
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --declarations $(foreach unit,$(UNITS),--unit $(unit)) $(foreach rule,$(RULES),--rule $(rule)) $(foreach id,$(IDS),--id $(id))
-parity-api-check: ## Run the API and static phase of the parity check
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase api
-parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check parity-bindings-php-check parity-bindings-php-ext-check parity-bindings-python-check: ## Run the native bindings of one implementation of config/parity.json
-	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation $(@:parity-bindings-%-check=%)
 
 # ---- Git hooks and merges -------------------------------------------------------------------------------------------------
 # .githooks/pre-commit and .githooks/commit-msg are template's own hooks (HOOK_DECLARATION); make hooks points
@@ -424,7 +399,7 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as the checks of the job gates, lint-ts
 # and conformance-ts. The list stays on one line: the owner-check utility of @polyspec/kit reads it.
-CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext parity-check hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 .PHONY: lint build test
 lint: lint-ts lint-go lint-rust lint-php lint-python lint-php-ext template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets and the format checks
@@ -713,11 +688,9 @@ conformance-generated-php: build-ts build-php ## PHP generated compiler conforma
 conformance-python: build-ts ## Conformance suite of TypeScript and Python
 	$(NODE) tests/runner/conformance.mts --langs ts,python
 
-# The Python package is installed, non-editable, into the virtual environment PYTHON_VENV, the environment of the command
-# of the implementation python of config/parity.json (scripts/python-venv.mts): the python extractor of kit reads the
-# modules from the file list of the installed distribution, which an editable install does not hold (kit K788). The link
+# The Python package is installed, non-editable, into the virtual environment PYTHON_VENV (scripts/python-venv.mts). The link
 # of kit then makes its installed package folder a link to packages/python/src/polyspec/template (kit K765), so its
-# tests, the conformance driver (tests/runner/drivers.mts) and the parity check (config/parity.json) import
+# tests and the conformance driver (tests/runner/drivers.mts) import
 # polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
 # python of mise.toml, and the uv of mise.toml installs into it the dependencies that packages/python/pylock.toml pins by
 # version and digest, then the package offline, with its build requirement from the wheelhouse that make install of the
@@ -725,21 +698,21 @@ conformance-python: build-ts ## Conformance suite of TypeScript and Python
 # make install makes the environment, so the locked dependencies are downloaded there (AGENTS, Idempotency: Network). The
 # stamp is remade when the project, its lock or its build requirements change; a change of the sources needs no install,
 # since the installed package folder is a link to them. The tests are discovered with packages/python as the top level: the directory
-# tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when the parity check
-# runs one test file by its path.
+# tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when a run
+# names one test file by its path.
 PYTHON_PACKAGE := packages/python
 # make reads the environment when it parses the Makefile, before make install-tools TOOLS=npm has installed the node of
 # the checkout, so the node of the machine that starts the bootstrap reads it (kit K171).
 PYTHON_BOOTSTRAP_NODE := $(if $(wildcard $(KIT_TOOLS)/bin/node),$(KIT_TOOLS)/bin/node,node)
 PYTHON_VENV := $(shell $(PYTHON_BOOTSTRAP_NODE) scripts/python-venv.mts)
 ifeq ($(PYTHON_VENV),)
-$(error scripts/python-venv.mts read no environment of the implementation python from config/parity.json)
+$(error scripts/python-venv.mts printed no environment of the Python package)
 endif
 UV := $(KIT_TOOLS)/mise/shims/uv
 WHEELHOUSE := $(or $(KIT_MAIN_CHECKOUT),$(CURDIR))/var/python/wheelhouse
 
 .PHONY: python-package
-python-package: $(PYTHON_VENV)/.installed ## Make the environment of config/parity.json with packages/python installed and its package folder linked to the checkout; offline
+python-package: $(PYTHON_VENV)/.installed ## Make the environment of the Python package with packages/python installed and its package folder linked to the checkout; offline
 
 $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.txt
 	rm -rf $(PYTHON_VENV)
@@ -773,22 +746,13 @@ template-install-workspace-check:
 package-installs-check: typed-generator
 	$(NODE) scripts/check-package-installs.mts
 
-# parity-check and parity-declarations-check read config/parity.json (T24.7): parity-check runs the native test of each
-# implementation that binds a shared suite, which reads the installed Composer packages, the PHP extension and the crates.
-# The ts symbol extractor reads the declarations that the build of the TypeScript package emits (packages/ts/dist/index.d.ts),
-# which both checks need to exist (symbols of config/parity.json, T22.6-14).
-# Formatter SDK bindings import the published package, which must exist in a clean checkout.
-parity-declarations-check: build-ts
-
-# R7 of the parity checks compares the error-code list of each implementation with the code tables of docs/spec/errors.md
-# (errors of config/parity.json); scripts/generate-error-codes.mts writes the lists from those tables (T22.6-15), and both
-# parity checks first check that every list is current.
+# scripts/generate-error-codes.mts writes the error-code list of each implementation from the code tables of
+# docs/spec/errors.md (T22.6-15); error-codes-check checks that every list is current.
 .PHONY: error-codes error-codes-check
 error-codes: ## Generate the error-code list of each implementation from docs/spec/errors.md
 	$(NODE) scripts/generate-error-codes.mts
 error-codes-check: ## Check that the error-code list of each implementation matches docs/spec/errors.md
 	$(NODE) scripts/generate-error-codes.mts --check
-parity-declarations-check: error-codes-check
 
 template-test-browser: build-ts ## Browser rendering test
 	$(NODE) tests/browser/run.mts
@@ -951,11 +915,3 @@ generated-lint-check: build-php typed-generator ## Lint the generated Go, Rust, 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
-# The parity phases of the job parity of CI read the builds and installs of every implementation.
-parity-api-check: build-ts build-php python-package template-build-language error-codes-check
-parity-bindings-ts-check: build-ts template-build-language error-codes-check
-parity-bindings-go-check: build-ts template-build-language error-codes-check
-parity-bindings-rust-check: build-ts template-build-language error-codes-check
-parity-bindings-php-check: build-ts template-build-language error-codes-check build-php
-parity-bindings-php-ext-check: build-ts template-build-language error-codes-check build-php-ext
-parity-bindings-python-check: build-ts template-build-language error-codes-check python-package

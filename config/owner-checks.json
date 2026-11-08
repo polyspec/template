@@ -96,8 +96,7 @@
         "tests/cases/**"
       ],
       "targets": [
-        "conformance-cases",
-        "parity-check"
+        "conformance-cases"
       ],
       "variable": "CASES"
     },
@@ -107,8 +106,7 @@
       ],
       "targets": [
         "rules-check",
-        "schema-check",
-        "parity-check"
+        "schema-check"
       ]
     },
     {
@@ -617,7 +615,7 @@
         "template-test-codemirror",
         "template-test-vscode",
         "template-test-browser",
-        "parity-check"
+        "error-codes-check"
       ],
       "tests": [
         "tests/scripts/decode-bundle-size.test.mts"
@@ -678,7 +676,7 @@
         "conformance-generated-go",
         "delimiter-matrix",
         "template-install-check",
-        "parity-check"
+        "error-codes-check"
       ]
     },
     {
@@ -693,7 +691,7 @@
         "conformance-generated-rust",
         "delimiter-matrix",
         "template-install-check",
-        "parity-check"
+        "error-codes-check"
       ]
     },
     {
@@ -708,7 +706,7 @@
         "conformance-generated-php",
         "delimiter-matrix",
         "template-install-check",
-        "parity-check"
+        "error-codes-check"
       ]
     },
     {
@@ -726,7 +724,7 @@
         "typed-generator-compile-check",
         "template-install-check",
         "contract-check",
-        "parity-check"
+        "error-codes-check"
       ]
     },
     {
@@ -737,7 +735,7 @@
         "template-test-ext",
         "test-php-ext",
         "lint-php",
-        "parity-check"
+        "error-codes-check"
       ],
       "tests": []
     },
@@ -951,38 +949,14 @@
     },
     {
       "paths": [
-        "config/parity.json",
-        "tests/fixtures/expr/**"
-      ],
-      "targets": [
-        "parity-declarations-check",
-        "parity-check"
-      ]
-    },
-    {
-      "paths": [
         "docs/spec/errors.md",
         "scripts/generate-error-codes.mts"
       ],
       "targets": [
-        "error-codes-check",
-        "parity-declarations-check"
+        "error-codes-check"
       ],
       "tests": [
         "tests/scripts/error-codes.test.mts"
-      ]
-    },
-    {
-      "paths": [
-        "README*.md",
-        "docs/*.md",
-        "docs/spec/*.md",
-        "docs/operations/*.md",
-        "packages/*/README*.md",
-        "Makefile"
-      ],
-      "targets": [
-        "parity-declarations-check"
       ]
     },
     {
@@ -1074,8 +1048,7 @@
     },
     {
       "paths": [
-        "scripts/typescript-exports.mts",
-        "tests/scripts/public-api-declarations.mts"
+        "scripts/typescript-exports.mts"
       ],
       "targets": [
         "compiler-interface-check"
@@ -1110,11 +1083,9 @@
       "paths": [
         "tests/fixtures/public-types/**",
         "packages/ts/api-extractor.json",
-        "config/parity.json",
         "packages/ts/src/**",
         "packages/ts/package.json",
-        "packages/ts/tsconfig.json",
-        "tests/scripts/public-api-declarations.mts"
+        "packages/ts/tsconfig.json"
       ],
       "targets": [
         "template-test-scripts"
@@ -1125,17 +1096,12 @@
     },
     {
       "paths": [
-        "tests/scripts/api-contract-declarations.test.mts",
-        "config/parity.json",
-        "packages/compiler/interface.json",
-        "tests/scripts/public-api-declarations.mts"
+        "packages/compiler/interface.json"
       ],
       "targets": [
         "template-test-scripts"
       ],
-      "tests": [
-        "tests/scripts/api-contract-declarations.test.mts"
-      ]
+      "tests": []
     },
     {
       "paths": [
@@ -1153,9 +1119,7 @@
     {
       "paths": [
         "tests/scripts/go-public-api.test.mts",
-        "packages/go/**",
-        "config/parity.json",
-        "tests/scripts/public-api-declarations.mts"
+        "packages/go/**"
       ],
       "targets": [
         "template-test-scripts"
@@ -1166,20 +1130,15 @@
     },
     {
       "paths": [
-        "tests/scripts/php-public-api.test.mts",
         "packages/php/src/**",
         "packages/php-ext/src/polyspec_template.stub.php",
-        "config/parity.json",
-        "tests/scripts/public-api-declarations.mts",
         "scripts/php-toolchain.mts",
         "config/toolchain.json"
       ],
       "targets": [
         "template-test-scripts"
       ],
-      "tests": [
-        "tests/scripts/php-public-api.test.mts"
-      ]
+      "tests": []
     },
     {
       "paths": [
@@ -1188,8 +1147,7 @@
         "packages/ts/src/ast.ts",
         "tests/runner/case-list.mts",
         "tests/cases/**",
-        "tests/fixtures/ast-decode/**",
-        "tests/scripts/public-api-declarations.mts"
+        "tests/fixtures/ast-decode/**"
       ],
       "targets": [
         "template-test-scripts"
@@ -1197,15 +1155,6 @@
       "tests": [
         "tests/scripts/ast-public-api.test.mts"
       ]
-    },
-    {
-      "paths": [
-        "config/parity.json"
-      ],
-      "targets": [
-        "template-test-go-unit"
-      ],
-      "tests": []
     },
     {
       "paths": [
@@ -1250,12 +1199,9 @@
     {
       "paths": [
         "tests/scripts/python-public-api.test.mts",
-        "tests/scripts/public-api-declarations.mts",
-        "config/parity.json",
         "packages/python/src/**",
         "scripts/python-toolchain.mts",
         "scripts/python-venv.mts",
-        "scripts/parity-config.mts",
         "scripts/toml.mts",
         "mise.toml"
       ],
@@ -1264,18 +1210,6 @@
       ],
       "tests": [
         "tests/scripts/python-public-api.test.mts"
-      ]
-    },
-    {
-      "paths": [
-        "tests/scripts/public-api-declarations.test.mts",
-        "tests/scripts/public-api-declarations.mts"
-      ],
-      "targets": [
-        "template-test-scripts"
-      ],
-      "tests": [
-        "tests/scripts/public-api-declarations.test.mts"
       ]
     },
     {
@@ -1290,7 +1224,6 @@
       ],
       "tests": [
         "tests/scripts/php-toolchain.test.mts",
-        "tests/scripts/php-public-api.test.mts",
         "tests/scripts/function-contract-registries.test.mts"
       ]
     }
@@ -1600,7 +1533,6 @@
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**",
-        "config/parity.json",
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
         "tests/fixtures/prefix-analysis.json",
@@ -1908,15 +1840,6 @@
       ]
     },
     {
-      "check": "make parity-check",
-      "paths": [
-        "config/parity.json",
-        "tests/cases/**",
-        "tests/fixtures/expr/**",
-        "packages/{ts,go,rust,php,php-ext,python}/**"
-      ]
-    },
-    {
       "check": "make error-codes-check",
       "paths": [
         "docs/spec/errors.md",
@@ -1927,18 +1850,6 @@
         "packages/python/src/polyspec/template/errors.py",
         "packages/php/src/ErrorCode.php",
         "packages/php-ext/src/pt_error_codes.h"
-      ]
-    },
-    {
-      "check": "make parity-declarations-check",
-      "paths": [
-        "config/parity.json",
-        "Makefile",
-        "README*.md",
-        "docs/*.md",
-        "docs/spec/*.md",
-        "docs/operations/*.md",
-        "packages/*/README*.md"
       ]
     },
     {
@@ -1957,15 +1868,12 @@
         "scripts/check-showcase-contract.mts",
         "tests/fixtures/public-types/**",
         "packages/ts/api-extractor.json",
-        "tests/scripts/api-contract-declarations.test.mts",
-        "config/parity.json",
         "packages/compiler/interface.json",
         "tests/scripts/rust-public-api.test.mts",
         "packages/rust/src/**",
         "packages/rust/tests/fixtures/public-api/**",
         "tests/scripts/go-public-api.test.mts",
         "packages/go/**",
-        "tests/scripts/php-public-api.test.mts",
         "packages/php/src/**",
         "packages/php-ext/src/polyspec_template.stub.php",
         "tests/scripts/ast-public-api.test.mts",
@@ -1977,16 +1885,13 @@
         "packages/ts/src/**",
         "packages/ts/package.json",
         "packages/ts/tsconfig.json",
-        "tests/scripts/public-api-declarations.mts",
         "tests/scripts/python-public-api.test.mts",
         "packages/python/src/**",
-        "tests/scripts/public-api-declarations.test.mts",
         "scripts/php-toolchain.mts",
         "config/toolchain.json",
         "tests/scripts/php-toolchain.test.mts",
         "scripts/python-toolchain.mts",
         "scripts/python-venv.mts",
-        "scripts/parity-config.mts",
         "scripts/toml.mts",
         "mise.toml"
       ]

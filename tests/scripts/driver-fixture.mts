@@ -9,10 +9,6 @@ import { parseSync } from 'oxc-parser';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-/** The data files that the driver modules read at run time: python-venv.mts reads the venv of the python
- * implementation from the parity declaration through parity-config.mts. */
-const DRIVER_DATA_FILES = ['config/parity.json'];
-
 /** The checkout-relative paths of tests/runner/drivers.mts and of every module that it imports, directly or through
  * another module; a module that does not parse fails. */
 export function driverModules(): string[] {
@@ -30,8 +26,8 @@ export function driverModules(): string[] {
   return [...reached];
 }
 
-/** The checkout-relative paths of the drivers, of the modules they import and of the data files they read. */
-const DRIVER_FILES = [...driverModules(), ...DRIVER_DATA_FILES];
+/** The checkout-relative paths of the drivers and of the modules they import. */
+const DRIVER_FILES = driverModules();
 
 /** Copies DRIVER_FILES of this checkout into `directory`, keeping each path, and links its node_modules there. */
 export function copyDriverFiles(directory: string) {

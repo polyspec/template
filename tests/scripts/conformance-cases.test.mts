@@ -8,15 +8,9 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { caseIds, RUNNERS } from '../../scripts/conformance-cases.mts';
-import { jsonDocument } from '../../scripts/json-document.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const run = (...args: string[]) => spawnSync(process.execPath, ['scripts/conformance-cases.mts', ...args], { cwd: ROOT, encoding: 'utf8' });
-const parityDocument = jsonDocument<{ implementations: { name: string; shares?: string }[] }>('parity declaration', {
-  type: 'object',
-  required: ['implementations'],
-  properties: { implementations: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' }, shares: { type: 'string', nullable: true } } } } },
-});
 
 test('changed paths name each case once', () => {
   assert.deepEqual(caseIds(['tests/cases/text/crlf-input/input.tpl', 'tests/cases/text/crlf-input/expected.html', 'tests/cases/data/null-assign']), {
@@ -29,11 +23,6 @@ test('a case runs in every mode and a removed case has nothing to run', () => {
   assert.equal(result.status, 0, result.stdout + result.stderr);
   assert.match(result.stdout, /text\/removed-case: the case directory does not exist; the case was removed and has nothing to run/);
   assert.deepEqual(result.stdout.match(/would run node .*/g), RUNNERS.map(runner => `would run node ${runner} --case text/crlf-input`));
-});
-
-test('every implementation of config/parity.json has its generated runner (S6)', () => {
-  const declared = parityDocument.read(path.join(ROOT, 'config/parity.json')).implementations.map(item => item.shares ?? item.name);
-  assert.deepEqual(RUNNERS.slice(1), [...new Set(declared)].map(name => `tests/runner/conformance-generated-${name}.mts`));
 });
 
 test('a path outside a case directory fails with its name', () => {

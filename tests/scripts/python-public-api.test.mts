@@ -4,7 +4,6 @@ import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { pythonEnvironment, pythonPackageCommand } from '../../scripts/python-toolchain.mts';
-import { declaredApiSymbols } from './public-api-declarations.mts';
 
 const probe = `
 import importlib
@@ -43,10 +42,6 @@ function missingReferences(references: string[]): string[] {
   assert.equal(result.status, 0, result.error?.message ?? result.stderr);
   return jsonDocument<string[]>('Missing Python SDK references', { type: 'array', items: { type: 'string' } }).parse(result.stdout, 'Python consumer');
 }
-
-test('every declared Python API reference is accessible to an installed SDK consumer', { timeout: 30_000 }, () => {
-  assert.deepEqual(missingReferences(declaredApiSymbols('python')), []);
-});
 
 test('the Python SDK consumer rejects nonexistent module and class members', { timeout: 30_000 }, () => {
   const missing = ['polyspec.template.nonexistent_sdk_module.member', 'polyspec.template.engine.Engine.nonexistent_sdk_member'];
