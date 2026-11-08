@@ -232,8 +232,7 @@
         "scripts/tools.mts"
       ],
       "tests": [
-        "tests/scripts/failure-messages.test.mts",
-        "tests/scripts/test-targets.test.mts"
+        "tests/scripts/failure-messages.test.mts"
       ],
       "targets": []
     },
@@ -245,7 +244,6 @@
         "tests/scripts/failure-accumulation.test.mts",
         "tests/scripts/atomic-publish.test.mts",
         "tests/scripts/no-silent-skips.test.mts",
-        "tests/scripts/test-targets.test.mts",
         "tests/scripts/cargo-target.test.mts",
         "tests/scripts/build-package.test.mts",
         "tests/scripts/conformance-cases.test.mts",
@@ -345,7 +343,6 @@
         "template-test-ext"
       ],
       "tests": [
-        "tests/scripts/test-targets.test.mts",
         "tests/scripts/toolchain-files.test.mts",
         "tests/scripts/drivers.test.mts"
       ]
