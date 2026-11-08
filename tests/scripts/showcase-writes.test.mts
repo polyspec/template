@@ -30,7 +30,7 @@ test('make bench installs the Python package before measuring its adapter', () =
 test('script tests prepare the generated adapter contracts and showcase programs before discovery', { timeout: 5000 }, () => {
   const run = spawnSync('make', ['--no-print-directory', '-n', 'template-test-scripts'], { cwd: ROOT, encoding: 'utf8', env: { ...process.env, MAKEFLAGS: 'w' } });
   assert.equal(run.status, 0, run.stderr);
-  const testAt = run.stdout.indexOf('node -- tests/scripts/');
+  const testAt = run.stdout.indexOf('node --timeout 30 -- --test-concurrency=1 tests/scripts/');
   assert.ok(testAt >= 0, 'the script-unit command is present');
   for (const generator of ['scripts/generate-showcase-contract.mts', 'examples/showcase/compile-generated.mts', 'scripts/generate-compiler-interface.mts']) {
     const at = run.stdout.indexOf(generator);

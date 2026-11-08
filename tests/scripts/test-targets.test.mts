@@ -35,11 +35,11 @@ function commands(target: string) {
 const RUNS_TESTS_DIRECTLY = /\bnpm (?:test|run test:extension)\b|\bvitest\b(?! --cwd)|\bnode --test\b/;
 
 const RUNNERS: [string, string][] = [
-  ['test-ts', `${NODE} @polyspec/kit/run-tests vitest --cwd packages/ts`],
-  ['template-test-language', `${NODE} @polyspec/kit/run-tests vitest --cwd packages/language`],
-  ['template-test-lsp', `${NODE} @polyspec/kit/run-tests vitest --cwd packages/lsp`],
-  ['template-test-codemirror', `${NODE} @polyspec/kit/run-tests vitest --cwd packages/codemirror`],
-  ['template-test-vscode', `${NODE} @polyspec/kit/run-tests node --cwd packages/vscode -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
+  ['test-ts', `${NODE} @polyspec/kit/run-tests vitest --timeout 30 --cwd packages/ts`],
+  ['template-test-language', `${NODE} @polyspec/kit/run-tests vitest --timeout 30 --cwd packages/language`],
+  ['template-test-lsp', `${NODE} @polyspec/kit/run-tests vitest --timeout 30 --cwd packages/lsp`],
+  ['template-test-codemirror', `${NODE} @polyspec/kit/run-tests vitest --timeout 30 --cwd packages/codemirror`],
+  ['template-test-vscode', `${NODE} @polyspec/kit/run-tests node --timeout 30 --cwd packages/vscode -- --test-concurrency=1 tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs`],
 ];
 for (const [target, runner] of RUNNERS) {
   test(`${target} runs its unit tests through the run-tests tool of @polyspec/kit`, () => {

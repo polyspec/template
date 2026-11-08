@@ -7,4 +7,4 @@ export const rustBuildArgs = (test: string): string[] => ['test', '--no-run', '-
 
 /** The run-tests arguments that run the tests of the built crate in `cwd`, each within `timeoutSeconds`. */
 export const rustRunArgs = (test: string, cwd: string, timeoutSeconds: number): string[] =>
-  ['cargo', '--timeout', String(timeoutSeconds), '--cwd', cwd, '--', '--locked', '--offline', '--test', test];
+  ['cargo', '--timeout', String(timeoutSeconds), '--cwd', cwd, '--', '--locked', '--offline', '--test', test, '--', '--test-threads=1'];

@@ -1,26 +1,21 @@
-// The pre-commit hook is a tracked hook of config/checklist.json (kit's hooks, K-generated-files): git runs it before
+// The pre-commit hook is a tracked hook of HOOK_DECLARATION of the Makefile (kit K1099): git runs it before
 // each commit, and it refuses a staged generated path through make staged-generated-hook, the check that AGENTS.md
 // "Generated files" and the rule of the links name as their enforcement.
-// The commit-msg hook, the other tracked hook of config/checklist.json (T27.1-64), runs make commit-msg-hook with the file
+// The commit-msg hook, the other tracked hook of HOOK_DECLARATION (T27.1-64, T27.1-68), runs make commit-msg-hook with the file
 // of the message, the message rules of make commit (T27.1-67).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
-import { jsonDocument } from '../../scripts/json-document.mts';
 
 const repository = resolve('.');
 const read = (file: string) => readFileSync(join(repository, file), 'utf8');
-const checklistDocument = jsonDocument<{ hooks: string[] }>('checklist config', {
-  type: 'object',
-  required: ['hooks'],
-  properties: { hooks: { type: 'array', items: { type: 'string' } } },
-});
 
-test('config/checklist.json lists the pre-commit and commit-msg hooks', () => {
-  const config = checklistDocument.parse(read('config/checklist.json'), 'config/checklist.json');
-  assert.deepEqual(config.hooks, ['pre-commit', 'commit-msg']);
+test('HOOK_DECLARATION of the Makefile declares the hooks pre-commit and commit-msg of .githooks', () => {
+  const declaration = /^HOOK_DECLARATION := (.*)$/m.exec(read('Makefile'))?.[1] ?? '';
+  assert.deepEqual([...declaration.matchAll(/--hook (\S+)/g)].map(match => match[1]), ['pre-commit', 'commit-msg']);
+  assert.match(declaration, /^--hooks-path \.githooks /);
 });
 
 test('.githooks/pre-commit is executable and runs make staged-generated-hook', () => {

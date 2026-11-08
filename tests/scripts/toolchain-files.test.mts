@@ -87,7 +87,8 @@ const shown = (value: unknown) => (value === undefined ? 'nothing' : typeof valu
 // The job ci-passed of ci.yml runs only make ci-passed, which reads the results of the other jobs: it installs nothing,
 // runs no check of the suite and writes no report.
 const CI_PASSED = 'ci-passed';
-const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}'";
+// FAIL_SKIPPED=1 keeps the failure of a skipped job, the default of kit 0.0.98 (kit K1111).
+const CI_PASSED_RUN = "make ci-passed RESULTS='${{ toJSON(needs) }}' FAIL_SKIPPED=1";
 // The bootstrap of every CI job is the composite action of template (kit K992, T27.1-64): it sets up the Node.js of
 // mise.toml, installs the locked kit package, then runs make install-tools TOOLS=npm and make install-packages; it runs at
 // the commit of the run, so it needs no pin. make ci-passed is a utility of @polyspec/kit that the node of mise.toml runs,
@@ -194,7 +195,7 @@ test('every recipe line runs the npm of var/tools/bin and the go of mise, with e
   // GNU Make 3.81 starts a line without shell syntax itself, with the PATH that make started with, also when SHELL names
   // another shell: the line `npm --version` printed the npm of the machine. The recipes start npm as $(NPM), the path of
   // its wrapper, go as $(GO), the path of its shim, and gofmt only in lines with shell syntax, which the shell runs with
-  // the exported PATH; make kit-check fails a recipe that starts a tool of the checkout by its bare name (kit K171).
+  // the exported PATH.
   // gmake is GNU Make 4 where it is installed beside make 3.81.
   const makes = ['make', ...(spawnSync('gmake', ['--version']).status === 0 ? ['gmake'] : [])];
   const npm = declaredNpm();
@@ -306,7 +307,8 @@ test('make install installs the tools of the checkout, the Rust toolchain and th
     at(subMake('--no-print-directory install-packages')),
     lines.indexOf(`${online} ${path.join(TOOLS, 'bin/npm')} ci`),
     at(subMake('--no-print-directory install-tools')),
-    lines.indexOf(`${online} ${node} ${kit}/install-tools.${extension}`),
+    // install-tools runs with the Composer home and cache of var/tools and --no-self-update, the values of kit 0.0.98 (kit K1095, K1097).
+    lines.indexOf(`COMPOSER_HOME=${path.join(TOOLS, 'composer/home')} COMPOSER_CACHE_DIR=${path.join(TOOLS, 'composer/cache')} ${online} ${node} ${kit}/install-tools.${extension} --no-self-update`),
     at(new RegExp(`^${online} \\S*cargo fetch --locked --manifest-path `)),
   ];
   assert.ok(bootstrap.every((index, position) => index > (bootstrap[position - 1] ?? -1)), `make install does not bootstrap kit and then fetch the crates, in this order:\n${lines.join('\n')}`);
@@ -600,5 +602,5 @@ test('the unit tests of the Python package run in packages/python/.venv, which p
   assert.match(makefile, /^\t\$\(MAKE\) python-venv DIR=\$\(PYTHON_VENV\)$/m);
   // test-python of kit runs the recipe template-test-python of the repository (T26.2).
   assert.match(makefile, /^test-python: template-test-python\b/m);
-  assert.match(makefile, /^template-test-python: python-package\n\t\$\(NODE\) \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
+  assert.match(makefile, /^template-test-python: python-package\n\tPYTHONUNBUFFERED=1 NO_COLOR=1 PYTHON_COLORS=0 \$\(NODE\) \$\(KIT\)\/run-tests\.\$\(KIT_EXT\) python --venv \$\(PYTHON_VENV\) -- /m);
 });

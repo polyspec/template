@@ -28,7 +28,7 @@ function directory(t: TestContext, prefix: string) {
 test('the generated runners name each case whose generated test failed', async (t) => {
   const tests = directory(t, 'template-case-tests-');
   writeFileSync(path.join(tests, 'cases.test.mjs'), "import test from 'node:test';\ntest('case_echo_path', () => { throw new Error('generated output differs'); });\ntest('case_text_plain', () => {});\n");
-  const run = await runCaseTests(['node', '--', path.join(tests, 'cases.test.mjs')], { cwd: ROOT }, new Map([['case_echo_path', 'echo/path'], ['case_text_plain', 'text/plain']]));
+  const run = await runCaseTests(['node', '--timeout', '30', '--', '--test-concurrency=1', path.join(tests, 'cases.test.mjs')], { cwd: ROOT }, new Map([['case_echo_path', 'echo/path'], ['case_text_plain', 'text/plain']]));
   assert.notEqual(run.status, 0);
   assert.deepEqual(run.failed, ['echo/path']);
   assert.deepEqual(caseTestFailures('Go', run), ['echo/path: the generated Go test of the case failed']);

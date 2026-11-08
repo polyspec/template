@@ -6,6 +6,9 @@
 # first on PATH (below, kit K127, K858), so every recipe uses the tools of the checkout and never the npm, Go or Python of the
 # machine (T19.2).
 # GOTOOLCHAIN=local keeps go from downloading another toolchain at run time.
+# kit 0.0.98's run-tests dropped NODE_TEST_CONTEXT, so a node --test that a recipe starts from inside a node test runs as
+# its own run, not as a child of that test (kit K1094); no recipe passes it on.
+unexport NODE_TEST_CONTEXT
 export PATH := $(HOME)/.cargo/bin:$(PATH)
 export GOTOOLCHAIN := local
 # go builds into the build cache of the checkout, never into a cache that other checkouts and runs share (T19.14).
@@ -81,13 +84,16 @@ endif
 
 # ---- Install: the bootstrap order of kit (kit K71-2, K246-2) ------------------------------------------------------------
 .PHONY: install-tools toolchain-lock install-packages install-link install-bootstrap install-symbols
+# The home and the cache of the Composer that install-tools and install-symbols run, the folders of var/tools that kit 0.0.98
+# set (kit K1095).
+COMPOSER_TOOL_ENV = COMPOSER_HOME=$(CURDIR)/var/tools/composer/home COMPOSER_CACHE_DIR=$(CURDIR)/var/tools/composer/cache
 # TOOLS=npm is the first step of a checkout, before npm ci installs the packages that the other utilities import, so it runs
 # the bootstrap of kit, which imports only Node.js built-ins, with the node of the machine.
 install-tools: ## Install every tool of mise.toml at the digests of mise.lock, or the tool names of TOOLS; TOOLS=npm installs mise and the node and npm of mise.toml; ONLINE
 ifeq ($(TOOLS),npm)
 	$(ONLINE) $(BOOTSTRAP_NODE) $(KIT)/bootstrap/bootstrap.$(KIT_EXT)
 else
-	$(ONLINE) $(NODE) $(KIT)/install-tools.$(KIT_EXT) $(TOOLS)
+	$(COMPOSER_TOOL_ENV) $(ONLINE) $(NODE) $(KIT)/install-tools.$(KIT_EXT) --no-self-update $(TOOLS)
 endif
 
 # mise lock with the mise of config/toolchain.json for each platform that has the archives of the tools (kit K836). mise locks a
@@ -109,7 +115,7 @@ install-link: ## Link the packages to the checkouts of .links after every instal
 # The symbol extractors of the parity checks, symbolExtractors of config/toolchain.json (kit K861).
 EXTRACTORS ?= go php
 install-symbols: ## Install the symbol extractors of EXTRACTORS (go php, those of config/toolchain.json); their tools must be installed first; ONLINE
-	$(ONLINE) $(NODE) $(KIT)/install-symbols.$(KIT_EXT) $(EXTRACTORS)
+	$(COMPOSER_TOOL_ENV) $(ONLINE) $(NODE) $(KIT)/install-symbols.$(KIT_EXT) $(EXTRACTORS)
 
 install-bootstrap: ## Install the mise, node and npm of mise.toml, the packages of package-lock.json, the tools of mise.toml and the symbol extractors, in that order, into the checkout's own var/tools; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS=npm
@@ -118,25 +124,26 @@ install-bootstrap: ## Install the mise, node and npm of mise.toml, the packages 
 	$(MAKE) --no-print-directory install-symbols
 
 # ---- Checks of the repository that utilities of kit run ---------------------------------------------------------------
-.PHONY: kit-check layout-check rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check owner-check owner-validate
-kit-check: ## Check the configuration files of kit's utilities (config/*.json) against their schemas; offline
-	$(NODE) $(KIT)/kit-check.$(KIT_EXT)
-
+.PHONY: layout-check rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check owner-check owner-validate
 # Each check of layout-check is a prerequisite of one command, so a failed one keeps the others running (T19.8).
 .PHONY: layout-tree-check layout-installs-check layout-tracked-check
 layout-check: layout-tree-check layout-installs-check layout-tracked-check ## Check the folder layout against config/layout.yml with the alint of mise.toml, that Git ignores each install directory and that no tracked file is generated; offline
 layout-tree-check:
 	$(ALINT) check --config config/layout.yml --color never --compact .
 layout-installs-check:
-	$(NODE) $(KIT)/generated-files.$(KIT_EXT) installs
+	$(NODE) $(KIT)/generated-files.$(KIT_EXT) installs var package.json=node_modules pyproject.toml=.venv composer.json=vendor
 layout-tracked-check:
-	$(NODE) $(KIT)/generated-files.$(KIT_EXT) tracked
+	$(NODE) $(KIT)/generated-files.$(KIT_EXT) tracked --binary ELF --binary Mach-O --binary PE
 
+# The tool sources of rebuild-check, the values that kit 0.0.98 fixed (kit K1080): the scripts and generators, each glob quoted.
+REBUILD_SOURCES := --source 'scripts/**/*.{mts,mjs,cjs,js,ts,py,php,sh,mk}' --source 'packages/*/{scripts,tools,bin}/**/*.{mts,mjs,cjs,js,ts,py,php,sh,mk}' --source 'packages/*/*/{scripts,tools,bin}/**/*.{mts,mjs,cjs,js,ts,py,php,sh,mk}' --source '**/*_generate.go' --source '**/*.generate.{mts,mjs,cjs,js,ts,py,php,sh,mk}' --source 'benchmarks/**/*.{mts,mjs,cjs,js,ts,py,php,sh,mk}' --source 'examples/**/*.{mts,mjs,cjs,js,ts,py,php,sh,mk}' --source 'tests/fixtures/*/generate.*'
+# The files among the sources that are no tool source (kit K1080): the .d.ts declarations and the tests.
+REBUILD_EXCLUDES := --exclude '**/*.d.ts' --exclude '*/**/{test,tests}/**' --exclude 'test/**' --exclude 'tests/**/{*_generate.go,*.generate.*}' --exclude '**/*.{test,spec}.{js,jsx,ts,tsx,cjs,cts,mjs,mts}' --exclude '**/{*_test.go,test_*.py,*_test.py,*Test.php}'
 rebuild-check: ## Check that every tool that config/rebuild.json selects has its class (S1); offline
-	$(NODE) $(KIT)/rebuild-check.$(KIT_EXT)
+	$(NODE) $(KIT)/rebuild-check.$(KIT_EXT) $(REBUILD_SOURCES) $(REBUILD_EXCLUDES)
 
 language-check: ## Fail on Hangul in a comment, an identifier, a message or a test name of the code; offline
-	$(NODE) $(KIT)/language-check.$(KIT_EXT)
+	$(NODE) $(KIT)/language-check.$(KIT_EXT) --forbid '\p{Script=Hangul}'
 
 test-markers-check: ## Fail on a test that a marker skips or narrows; offline
 	$(NODE) $(KIT)/test-markers.$(KIT_EXT)
@@ -148,17 +155,17 @@ suppression-check: ## Fail on a suppression of a lint finding that states no rea
 	$(NODE) $(KIT)/suppression-check.$(KIT_EXT)
 
 divergence-check: ## Fail on an implementation that diverges by a branch on the runtime, a narrowed run or an unsupported feature without a reason; offline
-	$(NODE) $(KIT)/divergence-check.$(KIT_EXT)
+	$(NODE) $(KIT)/divergence-check.$(KIT_EXT) --reason-kind generated --reason-kind fixture --reason-kind test --reason-kind harness --reason-kind ecosystem --reason-kind external --feature-state partial --feature-state unsupported --parity config/parity.json
 
 owner-check: ## Run the checks that own the changed paths (config/owner-checks.json); PATHS="a b" or BASE=<revision> selects the paths
-	$(NODE) $(KIT)/owner-check.$(KIT_EXT) $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base $(BASE))
+	$(NODE) $(KIT)/owner-check.$(KIT_EXT) --every-path $(if $(PATHS),--paths "$(PATHS)") $(if $(BASE),--base $(BASE))
 
 owner-validate: ## Check that config/owner-checks.json owns every tracked path and names only existing checks; offline
-	$(NODE) $(KIT)/owner-check.$(KIT_EXT) --validate
+	$(NODE) $(KIT)/owner-check.$(KIT_EXT) --every-path --validate
 
 # The document checks of kit after the document checks of template, which are the prerequisites of docs-check below.
 docs-check:
-	$(NODE) $(KIT)/check-documents.$(KIT_EXT)
+	$(NODE) $(KIT)/check-documents.$(KIT_EXT) --checklist-place --private-path /Users/ --private-path /home/ --kit-rows
 
 # The rules of PRINCIPLES.md and AGENTS.md, after the stage check of the case.json files of template.
 rules-check:
@@ -173,20 +180,20 @@ lint-ts: ## Lint the TypeScript: oxlint and knip, the type check of each tsconfi
 lint-go: ## Lint the Go: golangci-lint and deadcode -test in each Go module; offline
 	$(NODE) $(KIT)/lint-go.$(KIT_EXT)
 lint-rust: ## Lint the Rust: cargo clippy in each Cargo workspace
-	$(NODE) $(KIT)/lint-rust.$(KIT_EXT)
+	$(NODE) $(KIT)/lint-rust.$(KIT_EXT) --locked
 lint-php: ## Lint the PHP: phpcs, and PHPStan on each Composer package; offline
-	$(NODE) $(KIT)/lint-php.$(KIT_EXT)
+	$(NODE) $(KIT)/lint-php.$(KIT_EXT) --memory-limit=-1
 lint-python: ## Lint the Python: ruff check, ruff format --check and vulture on each package; offline
 	$(NODE) $(KIT)/lint-python.$(KIT_EXT)
 
 # The C PHP extension of packages/php-ext (S10): the build with phpize, the check of its names, its stub and its arginfo
 # header, and the declaration test before its unit tests.
 lint-php-ext: ## Check the names, the stub and the stub hash of the arginfo header of packages/php-ext (S10); offline
-	$(NODE) $(KIT)/php-extension.$(KIT_EXT) check
+	$(NODE) $(KIT)/php-extension.$(KIT_EXT) check --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php
 build-php-ext: ## Build packages/php-ext with phpize into $(EXT_LIBRARY) after the arginfo check; ONLINE (gen_stub.php may fetch its PHP-Parser once)
-	$(ONLINE) $(NODE) $(KIT)/php-extension.$(KIT_EXT) build
+	$(ONLINE) $(NODE) $(KIT)/php-extension.$(KIT_EXT) build --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php
 test-php-ext: build-php-ext ## Compare the declarations of the built extension with the PHP library, then run its unit tests; offline
-	$(NODE) $(KIT)/php-extension.$(KIT_EXT) test
+	$(NODE) $(KIT)/php-extension.$(KIT_EXT) test --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php -- --roots packages/php packages/php-ext
 
 # ---- Parity (config/parity.json) ----------------------------------------------------------------------------------------
 # The full parity check is the API phase and the binding phase of each implementation of config/parity.json, which the job
@@ -208,17 +215,23 @@ parity-bindings-ts-check parity-bindings-go-check parity-bindings-rust-check par
 	$(NODE) $(KIT)/parity.$(KIT_EXT) --phase bindings --implementation $(@:parity-bindings-%-check=%)
 
 # ---- Git hooks and merges -------------------------------------------------------------------------------------------------
-# .githooks/pre-commit and .githooks/commit-msg are template's own hooks (config/checklist.json); make hooks points
+# .githooks/pre-commit and .githooks/commit-msg are template's own hooks (HOOK_DECLARATION); make hooks points
 # core.hooksPath at them and declares the merge drivers of the changelogs and checklists, which run make twin-merge.
 .PHONY: hooks hooks-check staged-generated-hook commit-msg-hook twin-merge
-hooks: ## Point core.hooksPath at .githooks, make the hooks of config/checklist.json executable and declare the merge drivers, then check them
-	$(NODE) $(KIT)/git-hooks.$(KIT_EXT) install
-hooks-check: ## Fail while core.hooksPath is not .githooks, a hook of config/checklist.json is missing or not executable, or a merge driver is not declared
-	$(NODE) $(KIT)/git-hooks.$(KIT_EXT) check
+# The declaration of make hooks (kit K1099): the hooks pre-commit and commit-msg of .githooks,
+# the merges of the changelogs and checklists (kit K354) and their drivers, which run twin-merge of this checkout.
+TWIN_MERGE_DRIVER := make --no-print-directory twin-merge MERGE="%O %A %B %P"
+HOOK_DECLARATION := --hooks-path .githooks --hook pre-commit --hook commit-msg --merge 'CHANGELOG.md=kit-changelog' --merge 'CHANGELOG.ko.md=kit-twin' \
+	--merge 'docs/plans/*/checklist.md=kit-checklist' --merge 'docs/plans/*/checklist.ko.md=kit-twin' \
+	--driver 'kit-twin=$(TWIN_MERGE_DRIVER)' --driver 'kit-changelog=$(TWIN_MERGE_DRIVER)' --driver 'kit-checklist=$(TWIN_MERGE_DRIVER)'
+hooks: ## Point core.hooksPath at .githooks, make the hooks of HOOK_DECLARATION executable and declare the merge drivers, then check them
+	$(NODE) $(KIT)/git-hooks.$(KIT_EXT) install $(HOOK_DECLARATION)
+hooks-check: ## Fail while core.hooksPath is not .githooks, a hook of HOOK_DECLARATION is missing or not executable, or a merge driver is not declared
+	$(NODE) $(KIT)/git-hooks.$(KIT_EXT) check $(HOOK_DECLARATION)
 staged-generated-hook: ## The check of .githooks/pre-commit: fail while a staged path has a generated segment that config/generated.json does not declare
-	$(NODE) $(KIT)/generated-files.$(KIT_EXT) staged
+	$(NODE) $(KIT)/generated-files.$(KIT_EXT) staged --binary ELF --binary Mach-O --binary PE
 commit-msg-hook: ## The check of .githooks/commit-msg: the message rules of make commit on the message MESSAGE
-	$(NODE) $(KIT)/check-commits.$(KIT_EXT) --message $(MESSAGE)
+	$(NODE) $(KIT)/check-commits.$(KIT_EXT) --message $(MESSAGE) --rules commit-ai-footer,commit-ai-identity
 twin-merge: ## The merge drivers that make hooks declares; git runs it with MERGE="<base> <ours> <theirs> <path>"; offline
 	@$(NODE) $(KIT)/twin-merge.$(KIT_EXT) $(MERGE)
 
@@ -227,13 +240,13 @@ twin-merge: ## The merge drivers that make hooks declares; git runs it with MERG
 .PHONY: plan-new plan-split item-new item-edit item-state item-test commit documents-stamp text-absent
 raw_text = $(foreach v,$(1),$(if $(filter undefined,$(origin $(v))),,$(v)='$(subst ','\'',$(value $(v)))'))
 plan-new: ## Write the plan NAME=<slug> into docs/plans/<slug>/ with TITLE and TITLE_KO; offline
-	$(NODE) $(KIT)/plan.$(KIT_EXT) plan-new
+	NAME_PATTERN='^[a-z][a-z0-9-]*$$' $(NODE) $(KIT)/plan.$(KIT_EXT) plan-new
 plan-split: ## Move the items IDS="<id> <id>" from the checklist of the plan FROM to the plan TO; offline
 	$(NODE) $(KIT)/plan.$(KIT_EXT) plan-split
 item-new: ## Add the item ID to the checklist of PLAN and its Korean twin with TASK, TASK_KO, DELIVERABLES and VERIFICATION; offline
 	$(call raw_text,TASK TASK_KO DELIVERABLES VERIFICATION) $(NODE) $(KIT)/plan.$(KIT_EXT) item-new
 item-edit: ## Replace the cells of the item ID with VERIFICATION, DELIVERABLES, TASK and TASK_KO, or its CAUSE, RETRY, CAUSE_KO and RETRY_KO; offline
-	$(call raw_text,TASK TASK_KO DELIVERABLES VERIFICATION CAUSE RETRY CAUSE_KO RETRY_KO) $(NODE) $(KIT)/plan.$(KIT_EXT) item-edit
+	$(call raw_text,TASK TASK_KO DELIVERABLES VERIFICATION CAUSE RETRY CAUSE_KO RETRY_KO) DONE_STAYS=1 $(NODE) $(KIT)/plan.$(KIT_EXT) item-edit
 item-state: ## Move the item ID to STATE in both languages; offline
 	$(NODE) $(KIT)/plan.$(KIT_EXT) item-state
 item-test: ## Run the commands of the Verification cell of the item ID in order; offline
@@ -257,16 +270,22 @@ unlink: ## Remove the links and the go.work files that link wrote; make install 
 	$(NODE) $(KIT)/link.$(KIT_EXT) unlink$(if $(PROJECT), --project $(PROJECT))$(if $(RUNTIME), --runtime $(RUNTIME))
 link-check: ## List each declared folder of .links that is not a link to its provider; offline
 	$(NODE) $(KIT)/link-check.$(KIT_EXT)$(if $(PROJECT), --project $(PROJECT))
+# The worktree of a row (kit K1107), as kit 0.0.98 made it: ../<main checkout>-<NAME>-<ID> on <TYPE or fix>/<NAME>-<ID> from main;
+# a worktree without node_modules first gets npm ci of the npm of var/tools, then make install and make link-check run in it. The
+# worktree runs its own tools in a make of its own (kit K858): the recipe drops the flags of this make and this var/tools from PATH.
+WORKTREE_MAIN = $(patsubst %/.git,%,$(shell git rev-parse --path-format=absolute --git-common-dir))
+WORKTREE_DECLARATION = --folder $(WORKTREE_MAIN)-$(NAME)-$(ID) --branch $(or $(TYPE),fix)/$(NAME)-$(ID) --base main --prepare 'test -d node_modules || PATH="$(KIT_TOOLS)/bin:$$PATH" $(NPM) ci --ignore-scripts' --make install --make link-check
+WORKTREE_ENVIRONMENT = env -u MAKEFLAGS -u MFLAGS -u MAKELEVEL PATH="$$(printf '%s' "$$PATH" | awk -v RS=: -v ORS=: -v tools='$(KIT_TOOLS)' 'index($$0, tools) != 1' | sed 's/:$$//')"
 worktree-setup: ## Create or reuse the worktree of the row NAME and ID from main, run make install in it, then make link-check; ONLINE
-	$(ONLINE) $(NODE) $(KIT)/worktree-setup.$(KIT_EXT) $(NAME) $(ID) $(or $(TYPE),fix)
+	$(ONLINE) $(WORKTREE_ENVIRONMENT) $(NODE) $(KIT)/worktree-setup.$(KIT_EXT) $(WORKTREE_DECLARATION)
 land: ## Land the branch BRANCH on main fast-forward from its worktree, then remove the worktree and the branch; offline
-	$(NODE) $(KIT)/land.$(KIT_EXT) $(BRANCH)
+	$(NODE) $(KIT)/land.$(KIT_EXT) $(BRANCH) main
 
 # ---- CI (.github/workflows/ci.yml) --------------------------------------------------------------------------------------------
 .PHONY: ci-targets ci-passed
 CI_REPORT ?= var/report/ci-targets
 ci-targets: ## Run TARGETS past failures and write CI_REPORT: the log of each target, record.json and summary.md
-	$(NODE) $(KIT)/ci-targets.$(KIT_EXT) $(CI_REPORT) $(TARGETS)
+	$(NODE) $(KIT)/ci-targets.$(KIT_EXT) -k $(CI_REPORT) $(TARGETS)
 ci-passed: ## Fail unless every job of RESULTS, the JSON of toJSON(needs), has the result success
 	$(NODE) $(KIT)/ci-passed.$(KIT_EXT)
 
@@ -286,19 +305,19 @@ release-tools-path: ## Append var/tools/bin and the shims of mise to GITHUB_PATH
 	@for name in $(MISE_ENVIRONMENT); do echo "$$name=$$(printenv $$name)"; done >> "$$GITHUB_ENV"
 release-tag: ## Tag the commit of the successful CI run RUN of ci.yml on main with vX.Y.Z and the tags of the Go modules; AUTO releases only the version commit; reads the run with gh
 	@test -n "$$RUN" || { echo "release-tag: RUN is required, for example make release-tag RUN=123"; exit 1; }
-	$(NODE) $(KIT)/release-run.$(KIT_EXT) tag "$$RUN"$(if $(AUTO), --auto)
+	RELEASE_MAIN=origin/main $(NODE) $(KIT)/release-run.$(KIT_EXT) tag "$$RUN"$(if $(AUTO), --auto)
 release-assets: ## Build the archive of every package of TAG and packages.json of its Composer packages into var/release/assets; ONLINE
 	@test -n "$$TAG" || { echo "release-assets: TAG is required, for example make release-assets TAG=v0.0.1"; exit 1; }
-	$(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) assets "$$TAG"
+	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) assets "$$TAG"
 release-candidate-assets: ## Build the archive of every package from the committed HEAD for VERSION into var/release/assets; ONLINE
 	@test -n "$$VERSION" || { echo "release-candidate-assets: VERSION is required, for example make release-candidate-assets VERSION=0.0.1"; exit 1; }
-	$(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) candidate-assets "$$VERSION"
+	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) candidate-assets "$$VERSION"
 release-publish: ## Create the GitHub Release of TAG as a draft with the notes and the files of release-assets
 	@test -n "$$TAG" || { echo "release-publish: TAG is required, for example make release-publish TAG=v0.0.1"; exit 1; }
-	$(NODE) $(KIT)/release.$(KIT_EXT) publish "$$TAG"
+	RELEASE_ASSETS=var/release/assets RELEASE_RECORDS=var/release $(NODE) $(KIT)/release.$(KIT_EXT) publish "$$TAG"
 release-undraft: ## Make the draft release of TAG public
 	@test -n "$$TAG" || { echo "release-undraft: TAG is required, for example make release-undraft TAG=v0.0.1"; exit 1; }
-	$(NODE) $(KIT)/release.$(KIT_EXT) undraft "$$TAG"
+	RELEASE_RECORDS=var/release $(NODE) $(KIT)/release.$(KIT_EXT) undraft "$$TAG"
 release-coverage: ## Require every package file of the checkout to be classified in config/release.json; offline
 	$(NODE) $(KIT)/release.$(KIT_EXT) coverage
 # The release builds the released versions (kit K343), so its Go runs without the go.work files that link writes; the archive
@@ -356,7 +375,7 @@ PLAYWRIGHT := $(CURDIR)/node_modules/.bin/playwright
 
 help: ## List targets
 	@echo "Targets:"
-	@echo "  install-tools|install-packages|kit-check|layout-check|owner-check|owner-validate|hooks|hooks-check|item-*|commit|land|link|ci-targets|release-*   Targets that run the utilities of @polyspec/kit"
+	@echo "  install-tools|install-packages|layout-check|owner-check|owner-validate|hooks|hooks-check|item-*|commit|land|link|ci-targets|release-*   Targets that run the utilities of @polyspec/kit"
 	@echo "  conformance-cases      Conformance in all modes for the cases of CASES only"
 	@echo "  lint                   The lint targets (lint-ts, lint-go, lint-rust, lint-php, lint-python, lint-php-ext), gofmt, cargo fmt --check, Rust showcase warnings and pint --test"
 	@echo "  lint-python            ruff check and ruff format --check of the Python package (the lint-python tool of @polyspec/kit)"
@@ -405,7 +424,7 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as the checks of the job gates, lint-ts
 # and conformance-ts. The list stays on one line: the owner-check utility of @polyspec/kit reads it.
-CHECK_TARGETS := kit-check layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext parity-check hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext parity-check hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
 
 .PHONY: lint build test
 lint: lint-ts lint-go lint-rust lint-php lint-python lint-php-ext template-lint-go-format template-lint-go-modules template-lint-rust-format template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets and the format checks
@@ -507,7 +526,7 @@ packages/ts/src/ast-validator.mjs: contracts/schema/ast.schema.json scripts/gene
 # build-go builds every module of go.work, the showcase adapter among them, which imports the generated programs that
 # typed-generator writes (T27.1-40).
 build-go: template-build-go typed-generator ## Build the Go CLI and every module of go.work
-	$(NODE) $(KIT)/runtime-targets.$(KIT_EXT) build go
+	$(NODE) $(KIT)/runtime-targets.$(KIT_EXT) build --roots packages/go examples/showcase/adapters/go -- go build ./...
 
 template-build-go:
 	cd $(GO_DIR) && $(GO) build -o template ./cmd/template && cd $(CURDIR) && $(NODE) scripts/publish-build.mts $(GO_DIR)/template var/build/template-go
@@ -526,7 +545,7 @@ test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-nod
 
 .PHONY: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests
 template-test-ts-unit: build-ts
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(TS_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(TS_DIR)
 template-test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
 template-test-ts-types-node: build-ts
@@ -545,7 +564,7 @@ template-test-go-vet:
 template-test-go-backend-vet:
 	cd $(GO_BACKEND_DIR) && $(GO) vet *.go
 template-test-go-unit: typed-generator
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) go -- -race ./$(GO_DIR)/... ./examples/showcase/adapters/go/...
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) go -- -count=1 -timeout=0 -race ./$(GO_DIR)/... ./examples/showcase/adapters/go/...
 
 test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and tests
 
@@ -553,7 +572,7 @@ test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and 
 template-test-rust-clippy:
 	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
 template-test-rust-unit:
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support -- --test-threads=1
 
 test-php: template-test-php ## PHP unit tests
 
@@ -561,7 +580,7 @@ template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
 template-test-scripts: build-rust typed-generator compiler-interface-generate build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --timeout 30 -- --test-concurrency=1 tests/scripts/
 
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
@@ -593,7 +612,7 @@ template-test-language: template-test-language-unit template-test-language-types
 
 .PHONY: template-test-language-unit template-test-language-types
 template-test-language-unit: template-build-language
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LANGUAGE_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(LANGUAGE_DIR)
 template-test-language-types: template-build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
@@ -604,7 +623,7 @@ template-test-lsp: template-test-lsp-unit template-test-lsp-types ## Language se
 
 .PHONY: template-test-lsp-unit template-test-lsp-types
 template-test-lsp-unit: template-build-lsp
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LSP_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(LSP_DIR)
 template-test-lsp-types: template-build-lsp
 	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
@@ -630,7 +649,7 @@ template-test-codemirror: template-test-codemirror-unit template-test-codemirror
 
 .PHONY: template-test-codemirror-unit template-test-codemirror-browser template-test-codemirror-types
 template-test-codemirror-unit: template-build-codemirror
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(CODEMIRROR_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(CODEMIRROR_DIR)
 template-test-codemirror-browser: template-build-codemirror
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
 template-test-codemirror-types: template-build-codemirror
@@ -649,7 +668,7 @@ template-test-vscode: template-test-vscode-unit template-test-vscode-types ## Ex
 
 .PHONY: template-test-vscode-unit template-test-vscode-types
 template-test-vscode-unit: template-build-vscode
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --cwd $(VSCODE_DIR) -- tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --timeout 30 --cwd $(VSCODE_DIR) -- --test-concurrency=1 tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
 template-test-vscode-types: template-build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
@@ -733,7 +752,7 @@ $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/py
 test-python: template-test-python ## Unit tests of the Python package
 
 template-test-python: python-package
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
+	PYTHONUNBUFFERED=1 NO_COLOR=1 PYTHON_COLORS=0 $(NODE) $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
 
 conformance-generated-python: build-ts python-package ## Python generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-python.mts
@@ -804,7 +823,7 @@ docs-check: compiler-interface-generate schema-check doc-coverage benchmark-docs
 
 .PHONY: docs-markup-check
 docs-markup-check:
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- tests/scripts/docs-markup.test.mts
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --timeout 30 -- --test-concurrency=1 tests/scripts/docs-markup.test.mts
 
 .PHONY: benchmark-docs-check
 benchmark-docs-check:

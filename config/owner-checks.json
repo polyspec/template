@@ -823,9 +823,7 @@
         "config/*.json",
         "config/*.schema.json"
       ],
-      "targets": [
-        "kit-check"
-      ]
+      "targets": []
     },
     {
       "paths": [

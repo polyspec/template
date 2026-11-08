@@ -53,7 +53,7 @@ jobs:
           tools: none
       - run: make install
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="kit-check layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check"
+      - run: make ci-targets TARGETS="layout-check docs-check rules-check owner-validate rebuild-check language-check test-markers-check duplication-check suppression-check divergence-check parity-declarations-check"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
@@ -458,4 +458,4 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
       - name: make ci-passed
-        run: make ci-passed RESULTS='${{ toJSON(needs) }}'
+        run: make ci-passed RESULTS='${{ toJSON(needs) }}' FAIL_SKIPPED=1

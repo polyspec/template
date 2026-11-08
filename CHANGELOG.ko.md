@@ -1,10 +1,11 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6de327adbf17a253226a4f8594f5bfef4451cfe89b00e06b66dedcabd5c6da6d -->
+<!-- source-sha256: d03389d0e1e56ed5228068cdea24fd4ff9703a1adbf59215fa34748d7662d898 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+- 검사와 도구가 kit 0.0.98의 동작 그대로 kit 0.0.99에서 실행된다. 각 recipe는 kit 0.0.98이 고정했던 값을 넘기고, config/checklist.json, documents.json, duplication.json, generated.json, release.json은 kit이 기본으로 읽던 것을 선언한다. kit 0.0.99가 지운 make kit-check는 없어졌다(T27.1-68).
 
 ## 0.0.21
 - Rust 문서가 다시 build된다. packages/rust/src/format/mod.rs의 문서 link는 macro와 이름이 같은 함수 format()을 가리키므로 workspace lint의 warnings = "deny"가 rustdoc을 실패시키지 않는다. generated program lint는 ruff.toml, phpcs.xml.dist, phpstan.dist.neon, clippy.toml을 root에서 읽고, oxlint는 no-unused-vars만 켠 자기 설정으로 생성된 TypeScript를 lint한다(T27.1-66).

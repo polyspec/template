@@ -1,7 +1,18 @@
 {
   "schema": 1,
   "paths": [
-    "var/**"
+    "var/**",
+    "**/node_modules/**",
+    "**/vendor/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/__pycache__/**",
+    "**/target/**",
+    "**/dist/**",
+    "**/*.egg-info/**"
   ],
-  "exceptions": []
+  "exceptions": [],
+  "headers": [
+    "Code generated .* DO NOT EDIT"
+  ]
 }

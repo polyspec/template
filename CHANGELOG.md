@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The checks and tools run on kit 0.0.99 with the behaviour of kit 0.0.98: each recipe passes the values that kit 0.0.98 fixed, and config/checklist.json, documents.json, duplication.json, generated.json and release.json declare what kit read by default; make kit-check, which kit 0.0.99 deletes, is gone (T27.1-68).
 
 ## 0.0.21
 - The Rust docs build again: the doc links of packages/rust/src/format/mod.rs name the function format(), which shares its name with the macro, so the warnings = "deny" of the workspace lints no longer fail rustdoc; the generated-program lint reads ruff.toml, phpcs.xml.dist, phpstan.dist.neon and clippy.toml from the root, and oxlint lints the generated TypeScript with a configuration of its own that enables only no-unused-vars (T27.1-66).

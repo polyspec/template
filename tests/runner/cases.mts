@@ -350,8 +350,11 @@ export interface CaseTestRun {
 }
 
 export function runCaseTests(args: readonly string[], { cwd, env }: { cwd: string; env?: NodeJS.ProcessEnv }, names: ReadonlyMap<string, string>): Promise<CaseTestRun> {
+  // A run started from inside a node test is its own run, not a child of that test: the caller drops NODE_TEST_CONTEXT, which
+  // run-tests of kit 0.0.98 dropped itself (kit K1094).
+  const { NODE_TEST_CONTEXT: _context, ...own } = env ?? process.env;
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), ...args], { cwd, env, stdio: ['ignore', 'pipe', 'inherit'] });
+    const child = spawn(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), ...args], { cwd, env: own, stdio: ['ignore', 'pipe', 'inherit'] });
     const failed = new Set<string>();
     let last = '';
     readline.createInterface({ input: child.stdout }).on('line', (line) => {

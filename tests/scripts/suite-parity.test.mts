@@ -269,7 +269,7 @@ test('a CI job that selects its tools installs no lint tool, which only the lint
 test('the build of every Go module generates the showcase imports before it', () => {
   const commands = dryRun('build-go');
   const generated = commands.findIndex(command => command.includes('examples/showcase/compile-generated.mts'));
-  const native = commands.findIndex(command => command.includes('/runtime-targets.') && command.endsWith('build go'));
+  const native = commands.findIndex(command => command.includes('/runtime-targets.') && command.endsWith('build --roots packages/go examples/showcase/adapters/go -- go build ./...'));
   assert.ok(generated >= 0, 'the Go build must generate showcase imports');
   assert.ok(native > generated, 'the build of the modules of go.work runs after generation');
 });
