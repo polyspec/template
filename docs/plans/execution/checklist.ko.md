@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: a0e9537e5fd828167dd2ed9b559e293d83b364e1ef2afc2113168202610b9b2c -->
+<!-- source-sha256: 9514d39b6ffdffe48088ad5ab4246d3c876055ba6747e7617c52d9120ca4309c -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -510,3 +510,4 @@
 | T27.1-71 | kit 0.0.100과 함께 parity를 지운다: config/parity.json, target parity-check, parity-declarations-check, divergence-check, test-markers-check, CI의 parity job, parity 선언을 읽는 시험, go symbol extractor. 각 구현은 자기 시험을 실행한다. kit은 0.0.100이다 | config/parity.json, Makefile, .github/workflows/ci.yml, config/owner-checks.json, tests/scripts, PRINCIPLES, docs, package.json | `make owner-validate`, `make docs-check` and `make lint-ts` exit 0 | [o] |
 | T27.1-72 | kit 거부 두 가지만 멈추는 kit 0.0.101을 채택한다: 0.0.101 release asset을 고정하며, recipe 줄은 바뀌지 않는다 | package.json, package-lock.json | `make docs-check` and `make lint-ts` exit 0 | [o] |
 | T27.1-73 | P0: ## Unreleased의 항목(T27.1-68~T27.1-72)으로 0.0.22를 release한다. 인수 조건: config/release.json의 모든 manifest, PHP 확장의 version 상수, root composer.json과 packages/cli/php/composer.json, docs/features.md와 한국어 쌍, lock package-lock.json, composer.lock, packages/rust/Cargo.lock, examples/showcase/adapters/rust/Cargo.lock이 0.0.22를 담는다. CHANGELOG.md와 CHANGELOG.ko.md의 ## Unreleased는 ## 0.0.22가 되고 그 위에 빈 ## Unreleased가 생긴다. version commit의 CI가 통과하면 release workflow가 v0.0.22를 tag한다. | config/release.json의 manifest, 그 lock, packages/php-ext/src/php_polyspec_template.h, docs/features.md(.ko), CHANGELOG.md CHANGELOG.ko.md | `make release-coverage`, `make docs-check`; release workflow가 tag를 검사한다 | [v] |
+| T27.1-74 | 설치가 실패하면 uv-install이 provider 링크를 되돌리는 kit 0.0.102를 채택한다: 0.0.102 release asset을 고정하며, recipe 줄은 바뀌지 않는다 | package.json, package-lock.json | `make docs-check` and `make lint-ts` exit 0 | [o] |

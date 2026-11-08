@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- template adopts kit 0.0.102, whose uv-install puts back the provider links when its install fails; no recipe line changes (T27.1-74).
+
 ## 0.0.22
 - Release 0.0.22: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.22; it runs kit 0.0.101 (T27.1-73).
 - template runs kit 0.0.101 without parity: config/parity.json, its targets and its CI job are gone with kit 0.0.100, and the tests that asserted recipe or workflow text are deleted (T27.1-69 to T27.1-72).

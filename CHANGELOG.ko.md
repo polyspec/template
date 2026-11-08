@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: b985b5a4ae75060a0c456e2efc2e50faf301868adbcd985367d8fe52f21737a0 -->
+<!-- source-sha256: 4b4a2140375c9e9aa4959f5206ba74c9df3be750240c0d2779a15a580918214c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- template는 설치가 실패하면 uv-install이 provider 링크를 되돌리는 kit 0.0.102를 채택한다. recipe 줄은 바뀌지 않는다(T27.1-74).
 
 ## 0.0.22
 - Release 0.0.22: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.22를 담는다. kit 0.0.101에서 실행된다(T27.1-73).
