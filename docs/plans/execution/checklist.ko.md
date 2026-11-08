@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: aa8095db075f12e402d10d6b41ddceab2e01a77e97c973900d8191b9bae5b7d1 -->
+<!-- source-sha256: b39f0fc869603e519a586701896ec517fa40d1f8f1f7e642062e71b4dfbe31bc -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -508,3 +508,4 @@
 | T27.1-69 | recipe나 workflow의 문구를 단언하는 시험을 지운다: 그 시험은 동작을 확인하지 않고 kit나 recipe가 바뀔 때마다 깨진다 | tests/scripts/suite-parity.test.mts | `make lint-ts` and `make docs-check` exit 0; the deleted tests are named in the commit body | [o] |
 | T27.1-70 | 지운 tests/scripts/test-targets.test.mts를 가리키는 owner-checks 항목을 지운다 | config/owner-checks.json | `make owner-validate` and `make docs-check` exit 0 | [o] |
 | T27.1-71 | kit 0.0.100과 함께 parity를 지운다: config/parity.json, target parity-check, parity-declarations-check, divergence-check, test-markers-check, CI의 parity job, parity 선언을 읽는 시험, go symbol extractor. 각 구현은 자기 시험을 실행한다. kit은 0.0.100이다 | config/parity.json, Makefile, .github/workflows/ci.yml, config/owner-checks.json, tests/scripts, PRINCIPLES, docs, package.json | `make owner-validate`, `make docs-check` and `make lint-ts` exit 0 | [o] |
+| T27.1-72 | kit 거부 두 가지만 멈추는 kit 0.0.101을 채택한다: 0.0.101 release asset을 고정하며, recipe 줄은 바뀌지 않는다 | package.json, package-lock.json | `make docs-check` and `make lint-ts` exit 0 | [o] |
