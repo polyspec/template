@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Rust generated conformance: compiles every case into a module of one integration test file whose
 // tests are named after the cases, and runs it with scripts/kit/run-tests.mjs, which prints each case
-// test with its elapsed time and stops a test that outlives its own timeout.
+// test with its elapsed time.
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
@@ -13,9 +13,6 @@ import { runStep, stepProgress } from './bounded.mts';
 import { rustBuildArgs, rustRunArgs } from './rust-steps.mts';
 import { root } from './drivers.mts';
 import { CARGO, rustWorkspace } from '../../scripts/temporary-workspace.mts';
-
-// The time limit of one generated case test.
-const CASE_TIMEOUT_SECONDS = 30;
 
 // A crate of the system temporary directory that depends on packages/rust; it holds the generated cases and
 // their integration test.
@@ -101,12 +98,12 @@ ${tests}
 `);
   if (runnable.length > 0) {
     const env = { ...workspace.env, PATH: `${dirname(CARGO)}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' };
-    // The crate is built before its tests run: its compile is no test and has no case timeout.
+    // The crate is built before its tests run, so a compile failure is reported as the build of the crate, not as a test.
     const build = await runStep(CARGO, rustBuildArgs('generated_conformance_check'), { cwd: temporary, env });
     if (build.status !== 0) {
       failures.push(`the generated Rust test crate does not build (exit ${String(build.status)}):\n${build.stderr.trim()}`);
     } else {
-      const run = await runCaseTests(rustRunArgs('generated_conformance_check', temporary, CASE_TIMEOUT_SECONDS), { cwd: root, env },
+      const run = await runCaseTests(rustRunArgs('generated_conformance_check', temporary), { cwd: root, env },
         new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
       failures.push(...caseTestFailures('Rust', run));
       if (run.status === 0 || run.failed.length > 0) executed = runnable.length - run.failed.length;

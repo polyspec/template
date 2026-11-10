@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // Go generated conformance: compiles every case into its own Go package and runs the packages with
-// scripts/kit/run-tests.mjs, which prints each case test with its elapsed time and stops a test that
-// outlives its own timeout.
+// scripts/kit/run-tests.mjs, which prints each case test with its elapsed time.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
@@ -12,9 +11,6 @@ import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts'
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { goWorkspace } from '../../scripts/temporary-workspace.mts';
-
-// The time limit of one generated case test.
-const CASE_TIMEOUT_SECONDS = 30;
 
 // A module of the system temporary directory that uses the module of packages/go from that directory.
 const temporary = goWorkspace('generated-conformance-go');
@@ -55,7 +51,7 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
   if (runnable.length) {
     // The package of a case is named after the case: case_<case id> of the temporary module.
     const names = new Map(runnable.map(testCase => [`case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`, testCase.id]));
-    const run = await runCaseTests(['go', '--timeout', String(CASE_TIMEOUT_SECONDS), '--cwd', temporary, '--', '-count=1', '-timeout=0', '-run', '^TestGeneratedConformance$', './...'], { cwd: root }, names);
+    const run = await runCaseTests(['go', '--cwd', temporary, '--', '-count=1', '-timeout=0', '-run', '^TestGeneratedConformance$', './...'], { cwd: root }, names);
     failures.push(...caseTestFailures('Go', run));
     if (run.status === 0 || run.failed.length > 0) passed += runnable.length - run.failed.length;
   }

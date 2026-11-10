@@ -520,7 +520,7 @@ test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-nod
 
 .PHONY: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests
 template-test-ts-unit: build-ts
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(TS_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(TS_DIR)
 template-test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json
 template-test-ts-types-node: build-ts
@@ -555,7 +555,7 @@ template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
 template-test-scripts: build-rust typed-generator compiler-interface-generate build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --timeout 30 -- --test-concurrency=1 tests/scripts/
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- --test-concurrency=1 tests/scripts/
 
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
@@ -587,7 +587,7 @@ template-test-language: template-test-language-unit template-test-language-types
 
 .PHONY: template-test-language-unit template-test-language-types
 template-test-language-unit: template-build-language
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(LANGUAGE_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LANGUAGE_DIR)
 template-test-language-types: template-build-language
 	$(TSC) --noEmit -p $(LANGUAGE_DIR)/tsconfig.json
 
@@ -598,7 +598,7 @@ template-test-lsp: template-test-lsp-unit template-test-lsp-types ## Language se
 
 .PHONY: template-test-lsp-unit template-test-lsp-types
 template-test-lsp-unit: template-build-lsp
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(LSP_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(LSP_DIR)
 template-test-lsp-types: template-build-lsp
 	$(TSC) --noEmit -p $(LSP_DIR)/tsconfig.json
 
@@ -624,7 +624,7 @@ template-test-codemirror: template-test-codemirror-unit template-test-codemirror
 
 .PHONY: template-test-codemirror-unit template-test-codemirror-browser template-test-codemirror-types
 template-test-codemirror-unit: template-build-codemirror
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --timeout 30 --cwd $(CODEMIRROR_DIR)
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(CODEMIRROR_DIR)
 template-test-codemirror-browser: template-build-codemirror
 	cd $(CODEMIRROR_DIR) && $(PLAYWRIGHT) test
 template-test-codemirror-types: template-build-codemirror
@@ -643,7 +643,7 @@ template-test-vscode: template-test-vscode-unit template-test-vscode-types ## Ex
 
 .PHONY: template-test-vscode-unit template-test-vscode-types
 template-test-vscode-unit: template-build-vscode
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --timeout 30 --cwd $(VSCODE_DIR) -- --test-concurrency=1 tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --cwd $(VSCODE_DIR) -- --test-concurrency=1 tests/extension.test.mjs tests/integration-step.test.mjs tests/integration-wait.test.mjs
 template-test-vscode-types: template-build-vscode
 	$(TSC) --noEmit -p $(VSCODE_DIR)/tsconfig.json
 
@@ -787,7 +787,7 @@ docs-check: compiler-interface-generate schema-check doc-coverage benchmark-docs
 
 .PHONY: docs-markup-check
 docs-markup-check:
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node --timeout 30 -- --test-concurrency=1 tests/scripts/docs-markup.test.mts
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- --test-concurrency=1 tests/scripts/docs-markup.test.mts
 
 .PHONY: benchmark-docs-check
 benchmark-docs-check:
