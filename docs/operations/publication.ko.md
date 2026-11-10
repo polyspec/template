@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 6592a15397e689fd448fb94826f155a3fc36f0445c87b8cfd116742cfcc70674 -->
+<!-- source-sha256: f485d3cdf9f5abb7975b985c893f898bb96500c7167ac2f31c8f803aa11a516f -->
 # 발행
 
 [English](/operations/publication).

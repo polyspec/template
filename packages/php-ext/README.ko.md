@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: b4a692846f8dbbe52f073cf8a0799258047e7c4d67e06daabf591b12fa178afc -->
+<!-- source-sha256: 418b7b2c9cb155af43f0da8a82fd2f52fd28ee0078b8a8943031661c3015901a -->
 # polyspec_template PHP 확장
 
 [English](README.md).
