@@ -8,6 +8,7 @@
 ## 0.0.26
 
 - The repository adopts kit 0.0.105, which removed the time limits of run-tests (kit K1175), and passes no `--timeout` to run-tests (T27.1-80).
+- The generated conformance tests match the summary line of kit 0.0.105, which no longer counts timed-out tests (T27.1-82).
 
 ## 0.0.25
 

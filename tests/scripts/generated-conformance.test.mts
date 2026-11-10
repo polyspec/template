@@ -52,13 +52,13 @@ test('the tsc step has no deadline and is judged by the exit code of tsc', COMPI
 test('the Go runner prints each case test with its elapsed time', COMPILES, () => {
   const stdout = generated('go');
   assert.match(stdout, /▶ \S+\/case_echo_path › TestGeneratedConformance\n[^]*✔ \S+\/case_echo_path › TestGeneratedConformance \(\d+\.\ds\)\n/);
-  assert.match(stdout, /✔ go .*: 1 passed, 0 failed, 0 timed out, 0 skipped/);
+  assert.match(stdout, /✔ go .*: 1 passed, 0 failed, 0 skipped/);
 });
 
 test('the Rust runner names each test after its case and prints it with its elapsed time', { timeout: 6_230_000 }, () => {
   const stdout = generated('rust');
   assert.match(stdout, /▶ tests\/generated_conformance_check\.rs › case_echo_path\n[^]*✔ tests\/generated_conformance_check\.rs › case_echo_path \(\d+\.\ds\)\n/);
-  assert.match(stdout, /✔ cargo .*: 1 passed, 0 failed, 0 timed out, 0 skipped/);
+  assert.match(stdout, /✔ cargo .*: 1 passed, 0 failed, 0 skipped/);
 });
 
 test('the PHP runner prints each case with its elapsed time', COMPILES, () => {

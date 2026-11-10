@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5db4f7b8809c38223254e735aa89d247b32262794091b0c3dff44271db4517d2 -->
+<!-- source-sha256: 1fd5829c73c7374e0112bd229f29d3d117f482138a722eba5208d09dbf03d04e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -9,6 +9,7 @@
 ## 0.0.26
 
 - 저장소는 run-tests의 시간 제한을 없앤 kit 0.0.105(kit K1175)를 채택하고 run-tests에 `--timeout`을 넘기지 않는다(T27.1-80).
+- generated conformance test는 시간 초과 test를 더 이상 세지 않는 kit 0.0.105의 요약 줄에 맞춘다(T27.1-82).
 
 ## 0.0.25
 
