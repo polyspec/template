@@ -3,7 +3,7 @@ import { findPackageJSON } from 'node:module';
 import { dirname, join, relative } from 'node:path';
 
 /** The directory of the package of a module specifier, resolved from `base`, or of the file URL `specifier`. */
-export function packageDirectory(specifier: string, base?: string): string {
+function packageDirectory(specifier: string, base?: string): string {
   const manifest = findPackageJSON(specifier, base);
   if (manifest === undefined) throw new Error(`${specifier} is in no package`);
   return dirname(manifest);

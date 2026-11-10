@@ -1,5 +1,5 @@
 {
-  "schema": 3,
+  "schema": 4,
   "mode": "ast",
   "target": "canonical",
   "entry": "page.tpl",
@@ -7,7 +7,6 @@
   "sourceDigest": "7f6f66bdd078937e6644189a4d2943f86b3772af7f2df123181d6ebcc121d466",
   "typeDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "contractDigest": "3b9c9056a951b5c13ab48146770c4f64fcaba5cfb32b2561f073e49afd59a787",
-  "compilerDigest": "635e236aee8d636433a946b5843495e58778bd7d97414f200bfc939f85504727",
   "files": {
     "page.tpl": {
       "path": "page.tpl.ast.json",

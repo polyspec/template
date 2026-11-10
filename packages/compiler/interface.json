@@ -123,10 +123,9 @@
         "sourceDigest",
         "typeDigest",
         "contractDigest",
-        "compilerDigest",
         "files"
       ],
-      "invariant": "Digests bind the artifact to its complete sources, types, compiler contract and compiler implementation."
+      "invariant": "Digests bind the artifact to its complete sources, types and compiler contract; the compiler that wrote it is the installed one, which the manifest does not record."
     },
     "RenderRequest": {
       "fields": [

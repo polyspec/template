@@ -13,19 +13,17 @@ export interface ArtifactManifest {
   mode: string;
   target: string;
   entry: string;
-  compilerDigest: string;
   files: Record<string, ArtifactFile>;
 }
 
 export const artifactManifestDocument = jsonDocument<ArtifactManifest>('artifact manifest', {
   type: 'object',
-  required: ['schema', 'mode', 'target', 'entry', 'compilerDigest', 'files'],
+  required: ['schema', 'mode', 'target', 'entry', 'files'],
   properties: {
     schema: { type: 'integer' },
     mode: { type: 'string' },
     target: { type: 'string' },
     entry: { type: 'string' },
-    compilerDigest: { type: 'string' },
     files: { type: 'object', additionalProperties: { type: 'object', required: ['path'], properties: { path: { type: 'string' } } } },
   },
 });

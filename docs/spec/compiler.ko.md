@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 0eac5ba848e81c4c7e61314679f031b5e7dbe5ddec4052988d223c6963a282f9 -->
+<!-- source-sha256: a7c7ba72b89ae3bfabf594c2682fb01b59f66bec6478ad37ae15d1d3726a3710 -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -80,13 +80,13 @@ Compile mode와 artifact 갱신은 서로 독립적인 build 설정이다.
 - `true`는 source, type, contract, compiler 구현 digest를 계산하고 digest가 달라졌을 때만 emit한다.
 - `false`는 template source를 읽지 않고 아무것도 emit하지 않는다. 배포 artifact를 검증해 사용한다.
 
-Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다. Artifact manifest는 mode, target, entry, source digest, type digest, contract digest, compiler digest와 file을 기록한다. Compiler digest는 해당 target을 만든 parser/compiler module을 포괄하므로 compiler 구현이 바뀌면 나머지 입력이 같아도 artifact를 갱신한다. digest는 추적되는 source로 계산한다. AST artifact는 `packages/ts`의 source와 build 설정, `package-lock.json`, artifact writer로, generated artifact는 `packages/compiler`의 module로 계산하므로, 검사가 build 없이 읽는다(`make artifact-digest-check`). Artifact가 없거나 손상됐거나 호환되지 않으면 runtime 시작 전에 실패한다.
+Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다. Artifact manifest(schema 4)는 mode, target, entry, source digest, type digest, contract digest와 file, 곧 artifact의 입력과 출력을 기록한다. 그것을 쓴 compiler는 기록하지 않는다. 어떤 compiler가 설치되는지는 설치할 때 패키지 관리자가 정하므로, 한 버전의 release 설치와 checkout은 같은 입력에 같은 manifest를 쓴다. 이전 schema의 manifest는 stale이다. Artifact가 없거나 손상됐거나 호환되지 않으면 runtime 시작 전에 실패한다.
 
 ## 구현 상태
 
 AST compiler와 runtime은 구현됐다. 제품 compiler는 backend 언어마다 구체적인 `GeneratedProgram`을 생성하고 showcase는 모든 구현의 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. 모든 구현에서 모든 canonical case의 generated matrix가 통과하며, 별도의 generated native-call fixture가 모든 구현에서 같은 assign object field, instance method, class function 결과를 출력하며, AST program과 같은 호스트 인자(VAL-21)와 native object 동등성(EXP-39)을 가진다.
 
-Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 source·type·contract·compiler digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
+Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 entry와 source·type·contract digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. 검사는 다시 컴파일해 generated file이나 manifest의 바이트가 하나라도 다르면 실패한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
 `make conformance-generated-ts`는 canonical case 각각에 대해 새로운 generated TypeScript program을 만든다. Compile 진단, 입력 binding 진단, runtime 진단, 성공한 UTF-8 출력을 AST 실행과 같은 expected artifact에 대조한다.
 `make conformance-generated-php`는 각 case마다 별도로 생성하고 문법 검사한 PHP 소스로 같은 내용을 증명한다.

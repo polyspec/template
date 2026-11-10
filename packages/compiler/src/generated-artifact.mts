@@ -15,8 +15,8 @@ export function generatedManifestPath(output: string): string {
 const isDirectory = (path: string): boolean => existsSync(path) && statSync(path).isDirectory();
 const artifactBase = (output: string): string => isDirectory(output) ? output : dirname(output);
 
-/** The metadata that a generated artifact must record: the inputs and the compiler it is built from. */
-type Expected = Pick<GeneratedManifest, 'entry' | 'sourceDigest' | 'typeDigest' | 'contractDigest' | 'compilerDigest'>;
+/** The metadata that a generated artifact must record: the inputs it is built from. */
+type Expected = Pick<GeneratedManifest, 'entry' | 'sourceDigest' | 'typeDigest' | 'contractDigest'>;
 
 function verifyGeneratedArtifact(output: string, target: string, expected: Expected | null = null): GeneratedManifest {
   const manifestPath = generatedManifestPath(output);
@@ -32,14 +32,14 @@ function verifyGeneratedArtifact(output: string, target: string, expected: Expec
   const intact = files.every(([name, file]) => file.path === name && existsSync(join(artifactBase(output), name)) && hash(readFileSync(join(artifactBase(output), name))) === file.artifactDigest);
   if (!listed || !intact) throw new ArtifactStaleError(`generated artifact files are missing or changed: ${output}`);
   if (expected) {
-    for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'compilerDigest'] as const) {
+    for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest'] as const) {
       if (manifest[key] !== expected[key]) throw new ArtifactStaleError(`generated artifact ${key} differs`);
     }
   }
   return manifest;
 }
 
-function expectedMetadata(graphPath: string, typeManifestPath: string): Omit<Expected, 'compilerDigest'> {
+function expectedMetadata(graphPath: string, typeManifestPath: string): Expected {
   const graph = astManifestDocument.read(graphPath);
   const typeBytes = readFileSync(typeManifestPath);
   const contractDigest = hash(readFileSync(contractPath));
@@ -50,7 +50,7 @@ function expectedMetadata(graphPath: string, typeManifestPath: string): Omit<Exp
 }
 
 /**
- * The inputs of a generated artifact, its target, output and refresh policy, the digest of its compiler and the
+ * The inputs of a generated artifact, its target, output and refresh policy and the
  * compilation, which returns the source of a file artifact, or the sources of a directory artifact by their relative paths.
  */
 export interface GeneratedArtifactOptions {
@@ -59,7 +59,6 @@ export interface GeneratedArtifactOptions {
   target: string;
   output: string;
   refresh: string;
-  compilerDigest?: string;
   compile: () => string | Record<string, string>;
   check?: boolean;
 }
@@ -69,15 +68,14 @@ export interface GeneratedArtifactOptions {
  * digest, since it only verifies the committed artifact.
  */
 export function compileGeneratedArtifact(options: GeneratedArtifactOptions): GeneratedManifest {
-  const { graphPath, typeManifestPath, target, refresh, compilerDigest, compile, check = false } = options;
+  const { graphPath, typeManifestPath, target, refresh, compile, check = false } = options;
   const output = resolve(options.output);
   if (refresh === 'false') {
     if (check) throw new Error('artifact check cannot use the false refresh policy');
     return verifyGeneratedArtifact(output, target);
   }
   if (refresh !== 'dev' && refresh !== 'true') throw new Error(`${refresh} is not an artifact refresh policy`);
-  if (compilerDigest?.length !== 64) throw new Error('generated compiler digest is missing');
-  const expected = { ...expectedMetadata(resolve(graphPath), resolve(typeManifestPath)), compilerDigest };
+  const expected = expectedMetadata(resolve(graphPath), resolve(typeManifestPath));
   if (refresh === 'true' && !check) {
     try {
       return verifyGeneratedArtifact(output, target, expected);
@@ -91,7 +89,7 @@ export function compileGeneratedArtifact(options: GeneratedArtifactOptions): Gen
   const directory = typeof compiled !== 'string';
   const sources = typeof compiled === 'string' ? { [basename(output)]: compiled } : compiled;
   const manifest: GeneratedManifest = {
-    schema: 3,
+    schema: 4,
     mode: 'gen',
     target,
     ...expected,

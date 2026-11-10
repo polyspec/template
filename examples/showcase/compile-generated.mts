@@ -5,8 +5,6 @@ import { join } from 'node:path';
 import { transformSync } from 'esbuild';
 import { root } from '../../tests/runner/drivers.mts';
 import { compileFiles, compileSource } from '../../packages/compiler/src/compiler.mts';
-import { generatedCompilerDigest } from '../../packages/compiler/src/compiler-digest.mts';
-import { typescriptDeliveryDigest } from './delivery-digest.mts';
 import { compileGeneratedArtifact } from '../../packages/compiler/src/generated-artifact.mts';
 import { showcasePhpNamespace } from './php-namespace.mts';
 import { generatedLanguages, generatedOutput } from './generated-output.mts';
@@ -35,7 +33,6 @@ for (const id of scenarios) {
       output,
       refresh,
       check,
-      compilerDigest: generatedCompilerDigest(language),
       compile: () => language === 'php' ? compileFiles(graph, manifest, language, { phpNamespace: showcasePhpNamespace(id) }) : compileSource(graph, manifest, language),
     });
   }
@@ -47,7 +44,6 @@ for (const id of scenarios) {
     output: generatedOutput(id, 'js'),
     refresh,
     check,
-    compilerDigest: typescriptDeliveryDigest(),
     compile: () => transformSync(readFileSync(typescriptOutput, 'utf8'), {
       loader: 'ts',
       target: 'es2022',

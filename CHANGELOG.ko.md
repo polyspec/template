@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e3eba495eb68cff2ae545a645cf8cae97a59944a8edcc67a08fd590f88625d5a -->
+<!-- source-sha256: f72e75a1a6559f781874e3893de59c7ab0bfa41f278f26fda29421fb522416e5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- Artifact manifest는 artifact의 입력과 파일만 기록한다. AST와 generated manifest에서 compilerDigest가 빠지고 schema 4가 된다. 그래서 @polyspec/template-compiler는 release archive에서나 같은 버전의 checkout에서나 같은 manifest를 쓴다. refresh true는 entry, delimiters와 source, type, contract digest가 같은 artifact를 다시 쓰고, 검사는 generated file이나 manifest의 바이트가 다를 때만 실패한다. schema 3 manifest는 stale로 판정되어 한 번 다시 만들어진다 (T27.1-78).
 
 ## 0.0.24
 

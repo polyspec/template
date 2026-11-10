@@ -51,7 +51,7 @@ export interface AstFile {
 
 /** The manifest.json of a canonical AST artifact: the source graph that compileAst writes. */
 export interface AstManifest {
-  schema: 3;
+  schema: 4;
   mode: 'ast';
   target: 'canonical';
   entry: string;
@@ -59,7 +59,6 @@ export interface AstManifest {
   sourceDigest: string;
   typeDigest: string;
   contractDigest: string;
-  compilerDigest: string;
   files: Record<string, AstFile>;
 }
 
@@ -78,9 +77,9 @@ const astFileSchema: JSONSchemaType<AstFile> = {
 export const astManifestDocument = jsonDocument<AstManifest>('canonical AST artifact manifest', {
   type: 'object',
   additionalProperties: false,
-  required: ['schema', 'mode', 'target', 'entry', 'delimiters', 'sourceDigest', 'typeDigest', 'contractDigest', 'compilerDigest', 'files'],
+  required: ['schema', 'mode', 'target', 'entry', 'delimiters', 'sourceDigest', 'typeDigest', 'contractDigest', 'files'],
   properties: {
-    schema: { type: 'integer', const: 3 },
+    schema: { type: 'integer', const: 4 },
     mode: { type: 'string', const: 'ast' },
     target: { type: 'string', const: 'canonical' },
     entry: { type: 'string' },
@@ -89,7 +88,6 @@ export const astManifestDocument = jsonDocument<AstManifest>('canonical AST arti
     sourceDigest: digest,
     typeDigest: digest,
     contractDigest: digest,
-    compilerDigest: digest,
     files: names(astFileSchema),
   },
 } satisfies JSONSchemaType<AstManifest>);
@@ -100,32 +98,30 @@ export interface GeneratedFile {
   artifactDigest: string;
 }
 
-/** The manifest beside a generated artifact: the AST artifact, type manifest, contract and compiler it was built from. */
+/** The manifest beside a generated artifact: the AST artifact, type manifest and contract it was built from. */
 export interface GeneratedManifest {
-  schema: 3;
+  schema: 4;
   mode: 'gen';
   target: string;
   entry: string;
   sourceDigest: string;
   typeDigest: string;
   contractDigest: string;
-  compilerDigest: string;
   files: Record<string, GeneratedFile>;
 }
 
 export const generatedManifestDocument = jsonDocument<GeneratedManifest>('generated artifact manifest', {
   type: 'object',
   additionalProperties: false,
-  required: ['schema', 'mode', 'target', 'entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'compilerDigest', 'files'],
+  required: ['schema', 'mode', 'target', 'entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'files'],
   properties: {
-    schema: { type: 'integer', const: 3 },
+    schema: { type: 'integer', const: 4 },
     mode: { type: 'string', const: 'gen' },
     target: { type: 'string' },
     entry: { type: 'string' },
     sourceDigest: digest,
     typeDigest: digest,
     contractDigest: digest,
-    compilerDigest: digest,
     files: names<GeneratedFile>({
       type: 'object',
       additionalProperties: false,

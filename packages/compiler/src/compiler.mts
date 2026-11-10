@@ -4,7 +4,6 @@ import { loadSourceGraph, lowerSourceGraph } from './ir.mts';
 import { templateBodies, usedCode, usedFiles, type Backend, type CompileOptions, type Part } from './backend-support.mts';
 import { typeManifestDocument } from './documents.mts';
 import { compileGeneratedArtifact } from './generated-artifact.mts';
-import { generatedCompilerDigest } from './compiler-digest.mts';
 import * as typescript from './backends/typescript.mts';
 import * as go from './backends/go.mts';
 import * as rust from './backends/rust.mts';
@@ -65,7 +64,6 @@ function main(args: string[]): void {
     output,
     refresh,
     check,
-    compilerDigest: generatedCompilerDigest(language),
     compile: () => FILE_PER_CLASS_TARGETS.includes(language) ? compileFiles(graph, manifest, language, phpNamespace === null ? {} : { phpNamespace }) : compileSource(graph, manifest, language),
   });
   process.stdout.write(`compiler ${language}: ${check ? 'checked' : refresh === 'false' ? 'loaded' : 'ready'} ${output}\n`);

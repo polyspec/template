@@ -2,7 +2,6 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
 import { parse, type Node, type Template } from '@polyspec/template';
-import { astCompilerDigest } from './compiler-digest.mts';
 import { astManifestDocument, DocumentSchemaError, type AstFile, type AstManifest } from './documents.mts';
 import { contractPath, hash, json } from './artifact-support.mts';
 const lineIndex = (bytes: Buffer): number[] => {
@@ -103,7 +102,6 @@ export function compileAst(options: CompileAstOptions): AstManifest {
   const output = resolve(options.output);
   if (refresh === 'false') return verify(output);
   const contractDigest = hash(readFileSync(contractPath));
-  const compilerDigest = astCompilerDigest();
   if (refresh !== 'dev' && refresh !== 'true') throw new Error(`${refresh} is not an artifact refresh policy`);
   const names = sourceNames(root);
   if (names.length === 0) throw new Error(`source graph has no .tpl files: ${root}`);
@@ -140,7 +138,7 @@ export function compileAst(options: CompileAstOptions): AstManifest {
   if (refresh === 'true' && existsSync(join(output, 'manifest.json'))) {
     try {
       const current = verify(output);
-      if (current.contractDigest === contractDigest && current.compilerDigest === compilerDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry && current.delimiters === delimiters) return current;
+      if (current.contractDigest === contractDigest && current.sourceDigest === sourceDigest && current.typeDigest === typeDigest && current.entry === entry && current.delimiters === delimiters) return current;
     } catch (error) {
       // Only a missing or stale artifact is rebuilt under the true refresh policy; any other failure is its own.
       if (!(error instanceof ArtifactStaleError)) throw error;
@@ -158,7 +156,7 @@ export function compileAst(options: CompileAstOptions): AstManifest {
       writeFileSync(join(temporary, path), ast);
       files[name] = { path: posix.normalize(path), sourceDigest: hash(sourceOf(name)), artifactDigest: hash(ast), lines: lineIndex(sourceOf(name)) };
     }
-    const manifest: AstManifest = { schema: 3, mode: 'ast', target: 'canonical', entry, delimiters, sourceDigest, typeDigest, contractDigest, compilerDigest, files };
+    const manifest: AstManifest = { schema: 4, mode: 'ast', target: 'canonical', entry, delimiters, sourceDigest, typeDigest, contractDigest, files };
     writeFileSync(join(temporary, 'manifest.json'), json(manifest));
     mkdirSync(output, { recursive: true });
     for (const file of Object.values(files)) {

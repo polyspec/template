@@ -68,7 +68,7 @@ describe('the build side of ArtifactStore.loadOrRefresh (RT-56)', () => {
     const { source, output } = fixtureRoot();
     compileAst({ root: source, output, entry: 'page.tpl', refresh: 'dev', typeManifest: null, delimiters: null });
     writeFileSync(join(output, 'manifest.json'), JSON.stringify({ schema: 2, mode: 'ast' }));
-    expect(compileAst({ root: source, output, entry: 'page.tpl', refresh: 'true', typeManifest: null, delimiters: null }).schema).toBe(3);
+    expect(compileAst({ root: source, output, entry: 'page.tpl', refresh: 'true', typeManifest: null, delimiters: null }).schema).toBe(4);
   });
 
   it('compileGeneratedArtifact under true fails on a manifest that is not JSON and compiles nothing', () => {
@@ -81,7 +81,7 @@ describe('the build side of ArtifactStore.loadOrRefresh (RT-56)', () => {
     let compiles = 0;
     const options = {
       graphPath: join(output, 'manifest.json'), typeManifestPath, target: 'ts', output: generated, refresh: 'true',
-      compilerDigest: '0'.repeat(64), compile: () => { compiles++; return 'export {};\n'; },
+      compile: () => { compiles++; return 'export {};\n'; },
     };
     expect(() => compileGeneratedArtifact(options)).toThrow(/is no JSON text/);
     expect(compiles).toBe(0);

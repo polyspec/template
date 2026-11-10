@@ -32,7 +32,7 @@ try {
   writeFileSync(join(source, 'layout.tpl'), '<h1>{= title}</h1>');
   const first = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'dev' });
   assert.deepEqual(artifactFile(first, 'layout.tpl').lines, [0]);
-  assert.equal(first.schema, 3);
+  assert.equal(first.schema, 4);
   assert.equal(first.delimiters, null);
   assert.deepEqual(Object.keys(first.files), ['layout.tpl']);
   const manifestBytes = readFileSync(join(output, 'manifest.json'));
@@ -41,11 +41,13 @@ try {
   assert.equal(unchanged.sourceDigest, first.sourceDigest);
   assert.deepEqual(readFileSync(join(output, 'manifest.json')), manifestBytes);
 
-  const staleCompiler = artifactManifestDocument.parse(manifestBytes.toString('utf8'), 'the AST manifest of the first compilation');
-  staleCompiler.compilerDigest = 'stale';
-  writeFileSync(join(output, 'manifest.json'), JSON.stringify(staleCompiler));
+  // A manifest of an earlier schema is stale, so refresh true writes the manifest of this compiler again.
+  const earlierSchema = artifactManifestDocument.parse(manifestBytes.toString('utf8'), 'the AST manifest of the first compilation');
+  earlierSchema.schema = 3;
+  writeFileSync(join(output, 'manifest.json'), JSON.stringify(earlierSchema));
   const rebuilt = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true' });
-  assert.notEqual(rebuilt.compilerDigest, 'stale');
+  assert.equal(rebuilt.schema, 4);
+  assert.deepEqual(readFileSync(join(output, 'manifest.json')), manifestBytes);
 
   writeFileSync(join(source, 'layout.tpl'), '<h1>[[= title]]</h1>');
   const custom = compileAst({ root: source, output, entry: 'layout.tpl', refresh: 'true', delimiters: '[]' });
