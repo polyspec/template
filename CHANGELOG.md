@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The repository adopts kit 0.0.103, which keeps the output, errors and failures that kit used to drop silently (kit K1136–K1165) (T27.1-76).
+
 ## 0.0.23
 - Release 0.0.23: every manifest of config/release.json, the PHP extension version constant and the native locks hold 0.0.23; it runs kit 0.0.102 (T27.1-75).
 - template adopts kit 0.0.102, whose uv-install puts back the provider links when its install fails; no recipe line changes (T27.1-74).

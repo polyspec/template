@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 3aad0bf79a11ab3ea0a037675003300fc4971004743e0b1cc1d371874da04b15 -->
+<!-- source-sha256: e26fe67e26bdbb3a6da71ab9271e51569d6f31e6935746daaecac496d943f689 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- 저장소는 kit이 조용히 버리던 출력, 오류, 실패를 남기는 kit 0.0.103(kit K1136–K1165)를 채택한다(T27.1-76).
 
 ## 0.0.23
 - Release 0.0.23: config/release.json의 모든 manifest, PHP 확장의 version 상수, native lock은 0.0.23을 담는다. kit 0.0.102에서 실행된다(T27.1-75).
