@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 71de080b7fab925e87eeb9d6093714b9a7ab2663cfc86f3f518976a2e136e830 -->
+<!-- source-sha256: 2fd24d97bbf69b5ce96986bc172d06eafb7c59d14c3ccd423bd82d44b1c44da8 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -513,3 +513,4 @@
 | T27.1-74 | 설치가 실패하면 uv-install이 provider 링크를 되돌리는 kit 0.0.102를 채택한다: 0.0.102 release asset을 고정하며, recipe 줄은 바뀌지 않는다 | package.json, package-lock.json | `make docs-check` and `make lint-ts` exit 0 | [o] |
 | T27.1-75 | P0: ## Unreleased의 항목(T27.1-74)으로 0.0.23을 release한다. 인수 조건: config/release.json의 모든 manifest, PHP 확장의 version 상수, root composer.json과 packages/cli/php/composer.json, docs/features.md와 한국어 쌍, lock package-lock.json, composer.lock, packages/rust/Cargo.lock, examples/showcase/adapters/rust/Cargo.lock이 0.0.23을 담는다. CHANGELOG.md와 CHANGELOG.ko.md의 ## Unreleased는 ## 0.0.23이 되고 그 위에 빈 ## Unreleased가 생긴다. version commit의 CI가 통과하면 release workflow가 v0.0.23을 tag한다. | config/release.json의 manifest, 그 lock, packages/php-ext/src/php_polyspec_template.h, docs/features.md(.ko), CHANGELOG.md CHANGELOG.ko.md | `make release-coverage`, `make docs-check`; release workflow가 tag를 검사한다 | [o] |
 | T27.1-76 | kit이 조용히 버리던 출력, 오류, 실패를 남기는 kit 0.0.103(kit K1136–K1165)를 채택한다: 0.0.103 release asset을 고정한다 | `package.json`, `package-lock.json` | `make docs-check` and `make lint-ts` exit 0 | [o] |
+| T27.1-77 | 0.0.24 release | version commit과 release asset | `make release-coverage`와 version commit의 CI run에서 만들어진 release | [o] |

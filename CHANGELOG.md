@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.24
+
 - The repository adopts kit 0.0.103, which keeps the output, errors and failures that kit used to drop silently (kit K1136–K1165) (T27.1-76).
 
 ## 0.0.23
