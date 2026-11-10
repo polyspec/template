@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 6eb57e7ca7a28906e70d4b407f6cb1b8788f3d8dc1ded35f355b15b3bb375a6b -->
+<!-- source-sha256: ee147b8e50da4cb665f83237633016fa8c54afd60af438d4d1e91f69ce1e2880 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -519,3 +519,4 @@
 | T27.1-80 | run-tests의 시간 제한을 없앤 kit 0.0.105(kit K1175)를 채택한다: 0.0.105 release asset을 고정하고, Makefile recipe 일곱 개, Go와 Rust generated conformance runner, run-tests 인자를 만드는 test 두 개에서 0.0.105가 알 수 없는 option으로 거부하는 `--timeout`을 run-tests에 넘기지 않는다. development.md는 더 이상 runner가 30 s 뒤 test를 멈춘다고 적지 않는다 | `package.json`, `package-lock.json`, `Makefile`, `tests/runner/conformance-generated-go.mts`, `tests/runner/conformance-generated-rust.mts`, `tests/runner/rust-steps.mts`, `tests/scripts/rust-generated-steps.test.mts`, `tests/scripts/failure-messages.test.mts`, `docs/operations/development.md(.ko)` | `node --test tests/scripts/rust-generated-steps.test.mts tests/scripts/failure-messages.test.mts`, `make docs-markup-check`, `make docs-check` and `make lint-ts` exit 0 | [o] |
 | T27.1-81 | ## Unreleased의 항목(T27.1-80)으로 0.0.26 release | version commit과 release asset | `make release-coverage`와 version commit의 CI run에서 만들어진 release | [o] |
 | T27.1-82 | generated conformance test는 kit 0.0.105의 요약 줄 `<n> passed, <n> failed, <n> skipped`에 맞춘다: tests/scripts/generated-conformance.test.mts는 kit 0.0.105(K1175)가 더 이상 출력하지 않는 `0 timed out`을 검사해, 0.0.26 version commit의 CI run 42802213832(scripts)에서 Go와 Rust runner test가 실패했다. Red: 두 test가 요약 줄에서 실패한다 | `tests/scripts/generated-conformance.test.mts`, `CHANGELOG.md(.ko)` | `node --test tests/scripts/generated-conformance.test.mts` exit 0 | [o] |
+| T27.1-83 | 한국어 쌍둥이 문서 docs/operations/editor-tools.ko.md, docs/operations/publication.ko.md, docs/plans/execution/plan.ko.md, packages/php-ext/README.ko.md가 영어 원문의 현재 내용을 담는다. 각 원문은 쌍둥이가 stamp된 뒤에 바뀌었다(editor-tools.md는 e173bd2b 이후, publication.md는 9a693429 이후, plan.md는 25f4306d 이후, README.md는 a187eaca 이후). 각 쌍둥이를 다시 번역하고 이 경로들만 make documents-stamp로 stamp한다 | docs/operations/editor-tools.ko.md, docs/operations/publication.ko.md, docs/plans/execution/plan.ko.md, packages/php-ext/README.ko.md | `make docs-check`; each source-sha256 marker equals the sha256 of its English source | [ ] |
