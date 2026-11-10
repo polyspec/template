@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "acc8535b4efa18fcf296eea95ebd0f12",
+    "content-hash": "f157e81184912af2c02e2c0e20f09782",
     "packages": [
         {
             "name": "min-0-max/json-schema",
@@ -203,11 +203,11 @@
         },
         {
             "name": "polyspec/template",
-            "version": "0.0.24",
+            "version": "0.0.25",
             "dist": {
                 "type": "path",
                 "url": "packages/php",
-                "reference": "5c935ef3485d1eb6378fa7234350be1439078f2b"
+                "reference": "9911bca4ed4869c322427dce0b393095da5abc39"
             },
             "require": {
                 "ext-mbstring": "*",
@@ -1021,16 +1021,16 @@
         },
         {
             "name": "polyspec/template-cli",
-            "version": "0.0.24",
+            "version": "0.0.25",
             "dist": {
                 "type": "path",
                 "url": "packages/cli/php",
-                "reference": "2c8d0b68c4379d363854732c172c47461a6bd9c9"
+                "reference": "265da5a074685aa371f382562b24ccd78d1c6dc7"
             },
             "require": {
                 "ext-mbstring": "*",
                 "php": ">=8.4",
-                "polyspec/template": "0.0.24",
+                "polyspec/template": "0.0.25",
                 "symfony/console": "^8.1"
             },
             "require-dev": {

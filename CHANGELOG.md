@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.25
+
 - An artifact manifest records only the inputs and the files of the artifact: compilerDigest is gone from the AST and generated manifests, which are schema 4, so @polyspec/template-compiler writes the same manifest from its release archive and from a checkout of the same version, refresh true reuses an artifact whose entry, delimiters and source, type and contract digests match, and a check fails only on a changed byte of a generated file or of its manifest; a schema 3 manifest is stale and rebuilt once (T27.1-78).
 
 ## 0.0.24
