@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: e78607d5907f96336611452c24df05665c1af63cdb0fd0e88a918db0a1875687 -->
+<!-- source-sha256: a050871a1baa5662a2cfa329673b30095151bec07d8a2b24dbd3ee808c4963d7 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -521,4 +521,4 @@
 | T27.1-82 | generated conformance test는 kit 0.0.105의 요약 줄 `<n> passed, <n> failed, <n> skipped`에 맞춘다: tests/scripts/generated-conformance.test.mts는 kit 0.0.105(K1175)가 더 이상 출력하지 않는 `0 timed out`을 검사해, 0.0.26 version commit의 CI run 42802213832(scripts)에서 Go와 Rust runner test가 실패했다. Red: 두 test가 요약 줄에서 실패한다 | `tests/scripts/generated-conformance.test.mts`, `CHANGELOG.md(.ko)` | `node --test tests/scripts/generated-conformance.test.mts` exit 0 | [o] |
 | T27.1-83 | docs/operations/editor-tools.ko.md, docs/operations/publication.ko.md, docs/plans/execution/plan.ko.md, packages/php-ext/README.ko.md의 source-sha256 marker가 영어 원문의 현재 상태를 가리킨다. 각 원문은 쌍둥이가 stamp된 뒤 바뀌었고(editor-tools.md는 e173bd2b 이후, publication.md는 9a693429 이후, plan.md는 25f4306d 이후, README.md는 a187eaca 이후), 각 쌍둥이는 그 변경대로 번역되었지만 다시 stamp되지 않았다. 바뀐 문단을 하나씩 검토해 쌍둥이가 현재 내용임을 확인하고, make documents-stamp로 이 경로들만 stamp한다 | docs/operations/editor-tools.ko.md, docs/operations/publication.ko.md, docs/plans/execution/plan.ko.md, packages/php-ext/README.ko.md | `make docs-check`; each source-sha256 marker equals the sha256 of its English source | [o] |
 | T27.1-84 | include 검사는 optional 형태가 없는 any input에 any? 값을 받아들인다. 그래서 dynamic root에서 root 이름을 읽는 include된 template이 검사를 통과한다. 원인: 검사는 caller의 any? 값을 any input에 대해 거부했는데, RT-12와 RT-13에 따르면 그런 값이 나올 수 있다. 그래서 include/reads-root-name이 "include part.tpl input c requires any, got any?"로 실패했다. Red: conformance case include/reads-root-name이 그 메시지로 실패한다 | packages/compiler/src/ir.mts, docs/spec/compiler.md, docs/spec/compiler.ko.md, tests/cases/include/reads-root-name/, CHANGELOG.md, CHANGELOG.ko.md | `node tests/runner/conformance-generated-ts.mts --case include/reads-root-name` exits 0; CI runs the case in every generated language | [v] |
-| T27.1-85 | ## Unreleased의 항목(T27.1-84)으로 0.0.27 release | The version commit and the release assets | `make release-coverage` and the release of the CI run of the version commit | [~] |
+| T27.1-85 | ## Unreleased의 항목(T27.1-84)으로 0.0.27 release | The version commit and the release assets | `make release-coverage` and the release of the CI run of the version commit | [v] |
