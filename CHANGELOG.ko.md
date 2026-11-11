@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 1fd5829c73c7374e0112bd229f29d3d117f482138a722eba5208d09dbf03d04e -->
+<!-- source-sha256: ae6f5e1dc772e98c71768d53e2f33ed9581f93087cc09c95d4fec26cc593e351 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- include 검사는 `any?` 값을 optional 형태가 없는 `any` input에 받아들인다. 동적 root에서 root 이름을 읽는 include된 template은 호출자 scope가 바인딩되지 않은 이름을 `null`로 넘기고 `any`가 이를 받으므로 검사를 통과한다(T27.1-84).
 
 ## 0.0.26
 

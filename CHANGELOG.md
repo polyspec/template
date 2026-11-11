@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The include check accepts an `any?` value into an `any` input, which has no optional form. Under the dynamic root, an included template that reads a root name passes the check, because the caller's scope yields `null` for an unbound name and `any` takes it (T27.1-84).
+
 ## 0.0.26
 
 - The repository adopts kit 0.0.105, which removed the time limits of run-tests (kit K1175), and passes no `--timeout` to run-tests (T27.1-80).

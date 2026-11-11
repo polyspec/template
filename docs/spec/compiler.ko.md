@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: a7c7ba72b89ae3bfabf594c2682fb01b59f66bec6478ad37ae15d1d3726a3710 -->
+<!-- source-sha256: 7fd58d21e1f20d535ac5da0976816a8777c0a2cc0a29f3b2e72e21ce5eb1d7d7 -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -34,7 +34,7 @@ Canonical artifact manifest는 각 template의 digest 항목과 함께 source �
 
 ## 공개 구조
 
-`TypeManifest.root`는 `Assign` 또는 `any`다. `Assign`은 고정된 root field를 선언한다. `any`는 입력 계약이 의도적으로 동적일 때 알 수 없는 member를 `any?`로 취급하는 map 형태 root를 선언한다. 두 형태 모두 record field, definition target, template input, host-function signature는 명시한다. 한 request 값에서 type을 추론하지 않는다. 개별 field나 parameter의 `any`는 별도 실행 mode를 만들지 않고 runtime value model을 사용하며, root가 `Assign`일 때 field 검사를 끄지 않는다.
+`TypeManifest.root`는 `Assign` 또는 `any`다. `Assign`은 고정된 root field를 선언한다. `any`는 입력 계약이 의도적으로 동적일 때 알 수 없는 member를 `any?`로 취급하는 map 형태 root를 선언한다. 두 형태 모두 record field, definition target, template input, host-function signature는 명시한다. 한 request 값에서 type을 추론하지 않는다. 개별 field나 parameter의 `any`는 별도 실행 mode를 만들지 않고 runtime value model을 사용하며, root가 `Assign`일 때 field 검사를 끄지 않는다. `any` input은 optional 형태가 없다. `null`을 포함한 모든 runtime 값을 받으므로 `any?` 값도 nullability 오류 없이 들어간다. 따라서 동적 root는 include된 template의 자유 변수를 `any`로 도출한다. 호출자는 자기 scope에서 값을 넘기며, 그 scope에 바인딩되지 않은 이름은 `null`이다(RT-12, RT-13). Include는 그 scope에서 렌더링한다(RT-21). `any`는 값과 `null`을 모두 받는다.
 
 Typed IR은 모든 symbol, template path, definition target, function signature, input type을 해석하고 모든 node와 expression의 source span을 보존해 generated runtime 실패가 원본 template을 가리키게 한다. 변수 누락, 정적 타입에 없는 member, 선언하지 않은 definition, 잘못된 include path, 알 수 없는 함수 구현 종류, 호환되지 않는 block input은 compile 실패다. 명시적인 동적 `any`의 member, index, spread, loop는 IR에 남아 `RuntimeBindings`를 사용한다. Built-in과 host signature는 같은 call node를 사용하고 program load를 위해 구현 종류를 보존한다.
 
