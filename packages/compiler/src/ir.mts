@@ -440,7 +440,8 @@ export function lowerSourceGraph(graph: SourceGraph, manifest: TypeManifest): Pr
         if (!graph.templates.has(target)) throw new CompilerError('E_LOAD_NOT_FOUND', templateName, node.span, linesOf(templateName), `template ${target} does not exist`);
         const inputs = [...inputsOf(target)].map(([name, valueType]) => {
           const value = lowerExpr({ type: 'Var', name, span: node.span }, scope, loops);
-          if (!acceptsType(value.valueType, valueType) || value.valueType.optional && !valueType.optional) {
+          // An `any` input has no optional form: it takes every runtime value, null included (compiler.md).
+          if (!acceptsType(value.valueType, valueType) || value.valueType.optional && !valueType.optional && required(valueType).kind !== 'any') {
             throw new Error(`compiler: include ${target} input ${name} requires ${typeSource(valueType)}, got ${typeSource(value.valueType)}`);
           }
           return { name, value, valueType };

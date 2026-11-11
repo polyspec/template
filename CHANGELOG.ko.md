@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- include 검사는 `any?` 값을 optional 형태가 없는 `any` input에 받아들인다. 동적 root에서 root 이름을 읽는 include된 template은 호출자 scope가 바인딩되지 않은 이름을 `null`로 넘기고 `any`가 이를 받으므로 검사를 통과한다(T27.1-83).
+
 ## 0.0.26
 
 - 저장소는 run-tests의 시간 제한을 없앤 kit 0.0.105(kit K1175)를 채택하고 run-tests에 `--timeout`을 넘기지 않는다(T27.1-80).
