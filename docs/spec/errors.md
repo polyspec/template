@@ -19,7 +19,7 @@ The SDK exposes these seven fields through native error values and their plain-d
 
 - **ERR-14** An error raised by `bind` or `merge` (VAL-22), which run outside a render, has `template` equal to the empty string and `line`, `col`, `offset` and `end` equal to 0. Its code is the data_* code of the failed check or internal (ERR-13); an error of host code that the binding called reaches the caller unchanged (VAL-13, FUN-46). It is the error object of ERR-1 of the implementation, the same type that `render` raises. An exception that ERR-13 passes to the host unchanged leaves `bind` unchanged.
 
-- **ERR-6** An error for an entry template that the loader does not provide has `code` `load_not_found`, `template` equal to the requested name, `line` 0 and `col` 0. An error for an entry template whose loading fails (`load_failed`) has the same `template`, `line` and `col`.
+- **ERR-6** An error for an entry template that the loader does not provide has `code` `load_not_found`, `template` equal to the requested name, `line` 0 and `col` 0. An error for an entry template whose loading fails (`load_failed`) or that is not loaded (`load_not_loaded`, RT-77) has the same `template`, `line` and `col`.
 
 ## Codes
 
@@ -61,6 +61,7 @@ The code tables of ERR-7 to ERR-12 and ERR-15 are the catalog of the error codes
 | `load_cycle` | An include or block renders a template that is already being rendered in the same chain. | The include or block tag. |
 | `load_outside_root` | A resolved path leaves the loader root. | The include or block tag. |
 | `load_failed` | The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10), or a loader result lacks a source text and an AST, or a version (RT-9). | The include or block tag; for the entry template see ERR-6. |
+| `load_not_loaded` | A render needs a template of a loader that reads files (RT-77) that `prepare` or `load` did not load. | The include or block tag; for the entry template see ERR-6. |
 
 - **ERR-10** Data errors:
 

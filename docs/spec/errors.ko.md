@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 4e64620906194052e0a20c1cffad8bafdcd07bdebff9e505664f226b12d6d056 -->
+<!-- source-sha256: 9178bf1528466b2803921e93d8cedbe77e9640946618223806da38a381eca513 -->
 # 오류
 
 [English](/spec/errors).
@@ -20,7 +20,7 @@ SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 �
 
 - **ERR-14** render 밖에서 실행되는 `bind`와 `merge`(VAL-22)가 내는 오류는 `template`이 빈 문자열이고 `line`, `col`, `offset`, `end`가 0이다. code는 실패한 검사의 data_* code이거나 internal(ERR-13)이며, 바인딩이 호출한 호스트 코드의 오류는 바뀌지 않고 호출자에게 도달한다(VAL-13, FUN-46). 오류는 구현의 ERR-1 오류 객체이고, `render`가 내는 것과 같은 type이다. ERR-13이 호스트에 그대로 전달하는 예외는 `bind`에서도 그대로 나간다.
 
-- **ERR-6** 로더가 제공하지 않는 진입 템플릿의 오류는 `code`가 `load_not_found`이고 `template`이 요청한 이름이며 `line` 0, `col` 0이다. 로딩에 실패한 진입 템플릿의 오류(`load_failed`)도 `template`, `line`, `col`이 같다.
+- **ERR-6** 로더가 제공하지 않는 진입 템플릿의 오류는 `code`가 `load_not_found`이고 `template`이 요청한 이름이며 `line` 0, `col` 0이다. 로딩에 실패한 진입 템플릿의 오류(`load_failed`)와 로드되지 않은 진입 템플릿의 오류(`load_not_loaded`, RT-77)도 `template`, `line`, `col`이 같다.
 
 ## 코드
 
@@ -62,6 +62,7 @@ ERR-7에서 ERR-12와 ERR-15의 code table이 error code의 catalog입니다. `m
 | `load_cycle` | include 또는 block이 같은 체인에서 이미 렌더링 중인 템플릿을 렌더한다. | include 또는 block 태그. |
 | `load_outside_root` | 해석된 경로가 로더 루트를 벗어난다. | include 또는 block 태그. |
 | `load_failed` | 로더가 해석된 이름에 대해 실패를 보고한다(RT-9). TypeScript나 PHP 로더가 예외를 던지거나, Go나 Rust 로더가 오류를 반환하거나, 파일시스템 로더가 존재하는 일반 파일을 읽지 못한 경우이거나, 로더 결과에 소스 텍스트와 AST가 모두 없거나 버전이 없는 경우다(RT-9). | include 또는 block 태그; 진입 템플릿은 ERR-6. |
+| `load_not_loaded` | render가 파일을 읽는 로더(RT-77)의 템플릿 중 `prepare`나 `load`가 로드하지 않은 것을 필요로 한다. | include 또는 block 태그; 진입 템플릿은 ERR-6. |
 
 - **ERR-10** 데이터 오류:
 

@@ -228,6 +228,8 @@ Native loader results use source/AST alternatives with a non-empty version: Type
 
 - **RT-75** A filesystem loader closes the file that it reads before `load` returns, so loading any number of templates leaves no file of the loader open. Reason: a process that loads many templates, or runs for a long time, must not exhaust its file descriptors.
 
+- **RT-77** A render reads no file. A loader that reads files, the filesystem loader of the implementation (RT-10), declares it (`blocking_io` in Rust), and the program calls it only in `prepare` and in `load(name, options)`: they load the target and, transitively, every template that an include tag or a block tag of a loaded template names, by its path or by a template definition of `options.define`, and keep them in the cache of the program, applying the refresh policy of RT-76. `render`, `PreparedRender.render` and the render of an include or a block take such a template from that cache only; a name that is not in it fails with `load_not_loaded` (ERR-9). A loader that host code provides is called during a render as before, synchronously on the calling thread. Reason: a render runs on the thread of its caller, in Node.js the thread of the event loop, so a file read inside it blocks every other request; the reads happen where the caller expects blocking I/O.
+
 ## Scope
 
 - **RT-11** Each rendered template file has one local scope. Blocks inside a file (`{? }`, `{@ }`) do not create scopes.

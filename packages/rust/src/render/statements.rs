@@ -166,7 +166,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
 
     fn render_include(&mut self, path: &str, span: Span, frame: &Frame, scope: &mut Scope) -> Result<(), RenderError> {
         let name = self.resolve(path, frame, span)?;
-        let template = self.program.load_template(&name, Some(frame), Some(span))?;
+        let template = self.program.render_template(&name, Some(frame), Some(span))?;
         self.context.enter(&name, Some(frame), Some(span))?;
         let included = Frame {
             name: template.ast.name.clone(),
@@ -253,7 +253,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
             let value = self.evaluate(&item.expr, frame, scope)?;
             data.insert(item.name.clone(), value);
         }
-        let template = self.program.load_template(&template_name, Some(frame), Some(span))?;
+        let template = self.program.render_template(&template_name, Some(frame), Some(span))?;
         self.context.enter(&template_name, Some(frame), Some(span))?;
         let block_frame = Frame {
             name: template.ast.name.clone(),

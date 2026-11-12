@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: d4d6d22888ca9197e0c9a88819ec7eec9342fc665ee4370b8e47f05bbdb181e8 -->
+<!-- source-sha256: 128948cc07b3c4632d148faf9fb40a871d6ae2fab8a02c1c1d76c219aaeee2c0 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -228,6 +228,8 @@ flowchart TB
 네이티브 로더 결과는 소스·AST 중 하나와 비어 있지 않은 버전을 사용한다. TypeScript는 `LoadedSource`·`LoadedAst`, Go는 `loader.Result`(root의 `LoadResult`), Rust는 `Loaded::Source`·`Ast`, PHP·PHP 확장은 `LoaderInterface::load`가 반환하는 배열, Python은 `LoadResult` protocol의 `LoadedSource`·`LoadedAst`를 사용한다. 메모리 로더는 생성·소스/AST 교체·조회를 공개하며 TypeScript·Go·Rust·Python에서는 `MapLoader`, PHP·PHP 확장에서는 `ArrayLoader`다. Go·Rust는 AST 교체를 `SetAST`·`set_ast`로 구분하고 나머지 SDK는 네이티브 값에 따라 처리한다. 같은 이름의 내용을 변경하면 버전이 달라지고 같은 내용을 반복하면 버전이 유지된다. 버전 텍스트는 불투명하며 SDK 사이에 같을 필요가 없다. 이 계약에서 사용하는 공개 네이티브 subpackage 타입·root 재공개는 같은 데이터 carrier이며 네이티브 대입·identity 검사로 검증한다.
 
 - **RT-75** 파일시스템 로더는 읽은 파일을 `load`가 반환하기 전에 닫으므로, 템플릿을 몇 개 로드하든 로더의 파일이 열린 채 남지 않는다. 이유: 많은 템플릿을 로드하거나 오래 실행되는 process가 자기 file descriptor를 소진해서는 안 된다.
+
+- **RT-77** render는 파일을 읽지 않는다. 파일을 읽는 로더, 즉 구현의 파일시스템 로더(RT-10)는 그것을 선언하고(Rust에서는 `blocking_io`), 프로그램은 그 로더를 `prepare`와 `load(name, options)`에서만 부른다. 이 둘은 대상과, 로드한 템플릿의 include 태그나 block 태그가 경로로 또는 `options.define`의 템플릿 정의로 가리키는 모든 템플릿을 전이적으로 로드해 RT-76의 갱신 정책을 적용한 채 프로그램의 캐시에 둔다. `render`, `PreparedRender.render`, include와 block의 render는 그런 템플릿을 그 캐시에서만 가져오며, 캐시에 없는 이름은 `load_not_loaded`(ERR-9)로 실패한다. 호스트 코드가 제공한 로더는 전처럼 render 중에 호출 스레드에서 동기로 불린다. 이유: render는 호출자의 스레드에서, Node.js에서는 이벤트 루프의 스레드에서 실행되므로 그 안의 파일 읽기는 다른 모든 요청을 막는다. 읽기는 호출자가 blocking I/O를 예상하는 곳에서 일어난다.
 
 ## 스코프
 

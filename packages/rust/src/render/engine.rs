@@ -1,6 +1,6 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
-use crate::ast::Template;
+use crate::ast::{Node, Template};
 use crate::error::{ErrorCode, RenderError, Span, TemplateError, internal_boundary};
 use crate::functions::{Env, HostFunction};
 use crate::loader::{LoadError, Loaded, Loader, MapLoader, resolve_path};
@@ -195,7 +195,15 @@ pub struct AstProgram {
     pub(crate) delimiters: Delimiters,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
-    cache: Mutex<HashMap<String, (String, Arc<ParsedTemplate>)>>,
+    cache: Mutex<HashMap<String, Cached>>,
+}
+
+/// A template in the cache of a program: loaded with its version, or the failure of its load in `prepare` or `load`,
+/// which a render reports as it would have loaded it then (RT-77): a failure of the loader at the tag that names the
+/// template, an error of its source, such as a parse error, as it is.
+enum Cached {
+    Template(String, Arc<ParsedTemplate>),
+    Failed(TemplateError),
 }
 
 /// A render request with data, definitions and the target template prepared once.
@@ -220,6 +228,7 @@ impl AstProgram {
         &self,
         target: RenderTarget<'_>,
         registry: &HashMap<String, DefineEntry>,
+        io: bool,
     ) -> Result<(String, Arc<ParsedTemplate>), RenderError> {
         let target_name = match target {
             RenderTarget::Name(name) => match registry.get(name) {
@@ -229,7 +238,8 @@ impl AstProgram {
             RenderTarget::Ast(ast) => ast.name.clone(),
         };
         let template = match target {
-            RenderTarget::Name(_) => self.load_template(&target_name, None, None)?,
+            RenderTarget::Name(_) if io => self.load_template(&target_name, None, None)?,
+            RenderTarget::Name(_) => self.render_template(&target_name, None, None)?,
             RenderTarget::Ast(ast) => Arc::new(ParsedTemplate {
                 ast: ast.clone(),
                 lines: None,
@@ -301,7 +311,7 @@ impl AstProgram {
         }
         // A cache that a panic of another render poisoned fails the load as internal instead of serving what it holds.
         let poisoned = |error: PoisonError<_>| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be read: {error}"));
-        if let Some((version, template)) = self.cache.lock().map_err(poisoned)?.get(name)
+        if let Some(Cached::Template(version, template)) = self.cache.lock().map_err(poisoned)?.get(name)
             && (self.artifact_refresh == ArtifactRefresh::False
                 || (self.artifact_refresh == ArtifactRefresh::True && version == loaded.version()))
         {
@@ -323,8 +333,91 @@ impl AstProgram {
         self.cache
             .lock()
             .map_err(|error| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be written: {error}")))?
-            .insert(name.to_string(), (version, Arc::clone(&template)));
+            .insert(name.to_string(), Cached::Template(version, Arc::clone(&template)));
         Ok(template)
+    }
+
+    /// RT-77: the template that a render needs. A loader that reads files is not called: the template comes from the
+    /// cache that `prepare` or `load` filled, a failure of its load there is reported at the tag, and a name that they
+    /// did not load is `load_not_loaded`. A loader of host code is called (RT-9).
+    pub(crate) fn render_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Arc<ParsedTemplate>, RenderError> {
+        if !self.loader.blocking_io() {
+            return self.load_template(name, from, span);
+        }
+        let fail = |code: ErrorCode, message: String| {
+            RenderError::Kind(match (from, span) {
+                (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
+                _ => TemplateError::without_position(code, name, message),
+            })
+        };
+        let cache = self
+            .cache
+            .lock()
+            .map_err(|error| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be read: {error}")))?;
+        match cache.get(name) {
+            Some(Cached::Template(_, template)) => Ok(Arc::clone(template)),
+            Some(Cached::Failed(error)) if matches!(error.code, ErrorCode::E_LOAD_NOT_FOUND | ErrorCode::E_LOAD_FAILED) => {
+                Err(fail(error.code, error.message.clone()))
+            }
+            Some(Cached::Failed(error)) => Err(RenderError::Kind(error.clone())),
+            None => Err(fail(
+                ErrorCode::E_LOAD_NOT_LOADED,
+                format!("template {name} is not loaded: a loader that reads files is called by prepare and load only (RT-77)"),
+            )),
+        }
+    }
+
+    /// RT-77: loads the template of a target and every template that its include and block tags name, by their path or
+    /// by a template definition of `options.define`, transitively, into the cache that a render reads. It reads files
+    /// with a loader that reads files: call it where blocking I/O is expected. The target itself must load; a template
+    /// that another names and that fails to load fails the render that reaches it, at its tag.
+    pub fn load(&self, target: RenderTarget<'_>, options: &RenderOptions) -> Result<(), RenderError> {
+        let name = target.name();
+        internal_boundary(&name, || {
+            let registry =
+                bind_defines(&options.define).map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
+            let (target_name, template) = self.resolve_target(target, &registry, true)?;
+            self.preload(&target_name, &template, &registry)
+        })
+    }
+
+    /// Loads the templates that a loaded template names, transitively (RT-77); does nothing for a loader of host code,
+    /// which a render calls.
+    fn preload(&self, name: &str, template: &ParsedTemplate, registry: &HashMap<String, DefineEntry>) -> Result<(), RenderError> {
+        if !self.loader.blocking_io() {
+            return Ok(());
+        }
+        let mut pending: Vec<String> = registry
+            .values()
+            .filter_map(|entry| match entry {
+                DefineEntry::Template { template, .. } => Some(template.clone()),
+                DefineEntry::Html(_) => None,
+            })
+            .collect();
+        named_templates(name, &template.ast.body, &mut pending);
+        let mut seen = std::collections::HashSet::from([name.to_string()]);
+        while let Some(next) = pending.pop() {
+            if !seen.insert(next.clone()) {
+                continue;
+            }
+            match self.load_template(&next, None, None) {
+                Ok(loaded) => named_templates(&next, &loaded.ast.body, &mut pending),
+                Err(RenderError::Kind(error)) => {
+                    self.cache
+                        .lock()
+                        .map_err(|lock| {
+                            TemplateError::without_position(
+                                ErrorCode::E_INTERNAL,
+                                &next,
+                                format!("the template cache cannot be written: {lock}"),
+                            )
+                        })?
+                        .insert(next, Cached::Failed(error));
+                }
+                Err(other) => return Err(other),
+            }
+        }
+        Ok(())
     }
 
     /// Prepares a render request for repeated use.
@@ -335,7 +428,7 @@ impl AstProgram {
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, RenderError> {
         let name = target.name();
-        internal_boundary(&name, || self.prepare_request(&name, target, Root::Json(assign), options))
+        internal_boundary(&name, || self.prepare_request(&name, target, Root::Json(assign), options, true))
     }
 
     /// Prepares a render request whose assign is a bound map, which is not bound again (VAL-22).
@@ -346,7 +439,7 @@ impl AstProgram {
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, RenderError> {
         let name = target.name();
-        internal_boundary(&name, || self.prepare_request(&name, target, Root::Bound(assign), options))
+        internal_boundary(&name, || self.prepare_request(&name, target, Root::Bound(assign), options, true))
     }
 
     fn prepare_request<'e>(
@@ -355,6 +448,7 @@ impl AstProgram {
         target: RenderTarget<'_>,
         assign: Root<'_>,
         options: &RenderOptions,
+        io: bool,
     ) -> Result<PreparedRender<'e>, RenderError> {
         let bound = (|| -> Result<BoundRequest, BindError> {
             let root = match assign {
@@ -367,7 +461,10 @@ impl AstProgram {
         })();
         let BoundRequest { root, registry, env } =
             bound.map_err(|error| TemplateError::without_position(error.code, name, error.message))?;
-        let (target_name, template) = self.resolve_target(target, &registry)?;
+        let (target_name, template) = self.resolve_target(target, &registry, io)?;
+        if io {
+            self.preload(&target_name, &template, &registry)?;
+        }
         let execution = AstPreparedExecution {
             engine: self,
             root,
@@ -380,13 +477,20 @@ impl AstProgram {
     }
 
     /// Renders a template with data given as JSON.
+    /// RT-77: with a loader that reads files, the templates come from what `prepare` or `load` loaded.
     pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError> {
-        self.prepare(target, assign, options)?.render()
+        let name = target.name();
+        internal_boundary(&name, || {
+            self.prepare_request(&name, target, Root::Json(assign), options, false)?.render()
+        })
     }
 
     /// Renders a template whose assign is a bound map, which is not bound again (VAL-22).
     pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError> {
-        self.prepare_bound(target, assign, options)?.render()
+        let name = target.name();
+        internal_boundary(&name, || {
+            self.prepare_request(&name, target, Root::Bound(assign), options, false)?.render()
+        })
     }
 
     /// Renders a native value map while retaining assigned native objects. The map is bound
@@ -407,7 +511,7 @@ impl AstProgram {
         let assign = bind_values(assign).map_err(bind_failure)?;
         let registry = bind_defines(&options.define).map_err(bind_failure)?;
         let env = options.environment().map_err(bind_failure)?;
-        let (target_name, template) = self.resolve_target(target, &registry)?;
+        let (target_name, template) = self.resolve_target(target, &registry, false)?;
         AstPreparedExecution {
             engine: self,
             root: Arc::new(assign),
@@ -630,4 +734,39 @@ pub fn env_from_json(value: &JsonValue) -> Result<Env, BindError> {
         }
     };
     Ok(Env { timezone, now })
+}
+
+/// The names of the templates that the include and block tags of `nodes` name by a path, resolved against the template
+/// `name` (RT-77); a path that leaves the root is reported by the render that reaches its tag.
+fn named_templates(name: &str, nodes: &[Node], names: &mut Vec<String>) {
+    for node in nodes {
+        match node {
+            Node::Include { path, .. } | Node::Block { path: Some(path), .. } => {
+                if let Ok(resolved) = resolve_path(name, path) {
+                    names.push(resolved);
+                }
+            }
+            Node::If { branches, r#else, .. } => {
+                for branch in branches {
+                    named_templates(name, &branch.body, names);
+                }
+                if let Some(body) = r#else {
+                    named_templates(name, body, names);
+                }
+            }
+            Node::For { body, empty, .. } => {
+                named_templates(name, body, names);
+                if let Some(body) = empty {
+                    named_templates(name, body, names);
+                }
+            }
+            Node::IfBlock { body, r#else, .. } => {
+                named_templates(name, body, names);
+                if let Some(body) = r#else {
+                    named_templates(name, body, names);
+                }
+            }
+            Node::Text { .. } | Node::Echo { .. } | Node::Set { .. } | Node::Block { path: None, .. } => {}
+        }
+    }
 }

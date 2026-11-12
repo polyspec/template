@@ -52,6 +52,8 @@ pub enum ErrorCode {
     E_LOAD_OUTSIDE_ROOT,
     /// The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10), or a loader result lacks a source text and an AST, or a version (RT-9).
     E_LOAD_FAILED,
+    /// A render needs a template of a loader that reads files (RT-77) that `prepare` or `load` did not load.
+    E_LOAD_NOT_LOADED,
     /// A finite number has a magnitude greater than 2^53 − 1 (VAL-2).
     E_DATA_NUMBER_RANGE,
     /// A number is NaN or infinite.
@@ -134,6 +136,7 @@ impl ErrorCode {
             ErrorCode::E_LOAD_CYCLE => "load_cycle",
             ErrorCode::E_LOAD_OUTSIDE_ROOT => "load_outside_root",
             ErrorCode::E_LOAD_FAILED => "load_failed",
+            ErrorCode::E_LOAD_NOT_LOADED => "load_not_loaded",
             ErrorCode::E_DATA_NUMBER_RANGE => "data_number_range",
             ErrorCode::E_DATA_NUMBER_NOT_FINITE => "data_number_not_finite",
             ErrorCode::E_DATA_INVALID_UTF8 => "data_invalid_utf8",

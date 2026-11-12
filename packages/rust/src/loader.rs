@@ -48,6 +48,12 @@ pub enum LoadError {
 pub trait Loader: Send + Sync {
     /// Returns the template for a name, `Ok(None)` when the name does not exist, or the failure of the load.
     fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError>;
+
+    /// RT-77: whether the loader reads files. A program calls such a loader only in `prepare` and `load`, never during a
+    /// render; a loader of host code is called during a render, synchronously.
+    fn blocking_io(&self) -> bool {
+        false
+    }
 }
 
 /// FNV-1a hash of bytes, used as the version of in-memory sources.
@@ -170,6 +176,10 @@ impl FsLoader {
 impl Loader for FsLoader {
     fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError> {
         self.load_file(name).map_err(LoadError::Failed)
+    }
+
+    fn blocking_io(&self) -> bool {
+        true
     }
 }
 

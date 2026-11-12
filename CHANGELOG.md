@@ -28,6 +28,7 @@
 - The TypeScript backend of the compiler imports the binding package `@polyspec/template` again, the name that a user of the generated code sees; the compiler takes `@polyspec/template-legacy` as a development dependency and is no release target during the transition.
 - The legacy language packages, the TypeScript packages that take the legacy runtime and the code generated for them run `legacy/tests/`, the copy of the cases and fixtures that the legacy packages passed when they moved, in their native tests, the conformance runner and the generated runners; Rust runs `tests/`.
 - Rust: the kind interface comes from the crate `polyspec-binding-core` of the repository binding, the former bindgen; the binding packages are scaffolded again by binding.
+- Rust: a render reads no file (RT-77). With the filesystem loader, `prepare` and the new `AstProgram::load` read the target and every template that its include and block tags name, and `render` takes them from the cache of the program; a template that they did not load fails with the new kind `load_not_loaded`. A loader of host code is still called during a render.
 
 ## 0.0.27
 

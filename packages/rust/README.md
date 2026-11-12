@@ -20,7 +20,8 @@ let assign = polyspec_template::read_json(r#"{ "title": "Home" }"#)?;
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
 options.define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
-let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
+// RT-77: prepare reads the templates with the file loader; the render of the prepared request reads no file.
+let html = engine.prepare(RenderTarget::Name("layout"), &assign, &options)?.render()?;
 ```
 
 Assign data is a JSON value of the crate `polyspec-json`, which the crate re-exports; objects keep their document order and numbers outside the safe range are rejected (VAL-12).
@@ -44,6 +45,7 @@ Assign data is a JSON value of the crate `polyspec-json`, which the crate re-exp
 | `TemplateObject` | A native object: `member(key)` returns `Ok(Some(value))`, `Ok(None)` for no public field, or a `HostError`; `call(method, args)` returns `None` for no public method. |
 | `Value::downcast_object::<T>()` | Returns the original `TemplateObject` of type `T` that a template passed to a host function, a class function or a method. |
 | `internal_boundary` | Every public parse, prepare and render operation reports a panic as `internal` instead of unwinding into the host. |
+| `AstProgram::load(target, &options)`, `prepare` | Read the templates of a loader that reads files (`FsLoader`): the target and every template that its include and block tags name, transitively. `render` reads no file and fails with `load_not_loaded` for a template that they did not load (RT-77). |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. `Loader::load` returns `Result<Option<Loaded>, LoadError>`: `LoadError::Failed` is `load_failed`, which `FsLoader` returns for a regular file that cannot be read, and `LoadError::Host` carries the error of host code to the caller unchanged (RT-9). |
 | `parse_json`, `parse_json_bytes`, `read_json` | JSON parsing into template values or into a checked `polyspec_json::Value`. Numbers outside ±(2^53 − 1), unpaired surrogate escapes, nesting deeper than 64 levels and text that is not one JSON document (`data_invalid_json`) fail with their data codes. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |

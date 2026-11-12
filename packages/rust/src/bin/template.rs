@@ -289,18 +289,16 @@ fn main() {
 }
 
 fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<String>, define: Option<String>, env: Option<String>) {
-    let engine = Engine::new(
-        match AstProgram::new(EngineOptions {
-            loader: Some(Box::new(polyspec_template::FsLoader::new(root))),
-            functions: Default::default(),
-            limits: None,
-            delimiters,
-            artifact_refresh: Default::default(),
-        }) {
-            Ok(program) => program,
-            Err(error) => fail_request(error),
-        },
-    );
+    let program = match AstProgram::new(EngineOptions {
+        loader: Some(Box::new(polyspec_template::FsLoader::new(root))),
+        functions: Default::default(),
+        limits: None,
+        delimiters,
+        artifact_refresh: Default::default(),
+    }) {
+        Ok(program) => program,
+        Err(error) => fail_request(error),
+    };
     let assign = match &data {
         Some(path) => read_json(root, path, name),
         // RT-4: no data is an empty map.
@@ -319,7 +317,12 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
             Err(error) => bind_failure(name, error),
         });
     }
-    match engine.render(RenderTarget::Name(name), &assign, &render_options) {
+    let engine = Engine::new(program);
+    // RT-77: prepare reads the templates with the file loader; the render of the prepared request reads no file.
+    match engine
+        .prepare(RenderTarget::Name(name), &assign, &render_options)
+        .and_then(|prepared| prepared.render())
+    {
         Ok(output) => write_stdout(&output),
         Err(RenderError::Kind(error)) => fail_request(error),
         // The command registers no host function and loads with FsLoader, so no host code reports an error; one that

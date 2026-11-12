@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d243ddf00ec13f4eb504ed810b9d47a36fd30280 */
+ * Stub hash: 978341a47b2183b646ea538b82e640b76ac5ce67 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Polyspec_Template_Loader_LoaderInterface_load, 0, 1, IS_ARRAY, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -2269,6 +2269,17 @@ static zend_class_entry *register_class_Polyspec_Template_ErrorCode(void)
 #endif
 	zend_string_release(const_E_LOAD_FAILED_name);
 
+	zval const_E_LOAD_NOT_LOADED_value;
+	zend_string *const_E_LOAD_NOT_LOADED_value_str = zend_string_init("E_LOAD_NOT_LOADED", strlen("E_LOAD_NOT_LOADED"), 1);
+	ZVAL_STR(&const_E_LOAD_NOT_LOADED_value, const_E_LOAD_NOT_LOADED_value_str);
+	zend_string *const_E_LOAD_NOT_LOADED_name = zend_string_init_interned("E_LOAD_NOT_LOADED", sizeof("E_LOAD_NOT_LOADED") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_LOAD_NOT_LOADED_name, &const_E_LOAD_NOT_LOADED_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_LOAD_NOT_LOADED_name, &const_E_LOAD_NOT_LOADED_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_LOAD_NOT_LOADED_name);
+
 	zval const_E_DATA_NUMBER_RANGE_value;
 	zend_string *const_E_DATA_NUMBER_RANGE_value_str = zend_string_init("E_DATA_NUMBER_RANGE", strlen("E_DATA_NUMBER_RANGE"), 1);
 	ZVAL_STR(&const_E_DATA_NUMBER_RANGE_value, const_E_DATA_NUMBER_RANGE_value_str);
@@ -2466,6 +2477,83 @@ static zend_class_entry *register_class_Polyspec_Template_ErrorCode(void)
 	zend_declare_class_constant_ex(class_entry, const_E_RUNTIME_LIMIT_name, &const_E_RUNTIME_LIMIT_value, ZEND_ACC_PUBLIC, NULL);
 #endif
 	zend_string_release(const_E_RUNTIME_LIMIT_name);
+
+	zval const_E_ARGUMENT_DELIMITERS_value;
+	zend_string *const_E_ARGUMENT_DELIMITERS_value_str = zend_string_init("E_ARGUMENT_DELIMITERS", strlen("E_ARGUMENT_DELIMITERS"), 1);
+	ZVAL_STR(&const_E_ARGUMENT_DELIMITERS_value, const_E_ARGUMENT_DELIMITERS_value_str);
+	zend_string *const_E_ARGUMENT_DELIMITERS_name = zend_string_init_interned("E_ARGUMENT_DELIMITERS", sizeof("E_ARGUMENT_DELIMITERS") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_ARGUMENT_DELIMITERS_name, &const_E_ARGUMENT_DELIMITERS_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_ARGUMENT_DELIMITERS_name, &const_E_ARGUMENT_DELIMITERS_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_ARGUMENT_DELIMITERS_name);
+
+	zval const_E_ARGUMENT_FUNCTION_NAME_value;
+	zend_string *const_E_ARGUMENT_FUNCTION_NAME_value_str = zend_string_init("E_ARGUMENT_FUNCTION_NAME", strlen("E_ARGUMENT_FUNCTION_NAME"), 1);
+	ZVAL_STR(&const_E_ARGUMENT_FUNCTION_NAME_value, const_E_ARGUMENT_FUNCTION_NAME_value_str);
+	zend_string *const_E_ARGUMENT_FUNCTION_NAME_name = zend_string_init_interned("E_ARGUMENT_FUNCTION_NAME", sizeof("E_ARGUMENT_FUNCTION_NAME") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_ARGUMENT_FUNCTION_NAME_name, &const_E_ARGUMENT_FUNCTION_NAME_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_ARGUMENT_FUNCTION_NAME_name, &const_E_ARGUMENT_FUNCTION_NAME_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_ARGUMENT_FUNCTION_NAME_name);
+
+	zval const_E_ARGUMENT_SOURCE_RANGE_value;
+	zend_string *const_E_ARGUMENT_SOURCE_RANGE_value_str = zend_string_init("E_ARGUMENT_SOURCE_RANGE", strlen("E_ARGUMENT_SOURCE_RANGE"), 1);
+	ZVAL_STR(&const_E_ARGUMENT_SOURCE_RANGE_value, const_E_ARGUMENT_SOURCE_RANGE_value_str);
+	zend_string *const_E_ARGUMENT_SOURCE_RANGE_name = zend_string_init_interned("E_ARGUMENT_SOURCE_RANGE", sizeof("E_ARGUMENT_SOURCE_RANGE") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_ARGUMENT_SOURCE_RANGE_name, &const_E_ARGUMENT_SOURCE_RANGE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_ARGUMENT_SOURCE_RANGE_name, &const_E_ARGUMENT_SOURCE_RANGE_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_ARGUMENT_SOURCE_RANGE_name);
+
+	zval const_E_ARGUMENT_INDENT_value;
+	zend_string *const_E_ARGUMENT_INDENT_value_str = zend_string_init("E_ARGUMENT_INDENT", strlen("E_ARGUMENT_INDENT"), 1);
+	ZVAL_STR(&const_E_ARGUMENT_INDENT_value, const_E_ARGUMENT_INDENT_value_str);
+	zend_string *const_E_ARGUMENT_INDENT_name = zend_string_init_interned("E_ARGUMENT_INDENT", sizeof("E_ARGUMENT_INDENT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_ARGUMENT_INDENT_name, &const_E_ARGUMENT_INDENT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_ARGUMENT_INDENT_name, &const_E_ARGUMENT_INDENT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_ARGUMENT_INDENT_name);
+
+	zval const_E_FORMAT_INVARIANT_value;
+	zend_string *const_E_FORMAT_INVARIANT_value_str = zend_string_init("E_FORMAT_INVARIANT", strlen("E_FORMAT_INVARIANT"), 1);
+	ZVAL_STR(&const_E_FORMAT_INVARIANT_value, const_E_FORMAT_INVARIANT_value_str);
+	zend_string *const_E_FORMAT_INVARIANT_name = zend_string_init_interned("E_FORMAT_INVARIANT", sizeof("E_FORMAT_INVARIANT") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_FORMAT_INVARIANT_name, &const_E_FORMAT_INVARIANT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_FORMAT_INVARIANT_name, &const_E_FORMAT_INVARIANT_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_FORMAT_INVARIANT_name);
+
+	zval const_E_FORMAT_HTML_value;
+	zend_string *const_E_FORMAT_HTML_value_str = zend_string_init("E_FORMAT_HTML", strlen("E_FORMAT_HTML"), 1);
+	ZVAL_STR(&const_E_FORMAT_HTML_value, const_E_FORMAT_HTML_value_str);
+	zend_string *const_E_FORMAT_HTML_name = zend_string_init_interned("E_FORMAT_HTML", sizeof("E_FORMAT_HTML") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_FORMAT_HTML_name, &const_E_FORMAT_HTML_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_FORMAT_HTML_name, &const_E_FORMAT_HTML_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_FORMAT_HTML_name);
+
+	zval const_E_AST_INVALID_value;
+	zend_string *const_E_AST_INVALID_value_str = zend_string_init("E_AST_INVALID", strlen("E_AST_INVALID"), 1);
+	ZVAL_STR(&const_E_AST_INVALID_value, const_E_AST_INVALID_value_str);
+	zend_string *const_E_AST_INVALID_name = zend_string_init_interned("E_AST_INVALID", sizeof("E_AST_INVALID") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_E_AST_INVALID_name, &const_E_AST_INVALID_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+#else
+	zend_declare_class_constant_ex(class_entry, const_E_AST_INVALID_name, &const_E_AST_INVALID_value, ZEND_ACC_PUBLIC, NULL);
+#endif
+	zend_string_release(const_E_AST_INVALID_name);
 
 	zval const_E_INTERNAL_value;
 	zend_string *const_E_INTERNAL_value_str = zend_string_init("E_INTERNAL", strlen("E_INTERNAL"), 1);

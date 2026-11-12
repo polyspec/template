@@ -24,8 +24,8 @@ function literals(files: string[], quote: string): { place: string; code: string
     .flatMap((line, index) => [...line.matchAll(pattern)].map(match => ({ place: `${file}:${index + 1}`, code: match[1] ?? '' }))));
 }
 
-test('the catalog holds the 48 codes of the tables of docs/spec/errors.md in their order, each with its condition', { timeout: 10_000 }, () => {
-  assert.equal(catalog.length, 48);
+test('the catalog holds the 49 codes of the tables of docs/spec/errors.md in their order, each with its condition', { timeout: 10_000 }, () => {
+  assert.equal(catalog.length, 49);
   assert.deepEqual(catalog[0], { code: 'E_LEX_INVALID_UTF8', kind: 'lex_invalid_utf8', condition: 'The source is not valid UTF-8.' });
   assert.equal(catalog.at(-1)?.code, 'E_INTERNAL');
 });

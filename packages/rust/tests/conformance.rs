@@ -77,8 +77,10 @@ fn render_case(dir: &Path) -> Result<Outcome, Failed> {
         Some(Ok(env)) => options.env = Some(env_from_json(&env).map_err(|error| format!("env.json: {error:?}"))?),
         Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "env"))),
     }
+    // RT-77: prepare reads the templates with the file loader; the render of the prepared request reads no file.
     match engine
-        .render(RenderTarget::Name("input.tpl"), &assign, &options)
+        .prepare(RenderTarget::Name("input.tpl"), &assign, &options)
+        .and_then(|prepared| prepared.render())
         .map_err(common::kind)
     {
         Ok(html) => Ok(Outcome::Html(html)),

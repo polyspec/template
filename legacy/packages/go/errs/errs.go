@@ -35,6 +35,7 @@ const (
 	LoadCycle                Code = "E_LOAD_CYCLE"
 	LoadOutsideRoot          Code = "E_LOAD_OUTSIDE_ROOT"
 	LoadFailed               Code = "E_LOAD_FAILED"
+	LoadNotLoaded            Code = "E_LOAD_NOT_LOADED"
 	DataNumberRange          Code = "E_DATA_NUMBER_RANGE"
 	DataNumberNotFinite      Code = "E_DATA_NUMBER_NOT_FINITE"
 	DataInvalidUTF8          Code = "E_DATA_INVALID_UTF8"

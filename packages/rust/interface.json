@@ -203,6 +203,10 @@
         "category": "io"
       },
       {
+        "variant": "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
+        "category": "value"
+      },
+      {
         "variant": "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
         "category": "value"
       },
@@ -3186,6 +3190,7 @@
             "polyspec_template::ErrorCode::E_LOAD_CYCLE",
             "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
             "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
             "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
@@ -3409,6 +3414,7 @@
             "polyspec_template::ErrorCode::E_LOAD_CYCLE",
             "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
             "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
             "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
@@ -3494,6 +3500,7 @@
             "polyspec_template::ErrorCode::E_LOAD_CYCLE",
             "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
             "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
             "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
@@ -3581,6 +3588,7 @@
             "polyspec_template::ErrorCode::E_LOAD_CYCLE",
             "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
             "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
             "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
@@ -3605,6 +3613,93 @@
           "core": {
             "path": "polyspec_template::AstProgram::render_bound",
             "receiver": "&self"
+          }
+        },
+        {
+          "id": "engine.load",
+          "name": [
+            "load"
+          ],
+          "kind": "method",
+          "visibility": "public",
+          "parameters": [
+            {
+              "name": [
+                "name"
+              ],
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": [
+                "options"
+              ],
+              "type": {
+                "unit": "render_options"
+              },
+              "default": {
+                "empty": "object"
+              }
+            }
+          ],
+          "returns": "none",
+          "raises": [
+            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
+            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
+            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
+            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
+            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
+            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
+            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
+            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
+            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
+            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
+            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
+            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
+            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
+            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
+            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
+            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
+            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
+            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
+            "polyspec_template::ErrorCode::E_LOAD_CYCLE",
+            "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
+            "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
+            "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
+            "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
+            "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
+            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
+            "polyspec_template::ErrorCode::E_DATA_DEPTH",
+            "polyspec_template::ErrorCode::E_DATA_INVALID_JSON",
+            "polyspec_template::ErrorCode::E_RUNTIME_TYPE",
+            "polyspec_template::ErrorCode::E_RUNTIME_COMPARE",
+            "polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO",
+            "polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY",
+            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION",
+            "polyspec_template::ErrorCode::E_RUNTIME_ARITY",
+            "polyspec_template::ErrorCode::E_RUNTIME_HOST_FUNCTION",
+            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP",
+            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED",
+            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED",
+            "polyspec_template::ErrorCode::E_RUNTIME_DEPTH",
+            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
+            "polyspec_template::ErrorCode::E_INTERNAL"
+          ],
+          "wait": "blocking_io",
+          "core": {
+            "path": "polyspec_template::AstProgram::load",
+            "receiver": "&self"
+          },
+          "only": {
+            "targets": [
+              "php",
+              "python",
+              "node",
+              "go"
+            ],
+            "reason": "RT-10"
           }
         },
         {
@@ -3667,6 +3762,7 @@
             "polyspec_template::ErrorCode::E_LOAD_CYCLE",
             "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
             "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
             "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
@@ -3687,10 +3783,19 @@
             "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
             "polyspec_template::ErrorCode::E_INTERNAL"
           ],
-          "wait": "none",
+          "wait": "blocking_io",
           "core": {
             "path": "polyspec_template::AstProgram::prepare",
             "receiver": "&self"
+          },
+          "only": {
+            "targets": [
+              "php",
+              "python",
+              "node",
+              "go"
+            ],
+            "reason": "RT-10"
           }
         },
         {
@@ -3756,6 +3861,7 @@
             "polyspec_template::ErrorCode::E_LOAD_CYCLE",
             "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
             "polyspec_template::ErrorCode::E_LOAD_FAILED",
+            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
             "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
             "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
@@ -3776,10 +3882,19 @@
             "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
             "polyspec_template::ErrorCode::E_INTERNAL"
           ],
-          "wait": "none",
+          "wait": "blocking_io",
           "core": {
             "path": "polyspec_template::AstProgram::prepare_bound",
             "receiver": "&self"
+          },
+          "only": {
+            "targets": [
+              "php",
+              "python",
+              "node",
+              "go"
+            ],
+            "reason": "RT-10"
           }
         }
       ]
@@ -4324,6 +4439,19 @@
         "go": "a[true], list[1.5] and object[1] are nil"
       },
       "to": null
+    },
+    {
+      "id": "change-render-file-io",
+      "rule": "RT-77",
+      "reason": "RT-77: a render reads no file; with the filesystem loader, prepare or load reads the templates where blocking I/O is expected, and render takes them from the cache, so a render on the thread of an event loop never blocks on a file",
+      "symbol": "render",
+      "from": {
+        "node": "Engine.render with FsLoader reads the files of the templates during the render",
+        "python": "Engine.render with FsLoader reads the files of the templates during the render",
+        "php": "Engine::render with FilesystemLoader reads the files of the templates during the render",
+        "go": "Engine.Render with FSLoader reads the files of the templates during the render"
+      },
+      "to": "engine.load"
     },
     {
       "id": "change-render-template",

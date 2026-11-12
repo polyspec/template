@@ -442,6 +442,9 @@ final class ErrorCode
     /** The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10), or a loader result lacks a source text and an AST, or a version (RT-9). */
     public const string E_LOAD_FAILED = 'E_LOAD_FAILED';
 
+    /** A render needs a template of a loader that reads files (RT-77) that `prepare` or `load` did not load. */
+    public const string E_LOAD_NOT_LOADED = 'E_LOAD_NOT_LOADED';
+
     /** A finite number has a magnitude greater than 2^53 − 1 (VAL-2). */
     public const string E_DATA_NUMBER_RANGE = 'E_DATA_NUMBER_RANGE';
 

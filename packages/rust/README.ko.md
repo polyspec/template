@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: fcff8605c1b72ca895c07be00d221e9598c0644230115ef05f7040b15649089c -->
+<!-- source-sha256: 8aee8a02299762993004d04449aec84f11a3a60bf80532b301715dc4f05d9dd8 -->
 # polyspec-template
 
 [English](README.md).
@@ -21,7 +21,8 @@ let assign = polyspec_template::read_json(r#"{ "title": "Home" }"#)?;
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
 options.define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
-let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
+// RT-77: prepare가 파일 로더로 템플릿을 읽고, 준비된 요청의 render는 파일을 읽지 않는다.
+let html = engine.prepare(RenderTarget::Name("layout"), &assign, &options)?.render()?;
 ```
 
 assign 데이터는 crate가 다시 내보내는 crate `polyspec-json`의 JSON 값이다. 객체는 문서 순서를 유지하고, 안전 범위 밖의 숫자는 거부한다(VAL-12).
@@ -45,6 +46,7 @@ assign 데이터는 crate가 다시 내보내는 crate `polyspec-json`의 JSON �
 | `TemplateObject` | Native object. `member(key)`는 `Ok(Some(value))`, public field가 없으면 `Ok(None)`, 또는 `HostError`를 반환한다. `call(method, args)`는 public method가 없으면 `None`을 반환한다. |
 | `Value::downcast_object::<T>()` | 템플릿이 호스트 함수, class 함수, method에 넘긴 `T` 타입의 원본 `TemplateObject`를 반환한다. |
 | `internal_boundary` | 모든 공개 parse, prepare, render 연산은 panic을 호스트로 전파하지 않고 `internal`로 보고한다. |
+| `AstProgram::load(target, &options)`, `prepare` | 파일을 읽는 로더(`FsLoader`)의 템플릿, 즉 대상과 그 include·block 태그가 가리키는 모든 템플릿을 전이적으로 읽는다. `render`는 파일을 읽지 않으며 이 둘이 로드하지 않은 템플릿에는 `load_not_loaded`로 실패한다(RT-77). |
 | `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. `Loader::load`는 `Result<Option<Loaded>, LoadError>`를 반환한다. `LoadError::Failed`는 `load_failed`이며 `FsLoader`가 읽을 수 없는 일반 파일에 대해 반환하고, `LoadError::Host`는 호스트 코드의 오류를 바뀌지 않고 호출자에게 전한다(RT-9). |
 | `parse_json`, `parse_json_bytes`, `read_json` | 템플릿 값 또는 검사한 `polyspec_json::Value`로의 JSON 파싱. ±(2^53 − 1) 밖의 숫자, 짝이 없는 surrogate escape, 64단계보다 깊은 중첩, 하나의 JSON 문서가 아닌 텍스트(`data_invalid_json`)는 각 데이터 코드로 실패한다. |
 | `TemplateError` | `code`, `template`, `line`, `col`, `offset`, `end`, `message`를 가진 오류. |

@@ -49,12 +49,14 @@ impl Loader for ResultLoader {
 }
 
 fn render(loader: Box<dyn Loader>, target: &str) -> Result<String, RenderError> {
-    AstProgram::new(EngineOptions {
+    let program = AstProgram::new(EngineOptions {
         loader: Some(loader),
         ..Default::default()
     })
-    .expect("valid engine options")
-    .render_values(RenderTarget::Name(target), OrderedMap::new(), &RenderOptions::default())
+    .expect("valid engine options");
+    // RT-77: load reads the templates of a loader that reads files; the render reads none.
+    program.load(RenderTarget::Name(target), &RenderOptions::default())?;
+    program.render_values(RenderTarget::Name(target), OrderedMap::new(), &RenderOptions::default())
 }
 
 /// RT-9, FUN-46: the error of a host loader reaches the caller unchanged; a loader of the implementation that judges a
