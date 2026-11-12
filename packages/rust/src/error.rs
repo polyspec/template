@@ -178,6 +178,17 @@ pub struct LineIndex {
 }
 
 impl LineIndex {
+    /// Restores a line index stored in a compiled artifact; offsets that do not start at 0 or do not increase are an error.
+    pub fn try_from_starts(starts: Vec<usize>) -> Result<LineIndex, String> {
+        if starts.first() != Some(&0) {
+            return Err("a line index starts at byte 0".to_string());
+        }
+        if !starts.windows(2).all(|pair| pair[0] < pair[1]) {
+            return Err("the starts of the lines increase".to_string());
+        }
+        Ok(LineIndex { starts })
+    }
+
     /// Restores a verified line index stored in a compiled artifact.
     pub fn from_starts(starts: Vec<usize>) -> LineIndex {
         assert!(starts.first() == Some(&0), "a line index must start at byte zero");

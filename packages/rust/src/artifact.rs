@@ -19,6 +19,37 @@ struct Manifest {
 struct ManifestFile {
     path: String,
     artifact_digest: String,
+    /// The line index of the source of the template, which the build compiler records (RT-56), so that an error names
+    /// its line and column.
+    lines: Option<crate::LineIndex>,
+}
+
+/// The `lines` of a file of the manifest: the byte offset of the start of each line of its source, from 0; a file
+/// without `lines` has no line index.
+fn line_index(file: &Json) -> Result<Option<crate::LineIndex>, String> {
+    let found = match file.get("lines") {
+        Ok(Some(found)) => found,
+        Ok(None) => return Ok(None),
+        Err(error) => return Err(error.to_string()),
+    };
+    if found.kind() != Kind::Array {
+        return Err("lines is not an array".to_string());
+    }
+    let items = found.items().map_err(|error| error.to_string())?;
+    let mut starts = Vec::with_capacity(items.len());
+    for item in items {
+        let literal = if item.kind() == Kind::Number {
+            item.number_literal().map_err(|error| error.to_string())?
+        } else {
+            ""
+        };
+        starts.push(
+            literal
+                .parse::<usize>()
+                .map_err(|error| format!("a line start {literal:?} is not an offset: {error}"))?,
+        );
+    }
+    crate::LineIndex::try_from_starts(starts).map(Some)
 }
 
 /// The manifest of an AST artifact: an object with the strings `mode` and `entry` and the object `files`, whose members
@@ -44,11 +75,13 @@ fn read_manifest(raw: &[u8]) -> Result<Manifest, String> {
         if file.kind() != Kind::Object {
             return Err(format!("AST artifact manifest file {name} is not an object"));
         }
+        let lines = line_index(file).map_err(|error| format!("AST artifact manifest file {name}: {error}"))?;
         entries.insert(
             name,
             ManifestFile {
                 path: member(file, "path")?,
                 artifact_digest: member(file, "artifactDigest")?,
+                lines,
             },
         );
     }
@@ -61,14 +94,15 @@ fn read_manifest(raw: &[u8]) -> Result<Manifest, String> {
 
 /// The templates of a loaded artifact, by name.
 struct ArtifactLoader {
-    templates: HashMap<String, (crate::ast::Template, String)>,
+    templates: HashMap<String, (crate::ast::Template, String, Option<crate::LineIndex>)>,
 }
 
 impl Loader for ArtifactLoader {
     fn load(&self, name: &str) -> Result<Option<Loaded>, crate::loader::LoadError> {
-        Ok(self.templates.get(name).map(|(ast, version)| Loaded::Ast {
+        Ok(self.templates.get(name).map(|(ast, version, lines)| Loaded::Ast {
             ast: ast.clone(),
             version: version.clone(),
+            lines: lines.clone(),
         }))
     }
 }
@@ -132,7 +166,7 @@ pub fn load_artifact(directory: &Path) -> Result<AstProgram, ArtifactError> {
             .map_err(|error| ArtifactError::Failed(format!("AST artifact file of {name} is not UTF-8: {error}")))?;
         let ast = decode_template(text)
             .map_err(|error| ArtifactError::Failed(format!("AST artifact file of {name} does not decode: {error}")))?;
-        templates.insert(name.clone(), (ast, file.artifact_digest.clone()));
+        templates.insert(name.clone(), (ast, file.artifact_digest.clone(), file.lines.clone()));
     }
     AstProgram::new(EngineOptions {
         loader: Some(Box::new(ArtifactLoader { templates })),

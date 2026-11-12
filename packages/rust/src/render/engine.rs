@@ -319,7 +319,7 @@ impl AstProgram {
         }
         let version = loaded.version().to_string();
         let template = match loaded {
-            Loaded::Ast { ast, .. } => ParsedTemplate { ast, lines: None },
+            Loaded::Ast { ast, lines, .. } => ParsedTemplate { ast, lines },
             Loaded::Source { bytes, .. } => {
                 let source = Source::from_bytes(name, &bytes)?;
                 let ast = parse_template(&source, self.delimiters)?;

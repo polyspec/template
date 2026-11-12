@@ -8,6 +8,8 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
+mod common;
+
 use polyspec_template::{
     AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, ParseOptions, RenderOptions, RenderTarget, parse, resolve_path,
 };
@@ -132,4 +134,29 @@ fn kind(error: polyspec_template::RenderError) -> polyspec_template::TemplateErr
         polyspec_template::RenderError::Kind(error) => error,
         other => panic!("expected a template error, got the error of host code: {other}"),
     }
+}
+
+/// An AST added with the line index of its source fails with the line and the column of the error (ERR-3); an index
+/// that does not start at 0 is refused.
+#[test]
+fn an_ast_with_its_line_index_names_the_position_of_an_error() {
+    let ast = polyspec_template::parse(b"a\n{= 1 / 0}", "x.tpl", &polyspec_template::ParseOptions::default()).unwrap();
+    let mut loader = polyspec_template::MapLoader::new();
+    assert!(loader.set_ast_lines("x.tpl", vec![1, 2], ast.clone()).is_err());
+    loader.set_ast_lines("x.tpl", vec![0, 2], ast).unwrap();
+    let program = polyspec_template::AstProgram::new(polyspec_template::EngineOptions {
+        loader: Some(Box::new(loader)),
+        ..Default::default()
+    })
+    .unwrap();
+    let error = common::kind(
+        program
+            .render(
+                polyspec_template::RenderTarget::Name("x.tpl"),
+                &polyspec_template::polyspec_json::Value::null(),
+                &polyspec_template::RenderOptions::default(),
+            )
+            .unwrap_err(),
+    );
+    assert_eq!((error.line, error.col), (2, 4));
 }

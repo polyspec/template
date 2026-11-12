@@ -30,6 +30,7 @@
 - Rust: the kind interface comes from the crate `polyspec-binding-core` of the repository binding, the former bindgen; the binding packages are scaffolded again by binding.
 - Rust: a render reads no file (RT-77). With the filesystem loader, `prepare` and the new `AstProgram::load` read the target and every template that its include and block tags name, and `render` takes them from the cache of the program; a template that they did not load fails with the new kind `load_not_loaded`. A loader of host code is still called during a render.
 - The compiler specification states typed programs (docs/spec/compiler.md#typed-programs): a backend emits declarations that render through the AstProgram of the runtime, and the backends move one by one, in the order Rust, TypeScript, Python, PHP and Go (Wave 28).
+- Rust: an AST loaded with the line index of its source names the line and the column of an error: `Loaded::Ast` holds `lines`, `MapLoader::set_ast_lines` takes them, and the artifact runtime reads the `lines` of its manifest.
 
 ## 0.0.27
 

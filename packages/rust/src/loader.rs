@@ -23,6 +23,9 @@ pub enum Loaded {
         ast: Template,
         /// Version of the AST.
         version: String,
+        /// The line index of the source of the AST, which an AST artifact records, so that an error names its line and
+        /// column (ERR-3); without it the error has line 0 and column 0.
+        lines: Option<crate::LineIndex>,
     },
 }
 
@@ -94,7 +97,18 @@ impl MapLoader {
     pub fn set_ast(&mut self, name: &str, ast: Template) -> Result<(), String> {
         let json = crate::encode_template(&ast).map_err(|error| format!("the AST of {name} has no JSON form: {}", error.message))?;
         let version = content_hash(json.as_bytes());
-        self.entries.insert(name.to_string(), Loaded::Ast { ast, version });
+        self.entries.insert(name.to_string(), Loaded::Ast { ast, version, lines: None });
+        Ok(())
+    }
+
+    /// Adds a parsed template with the line index of its source: the byte offset of the start of each line, from 0, as
+    /// an AST artifact records it. Offsets that do not start at 0 or do not increase are an error.
+    pub fn set_ast_lines(&mut self, name: &str, starts: Vec<usize>, ast: Template) -> Result<(), String> {
+        let lines = crate::LineIndex::try_from_starts(starts).map_err(|error| format!("the line index of {name}: {error}"))?;
+        self.set_ast(name, ast)?;
+        if let Some(Loaded::Ast { lines: held, .. }) = self.entries.get_mut(name) {
+            *held = Some(lines);
+        }
         Ok(())
     }
 }

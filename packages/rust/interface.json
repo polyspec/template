@@ -2936,6 +2936,18 @@
               ],
               "type": "text",
               "required": true
+            },
+            {
+              "name": [
+                "lines"
+              ],
+              "type": {
+                "optional": {
+                  "list": "uint"
+                }
+              },
+              "required": true,
+              "reason": "RT-24"
             }
           ]
         }
@@ -3088,6 +3100,52 @@
           "wait": "none",
           "core": {
             "path": "polyspec_template::MapLoader::set",
+            "receiver": "&mut self"
+          }
+        },
+        {
+          "id": "map_loader.set_ast_lines",
+          "name": [
+            "set",
+            "ast",
+            "lines"
+          ],
+          "kind": "method",
+          "visibility": "public",
+          "parameters": [
+            {
+              "name": [
+                "path"
+              ],
+              "type": "text",
+              "required": true
+            },
+            {
+              "name": [
+                "lines"
+              ],
+              "type": {
+                "list": "uint"
+              },
+              "required": true
+            },
+            {
+              "name": [
+                "ast"
+              ],
+              "type": {
+                "unit": "template"
+              },
+              "required": true
+            }
+          ],
+          "returns": "none",
+          "raises": [
+            "polyspec_template::ErrorCode::E_INTERNAL"
+          ],
+          "wait": "none",
+          "core": {
+            "path": "polyspec_template::MapLoader::set_ast_lines",
             "receiver": "&mut self"
           }
         },
