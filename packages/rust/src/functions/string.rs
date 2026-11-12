@@ -1,6 +1,6 @@
 //! upper, lower, trim, replace, split, truncate, contains, starts_with, ends_with, length (FUN-12, FUN-13).
 
-use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_integer, arg_string, optional, type_error};
+use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_count, arg_string, optional, type_error};
 use crate::value::{Value, code_point_length, loose_equals};
 
 fn upper(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
@@ -41,14 +41,14 @@ fn split(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Functi
 
 fn truncate(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
     let text = arg_string(&args[0], "truncate")?;
-    let limit = arg_integer(&args[1])?;
+    let limit = arg_count(&args[1])?;
     let suffix = match optional(args, 2) {
         Some(value) => arg_string(value, "truncate")?,
         None => "...".to_string(),
     };
     let points: Vec<char> = text.chars().collect();
-    if (points.len() as i64) > limit {
-        let kept: String = points.iter().take(limit.max(0) as usize).collect();
+    if points.len() > limit {
+        let kept: String = points.iter().take(limit).collect();
         return Ok(Value::text(format!("{kept}{suffix}")));
     }
     Ok(Value::text(text))

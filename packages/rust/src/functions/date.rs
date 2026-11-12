@@ -1,6 +1,6 @@
 //! date and now (FUN-37 to FUN-42).
 
-use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, type_error};
+use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_integer, arg_string, internal, type_error};
 use crate::value::Value;
 
 const DAY_SHORT: [&str; 7] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -34,8 +34,8 @@ pub fn parse_offset(text: &str) -> Option<i64> {
     if !hour_text.bytes().all(|b| b.is_ascii_digit()) || !minute_text.bytes().all(|b| b.is_ascii_digit()) {
         return None;
     }
-    let hours: i64 = hour_text.parse().expect("two ASCII digits parse as i64");
-    let minutes: i64 = minute_text.parse().expect("two ASCII digits parse as i64");
+    let hours = ascii_number(hour_text);
+    let minutes = ascii_number(minute_text);
     if hours > 23 || minutes > 59 {
         return None;
     }
@@ -78,13 +78,28 @@ struct DateText {
     offset: Option<i64>,
 }
 
+/// The number that a text of at most four ASCII digits spells; the callers check the digits.
+fn ascii_number(digits: &str) -> i64 {
+    digits.bytes().fold(0, |number, digit| number * 10 + i64::from(digit - b'0'))
+}
+
 /// The number that the ASCII digits of `text` at `range` spell, or None when the range is not all digits or splits a character.
 fn digits_at(text: &str, range: std::ops::Range<usize>) -> Option<i64> {
     let part = text.get(range)?;
     if part.bytes().all(|b| b.is_ascii_digit()) {
-        Some(part.parse::<i64>().expect("ASCII digits of at most four places parse as i64"))
+        Some(ascii_number(part))
     } else {
         None
+    }
+}
+
+/// FUN-37: the number of days of a month of the proleptic Gregorian calendar.
+fn days_in_month(year: i64, month: i64) -> i64 {
+    match month {
+        2 if (year % 4 == 0 && year % 100 != 0) || year % 400 == 0 => 29,
+        2 => 28,
+        4 | 6 | 9 | 11 => 30,
+        _ => 31,
     }
 }
 
@@ -125,7 +140,8 @@ fn parse_date_text(text: &str) -> Option<DateText> {
 /// Unix seconds of a date value (FUN-37).
 pub fn to_unix_seconds(value: &Value, env_offset: i64) -> Result<i64, FunctionError> {
     match value {
-        Value::Number(number) => Ok(number.trunc() as i64),
+        // FUN-37, FUN-50: an integer number of seconds; a fraction is not truncated.
+        Value::Number(_) => arg_integer(value),
         Value::Str(text) | Value::Safe(text) => {
             let Some(DateText {
                 year,
@@ -139,11 +155,15 @@ pub fn to_unix_seconds(value: &Value, env_offset: i64) -> Result<i64, FunctionEr
             else {
                 return Err(type_error(format!("{text:?} is not a date")));
             };
-            if !(1..=12).contains(&month) || !(1..=31).contains(&day) || hour > 23 || minute > 59 || second > 59 {
+            // FUN-37: the day is a day of its month; an excess is not carried into the next month.
+            if !(1..=12).contains(&month) || day < 1 || day > days_in_month(year, month) || hour > 23 || minute > 59 || second > 59 {
                 return Err(type_error(format!("{text:?} is not a date")));
             }
             // A text without offset is read in env.timezone (FUN-37).
-            let offset = offset.unwrap_or(env_offset);
+            let offset = match offset {
+                Some(offset) => offset,
+                None => env_offset,
+            };
             Ok(days_from_civil(year, month, day) * 86400 + hour * 3600 + minute * 60 + second - offset)
         }
         _ => Err(type_error("date requires a number or a string")),
@@ -151,7 +171,7 @@ pub fn to_unix_seconds(value: &Value, env_offset: i64) -> Result<i64, FunctionEr
 }
 
 /// Formats unix seconds with the tokens of FUN-40 in a fixed offset.
-pub fn format_date(seconds: i64, format: &str, offset: i64) -> String {
+pub fn format_date(seconds: i64, format: &str, offset: i64) -> Result<String, FunctionError> {
     let local = seconds + offset;
     let days = local.div_euclid(86400);
     let second_of_day = local - days * 86400;
@@ -159,7 +179,11 @@ pub fn format_date(seconds: i64, format: &str, offset: i64) -> String {
     let hour = second_of_day / 3600;
     let minute = (second_of_day % 3600) / 60;
     let second = second_of_day % 60;
-    let weekday = ((days % 7) + 11).rem_euclid(7) as usize;
+    let weekday = usize::try_from(((days % 7) + 11).rem_euclid(7)).map_err(|error| internal(&error))?;
+    let month_index = usize::try_from(month - 1).map_err(|error| internal(&error))?;
+    let names = |table: &'static [&'static str], index: usize| -> Result<&'static str, FunctionError> {
+        table.get(index).copied().ok_or_else(|| internal(&format!("no name at {index}")))
+    };
     let sign = if offset < 0 { '-' } else { '+' };
     let abs_offset = offset.abs();
     let mut result = String::new();
@@ -183,19 +207,19 @@ pub fn format_date(seconds: i64, format: &str, offset: i64) -> String {
             'G' => result.push_str(&hour.to_string()),
             'i' => result.push_str(&format!("{minute:02}")),
             's' => result.push_str(&format!("{second:02}")),
-            'D' => result.push_str(DAY_SHORT[weekday]),
-            'l' => result.push_str(DAY_LONG[weekday]),
+            'D' => result.push_str(names(&DAY_SHORT, weekday)?),
+            'l' => result.push_str(names(&DAY_LONG, weekday)?),
             'N' => result.push_str(&(if weekday == 0 { 7 } else { weekday }).to_string()),
             'w' => result.push_str(&weekday.to_string()),
-            'M' => result.push_str(MONTH_SHORT[(month - 1) as usize]),
-            'F' => result.push_str(MONTH_LONG[(month - 1) as usize]),
+            'M' => result.push_str(names(&MONTH_SHORT, month_index)?),
+            'F' => result.push_str(names(&MONTH_LONG, month_index)?),
             'U' => result.push_str(&seconds.to_string()),
             'P' => result.push_str(&format!("{sign}{:02}:{:02}", abs_offset / 3600, (abs_offset % 3600) / 60)),
             other => result.push(other),
         }
         i += 1;
     }
-    result
+    Ok(result)
 }
 
 fn env_offset(context: &FunctionContext<'_>) -> Result<i64, FunctionError> {
@@ -208,7 +232,7 @@ fn date(args: &[Value], context: &FunctionContext<'_>) -> Result<Value, Function
     }
     let offset = env_offset(context)?;
     let seconds = to_unix_seconds(&args[0], offset)?;
-    Ok(Value::text(format_date(seconds, &arg_string(&args[1], "date")?, offset)))
+    Ok(Value::text(format_date(seconds, &arg_string(&args[1], "date")?, offset)?))
 }
 
 fn now(_args: &[Value], context: &FunctionContext<'_>) -> Result<Value, FunctionError> {

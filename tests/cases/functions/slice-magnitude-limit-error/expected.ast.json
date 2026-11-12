@@ -1,0 +1,67 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "slice",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "abc",
+            "span": [
+              9,
+              14
+            ]
+          },
+          {
+            "type": "Binary",
+            "op": "+",
+            "left": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 9007199254740991,
+              "span": [
+                16,
+                32
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                35,
+                36
+              ]
+            },
+            "span": [
+              16,
+              36
+            ]
+          }
+        ],
+        "span": [
+          3,
+          37
+        ]
+      },
+      "span": [
+        0,
+        38
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        38,
+        39
+      ]
+    }
+  ],
+  "comments": []
+}

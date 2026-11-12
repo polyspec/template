@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-functions -->
-<!-- source-sha256: 1128704c4f3730a3f53c1caf60c6d13605ac2286e88eda3bb1cacab839e35085 -->
+<!-- source-sha256: ecfe6e67138f440936680afd34a865872afd7b3c2a36def5d0802a8aad4644dc -->
 # 함수
 
 [English](/spec/functions).
@@ -51,7 +51,7 @@
 | `trim(s, chars=" \t\r\n")` | string, string | `chars`에 포함된 문자를 양끝에서 제거한 `s` |
 | `replace(s, from, to)` | string, string, string | `from`의 모든 리터럴 발생을 `to`로 치환; `from`이 빈 문자열이면 `s` 그대로 |
 | `split(s, sep)` | string, string | `sep`으로 나눈 부분 문자열의 list; 빈 `sep`은 `E_RUNTIME_TYPE`으로 실패 |
-| `truncate(s, n, suffix="...")` | string, number, string | `s`의 길이가 `n`을 넘으면 앞 `n`개 코드포인트 뒤에 `suffix`를 붙인 값; 아니면 `s` |
+| `truncate(s, n, suffix="...")` | string, number, string | `s`의 길이가 `n`을 넘으면 앞 `n`개 코드포인트 뒤에 `suffix`를 붙인 값; 아니면 `s`; `n`은 개수다(FUN-50) |
 | `contains(h, n)` | string 또는 list, 임의 | `n`이 `h`의 부분 문자열이거나 list 원소가 `==`로 `n`과 같으면 `true` |
 | `starts_with(s, p)` | string, string | `s`가 `p`로 시작하면 `true` |
 | `ends_with(s, p)` | string, string | `s`가 `p`로 끝나면 `true` |
@@ -93,6 +93,7 @@
 
 - **FUN-16** `number`, `round`, `floor`, `ceil`, `abs`, `num`은 첫 인자를 `to_number`로 변환한다. 변환할 수 없는 값은 `E_RUNTIME_TYPE`으로 실패한다.
 - **FUN-17** `min`과 `max`는 최소 한 개의 인자가 필요하고 number만 받는다.
+- **FUN-50** 정수 인자(`slice`의 `start`와 `length`, `date`의 초)와 개수(`truncate`의 `n`, `number`의 `decimals`, `round`의 `d`)는 `to_number`로 변환한다. 소수 부분이 있는 값은 `E_RUNTIME_TYPE`이고 음수 개수도 같다. 크기가 2^53 − 1보다 큰 값은 `E_RUNTIME_LIMIT`다. 인자를 0 방향으로 절단하거나 반올림하거나 구현이 담을 수 있는 범위로 맞추지 않는다. 이유: 소수나 어떤 구현도 정확히 담지 못하는 크기에는 정수가 하나로 정해지지 않으므로, 한 host는 절단하고 다른 host는 반올림하거나 포화하면 결과가 달라진다.
 
 ### 값
 
@@ -113,7 +114,7 @@
 
 ## number
 
-- **FUN-20** `x`는 `to_number`로 변환한다. `decimals`는 0 이상의 정수다.
+- **FUN-20** `x`는 `to_number`로 변환한다. `decimals`는 100 이하의 개수(FUN-50)이며, 더 큰 개수는 `E_RUNTIME_LIMIT`다. 이유: 결과는 소수 자리 `decimals`개를 가지므로 이 개수가 한 호출이 쓰는 텍스트를 제한한다.
 - **FUN-21** `x`의 최단 왕복 십진 자릿수를 지수 없는 위치 표기로 전개한다.
 - **FUN-22** 위치 표기 자릿수 문자열을 십진 자릿수에 half-away-from-zero 규칙을 적용해 소수 `decimals`자리로 반올림한다. `number(2.675, 2)`는 `2.68`을 반환한다. `number(1.005, 2)`는 `1.01`을 반환한다. `number(-2.5)`는 `-3`을 반환한다.
 - **FUN-23** 정수부는 오른쪽부터 세 자리씩 `thousands`로 묶는다. 소수부는 `dec`로 잇는다. `decimals`가 `0`이면 `dec`를 쓰지 않는다.
@@ -134,7 +135,7 @@
 
 ## slice
 
-- **FUN-31** `slice(v, start, length?)`는 list 또는 string을 받는다. `start`와 `length`는 절단으로 정수로 변환한다.
+- **FUN-31** `slice(v, start, length?)`는 list 또는 string을 받는다. `start`와 `length`는 정수 인자다(FUN-50).
 - **FUN-32** 음수 `start`는 끝에서부터 센다: `start + length(v)`. 조정 후 `0`보다 작은 `start`는 `0`으로 고정한다. 끝을 넘는 `start`는 빈 결과를 반환한다.
 - **FUN-33** `length`를 생략하면 결과는 끝까지다. 음수 `length`는 빈 결과를 반환한다. 끝을 넘는 `length`는 끝으로 고정한다.
 
@@ -146,7 +147,7 @@
 
 ## date
 
-- **FUN-37** `v`는 unix 초 number(소수는 0 방향으로 절단)이거나 `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS` 중 한 형식의 문자열이며, 각 형식 뒤에 `Z` 또는 `±HH:MM`이 올 수 있다. 오프셋 없는 문자열은 `env.timezone`으로 해석한다. 날짜만 있는 문자열의 시각은 `00:00:00`이다. 오프셋 `±HH:MM`의 `HH`는 `00`부터 `23`까지, `MM`은 `00`부터 `59`까지이며, 이 범위를 벗어난 오프셋을 가진 문자열은 해석할 수 없는 문자열이다(FUN-38).
+- **FUN-37** `v`는 정수 인자(FUN-50)인 unix 초 number이거나 `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS` 중 한 형식의 문자열이며, 각 형식 뒤에 `Z` 또는 `±HH:MM`이 올 수 있다. 오프셋 없는 문자열은 `env.timezone`으로 해석한다. 날짜만 있는 문자열의 시각은 `00:00:00`이다. 오프셋 `±HH:MM`의 `HH`는 `00`부터 `23`까지, `MM`은 `00`부터 `59`까지이며, 이 범위를 벗어난 오프셋을 가진 문자열은 해석할 수 없는 문자열이다(FUN-38). 문자열의 날짜는 역산 그레고리력에서 그 달의 날이다: `DD`는 달에 따라, 2월은 윤년 규칙에 따라 28, 29, 30, 31 이하이며, `2025-02-29`나 `2024-04-31`처럼 다른 날을 적은 문자열은 해석할 수 없는 문자열이고(FUN-38) 넘친 만큼 다음 달로 간 날이 아니다.
 - **FUN-38** `v`가 `null`이면 `""`를 반환한다. 다른 타입이나 해석할 수 없는 문자열은 `E_RUNTIME_TYPE`으로 실패한다.
 - **FUN-39** 출력은 `env.timezone`으로 계산한다. `env.timezone`은 `Z` 또는 고정 오프셋 `±HH:MM`이다. 이름 있는 시간대는 지원하지 않으며 시간대 데이터베이스를 사용하지 않는다.
 - **FUN-40** 포맷 토큰:

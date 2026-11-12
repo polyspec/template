@@ -1,0 +1,50 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "round",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.25,
+            "span": [
+              9,
+              13
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.5,
+            "span": [
+              15,
+              18
+            ]
+          }
+        ],
+        "span": [
+          3,
+          19
+        ]
+      },
+      "span": [
+        0,
+        20
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        20,
+        21
+      ]
+    }
+  ],
+  "comments": []
+}

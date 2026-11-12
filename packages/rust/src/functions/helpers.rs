@@ -1,6 +1,7 @@
 //! Argument helpers and the error type shared by the function groups.
 
 use crate::error::ErrorCode;
+use crate::value::number::MAX_SAFE;
 use crate::value::{StringifyError, Value, parse_numeric_string, stringify};
 
 /// Environment of a render (FUN-42).
@@ -79,9 +80,28 @@ pub fn arg_number(value: &Value) -> Result<f64, FunctionError> {
     to_number(value)
 }
 
-/// Converts an argument with to_number and truncates it.
+/// FUN-50: an integer argument. The value of to_number must have no fractional part (E_RUNTIME_TYPE) and a magnitude
+/// of at most 2^53 − 1 (E_RUNTIME_LIMIT); it is never truncated, rounded or clamped.
 pub fn arg_integer(value: &Value) -> Result<i64, FunctionError> {
-    Ok(to_number(value)?.trunc() as i64)
+    let number = to_number(value)?;
+    if number.fract() != 0.0 {
+        return Err(type_error(format!("{number} is not an integer")));
+    }
+    if number.abs() > MAX_SAFE {
+        return Err(FunctionError {
+            code: ErrorCode::E_RUNTIME_LIMIT,
+            message: format!("{number} is outside the integer range of an argument"),
+        });
+    }
+    // The value is integral and within ±(2^53 − 1), so i64 holds it exactly.
+    #[allow(clippy::cast_possible_truncation, reason = "FUN-50: the value is integral and within ±(2^53 − 1)")]
+    Ok(number as i64)
+}
+
+/// FUN-50: a count, an integer argument that is not negative (E_RUNTIME_TYPE).
+pub fn arg_count(value: &Value) -> Result<usize, FunctionError> {
+    let integer = arg_integer(value)?;
+    usize::try_from(integer).map_err(|error| type_error(format!("{integer} is not a count: {error}")))
 }
 
 /// Stringifies an argument; a list or map is E_RUNTIME_STRINGIFY.
@@ -95,4 +115,12 @@ pub fn stringify_arg(value: &Value) -> Result<String, FunctionError> {
 /// Optional argument accessor.
 pub fn optional(args: &[Value], index: usize) -> Option<&Value> {
     args.get(index)
+}
+
+/// E_INTERNAL: a broken invariant of a function, such as a count that its own checks bounded and that still does not fit.
+pub fn internal(error: &dyn std::fmt::Display) -> FunctionError {
+    FunctionError {
+        code: ErrorCode::E_INTERNAL,
+        message: format!("internal failure: {error}"),
+    }
 }

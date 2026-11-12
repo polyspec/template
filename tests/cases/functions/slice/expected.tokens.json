@@ -88,21 +88,5 @@
   [174,175,"operator"],
   [176,177,"number"],
   [177,178,"operator"],
-  [178,179,"delimiter"],
-  [180,181,"delimiter"],
-  [181,182,"keyword"],
-  [183,187,"function"],
-  [187,188,"operator"],
-  [188,193,"function"],
-  [193,194,"operator"],
-  [194,195,"variable"],
-  [195,196,"operator"],
-  [197,200,"number"],
-  [200,201,"operator"],
-  [202,205,"number"],
-  [205,206,"operator"],
-  [206,207,"operator"],
-  [208,209,"operator"],
-  [210,213,"function"],
-  [213,214,"delimiter"]
+  [178,179,"delimiter"]
 ]

@@ -1,0 +1,136 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2024-02-29",
+            "span": [
+              8,
+              20
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d",
+            "span": [
+              22,
+              29
+            ]
+          }
+        ],
+        "span": [
+          3,
+          30
+        ]
+      },
+      "span": [
+        0,
+        31
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        31,
+        32
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2000-02-29 12:00:00Z",
+            "span": [
+              40,
+              62
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d",
+            "span": [
+              64,
+              71
+            ]
+          }
+        ],
+        "span": [
+          35,
+          72
+        ]
+      },
+      "span": [
+        32,
+        73
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        73,
+        74
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "date",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "2024-04-30",
+            "span": [
+              82,
+              94
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "Y-m-d",
+            "span": [
+              96,
+              103
+            ]
+          }
+        ],
+        "span": [
+          77,
+          104
+        ]
+      },
+      "span": [
+        74,
+        105
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        105,
+        106
+      ]
+    }
+  ],
+  "comments": []
+}

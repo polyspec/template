@@ -182,54 +182,11 @@
         "args": [
           {
             "type": "Literal",
-            "kind": "number",
-            "value": 1789084800.9,
-            "span": [
-              182,
-              194
-            ]
-          },
-          {
-            "type": "Literal",
-            "kind": "string",
-            "value": "H:i:s",
-            "span": [
-              196,
-              203
-            ]
-          }
-        ],
-        "span": [
-          177,
-          204
-        ]
-      },
-      "span": [
-        174,
-        205
-      ]
-    },
-    {
-      "type": "Text",
-      "value": "\n",
-      "span": [
-        205,
-        206
-      ]
-    },
-    {
-      "type": "Echo",
-      "expr": {
-        "type": "Call",
-        "name": "date",
-        "args": [
-          {
-            "type": "Literal",
             "kind": "string",
             "value": "2026-09-11 09:00:00",
             "span": [
-              214,
-              235
+              182,
+              203
             ]
           },
           {
@@ -237,27 +194,27 @@
             "kind": "string",
             "value": "U",
             "span": [
-              237,
-              240
+              205,
+              208
             ]
           }
         ],
         "span": [
-          209,
-          241
+          177,
+          209
         ]
       },
       "span": [
-        206,
-        242
+        174,
+        210
       ]
     },
     {
       "type": "Text",
       "value": "\n",
       "span": [
-        242,
-        243
+        210,
+        211
       ]
     }
   ],

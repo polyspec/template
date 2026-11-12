@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= truncate('abc', 1.5)}\n"
+  },
+  "keep": {
+    "text": "{= truncate('abc', 1.5)}\n"
+  }
+}

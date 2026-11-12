@@ -50,7 +50,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 | `trim(s, chars=" \t\r\n")` | string, string | `s` without leading and trailing characters contained in `chars` |
 | `replace(s, from, to)` | string, string, string | Every literal occurrence of `from` replaced by `to`; when `from` is empty, `s` unchanged |
 | `split(s, sep)` | string, string | List of substrings separated by `sep`; empty `sep` fails with `E_RUNTIME_TYPE` |
-| `truncate(s, n, suffix="...")` | string, number, string | When the length of `s` exceeds `n`, the first `n` code points followed by `suffix`; otherwise `s` |
+| `truncate(s, n, suffix="...")` | string, number, string | When the length of `s` exceeds `n`, the first `n` code points followed by `suffix`; otherwise `s`; `n` is a count (FUN-50) |
 | `contains(h, n)` | string or list, any | `true` when `n` is a substring of `h`, or when a list element equals `n` by `==` |
 | `starts_with(s, p)` | string, string | `true` when `s` begins with `p` |
 | `ends_with(s, p)` | string, string | `true` when `s` ends with `p` |
@@ -92,6 +92,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 - **FUN-16** `number`, `round`, `floor`, `ceil`, `abs` and `num` convert their first argument with `to_number`; a value that cannot be converted fails with `E_RUNTIME_TYPE`.
 - **FUN-17** `min` and `max` require at least one argument and accept only numbers.
+- **FUN-50** An integer argument (the `start` and `length` of `slice`, the seconds of `date`) and a count (the `n` of `truncate`, the `decimals` of `number` and `d` of `round`) are converted with `to_number`. A value with a fractional part is `E_RUNTIME_TYPE`, and so is a negative count; a value whose magnitude is greater than 2^53 − 1 is `E_RUNTIME_LIMIT`. The argument is never truncated toward zero, rounded or clamped to a range that the implementation can hold. Reason: a fraction or a magnitude that no implementation holds exactly has no single integer, so a value that one host truncates and another rounds or saturates would give different results.
 
 ### Value
 
@@ -112,7 +113,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 ## number
 
-- **FUN-20** `x` is converted with `to_number`. `decimals` is a non-negative integer.
+- **FUN-20** `x` is converted with `to_number`. `decimals` is a count (FUN-50) of at most 100; a larger count is `E_RUNTIME_LIMIT`. Reason: the result has `decimals` fraction digits, so the count bounds the text that one call writes.
 - **FUN-21** The shortest round-trip decimal digits of `x` are expanded to positional notation without exponent.
 - **FUN-22** The positional digit string is rounded to `decimals` fraction digits with the half-away-from-zero rule applied to the decimal digits. `number(2.675, 2)` returns `2.68`. `number(1.005, 2)` returns `1.01`. `number(-2.5)` returns `-3`.
 - **FUN-23** The integer part is grouped in threes from the right with `thousands`. The fraction part is joined with `dec`. When `decimals` is `0`, `dec` is not written.
@@ -133,7 +134,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 ## slice
 
-- **FUN-31** `slice(v, start, length?)` accepts a list or a string. `start` and `length` are converted to integers by truncation.
+- **FUN-31** `slice(v, start, length?)` accepts a list or a string. `start` and `length` are integer arguments (FUN-50).
 - **FUN-32** A negative `start` counts from the end: `start + length(v)`. A `start` below `0` after that adjustment is clamped to `0`. A `start` beyond the end returns an empty result.
 - **FUN-33** When `length` is omitted, the result extends to the end. A negative `length` returns an empty result. A `length` beyond the end is clamped.
 
@@ -145,7 +146,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 ## date
 
-- **FUN-37** `v` is a number of unix seconds (a fraction is truncated toward zero), or a string in one of the forms `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS`, each optionally followed by `Z` or `±HH:MM`. A string without offset is interpreted in `env.timezone`. A date-only string has the time `00:00:00`. An offset `±HH:MM` has `HH` from `00` to `23` and `MM` from `00` to `59`; a string with an offset outside that range is unparseable (FUN-38).
+- **FUN-37** `v` is a number of unix seconds, an integer argument (FUN-50), or a string in one of the forms `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS`, each optionally followed by `Z` or `±HH:MM`. A string without offset is interpreted in `env.timezone`. A date-only string has the time `00:00:00`. An offset `±HH:MM` has `HH` from `00` to `23` and `MM` from `00` to `59`; a string with an offset outside that range is unparseable (FUN-38). The day of a string is a day of its month in the proleptic Gregorian calendar: `DD` is at most 28, 29, 30 or 31 by the month and, for February, by the leap year rule; a string that names another day, such as `2025-02-29` or `2024-04-31`, is unparseable (FUN-38), not the day that the excess reaches in the next month.
 - **FUN-38** `v` equal to `null` returns `""`. Any other type or an unparseable string fails with `E_RUNTIME_TYPE`.
 - **FUN-39** The output is computed in `env.timezone`. `env.timezone` is `Z` or a fixed offset `±HH:MM`. Named time zones are not supported and no time zone database is used.
 - **FUN-40** Format tokens:

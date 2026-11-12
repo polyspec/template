@@ -1,0 +1,50 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "truncate",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "abc",
+            "span": [
+              12,
+              17
+            ]
+          },
+          {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1.5,
+            "span": [
+              19,
+              22
+            ]
+          }
+        ],
+        "span": [
+          3,
+          23
+        ]
+      },
+      "span": [
+        0,
+        24
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        24,
+        25
+      ]
+    }
+  ],
+  "comments": []
+}

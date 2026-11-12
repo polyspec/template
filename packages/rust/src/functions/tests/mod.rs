@@ -16,9 +16,12 @@ fn date_parsing_and_formatting() {
     assert_eq!(parse_offset("+09:00"), Some(32400));
     assert_eq!(parse_offset("-05:30"), Some(-19800));
     assert_eq!(parse_offset("+24:00"), None);
-    assert_eq!(format_date(1789084800, "Y-m-d H:i:s D P", 32400), "2026-09-11 09:00:00 Fri +09:00");
-    assert_eq!(format_date(0, "Y-m-d l N w", 0), "1970-01-01 Thursday 4 4");
-    assert_eq!(format_date(-86400, "Y-m-d", 0), "1969-12-31");
+    assert_eq!(
+        format_date(1789084800, "Y-m-d H:i:s D P", 32400).expect("format"),
+        "2026-09-11 09:00:00 Fri +09:00"
+    );
+    assert_eq!(format_date(0, "Y-m-d l N w", 0).expect("format"), "1970-01-01 Thursday 4 4");
+    assert_eq!(format_date(-86400, "Y-m-d", 0).expect("format"), "1969-12-31");
     assert_eq!(to_unix_seconds(&Value::text("1970-01-02".to_string()), 0).expect("date"), 86400);
     assert_eq!(
         to_unix_seconds(&Value::text("1970-01-01T00:00:00+01:00".to_string()), 0).expect("date"),
@@ -29,6 +32,33 @@ fn date_parsing_and_formatting() {
         -3600
     );
     assert!(to_unix_seconds(&Value::text("1970-13-01".to_string()), 0).is_err());
+}
+
+/// FUN-37: a day beyond the days of its month is no date; February 29 exists only in a leap year.
+#[test]
+fn date_text_names_a_day_of_its_month() {
+    assert!(to_unix_seconds(&Value::text("2025-02-29"), 0).is_err());
+    assert!(to_unix_seconds(&Value::text("1900-02-29"), 0).is_err());
+    assert!(to_unix_seconds(&Value::text("2024-04-31"), 0).is_err());
+    assert!(to_unix_seconds(&Value::text("2024-02-29"), 0).is_ok());
+    assert!(to_unix_seconds(&Value::text("2000-02-29"), 0).is_ok());
+}
+
+/// FUN-50: an integer argument has no fraction and a magnitude of at most 2^53 − 1; a count is not negative.
+#[test]
+fn integer_arguments_are_never_truncated_or_clamped() {
+    use crate::functions::helpers::{arg_count, arg_integer};
+    assert_eq!(arg_integer(&Value::Number(-3.0)).expect("integer"), -3);
+    assert_eq!(arg_integer(&Value::text("7")).expect("integer"), 7);
+    assert_eq!(arg_integer(&Value::Number(1.5)).unwrap_err().code, ErrorCode::E_RUNTIME_TYPE);
+    assert_eq!(
+        arg_integer(&Value::Number(9007199254740992.0)).unwrap_err().code,
+        ErrorCode::E_RUNTIME_LIMIT
+    );
+    assert_eq!(arg_integer(&Value::Number(-1e300)).unwrap_err().code, ErrorCode::E_RUNTIME_LIMIT);
+    assert_eq!(arg_count(&Value::Number(-1.0)).unwrap_err().code, ErrorCode::E_RUNTIME_TYPE);
+    assert_eq!(arg_count(&Value::Number(2.0)).expect("count"), 2);
+    assert_eq!(to_unix_seconds(&Value::Number(1.5), 0).unwrap_err().code, ErrorCode::E_RUNTIME_TYPE);
 }
 
 #[test]
@@ -99,7 +129,7 @@ fn engine_renders_and_registers_functions() {
     engine
         .register(
             "wrap",
-            Box::new(|args, _| Ok(Value::text(format!("[{}]", args[0].as_text().unwrap_or(""))))),
+            Box::new(|args, _| Ok(Value::text(format!("[{}]", args[0].as_text().expect("wrap receives a string"))))),
         )
         .expect("register");
     assert!(engine.register("upper", Box::new(|_, _| Ok(Value::Null))).is_err());

@@ -39,18 +39,9 @@
   [175,176,"keyword"],
   [177,181,"function"],
   [181,182,"operator"],
-  [182,194,"number"],
-  [194,195,"operator"],
-  [196,203,"string"],
+  [182,203,"string"],
   [203,204,"operator"],
-  [204,205,"delimiter"],
-  [206,207,"delimiter"],
-  [207,208,"keyword"],
-  [209,213,"function"],
-  [213,214,"operator"],
-  [214,235,"string"],
-  [235,236,"operator"],
-  [237,240,"string"],
-  [240,241,"operator"],
-  [241,242,"delimiter"]
+  [205,208,"string"],
+  [208,209,"operator"],
+  [209,210,"delimiter"]
 ]

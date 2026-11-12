@@ -2,7 +2,7 @@
 
 use crate::error::ErrorCode;
 use crate::functions::helpers::{
-    BuiltIn, FunctionContext, FunctionError, arg_integer, arg_list, arg_number, arg_string, optional, stringify_arg, type_error,
+    BuiltIn, FunctionContext, FunctionError, arg_integer, arg_list, arg_number, arg_string, internal, optional, stringify_arg, type_error,
 };
 use crate::value::{Value, compare_values};
 use std::sync::Arc;
@@ -123,8 +123,10 @@ fn slice(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Functi
         ),
         _ => return Err(type_error("slice requires a list or a string")),
     };
-    let length = items.len() as i64;
-    let mut from = arg_integer(&args[1])?;
+    // FUN-31 to FUN-33 in i128: the arguments are within ±(2^53 − 1) (FUN-50) and the length fits a usize, so no step
+    // overflows.
+    let length = i128::try_from(items.len()).map_err(|error| internal(&error))?;
+    let mut from = i128::from(arg_integer(&args[1])?);
     if from < 0 {
         from = (from + length).max(0);
     }
@@ -135,15 +137,13 @@ fn slice(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Functi
             Value::text(String::new())
         });
     }
-    let mut count = match optional(args, 2) {
-        Some(value) => arg_integer(value)?,
+    let count = match optional(args, 2) {
+        Some(value) => i128::from(arg_integer(value)?).max(0),
         None => length - from,
     };
-    if count < 0 {
-        count = 0;
-    }
-    let end = (from + count).min(length) as usize;
-    let part = &items[from as usize..end];
+    let start = usize::try_from(from).map_err(|error| internal(&error))?;
+    let end = usize::try_from((from + count).min(length)).map_err(|error| internal(&error))?;
+    let part = &items[start..end];
     if is_list {
         Ok(Value::list(part.to_vec()))
     } else {

@@ -1,6 +1,7 @@
 //! number, round, floor, ceil, abs, min, max, num (FUN-16, FUN-17, FUN-20 to FUN-25).
 
-use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_integer, arg_number, arg_string, optional, type_error};
+use crate::error::ErrorCode;
+use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_count, arg_number, arg_string, optional, type_error};
 use crate::value::Value;
 use crate::value::number::{format_number, round_number};
 
@@ -12,17 +13,21 @@ fn finite(value: f64) -> Result<Value, FunctionError> {
     }
 }
 
+/// FUN-20: the largest decimal count of `number` and `round`.
+const MAX_DECIMALS: usize = 100;
+
 fn decimals(args: &[Value], index: usize, name: &str) -> Result<usize, FunctionError> {
-    match optional(args, index) {
-        None => Ok(0),
-        Some(value) => {
-            let places = arg_integer(value)?;
-            if places < 0 {
-                return Err(type_error(format!("{name} requires a non-negative decimal count")));
-            }
-            Ok(places as usize)
-        }
+    let Some(value) = optional(args, index) else {
+        return Ok(0);
+    };
+    let places = arg_count(value)?;
+    if places > MAX_DECIMALS {
+        return Err(FunctionError {
+            code: ErrorCode::E_RUNTIME_LIMIT,
+            message: format!("{name} writes at most {MAX_DECIMALS} decimals, not {places}"),
+        });
     }
+    Ok(places)
 }
 
 fn number(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {

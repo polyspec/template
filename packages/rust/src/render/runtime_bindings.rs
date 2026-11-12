@@ -6,6 +6,7 @@ use crate::escape::escape_html;
 use crate::functions::{FunctionContext, builtins, to_number};
 use crate::render::context::{Frame, RenderContext};
 use crate::value::bind::bind_value;
+use crate::value::number::MAX_SAFE;
 use crate::value::{HostError, MAX_DEPTH, StringifyError, Value, compare_values, loose_equals, strict_equals, stringify};
 use std::cmp::Ordering;
 
@@ -298,17 +299,23 @@ impl RuntimeBindings {
                 Ok(Value::Null)
             }
             Value::List(list) => {
-                // An index that does not fit i64 names no element, so it reads as absent like any missing index.
-                #[allow(clippy::disallowed_methods, reason = "text beyond i64 is absent")]
-                let position: Option<i64> = match key {
-                    Value::Number(number) if number.fract() == 0.0 => Some(*number as i64),
-                    other => other
-                        .as_text()
-                        .and_then(|text| if is_index_text(text) { text.parse().ok() } else { None }),
+                // EXP-19: an integral number or an index text names the element at that index; a number below 0 or not
+                // below the length, a fraction and any other key name none. The number is compared before it is
+                // converted, so no cast saturates.
+                let position: Option<usize> = match key {
+                    Value::Number(number) if number.fract() == 0.0 && *number >= 0.0 && *number < MAX_SAFE => list_index(*number),
+                    other => match other.as_text() {
+                        Some(text) if is_index_text(text) => match text.parse::<usize>() {
+                            Ok(position) => Some(position),
+                            // EXP-19: digits beyond usize are an index beyond every list.
+                            Err(_) => None,
+                        },
+                        _ => None,
+                    },
                 };
-                Ok(match position {
-                    Some(position) if position >= 0 && (position as usize) < list.len() => list[position as usize].clone(),
-                    _ => Value::Null,
+                Ok(match position.and_then(|position| list.get(position)) {
+                    Some(item) => item.clone(),
+                    None => Value::Null,
                 })
             }
             Value::Object(object) => {
@@ -484,6 +491,21 @@ fn host_result(
             ErrorCode::E_RUNTIME_HOST_FUNCTION,
             format!("{name} failed: {message}"),
         )),
+    }
+}
+
+/// The index that a number names: the caller checked that it is integral, not negative and below 2^53, so the
+/// conversion is exact; an index beyond usize names no element (EXP-19).
+fn list_index(number: f64) -> Option<usize> {
+    #[allow(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        reason = "EXP-19: the caller checked an integral number from 0 to 2^53, which u64 holds exactly"
+    )]
+    let index = number as u64;
+    match usize::try_from(index) {
+        Ok(index) => Some(index),
+        Err(_) => None,
     }
 }
 

@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: fe98451b4c9e379f3fe9fb46d83a47e46a2cace0d465ba082216d5cbb126bdcf -->
+<!-- source-sha256: 8fad5b2a21e93fae8ba927eb484b2028737f1ddf0f89fc3330bc548d5168e69c -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- 정수 인자(`slice`의 start와 length, `date`의 초)와 개수(`truncate`의 n, `number`의 decimals, `round`의 d)를 절단하거나 반올림하거나 범위로 맞추지 않는다: 소수는 `E_RUNTIME_TYPE`, 음수 개수는 `E_RUNTIME_TYPE`, 크기가 2^53 − 1을 넘으면 `E_RUNTIME_LIMIT`다(FUN-50). `number`와 `round`는 소수 자리를 최대 100개 쓴다(FUN-20). 날짜 텍스트는 그 달의 날을 적어야 한다: `2025-02-29`와 `2024-04-31`은 다음 달 첫날이 아니라 날짜가 아니다(FUN-37). Rust 구현이 이 규칙을 따르며 다른 구현은 바뀌지 않았다.
 
 ## 0.0.27
 
