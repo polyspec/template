@@ -114,7 +114,7 @@ impl RenderTarget<'_> {
 }
 
 /// A complete AST or generated template program.
-pub trait Program {
+pub trait Program: Send + Sync {
     /// Prepares a reusable render request.
     fn prepare(
         &self,
@@ -206,7 +206,7 @@ pub struct AstProgram {
 /// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render.
 pub struct PreparedRender<'e> {
     name: String,
-    render: Box<dyn Fn() -> Result<String, TemplateError> + 'e>,
+    render: Box<dyn Fn() -> Result<String, TemplateError> + Send + Sync + 'e>,
 }
 
 struct AstPreparedExecution<'e> {
@@ -457,7 +457,7 @@ impl RuntimeServices for AstProgram {
 
 impl<'e> PreparedRender<'e> {
     /// Creates a prepared operation for the entry template `name` from compiled program state.
-    pub fn new(name: &str, render: impl Fn() -> Result<String, TemplateError> + 'e) -> PreparedRender<'e> {
+    pub fn new(name: &str, render: impl Fn() -> Result<String, TemplateError> + Send + Sync + 'e) -> PreparedRender<'e> {
         PreparedRender {
             name: name.to_string(),
             render: Box::new(render),

@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e0294a2add84c210ab616bc282f38ba4f49c6acdf27a9ea5eb75ff991b2637a1 -->
+<!-- source-sha256: a1040d09fad8d7a1887055062b73e5ef2ba983d04414e0c8435c328b54a7d67e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -9,6 +9,7 @@
 - 정수 인자(`slice`의 start와 length, `date`의 초)와 개수(`truncate`의 n, `number`의 decimals, `round`의 d)를 절단하거나 반올림하거나 범위로 맞추지 않는다: 소수는 `E_RUNTIME_TYPE`, 음수 개수는 `E_RUNTIME_TYPE`, 크기가 2^53 − 1을 넘으면 `E_RUNTIME_LIMIT`다(FUN-50). `number`와 `round`는 소수 자리를 최대 100개 쓴다(FUN-20). 날짜 텍스트는 그 달의 날을 적어야 한다: `2025-02-29`와 `2024-04-31`은 다음 달 첫날이 아니라 날짜가 아니다(FUN-37). Rust 구현이 이 규칙을 따르며 다른 구현은 바뀌지 않았다.
 - 서로게이트 쌍에 속하지 않는 서로게이트의 `\uXXXX` 이스케이프는 U+FFFD가 아니라 그 이스케이프 위치에서 `E_PARSE_INVALID_ESCAPE`다(EXP-3). Rust 구현이 이 규칙을 따른다.
 - 파일시스템 로더는 `ENOENT`와 `ENOTDIR`일 때만 이름이 없다고 보고한다. 디렉터리, 일반 파일이 아닌 다른 파일, 그리고 디렉터리의 `EACCES` 같은 다른 모든 메타데이터 오류는 파일시스템의 메시지와 함께 `E_LOAD_FAILED`다(RT-10). Rust `FsLoader`가 이 규칙을 따른다.
+- Rust `Program` trait은 `Send`와 `Sync`를 요구하고 `PreparedRender`는 `Send`이고 `Sync`다. data-model.md와 RT-70은 한 thread에 머무는 `Rc` 값 대신, 실제 그렇듯 Rust program, prepared render, bound map, 값이 `Send`이고 `Sync`라고 적는다(VAL-22, RT-70).
 
 ## 0.0.27
 

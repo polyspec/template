@@ -253,7 +253,7 @@ Through the host interface, which is `bind`, `merge`, `prepare`, `render` and th
 
 Reflection, `unsafe` code, a closure bound to the class scope, and the operations that a runtime exports for generated programs (RuntimeBindings, RenderFrame, RenderScope and the render context, RT-67) are not the host interface. A host that changes a bound map through them is outside this specification. Reason: generated programs live outside the runtime package and read bound maps through these exported operations.
 
-A Go bound map may be read by concurrent renders. A Rust bound map is not `Send`, because template values share their lists and maps with `Rc`, so a Rust host binds data in the thread that renders it.
+A Go bound map may be read by concurrent renders. A Rust bound map is `Send` and `Sync`: template values share their lists and maps with `Arc`, and a native object is a `TemplateObject`, which is `Send` and `Sync`, so renders in several threads read one bound map at the same time (RT-70).
 
 A native object inside a bound map stays a reference (VAL-18) whose members are bound when a template reads them (VAL-19); the host may change such an object, as without a bound map.
 

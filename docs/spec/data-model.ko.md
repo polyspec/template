@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: dd44f3074e395d41abf78ec122b8c882fe951c2a123267708ff79a9596f1da25 -->
+<!-- source-sha256: 13359985fc47b8c982062e7b6565765af7ba7aaff38d71d42a34b45d718eba59 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -255,7 +255,7 @@ host interface, 즉 `bind`, `merge`, `prepare`, `render`와 host function의 인
 
 reflection, `unsafe` 코드, class scope에 bind한 closure, runtime이 generated program을 위해 export하는 연산(RuntimeBindings, RenderFrame, RenderScope, render context, RT-67)은 host interface가 아니다. 그것으로 bound map을 바꾸는 호스트는 이 명세의 범위 밖이다. 이유: generated program은 runtime package 밖에 있고, 이 export된 연산으로 bound map을 읽는다.
 
-Go bound map은 동시에 실행되는 render가 읽을 수 있다. Rust bound map은 `Send`가 아니다. template 값이 list와 map을 `Rc`로 공유하기 때문이다. 그래서 Rust 호스트는 data를 렌더하는 thread에서 binding한다.
+Go bound map은 동시에 실행되는 render가 읽을 수 있다. Rust bound map은 `Send`이고 `Sync`다. template 값은 list와 map을 `Arc`로 공유하고 native object는 `Send`이고 `Sync`인 `TemplateObject`이므로, 여러 thread의 렌더가 한 bound map을 동시에 읽는다(RT-70).
 
 bound map 안의 native object는 참조로 남고(VAL-18), 템플릿이 member를 읽을 때 binding된다(VAL-19). 호스트는 bound map이 없을 때처럼 그 object를 바꿀 수 있다.
 
