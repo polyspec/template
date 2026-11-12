@@ -298,19 +298,22 @@ impl RuntimeBindings {
                         .map_err(|error| self.error(context, frame, span, ErrorCode::E_INTERNAL, format!("internal failure: {error}")))?;
                     return Ok(absent_is_null(map.get(&text)));
                 }
-                Ok(Value::Null)
+                Err(key_type(self, context, "map", key, frame, span))
             }
             Value::List(list) => {
                 // EXP-19: an integral number or an index text names the element at that index; a number below 0 or not
                 // below the length, a fraction and any other key name none. The number is compared before it is
                 // converted, so no cast saturates.
+                // A key of another type, a fraction included, is runtime_type.
                 let position: Option<usize> = match key {
                     Value::Number(number) if number.fract() == 0.0 && *number >= 0.0 && *number < MAX_SAFE => list_index(*number),
+                    Value::Number(number) if number.fract() == 0.0 => None,
                     other => match other.as_text() {
                         // EXP-19: digits beyond usize are an index beyond every list.
                         #[allow(clippy::disallowed_methods, reason = "EXP-19: an index text beyond usize names no element")]
                         Some(text) if is_index_text(text) => text.parse::<usize>().ok(),
-                        _ => None,
+                        Some(_) => None,
+                        None => return Err(key_type(self, context, "list", key, frame, span)),
                     },
                 };
                 Ok(match position.and_then(|position| list.get(position)) {
@@ -320,7 +323,7 @@ impl RuntimeBindings {
             }
             Value::Object(object) => {
                 let Some(name) = key.as_text() else {
-                    return Ok(Value::Null);
+                    return Err(key_type(self, context, "native object", key, frame, span));
                 };
                 match object
                     .member(name)
@@ -497,3 +500,17 @@ fn is_index_text(text: &str) -> bool {
 fn host_arguments(args: &[Value]) -> Vec<Value> {
     args.iter().map(Value::host_argument).collect()
 }
+
+    /// EXP-19: a key whose type names no entry of the container: runtime_type.
+fn key_type(runtime: &RuntimeBindings, context: &RenderContext<'_>, container: &str, key: &Value, frame: &Frame, span: Span) -> RenderError {
+        let found = match key {
+            Value::Number(_) => "a fractional number",
+            other => other.value_type().name(),
+        };
+        let expected = match container {
+            "map" => "a map key is a string or an integer",
+            "list" => "a list index is an integer or an index text",
+            _ => "a member name of a native object is a string",
+        };
+        runtime.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, format!("{expected}, not {found}"))
+    }

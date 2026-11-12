@@ -4313,6 +4313,19 @@
       "to": "template_value"
     },
     {
+      "id": "change-lookup-key-type",
+      "rule": "EXP-19",
+      "reason": "EXP-19, P8: a key of a type that names no entry of a map, a list or a native object, such as a boolean or a fractional number, is runtime_type; as null it hid the mistake of the template",
+      "symbol": "lookup",
+      "from": {
+        "node": "a[true], list[1.5] and object[1] are null",
+        "python": "a[true], list[1.5] and object[1] are None",
+        "php": "a[true], list[1.5] and object[1] are null",
+        "go": "a[true], list[1.5] and object[1] are nil"
+      },
+      "to": null
+    },
+    {
       "id": "change-render-template",
       "rule": "RT-2",
       "reason": "RT-2, T-4: a parsed template reaches a program through a loader (map_loader.set_ast) and renders by its name; render of a template object beside the options took two records, which a language API cannot spread",

@@ -101,10 +101,12 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 | map | number with an integer value | The value under the key obtained by stringifying the number, or `null` |
 | list | number with an integer value `i` where `0 <= i < length` | The element at index `i` |
 | list | string matching `^(0\|[1-9][0-9]*)$` whose integer value is in range | The element at that index |
+| list | any other number with an integer value, or any other string | `null` |
 | native object | string | The value of the public field or property of that name (VAL-19), or `null` when there is none |
-| any other combination | any | `null` |
+| map, list or native object | a key of any other type: `null`, a boolean, a fractional number, a list, a map or a native object | runtime_type |
+| `null`, string, bool or number | any | `null` |
 
-The last row includes `null`, string, bool and number containers, negative indexes, out-of-range indexes, fractional numbers and a native object with a key that is not a string. Lookup raises no error of its own; a missing value at any depth is `null`. The only errors of a lookup are the binding and accessor errors of a native object field (VAL-19).
+A key that names no entry, a negative index and an index out of range are `null`, so a missing value at any depth is `null`; a key of a type that names no entry of its container is runtime_type, because no value of the container can be under it and a `null` would hide the mistake of the template (P8). Lookup into a `null`, string, bool or number container is `null`. The other errors of a lookup are the binding and accessor errors of a native object field (VAL-19).
 
 ## Loop meta
 

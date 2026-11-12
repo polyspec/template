@@ -1,0 +1,46 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Index",
+        "object": {
+          "type": "Var",
+          "name": "l",
+          "span": [
+            3,
+            4
+          ]
+        },
+        "index": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1.5,
+          "span": [
+            5,
+            8
+          ]
+        },
+        "span": [
+          3,
+          9
+        ]
+      },
+      "span": [
+        0,
+        10
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        10,
+        11
+      ]
+    }
+  ],
+  "comments": []
+}

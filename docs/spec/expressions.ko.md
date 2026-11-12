@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-expressions -->
-<!-- source-sha256: 7071e3ab596bf2af7f2fe9d01b4a74a30bfe2d782653176aedffc341fcb6fe8a -->
+<!-- source-sha256: 010b85a57e90693f6070aa9028fcaa8b0b8d36ee18b9312a8687da84bba44ffb -->
 # 표현식
 
 [English](/spec/expressions).
@@ -102,10 +102,12 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 | map | 정수 값을 가진 number | 숫자를 문자열화한 키의 값, 없으면 `null` |
 | list | `0 <= i < length`인 정수 값 `i`의 number | 인덱스 `i`의 원소 |
 | list | `^(0\|[1-9][0-9]*)$`에 맞고 정수 값이 범위 안인 string | 그 인덱스의 원소 |
+| list | 그 밖의 정수 값 number 또는 그 밖의 string | `null` |
 | native object | string | 그 이름의 public field 또는 property 값(VAL-19), 없으면 `null` |
-| 그 외 모든 조합 | 임의 | `null` |
+| map, list 또는 native object | 그 밖의 타입의 키: `null`, boolean, 소수 number, list, map, native object | runtime_type |
+| `null`, string, bool 또는 number | 임의 | `null` |
 
-마지막 행은 `null`, string, bool, number 컨테이너, 음수 인덱스, 범위 밖 인덱스, 소수 숫자, string이 아닌 키를 쓴 native object를 포함한다. 조회는 자체 오류를 발생시키지 않으며, 어떤 깊이에서든 없는 값은 `null`이다. 조회의 오류는 native object field의 바인딩 오류와 accessor 오류(VAL-19)뿐이다.
+항목을 가리키지 않는 키, 음수 인덱스, 범위 밖 인덱스는 `null`이므로 어떤 깊이에서든 없는 값은 `null`이다. 컨테이너의 항목을 가리킬 수 없는 타입의 키는 runtime_type이다. 그 키 아래에는 컨테이너의 어떤 값도 있을 수 없고 `null`은 템플릿의 실수를 숨기기 때문이다(P8). `null`, string, bool, number 컨테이너의 조회는 `null`이다. 조회의 그 밖의 오류는 native object field의 바인딩 오류와 accessor 오류(VAL-19)뿐이다.
 
 ## 루프 메타
 

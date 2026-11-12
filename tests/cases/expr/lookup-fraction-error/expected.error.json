@@ -1,0 +1,13 @@
+{
+  "raises": {
+    "kind": "runtime_type",
+    "status": null,
+    "category": "type",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 4
+    }
+  }
+}
