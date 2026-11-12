@@ -34,11 +34,10 @@ pub mod __test_support {
 }
 
 pub use ast::{
-    AstDecodeError, BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp,
-    decode_template,
+    BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp, decode_template,
 };
-pub use error::{ArgumentError, ErrorCode, LineIndex, RequestError, Span, TemplateError, internal_boundary};
-pub use format::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
+pub use error::{ErrorCode, LineIndex, Span, TemplateError, internal_boundary};
+pub use format::{FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};
 pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{DefineEntry, Frame, Limits, LoopMeta, ParsedTemplate, RenderContext, RuntimeServices, Scope};
@@ -71,39 +70,38 @@ pub struct ParseOptions {
 
 /// RT-2: parses one template source without loading other templates. A delimiter option that is not a
 /// delimiter pair is an argument error, and a panic is `internal` (ERR-13).
-pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, RequestError> {
+pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, TemplateError> {
     internal_boundary(name, || parse_source(source, name, options))
 }
 
-fn parse_source(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, RequestError> {
+fn parse_source(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, TemplateError> {
     let parsed = source::Source::from_bytes(name, source)?;
-    Ok(parser::parse_template(&parsed, option_delimiters(options)?)?)
+    parser::parse_template(&parsed, option_delimiters(options, name)?)
 }
 
 /// EDT-8: parses one template like [`parse`] and also returns the tags the parser accepted, with their kind and body
 /// ranges, and the class of every part of them. Offsets are byte offsets after a leading BOM, as in AST spans.
-pub fn analyze(source: &[u8], name: &str, options: &ParseOptions) -> Result<TemplateAnalysis, RequestError> {
+pub fn analyze(source: &[u8], name: &str, options: &ParseOptions) -> Result<TemplateAnalysis, TemplateError> {
     internal_boundary(name, || {
         let parsed = source::Source::from_bytes(name, source)?;
-        Ok(parser::analyze_template(&parsed, option_delimiters(options)?)?)
+        parser::analyze_template(&parsed, option_delimiters(options, name)?)
     })
 }
 
 /// EDT-11: accepted tags and tokens before the first parser error. Invalid
 /// UTF-8 and delimiter options reject the operation at the SDK boundary.
-pub fn analyze_prefix(source: &[u8], name: &str, options: &ParseOptions) -> Result<PrefixAnalysis, RequestError> {
+pub fn analyze_prefix(source: &[u8], name: &str, options: &ParseOptions) -> Result<PrefixAnalysis, TemplateError> {
     internal_boundary(name, || {
-        let delimiters = option_delimiters(options)?;
+        let delimiters = option_delimiters(options, name)?;
         let parsed = source::Source::from_bytes(name, source)?;
         Ok(parser::analyze_template_prefix(&parsed, delimiters))
     })
 }
 
-fn option_delimiters(options: &ParseOptions) -> Result<Delimiters, ArgumentError> {
+fn option_delimiters(options: &ParseOptions, name: &str) -> Result<Delimiters, TemplateError> {
     match &options.delimiters {
-        Some(value) => parse_delimiters(value).ok_or_else(|| ArgumentError {
-            message: format!("{value:?} is not a delimiter pair"),
-        }),
+        Some(value) => parse_delimiters(value)
+            .ok_or_else(|| TemplateError::argument(ErrorCode::E_ARGUMENT_DELIMITERS, name, format!("{value:?} is not a delimiter pair"))),
         None => Ok(DEFAULT_DELIMITERS),
     }
 }

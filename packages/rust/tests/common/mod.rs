@@ -97,3 +97,24 @@ pub fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_js
     use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
     parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
 }
+
+/// The JSON Pointer that the message of an ast_invalid error names (ERR-15, AST-10): empty for the root, None when the
+/// text is not JSON.
+pub fn ast_pointer(error: &polyspec_template::TemplateError) -> Option<&str> {
+    if error.message.contains("at the root:") {
+        return Some("");
+    }
+    let rest = error.message.strip_prefix("invalid template AST at ")?;
+    rest.split_once(": ").map(|(pointer, _)| pointer)
+}
+
+/// The record of FMT-14 that the shared fixtures write for a format error: the reason that its kind names and the
+/// parser code, which only the reason `parse` has (ERR-15).
+pub fn format_record(error: &polyspec_template::TemplateError) -> (&'static str, Option<String>) {
+    match error.code {
+        polyspec_template::ErrorCode::E_FORMAT_INVARIANT => ("invariant", None),
+        polyspec_template::ErrorCode::E_FORMAT_HTML => ("html", None),
+        code if code.as_str().starts_with("argument_") => ("parse", None),
+        code => ("parse", Some(code.as_str().to_string())),
+    }
+}

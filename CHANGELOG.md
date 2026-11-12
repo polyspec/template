@@ -16,6 +16,7 @@
 - The Rust crate depends on `polyspec-bindgen-core` from the bindgen repository and gives `TemplateError` the kind interface `Kinds`: its kind is the kind of its code, with no status and no OS error number. The crate package holds `interface.json` (`include`).
 - packages/rust/interface.json is the interface contract of the bindings (bindgen design I-1): packages, the value type `template_value` with its out and in tables, the AST as records and variants, the analysis and format results, the engine, the loaders, the bound map, the functions, the error classes `Template<Category>Error` with the category of every kind, and the changes from the language APIs.
 - The Rust command line interface builds with the feature `cli`, off by default, so the library builds without `clap`; make build-rust, the conformance driver and the unit tests turn it on.
+- Every failure of the Rust crate is a `TemplateError` with a kind: `ArgumentError`, `RequestError`, `FormatError`, `FormatErrorReason`, `AstDecodeError` and `PathError` are gone. The new kinds `argument_delimiters`, `argument_function_name`, `argument_source_range`, `argument_indent`, `format_invariant`, `format_html` and `ast_invalid` (ERR-15) name the failures that had no kind; `resolve_path` fails with `load_outside_root`. The command line writes the FMT-14 record of a format error from its kind.
 
 ## 0.0.27
 

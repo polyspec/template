@@ -7,7 +7,7 @@
 )]
 mod common;
 
-use polyspec_template::{ErrorCode, ParseOptions, RequestError, analyze_prefix};
+use polyspec_template::{ErrorCode, ParseOptions, analyze_prefix};
 
 #[derive(Debug, PartialEq, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -103,7 +103,7 @@ fn public_prefix_analysis_preserves_shared_contexts() {
 #[test]
 fn public_prefix_analysis_rejects_invalid_inputs() {
     let error = analyze_prefix(&[255], "invalid.tpl", &ParseOptions::default()).expect_err("invalid UTF-8");
-    assert!(matches!(error,RequestError::Template(error) if error.code==ErrorCode::E_LEX_INVALID_UTF8));
+    assert!(matches!(error, error if error.code==ErrorCode::E_LEX_INVALID_UTF8));
     assert!(matches!(
         analyze_prefix(
             b"x",
@@ -112,6 +112,6 @@ fn public_prefix_analysis_rejects_invalid_inputs() {
                 delimiters: Some("[".into())
             }
         ),
-        Err(RequestError::Argument(_))
+        Err(error) if error.code == ErrorCode::E_ARGUMENT_DELIMITERS
     ));
 }

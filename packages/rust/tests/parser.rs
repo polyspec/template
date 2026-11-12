@@ -6,13 +6,12 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
-use polyspec_template::{ErrorCode, Node, ParseOptions, RequestError, TemplateError, parse};
+use polyspec_template::{ErrorCode, Node, ParseOptions, TemplateError, parse};
 
 fn code_of(source: &str, options: &ParseOptions) -> Option<ErrorCode> {
     match parse(source.as_bytes(), "t.tpl", options) {
         Ok(_) => None,
-        Err(RequestError::Template(error)) => Some(error.code),
-        Err(RequestError::Argument(error)) => panic!("unexpected argument error: {error}"),
+        Err(error) => Some(error.code),
     }
 }
 
@@ -89,7 +88,7 @@ fn number_literals_serialize_as_json_numbers() {
 /// JSON writes in that order.
 #[test]
 fn a_parse_error_is_the_error_object() {
-    let Err(RequestError::Template(error)) = parse("a\n{? x}".as_bytes(), "x.tpl", &ParseOptions::default()) else {
+    let Err(error) = parse("a\n{? x}".as_bytes(), "x.tpl", &ParseOptions::default()) else {
         panic!("the parse did not fail with a template error");
     };
     assert_eq!(

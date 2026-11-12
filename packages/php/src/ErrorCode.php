@@ -132,6 +132,27 @@ final class ErrorCode
     /** The iteration count, the output size, the expression depth, a range size or the depth of a value that a list or map literal builds (VAL-20) exceeds its limit. */
     public const E_RUNTIME_LIMIT = 'E_RUNTIME_LIMIT';
 
+    /** A delimiter option of `parse`, `analyze`, `format` or an engine is not a delimiter pair (LEX-21). */
+    public const E_ARGUMENT_DELIMITERS = 'E_ARGUMENT_DELIMITERS';
+
+    /** A host function name of `register` or of the engine options is not an identifier or names a built-in function (RT-5, FUN-44). */
+    public const E_ARGUMENT_FUNCTION_NAME = 'E_ARGUMENT_FUNCTION_NAME';
+
+    /** A byte range of the public `Source` of an implementation is reversed or reaches beyond the source. */
+    public const E_ARGUMENT_SOURCE_RANGE = 'E_ARGUMENT_SOURCE_RANGE';
+
+    /** An indent unit of `format` is not a run of spaces or one tab (FMT-9). */
+    public const E_ARGUMENT_INDENT = 'E_ARGUMENT_INDENT';
+
+    /** The text that `format` would return does not parse to the AST of the source (FMT-1). */
+    public const E_FORMAT_INVARIANT = 'E_FORMAT_INVARIANT';
+
+    /** The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12). */
+    public const E_FORMAT_HTML = 'E_FORMAT_HTML';
+
+    /** The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the first invalid node (AST-10). */
+    public const E_AST_INVALID = 'E_AST_INVALID';
+
     /** The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect. */
     public const E_INTERNAL = 'E_INTERNAL';
 }

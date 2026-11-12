@@ -18,6 +18,6 @@ fn decode_reads_the_embedded_schema_outside_the_repository() {
     let decoded = decode_template(r#"{"type":"Template","name":"x.tpl","body":[],"comments":[]}"#).expect("a valid AST decodes");
     assert_eq!(decoded.name, "x.tpl");
     let error = decode_template(r#"{"type":"Template","name":"x.tpl","body":[],"comments":1}"#).expect_err("an invalid AST");
-    assert_eq!(error.path(), Some("/comments"));
+    assert!(error.message.contains("/comments"), "{error}");
     std::fs::remove_dir_all(&directory).expect("remove the directory");
 }

@@ -71,7 +71,8 @@ fn decode_fails_naming_the_json_pointer_of_the_invalid_node() {
         let pointer = case["path"].as_str().expect("path");
         let json = serde_json::to_string(&case["ast"]).expect("encode");
         let error = decode_template(&json).expect_err(name);
-        assert_eq!(error.path(), Some(pointer), "{name}: {error}");
+        assert_eq!(error.code, polyspec_template::ErrorCode::E_AST_INVALID, "{name}: {error}");
+        assert_eq!(common::ast_pointer(&error), Some(pointer), "{name}: {error}");
         let shown = if pointer.is_empty() { "the root" } else { pointer };
         assert!(error.to_string().contains(shown), "{name}: {error}");
     }
@@ -92,12 +93,12 @@ fn the_embedded_schema_is_the_contract_schema() {
     );
 }
 
-/// Text that is not JSON fails with the error of serde_json and no path.
+/// ERR-15: text that is not JSON is ast_invalid and names no node.
 #[test]
 fn decode_fails_on_text_that_is_not_json() {
     let error = decode_template("{").expect_err("{");
-    assert!(error.path().is_none(), "{error}");
-    assert!(matches!(error, polyspec_template::AstDecodeError::Json(_)), "{error}");
+    assert_eq!(error.code, polyspec_template::ErrorCode::E_AST_INVALID, "{error}");
+    assert!(common::ast_pointer(&error).is_none(), "{error}");
 }
 
 /// AST-10: class-call data decodes without registering the class to render it.
@@ -143,21 +144,4 @@ fn public_decoder_preserves_canonical_enum_literals() {
     assert_eq!(polyspec_template::BinaryOp::from_text("unknown"), None);
     assert_eq!(polyspec_template::LoopMetaField::from_name("unknown"), None);
     assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
-}
-
-/// AST-10: public schema errors retain the supplied pointer and reason.
-#[test]
-fn public_decode_error_pointer_and_reason() {
-    for path in ["", "/body/0/expr/value~1key"] {
-        let error = polyspec_template::AstDecodeError::Invalid {
-            path: path.into(),
-            reason: "expected scalar".into(),
-        };
-        assert_eq!(error.path(), Some(path));
-        let native: &dyn std::error::Error = &error;
-        let text = native.to_string();
-        assert!(text.contains(if path.is_empty() { "the root" } else { path }));
-        assert!(text.contains("expected scalar"));
-        assert!(native.source().is_none());
-    }
 }

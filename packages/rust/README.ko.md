@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 9adbe58dc56ff6e70d3d34eb45187602c6d0951577feadaa519da753ac7f43e7 -->
+<!-- source-sha256: d71b173d98de5243f21051ee5c272c879211038989f9a18826d5d7eec71d1b99 -->
 # polyspec-template
 
 [English](README.md).
@@ -31,11 +31,11 @@ assign 데이터는 crate가 다시 내보내는 crate `polyspec-ordered-json`�
 | 항목 | 설명 |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | 선택적인 구분자로 UTF-8 템플릿 하나를 AST로 파싱한다. |
-| `decode_template(json)` | AST JSON 텍스트를 crate jsonschema로 crate가 embed한 `contracts/schema/ast.schema.json`에 대해 검증해 `parse`가 반환하는 `Template`으로 읽는다. `AstDecodeError::Invalid`는 `path()`에 잘못된 노드의 JSON Pointer를 담고, JSON이 아닌 텍스트는 `AstDecodeError::Json`이다(AST-10). |
+| `decode_template(json)` | AST JSON 텍스트를 crate jsonschema로 crate가 embed한 `contracts/schema/ast.schema.json`에 대해 검증해 `parse`가 반환하는 `Template`으로 읽는다. 잘못된 AST와 JSON이 아닌 텍스트는 kind `ast_invalid`의 `TemplateError`이며 메시지가 잘못된 노드의 JSON Pointer를 적는다(AST-10, ERR-15). |
 | `analyze(source, name, &ParseOptions)` | `parse`처럼 파싱하고, 받아들인 모든 태그(`TagKind`, 범위, 본문 범위)와 그 모든 부분의 EDT-8 분류(`SyntaxToken`)를 앞의 BOM을 뺀 바이트 오프셋으로 함께 반환한다. |
-| `analyze_prefix(source, name, &ParseOptions)` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환한다. 잘못된 UTF-8이나 옵션은 `RequestError`를 반환한다. 성공한 부분 분석 결과는 `ast`(Go는 `AST`)에 완전한 AST도 제공하며 파서 오류가 있으면 해당 필드는 null 또는 네이티브 부재 값이다. |
-| `format(source, &FormatOptions)` | 태그 안의 공백과, HTML 요소와 템플릿 블록에 따른 줄 들여쓰기를 정리한다. `FormatOptions`는 들여쓰기 단위(`IndentUnit`, 기본값 공백 두 칸; `None`은 모든 줄을 유지), `TemplateBlocks::Indent` 또는 `Flat`, 구분자, 바이트 범위를 정한다. 결과가 같은 AST로 파싱될 때만 텍스트를 돌려주고, 아니면 reason이 `parse`, `invariant`, `html`인 `FormatError`를 돌려준다. |
-| `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 `ArgumentError`를 돌려준다. |
+| `analyze_prefix(source, name, &ParseOptions)` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환한다. 잘못된 UTF-8이나 옵션은 `TemplateError`를 반환한다. 성공한 부분 분석 결과는 `ast`(Go는 `AST`)에 완전한 AST도 제공하며 파서 오류가 있으면 해당 필드는 null 또는 네이티브 부재 값이다. |
+| `format(source, &FormatOptions)` | 태그 안의 공백과, HTML 요소와 템플릿 블록에 따른 줄 들여쓰기를 정리한다. `FormatOptions`는 들여쓰기 단위(`IndentUnit`, 기본값 공백 두 칸; `None`은 모든 줄을 유지), `TemplateBlocks::Indent` 또는 `Flat`, 구분자, 바이트 범위를 정한다. 결과가 같은 AST로 파싱될 때만 텍스트를 돌려주고, 아니면 파서 오류, `format_invariant`, `format_html`의 `TemplateError`를 돌려준다(FMT-14, ERR-15). |
+| `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 kind `argument_delimiters`의 `TemplateError`를 돌려준다. |
 | `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. Generated program은 module 파일이 아니라 `include!`로(`build.rs` 뒤의 `OUT_DIR`에서, 또는 commit한 파일에서) crate에 들어오므로 `cargo fmt`는 그 배치를 compiler에 맡기고 clippy가 이를 lint한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
 | `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind`는 `&polyspec_ordered_json::Value`, `&OrderedMap`, `&BoundMap`을 한 번 검사하고 `BoundMap`을 반환한다. `merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `render_bound`와 `prepare_bound`는 bound map을 assign으로 받고, `DefineData::Bound`는 그것을 정의 데이터로 준다. 둘 다 다시 binding하지 않는다(VAL-22). `BoundMap`은 `Send`이고 `Sync`다. 오류에는 template과 위치가 없다(ERR-14). |

@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4f32621be847c5c9a6772976f97696f28ddbe1e1e8f48db4f4893fba32d2c58e -->
+<!-- source-sha256: 8a98d37f458a3961a9cdf9c2283bf8d6cfee9c27c38501fe789180e6868d2d83 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -17,6 +17,7 @@
 - Rust crate는 bindgen 레포의 `polyspec-bindgen-core`에 의존하고 `TemplateError`에 kind 인터페이스 `Kinds`를 준다: kind는 코드의 kind이며 status와 OS 오류 번호는 없다. crate 패키지는 `interface.json`을 담는다(`include`).
 - packages/rust/interface.json은 바인딩의 인터페이스 계약이다(bindgen 설계 I-1): 패키지, out·in 표를 가진 값 타입 `template_value`, record와 variant로 쓴 AST, 분석과 format 결과, engine, loader, bound map, 함수, 모든 kind의 category를 가진 오류 클래스 `Template<Category>Error`, 그리고 언어 API와의 차이.
 - Rust 명령행 인터페이스는 기본으로 꺼진 feature `cli`로 빌드하므로 라이브러리는 `clap` 없이 빌드된다. make build-rust, conformance driver, 단위 시험은 이 feature를 켠다.
+- Rust crate의 모든 실패는 kind를 가진 `TemplateError`다: `ArgumentError`, `RequestError`, `FormatError`, `FormatErrorReason`, `AstDecodeError`, `PathError`는 없어졌다. 새 kind `argument_delimiters`, `argument_function_name`, `argument_source_range`, `argument_indent`, `format_invariant`, `format_html`, `ast_invalid`(ERR-15)가 kind 없던 실패를 명명하고, `resolve_path`는 `load_outside_root`로 실패한다. 명령행은 format 오류의 FMT-14 record를 kind에서 쓴다.
 
 ## 0.0.27
 

@@ -6,8 +6,8 @@
 
 use clap::{Args, Parser, Subcommand};
 use polyspec_template::{
-    ArgumentError, AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderOptions, RenderTarget,
-    RequestError, TemplateError, analyze, defines_from_json, env_from_json, format_bytes, parse, read_json as parse_json_text,
+    AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderOptions, RenderTarget, TemplateError,
+    analyze, defines_from_json, env_from_json, format_bytes, parse, read_json as parse_json_text,
 };
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -101,10 +101,14 @@ fn usage(message: &str) -> ! {
     exit(1);
 }
 
-/// An argument error is not an ERR-1 error (ERR-13); it ends like a usage error.
-fn argument(error: ArgumentError) -> ! {
-    eprintln!("{error}");
-    exit(1);
+/// An error of an argument (ERR-15) ends like a usage error, with status 1; every other error is the ERR-1 object with
+/// status 2.
+fn fail_request(error: TemplateError) -> ! {
+    if error.code.as_str().starts_with("argument_") {
+        eprintln!("{error}");
+        exit(1);
+    }
+    fail(error)
 }
 
 /// The JSON text of a result or an error; a value that does not serialize ends the command with status 1.
@@ -115,6 +119,32 @@ fn json<T: serde::Serialize>(value: &T) -> String {
             eprintln!("cannot write JSON: {error}");
             exit(1)
         }
+    }
+}
+
+/// The record of FMT-14 that CNF-4 writes for a format error: the reason that the kind of the error names (ERR-15), the
+/// parser code for the reason `parse`, the position and the message.
+#[derive(serde::Serialize)]
+struct FormatRecord<'e> {
+    reason: &'static str,
+    code: Option<&'static str>,
+    line: usize,
+    col: usize,
+    message: &'e str,
+}
+
+fn format_record(error: &TemplateError) -> FormatRecord<'_> {
+    let (reason, code) = match error.code {
+        polyspec_template::ErrorCode::E_FORMAT_INVARIANT => ("invariant", None),
+        polyspec_template::ErrorCode::E_FORMAT_HTML => ("html", None),
+        code => ("parse", Some(code.as_str())),
+    };
+    FormatRecord {
+        reason,
+        code,
+        line: error.line,
+        col: error.col,
+        message: &error.message,
     }
 }
 
@@ -232,8 +262,9 @@ fn main() {
             };
             match format_bytes(&source, &options) {
                 Ok(formatted) => write_stdout(&formatted.text),
+                Err(error) if error.code.as_str().starts_with("argument_") => fail_request(error),
                 Err(error) => {
-                    eprintln!("{}", json(&error));
+                    eprintln!("{}", json(&format_record(&error)));
                     exit(2);
                 }
             }
@@ -245,16 +276,14 @@ fn main() {
                     let tokens: Vec<_> = analysis.tokens.iter().map(|token| (token.start, token.end, token.kind)).collect();
                     write_stdout(&json(&tokens));
                 }
-                Err(RequestError::Template(error)) => fail(error),
-                Err(RequestError::Argument(error)) => argument(error),
+                Err(error) => fail_request(error),
             }
         }
         Command::Parse { input } => {
             let (source, name, parse_options) = read_input(input);
             match parse(&source, &name, &parse_options) {
                 Ok(ast) => write_stdout(&json(&ast)),
-                Err(RequestError::Template(error)) => fail(error),
-                Err(RequestError::Argument(error)) => argument(error),
+                Err(error) => fail_request(error),
             }
         }
         Command::Render { data, define, env, input } => {
@@ -274,7 +303,7 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
             artifact_refresh: Default::default(),
         }) {
             Ok(program) => program,
-            Err(error) => argument(error),
+            Err(error) => fail_request(error),
         },
     );
     let assign = match &data {
@@ -297,7 +326,6 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
     }
     match engine.render(RenderTarget::Name(name), &assign, &render_options) {
         Ok(output) => write_stdout(&output),
-        Err(RequestError::Template(error)) => fail(error),
-        Err(RequestError::Argument(error)) => argument(error),
+        Err(error) => fail_request(error),
     }
 }

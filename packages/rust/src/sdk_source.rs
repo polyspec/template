@@ -1,6 +1,6 @@
 //! Public source context; parsing keeps its implementation source private.
 
-use crate::{ArgumentError, ErrorCode, LineIndex, Span, TemplateError};
+use crate::{ErrorCode, LineIndex, Span, TemplateError};
 
 /// Validated UTF-8 source with native byte-index projection (LEX-24).
 #[derive(Debug, Clone)]
@@ -47,21 +47,25 @@ impl Source {
     }
 
     /// Maps a native byte index, including the end position, to a byte offset.
-    pub fn byte_at(&self, index: usize) -> Result<usize, ArgumentError> {
+    pub fn byte_at(&self, index: usize) -> Result<usize, TemplateError> {
         if index > self.length() {
-            return Err(ArgumentError {
-                message: "index is outside the source".into(),
-            });
+            return Err(TemplateError::argument(
+                ErrorCode::E_ARGUMENT_SOURCE_RANGE,
+                "",
+                "index is outside the source",
+            ));
         }
         Ok(index)
     }
 
     /// Maps a half-open native range to its byte span.
-    pub fn span(&self, start: usize, end: usize) -> Result<Span, ArgumentError> {
+    pub fn span(&self, start: usize, end: usize) -> Result<Span, TemplateError> {
         if start > end {
-            return Err(ArgumentError {
-                message: "source range is reversed".into(),
-            });
+            return Err(TemplateError::argument(
+                ErrorCode::E_ARGUMENT_SOURCE_RANGE,
+                "",
+                "source range is reversed",
+            ));
         }
         Ok([self.byte_at(start)?, self.byte_at(end)?])
     }

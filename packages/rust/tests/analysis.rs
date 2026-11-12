@@ -7,7 +7,7 @@
 )]
 mod common;
 
-use polyspec_template::{ErrorCode, ParseOptions, RequestError, TemplateAnalysis, analyze, parse};
+use polyspec_template::{ErrorCode, ParseOptions, TemplateAnalysis, analyze, parse};
 
 #[derive(serde::Deserialize)]
 struct Case {
@@ -59,5 +59,5 @@ fn public_analysis_preserves_shared_contexts() {
 #[test]
 fn public_analysis_rejects_incomplete_source() {
     let error = analyze(b"{? x}", "invalid.tpl", &ParseOptions::default()).expect_err("incomplete source");
-    assert!(matches!(error, RequestError::Template(error) if error.code == ErrorCode::E_PARSE_UNCLOSED_BLOCK));
+    assert!(error.code == ErrorCode::E_PARSE_UNCLOSED_BLOCK);
 }

@@ -6,13 +6,12 @@ mod expression;
 mod indent;
 pub mod invariant;
 
-use crate::error::{ArgumentError, LineIndex, RequestError};
+use crate::error::{ErrorCode, LineIndex, TemplateError};
 use crate::parser::{SyntaxTag, TagKind};
 use crate::{ParseOptions, analyze};
 use body::{BodyInput, format_body};
 use indent::indent_edits;
 use invariant::{same_tree, without_line_indentation};
-use std::fmt;
 use std::ops::Range;
 
 /// An indent unit: a run of spaces or one tab.
@@ -21,13 +20,15 @@ pub struct IndentUnit(String);
 
 impl IndentUnit {
     /// Validates an indent unit.
-    pub fn new(unit: &str) -> Result<IndentUnit, ArgumentError> {
+    pub fn new(unit: &str) -> Result<IndentUnit, TemplateError> {
         if unit == "\t" || (!unit.is_empty() && unit.bytes().all(|byte| byte == b' ')) {
             Ok(IndentUnit(unit.to_string()))
         } else {
-            Err(ArgumentError {
-                message: "indent must be a run of spaces or one tab".to_string(),
-            })
+            Err(TemplateError::argument(
+                ErrorCode::E_ARGUMENT_INDENT,
+                "",
+                "indent must be a run of spaces or one tab",
+            ))
         }
     }
 
@@ -83,41 +84,6 @@ pub struct Formatted {
     pub changed: bool,
 }
 
-/// Why [`format()`] returned no text.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum FormatErrorReason {
-    /// The source does not parse.
-    Parse,
-    /// The formatted text does not parse to the same AST.
-    Invariant,
-    /// The HTML structure is not balanced, so the lines cannot be indented.
-    Html,
-}
-
-/// The reason why [`format()`] keeps the source.
-#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
-pub struct FormatError {
-    /// Why the source is kept.
-    pub reason: FormatErrorReason,
-    /// Error code of the parser, or None for an AST difference or an HTML structure.
-    pub code: Option<String>,
-    /// 1-based line of the error position.
-    pub line: usize,
-    /// 1-based byte column of the error position, as in parser errors (ERR-1).
-    pub col: usize,
-    /// Free text.
-    pub message: String,
-}
-
-impl fmt::Display for FormatError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.message)
-    }
-}
-
-impl std::error::Error for FormatError {}
-
 /// A replacement of a byte range of the source.
 #[derive(Debug, Clone)]
 struct Edit {
@@ -132,14 +98,16 @@ const BOM: &str = "\u{feff}";
 /// comments and directives are never changed. The source and the result are parsed, and the result is returned only
 /// when both ASTs are equal without their `span` fields and, when lines are indented, without the spaces and tabs at
 /// the start of lines of text.
-pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, FormatError> {
+/// A source that cannot be formatted keeps its text, and the error says why (ERR-15): the parse error of the source,
+/// `argument_delimiters`, `format_html` at the tag that does not nest or `format_invariant` at the first changed byte.
+pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, TemplateError> {
     let name = options.name.as_str();
     let bom = if source.starts_with(BOM) { BOM } else { "" };
     let text = &source[bom.len()..];
     let parse_options = ParseOptions {
         delimiters: options.delimiters.clone(),
     };
-    let analysis = analyze(text.as_bytes(), name, &parse_options).map_err(parse_error)?;
+    let analysis = analyze(text.as_bytes(), name, &parse_options)?;
 
     let range = options
         .range
@@ -159,14 +127,13 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Format
     }
     if let Some(unit) = &options.indent {
         let indentation = indent_edits(text, &analysis.tags, unit.as_str(), options.template_blocks, range.as_ref()).map_err(|error| {
-            let (line, col) = position_of(text, error.index);
-            FormatError {
-                reason: FormatErrorReason::Html,
-                code: None,
-                line,
-                col,
-                message: error.message,
-            }
+            TemplateError::at(
+                ErrorCode::E_FORMAT_HTML,
+                name,
+                Some(&LineIndex::of(text.as_bytes())),
+                [error.index, error.index + 1],
+                error.message,
+            )
         })?;
         edits.extend(indentation);
         edits.sort_by_key(|edit| edit.start);
@@ -180,14 +147,13 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Format
 
     let formatted = apply(text, &edits);
     let invariant = |message: String| {
-        let (line, col) = position_of(text, first);
-        FormatError {
-            reason: FormatErrorReason::Invariant,
-            code: None,
-            line,
-            col,
+        TemplateError::at(
+            ErrorCode::E_FORMAT_INVARIANT,
+            name,
+            Some(&LineIndex::of(text.as_bytes())),
+            [first, first],
             message,
-        }
+        )
     };
     let after = analyze(formatted.as_bytes(), name, &parse_options)
         .map_err(|error| invariant(format!("formatted text does not parse: {error}")))?
@@ -210,15 +176,19 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Format
 
 /// Formats a source given as bytes: UTF-8 bytes format as [`format()`] does, and other bytes keep the source with the
 /// parse error that the parser reports for them (LEX-1).
-pub fn format_bytes(source: &[u8], options: &FormatOptions) -> Result<Formatted, FormatError> {
+pub fn format_bytes(source: &[u8], options: &FormatOptions) -> Result<Formatted, TemplateError> {
     match std::str::from_utf8(source) {
         Ok(text) => format(text, options),
         Err(_) => {
             let parse_options = ParseOptions {
                 delimiters: options.delimiters.clone(),
             };
-            analyze(source, &options.name, &parse_options).map_err(parse_error)?;
-            unreachable!("the parser rejects a source that is not UTF-8 (LEX-1)")
+            analyze(source, &options.name, &parse_options)?;
+            Err(TemplateError::without_position(
+                ErrorCode::E_INTERNAL,
+                &options.name,
+                "internal failure: the parser accepted a source that is not UTF-8 (LEX-1)",
+            ))
         }
     }
 }
@@ -253,28 +223,4 @@ fn apply(text: &str, edits: &[Edit]) -> String {
     }
     output.push_str(&text[cursor..]);
     output
-}
-
-fn parse_error(error: RequestError) -> FormatError {
-    match error {
-        RequestError::Template(error) => FormatError {
-            reason: FormatErrorReason::Parse,
-            code: Some(error.code.as_str().to_string()),
-            line: error.line,
-            col: error.col,
-            message: error.to_string(),
-        },
-        RequestError::Argument(error) => FormatError {
-            reason: FormatErrorReason::Parse,
-            code: None,
-            line: 0,
-            col: 0,
-            message: error.message,
-        },
-    }
-}
-
-// The 1-based line and byte column of a byte offset, counted as the parser counts them.
-fn position_of(text: &str, index: usize) -> (usize, usize) {
-    LineIndex::of(text.as_bytes()).position(index)
 }

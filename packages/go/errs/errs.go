@@ -53,6 +53,13 @@ const (
 	RuntimeBlockRedefined    Code = "E_RUNTIME_BLOCK_REDEFINED"
 	RuntimeDepth             Code = "E_RUNTIME_DEPTH"
 	RuntimeLimit             Code = "E_RUNTIME_LIMIT"
+	ArgumentDelimiters       Code = "E_ARGUMENT_DELIMITERS"
+	ArgumentFunctionName     Code = "E_ARGUMENT_FUNCTION_NAME"
+	ArgumentSourceRange      Code = "E_ARGUMENT_SOURCE_RANGE"
+	ArgumentIndent           Code = "E_ARGUMENT_INDENT"
+	FormatInvariant          Code = "E_FORMAT_INVARIANT"
+	FormatHtml               Code = "E_FORMAT_HTML"
+	AstInvalid               Code = "E_AST_INVALID"
 	Internal                 Code = "E_INTERNAL"
 	// END GENERATED ERROR CODES
 )

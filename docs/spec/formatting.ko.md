@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-formatting -->
-<!-- source-sha256: 8537bbf186d7a9d995b29a2d23349431d8855e4b9e5a01fed513ed56d20d7001 -->
+<!-- source-sha256: e27b462cd3ca9c503a31cd9500c378800de76bd4eecb68270afb7df78eab79b4 -->
 # 포맷
 
 [English](/spec/formatting).
@@ -95,7 +95,7 @@
 | `invariant` | 포맷한 텍스트가 파싱되지 않거나 다른 AST로 파싱된다 | `null`, 처음 바뀐 곳 |
 | `html` | HTML 구조의 짝이 맞지 않는다(FMT-12) | `null`, 구조가 어긋난 태그 |
 
-`line`과 `col`은 1부터 센다. `col`은 파서 오류처럼 바이트를 센다(ERR-1). 바뀌는 것이 없으면 텍스트는 소스와 같다.
+`line`과 `col`은 1부터 센다. `col`은 파서 오류처럼 바이트를 센다(ERR-1). 바뀌는 것이 없으면 텍스트는 소스와 같다. Rust 구현은 실패를 reason을 kind로 가진 ERR-1의 오류로 알린다: `parse`는 파서 오류, `invariant`는 `format_invariant`, `html`은 `format_html`이며(ERR-15) `line`과 `col`은 같다. legacy 구현은 없어질 때까지 위 record를 유지한다.
 
 - **FMT-15** 포맷은 멱등이다. 포맷한 텍스트를 같은 옵션으로 다시 포맷하면 같은 텍스트가 나온다.
 
@@ -103,4 +103,4 @@
 
 - **FMT-16** 모든 SDK는 formatter의 호출 signature, 옵션과 성공·실패 결과를 공개한다. 이름 있는 callable 계약으로 같은 SDK의 다른 진입점에서 공개한 구현을 기술할 수 있다. 공개 구현은 formatting 동작을 바꾸는 adapter 없이 이 계약을 충족한다.
 
-공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `templateBlocks`를 제공한다. TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`FormatErrorReason`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.
+공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `templateBlocks`를 제공한다. TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.

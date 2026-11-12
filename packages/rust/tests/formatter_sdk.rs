@@ -7,7 +7,7 @@
 )]
 mod common;
 
-use polyspec_template::{FormatError, FormatErrorReason, FormatOptions, IndentUnit, TemplateBlocks, format};
+use polyspec_template::{ErrorCode, FormatOptions, IndentUnit, TemplateBlocks, TemplateError, format};
 
 fn default_indent() -> serde_json::Value {
     serde_json::json!("  ")
@@ -80,34 +80,31 @@ fn public_formatter_preserves_shared_results() {
             Ok(result) => serde_json::json!({"ok":true,"text":result.text,"changed":result.changed}),
             Err(error) => {
                 assert!(!error.message.is_empty());
-                serde_json::json!({"ok":false,"error":{"reason":error.reason,"code":error.code,"line":error.line,"col":error.col}})
+                let (reason, code) = common::format_record(&error);
+                serde_json::json!({"ok":false,"error":{"reason":reason,"code":code,"line":error.line,"col":error.col}})
             }
         };
         assert_eq!(actual, item.expected, "{}", item.id);
     }
 }
 
+/// ERR-15, FMT-14: the shared error records are format errors of the kind that their reason names, with their position.
 #[test]
 fn public_formatter_constructs_shared_error_data() {
     let data = fixture();
     assert_eq!(data.errors.len(), 3);
     for value in data.errors {
-        let error = FormatError {
-            reason: match value.reason.as_str() {
-                "parse" => FormatErrorReason::Parse,
-                "invariant" => FormatErrorReason::Invariant,
-                "html" => FormatErrorReason::Html,
-                _ => panic!("invalid error reason"),
-            },
-            code: value.code.clone(),
-            line: value.line,
-            col: value.col,
-            message: value.message.clone(),
+        let code = match (value.reason.as_str(), value.code.as_deref()) {
+            ("invariant", None) => ErrorCode::E_FORMAT_INVARIANT,
+            ("html", None) => ErrorCode::E_FORMAT_HTML,
+            ("parse", Some("parse_unclosed_block")) => ErrorCode::E_PARSE_UNCLOSED_BLOCK,
+            other => panic!("invalid error record {other:?}"),
         };
-        assert_eq!(
-            serde_json::to_value(&error).expect("native error"),
-            serde_json::to_value(&value).expect("expected error")
-        );
+        let mut error = TemplateError::without_position(code, "template.tpl", value.message.clone());
+        error.line = value.line;
+        error.col = value.col;
+        let (reason, record_code) = common::format_record(&error);
+        assert_eq!((reason, record_code.as_deref()), (value.reason.as_str(), value.code.as_deref()));
         assert!(error.to_string().contains(&value.message));
     }
 }

@@ -12,7 +12,7 @@ mod common;
 
 use common::{case_delimiters, cases};
 use libtest_mimic::{Arguments, Failed, Trial};
-use polyspec_template::{FormatError, FormatOptions, Formatted, IndentUnit, ParseOptions, analyze, format};
+use polyspec_template::{FormatOptions, Formatted, IndentUnit, ParseOptions, analyze, format};
 use std::fs;
 use std::path::Path;
 
@@ -56,12 +56,13 @@ fn tokens(dir: &Path) -> Result<(), Failed> {
     Ok(())
 }
 
-fn result_json(result: Result<Formatted, FormatError>) -> serde_json::Value {
+fn result_json(result: Result<Formatted, polyspec_template::TemplateError>) -> serde_json::Value {
     match result {
         Ok(formatted) => serde_json::json!({ "text": formatted.text }),
-        Err(error) => serde_json::json!({
-            "error": { "reason": error.reason, "code": error.code, "line": error.line, "col": error.col }
-        }),
+        Err(error) => {
+            let (reason, code) = common::format_record(&error);
+            serde_json::json!({ "error": { "reason": reason, "code": code, "line": error.line, "col": error.col } })
+        }
     }
 }
 

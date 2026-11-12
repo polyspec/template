@@ -1,7 +1,7 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::Template;
-use crate::error::{ArgumentError, ErrorCode, RequestError, Span, TemplateError, internal_boundary};
+use crate::error::{ErrorCode, Span, TemplateError, internal_boundary};
 use crate::functions::{Env, HostFunction};
 use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
@@ -117,10 +117,10 @@ impl RenderTarget<'_> {
 /// A complete AST or generated template program.
 pub trait Program: Send + Sync {
     /// Prepares a reusable render request.
-    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RequestError>;
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError>;
 
     /// Renders one request.
-    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RequestError>;
+    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError>;
 
     /// Prepares a reusable render request whose assign is a bound map, which is not bound again (VAL-22).
     fn prepare_bound(
@@ -128,10 +128,10 @@ pub trait Program: Send + Sync {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RequestError>;
+    ) -> Result<PreparedRender<'_>, TemplateError>;
 
     /// Renders one request whose assign is a bound map, which is not bound again (VAL-22).
-    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RequestError>;
+    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError>;
 }
 
 /// Delegates requests to one complete program.
@@ -160,12 +160,12 @@ impl Engine {
         target: RenderTarget<'_>,
         assign: &JsonValue,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RequestError> {
+    ) -> Result<PreparedRender<'_>, TemplateError> {
         self.program.prepare(target, assign, options)
     }
 
     /// Renders a request through the selected program.
-    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RequestError> {
+    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> {
         self.program.render(target, assign, options)
     }
 
@@ -175,12 +175,12 @@ impl Engine {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RequestError> {
+    ) -> Result<PreparedRender<'_>, TemplateError> {
         self.program.prepare_bound(target, assign, options)
     }
 
     /// Renders a request whose assign is a bound map through the selected program (VAL-22).
-    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RequestError> {
+    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError> {
         self.program.render_bound(target, assign, options)
     }
 }
@@ -239,10 +239,10 @@ impl AstProgram {
     }
 
     /// Creates an engine. A delimiter option that is not a delimiter pair is an argument error (ERR-13).
-    pub fn new(options: EngineOptions) -> Result<AstProgram, ArgumentError> {
+    pub fn new(options: EngineOptions) -> Result<AstProgram, TemplateError> {
         let delimiters = match options.delimiters {
-            Some(value) => parse_delimiters(&value).ok_or_else(|| ArgumentError {
-                message: format!("{value:?} is not a delimiter pair"),
+            Some(value) => parse_delimiters(&value).ok_or_else(|| {
+                TemplateError::argument(ErrorCode::E_ARGUMENT_DELIMITERS, "", format!("{value:?} is not a delimiter pair"))
             })?,
             None => DEFAULT_DELIMITERS,
         };
@@ -414,12 +414,12 @@ impl AstProgram {
 }
 
 impl Program for AstProgram {
-    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RequestError> {
-        Ok(AstProgram::prepare(self, target, assign, options)?)
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError> {
+        AstProgram::prepare(self, target, assign, options)
     }
 
-    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RequestError> {
-        Ok(AstProgram::render(self, target, assign, options)?)
+    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> {
+        AstProgram::render(self, target, assign, options)
     }
 
     fn prepare_bound(
@@ -427,12 +427,12 @@ impl Program for AstProgram {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RequestError> {
-        Ok(AstProgram::prepare_bound(self, target, assign, options)?)
+    ) -> Result<PreparedRender<'_>, TemplateError> {
+        AstProgram::prepare_bound(self, target, assign, options)
     }
 
-    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RequestError> {
-        Ok(AstProgram::render_bound(self, target, assign, options)?)
+    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError> {
+        AstProgram::render_bound(self, target, assign, options)
     }
 }
 
@@ -489,7 +489,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
         } else if let Some(template) = &input.template {
             let name = resolve_path("", template).map_err(|error| BindError {
                 code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
-                message: format!("define {id}: {}", error.0),
+                message: format!("define {id}: {}", error.message),
             })?;
             let data = match &input.data {
                 None => None,

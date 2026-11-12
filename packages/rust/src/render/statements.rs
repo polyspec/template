@@ -158,7 +158,10 @@ impl<'c, 'e> Renderer<'c, 'e> {
     }
 
     fn resolve(&self, path: &str, frame: &Frame, span: Span) -> Result<String, TemplateError> {
-        resolve_path(&frame.name, path).map_err(|error| self.context.fail(ErrorCode::E_LOAD_OUTSIDE_ROOT, Some(frame), Some(span), error.0))
+        resolve_path(&frame.name, path).map_err(|error| {
+            self.context
+                .fail(ErrorCode::E_LOAD_OUTSIDE_ROOT, Some(frame), Some(span), error.message)
+        })
     }
 
     fn render_include(&mut self, path: &str, span: Span, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {

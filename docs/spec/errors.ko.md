@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 78b8d339e0deda6dfb2159cbf80ed3ddaaba924a4c915704ec07f6deca1ad290 -->
+<!-- source-sha256: 75bd8df2f0b3194263cd3df38d23c42bc7f65d2c3d6ae3872a4f04832c89ab00 -->
 # 오류
 
 [English](/spec/errors).
@@ -24,7 +24,7 @@ SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 �
 
 ## 코드
 
-ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-codes`가 이 table에서 각 implementation의 code 목록을 쓰고, `make error-codes-check`가 각 목록이 table과 같은지 검사합니다.
+ERR-7에서 ERR-12와 ERR-15의 code table이 error code의 catalog입니다. `make error-codes`가 이 table에서 각 implementation의 code 목록을 쓰고, `make error-codes-check`가 각 목록이 table과 같은지 검사합니다.
 
 - **ERR-7** 렉시컬 오류:
 
@@ -91,13 +91,25 @@ ERR-7에서 ERR-12의 code table이 error code의 catalog입니다. `make error-
 | `runtime_depth` | include와 block의 중첩 깊이가 제한을 넘는다. | include 또는 block 태그. |
 | `runtime_limit` | 반복 횟수, 출력 크기, 표현식 깊이, range 크기 또는 list·map literal이 만드는 값의 깊이(VAL-20)가 제한을 넘는다. | 루프 태그, echo, 표현식, 호출 또는 literal. |
 
+- **ERR-15** 인자·format·AST 오류. 행이 위치를 정하지 않으면 각각 위치 없는 ERR-1의 오류이며 `template`은 연산이 받은 이름이다. 이유: 라이브러리의 모든 실패는 kind를 가진 한 오류 타입으로 host에 도달하므로(ERR-1) host는 인자 오류, 유지된 format, 잘못된 AST를 연산마다의 두 번째 오류 타입이 아니라 kind로 구별한다.
+
+| 코드 | 조건 | 위치 |
+| --- | --- | --- |
+| `argument_delimiters` | `parse`, `analyze`, `format`이나 engine의 구분자 옵션이 구분자 쌍이 아니다(LEX-21). | 없음. |
+| `argument_function_name` | `register`나 engine 옵션의 host 함수 이름이 식별자가 아니거나 내장 함수 이름이다(RT-5, FUN-44). | 없음. |
+| `argument_source_range` | 구현의 공개 `Source`의 바이트 범위가 뒤집혔거나 소스 밖에 닿는다. | 없음. |
+| `argument_indent` | `format`의 들여쓰기 단위가 공백의 연속이나 탭 하나가 아니다(FMT-9). | 없음. |
+| `format_invariant` | `format`이 돌려줄 텍스트가 소스의 AST로 파싱되지 않는다(FMT-1). | 처음 바뀐 바이트. |
+| `format_html` | 소스의 HTML 요소가 짝이 맞지 않아 `format`이 그에 따라 줄을 들여쓸 수 없다(FMT-12). | 짝이 맞지 않는 태그. |
+| `ast_invalid` | `decode_template`이 읽는 텍스트가 JSON이 아니거나 그 값이 canonical schema의 AST가 아니다. 메시지가 첫 잘못된 노드의 JSON Pointer를 적는다(AST-10). | 없음. |
+
 - **ERR-12** 내부 오류:
 
 | 코드 | 조건 | 위치 |
 | --- | --- | --- |
 | `internal` | 이 명세가 정의하지 않은 방식으로 구현이 실패했다. 엔진이 실행하는 Rust 또는 Go 코드의 panic, 또는 TypeScript와 PHP에서 언어 런타임이 프로그래밍 결함에 대해 발생시킨 오류다. | ERR-5. `bind`와 `merge`에서는 ERR-14. `parse`에서는 `parse`에 전달한 템플릿 이름. |
 
-- **ERR-13** 어떤 구현도 호스트 프로세스를 종료시키지 않으며, panic이나 언어 런타임 오류가 구현의 공개 `parse`, `prepare`, `render`, `bind`, `merge` operation 밖으로 나가지 않는다. Generated program과 PHP 확장의 operation도 같다. 이런 실패는 모두 호스트에 `internal`로 보고한다. 언어 런타임 오류는 JavaScript 엔진이 발생시키는 `Error`의 내장 하위 클래스(`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`)와 PHP `Error` 계층의 클래스다. 엔진이 호출하는 호스트 코드(등록된 함수, 논리 class 함수, instance method, member accessor, `jsonSerialize()`)가 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고하면 이 경계에 도달하기 전에 `runtime_host_function`이 된다. 같은 방식으로 실패를 보고하는 로더는 `load_failed`로 실패한다(RT-9). Go나 Rust의 그런 호스트 코드가 일으킨 panic은 내부 오류다. 그 밖의 예외는 바뀌지 않고 호스트에 전달된다. 예를 들어 파싱이나 렌더링을 시작하기 전에 API가 발생시키는 인자 오류, 즉 잘못된 delimiter 옵션이나 generated program의 선언 타입과 맞지 않는 요청이다. `assign`이나 정의 `data`가 generated program의 선언 타입과 맞지 않거나 program이 선언하지 않은 정의를 담은 요청은 ERR-1 오류가 아니라 그 언어의 인자 오류로 실패한다. TypeScript에서는 `TemplateError`도 언어 런타임 오류도 아닌 `Error`, Go에서는 `*errs.Error`가 아닌 `error`, Rust에서는 Rust `Program`의 `prepare`와 `render`가 ERR-1 오류인 `RequestError::Template`와 함께 돌려주는 `RequestError::Argument`, PHP에서는 `\InvalidArgumentException`이고, Python에서는 `ValueError`다. 이는 generated program의 `prepare`가 언어 런타임 오류를 `internal`로 보고하는 `render`의 경계 앞에서 발생시킨다. 인자 오류의 message는 모든 target에서 같은 문장이다. 값은 요청 안의 경로로 부른다: `assign.<field>`, 또는 정의 data는 `define.<id>.data.<field>`이고, 뒤에 record의 field는 `.<field>`, map의 항목은 `.<key>`, list의 item은 `[<index>]`가 붙는다. 값이 없거나 null이고 그 type이 optional이 아니면 `<path> is required`, 그 밖에는 `<path> is not <expected>`로 보고하며, `<expected>`는 `a string`, `a number`, `a boolean`, `a list`, `an object` 중 하나다. object가 아닌 `define` 옵션은 그런 값을 요청에 담을 수 있는 모든 target에서 `define is not an object`로, 정의 항목은 `define.<id> is not declared`, `define.<id> has an invalid template`, `define.<id> has an invalid html entry`, `define.<id>.data is not an object`로 보고한다. 구분자 쌍이 아닌 구분자 옵션도 같은 인자 오류다. Go에서 `Parse`와 `NewAstProgram`은 `*errs.Error`가 아닌 `error`를 돌려준다. Rust에서 `AstProgram::new`는 `ArgumentError`를, `parse`는 `RequestError::Argument`를 돌려주고, PHP extension은 PHP package처럼 `\InvalidArgumentException`을 던진다. 잘못된 UTF-8처럼 binding한 값 자체의 데이터 오류는 `data_*` 오류로 남는다.
+- **ERR-13** 어떤 구현도 호스트 프로세스를 종료시키지 않으며, panic이나 언어 런타임 오류가 구현의 공개 `parse`, `prepare`, `render`, `bind`, `merge` operation 밖으로 나가지 않는다. Generated program과 PHP 확장의 operation도 같다. 이런 실패는 모두 호스트에 `internal`로 보고한다. 언어 런타임 오류는 JavaScript 엔진이 발생시키는 `Error`의 내장 하위 클래스(`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`)와 PHP `Error` 계층의 클래스다. 엔진이 호출하는 호스트 코드(등록된 함수, 논리 class 함수, instance method, member accessor, `jsonSerialize()`)가 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고하면 이 경계에 도달하기 전에 `runtime_host_function`이 된다. 같은 방식으로 실패를 보고하는 로더는 `load_failed`로 실패한다(RT-9). Go나 Rust의 그런 호스트 코드가 일으킨 panic은 내부 오류다. 그 밖의 예외는 바뀌지 않고 호스트에 전달된다. 예를 들어 파싱이나 렌더링을 시작하기 전에 API가 발생시키는 인자 오류, 즉 잘못된 delimiter 옵션이나 generated program의 선언 타입과 맞지 않는 요청이다. `assign`이나 정의 `data`가 generated program의 선언 타입과 맞지 않거나 program이 선언하지 않은 정의를 담은 요청은 ERR-1 오류가 아니라 그 언어의 인자 오류로 실패한다. TypeScript에서는 `TemplateError`도 언어 런타임 오류도 아닌 `Error`, Go에서는 `*errs.Error`가 아닌 `error`, Rust에서는 Rust `Program`의 하나뿐인 오류 타입인 `argument_*` kind의 `TemplateError`(ERR-15), PHP에서는 `\InvalidArgumentException`이고, Python에서는 `ValueError`다. 이는 generated program의 `prepare`가 언어 런타임 오류를 `internal`로 보고하는 `render`의 경계 앞에서 발생시킨다. 인자 오류의 message는 모든 target에서 같은 문장이다. 값은 요청 안의 경로로 부른다: `assign.<field>`, 또는 정의 data는 `define.<id>.data.<field>`이고, 뒤에 record의 field는 `.<field>`, map의 항목은 `.<key>`, list의 item은 `[<index>]`가 붙는다. 값이 없거나 null이고 그 type이 optional이 아니면 `<path> is required`, 그 밖에는 `<path> is not <expected>`로 보고하며, `<expected>`는 `a string`, `a number`, `a boolean`, `a list`, `an object` 중 하나다. object가 아닌 `define` 옵션은 그런 값을 요청에 담을 수 있는 모든 target에서 `define is not an object`로, 정의 항목은 `define.<id> is not declared`, `define.<id> has an invalid template`, `define.<id> has an invalid html entry`, `define.<id>.data is not an object`로 보고한다. 구분자 쌍이 아닌 구분자 옵션도 같은 인자 오류다. Go에서 `Parse`와 `NewAstProgram`은 `*errs.Error`가 아닌 `error`를 돌려준다. Rust에서 `AstProgram::new`와 `parse`는 kind `argument_delimiters`의 `TemplateError`를 돌려주고, PHP extension은 PHP package처럼 `\InvalidArgumentException`을 던진다. 잘못된 UTF-8처럼 binding한 값 자체의 데이터 오류는 `data_*` 오류로 남는다.
 
 ## 예제
 

@@ -11,8 +11,8 @@ mod common;
 use common::{case_delimiters, cases, json_equal};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
-    AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, RequestError, TemplateError,
-    defines_from_json, env_from_json, parse,
+    AstProgram, Engine, EngineOptions, ErrorCode, FsLoader, ParseOptions, RenderOptions, RenderTarget, TemplateError, defines_from_json,
+    env_from_json, parse,
 };
 use std::fs;
 use std::path::Path;
@@ -79,8 +79,10 @@ fn render_case(dir: &Path) -> Result<Outcome, Failed> {
     }
     match engine.render(RenderTarget::Name("input.tpl"), &assign, &options) {
         Ok(html) => Ok(Outcome::Html(html)),
-        Err(RequestError::Template(error)) => Ok(Outcome::Error(error)),
-        Err(RequestError::Argument(error)) => Err(format!("an AST program reported an argument error: {error}").into()),
+        Err(error) if error.code.as_str().starts_with("argument_") => {
+            Err(format!("an AST program reported an argument error: {error}").into())
+        }
+        Err(error) => Ok(Outcome::Error(error)),
     }
 }
 

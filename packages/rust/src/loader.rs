@@ -208,12 +208,8 @@ impl Loader for FsLoader {
     }
 }
 
-/// Error of a path that leaves the loader root.
-#[derive(Debug)]
-pub struct PathError(pub String);
-
 /// RT-8: resolves a path written in a tag against the directory of the current template.
-pub fn resolve_path(current: &str, path: &str) -> Result<String, PathError> {
+pub fn resolve_path(current: &str, path: &str) -> Result<String, crate::TemplateError> {
     let mut segments: Vec<&str> = if path.starts_with('/') {
         Vec::new()
     } else {
@@ -229,7 +225,11 @@ pub fn resolve_path(current: &str, path: &str) -> Result<String, PathError> {
             "" | "." => {}
             ".." => {
                 if segments.pop().is_none() {
-                    return Err(PathError(format!("{path:?} leaves the loader root")));
+                    return Err(crate::TemplateError::without_position(
+                        crate::ErrorCode::E_LOAD_OUTSIDE_ROOT,
+                        current,
+                        format!("{path:?} leaves the loader root"),
+                    ));
                 }
             }
             other => segments.push(other),

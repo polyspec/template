@@ -89,6 +89,20 @@ pub enum ErrorCode {
     E_RUNTIME_DEPTH,
     /// The iteration count, the output size, the expression depth, a range size or the depth of a value that a list or map literal builds (VAL-20) exceeds its limit.
     E_RUNTIME_LIMIT,
+    /// A delimiter option of `parse`, `analyze`, `format` or an engine is not a delimiter pair (LEX-21).
+    E_ARGUMENT_DELIMITERS,
+    /// A host function name of `register` or of the engine options is not an identifier or names a built-in function (RT-5, FUN-44).
+    E_ARGUMENT_FUNCTION_NAME,
+    /// A byte range of the public `Source` of an implementation is reversed or reaches beyond the source.
+    E_ARGUMENT_SOURCE_RANGE,
+    /// An indent unit of `format` is not a run of spaces or one tab (FMT-9).
+    E_ARGUMENT_INDENT,
+    /// The text that `format` would return does not parse to the AST of the source (FMT-1).
+    E_FORMAT_INVARIANT,
+    /// The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12).
+    E_FORMAT_HTML,
+    /// The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the first invalid node (AST-10).
+    E_AST_INVALID,
     /// The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect.
     E_INTERNAL,
     // END GENERATED ERROR CODES
@@ -145,6 +159,13 @@ impl ErrorCode {
             ErrorCode::E_RUNTIME_BLOCK_REDEFINED => "runtime_block_redefined",
             ErrorCode::E_RUNTIME_DEPTH => "runtime_depth",
             ErrorCode::E_RUNTIME_LIMIT => "runtime_limit",
+            ErrorCode::E_ARGUMENT_DELIMITERS => "argument_delimiters",
+            ErrorCode::E_ARGUMENT_FUNCTION_NAME => "argument_function_name",
+            ErrorCode::E_ARGUMENT_SOURCE_RANGE => "argument_source_range",
+            ErrorCode::E_ARGUMENT_INDENT => "argument_indent",
+            ErrorCode::E_FORMAT_INVARIANT => "format_invariant",
+            ErrorCode::E_FORMAT_HTML => "format_html",
+            ErrorCode::E_AST_INVALID => "ast_invalid",
             ErrorCode::E_INTERNAL => "internal",
             // END GENERATED ERROR CODES
         }
@@ -278,54 +299,12 @@ impl bindgen_core::Kinds for TemplateError {
     }
 }
 
-/// A request that does not match what a program declares, such as the declared types of the `assign`
-/// or the definition data of a generated program (ERR-13). It is not an ERR-1 error: it passes to the
-/// host unchanged and carries no error code or template position.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ArgumentError {
-    /// Free text that names the member of the request.
-    pub message: String,
-}
-
-impl fmt::Display for ArgumentError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.message)
+impl TemplateError {
+    /// An error of an argument of an operation (ERR-15): no position, the name that the operation received.
+    pub fn argument(code: ErrorCode, template: &str, message: impl Into<String>) -> TemplateError {
+        TemplateError::without_position(code, template, message)
     }
 }
-
-impl std::error::Error for ArgumentError {}
-
-/// The failure of a request to a program: an ERR-1 error or an argument error of the request (ERR-13).
-#[derive(Debug, Clone, PartialEq)]
-pub enum RequestError {
-    /// An ERR-1 error of parsing, binding or rendering.
-    Template(TemplateError),
-    /// A request that does not match what the program declares.
-    Argument(ArgumentError),
-}
-
-impl From<TemplateError> for RequestError {
-    fn from(error: TemplateError) -> RequestError {
-        RequestError::Template(error)
-    }
-}
-
-impl From<ArgumentError> for RequestError {
-    fn from(error: ArgumentError) -> RequestError {
-        RequestError::Argument(error)
-    }
-}
-
-impl fmt::Display for RequestError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            RequestError::Template(error) => error.fmt(f),
-            RequestError::Argument(error) => error.fmt(f),
-        }
-    }
-}
-
-impl std::error::Error for RequestError {}
 
 /// Runs one public operation and reports a panic as `internal` for `template` (ERR-12, ERR-13).
 ///

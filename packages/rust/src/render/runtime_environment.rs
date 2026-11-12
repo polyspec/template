@@ -1,7 +1,7 @@
 //! Host functions and resource limits shared by compiler modes.
 
 use super::context::{Limits, RuntimeServices};
-use crate::error::ArgumentError;
+use crate::error::{ErrorCode, TemplateError};
 use crate::functions::HostFunction;
 use std::collections::HashMap;
 
@@ -19,14 +19,16 @@ impl RuntimeEnvironment {
     /// Creates runtime services from explicit limits and host functions. Each host function is added as `register` adds
     /// it (RT-5, FUN-43, FUN-44): a name that is no identifier or a built-in is an argument error.
     #[allow(clippy::disallowed_methods, reason = "RT-5: absent limits are the default limits")]
-    pub fn new(limits: Option<Limits>, host_functions: HashMap<String, HostFunction>) -> Result<RuntimeEnvironment, ArgumentError> {
+    pub fn new(limits: Option<Limits>, host_functions: HashMap<String, HostFunction>) -> Result<RuntimeEnvironment, TemplateError> {
         let mut runtime = RuntimeEnvironment {
             limits: limits.unwrap_or_default(),
             host_functions: HashMap::new(),
             class_functions: HashMap::new(),
         };
         for (name, function) in host_functions {
-            runtime.register(&name, function).map_err(|message| ArgumentError { message })?;
+            runtime
+                .register(&name, function)
+                .map_err(|message| TemplateError::argument(ErrorCode::E_ARGUMENT_FUNCTION_NAME, "", message))?;
         }
         Ok(runtime)
     }

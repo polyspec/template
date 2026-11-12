@@ -6,7 +6,7 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
-use polyspec_template::{AstProgram, EngineOptions, ParseOptions, RequestError, parse};
+use polyspec_template::{AstProgram, EngineOptions, ErrorCode, ParseOptions, parse};
 
 /// LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.
 #[test]
@@ -28,7 +28,7 @@ fn a_parse_with_an_invalid_delimiter_option_returns_an_argument_error() {
         delimiters: Some("x".to_string()),
     };
     match parse(b"text", "t.tpl", &options) {
-        Err(RequestError::Argument(error)) => assert_eq!(error.message, "\"x\" is not a delimiter pair"),
+        Err(error) if error.code == ErrorCode::E_ARGUMENT_DELIMITERS => assert_eq!(error.message, "\"x\" is not a delimiter pair"),
         other => panic!("expected an argument error, got {other:?}"),
     }
 }

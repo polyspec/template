@@ -578,9 +578,9 @@ impl Expr {
 // it, which decode_template validates against (AST-10).
 const AST_SCHEMA: &str = include_str!("ast.schema.json");
 
-/// The failure of [`decode_template`].
+/// The failure of [`decode_template`] before it becomes the error of ERR-15.
 #[derive(Debug)]
-pub enum AstDecodeError {
+enum AstDecodeError {
     /// The text is not JSON.
     Json(serde_json::Error),
     /// The JSON is not a template AST of `contracts/schema/ast.schema.json`.
@@ -593,12 +593,9 @@ pub enum AstDecodeError {
 }
 
 impl AstDecodeError {
-    /// The JSON Pointer of the invalid node (AST-10), empty for the root, or None when the text is not JSON.
-    pub fn path(&self) -> Option<&str> {
-        match self {
-            AstDecodeError::Json(_) => None,
-            AstDecodeError::Invalid { path, .. } => Some(path),
-        }
+    /// The error of ERR-15: `ast_invalid`, whose message names the JSON Pointer of the invalid node (AST-10).
+    fn into_error(self) -> crate::TemplateError {
+        crate::TemplateError::without_position(crate::ErrorCode::E_AST_INVALID, "", self.to_string())
     }
 }
 
@@ -671,9 +668,13 @@ fn json_pointer(path: &serde_path_to_error::Path) -> String {
 
 /// Decodes the canonical JSON text of a template AST (AST-7) into the [`Template`] that `parse` returns, so a program
 /// renders it without parsing a source (RT-41). The JSON is validated against `contracts/schema/ast.schema.json` (AST-10), and the error
-/// names the JSON Pointer of the invalid node ([`AstDecodeError::path`]). A valid value that the AST types cannot
-/// hold, such as a span offset beyond `usize`, fails with the pointer of the node that holds it.
-pub fn decode_template(json: &str) -> Result<Template, AstDecodeError> {
+/// is `ast_invalid` (ERR-15), whose message names the JSON Pointer of the invalid node. A valid value that the AST types
+/// cannot hold, such as a span offset beyond `usize`, fails with the pointer of the node that holds it.
+pub fn decode_template(json: &str) -> Result<Template, crate::TemplateError> {
+    decode(json).map_err(AstDecodeError::into_error)
+}
+
+fn decode(json: &str) -> Result<Template, AstDecodeError> {
     let value: serde_json::Value = serde_json::from_str(json).map_err(AstDecodeError::Json)?;
     let errors: Vec<_> = validator().iter_errors(&value).collect();
     if let Some(error) = invalid_node(&errors) {
