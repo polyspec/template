@@ -3,7 +3,7 @@
 use crate::ast::Template;
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Read;
+use std::io::{ErrorKind, Read};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
@@ -157,9 +157,9 @@ impl FsLoader {
     }
 }
 
-/// RT-10: a name for which no regular file can be found does not exist; a symbolic link at any
-/// component of the name, a regular file that cannot be read and a file that the loader read under
-/// another name are failures.
+/// RT-10: a name does not exist exactly when reading the metadata of a component fails with `ENOENT` or `ENOTDIR`;
+/// every other metadata error, a symbolic link at any component, a name that is not a regular file, a regular file that
+/// cannot be read and a file that the loader read under another name are failures.
 impl Loader for FsLoader {
     fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
         let segments: Vec<&str> = name.split('/').collect();
@@ -167,20 +167,23 @@ impl Loader for FsLoader {
         let mut found = None;
         for (index, segment) in segments.iter().enumerate() {
             path.push(segment);
-            let Ok(metadata) = std::fs::symlink_metadata(&path) else {
-                return Ok(None);
+            let metadata = match std::fs::symlink_metadata(&path) {
+                Ok(metadata) => metadata,
+                // RT-10: the absence of an entry, and only it, is a name that does not exist.
+                Err(error) if matches!(error.kind(), ErrorKind::NotFound | ErrorKind::NotADirectory) => return Ok(None),
+                Err(error) => return Err(format!("{}: {error}", path.display())),
             };
             if metadata.file_type().is_symlink() {
                 return Err(format!("{} is a symbolic link", segments[..=index].join("/")));
             }
-            if index + 1 < segments.len() && !metadata.is_dir() {
-                return Ok(None);
-            }
             found = Some(metadata);
         }
-        let Some(metadata) = found.filter(|metadata| metadata.is_file()) else {
-            return Ok(None);
+        let Some(metadata) = found else {
+            return Err(format!("{name:?} names no file"));
         };
+        if !metadata.is_file() {
+            return Err(format!("{} is not a regular file", path.display()));
+        }
         let failure = |error: std::io::Error| format!("{}: {error}", path.display());
         let mut file = File::open(&path).map_err(failure)?;
         let identity = file_identity(&file).map_err(failure)?;

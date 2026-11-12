@@ -92,7 +92,8 @@ fn a_loader_result_without_a_version_is_a_load_failure() {
     assert_eq!(empty, Ok(String::new()));
 }
 
-/// RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist, E_LOAD_NOT_FOUND.
+/// RT-9, RT-10: an unreadable regular file and a directory are E_LOAD_FAILED; a missing name and a name below a regular
+/// file (ENOTDIR) do not exist, E_LOAD_NOT_FOUND.
 #[test]
 fn the_filesystem_loader_separates_missing_and_unreadable_files() {
     let root = std::env::temp_dir().join(format!("template-loader-{}", std::process::id()));
@@ -106,7 +107,7 @@ fn the_filesystem_loader_separates_missing_and_unreadable_files() {
     let user = std::process::Command::new("id").arg("-u").output().expect("id -u");
     let as_root = String::from_utf8_lossy(&user.stdout).trim() == "0";
     let locked_result = render(Box::new(FsLoader::new(&root)), "locked.tpl").map_err(|error| error.code);
-    let codes: Vec<ErrorCode> = ["folder.tpl", "missing.tpl"]
+    let codes: Vec<ErrorCode> = ["folder.tpl", "missing.tpl", "locked.tpl/inner.tpl", "missing/inner.tpl"]
         .iter()
         .map(|name| render(Box::new(FsLoader::new(&root)), name).unwrap_err().code)
         .collect();
@@ -118,7 +119,15 @@ fn the_filesystem_loader_separates_missing_and_unreadable_files() {
     } else {
         assert_eq!(locked_result, Err(ErrorCode::E_LOAD_FAILED));
     }
-    assert_eq!(codes, vec![ErrorCode::E_LOAD_NOT_FOUND, ErrorCode::E_LOAD_NOT_FOUND]);
+    assert_eq!(
+        codes,
+        vec![
+            ErrorCode::E_LOAD_FAILED,
+            ErrorCode::E_LOAD_NOT_FOUND,
+            ErrorCode::E_LOAD_NOT_FOUND,
+            ErrorCode::E_LOAD_NOT_FOUND
+        ]
+    );
 }
 
 #[test]

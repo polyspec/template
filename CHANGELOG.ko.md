@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6ce81343f6f2340f327a6e008182525051db6d6d848536a633d5040b87caba1b -->
+<!-- source-sha256: e0294a2add84c210ab616bc282f38ba4f49c6acdf27a9ea5eb75ff991b2637a1 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -8,6 +8,7 @@
 
 - 정수 인자(`slice`의 start와 length, `date`의 초)와 개수(`truncate`의 n, `number`의 decimals, `round`의 d)를 절단하거나 반올림하거나 범위로 맞추지 않는다: 소수는 `E_RUNTIME_TYPE`, 음수 개수는 `E_RUNTIME_TYPE`, 크기가 2^53 − 1을 넘으면 `E_RUNTIME_LIMIT`다(FUN-50). `number`와 `round`는 소수 자리를 최대 100개 쓴다(FUN-20). 날짜 텍스트는 그 달의 날을 적어야 한다: `2025-02-29`와 `2024-04-31`은 다음 달 첫날이 아니라 날짜가 아니다(FUN-37). Rust 구현이 이 규칙을 따르며 다른 구현은 바뀌지 않았다.
 - 서로게이트 쌍에 속하지 않는 서로게이트의 `\uXXXX` 이스케이프는 U+FFFD가 아니라 그 이스케이프 위치에서 `E_PARSE_INVALID_ESCAPE`다(EXP-3). Rust 구현이 이 규칙을 따른다.
+- 파일시스템 로더는 `ENOENT`와 `ENOTDIR`일 때만 이름이 없다고 보고한다. 디렉터리, 일반 파일이 아닌 다른 파일, 그리고 디렉터리의 `EACCES` 같은 다른 모든 메타데이터 오류는 파일시스템의 메시지와 함께 `E_LOAD_FAILED`다(RT-10). Rust `FsLoader`가 이 규칙을 따른다.
 
 ## 0.0.27
 

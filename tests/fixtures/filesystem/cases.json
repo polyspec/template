@@ -12,6 +12,24 @@
     "expected": { "html": "x" }
   },
   {
+    "name": "directory-name",
+    "requirements": ["RT-9", "RT-10"],
+    "files": { "input.tpl": "{+ folder.tpl}", "folder.tpl/inner.tpl": "x" },
+    "expected": { "error": { "code": "E_LOAD_FAILED", "template": "input.tpl", "line": 1, "col": 1 } }
+  },
+  {
+    "name": "file-as-directory",
+    "requirements": ["RT-10"],
+    "files": { "input.tpl": "{+ part.tpl/inner.tpl}", "part.tpl": "x" },
+    "expected": { "error": { "code": "E_LOAD_NOT_FOUND", "template": "input.tpl", "line": 1, "col": 1 } }
+  },
+  {
+    "name": "missing-name",
+    "requirements": ["RT-10"],
+    "files": { "input.tpl": "{+ missing.tpl}" },
+    "expected": { "error": { "code": "E_LOAD_NOT_FOUND", "template": "input.tpl", "line": 1, "col": 1 } }
+  },
+  {
     "name": "symbolic-link-file",
     "requirements": ["RT-10"],
     "files": { "input.tpl": "a{+ part.tpl}", "target.tpl": "x" },
