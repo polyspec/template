@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 7fbbd59d107ab72928bf0a252cf4f4ec7253d9baa281022779e29bb1215abd7a -->
+<!-- source-sha256: 73270ad11ba68a9a975a7355b28c34935b039e38ef1b6122723dcb8b508cfa97 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -216,7 +216,7 @@ flowchart TB
 
 ## 이행
 
-이전 언어 패키지는 `legacy/packages/ts`(비공개 npm 패키지 `@polyspec/template-legacy`), `legacy/packages/go`, `legacy/packages/php`, `legacy/packages/php-ext`, `legacy/packages/python`, `legacy/packages/cli/php`에 있고, bindgen이 `packages/rust/interface.json`에서 생성하는 바인딩이 `packages/`를 차지한다. legacy 패키지는 자기 API와 자기 구현을 유지하고, 릴리스 대상이 아니며, 테스트와 lint와 공유 case를 새 경로에서 실행한다. 런타임이 아닌 TypeScript 패키지(`packages/compiler`, `packages/language`, `packages/lsp`, `packages/codemirror`, `packages/vscode`)는 TypeScript 런타임을 `@polyspec/template-legacy`로 받는다. 각 legacy 패키지는 그 언어의 생성 바인딩이 공유 suite를 실패와 skip 없이 통과하고, legacy 패키지의 패키지 테스트가 인터페이스 계약의 `changes` 밖의 변경 없이 바인딩에 대해 통과하면 별도 변경으로 제거된다(V-6 (5)). 그때까지 이 저장소는 언어마다 두 구현을 가지며, 이는 그 제거로 끝나는 PRINCIPLES S6의 예외다. legacy 패키지의 API와 인터페이스 계약의 차이는 모두 규칙과 함께 `packages/rust/interface.json`의 `changes` 항목이다.
+이전 언어 패키지는 `legacy/packages/ts`(비공개 npm 패키지 `@polyspec/template-legacy`), `legacy/packages/go`, `legacy/packages/php`, `legacy/packages/php-ext`, `legacy/packages/python`, `legacy/packages/cli/php`에 있고, bindgen이 `packages/rust/interface.json`에서 생성하는 바인딩이 `packages/`를 차지한다. legacy 패키지는 자기 API와 자기 구현을 유지하고, 릴리스 대상이 아니며, 테스트와 lint와 공유 case를 새 경로에서 실행한다. 런타임이 아닌 TypeScript 패키지(`packages/compiler`, `packages/language`, `packages/lsp`, `packages/codemirror`, `packages/vscode`)는 TypeScript 런타임을 `@polyspec/template-legacy`로 받는다. compiler는 그것을 개발 의존으로 받고 바인딩을 쓰기 전까지 릴리스 대상이 아니며, compiler가 생성하는 코드는 생성 코드 사용자가 보는 이름인 바인딩 패키지 `@polyspec/template`을 import한다. 각 legacy 패키지는 그 언어의 생성 바인딩이 공유 suite를 실패와 skip 없이 통과하고, legacy 패키지의 패키지 테스트가 인터페이스 계약의 `changes` 밖의 변경 없이 바인딩에 대해 통과하면 별도 변경으로 제거된다(V-6 (5)). 그때까지 이 저장소는 언어마다 두 구현을 가지며, 이는 그 제거로 끝나는 PRINCIPLES S6의 예외다. legacy 패키지의 API와 인터페이스 계약의 차이는 모두 규칙과 함께 `packages/rust/interface.json`의 `changes` 항목이다.
 
 ## 이름과 로딩
 

@@ -25,6 +25,7 @@
 - The language packages move to `legacy/packages` (ts, go, php, php-ext, python and cli/php) and leave the release (docs/spec/runtime.md#transition); the TypeScript runtime is the private npm package `@polyspec/template-legacy`, which the compiler, the language service and the editor packages take. `packages/ts`, `packages/python` and `packages/php-ext` are the binding packages that bindgen scaffolds, and the root Cargo workspace holds them with the core crate under one `Cargo.lock`; `make bindings`, `make bindings-check`, `make lint-bindings` and `make test-bindings` run bindgen (`BINDGEN`).
 - Rust: a lookup with a key of a type that names no entry of a map, a list or a native object, such as `m[true]` or `list[1.5]`, is `runtime_type` instead of `null`; a missing key and an index out of range stay `null` (EXP-19).
 - Rust: the JSON library is the crate `polyspec-json` of the repository json, the former ordered-json; the crate re-exports it as `polyspec_json`, and the contract names its `json_value` as a unit of the library json.
+- The TypeScript backend of the compiler imports the binding package `@polyspec/template` again, the name that a user of the generated code sees; the compiler takes `@polyspec/template-legacy` as a development dependency and is no release target during the transition.
 
 ## 0.0.27
 

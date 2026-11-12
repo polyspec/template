@@ -275,7 +275,7 @@ export function emitDeclarations(context: BackendContext): Part[] {
   const definitionsType = `export type DefinitionData<T> = Partial<T>;\nexport interface Definition<T> { template?: string; html?: string; data?: DefinitionData<T>; }\nexport interface Definitions { ${[...program.definitions].map(([name, definition]) => `${fieldName(name)}?: Definition<${definition.template !== null ? inputName(definition.template) : 'Record<never, never>'}>;`).join(' ')} }`;
   const names = ['BindError', 'Frame', 'RenderContext', 'RuntimeBindings', 'RuntimeEnvironment', 'Scope', 'TemplateError', 'bindData', 'bindMap', 'checkText', 'internalBoundary', 'type MapValue', 'type PreparedRender', 'type Program', 'type RenderOptions', 'type Span', 'type Template', 'type Value'];
   // The import names what the program uses of the package.
-  const imports = dependent(text => `import { ${names.filter(name => new RegExp(`\\b${name.replace('type ', '')}\\b`).test(text)).join(', ')} } from '@polyspec/template-legacy';`);
+  const imports = dependent(text => `import { ${names.filter(name => new RegExp(`\\b${name.replace('type ', '')}\\b`).test(text)).join(', ')} } from '@polyspec/template';`);
   return ['// Generated.', imports, `${tsRecords}\n${assignType}\n${inputTypes}\n${definitionsType}\nexport interface ArtifactManifest { schema: number; mode: 'gen'; target: 'ts'; entry: string; sourceDigest: string; typeDigest: string; contractDigest: string; files: Record<string, string>; }`];
 }
 

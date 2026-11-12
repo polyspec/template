@@ -26,6 +26,7 @@
 - 언어 패키지가 `legacy/packages`(ts, go, php, php-ext, python, cli/php)로 옮겨지고 릴리스에서 빠진다(docs/spec/runtime.md#transition). TypeScript 런타임은 비공개 npm 패키지 `@polyspec/template-legacy`이며 compiler, language service, editor 패키지가 그것을 받는다. `packages/ts`, `packages/python`, `packages/php-ext`는 bindgen이 scaffold하는 바인딩 패키지이고, 루트 Cargo workspace가 그것들과 core crate를 하나의 `Cargo.lock`으로 묶는다. `make bindings`, `make bindings-check`, `make lint-bindings`, `make test-bindings`가 bindgen(`BINDGEN`)을 실행한다.
 - Rust: map, list, native object의 항목을 가리킬 수 없는 타입의 키로 하는 조회(`m[true]`, `list[1.5]` 등)는 `null` 대신 `runtime_type`이다. 없는 키와 범위 밖 인덱스는 그대로 `null`이다(EXP-19).
 - Rust: JSON 라이브러리는 이전 ordered-json인 저장소 json의 crate `polyspec-json`이다. crate는 그것을 `polyspec_json`으로 다시 내보내고, 계약은 `json_value`를 라이브러리 json의 unit으로 적는다.
+- compiler의 TypeScript backend는 다시 생성 코드 사용자가 보는 이름인 바인딩 패키지 `@polyspec/template`을 import한다. compiler는 `@polyspec/template-legacy`를 개발 의존으로 받고 이행 기간에는 릴리스 대상이 아니다.
 
 ## 0.0.27
 

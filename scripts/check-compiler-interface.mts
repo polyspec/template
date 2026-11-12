@@ -177,7 +177,7 @@ for (const language of [...core.languages, 'php-extension', 'javascript-esm']) {
   }
   if (bound.generatedOperations === undefined) throw new Error(`${language}: BoundMap generated operations are missing`);
 }
-if (languageMapping(manifest, 'javascript-esm').entry !== '@polyspec/template-legacy/render') throw new Error('javascript-esm: the browser entry is missing');
+if (languageMapping(manifest, 'javascript-esm').entry !== '@polyspec/template/render') throw new Error('javascript-esm: the browser entry is missing');
 
 function classDeclaration(source: Source, name: string): Class | undefined {
   for (const statement of source.statements.map(declared)) {

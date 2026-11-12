@@ -30,7 +30,9 @@
     "node": ">=26.12.0"
   },
   "dependencies": {
-    "@polyspec/template-legacy": "0.0.27",
     "ajv": "^8.20.0"
+  },
+  "devDependencies": {
+    "@polyspec/template-legacy": "0.0.27"
   }
 }

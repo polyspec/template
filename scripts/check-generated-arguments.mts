@@ -84,7 +84,7 @@ try {
       runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), ...lines.map(fixture => join(temporary, `${fixture.id}.ts`))], root);
       const runner = join(temporary, 'arguments.mjs');
       writeFileSync(runner, `import { readFileSync } from 'node:fs';
-import { RuntimeEnvironment, TemplateError } from '@polyspec/template-legacy';
+import { RuntimeEnvironment, TemplateError } from '@polyspec/template';
 ${fixtures.map(fixture => `import { GeneratedProgram as ${fixture.id} } from './ts/${fixture.id}.js';`).join('\n')}
 const result = (request) => { try { return 'rendered: ' + request(); } catch (error) { if (error instanceof TemplateError) return 'template: ' + error.code; return Object.getPrototypeOf(error) === Error.prototype ? 'argument: ' + error.message : 'other ' + error?.constructor?.name + ': ' + error?.message; } };
 ${fixtures.map(fixture => `{ const program = new ${fixture.id}(new RuntimeEnvironment()); const vectors = JSON.parse(readFileSync(${JSON.stringify(vectorsFor(fixture, 'TypeScript'))}, 'utf8')); console.log(${JSON.stringify(fixture.name)} + ' ' + JSON.stringify(vectors.map(vector => result(() => program.render('input.tpl', vector.assign, { define: vector.define }))))); }`).join('\n')}

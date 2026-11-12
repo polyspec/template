@@ -26,13 +26,6 @@
       "name": "@polyspec/template-codemirror",
       "product": "template-codemirror",
       "runtime": "ts"
-    },
-    {
-      "kind": "npm",
-      "directory": "packages/compiler",
-      "name": "@polyspec/template-compiler",
-      "product": "template-compiler",
-      "runtime": "ts"
     }
   ],
   "manifests": {
@@ -40,7 +33,6 @@
     "packages/language/package.json": "archive",
     "packages/lsp/package.json": "archive",
     "packages/codemirror/package.json": "archive",
-    "packages/compiler/package.json": "archive",
     "packages/vscode/package.json": "version",
     "packages/rust/Cargo.toml": "git-tag"
   },
@@ -61,7 +53,8 @@
     "packages/python/pyproject.toml": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
     "packages/ts/Cargo.toml": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
     "packages/ts/package.json": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "legacy/packages/go/go.mod": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)"
+    "legacy/packages/go/go.mod": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
+    "packages/compiler/package.json": "the build compiler, which takes the TypeScript runtime as the legacy package @polyspec/template-legacy during the transition and is released again once it uses a binding (docs/spec/runtime.md#transition)"
   },
   "goModules": {},
   "annotatedTags": true,

@@ -45,7 +45,7 @@ try {
       runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
       const tsRunner = join(temporary, 'typed.mjs');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
-import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template-legacy';
+import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template';
 ${tsDescribe}
 const expected = ${JSON.stringify(expected)};
 const runtime = new RuntimeEnvironment();

@@ -4,7 +4,9 @@
 // checks, such as the owner check of every tracked path, and compiled by a concurrent `cargo test` of the crate.
 //
 // - nodeWorkspace: an ES module directory whose node_modules holds copies of installed packages of this repository, so
-//   that tsc and Node.js resolve `@polyspec/template-legacy` from it as from the checkout. No symbolic link (AGENTS).
+//   that tsc and Node.js resolve `@polyspec/template` from it as from the checkout. No symbolic link (AGENTS). During the
+//   transition (docs/spec/runtime.md#transition) the copy is the legacy package `@polyspec/template-legacy` under the
+//   name `@polyspec/template` that generated code imports.
 // - rustWorkspace: a crate that depends on packages/rust by path, with the versions of its Cargo.lock and the
 //   rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
 //   checkout (T18.7).
@@ -35,13 +37,13 @@ export function temporaryDirectory(name: string): string {
 }
 
 /** A temporary ES module directory with copies of the installed `packages`. */
-export function nodeWorkspace(name: string, packages: readonly string[] = ['@polyspec/template-legacy']): string {
+export function nodeWorkspace(name: string, packages: readonly (readonly [string, string])[] = [['@polyspec/template-legacy', '@polyspec/template']]): string {
   const directory = temporaryDirectory(name);
   writeFileSync(join(directory, 'package.json'), `${JSON.stringify({ private: true, type: 'module' })}\n`);
-  for (const name of packages) {
+  for (const [name, as] of packages) {
     const installed = join(root, 'node_modules', name);
     if (!existsSync(join(installed, 'dist'))) throw new Error(`${relative(root, installed)} has no dist; make build-ts builds and installs it`);
-    cpSync(installed, join(directory, 'node_modules', name), { recursive: true });
+    cpSync(installed, join(directory, 'node_modules', as), { recursive: true });
   }
   return directory;
 }

@@ -43,7 +43,7 @@ try {
       runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', tsOutput, tsSource], root);
       const tsRunner = join(temporary, 'native.mjs');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/native.js';
-import { RuntimeEnvironment } from '@polyspec/template-legacy';
+import { RuntimeEnvironment } from '@polyspec/template';
 class Order {
   label = 'Order 12';
   status_label(prefix) { if (arguments.length !== 1 || typeof prefix !== 'string') throw new Error('invalid status_label'); return prefix + ':12'; }
