@@ -275,6 +275,34 @@
         "category": "value"
       },
       {
+        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
+        "category": "value"
+      },
+      {
+        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_FUNCTION_NAME",
+        "category": "value"
+      },
+      {
+        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_SOURCE_RANGE",
+        "category": "value"
+      },
+      {
+        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_INDENT",
+        "category": "value"
+      },
+      {
+        "variant": "polyspec_template::ErrorCode::E_FORMAT_INVARIANT",
+        "category": "value"
+      },
+      {
+        "variant": "polyspec_template::ErrorCode::E_FORMAT_HTML",
+        "category": "value"
+      },
+      {
+        "variant": "polyspec_template::ErrorCode::E_AST_INVALID",
+        "category": "value"
+      },
+      {
         "variant": "polyspec_template::ErrorCode::E_INTERNAL",
         "category": "internal"
       }
@@ -354,7 +382,9 @@
             "php": "map",
             "python": "map",
             "node": "map",
-            "go": "map_value.new",
+            "go": {
+              "todo": "an ordered Go map type: map[string]any loses the entry order (VAL-4)"
+            },
             "wasm": "map"
           }
         },
@@ -365,11 +395,19 @@
             "is": true
           },
           "make": {
-            "php": "map_value.new",
+            "php": "php_object",
             "python": "map",
             "node": "map",
-            "go": "map_value.new",
+            "go": {
+              "todo": "an ordered Go map type: map[string]any loses the entry order (VAL-4)"
+            },
             "wasm": "map"
+          }
+        },
+        {
+          "kind": "native",
+          "make": {
+            "todo": "the value kind native of bindgen: the core holds the handle and gives back the same object (VAL-18)"
           }
         }
       ],
@@ -440,11 +478,11 @@
           ]
         },
         {
-          "php": "map_value",
+          "php": "stdClass",
           "cases": [
             {
               "kind": "map",
-              "read": "map_value.entries"
+              "read": "builtin"
             }
           ]
         },
@@ -617,15 +655,6 @@
           ]
         },
         {
-          "go": "map_value",
-          "cases": [
-            {
-              "kind": "map",
-              "read": "map_value.entries"
-            }
-          ]
-        },
-        {
           "wasm": "null",
           "cases": [
             {
@@ -677,76 +706,6 @@
               "read": "builtin"
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": "map_value",
-      "name": [
-        "map",
-        "value"
-      ],
-      "module": "",
-      "kind": "class",
-      "visibility": "public",
-      "origin": "value",
-      "final": true,
-      "only": {
-        "targets": [
-          "php",
-          "go"
-        ],
-        "reason": "VAL-21"
-      },
-      "members": [
-        {
-          "id": "map_value.new",
-          "name": [
-            "new"
-          ],
-          "kind": "constructor",
-          "visibility": "public",
-          "parameters": [
-            {
-              "name": [
-                "entries"
-              ],
-              "type": {
-                "list": {
-                  "tuple": [
-                    "text",
-                    "template_value"
-                  ]
-                }
-              },
-              "required": true
-            }
-          ],
-          "wait": "none",
-          "core": {
-            "path": "polyspec_template::Value::map"
-          }
-        },
-        {
-          "id": "map_value.entries",
-          "name": [
-            "entries"
-          ],
-          "kind": "property",
-          "visibility": "public",
-          "returns": {
-            "list": {
-              "tuple": [
-                "text",
-                "template_value"
-              ]
-            }
-          },
-          "wait": "none",
-          "core": {
-            "path": "polyspec_template::OrderedMap::iter",
-            "receiver": "&self"
-          }
         }
       ]
     },
@@ -3239,6 +3198,8 @@
             }
           ],
           "raises": [
+            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
+            "polyspec_template::ErrorCode::E_ARGUMENT_FUNCTION_NAME",
             "polyspec_template::ErrorCode::E_INTERNAL"
           ],
           "wait": "none",
@@ -3840,6 +3801,7 @@
             "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
             "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
             "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
+            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
             "polyspec_template::ErrorCode::E_INTERNAL"
           ],
           "wait": "none",
@@ -3903,6 +3865,7 @@
             "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
             "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
             "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
+            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
             "polyspec_template::ErrorCode::E_INTERNAL"
           ],
           "wait": "none",
@@ -4006,7 +3969,11 @@
             "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
             "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
             "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
+            "polyspec_template::ErrorCode::E_INTERNAL",
+            "polyspec_template::ErrorCode::E_ARGUMENT_INDENT",
+            "polyspec_template::ErrorCode::E_FORMAT_INVARIANT",
+            "polyspec_template::ErrorCode::E_FORMAT_HTML"
           ],
           "wait": "none",
           "core": {
@@ -4067,7 +4034,7 @@
             "unit": "template"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_DATA_INVALID_JSON",
+            "polyspec_template::ErrorCode::E_AST_INVALID",
             "polyspec_template::ErrorCode::E_INTERNAL"
           ],
           "wait": "none",
@@ -4251,13 +4218,12 @@
     {
       "id": "change-php-maps",
       "rule": "VAL-21",
-      "reason": "VAL-21, P-3: a map whose keys are 0 to n-1, or an empty map, reaches PHP and Go code as a MapValue, so it comes back as a map; as a PHP list array it came back as a list",
-      "symbol": "MapValue",
+      "reason": "VAL-21, P8: a map whose keys are 0 to n-1, or an empty map, reaches PHP code as a stdClass object, so it binds back as a map; as a list array it came back as a list",
+      "symbol": "host arguments",
       "from": {
-        "php": "a map with the keys 0 to n-1 arrives as a list array",
-        "go": "a map arrives as *value.OrderedMap"
+        "php": "a map with the keys 0 to n-1 or no key arrives as a list array"
       },
-      "to": "map_value"
+      "to": "template_value"
     },
     {
       "id": "change-render-template",
