@@ -12,7 +12,7 @@ use crate::render::statements::Renderer;
 use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values, value_from_json};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
-use crate::value::{HostError, OrderedMap, Value};
+use crate::value::{OrderedMap, Value};
 use polyspec_json::{Kind as JsonKind, Value as JsonValue};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -290,17 +290,17 @@ impl AstProgram {
         let loaded = match self.loader.load(name) {
             Ok(Some(loaded)) => loaded,
             Ok(None) => return Err(fail(ErrorCode::E_LOAD_NOT_FOUND, format!("template {name} does not exist"))),
-            // RT-9: a loader of the implementation judged the load failed.
-            Err(LoadError::Failed(message)) => {
+            // RT-9: a load that the loader judges failed is load_failed with its cause, at the tag that names the template.
+            Err(LoadError::Kind(error)) if error.code == ErrorCode::E_LOAD_FAILED => {
                 return Err(fail(
                     ErrorCode::E_LOAD_FAILED,
-                    format!("template {name} cannot be loaded: {message}"),
+                    format!("template {name} cannot be loaded: {}", error.message),
                 ));
             }
+            // Another kind of a loader, such as a data error of the value that it built, is reported at the tag too.
+            Err(LoadError::Kind(error)) => return Err(fail(error.code, error.message)),
             // RT-9, FUN-46: the error of a host loader reaches the caller unchanged.
-            Err(LoadError::Host(HostError::Data(error))) => return Err(fail(error.code, error.message)),
-            Err(LoadError::Host(HostError::Raised(raised))) => return Err(RenderError::Raised(raised)),
-            Err(LoadError::Host(HostError::Callback(error))) => return Err(RenderError::Callback(error)),
+            Err(error @ (LoadError::Raised(_) | LoadError::Callback(_))) => return Err(error),
         };
         // RT-9: a loaded template holds a non-empty version; the type holds a source or an AST.
         if loaded.version().is_empty() {

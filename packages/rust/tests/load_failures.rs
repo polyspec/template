@@ -7,8 +7,8 @@
 )]
 
 use polyspec_template::{
-    AstProgram, EngineOptions, ErrorCode, FsLoader, HostError, LoadError, Loaded, Loader, OrderedMap, RenderError, RenderOptions,
-    RenderTarget, read_json,
+    AstProgram, EngineOptions, ErrorCode, FsLoader, LoadError, Loaded, Loader, OrderedMap, RenderError, RenderOptions, RenderTarget,
+    read_json,
 };
 use std::os::unix::fs::PermissionsExt;
 
@@ -20,10 +20,10 @@ struct FailingLoader {
 impl Loader for FailingLoader {
     fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError> {
         if name == self.failing {
-            return Err(LoadError::Host(HostError::Callback(format!("cannot read {name}").into())));
+            return Err(LoadError::Callback(format!("cannot read {name}").into()));
         }
         if name == self.judged {
-            return Err(LoadError::Failed(format!("{name} cannot be read")));
+            return Err(polyspec_template::loader::load_failed(name, format!("{name} cannot be read")));
         }
         let source = if name == "page.tpl" { "a\n{+ part.tpl}" } else { "part" };
         Ok(Some(Loaded::Source {

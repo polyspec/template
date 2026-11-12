@@ -33,6 +33,7 @@
 - compiler 명세가 타입 있는 프로그램을 정한다(docs/spec/compiler.md#typed-programs). backend는 런타임의 AstProgram으로 렌더하는 선언을 내고, backend는 Rust, TypeScript, Python, PHP, Go 순서로 하나씩 옮겨진다(Wave 28).
 - Rust: 소스의 줄 인덱스와 함께 로드한 AST는 오류의 줄과 열을 말한다. `Loaded::Ast`가 `lines`를 담고, `MapLoader::set_ast_lines`가 그것을 받으며, artifact 런타임은 manifest의 `lines`를 읽는다.
 - compiler의 Rust backend는 타입 있는 프로그램을 낸다. 즉 타입 manifest의 선언과, 요청을 그것에 대해 검사하고 artifact의 AST 위에서 crate의 `AstProgram`으로 렌더하는 `GeneratedProgram`이다. 모듈에는 템플릿 제어 흐름이 없고 `polyspec-template`에만 의존한다. Rust generated runner, 생성 검사의 Rust 행, Rust showcase adapter, Rust 설치 프로젝트가 이를 쓴다.
+- Rust: `Loader::load`는 `Result<Option<Loaded>, Failure<TemplateError>>`를 반환한다(`LoadError`는 `RenderError`). 실패한 로드는 `loader::load_failed`가 만드는 kind `load_failed`이고, 호스트 코드의 오류는 `Raised` 또는 `Callback`이다. 계약은 loader callback의 core 경로를 적고, 바인딩 패키지는 binding 20ad790으로 다시 scaffold된다.
 
 ## 0.0.27
 

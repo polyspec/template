@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 8aee8a02299762993004d04449aec84f11a3a60bf80532b301715dc4f05d9dd8 -->
+<!-- source-sha256: 73b55999c2c29cdb375904e2e9fdb567f5cc172f283bc0359e453c5a75821b18 -->
 # polyspec-template
 
 [English](README.md).
@@ -47,7 +47,7 @@ assign 데이터는 crate가 다시 내보내는 crate `polyspec-json`의 JSON �
 | `Value::downcast_object::<T>()` | 템플릿이 호스트 함수, class 함수, method에 넘긴 `T` 타입의 원본 `TemplateObject`를 반환한다. |
 | `internal_boundary` | 모든 공개 parse, prepare, render 연산은 panic을 호스트로 전파하지 않고 `internal`로 보고한다. |
 | `AstProgram::load(target, &options)`, `prepare` | 파일을 읽는 로더(`FsLoader`)의 템플릿, 즉 대상과 그 include·block 태그가 가리키는 모든 템플릿을 전이적으로 읽는다. `render`는 파일을 읽지 않으며 이 둘이 로드하지 않은 템플릿에는 `load_not_loaded`로 실패한다(RT-77). |
-| `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. `Loader::load`는 `Result<Option<Loaded>, LoadError>`를 반환한다. `LoadError::Failed`는 `load_failed`이며 `FsLoader`가 읽을 수 없는 일반 파일에 대해 반환하고, `LoadError::Host`는 호스트 코드의 오류를 바뀌지 않고 호출자에게 전한다(RT-9). |
+| `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. `Loader::load`는 `Result<Option<Loaded>, LoadError>`를 반환하며 `LoadError`는 `RenderError`, 즉 binding_core의 `Failure<TemplateError>`다. kind `load_failed`(`loader::load_failed`)는 `FsLoader`가 읽을 수 없는 일반 파일에 대해 반환하고, `Raised`와 `Callback`은 호스트 코드의 오류를 바뀌지 않고 호출자에게 전한다(RT-9). |
 | `parse_json`, `parse_json_bytes`, `read_json` | 템플릿 값 또는 검사한 `polyspec_json::Value`로의 JSON 파싱. ±(2^53 − 1) 밖의 숫자, 짝이 없는 surrogate escape, 64단계보다 깊은 중첩, 하나의 JSON 문서가 아닌 텍스트(`data_invalid_json`)는 각 데이터 코드로 실패한다. |
 | `TemplateError` | `code`, `template`, `line`, `col`, `offset`, `end`, `message`를 가진 오류. |
 | `Value::text`, `Value::safe_text`, `Value::list`, `Value::map` | text, safe text, list, map 값을 생성하는 함수. 값을 복제할 때 list와 map은 저장소를 공유한다. |

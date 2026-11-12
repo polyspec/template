@@ -38,13 +38,15 @@ impl Loaded {
     }
 }
 
-/// The failure of a loader (RT-9).
-#[derive(Debug)]
-pub enum LoadError {
-    /// A loader of the implementation, such as [`FsLoader`], judged the load failed: `load_failed` with this cause.
-    Failed(String),
-    /// The error of host code, which reaches the caller of `render` unchanged (FUN-46).
-    Host(crate::HostError),
+/// The failure of a loader (RT-9), the error of a core function that calls a callback (binding design E-1c): a kind,
+/// which the program reports at the tag that names the template, `load_failed` with the cause as its message for a
+/// load that the loader judges failed; or the error of host code, `Raised` or `Callback`, which reaches the caller of
+/// `render` unchanged (FUN-46).
+pub type LoadError = crate::RenderError;
+
+/// The `load_failed` of a loader of the implementation, with the cause as its message (RT-9).
+pub fn load_failed(name: &str, cause: impl Into<String>) -> LoadError {
+    LoadError::Kind(crate::TemplateError::without_position(crate::ErrorCode::E_LOAD_FAILED, name, cause))
 }
 
 /// Loads templates by name (RT-9).
@@ -189,7 +191,7 @@ impl FsLoader {
 /// cannot be read and a file that the loader read under another name are failures.
 impl Loader for FsLoader {
     fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError> {
-        self.load_file(name).map_err(LoadError::Failed)
+        self.load_file(name).map_err(|cause| load_failed(name, cause))
     }
 
     fn blocking_io(&self) -> bool {

@@ -2987,6 +2987,10 @@
             }
           },
           "wait": "none",
+          "core": {
+            "path": "polyspec_template::Loader::load",
+            "receiver": "&self"
+          },
           "optional_reason": "RT-9",
           "async_allowed": false
         }

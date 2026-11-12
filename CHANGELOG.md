@@ -32,6 +32,7 @@
 - The compiler specification states typed programs (docs/spec/compiler.md#typed-programs): a backend emits declarations that render through the AstProgram of the runtime, and the backends move one by one, in the order Rust, TypeScript, Python, PHP and Go (Wave 28).
 - Rust: an AST loaded with the line index of its source names the line and the column of an error: `Loaded::Ast` holds `lines`, `MapLoader::set_ast_lines` takes them, and the artifact runtime reads the `lines` of its manifest.
 - The Rust backend of the compiler emits a typed program: the declarations of the type manifest and a `GeneratedProgram` that checks a request against them and renders it with the `AstProgram` of the crate over the ASTs of the artifact; the module holds no template control flow and depends on `polyspec-template` only. The Rust generated runner, the Rust rows of the generated checks, the Rust showcase adapter and the Rust install project use it.
+- Rust: `Loader::load` returns `Result<Option<Loaded>, Failure<TemplateError>>` (`LoadError` is `RenderError`): a failed load is the kind `load_failed`, made by `loader::load_failed`, and the error of host code is `Raised` or `Callback`. The contract names the core path of the loader callback, and the binding packages are scaffolded again by binding 20ad790.
 
 ## 0.0.27
 
