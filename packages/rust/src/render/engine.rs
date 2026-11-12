@@ -269,14 +269,20 @@ impl AstProgram {
         })
     }
 
-    /// FUN-43, FUN-44: registers a host function. Returns an error message for an invalid or built-in name.
-    pub fn register(&mut self, name: &str, function: HostFunction) -> Result<(), String> {
-        self.runtime.register(name, function)
+    /// FUN-43, FUN-44: registers a host function. A name that is not an identifier or names a built-in function is
+    /// `argument_function_name` (ERR-15).
+    pub fn register(&mut self, name: &str, function: HostFunction) -> Result<(), TemplateError> {
+        self.runtime
+            .register(name, function)
+            .map_err(|message| TemplateError::argument(ErrorCode::E_ARGUMENT_FUNCTION_NAME, "", message))
     }
 
-    /// Registers one logical class function used by `Class::method(...)`.
-    pub fn register_class(&mut self, class_name: &str, method: &str, function: HostFunction) -> Result<(), String> {
-        self.runtime.register_class(class_name, method, function)
+    /// Registers one logical class function used by `Class::method(...)`. A class or method name that is not an
+    /// identifier is `argument_function_name` (ERR-15).
+    pub fn register_class(&mut self, class_name: &str, method: &str, function: HostFunction) -> Result<(), TemplateError> {
+        self.runtime
+            .register_class(class_name, method, function)
+            .map_err(|message| TemplateError::argument(ErrorCode::E_ARGUMENT_FUNCTION_NAME, "", message))
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
