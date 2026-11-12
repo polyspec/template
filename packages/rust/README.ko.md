@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 336fb9c5991a912f994e77672e295cd4f099226aed365a57259c1e6746a9c878 -->
+<!-- source-sha256: 9adbe58dc56ff6e70d3d34eb45187602c6d0951577feadaa519da753ac7f43e7 -->
 # polyspec-template
 
 [English](README.md).
@@ -52,6 +52,8 @@ assign 데이터는 crate가 다시 내보내는 crate `polyspec-ordered-json`�
 
 ## 명령줄
 
+binary는 기본으로 꺼진 feature `cli`로 빌드하므로(`cargo build --features cli`) 라이브러리 사용자는 인자 파서를 빌드하지 않는다.
+
 ```sh
 template parse [--root DIR] [--delimiters OC] FILE
 template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
@@ -65,7 +67,7 @@ template format [--indent none|tab|N] [--delimiters OC] FILE
 ```sh
 cargo fmt --check
 cargo clippy --locked --release -- -D warnings
-cargo test --locked --features __test_support
+cargo test --locked --features __test_support,cli
 ```
 
 통합 테스트는 `tests/`에 있고 내부 단위는 각 모듈 옆에 있다. Conformance case와 expression fixture를 process 안에서 실행한다. Rust 단위·parity target은 네이티브 expression 벡터·formatter 불변식 bridge와 전체 formatter target에 `__test_support`를 활성화한다. 릴리스 소비자는 formatting 계약을 공개하고 expression·source·value·formatter 구현을 비공개로 유지하는 기본 SDK를 사용한다.

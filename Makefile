@@ -509,7 +509,7 @@ template-build-go:
 build-rust: template-build-rust typed-generator ## Build the Rust CLI
 
 template-build-rust:
-	$(CARGO) build --locked --release --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
+	$(CARGO) build --locked --release --features cli --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
 
 build-php: template-build-php ## Install the Composer packages of the development root composer.json into vendor/
 
@@ -545,9 +545,9 @@ test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and 
 
 .PHONY: template-test-rust-clippy template-test-rust-unit
 template-test-rust-clippy:
-	$(CARGO) clippy --locked --release --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
+	$(CARGO) clippy --locked --release --all-targets --all-features --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
 template-test-rust-unit:
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support -- --test-threads=1
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support,cli -- --test-threads=1
 
 test-php: template-test-php ## PHP unit tests
 

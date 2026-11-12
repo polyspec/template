@@ -11,6 +11,9 @@ publish = false
 include = ["/src/**", "/Cargo.toml", "/interface.json", "/README.md"]
 
 [features]
+# The command line interface (CNF-4): the binary `template` and its argument parser. A library consumer builds no CLI
+# dependency, so the feature is off by default and the CLI builds with `--features cli`.
+cli = ["dep:clap"]
 # Native expression-vector harness only; the release SDK keeps implementation modules private.
 __test_support = []
 
@@ -21,12 +24,19 @@ path = "src/lib.rs"
 [[bin]]
 name = "template"
 path = "src/bin/template.rs"
+required-features = ["cli"]
 
 # The tokens and format results of the conformance cases, one test per case through libtest-mimic.
 [[test]]
 name = "cases"
 path = "tests/cases.rs"
 harness = false
+
+# The command line interface runs the binary, which the feature cli builds.
+[[test]]
+name = "cli"
+path = "tests/cli.rs"
+required-features = ["cli"]
 
 # The conformance cases rendered in-process, one test per case through libtest-mimic.
 [[test]]
@@ -81,7 +91,7 @@ polyspec-ordered-json = { path = "../../../ordered-json/packages/rust" }
 # The kind interface that the generated bindings read from the core error (bindgen design E-1, I-2 (3)); Cargo.lock pins the
 # commit of the bindgen repository, the source of the generated binding crates too.
 polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core" }
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
 # The validation of a decoded AST against contracts/schema/ast.schema.json (decode_template, AST-10), with the number

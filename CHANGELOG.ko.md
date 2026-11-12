@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c0af698cad55be7f3502615149a4eae8ffd3572beff8726a953844d42dac4e45 -->
+<!-- source-sha256: 4f32621be847c5c9a6772976f97696f28ddbe1e1e8f48db4f4893fba32d2c58e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -16,6 +16,7 @@
 - 오류 코드는 소문자 snake_case kind다(`E_DATA_DEPTH`는 `data_depth`, ERR-1): docs/spec/errors.md의 목록, 모든 명세, contract case와 fixture, Rust `ErrorCode::as_str`와 `TemplateError`의 직렬화. legacy 구현은 없어질 때까지 대문자 이름을 유지하며 `make error-codes`가 kind에서 그 이름을 쓴다.
 - Rust crate는 bindgen 레포의 `polyspec-bindgen-core`에 의존하고 `TemplateError`에 kind 인터페이스 `Kinds`를 준다: kind는 코드의 kind이며 status와 OS 오류 번호는 없다. crate 패키지는 `interface.json`을 담는다(`include`).
 - packages/rust/interface.json은 바인딩의 인터페이스 계약이다(bindgen 설계 I-1): 패키지, out·in 표를 가진 값 타입 `template_value`, record와 variant로 쓴 AST, 분석과 format 결과, engine, loader, bound map, 함수, 모든 kind의 category를 가진 오류 클래스 `Template<Category>Error`, 그리고 언어 API와의 차이.
+- Rust 명령행 인터페이스는 기본으로 꺼진 feature `cli`로 빌드하므로 라이브러리는 `clap` 없이 빌드된다. make build-rust, conformance driver, 단위 시험은 이 feature를 켠다.
 
 ## 0.0.27
 

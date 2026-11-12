@@ -77,7 +77,7 @@ export const drivers: Record<Language, Driver> = {
   rust: {
     dir: join(packages, 'rust'),
     build() {
-      build('rust', 'cargo', ['build', '--locked', '--release', '--bin', 'template'], join(packages, 'rust'));
+      build('rust', 'cargo', ['build', '--locked', '--release', '--features', 'cli', '--bin', 'template'], join(packages, 'rust'));
       publishBuild(join(packages, 'rust', 'target', 'release', 'template'), published.rust);
     },
     command(args) {

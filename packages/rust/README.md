@@ -51,6 +51,8 @@ Assign data is a JSON value of the crate `polyspec-ordered-json`, which the crat
 
 ## Command line
 
+The binary builds with the feature `cli` (`cargo build --features cli`), which is off by default, so a library consumer builds no argument parser.
+
 ```sh
 template parse [--root DIR] [--delimiters OC] FILE
 template render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
@@ -64,7 +66,7 @@ template format [--indent none|tab|N] [--delimiters OC] FILE
 ```sh
 cargo fmt --check
 cargo clippy --locked --release -- -D warnings
-cargo test --locked --features __test_support
+cargo test --locked --features __test_support,cli
 ```
 
 Integration tests are in `tests/`; internal units live beside their modules. The conformance cases and expression fixtures run in-process. Rust unit and parity targets enable `__test_support` for the native expression-vector and formatter-invariant bridges, including the complete formatter target. Release consumers use the default SDK with public formatting contracts and private expression, source, value and formatter implementations.
