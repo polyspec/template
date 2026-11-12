@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 03bca85fd6eed1074e1c32cc892e790cd04c96e81665eb58270c514a81823a3c -->
+<!-- source-sha256: 0baad6cd010647182798361a40b7c81a420539496f5947ac4821f311b51e6938 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -11,6 +11,7 @@
 - 파일시스템 로더는 `ENOENT`와 `ENOTDIR`일 때만 이름이 없다고 보고한다. 디렉터리, 일반 파일이 아닌 다른 파일, 그리고 디렉터리의 `EACCES` 같은 다른 모든 메타데이터 오류는 파일시스템의 메시지와 함께 `E_LOAD_FAILED`다(RT-10). Rust `FsLoader`가 이 규칙을 따른다.
 - Rust `Program` trait은 `Send`와 `Sync`를 요구하고 `PreparedRender`는 `Send`이고 `Sync`다. data-model.md와 RT-70은 한 thread에 머무는 `Rc` 값 대신, 실제 그렇듯 Rust program, prepared render, bound map, 값이 `Send`이고 `Sync`라고 적는다(VAL-22, RT-70).
 - Rust crate는 `unwrap`, `expect`, 그리고 값을 자르거나 넘기거나 부호를 잃을 수 있는 cast를 거부하고, clippy.toml은 `Result::ok`와 그 `unwrap_or` 계열에 더해 `Option::{unwrap_or, unwrap_or_default, unwrap_or_else, map_or, map_or_else}`와 `Result::{map_or, map_or_else}`를 금지한다(R-1). panic하던 불변식 위반은 `E_INTERNAL`이며, 남은 사용은 모두 규칙을 이유로 적은 `allow`를 가진다. `MapLoader::set_ast`는 JSON 형태가 없는 AST에 오류를 돌려주고 `value_from_json`은 `Result`를 돌려준다.
+- Rust 구현은 숫자의 텍스트를 JSON 숫자 토큰 함수인 `polyspec-ordered-json`의 `number_text`로 쓴다(VAL-9, VAL-10). `-0`은 계속 `0`이며 그 이유를 VAL-9에 적었다. 어떤 값도 갖지 않는 유한하지 않은 숫자는 쓰는 자리에서 `E_INTERNAL`이다.
 
 ## 0.0.27
 

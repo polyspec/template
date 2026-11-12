@@ -8,15 +8,15 @@ use std::cmp::Ordering;
 /// VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.
 #[test]
 fn number_to_string_follows_the_ecmascript_layout() {
-    assert_eq!(number_to_string(1.0), "1");
-    assert_eq!(number_to_string(-0.0), "0");
-    assert_eq!(number_to_string(0.1 + 0.2), "0.30000000000000004");
-    assert_eq!(number_to_string(1e21), "1e+21");
-    assert_eq!(number_to_string(1e-7), "1e-7");
-    assert_eq!(number_to_string(1.5e-7), "1.5e-7");
-    assert_eq!(number_to_string(0.000001), "0.000001");
-    assert_eq!(number_to_string(123456789012345680000.0), "123456789012345680000");
-    assert_eq!(number_to_string(9007199254740991.0), "9007199254740991");
+    assert_eq!(number_to_string(1.0).expect("finite"), "1");
+    assert_eq!(number_to_string(-0.0).expect("finite"), "0");
+    assert_eq!(number_to_string(0.1 + 0.2).expect("finite"), "0.30000000000000004");
+    assert_eq!(number_to_string(1e21).expect("finite"), "1e+21");
+    assert_eq!(number_to_string(1e-7).expect("finite"), "1e-7");
+    assert_eq!(number_to_string(1.5e-7).expect("finite"), "1.5e-7");
+    assert_eq!(number_to_string(0.000001).expect("finite"), "0.000001");
+    assert_eq!(number_to_string(123456789012345680000.0).expect("finite"), "123456789012345680000");
+    assert_eq!(number_to_string(9007199254740991.0).expect("finite"), "9007199254740991");
 }
 
 #[test]

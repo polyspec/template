@@ -72,6 +72,9 @@ cast_possible_wrap = "deny"
 cast_sign_loss = "deny"
 
 [dependencies]
+# The JSON values of assign data, definitions and the environment, the JSON text of `json` and the text of a number
+# (VAL-9, VAL-12, FUN-26): the one JSON reader and writer of polyspec.
+polyspec-ordered-json = { path = "../../../ordered-json/packages/rust" }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }

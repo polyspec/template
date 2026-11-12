@@ -145,14 +145,17 @@ impl RuntimeBindings {
 
     /// Converts one value to text at its source location.
     pub fn stringify(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<String, TemplateError> {
-        stringify(value).map_err(|StringifyError| {
-            self.error(
+        stringify(value).map_err(|error| match error {
+            StringifyError::NoText => self.error(
                 context,
                 frame,
                 span,
                 ErrorCode::E_RUNTIME_STRINGIFY,
                 "a list or map cannot be converted to text",
-            )
+            ),
+            StringifyError::NotFinite(error) => {
+                self.error(context, frame, span, ErrorCode::E_INTERNAL, format!("internal failure: {error}"))
+            }
         })
     }
 
@@ -291,7 +294,9 @@ impl RuntimeBindings {
                 if let Value::Number(number) = key
                     && number.fract() == 0.0
                 {
-                    return Ok(absent_is_null(map.get(&crate::value::number::number_to_string(*number))));
+                    let text = crate::value::number::number_to_string(*number)
+                        .map_err(|error| self.error(context, frame, span, ErrorCode::E_INTERNAL, format!("internal failure: {error}")))?;
+                    return Ok(absent_is_null(map.get(&text)));
                 }
                 Ok(Value::Null)
             }

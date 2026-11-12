@@ -52,7 +52,7 @@ The native safe-text carrier is `SafeString` with its text payload in TypeScript
 
 - **VAL-9** A number `x` is converted to text as follows.
 
-1. If `x` is 0 or -0, the result is `0`.
+1. If `x` is 0 or -0, the result is `0`. Reason: `-0 == 0` is true (EXP-34), so a text that kept the sign would tell apart two equal values, and the layout is the one of ECMAScript `Number::toString`, which the JSON number token of the JSON library writes too.
 2. If `x` is negative, the result is `-` followed by the conversion of `-x`.
 3. Let `s`, `k` and `n` be integers such that `k >= 1`, `10^(k-1) <= s < 10^k`, `s × 10^(n-k)` equals `x`, and `k` is the smallest such value. `s` is the shortest digit string that round-trips to `x`; when several `s` with the same `k` exist, the one closest to `x` is chosen, and among equals the even one.
 4. If `k <= n <= 21`, the result is the `k` digits of `s` followed by `n - k` zeros.
@@ -81,7 +81,7 @@ The native safe-text carrier is `SafeString` with its text payload in TypeScript
 | --- | --- |
 | TypeScript | `String(x)` produces the complete result |
 | Go | `strconv.FormatFloat(x, 'e', -1, 64)` gives the digits and the exponent |
-| Rust | `format!("{:e}", x)` gives the digits and the exponent |
+| Rust | `number_text(x)` of the crate `polyspec-ordered-json`, the JSON number token function of the JSON library, produces the complete result |
 | PHP | `json_encode($x)` or `var_export($x, true)` with `serialize_precision` set to `-1` gives the digits and the exponent |
 
 ## Host binding

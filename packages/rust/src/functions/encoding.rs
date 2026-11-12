@@ -1,7 +1,7 @@
 //! escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
 
 use crate::escape::escape_html;
-use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, stringify_arg, type_error};
+use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, internal, stringify_arg, type_error};
 use crate::value::Value;
 use crate::value::number::number_to_string;
 
@@ -35,7 +35,7 @@ pub fn to_json(value: &Value) -> Result<String, FunctionError> {
     Ok(match value {
         Value::Null => "null".to_string(),
         Value::Bool(value) => value.to_string(),
-        Value::Number(number) => number_to_string(*number),
+        Value::Number(number) => number_to_string(*number).map_err(|error| internal(&error))?,
         Value::Str(text) | Value::Safe(text) => json_string(text),
         Value::List(list) => format!("[{}]", list.iter().map(to_json).collect::<Result<Vec<_>, _>>()?.join(",")),
         Value::Map(map) => {

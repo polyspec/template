@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 13359985fc47b8c982062e7b6565765af7ba7aaff38d71d42a34b45d718eba59 -->
+<!-- source-sha256: d398002fd61f2097be3934f098507f926d972aff85108e195744d3bb0968d782 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -53,7 +53,7 @@
 
 - **VAL-9** number `x`는 다음과 같이 텍스트로 변환한다.
 
-1. `x`가 0 또는 -0이면 결과는 `0`이다.
+1. `x`가 0 또는 -0이면 결과는 `0`이다. 이유: `-0 == 0`은 참이므로(EXP-34) 부호를 남긴 텍스트는 같은 두 값을 구별하게 되고, 이 배치는 JSON 라이브러리의 JSON 숫자 토큰도 쓰는 ECMAScript `Number::toString`의 것이다.
 2. `x`가 음수이면 결과는 `-` 뒤에 `-x`의 변환을 붙인 것이다.
 3. `k >= 1`, `10^(k-1) <= s < 10^k`, `s × 10^(n-k)`가 `x`와 같고, `k`가 그러한 최소값인 정수 `s`, `k`, `n`을 취한다. `s`는 `x`로 되돌아오는 최단 자릿수 문자열이다. 같은 `k`를 가진 `s`가 여럿이면 `x`에 가장 가까운 것을 택하고, 같으면 짝수를 택한다.
 4. `k <= n <= 21`이면 결과는 `s`의 `k`자리 뒤에 `n - k`개의 0을 붙인 것이다.
@@ -82,7 +82,7 @@
 | --- | --- |
 | TypeScript | `String(x)`가 완전한 결과를 생성한다 |
 | Go | `strconv.FormatFloat(x, 'e', -1, 64)`가 자릿수와 지수를 준다 |
-| Rust | `format!("{:e}", x)`가 자릿수와 지수를 준다 |
+| Rust | JSON 라이브러리의 JSON 숫자 토큰 함수인 crate `polyspec-ordered-json`의 `number_text(x)`가 전체 결과를 만든다 |
 | PHP | `serialize_precision`을 `-1`로 둔 `json_encode($x)` 또는 `var_export($x, true)`가 자릿수와 지수를 준다 |
 
 ## 호스트 바인딩

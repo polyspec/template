@@ -28,35 +28,10 @@ pub fn shortest_digits(value: f64) -> (bool, String, i32) {
     (negative, digits, exponent + 1)
 }
 
-/// VAL-9: ECMAScript Number::toString.
-#[allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss,
-    reason = "VAL-10: at most 17 digits and an exponent within ±325; each count is cast where the branch makes it positive"
-)]
-pub fn number_to_string(value: f64) -> String {
-    if value == 0.0 {
-        return "0".to_string();
-    }
-    let (negative, digits, n) = shortest_digits(value);
-    let k = digits.len() as i32;
-    let body = if k <= n && n <= 21 {
-        format!("{digits}{}", "0".repeat((n - k) as usize))
-    } else if 0 < n && n <= 21 {
-        format!("{}.{}", &digits[..n as usize], &digits[n as usize..])
-    } else if -6 < n && n <= 0 {
-        format!("0.{}{digits}", "0".repeat((-n) as usize))
-    } else {
-        let e = n - 1;
-        let sign = if e < 0 { '-' } else { '+' };
-        if k == 1 {
-            format!("{digits}e{sign}{}", e.abs())
-        } else {
-            format!("{}.{}e{sign}{}", &digits[..1], &digits[1..], e.abs())
-        }
-    };
-    if negative { format!("-{body}") } else { body }
+/// VAL-9: the text of a number is the JSON number token of ordered-json, the layout of ECMAScript Number::toString with
+/// `-0` written as `0` (VAL-10). A number that is not finite has no text; no template value holds one (VAL-3).
+pub fn number_to_string(value: f64) -> Result<String, polyspec_ordered_json::Error> {
+    polyspec_ordered_json::number_text(value)
 }
 
 /// Positional decimal expansion without exponent.

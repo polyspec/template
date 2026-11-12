@@ -106,9 +106,12 @@ pub fn arg_count(value: &Value) -> Result<usize, FunctionError> {
 
 /// Stringifies an argument; a list or map is E_RUNTIME_STRINGIFY.
 pub fn stringify_arg(value: &Value) -> Result<String, FunctionError> {
-    stringify(value).map_err(|StringifyError| FunctionError {
-        code: ErrorCode::E_RUNTIME_STRINGIFY,
-        message: "a list or map cannot be converted to text".to_string(),
+    stringify(value).map_err(|error| match error {
+        StringifyError::NoText => FunctionError {
+            code: ErrorCode::E_RUNTIME_STRINGIFY,
+            message: "a list or map cannot be converted to text".to_string(),
+        },
+        StringifyError::NotFinite(error) => internal(&error),
     })
 }
 

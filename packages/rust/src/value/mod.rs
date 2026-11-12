@@ -452,9 +452,14 @@ pub fn compare_values(a: &Value, b: &Value) -> Option<Ordering> {
     }
 }
 
-/// Error of VAL-8 for a list or map.
+/// Error of VAL-8.
 #[derive(Debug)]
-pub struct StringifyError;
+pub enum StringifyError {
+    /// A list, a map or a native object, which has no text (E_RUNTIME_STRINGIFY).
+    NoText,
+    /// A number that is not finite, which no value holds (VAL-3): a broken invariant, E_INTERNAL.
+    NotFinite(polyspec_ordered_json::Error),
+}
 
 /// VAL-8: converts a value to text.
 pub fn stringify(value: &Value) -> Result<String, StringifyError> {
@@ -462,9 +467,9 @@ pub fn stringify(value: &Value) -> Result<String, StringifyError> {
         Value::Null => Ok(String::new()),
         Value::Bool(true) => Ok("true".to_string()),
         Value::Bool(false) => Ok("false".to_string()),
-        Value::Number(n) => Ok(number::number_to_string(*n)),
+        Value::Number(n) => number::number_to_string(*n).map_err(StringifyError::NotFinite),
         Value::Str(text) | Value::Safe(text) => Ok(text.to_string()),
-        Value::List(_) | Value::Map(_) | Value::Object(_) => Err(StringifyError),
+        Value::List(_) | Value::Map(_) | Value::Object(_) => Err(StringifyError::NoText),
     }
 }
 
