@@ -112,7 +112,7 @@ dependencies = [
  "regex",
  "rustc-hash",
  "shlex",
- "syn 3.0.9",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -1122,18 +1122,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 
 [[package]]
-name = "polyspec-bindgen-core"
-version = "0.0.1"
-source = "git+https://github.com/polyspec/bindgen.git?branch=v1%2Frust-core#994b0e29c5ea32424ffc59bdd994d598a9b4a750"
-dependencies = [
- "indexmap",
- "tokio-util",
-]
-
-[[package]]
 name = "polyspec-binding-core"
 version = "0.0.1"
-source = "git+https://github.com/polyspec/binding.git?branch=v1%2Frust-core#06e9bc4a52c520ca7847e1f25b1f9e62fb44f9df"
+source = "git+https://github.com/polyspec/binding.git?branch=v1%2Frust-core#7cda8c03d825725366fd9957151711f5bac47eb7"
 dependencies = [
  "indexmap",
  "tokio-util",
@@ -1142,9 +1133,9 @@ dependencies = [
 [[package]]
 name = "polyspec-json"
 version = "0.0.25"
-source = "git+https://github.com/polyspec/json.git?branch=v1%2Frust-core#d7074976a790af82512d5a502cdabd936de9a955"
+source = "git+https://github.com/polyspec/json.git?branch=v1%2Frust-core#60f6a15bafc0c3c9bcbae1060370a2db686fc4c8"
 dependencies = [
- "polyspec-bindgen-core",
+ "polyspec-binding-core",
  "ryu-js",
  "serde",
  "serde_json",
