@@ -6,6 +6,9 @@ rust-version = "1.99.0"
 description = "Template language implementation: lexer, parser, renderer, functions and CLI"
 license = "MIT"
 publish = false
+# The interface contract of the bindings ships in the crate package, so that a library that takes or gives a template_value
+# reads it from the package that Cargo resolved (bindgen design I-1, T-3).
+include = ["/src/**", "/Cargo.toml", "/interface.json", "/README.md"]
 
 [features]
 # Native expression-vector harness only; the release SDK keeps implementation modules private.
@@ -75,6 +78,9 @@ cast_sign_loss = "deny"
 # The JSON values of assign data, definitions and the environment, the JSON text of `json` and the text of a number
 # (VAL-9, VAL-12, FUN-26): the one JSON reader and writer of polyspec.
 polyspec-ordered-json = { path = "../../../ordered-json/packages/rust" }
+# The kind interface that the generated bindings read from the core error (bindgen design E-1, I-2 (3)); Cargo.lock pins the
+# commit of the bindgen repository, the source of the generated binding crates too.
+polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core" }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }

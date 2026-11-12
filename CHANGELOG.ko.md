@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 523db9e052917b08bada93a5dada4de3417222da7baa4a8a05bbb1daab289de2 -->
+<!-- source-sha256: 9da1f7c622b4230a1c42a497dcfb0c4500360a6ef6781a01850e26abecd8ebb7 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -14,6 +14,7 @@
 - Rust 구현은 숫자의 텍스트를 JSON 숫자 토큰 함수인 `polyspec-ordered-json`의 `number_text`로 쓴다(VAL-9, VAL-10). `-0`은 계속 `0`이며 그 이유를 VAL-9에 적었다. 어떤 값도 갖지 않는 유한하지 않은 숫자는 쓰는 자리에서 `E_INTERNAL`이다.
 - Rust 구현은 JSON 입력을 `serde_json::Value` 대신 `polyspec_ordered_json::Value`로 받는다: `Engine::render`, `prepare`, `bind`, `bind_json`, `bind_map`, `defines_from_json`, `env_from_json`, `read_json`은 ordered-json의 값을 읽고, `to_json_value`와 `value_from_json`은 그 값을 쓰고 읽으며, `json`은 ordered-json의 HTML 안전 직렬화기로 텍스트를 쓴다(VAL-12, VAL-13, FUN-26, FUN-27). crate는 `polyspec_ordered_json`을 다시 내보낸다. 다른 JSON 타입을 가진 define 항목이나 환경의 필드는 `E_DATA_UNSUPPORTED_TYPE`다.
 - 오류 코드는 소문자 snake_case kind다(`E_DATA_DEPTH`는 `data_depth`, ERR-1): docs/spec/errors.md의 목록, 모든 명세, contract case와 fixture, Rust `ErrorCode::as_str`와 `TemplateError`의 직렬화. legacy 구현은 없어질 때까지 대문자 이름을 유지하며 `make error-codes`가 kind에서 그 이름을 쓴다.
+- Rust crate는 bindgen 레포의 `polyspec-bindgen-core`에 의존하고 `TemplateError`에 kind 인터페이스 `Kinds`를 준다: kind는 코드의 kind이며 status와 OS 오류 번호는 없다. crate 패키지는 `interface.json`을 담는다(`include`).
 
 ## 0.0.27
 

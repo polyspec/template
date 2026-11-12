@@ -262,6 +262,22 @@ impl fmt::Display for TemplateError {
 
 impl std::error::Error for TemplateError {}
 
+/// The kind of a template error is the kind of its code (ERR-1); a template error has no HTTP status and no OS error
+/// number.
+impl bindgen_core::Kinds for TemplateError {
+    fn kind(&self) -> &'static str {
+        self.code.as_str()
+    }
+
+    fn status(&self) -> Option<u16> {
+        None
+    }
+
+    fn errno(&self) -> Option<i32> {
+        None
+    }
+}
+
 /// A request that does not match what a program declares, such as the declared types of the `assign`
 /// or the definition data of a generated program (ERR-13). It is not an ERR-1 error: it passes to the
 /// host unchanged and carries no error code or template position.

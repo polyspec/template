@@ -13,6 +13,7 @@
 - The Rust implementation writes the text of a number with `number_text` of `polyspec-ordered-json`, the JSON number token function (VAL-9, VAL-10); `-0` stays `0`, with its reason in VAL-9. A number that is not finite, which no value holds, is `E_INTERNAL` where it is written.
 - The Rust implementation takes JSON input as a `polyspec_ordered_json::Value` instead of a `serde_json::Value`: `Engine::render`, `prepare`, `bind`, `bind_json`, `bind_map`, `defines_from_json`, `env_from_json` and `read_json` read the values of ordered-json, `to_json_value` and `value_from_json` write and read them, and `json` writes its text with the HTML-safe serializer of ordered-json (VAL-12, VAL-13, FUN-26, FUN-27). The crate re-exports `polyspec_ordered_json`. A field of a define entry or of the environment with another JSON type is `E_DATA_UNSUPPORTED_TYPE`.
 - Error codes are kinds in lowercase snake_case, such as `data_depth` for `E_DATA_DEPTH` (ERR-1): the catalog of docs/spec/errors.md, every specification, the contract cases and the fixtures, the Rust `ErrorCode::as_str` and the serialization of a `TemplateError`. The legacy implementations keep the capital names until they are removed, and `make error-codes` writes those names from the kinds.
+- The Rust crate depends on `polyspec-bindgen-core` from the bindgen repository and gives `TemplateError` the kind interface `Kinds`: its kind is the kind of its code, with no status and no OS error number. The crate package holds `interface.json` (`include`).
 
 ## 0.0.27
 

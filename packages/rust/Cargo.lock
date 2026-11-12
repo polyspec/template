@@ -605,6 +605,7 @@ dependencies = [
  "clap",
  "jsonschema",
  "libtest-mimic",
+ "polyspec-bindgen-core",
  "polyspec-ordered-json",
  "serde",
  "serde_json",
