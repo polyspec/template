@@ -6,7 +6,7 @@ use crate::ast_json::decode_template;
 use crate::loader::{Loaded, Loader};
 use crate::render::engine::{ArtifactRefresh, AstProgram, EngineOptions};
 use crate::sha256::sha256_hex;
-use polyspec_ordered_json::{Kind, ParseOptions, Value as Json, parse};
+use polyspec_json::{Kind, ParseOptions, Value as Json, parse};
 use std::collections::HashMap;
 use std::path::Path;
 

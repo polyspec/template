@@ -20,7 +20,7 @@ mod sealed {
 
     /// The values that `bind` accepts.
     pub enum Source<'a> {
-        Json(&'a polyspec_ordered_json::Value),
+        Json(&'a polyspec_json::Value),
         Values(&'a OrderedMap),
         Bound(&'a BoundMap),
     }
@@ -31,7 +31,7 @@ mod sealed {
         fn source(self) -> Source<'a>;
     }
 
-    impl<'a> Sealed<'a> for &'a polyspec_ordered_json::Value {
+    impl<'a> Sealed<'a> for &'a polyspec_json::Value {
         fn source(self) -> Source<'a> {
             Source::Json(self)
         }
@@ -52,11 +52,11 @@ mod sealed {
 
 use sealed::{Sealed, Source};
 
-/// A host value that `bind` accepts (VAL-13): JSON data of ordered-json, a map of values that the host built, or a
+/// A host value that `bind` accepts (VAL-13): JSON data of polyspec-json, a map of values that the host built, or a
 /// bound map.
 pub trait BindInput<'a>: Sealed<'a> {}
 
-impl<'a> BindInput<'a> for &'a polyspec_ordered_json::Value {}
+impl<'a> BindInput<'a> for &'a polyspec_json::Value {}
 impl<'a> BindInput<'a> for &'a OrderedMap {}
 impl<'a> BindInput<'a> for &'a BoundMap {}
 

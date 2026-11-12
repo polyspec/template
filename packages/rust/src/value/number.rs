@@ -28,10 +28,10 @@ pub fn shortest_digits(value: f64) -> (bool, String, i32) {
     (negative, digits, exponent + 1)
 }
 
-/// VAL-9: the text of a number is the JSON number token of ordered-json, the layout of ECMAScript Number::toString with
+/// VAL-9: the text of a number is the JSON number token of polyspec-json, the layout of ECMAScript Number::toString with
 /// `-0` written as `0` (VAL-10). A number that is not finite has no text; no template value holds one (VAL-3).
-pub fn number_to_string(value: f64) -> Result<String, polyspec_ordered_json::Error> {
-    polyspec_ordered_json::number_text(value)
+pub fn number_to_string(value: f64) -> Result<String, polyspec_json::Error> {
+    polyspec_json::number_text(value)
 }
 
 /// Positional decimal expansion without exponent.

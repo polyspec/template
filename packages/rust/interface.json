@@ -44,7 +44,7 @@
   },
   "types": {
     "json_value": {
-      "library": "ordered-json",
+      "library": "json",
       "unit": "value"
     },
     "template_value": {
@@ -4220,7 +4220,7 @@
     {
       "id": "change-render-assign",
       "rule": "VAL-12",
-      "reason": "VAL-11, VAL-12: render binds a host value of the language as template_value; JSON input is a json_value of ordered-json, the one JSON reader (C-1), so a second JSON text entry point per implementation is gone",
+      "reason": "VAL-11, VAL-12: render binds a host value of the language as template_value; JSON input is a json_value of the json library, the one JSON reader (C-1), so a second JSON text entry point per implementation is gone",
       "symbol": "render",
       "from": {
         "node": "Engine.render(target, assign?: unknown, options?)",
@@ -4233,7 +4233,7 @@
     {
       "id": "change-render-json",
       "rule": "VAL-12",
-      "reason": "VAL-12: JSON text reaches the core as a json_value, which ordered-json reads; the PHP extension method render_json took the text itself",
+      "reason": "VAL-12: JSON text reaches the core as a json_value, which the json library reads; the PHP extension method render_json took the text itself",
       "symbol": "render_json",
       "from": {
         "php": "Polyspec\\Template\\Engine::renderJson(string $target, string $json, string $options = \"{}\")"

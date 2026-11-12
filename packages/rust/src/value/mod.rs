@@ -460,7 +460,7 @@ pub enum StringifyError {
     /// A list, a map or a native object, which has no text (runtime_stringify).
     NoText,
     /// A number that is not finite, which no value holds (VAL-3): a broken invariant, internal.
-    NotFinite(polyspec_ordered_json::Error),
+    NotFinite(polyspec_json::Error),
 }
 
 /// VAL-8: converts a value to text.

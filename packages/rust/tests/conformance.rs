@@ -28,7 +28,7 @@ fn read_optional(path: &Path) -> Result<Option<Vec<u8>>, Failed> {
 
 /// The JSON of an optional file of a case as the command line reads it: None when the case has no such file, or the
 /// value, or the code of the data error of its text.
-fn read_json(path: &Path) -> Result<Option<Result<polyspec_template::polyspec_ordered_json::Value, ErrorCode>>, Failed> {
+fn read_json(path: &Path) -> Result<Option<Result<polyspec_template::polyspec_json::Value, ErrorCode>>, Failed> {
     let Some(bytes) = read_optional(path)? else {
         return Ok(None);
     };
@@ -62,7 +62,7 @@ fn render_case(dir: &Path) -> Result<Outcome, Failed> {
         .map_err(|error| format!("engine options: {error}"))?,
     );
     let assign = match read_json(&dir.join("data.json"))? {
-        None => polyspec_template::polyspec_ordered_json::Value::null(),
+        None => polyspec_template::polyspec_json::Value::null(),
         Some(Ok(value)) => value,
         Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "data"))),
     };

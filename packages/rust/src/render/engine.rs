@@ -13,7 +13,7 @@ use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values, value_from_json};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
 use crate::value::{HostError, OrderedMap, Value};
-use polyspec_ordered_json::{Kind as JsonKind, Value as JsonValue};
+use polyspec_json::{Kind as JsonKind, Value as JsonValue};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::{Mutex, PoisonError};
@@ -568,7 +568,7 @@ pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInpu
 }
 
 /// The members of a JSON object, or data_unsupported_type with `message` for a value of another kind (RT-4).
-fn json_object<'v>(value: &'v JsonValue, message: &str) -> Result<&'v polyspec_ordered_json::OrderedMap, BindError> {
+fn json_object<'v>(value: &'v JsonValue, message: &str) -> Result<&'v polyspec_json::OrderedMap, BindError> {
     if value.kind() != JsonKind::Object {
         return Err(BindError {
             code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
@@ -590,7 +590,7 @@ fn json_text(value: &JsonValue) -> Result<String, BindError> {
 }
 
 /// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, internal.
-fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
+fn json_internal(error: &polyspec_json::Error) -> BindError {
     BindError {
         code: ErrorCode::E_INTERNAL,
         message: format!("internal failure: {error}"),

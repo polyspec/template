@@ -55,7 +55,7 @@ pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value, ValueTy
 pub use sdk_source::Source;
 
 /// The JSON library of the JSON values that the crate reads and writes (VAL-12, FUN-26).
-pub use polyspec_ordered_json;
+pub use polyspec_json;
 
 pub use parser::{PrefixAnalysis, SyntaxTag, SyntaxToken, TagKind, TemplateAnalysis, TokenKind};
 

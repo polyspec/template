@@ -135,9 +135,9 @@ fn binding_limits_the_nesting_depth() {
     assert!(parse_json(&nested(64)).is_ok());
     assert_eq!(parse_json(&nested(65)).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
     assert_eq!(parse_json(&"[".repeat(200_000)).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
-    let mut deep = polyspec_ordered_json::Value::null();
+    let mut deep = polyspec_json::Value::null();
     for _ in 0..200 {
-        deep = polyspec_ordered_json::Value::array(&[deep]).expect("array");
+        deep = polyspec_json::Value::array(&[deep]).expect("array");
     }
     assert_eq!(bind_json(&deep).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
     let mut value = Value::Null;
@@ -163,7 +163,7 @@ fn json_bytes_that_are_not_utf8_are_invalid_utf8() {
     }
 }
 
-/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
-fn ojson(value: serde_json::Value) -> polyspec_ordered_json::Value {
-    polyspec_ordered_json::parse(value.to_string().as_bytes(), &polyspec_ordered_json::ParseOptions::default()).expect("JSON")
+/// The polyspec-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_json::Value {
+    polyspec_json::parse(value.to_string().as_bytes(), &polyspec_json::ParseOptions::default()).expect("JSON")
 }

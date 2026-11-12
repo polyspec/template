@@ -5,9 +5,9 @@ use crate::escape::escape_html;
 use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, internal, stringify_arg, type_error};
 use crate::value::Value;
 use crate::value::bind::to_json_value;
-use polyspec_ordered_json::{StringifyOptions, stringify};
+use polyspec_json::{StringifyOptions, stringify};
 
-/// FUN-26 to FUN-28: compact JSON text of a value, written by the JSON serializer of ordered-json with its HTML-safe
+/// FUN-26 to FUN-28: compact JSON text of a value, written by the JSON serializer of polyspec-json with its HTML-safe
 /// escapes (FUN-27). A native object is opaque (VAL-19) and has no JSON text, so a value that is or holds one fails with
 /// `runtime_type`.
 pub fn to_json(value: &Value) -> Result<String, FunctionError> {

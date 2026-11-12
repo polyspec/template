@@ -247,9 +247,9 @@ impl TemplateError {
     }
 
     /// The JSON text of the error object of ERR-1: `code` (its kind), `template`, `line`, `col`, `offset`, `end` and
-    /// `message`, written with ordered-json.
+    /// `message`, written with polyspec-json.
     pub fn to_json(&self) -> String {
-        let text = |value: &str| polyspec_ordered_json::Value::string(value).raw().to_string();
+        let text = |value: &str| polyspec_json::Value::string(value).raw().to_string();
         format!(
             "{{\"code\":{},\"template\":{},\"line\":{},\"col\":{},\"offset\":{},\"end\":{},\"message\":{}}}",
             text(self.code.as_str()),

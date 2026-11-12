@@ -1,10 +1,10 @@
 //! The canonical JSON form of the AST (AST-7) and its decode with the rules of `contracts/schema/ast.schema.json`
-//! (AST-10). The JSON text is read and written with ordered-json, the one JSON reader and writer; the decoder states the
+//! (AST-10). The JSON text is read and written with polyspec-json, the one JSON reader and writer; the decoder states the
 //! rules of the schema in code and names the JSON Pointer of the first node, in document order, that breaks one.
 
 use crate::ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp};
 use crate::error::{ErrorCode, Span, TemplateError};
-use polyspec_ordered_json::{Kind, OrderedMap, ParseOptions, Value as Json, number_text, parse};
+use polyspec_json::{Kind, OrderedMap, ParseOptions, Value as Json, number_text, parse};
 
 // ---- encode (AST-7) ----
 

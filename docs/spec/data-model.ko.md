@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 9e54598ed6976d3f9fbda8ef8945b79adcc96cdd4ef6335727142f41394c5376 -->
+<!-- source-sha256: dddeb233139c8a2c5bccf1d1e436ecedf930340e77deff94ed3d0a70ff3aa3bc -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -82,14 +82,14 @@
 | --- | --- |
 | TypeScript | `String(x)`가 완전한 결과를 생성한다 |
 | Go | `strconv.FormatFloat(x, 'e', -1, 64)`가 자릿수와 지수를 준다 |
-| Rust | JSON 라이브러리의 JSON 숫자 토큰 함수인 crate `polyspec-ordered-json`의 `number_text(x)`가 전체 결과를 만든다 |
+| Rust | JSON 라이브러리의 JSON 숫자 토큰 함수인 crate `polyspec-json`의 `number_text(x)`가 전체 결과를 만든다 |
 | PHP | `serialize_precision`을 `-1`로 둔 `json_encode($x)` 또는 `var_export($x, true)`가 자릿수와 지수를 준다 |
 
 ## 호스트 바인딩
 
 - **VAL-11** 호스트 바인딩은 호스트 언어의 값을 템플릿 값으로 변환한다. 바인딩은 assign 데이터, 템플릿 define 데이터, 호스트가 계산한 scope 인자, 호스트 함수·논리 class 함수·instance method의 반환값, 템플릿이 읽는 native object member의 값에 적용된다(VAL-19). VAL-12와 VAL-13의 변환 표는 허용되는 입력의 전체 집합이며 그 외 입력은 data_unsupported_type이다. VAL-17부터 VAL-21은 모든 호스트에 적용된다. bound map(VAL-22)은 바인딩을 거쳤으므로 `render`가 `assign`이나 정의 data로 받을 때 다시 binding하지 않는다(RT-61).
 
-- **VAL-12** JSON 텍스트는 assign 데이터의 기준 형태다. 모든 구현은 JSON 텍스트를 받아 같은 값을 생성한다. 각 구현은 문서 순서를 보존하고 VAL-2의 숫자 규칙과 VAL-20의 깊이 제한을 적용하는 파서로 JSON 텍스트를 파싱한다. TypeScript 구현은 이 파서를 패키지에 제공하며 assign 데이터에 `JSON.parse`를 사용하지 않고, Rust 구현은 JSON 라이브러리인 crate `polyspec-ordered-json`으로 JSON 텍스트와 JSON 값을 읽고 그 값에 이 표의 규칙을 적용한다.
+- **VAL-12** JSON 텍스트는 assign 데이터의 기준 형태다. 모든 구현은 JSON 텍스트를 받아 같은 값을 생성한다. 각 구현은 문서 순서를 보존하고 VAL-2의 숫자 규칙과 VAL-20의 깊이 제한을 적용하는 파서로 JSON 텍스트를 파싱한다. TypeScript 구현은 이 파서를 패키지에 제공하며 assign 데이터에 `JSON.parse`를 사용하지 않고, Rust 구현은 JSON 라이브러리인 crate `polyspec-json`으로 JSON 텍스트와 JSON 값을 읽고 그 값에 이 표의 규칙을 적용한다.
 
 | JSON | 값 |
 | --- | --- |
@@ -163,12 +163,12 @@ SDK 계약은 TypeScript·Go·Rust·PHP·PHP 확장·Python의 정확한 네이�
 
 | 입력 | 값 |
 | --- | --- |
-| 종류 `Null`인 `polyspec_ordered_json::Value` | null |
-| 종류 `Boolean`인 `polyspec_ordered_json::Value` | bool |
-| 종류 `Number`인 `polyspec_ordered_json::Value` | literal에 가장 가까운 double로 VAL-2에 따른 number |
-| 종류 `String`인 `polyspec_ordered_json::Value` | string. 이스케이프한 짝 없는 서로게이트를 가진 문자열은 data_invalid_utf8 |
-| 종류 `Array`인 `polyspec_ordered_json::Value` | list |
-| 종류 `Object`인 `polyspec_ordered_json::Value` | 문서 순서의 map. 반복된 key는 첫 위치와 마지막 값을 가진다. key는 `String` 행을 따른다 |
+| 종류 `Null`인 `polyspec_json::Value` | null |
+| 종류 `Boolean`인 `polyspec_json::Value` | bool |
+| 종류 `Number`인 `polyspec_json::Value` | literal에 가장 가까운 double로 VAL-2에 따른 number |
+| 종류 `String`인 `polyspec_json::Value` | string. 이스케이프한 짝 없는 서로게이트를 가진 문자열은 data_invalid_utf8 |
+| 종류 `Array`인 `polyspec_json::Value` | list |
+| 종류 `Object`인 `polyspec_json::Value` | 문서 순서의 map. 반복된 key는 첫 위치와 마지막 값을 가진다. key는 `String` 행을 따른다 |
 | 호스트가 만들어 `render_values`에 전달한 `Value`, 또는 호스트 함수·논리 class 함수·`TemplateObject`가 반환한 `Value` | VAL-2, VAL-3, VAL-20 검사를 거친 같은 값 |
 | `Value::Object` | object(VAL-19). `TemplateObject`를 유지한다 |
 

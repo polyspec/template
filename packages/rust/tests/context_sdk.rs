@@ -148,9 +148,9 @@ fn isolated_state_positioned_errors_and_bounded_output() {
     );
 }
 
-/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
-fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
-    use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
+/// The polyspec-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_json::Value {
+    use polyspec_template::polyspec_json::{ParseOptions, parse};
     parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
 }
 

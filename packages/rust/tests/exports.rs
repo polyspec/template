@@ -47,8 +47,8 @@ fn the_entry_points_share_one_runtime() {
     assert_eq!(render(&merge(&second, &first)), "x12", "module loader accepts merged bound data");
 }
 
-/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
-fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
-    use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
+/// The polyspec-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_json::Value {
+    use polyspec_template::polyspec_json::{ParseOptions, parse};
     parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
 }

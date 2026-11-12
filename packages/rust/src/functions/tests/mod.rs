@@ -560,9 +560,9 @@ fn date_text_with_a_multibyte_character_in_the_time_is_not_a_date() {
     assert_eq!(parse_offset("+0\u{e9}:0"), None);
 }
 
-/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
-fn ojson(value: serde_json::Value) -> polyspec_ordered_json::Value {
-    polyspec_ordered_json::parse(value.to_string().as_bytes(), &polyspec_ordered_json::ParseOptions::default()).expect("JSON")
+/// The polyspec-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_json::Value {
+    polyspec_json::parse(value.to_string().as_bytes(), &polyspec_json::ParseOptions::default()).expect("JSON")
 }
 
 /// The template error of a render failure; a test that expects a kind fails on the error of host code (FUN-46).

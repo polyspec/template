@@ -78,9 +78,8 @@ fn vector(item: &Vector) -> Result<(), Failed> {
         let value =
             evaluate_expression(&ast, &common::ojson(evaluation.data.clone())).map_err(|error| format!("value {index}: {error}"))?;
         let json = to_json_value(&value).map_err(|error| format!("value {index}: {error}"))?;
-        let json: serde_json::Value =
-            serde_json::from_str(&polyspec_template::polyspec_ordered_json::stringify(&json, &Default::default()))
-                .map_err(|error| format!("value {index}: {error}"))?;
+        let json: serde_json::Value = serde_json::from_str(&polyspec_template::polyspec_json::stringify(&json, &Default::default()))
+            .map_err(|error| format!("value {index}: {error}"))?;
         if !json_equal(&json, &evaluation.value) {
             return Err(format!("value {index}: got {json}").into());
         }

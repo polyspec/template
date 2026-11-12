@@ -23,29 +23,29 @@ options.define.insert("content".to_string(), DefineInput { template: Some("pages
 let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 ```
 
-Assign data is a JSON value of the crate `polyspec-ordered-json`, which the crate re-exports; objects keep their document order and numbers outside the safe range are rejected (VAL-12).
+Assign data is a JSON value of the crate `polyspec-json`, which the crate re-exports; objects keep their document order and numbers outside the safe range are rejected (VAL-12).
 
 ## API
 
 | Item | Description |
 | --- | --- |
 | `parse(source, name, &ParseOptions)` | Parses one UTF-8 template into its AST with optional delimiters. |
-| `encode_template(ast)` | Writes the canonical AST JSON text of a `Template` (AST-7) with ordered-json. |
-| `decode_template(json)` | Reads the AST JSON text with ordered-json into the `Template` that `parse` returns, checked against the rules of `contracts/schema/ast.schema.json`; an invalid AST and text that is not JSON are a `TemplateError` of kind `ast_invalid`, whose message names the JSON Pointer of the invalid node (AST-10, ERR-15). |
+| `encode_template(ast)` | Writes the canonical AST JSON text of a `Template` (AST-7) with polyspec-json. |
+| `decode_template(json)` | Reads the AST JSON text with polyspec-json into the `Template` that `parse` returns, checked against the rules of `contracts/schema/ast.schema.json`; an invalid AST and text that is not JSON are a `TemplateError` of kind `ast_invalid`, whose message names the JSON Pointer of the invalid node (AST-10, ERR-15). |
 | `analyze(source, name, &ParseOptions)` | Parses like `parse` and also returns every accepted tag (`TagKind`, range, body range) and the EDT-8 class of every part of it (`SyntaxToken`), in byte offsets after a leading BOM. |
 | `analyze_prefix(source, name, &ParseOptions)` | Returns accepted tags/tokens and the first parser error in `PrefixAnalysis.error`. Invalid UTF-8 or options return a `TemplateError`. A successful prefix result also carries its complete AST in `ast` (`AST` in Go); after a parse error that field is null or the native absent value. |
 | `format(source, &FormatOptions)` | Formats the whitespace inside tags and the indentation of lines by HTML elements and template blocks. `FormatOptions` sets the indent unit (`IndentUnit`, two spaces by default; `None` keeps every line), `TemplateBlocks::Indent` or `Flat`, delimiters and a byte range. The result is the text only when it parses to the same AST; otherwise a `TemplateError` with the parse error, `format_invariant` or `format_html` (FMT-14, ERR-15). |
 | `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters, or returns a `TemplateError` of kind `argument_delimiters` for a delimiter option that is not a delimiter pair. |
 | `Engine::new(Program)` | Creates an engine that delegates to one AST or generated program. A generated program comes into the crate with `include!` (from `OUT_DIR` after `build.rs`, or from a committed file), never as a module file, so `cargo fmt` leaves its layout to the compiler and clippy lints it. |
 | `Engine::render(target, assign, &RenderOptions)` | Renders a template name or a parsed template to a string. `assign` contains variables and `define` supplies template or HTML entries. |
-| `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind` checks a `&polyspec_ordered_json::Value`, a `&OrderedMap` or a `&BoundMap` once and returns a `BoundMap`; `merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `render_bound` and `prepare_bound` take a bound map as assign, and `DefineData::Bound` gives one as definition data, without binding it again (VAL-22). A `BoundMap` is `Send` and `Sync`. Errors have no template and no position (ERR-14). |
+| `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind` checks a `&polyspec_json::Value`, a `&OrderedMap` or a `&BoundMap` once and returns a `BoundMap`; `merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `render_bound` and `prepare_bound` take a bound map as assign, and `DefineData::Bound` gives one as definition data, without binding it again (VAL-22). A `BoundMap` is `Send` and `Sync`. Errors have no template and no position (ERR-14). |
 | `AstProgram::register(name, function)` | Registers a host function `Fn(&[Value], &FunctionContext) -> Result<Value, HostError>`. `Err("message".into())` ends the render, and the caller of `render` receives that error unchanged as `RenderError::Callback` (FUN-46); the returned value is checked like host data. A safe string argument arrives as `Value::Str` (VAL-21). |
 | `AstProgram::render_values(target, OrderedMap, &RenderOptions)` | Renders a root map built from `Value`s, which may hold `Value::Object` native objects. Numbers, depth and safe strings are checked like JSON data. |
 | `TemplateObject` | A native object: `member(key)` returns `Ok(Some(value))`, `Ok(None)` for no public field, or a `HostError`; `call(method, args)` returns `None` for no public method. |
 | `Value::downcast_object::<T>()` | Returns the original `TemplateObject` of type `T` that a template passed to a host function, a class function or a method. |
 | `internal_boundary` | Every public parse, prepare and render operation reports a panic as `internal` instead of unwinding into the host. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. `Loader::load` returns `Result<Option<Loaded>, LoadError>`: `LoadError::Failed` is `load_failed`, which `FsLoader` returns for a regular file that cannot be read, and `LoadError::Host` carries the error of host code to the caller unchanged (RT-9). |
-| `parse_json`, `parse_json_bytes`, `read_json` | JSON parsing into template values or into a checked `polyspec_ordered_json::Value`. Numbers outside ±(2^53 − 1), unpaired surrogate escapes, nesting deeper than 64 levels and text that is not one JSON document (`data_invalid_json`) fail with their data codes. |
+| `parse_json`, `parse_json_bytes`, `read_json` | JSON parsing into template values or into a checked `polyspec_json::Value`. Numbers outside ±(2^53 − 1), unpaired surrogate escapes, nesting deeper than 64 levels and text that is not one JSON document (`data_invalid_json`) fail with their data codes. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |
 | `Value::text`, `Value::safe_text`, `Value::list`, `Value::map` | Constructors for text, safe text, list and map values. Lists and maps share storage when values are cloned. |
 | `Value::Safe` | A string that the echo tag writes without escaping. |

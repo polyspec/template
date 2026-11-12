@@ -1,10 +1,10 @@
-//! Host binding of JSON values of ordered-json and of host-built values (VAL-2, VAL-3, VAL-20),
+//! Host binding of JSON values of polyspec-json and of host-built values (VAL-2, VAL-3, VAL-20),
 //! and the binding error.
 
 use crate::error::ErrorCode;
 use crate::value::number::MAX_SAFE;
 use crate::value::{MAX_DEPTH, OrderedMap, Value};
-use polyspec_ordered_json::{Kind as JsonKind, Value as JsonValue};
+use polyspec_json::{Kind as JsonKind, Value as JsonValue};
 use std::fmt;
 use std::sync::Arc;
 
@@ -58,7 +58,7 @@ pub fn check_level(level: usize) -> Result<(), BindError> {
     Ok(())
 }
 
-/// Converts a JSON value of ordered-json into a template value (VAL-12): numbers under VAL-2, strings that are Unicode
+/// Converts a JSON value of polyspec-json into a template value (VAL-12): numbers under VAL-2, strings that are Unicode
 /// text, object members in document order with the last value of a repeated key in the first position, and the depth
 /// limit of VAL-20.
 pub fn bind_json(input: &JsonValue) -> Result<Value, BindError> {
@@ -66,7 +66,7 @@ pub fn bind_json(input: &JsonValue) -> Result<Value, BindError> {
 }
 
 /// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, internal.
-fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
+fn json_internal(error: &polyspec_json::Error) -> BindError {
     BindError {
         code: ErrorCode::E_INTERNAL,
         message: format!("internal failure: {error}"),
@@ -76,7 +76,7 @@ fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
 /// VAL-12: the text of a JSON string or key; an escaped unpaired surrogate is data_invalid_utf8.
 fn json_text(input: &JsonValue) -> Result<String, BindError> {
     input.string_value().map_err(|error| match error {
-        polyspec_ordered_json::Error::UnpairedSurrogate => BindError {
+        polyspec_json::Error::UnpairedSurrogate => BindError {
             code: ErrorCode::E_DATA_INVALID_UTF8,
             message: "a \\u escape leaves a surrogate unpaired".to_string(),
         },
@@ -207,7 +207,7 @@ pub fn value_from_json(input: &JsonValue) -> Result<Value, BindError> {
     })
 }
 
-/// The JSON form of a template value (the form of VAL-21 without native objects) as an ordered-json value; safe strings
+/// The JSON form of a template value (the form of VAL-21 without native objects) as a polyspec-json value; safe strings
 /// become plain strings and numbers are written as VAL-9 writes them. A native object has no JSON form and is
 /// data_unsupported_type; a number that is not finite is a broken invariant of the value model and is internal.
 pub fn to_json_value(value: &Value) -> Result<JsonValue, BindError> {
@@ -220,7 +220,7 @@ pub fn to_json_value(value: &Value) -> Result<JsonValue, BindError> {
             JsonValue::array(&list.iter().map(to_json_value).collect::<Result<Vec<_>, _>>()?).map_err(|error| json_internal(&error))?
         }
         Value::Map(map) => {
-            let mut members = polyspec_ordered_json::OrderedMap::new();
+            let mut members = polyspec_json::OrderedMap::new();
             for (key, value) in map.iter() {
                 members
                     .insert(JsonValue::string(key), to_json_value(value)?)
