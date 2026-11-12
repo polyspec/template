@@ -1258,6 +1258,17 @@
         "test-php-ext",
         "template-test-language"
       ]
+    },
+    {
+      "paths": [
+        "tests/runner/known-failures.mts"
+      ],
+      "targets": [
+        "conformance-generated-rust"
+      ],
+      "tests": [
+        "tests/scripts/known-failures.test.mts"
+      ]
     }
   ],
   "inputs": [
@@ -1646,7 +1657,8 @@
       "paths": [
         "packages/rust/**",
         "packages/compiler/**",
-        "tests/runner/{conformance-generated-rust,bounded,cases}.mts"
+        "tests/runner/{conformance-generated-rust,bounded,cases}.mts",
+        "tests/runner/known-failures.mts"
       ]
     },
     {

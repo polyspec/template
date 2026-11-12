@@ -9,6 +9,7 @@ import { rustString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
 import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
+import { knownFailureVerdict } from './known-failures.mts';
 import { runStep, stepProgress } from './bounded.mts';
 import { rustBuildArgs, rustRunArgs } from './rust-steps.mts';
 import { root } from './drivers.mts';
@@ -120,16 +121,14 @@ ${tests}
     } else {
       const run = await runCaseTests(rustRunArgs('generated_conformance_check', temporary), { cwd: root, env },
         new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
-      const failed = new Set(run.failed);
-      // A failure outside the list fails the run; a failure before any case failed is reported as it is.
-      failures.push(...caseTestFailures('Rust', { ...run, failed: run.failed.filter(id => !KNOWN_FAILURES.has(id)), status: run.failed.length > 0 && run.failed.every(id => KNOWN_FAILURES.has(id)) ? 0 : run.status }));
+      // A failure outside the list fails the run, and so does a case of the list that passes; a failure before any case
+      // failed is reported as it is.
+      const verdict = knownFailureVerdict(runnable.map(({ testCase }) => testCase.id), run.failed, new Set(KNOWN_FAILURES.keys()));
+      failures.push(...caseTestFailures('Rust', { ...run, failed: verdict.unexpected, status: run.failed.length > 0 && verdict.unexpected.length === 0 ? 0 : run.status }));
       if (run.status === 0 || run.failed.length > 0) {
         executed = runnable.length - run.failed.length;
-        for (const { testCase } of runnable) {
-          if (!KNOWN_FAILURES.has(testCase.id)) continue;
-          if (failed.has(testCase.id)) knownFailed++;
-          else failures.push(`${testCase.id}: a known failure passed; remove it from KNOWN_FAILURES (${KNOWN_FAILURE_REASON})`);
-        }
+        knownFailed = verdict.observed;
+        failures.push(...verdict.passed.map(id => `${id}: a known failure passed; remove it from KNOWN_FAILURES (${KNOWN_FAILURE_REASON})`));
       }
     }
   }
