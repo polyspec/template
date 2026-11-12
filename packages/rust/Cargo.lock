@@ -582,7 +582,7 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 [[package]]
 name = "polyspec-bindgen-core"
 version = "0.0.1"
-source = "git+https://github.com/polyspec/bindgen.git?branch=v1%2Frust-core#1b20ddaf05d1252e81de2b87d0f6ac26c7345bf9"
+source = "git+https://github.com/polyspec/bindgen.git?branch=v1%2Frust-core#8fda8f448cabb261f05f8a7b909702cf419a87e5"
 dependencies = [
  "indexmap",
  "tokio-util",
@@ -591,6 +591,7 @@ dependencies = [
 [[package]]
 name = "polyspec-ordered-json"
 version = "0.0.25"
+source = "git+https://github.com/polyspec/ordered-json.git?branch=v1%2Frust-core#07f84344dff893cea14943a2e105a91c093dcaf8"
 dependencies = [
  "polyspec-bindgen-core",
  "ryu-js",
