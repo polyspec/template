@@ -22,6 +22,7 @@
 - 실패하는 case는 expected.error.json과 filesystem case에 실패를 `{"raises": {"kind", "status", "category", "message", "properties"}}`로 적는다: kind, 상태 없음, 인터페이스 계약 오류 표의 그 kind의 category, 메시지 없음, template과 위치(CNF-2, CNF-8). 러너는 kind를 비교하고 legacy 코드 `E_<KIND>`는 그 kind로 비교한다. expected.ast.json 존재 검사는 kind `lex_*`와 `parse_*`를 읽는다.
 - 호스트 코드의 오류는 바뀌지 않고 `render` 호출자에게 도달한다(FUN-46, VAL-19, RT-9): Rust 렌더 경로는 `RenderError`, 즉 `bindgen_core::Failure<TemplateError>`를 돌려주며 `Raised` 갈래는 언어 코드의 예외를, `Callback` 갈래는 Rust callback의 오류를 담는다. `HostError`는 `Data`, `Raised`, `Callback` 갈래를 갖고, `Loader::load`는 `Failed`(load_failed, 구현의 판정) 또는 `Host`인 `LoadError`를 돌려준다. Rust 코어는 더는 `runtime_host_function`을 내지 않으며 legacy 구현은 유지한다.
 - Rust: AST JSON, artifact manifest, 명령행 출력을 ordered-json으로 읽고 쓴다. `encode_template`이 canonical AST JSON(AST-7)을 쓰고, `decode_template`이 `contracts/schema/ast.schema.json`의 규칙을 코드로 검사해 가장 깊은 잘못된 노드를 말하며(AST-10), `TemplateError::to_json`이 오류 객체를 쓴다(ERR-1). crate는 더 이상 serde, serde_json, jsonschema, serde_path_to_error에 의존하지 않고 AST 스키마 사본도 가지지 않는다. formatter는 AST를 AST 타입으로 비교한다(FMT-13).
+- Rust 계약: 템플릿 map은 draft 행 대신 Go의 built-in map 형태 `map[string]any`로 Go 코드에 전달된다. 그래서 계약이 bindgen 스키마를 통과하고 template에 의존하는 계약이 그것으로 검사된다. Go 코드는 항목 순서를 보지 못한다(`change-go-maps`).
 
 ## 0.0.27
 

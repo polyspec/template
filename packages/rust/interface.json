@@ -382,9 +382,7 @@
             "php": "map",
             "python": "map",
             "node": "map",
-            "go": {
-              "todo": "an ordered Go map type: map[string]any loses the entry order (VAL-4)"
-            },
+            "go": "map",
             "wasm": "map"
           }
         },
@@ -398,9 +396,7 @@
             "php": "php_object",
             "python": "map",
             "node": "map",
-            "go": {
-              "todo": "an ordered Go map type: map[string]any loses the entry order (VAL-4)"
-            },
+            "go": "map",
             "wasm": "map"
           }
         },
@@ -678,6 +674,15 @@
           "cases": [
             {
               "kind": "list",
+              "read": "builtin"
+            }
+          ]
+        },
+        {
+          "go": "map[string]any",
+          "cases": [
+            {
+              "kind": "map",
               "read": "builtin"
             }
           ]
@@ -4294,6 +4299,16 @@
       "symbol": "host arguments",
       "from": {
         "php": "a map with the keys 0 to n-1 or no key arrives as a list array"
+      },
+      "to": "template_value"
+    },
+    {
+      "id": "change-go-maps",
+      "rule": "VAL-4",
+      "reason": "U-7 (bindgen design): a template map reaches Go code as the built-in Go map form of the binding, map[string]any, which has no entry order; the order of a map that comes back from Go is the order of its keys as Go hands them over",
+      "symbol": "host arguments",
+      "from": {
+        "go": "a map arrives as *template.OrderedMap, which keeps the entry order"
       },
       "to": "template_value"
     },
