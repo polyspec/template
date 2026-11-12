@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: 314bd85ee7be6ea9231dc4b35c99b7fc0505d5d4af3a4bcbc288e5c5d36ddc80 -->
+<!-- source-sha256: 71ed0f9247af998ffd02247eec967b35641ed86e297451eb4208d5af0fa85eaf -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -227,7 +227,7 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 | `Object` | object(VAL-19). 코어는 언어 객체의 handle을 들고 그대로 돌려준다. 그 member를 읽지도 method를 부르지도 않으므로 member 조회는 `null`이고 method 호출은 runtime_unknown_function이다 |
 | `Bytes`, `Date`, `Callable`, `Value`, `Other` | data_unsupported_type |
 
-list와 map은 VAL-20이 허용하는 만큼만 중첩되므로 자기를 담은 값은 data_depth다. 바인딩이 walk의 질문에 답하는 동안 언어 코드가 던진 예외는 바뀌지 않고 호출자에게 간다(FUN-46). 템플릿 값은 `value_out`으로 한 단계씩 코어를 나간다. null, bool, float인 number, text인 string과 safe string, list, 키가 차례로 `"0"`부터 `"n-1"`이면 predicate `sequence_keys`를 가진 map, handle로 들어온 object는 그 handle이다. 값의 한 list나 map은 값이 그것을 몇 번 담든 한 언어 객체다. 이유: 모든 언어의 바인딩이 코어의 한 함수이므로 언어는 값을 기술하는 방식만 다르고, 그 방식은 binding_core가 정한다.
+list와 map은 VAL-20이 허용하는 만큼만 중첩되므로 자기를 담은 값은 data_depth다. `value_in`은 `Result<Value, Failure<TemplateError>>`를 돌려준다(바인딩 설계 E-1c; `RenderError`는 같은 타입의 이름이다). 템플릿 값이 아닌 값은 표의 kind를 가진 `Failure::Kind`이고, 바인딩이 walk의 질문에 답하는 동안 언어 코드가 던진 예외는 그 예외를 담은 `Failure::Raised`이며 바뀌지 않고 호출자에게 간다(FUN-46). walk는 Rust callback을 부르지 않으므로 `Failure::Callback`을 내지 않는다. 템플릿 값은 `value_out`으로 한 단계씩 코어를 나간다. null, bool, float인 number, text인 string과 safe string, list, 키가 차례로 `"0"`부터 `"n-1"`이면 predicate `sequence_keys`를 가진 map, handle로 들어온 object는 그 handle이다. 값의 한 list나 map은 값이 그것을 몇 번 담든 한 언어 객체다. 이유: 모든 언어의 바인딩이 코어의 한 함수이므로 언어는 값을 기술하는 방식만 다르고, 그 방식은 binding_core가 정한다.
 
 ## 호스트 인자
 

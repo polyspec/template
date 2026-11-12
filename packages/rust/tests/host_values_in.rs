@@ -7,8 +7,8 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
-use binding_core::{Handle, HostText, HostValue, HostValues, OutValue, OutValues, Raised};
-use polyspec_template::{ErrorCode, OrderedMap, RenderError, Value, value_in, value_out};
+use binding_core::{Failure, Handle, HostText, HostValue, HostValues, OutValue, OutValues, Raised};
+use polyspec_template::{ErrorCode, OrderedMap, RenderError, TemplateError, Value, value_in, value_out};
 use std::collections::HashMap;
 
 /// A language value as a binding describes it: containers by handle, with their children.
@@ -163,8 +163,20 @@ fn an_exception_of_the_walk_reaches_the_caller_unchanged() {
             len: 1,
         },
     ) {
-        Err(RenderError::Raised(raised)) => assert_eq!(raised, Raised::from_generated(Handle::new(99))),
+        Err(Failure::Raised(raised)) => assert_eq!(raised, Raised::from_generated(Handle::new(99))),
         other => panic!("expected the raised exception, got {other:?}"),
+    }
+}
+
+#[test]
+fn value_in_has_the_form_of_a_value_alias_in() {
+    // Binding design E-1c: the `in` function of a value alias returns `Result<T, Failure<E>>` with the error enum of the
+    // core, so an exception of language code is `Failure::Raised` beside the kinds of `TemplateError`.
+    let function: fn(&mut dyn HostValues, HostValue) -> Result<Value, Failure<TemplateError>> = value_in;
+    let mut host = Host::default();
+    match function(&mut host, HostValue::Bytes(Vec::new())) {
+        Err(Failure::Kind(error)) => assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE),
+        other => panic!("expected the kind data_unsupported_type, got {other:?}"),
     }
 }
 

@@ -5,7 +5,7 @@
 use crate::error::{ErrorCode, RenderError, TemplateError};
 use crate::value::bind::{BindError, check_level, check_number};
 use crate::value::{HostError, OrderedMap, TemplateObject, Value};
-use binding_core::{Handle, HostText, HostValue, HostValues, MapOut, OutValue, OutValues};
+use binding_core::{Failure, Handle, HostText, HostValue, HostValues, MapOut, OutValue, OutValues};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -79,9 +79,10 @@ fn text(units: HostText) -> Result<String, RenderError> {
 ///
 /// # Errors
 ///
-/// The kind of a value that is no template value, and the exception that language code raised while the binding
-/// answered a question of the walk.
-pub fn value_in(host: &mut dyn HostValues, value: HostValue) -> Result<Value, RenderError> {
+/// `Failure::Kind` with the kind of a value that is no template value, and `Failure::Raised` with the exception that
+/// language code raised while the binding answered a question of the walk (binding design E-1c). The walk calls no
+/// Rust callback, so it never gives `Failure::Callback`.
+pub fn value_in(host: &mut dyn HostValues, value: HostValue) -> Result<Value, Failure<TemplateError>> {
     bind(host, value, 0)
 }
 
