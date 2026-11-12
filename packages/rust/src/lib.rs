@@ -11,6 +11,7 @@
 
 pub mod artifact;
 mod ast;
+mod ast_json;
 mod error;
 mod escape;
 mod expr;
@@ -29,13 +30,12 @@ mod sha256;
 /// Native conformance harness bridge, enabled only for repository test targets.
 #[cfg(feature = "__test_support")]
 pub mod __test_support {
+    pub use crate::ast_json::encode_expr;
     pub use crate::expr::vectors::{ExpressionToken, evaluate_expression, parse_expression, tokenize_expression};
-    pub use crate::format::invariant::{without_line_indentation, without_spans};
 }
 
-pub use ast::{
-    BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp, decode_template,
-};
+pub use ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp};
+pub use ast_json::{decode_template, encode_template};
 pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
 pub use format::{FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};

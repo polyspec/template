@@ -10,7 +10,7 @@
 mod common;
 
 use common::{case_delimiters, repo_root, templates};
-use polyspec_template::__test_support::{without_line_indentation, without_spans};
+use common::{without_line_indentation, without_spans};
 use polyspec_template::{ErrorCode, FormatOptions, Formatted, IndentUnit, ParseOptions, TemplateBlocks, format, format_bytes, parse};
 use std::fs;
 
@@ -435,7 +435,7 @@ fn ast(source: &str, delimiters: &Option<String>) -> serde_json::Value {
     let options = ParseOptions {
         delimiters: delimiters.clone(),
     };
-    without_spans(&serde_json::to_value(parse(source.as_bytes(), "input.tpl", &options).expect("parse")).expect("json"))
+    without_spans(&common::ast_value(&parse(source.as_bytes(), "input.tpl", &options).expect("parse")))
 }
 
 /// The invariant and idempotence over every case that parses, in both indentation modes: the formatted text parses to

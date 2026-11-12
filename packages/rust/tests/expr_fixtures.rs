@@ -12,7 +12,7 @@ mod common;
 
 use common::{json_equal, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
-use polyspec_template::__test_support::{evaluate_expression, parse_expression, tokenize_expression};
+use polyspec_template::__test_support::{encode_expr, evaluate_expression, parse_expression, tokenize_expression};
 use polyspec_template::to_json_value;
 use serde::Deserialize;
 
@@ -70,7 +70,7 @@ fn vector(item: &Vector) -> Result<(), Failed> {
     }
     let expected_ast = item.ast.as_ref().ok_or("the vector has neither error nor ast")?;
     let ast = parse_expression(&item.expr).map_err(|error| format!("parse failed: {error}"))?;
-    let ast_json = serde_json::to_value(&ast).map_err(|error| format!("ast json: {error}"))?;
+    let ast_json: serde_json::Value = serde_json::from_str(&encode_expr(&ast)?)?;
     if !json_equal(&ast_json, expected_ast) {
         return Err(format!("ast differs: {ast_json}").into());
     }

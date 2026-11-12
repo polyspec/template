@@ -86,7 +86,7 @@ impl MapLoader {
     /// Adds a parsed template. Its version is the hash of its AST JSON (RT-10); an AST without a JSON form, which no
     /// parsed or decoded template is, is an error.
     pub fn set_ast(&mut self, name: &str, ast: Template) -> Result<(), String> {
-        let json = serde_json::to_string(&ast).map_err(|error| format!("the AST of {name} has no JSON form: {error}"))?;
+        let json = crate::encode_template(&ast).map_err(|error| format!("the AST of {name} has no JSON form: {}", error.message))?;
         let version = content_hash(json.as_bytes());
         self.entries.insert(name.to_string(), Loaded::Ast { ast, version });
         Ok(())

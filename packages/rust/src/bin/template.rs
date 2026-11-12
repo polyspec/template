@@ -7,7 +7,7 @@
 use clap::{Args, Parser, Subcommand};
 use polyspec_template::{
     AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderError, RenderOptions, RenderTarget,
-    TemplateError, analyze, defines_from_json, env_from_json, format_bytes, parse, read_json as parse_json_text,
+    TemplateError, analyze, defines_from_json, encode_template, env_from_json, format_bytes, parse, read_json as parse_json_text,
 };
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -111,41 +111,29 @@ fn fail_request(error: TemplateError) -> ! {
     fail(error)
 }
 
-/// The JSON text of a result or an error; a value that does not serialize ends the command with status 1.
-fn json<T: serde::Serialize>(value: &T) -> String {
-    match serde_json::to_string(value) {
-        Ok(text) => text,
-        Err(error) => {
-            eprintln!("cannot write JSON: {error}");
-            exit(1)
-        }
-    }
+fn text(value: &str) -> String {
+    polyspec_template::polyspec_ordered_json::Value::string(value).raw().to_string()
 }
 
 /// The record of FMT-14 that CNF-4 writes for a format error: the reason that the kind of the error names (ERR-15), the
 /// parser code for the reason `parse`, the position and the message.
-#[derive(serde::Serialize)]
-struct FormatRecord<'e> {
-    reason: &'static str,
-    code: Option<&'static str>,
-    line: usize,
-    col: usize,
-    message: &'e str,
-}
-
-fn format_record(error: &TemplateError) -> FormatRecord<'_> {
+fn format_record(error: &TemplateError) -> String {
     let (reason, code) = match error.code {
         polyspec_template::ErrorCode::E_FORMAT_INVARIANT => ("invariant", None),
         polyspec_template::ErrorCode::E_FORMAT_HTML => ("html", None),
         code => ("parse", Some(code.as_str())),
     };
-    FormatRecord {
-        reason,
-        code,
-        line: error.line,
-        col: error.col,
-        message: &error.message,
-    }
+    format!(
+        "{{\"reason\":{},\"code\":{},\"line\":{},\"col\":{},\"message\":{}}}",
+        text(reason),
+        match code {
+            Some(code) => text(code),
+            None => "null".to_string(),
+        },
+        error.line,
+        error.col,
+        text(&error.message)
+    )
 }
 
 /// Writes a result to stdout; a write error ends the command with status 1.
@@ -158,7 +146,7 @@ fn write_stdout(text: &str) {
 }
 
 fn fail(error: TemplateError) -> ! {
-    eprintln!("{}", json(&error));
+    eprintln!("{}", error.to_json());
     exit(2);
 }
 
@@ -264,7 +252,7 @@ fn main() {
                 Ok(formatted) => write_stdout(&formatted.text),
                 Err(error) if error.code.as_str().starts_with("argument_") => fail_request(error),
                 Err(error) => {
-                    eprintln!("{}", json(&format_record(&error)));
+                    eprintln!("{}", format_record(&error));
                     exit(2);
                 }
             }
@@ -273,8 +261,12 @@ fn main() {
             let (source, name, parse_options) = read_input(input);
             match analyze(&source, &name, &parse_options) {
                 Ok(analysis) => {
-                    let tokens: Vec<_> = analysis.tokens.iter().map(|token| (token.start, token.end, token.kind)).collect();
-                    write_stdout(&json(&tokens));
+                    let tokens: Vec<_> = analysis
+                        .tokens
+                        .iter()
+                        .map(|token| format!("[{},{},{}]", token.start, token.end, text(token.kind.as_str())))
+                        .collect();
+                    write_stdout(&format!("[{}]", tokens.join(",")));
                 }
                 Err(error) => fail_request(error),
             }
@@ -282,7 +274,10 @@ fn main() {
         Command::Parse { input } => {
             let (source, name, parse_options) = read_input(input);
             match parse(&source, &name, &parse_options) {
-                Ok(ast) => write_stdout(&json(&ast)),
+                Ok(ast) => match encode_template(&ast) {
+                    Ok(json) => write_stdout(&json),
+                    Err(error) => fail(error),
+                },
                 Err(error) => fail_request(error),
             }
         }

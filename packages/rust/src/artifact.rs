@@ -2,26 +2,61 @@
 //! manifest and the digest of every file, and returns the program that renders its templates. The loaded templates keep
 //! the digest of their file as their version (RT-10).
 
-use crate::ast::decode_template;
+use crate::ast_json::decode_template;
 use crate::loader::{Loaded, Loader};
 use crate::render::engine::{ArtifactRefresh, AstProgram, EngineOptions};
 use crate::sha256::sha256_hex;
-use serde::Deserialize;
+use polyspec_ordered_json::{Kind, ParseOptions, Value as Json, parse};
 use std::collections::HashMap;
 use std::path::Path;
 
-#[derive(Deserialize)]
 struct Manifest {
     mode: String,
     entry: String,
     files: HashMap<String, ManifestFile>,
 }
 
-#[derive(Deserialize)]
 struct ManifestFile {
     path: String,
-    #[serde(rename = "artifactDigest")]
     artifact_digest: String,
+}
+
+/// The manifest of an AST artifact: an object with the strings `mode` and `entry` and the object `files`, whose members
+/// are objects with the strings `path` and `artifactDigest`; other members are ignored.
+fn read_manifest(raw: &[u8]) -> Result<Manifest, String> {
+    let value = parse(raw, &ParseOptions::default()).map_err(|error| format!("AST artifact manifest is not JSON: {error}"))?;
+    let member = |value: &'_ Json, name: &str| -> Result<String, String> {
+        match value.get(name) {
+            Ok(Some(found)) if found.kind() == Kind::String => found.string_value().map_err(|error| error.to_string()),
+            _ => Err(format!("AST artifact manifest has no string {name}")),
+        }
+    };
+    if value.kind() != Kind::Object {
+        return Err("AST artifact manifest is not an object".to_string());
+    }
+    let files = match value.get("files") {
+        Ok(Some(files)) if files.kind() == Kind::Object => files.members().map_err(|error| error.to_string())?,
+        _ => return Err("AST artifact manifest has no object files".to_string()),
+    };
+    let mut entries = HashMap::new();
+    for (name, file) in files.iter() {
+        let name = name.string_value().map_err(|error| error.to_string())?;
+        if file.kind() != Kind::Object {
+            return Err(format!("AST artifact manifest file {name} is not an object"));
+        }
+        entries.insert(
+            name,
+            ManifestFile {
+                path: member(file, "path")?,
+                artifact_digest: member(file, "artifactDigest")?,
+            },
+        );
+    }
+    Ok(Manifest {
+        mode: member(&value, "mode")?,
+        entry: member(&value, "entry")?,
+        files: entries,
+    })
 }
 
 /// The templates of a loaded artifact, by name.
@@ -74,8 +109,7 @@ fn read_artifact_file(path: &Path, what: &str) -> Result<Vec<u8>, ArtifactError>
 /// artifact fails with `ArtifactError::Stale`; any other failure fails with `ArtifactError::Failed` and its cause.
 pub fn load_artifact(directory: &Path) -> Result<AstProgram, ArtifactError> {
     let raw = read_artifact_file(&directory.join("manifest.json"), "AST artifact manifest")?;
-    let manifest: Manifest =
-        serde_json::from_slice(&raw).map_err(|error| ArtifactError::Failed(format!("AST artifact manifest is not JSON: {error}")))?;
+    let manifest = read_manifest(&raw).map_err(ArtifactError::Failed)?;
     if manifest.mode != "ast" {
         return Err(ArtifactError::Failed(format!(
             "the artifact in {} is not an AST artifact: {}",

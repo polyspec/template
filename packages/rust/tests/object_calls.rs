@@ -249,7 +249,9 @@ fn kind(error: polyspec_template::RenderError) -> TemplateError {
 fn a_raised_exception_reaches_the_caller_unchanged() {
     let raised = || bindgen_core::Raised::from_generated(bindgen_core::Handle::new(7));
     let mut program = program(&["{= raise()}"]);
-    program.register("raise", Box::new(move |_, _| Err(HostError::Raised(raised())))).unwrap();
+    program
+        .register("raise", Box::new(move |_, _| Err(HostError::Raised(raised()))))
+        .unwrap();
     match render_failure(&program, 0, OrderedMap::new()) {
         Err(polyspec_template::RenderError::Raised(found)) => assert_eq!(found, raised()),
         other => panic!("expected the raised exception, got {other:?}"),

@@ -81,7 +81,11 @@ fn public_prefix_analysis_preserves_shared_contexts() {
             })
             .collect();
         assert_eq!(
-            serde_json::to_value(&result.ast).expect("native AST"),
+            match &result.ast {
+                Some(ast) => common::ast_value(ast),
+                // The fixture writes null for a prefix without an AST.
+                None => serde_json::Value::Null,
+            },
             item.expected.ast,
             "{}",
             item.id
@@ -93,7 +97,7 @@ fn public_prefix_analysis_preserves_shared_contexts() {
             None => serde_json::Value::Null,
             Some(error) => {
                 assert!(!error.message.is_empty());
-                serde_json::json!({"code":error.code,"template":error.template,"line":error.line,"col":error.col,"offset":error.offset,"end":error.end})
+                serde_json::json!({"code":error.code.as_str(),"template":error.template,"line":error.line,"col":error.col,"offset":error.offset,"end":error.end})
             }
         };
         assert_eq!(error, item.expected.error, "{}", item.id);

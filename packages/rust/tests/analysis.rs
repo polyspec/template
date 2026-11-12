@@ -47,7 +47,7 @@ fn public_analysis_preserves_shared_contexts() {
                 })
             })
             .collect();
-        let actual = serde_json::json!({"ast": result.ast, "tags":tags,"tokens":tokens});
+        let actual = serde_json::json!({"ast": common::ast_value(&result.ast), "tags":tags,"tokens":tokens});
         assert_eq!(actual, item.expected, "{}", item.id);
         assert_eq!(
             result.ast,

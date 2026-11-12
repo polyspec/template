@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: ddceffe4e9ccf11af73a057d0bb75287075fb53485522a3a55708f89f448324e -->
+<!-- source-sha256: 4e64620906194052e0a20c1cffad8bafdcd07bdebff9e505664f226b12d6d056 -->
 # 오류
 
 [English](/spec/errors).
@@ -101,7 +101,7 @@ ERR-7에서 ERR-12와 ERR-15의 code table이 error code의 catalog입니다. `m
 | `argument_indent` | `format`의 들여쓰기 단위가 공백의 연속이나 탭 하나가 아니다(FMT-9). | 없음. |
 | `format_invariant` | `format`이 돌려줄 텍스트가 소스의 AST로 파싱되지 않는다(FMT-1). | 처음 바뀐 바이트. |
 | `format_html` | 소스의 HTML 요소가 짝이 맞지 않아 `format`이 그에 따라 줄을 들여쓸 수 없다(FMT-12). | 짝이 맞지 않는 태그. |
-| `ast_invalid` | `decode_template`이 읽는 텍스트가 JSON이 아니거나 그 값이 canonical schema의 AST가 아니다. 메시지가 첫 잘못된 노드의 JSON Pointer를 적는다(AST-10). | 없음. |
+| `ast_invalid` | `decode_template`이 읽는 텍스트가 JSON이 아니거나 그 값이 canonical schema의 AST가 아니다. 메시지가 잘못된 노드의 JSON Pointer를 적는다(AST-10). | 없음. |
 
 - **ERR-12** 내부 오류:
 

@@ -86,20 +86,13 @@ cast_sign_loss = "deny"
 
 [dependencies]
 # The JSON values of assign data, definitions and the environment, the JSON text of `json` and the text of a number
-# (VAL-9, VAL-12, FUN-26): the one JSON reader and writer of polyspec.
+# (VAL-9, VAL-12, FUN-26), the AST JSON (AST-7, AST-10), the artifact manifest (RT-56) and the output of the command
+# line: the one JSON reader and writer of polyspec.
 polyspec-ordered-json = { git = "https://github.com/polyspec/ordered-json.git", branch = "v1/rust-core" }
 # The kind interface that the generated bindings read from the core error (bindgen design E-1, I-2 (3)); Cargo.lock pins the
 # commit of the bindgen repository, the source of the generated binding crates too.
 polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core" }
 clap = { version = "4", features = ["derive"], optional = true }
-serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
-# The validation of a decoded AST against contracts/schema/ast.schema.json (decode_template, AST-10), with the number
-# reading of serde_json under arbitrary_precision; no default feature, so no schema is fetched over HTTP or from a file.
-jsonschema = { version = "0.58.6", default-features = false, features = ["arbitrary-precision"] }
-# The JSON Pointer of a validated value that the AST types cannot hold, such as a span offset beyond usize
-# (decode_template).
-serde_path_to_error = "0.1.20"
 
 # The volume serial number and file index of an open file, the identity of a file of FsLoader on Windows; the standard
 # library offers them only behind the unstable feature windows_by_handle.
@@ -111,6 +104,9 @@ winapi-util = "0.1.11"
 # caller unchanged (FUN-46).
 polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core", features = ["construct"] }
 libtest-mimic = "0.8.2"
+# The JSON of the test fixtures and of the expected results that the tests compare.
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
 syn = { version = "3", features = ["full"] }
 
 [profile.release]

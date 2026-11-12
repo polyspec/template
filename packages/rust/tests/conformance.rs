@@ -101,7 +101,7 @@ fn conformance(dir: &Path) -> Result<(), Failed> {
             },
         )
         .map_err(|error| format!("parse failed: {error}"))?;
-        let actual = serde_json::to_value(&ast).map_err(|error| format!("ast json: {error}"))?;
+        let actual = common::ast_value(&ast);
         let expected: serde_json::Value = serde_json::from_str(&expected).map_err(|error| format!("expected.ast.json: {error}"))?;
         if !json_equal(&actual, &expected) {
             return Err(format!(
@@ -119,7 +119,7 @@ expected {expected}"
             Outcome::Error(error) => {
                 let category = common::kind_category(error.code.as_str());
                 let actual = serde_json::json!({ "raises": {
-                    "kind": error.code, "status": null, "category": category, "message": null,
+                    "kind": error.code.as_str(), "status": null, "category": category, "message": null,
                     "properties": { "template": error.template, "line": error.line, "col": error.col }
                 } });
                 if json_equal(&actual, &expected) {

@@ -4,14 +4,14 @@
 mod body;
 mod expression;
 mod indent;
-pub mod invariant;
+mod invariant;
 
 use crate::error::{ErrorCode, LineIndex, TemplateError};
 use crate::parser::{SyntaxTag, TagKind};
 use crate::{ParseOptions, analyze};
 use body::{BodyInput, format_body};
 use indent::indent_edits;
-use invariant::{same_tree, without_line_indentation};
+use invariant::same_tree;
 use std::ops::Range;
 
 /// An indent unit: a run of spaces or one tab.
@@ -158,14 +158,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
     let after = analyze(formatted.as_bytes(), name, &parse_options)
         .map_err(|error| invariant(format!("formatted text does not parse: {error}")))?
         .ast;
-    let before = serde_json::to_value(&analysis.ast).map_err(|error| invariant(format!("the AST has no JSON form: {error}")))?;
-    let after = serde_json::to_value(&after).map_err(|error| invariant(format!("the AST has no JSON form: {error}")))?;
-    let same = if options.indent.is_none() {
-        same_tree(&before, &after)
-    } else {
-        same_tree(&without_line_indentation(&before), &without_line_indentation(&after))
-    };
-    if !same {
+    if !same_tree(&analysis.ast, &after, options.indent.is_some()) {
         return Err(invariant("formatted text parses to a different AST".to_string()));
     }
     Ok(Formatted {

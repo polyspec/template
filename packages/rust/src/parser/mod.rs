@@ -20,8 +20,7 @@ use crate::source::Source;
 const RESERVED: &[&str] = &["true", "false", "null", "in"];
 
 /// The kind of an accepted tag.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TagKind {
     /// `{: name = value}` and the other assignment forms.
     Assignment,
@@ -88,8 +87,7 @@ pub struct SyntaxTag {
 }
 
 /// The token classes of EDT-8.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenKind {
     /// Open and close delimiters with their wrappers.
     Delimiter,

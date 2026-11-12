@@ -4058,6 +4058,34 @@
           }
         },
         {
+          "id": "encode_template",
+          "name": [
+            "encode",
+            "template"
+          ],
+          "kind": "function",
+          "visibility": "public",
+          "parameters": [
+            {
+              "name": [
+                "template"
+              ],
+              "type": {
+                "unit": "template"
+              },
+              "required": true
+            }
+          ],
+          "returns": "text",
+          "raises": [
+            "polyspec_template::ErrorCode::E_INTERNAL"
+          ],
+          "wait": "none",
+          "core": {
+            "path": "polyspec_template::encode_template"
+          }
+        },
+        {
           "id": "decode_template",
           "name": [
             "decode",

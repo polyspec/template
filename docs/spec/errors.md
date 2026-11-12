@@ -100,7 +100,7 @@ The code tables of ERR-7 to ERR-12 and ERR-15 are the catalog of the error codes
 | `argument_indent` | An indent unit of `format` is not a run of spaces or one tab (FMT-9). | None. |
 | `format_invariant` | The text that `format` would return does not parse to the AST of the source (FMT-1). | The first changed byte. |
 | `format_html` | The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12). | The tag that does not nest. |
-| `ast_invalid` | The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the first invalid node (AST-10). | None. |
+| `ast_invalid` | The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the invalid node (AST-10). | None. |
 
 - **ERR-12** Internal errors:
 

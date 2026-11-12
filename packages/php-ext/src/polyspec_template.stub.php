@@ -514,7 +514,7 @@ final class ErrorCode
     /** The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12). */
     public const string E_FORMAT_HTML = 'E_FORMAT_HTML';
 
-    /** The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the first invalid node (AST-10). */
+    /** The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the invalid node (AST-10). */
     public const string E_AST_INVALID = 'E_AST_INVALID';
 
     /** The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect. */

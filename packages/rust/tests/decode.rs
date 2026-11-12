@@ -25,7 +25,7 @@ fn decode_reads_the_ast_of_every_conformance_case() {
             .map_err(|error| format!("{id}: {error}"))
             .expect("the template decodes");
         let expected: serde_json::Value = serde_json::from_str(&text).expect("expected.ast.json");
-        let actual = serde_json::to_value(&decoded).expect("encode");
+        let actual = common::ast_value(&decoded);
         assert!(common::json_equal(&actual, &expected), "{id}: the decoded AST encodes as {actual}");
         count += 1;
     }
@@ -78,19 +78,13 @@ fn decode_fails_naming_the_json_pointer_of_the_invalid_node() {
     }
 }
 
-/// The schema that the crate embeds, src/ast.schema.json, is contracts/schema/ast.schema.json byte for byte.
+/// AST-10: of several invalid nodes, the error names the deepest, and of several at that depth the least in code point
+/// order, as a JSON Schema validator reports them, not the first in document order.
 #[test]
-fn the_embedded_schema_is_the_contract_schema() {
-    let root = common::repo_root();
-    let read = |path: &str| {
-        std::fs::read(root.join(path))
-            .map_err(|error| format!("{path}: {error}"))
-            .expect("the file is readable")
-    };
-    assert!(
-        read("packages/rust/src/ast.schema.json") == read("contracts/schema/ast.schema.json"),
-        "packages/rust/src/ast.schema.json differs from contracts/schema/ast.schema.json: copy the contract schema to it"
-    );
+fn decode_names_the_deepest_invalid_node() {
+    let json = r#"{"type":"Template","name":"x","body":[{"type":"Text","value":1,"span":[0,1]},{"type":"Echo","expr":{"type":"Var","name":"1a","span":[0,1]},"span":[0,1]},{"type":"Echo","expr":{"type":"Var","name":"2a","span":[0,1]},"span":[0,1]}],"comments":[]}"#;
+    let error = decode_template(json).expect_err("invalid");
+    assert_eq!(common::ast_pointer(&error), Some("/body/1/expr/name"), "{error}");
 }
 
 /// ERR-15: text that is not JSON is ast_invalid and names no node.
@@ -110,7 +104,7 @@ fn public_decoder_preserves_class_call_ast_fields() {
     let expected: serde_json::Value = serde_json::from_str(&text).expect("fixture JSON");
     assert_eq!(polyspec_template::BinaryOp::from_text("unknown"), None);
     assert_eq!(polyspec_template::LoopMetaField::from_name("unknown"), None);
-    assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
+    assert_eq!(common::ast_value(&decoded), expected);
 }
 
 /// AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
@@ -143,5 +137,5 @@ fn public_decoder_preserves_canonical_enum_literals() {
     }
     assert_eq!(polyspec_template::BinaryOp::from_text("unknown"), None);
     assert_eq!(polyspec_template::LoopMetaField::from_name("unknown"), None);
-    assert_eq!(serde_json::to_value(decoded).expect("encode AST"), expected);
+    assert_eq!(common::ast_value(&decoded), expected);
 }

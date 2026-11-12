@@ -1,72 +1,62 @@
-//! AST node types as defined in docs/spec/ast.md, serialized to the schema shape.
+//! AST node types as defined in docs/spec/ast.md; `ast_json` reads and writes their JSON form (AST-7).
 
 use crate::error::Span;
-use serde::{Deserialize, Serialize};
 
 /// A unary operator (AST-4).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnaryOp {
     /// Logical negation.
-    #[serde(rename = "!")]
     Not,
     /// Arithmetic negation.
-    #[serde(rename = "-")]
     Negate,
 }
 
+impl UnaryOp {
+    /// The operator token.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            UnaryOp::Not => "!",
+            UnaryOp::Negate => "-",
+        }
+    }
+}
+
 /// A binary operator (AST-4).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BinaryOp {
     /// Addition or concatenation.
-    #[serde(rename = "+")]
     Add,
     /// Subtraction.
-    #[serde(rename = "-")]
     Subtract,
     /// Multiplication.
-    #[serde(rename = "*")]
     Multiply,
     /// Division.
-    #[serde(rename = "/")]
     Divide,
     /// Remainder.
-    #[serde(rename = "%")]
     Remainder,
     /// Loose equality.
-    #[serde(rename = "==")]
     Equal,
     /// Loose inequality.
-    #[serde(rename = "!=")]
     NotEqual,
     /// Strict equality.
-    #[serde(rename = "===")]
     StrictEqual,
     /// Strict inequality.
-    #[serde(rename = "!==")]
     StrictNotEqual,
     /// Less than.
-    #[serde(rename = "<")]
     Less,
     /// Greater than.
-    #[serde(rename = ">")]
     Greater,
     /// Less than or equal.
-    #[serde(rename = "<=")]
     LessEqual,
     /// Greater than or equal.
-    #[serde(rename = ">=")]
     GreaterEqual,
     /// Logical and.
-    #[serde(rename = "&&")]
     And,
     /// Logical or.
-    #[serde(rename = "||")]
     Or,
     /// Null coalescing.
-    #[serde(rename = "??")]
     Coalesce,
     /// Membership.
-    #[serde(rename = "in")]
     In,
 }
 
@@ -120,8 +110,7 @@ impl BinaryOp {
 }
 
 /// The root of a parsed template.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", rename = "Template", from = "TemplateJson")]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Template {
     /// Template name given to the parser.
     pub name: String,
@@ -132,8 +121,7 @@ pub struct Template {
 }
 
 /// A comment of the template, listed in `Template::comments` (AST-9).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", rename = "Comment", from = "CommentJson")]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Comment {
     /// Source text between the sigil `*` and the `*` of the terminator.
     pub value: String,
@@ -141,59 +129,8 @@ pub struct Comment {
     pub span: Span,
 }
 
-// The tag of a struct is written by Serialize but not read by Deserialize, so a decode reads the struct through a
-// mirror whose `type` field accepts only the name of the struct.
-#[derive(Deserialize)]
-enum TemplateType {
-    Template,
-}
-
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct TemplateJson {
-    #[serde(rename = "type")]
-    _type: TemplateType,
-    name: String,
-    body: Vec<Node>,
-    comments: Vec<Comment>,
-}
-
-impl From<TemplateJson> for Template {
-    fn from(json: TemplateJson) -> Template {
-        Template {
-            name: json.name,
-            body: json.body,
-            comments: json.comments,
-        }
-    }
-}
-
-#[derive(Deserialize)]
-enum CommentType {
-    Comment,
-}
-
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct CommentJson {
-    #[serde(rename = "type")]
-    _type: CommentType,
-    value: String,
-    span: Span,
-}
-
-impl From<CommentJson> for Comment {
-    fn from(json: CommentJson) -> Comment {
-        Comment {
-            value: json.value,
-            span: json.span,
-        }
-    }
-}
-
 /// Statement nodes.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Node {
     /// Literal text between tags (AST-1).
     Text {
@@ -214,7 +151,6 @@ pub enum Node {
         /// The branches in source order, each with its condition and body.
         branches: Vec<IfBranch>,
         /// The body of the `{:}` branch, or None.
-        #[serde(rename = "else", deserialize_with = "Option::deserialize")]
         r#else: Option<Vec<Node>>,
         /// From the opening tag to the end of the closing tag.
         span: Span,
@@ -228,7 +164,6 @@ pub enum Node {
         /// The body rendered for each entry.
         body: Vec<Node>,
         /// The body rendered when the iterable has no entry, or None.
-        #[serde(deserialize_with = "Option::deserialize")]
         empty: Option<Vec<Node>>,
         /// From the opening tag to the end of the closing tag.
         span: Span,
@@ -252,10 +187,8 @@ pub enum Node {
     /// A block tag `{# id path scope}`.
     Block {
         /// The identifier of the template definition, or None.
-        #[serde(deserialize_with = "Option::deserialize")]
         id: Option<String>,
         /// The template path, or None.
-        #[serde(deserialize_with = "Option::deserialize")]
         path: Option<String>,
         /// The scope arguments of the tag.
         scope: Vec<ScopeItem>,
@@ -269,7 +202,6 @@ pub enum Node {
         /// The body rendered when the definition is registered.
         body: Vec<Node>,
         /// The body of the `{:}` branch, or None.
-        #[serde(rename = "else", deserialize_with = "Option::deserialize")]
         r#else: Option<Vec<Node>>,
         /// From the opening tag to the end of the closing tag.
         span: Span,
@@ -293,8 +225,7 @@ impl Node {
 }
 
 /// One branch of an `If` node.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct IfBranch {
     /// Condition.
     pub test: Expr,
@@ -305,8 +236,7 @@ pub struct IfBranch {
 }
 
 /// A scope item of a block tag.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ScopeItem {
     /// Name bound inside the block.
     pub name: String,
@@ -327,68 +257,36 @@ pub enum LiteralValue {
     String(String),
 }
 
-impl<'de> Deserialize<'de> for LiteralValue {
-    // An untagged enum buffers its input, which reads a number of serde_json with arbitrary_precision as a map, so the
-    // value is read as a JSON value of serde_json, which reads that map back as a number.
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        match serde_json::Value::deserialize(deserializer)? {
-            serde_json::Value::Null => Ok(LiteralValue::Null),
-            serde_json::Value::Bool(value) => Ok(LiteralValue::Bool(value)),
-            serde_json::Value::Number(value) => value
-                .as_f64()
-                .map(LiteralValue::Number)
-                .ok_or_else(|| serde::de::Error::custom(format!("the number {value} has no 64-bit float"))),
-            serde_json::Value::String(value) => Ok(LiteralValue::String(value)),
-            _ => Err(serde::de::Error::custom("a literal value is null, a boolean, a number or a string")),
-        }
-    }
-}
-
-impl Serialize for LiteralValue {
-    // AST-7: a number literal serializes as a JSON number; an integer within the safe range is
-    // written without a fraction, other numbers with their shortest round-trip representation.
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        match self {
-            LiteralValue::Null => serializer.serialize_none(),
-            LiteralValue::Bool(value) => serializer.serialize_bool(*value),
-            LiteralValue::Number(value) if value.fract() == 0.0 && value.abs() <= 9007199254740991.0 => {
-                #[allow(
-                    clippy::cast_possible_truncation,
-                    reason = "AST-8: an integral value within ±(2^53 − 1), which i64 holds exactly"
-                )]
-                let integer = *value as i64;
-                serializer.serialize_i64(integer)
-            }
-            LiteralValue::Number(value) => serializer.serialize_f64(*value),
-            LiteralValue::String(value) => serializer.serialize_str(value),
-        }
-    }
-}
-
 /// Loop meta fields.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LoopMetaField {
     /// `index_`: the position of the entry, from 0.
-    #[serde(rename = "index_")]
     Index,
     /// `key_`: the key of the entry.
-    #[serde(rename = "key_")]
     Key,
     /// `value_`: the value of the entry.
-    #[serde(rename = "value_")]
     Value,
     /// `last_`: whether the entry is the last one.
-    #[serde(rename = "last_")]
     Last,
     /// `first_`: whether the entry is the first one.
-    #[serde(rename = "first_")]
     First,
     /// `size_`: the number of entries.
-    #[serde(rename = "size_")]
     Size,
 }
 
 impl LoopMetaField {
+    /// The name of the field in the source and the AST.
+    pub fn name(self) -> &'static str {
+        match self {
+            LoopMetaField::Index => "index_",
+            LoopMetaField::Key => "key_",
+            LoopMetaField::Value => "value_",
+            LoopMetaField::Last => "last_",
+            LoopMetaField::First => "first_",
+            LoopMetaField::Size => "size_",
+        }
+    }
+
     /// The field of a loop meta name, or None.
     pub fn from_name(name: &str) -> Option<LoopMetaField> {
         match name {
@@ -404,8 +302,7 @@ impl LoopMetaField {
 }
 
 /// Entry of a map literal.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(untagged, deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MapEntry {
     /// An entry `key => value`.
     Entry {
@@ -419,8 +316,7 @@ pub enum MapEntry {
 }
 
 /// Expression nodes. `Spread` appears only inside `List` items and `Map` entries.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "type", deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     /// A literal.
     Literal {
@@ -470,7 +366,6 @@ pub enum Expr {
     /// A call `Class::method(args)` of a declared logical class function.
     ClassCall {
         /// The class name.
-        #[serde(rename = "className")]
         class_name: String,
         /// The method name.
         method: String,
@@ -522,7 +417,6 @@ pub enum Expr {
         /// The condition.
         test: Box<Expr>,
         /// The value when the condition is truthy, or None for `?:`.
-        #[serde(deserialize_with = "Option::deserialize")]
         then: Option<Box<Expr>>,
         /// The value when the condition is falsy.
         r#else: Box<Expr>,
@@ -572,118 +466,4 @@ impl Expr {
             | Expr::Spread { span, .. } => *span,
         }
     }
-}
-
-// The JSON Schema of the template AST, a copy of contracts/schema/ast.schema.json that tests/decode.rs compares with
-// it, which decode_template validates against (AST-10).
-const AST_SCHEMA: &str = include_str!("ast.schema.json");
-
-/// The failure of [`decode_template`] before it becomes the error of ERR-15.
-#[derive(Debug)]
-enum AstDecodeError {
-    /// The text is not JSON.
-    Json(serde_json::Error),
-    /// The JSON is not a template AST of `contracts/schema/ast.schema.json`.
-    Invalid {
-        /// The JSON Pointer (RFC 6901) of the invalid node, empty for the root.
-        path: String,
-        /// The rule of the schema that the node breaks.
-        reason: String,
-    },
-}
-
-impl AstDecodeError {
-    /// The error of ERR-15: `ast_invalid`, whose message names the JSON Pointer of the invalid node (AST-10).
-    fn into_error(self) -> crate::TemplateError {
-        crate::TemplateError::without_position(crate::ErrorCode::E_AST_INVALID, "", self.to_string())
-    }
-}
-
-impl std::fmt::Display for AstDecodeError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AstDecodeError::Json(error) => write!(formatter, "the template AST is not JSON: {error}"),
-            AstDecodeError::Invalid { path, reason } if path.is_empty() => {
-                write!(formatter, "invalid template AST at the root: {reason}")
-            }
-            AstDecodeError::Invalid { path, reason } => write!(formatter, "invalid template AST at {path}: {reason}"),
-        }
-    }
-}
-
-impl std::error::Error for AstDecodeError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            AstDecodeError::Json(error) => Some(error),
-            AstDecodeError::Invalid { .. } => None,
-        }
-    }
-}
-
-// The validator of AST_SCHEMA, built on the first decode.
-static VALIDATOR: std::sync::OnceLock<jsonschema::Validator> = std::sync::OnceLock::new();
-
-#[allow(
-    clippy::expect_used,
-    reason = "AST-10: AST_SCHEMA is a constant of the crate, a draft 7 schema that every decode test compiles"
-)]
-fn validator() -> &'static jsonschema::Validator {
-    VALIDATOR.get_or_init(|| {
-        let schema: serde_json::Value = serde_json::from_str(AST_SCHEMA).expect("AST_SCHEMA is JSON");
-        jsonschema::draft7::new(&schema).expect("AST_SCHEMA is a JSON Schema of draft 7")
-    })
-}
-
-// The invalid node (AST-10): the deepest instance location of the errors, and of several at that depth the least in
-// code point order. The schema selects the schema of a node by its type with if/then, so an error names a value of the
-// node itself.
-fn invalid_node(errors: &[jsonschema::ValidationError<'_>]) -> Option<AstDecodeError> {
-    let depth = |error: &jsonschema::ValidationError<'_>| error.instance_path().as_str().matches('/').count();
-    let deepest = errors.iter().map(depth).max()?;
-    let error = errors
-        .iter()
-        .filter(|error| depth(error) == deepest)
-        .min_by(|a, b| a.instance_path().as_str().cmp(b.instance_path().as_str()))?;
-    Some(AstDecodeError::Invalid {
-        path: error.instance_path().as_str().to_owned(),
-        reason: error.to_string(),
-    })
-}
-
-// The JSON Pointer of a path of serde_path_to_error, up to its first segment that names no value of the JSON.
-fn json_pointer(path: &serde_path_to_error::Path) -> String {
-    let mut pointer = String::new();
-    for segment in path.iter() {
-        match segment {
-            serde_path_to_error::Segment::Seq { index } => pointer.push_str(&format!("/{index}")),
-            serde_path_to_error::Segment::Map { key } => {
-                pointer.push('/');
-                pointer.push_str(&key.replace('~', "~0").replace('/', "~1"));
-            }
-            serde_path_to_error::Segment::Enum { .. } | serde_path_to_error::Segment::Unknown => break,
-        }
-    }
-    pointer
-}
-
-/// Decodes the canonical JSON text of a template AST (AST-7) into the [`Template`] that `parse` returns, so a program
-/// renders it without parsing a source (RT-41). The JSON is validated against `contracts/schema/ast.schema.json` (AST-10), and the error
-/// is `ast_invalid` (ERR-15), whose message names the JSON Pointer of the invalid node. A valid value that the AST types
-/// cannot hold, such as a span offset beyond `usize`, fails with the pointer of the node that holds it.
-pub fn decode_template(json: &str) -> Result<Template, crate::TemplateError> {
-    decode(json).map_err(AstDecodeError::into_error)
-}
-
-fn decode(json: &str) -> Result<Template, AstDecodeError> {
-    let value: serde_json::Value = serde_json::from_str(json).map_err(AstDecodeError::Json)?;
-    let errors: Vec<_> = validator().iter_errors(&value).collect();
-    if let Some(error) = invalid_node(&errors) {
-        return Err(error);
-    }
-    // The AST is read from the text, not from the validated value: under arbitrary_precision, a serde_json::Value
-    // hands an integer beyond u64 to its visitor as a u128, which a literal value, read as a serde_json::Value, rejects.
-    serde_path_to_error::deserialize(&mut serde_json::Deserializer::from_str(json)).map_err(|error| AstDecodeError::Invalid {
-        path: json_pointer(error.path()),
-        reason: error.inner().to_string(),
-    })
 }

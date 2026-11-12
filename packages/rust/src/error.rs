@@ -1,6 +1,5 @@
 //! Error object and error codes as defined in docs/spec/errors.md.
 
-use serde::Serialize;
 use std::fmt;
 
 /// Error codes of the specification. A variant is named `E_` and its kind in capitals; the kind, which `as_str` returns and
@@ -101,17 +100,11 @@ pub enum ErrorCode {
     E_FORMAT_INVARIANT,
     /// The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12).
     E_FORMAT_HTML,
-    /// The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the first invalid node (AST-10).
+    /// The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the invalid node (AST-10).
     E_AST_INVALID,
     /// The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect.
     E_INTERNAL,
     // END GENERATED ERROR CODES
-}
-
-impl Serialize for ErrorCode {
-    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(self.as_str())
-    }
 }
 
 impl ErrorCode {
@@ -217,7 +210,7 @@ impl LineIndex {
 }
 
 /// The error object of ERR-1.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TemplateError {
     /// Error code.
     pub code: ErrorCode,
@@ -251,6 +244,22 @@ impl TemplateError {
             end: span[1],
             message: message.into(),
         }
+    }
+
+    /// The JSON text of the error object of ERR-1: `code` (its kind), `template`, `line`, `col`, `offset`, `end` and
+    /// `message`, written with ordered-json.
+    pub fn to_json(&self) -> String {
+        let text = |value: &str| polyspec_ordered_json::Value::string(value).raw().to_string();
+        format!(
+            "{{\"code\":{},\"template\":{},\"line\":{},\"col\":{},\"offset\":{},\"end\":{},\"message\":{}}}",
+            text(self.code.as_str()),
+            text(&self.template),
+            self.line,
+            self.col,
+            self.offset,
+            self.end,
+            text(&self.message)
+        )
     }
 
     /// Creates an error without a source position (ERR-5, ERR-6).

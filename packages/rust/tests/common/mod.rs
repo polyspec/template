@@ -141,3 +141,58 @@ pub fn kind(error: polyspec_template::RenderError) -> polyspec_template::Templat
         other => panic!("expected a template error, got the error of host code: {other}"),
     }
 }
+
+/// The JSON value of the canonical AST JSON of a template (AST-7).
+pub fn ast_value(ast: &polyspec_template::Template) -> serde_json::Value {
+    serde_json::from_str(&polyspec_template::encode_template(ast).expect("the AST encodes")).expect("the AST JSON is JSON")
+}
+
+/// A copy of an AST JSON value without `span` fields (FMT-13).
+pub fn without_spans(value: &serde_json::Value) -> serde_json::Value {
+    match value {
+        serde_json::Value::Array(items) => serde_json::Value::Array(items.iter().map(without_spans).collect()),
+        serde_json::Value::Object(map) => serde_json::Value::Object(
+            map.iter()
+                .filter(|(key, _)| key.as_str() != "span")
+                .map(|(key, field)| (key.clone(), without_spans(field)))
+                .collect(),
+        ),
+        other => other.clone(),
+    }
+}
+
+/// A copy of an AST JSON value whose `Text` nodes have no spaces or tabs at the start of a line, without the `Text`
+/// nodes that become empty (FMT-13).
+pub fn without_line_indentation(value: &serde_json::Value) -> serde_json::Value {
+    let is_text = |value: &serde_json::Value| value.get("type").and_then(serde_json::Value::as_str) == Some("Text");
+    match value {
+        serde_json::Value::Array(items) => serde_json::Value::Array(
+            items
+                .iter()
+                .map(without_line_indentation)
+                .filter(|item| !(is_text(item) && item.get("value").and_then(serde_json::Value::as_str) == Some("")))
+                .collect(),
+        ),
+        serde_json::Value::Object(map) => {
+            let text = is_text(value);
+            serde_json::Value::Object(
+                map.iter()
+                    .map(|(key, field)| match field {
+                        serde_json::Value::String(value) if text && key == "value" => (
+                            key.clone(),
+                            serde_json::Value::String(
+                                value
+                                    .split('\n')
+                                    .map(|line| line.trim_start_matches([' ', '\t']))
+                                    .collect::<Vec<_>>()
+                                    .join("\n"),
+                            ),
+                        ),
+                        _ => (key.clone(), without_line_indentation(field)),
+                    })
+                    .collect(),
+            )
+        }
+        other => other.clone(),
+    }
+}
