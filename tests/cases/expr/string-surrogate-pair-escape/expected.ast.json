@@ -1,0 +1,109 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Literal",
+                "kind": "string",
+                "value": "😀",
+                "span": [
+                  3,
+                  17
+                ]
+              }
+            ],
+            "span": [
+              3,
+              24
+            ]
+          }
+        ],
+        "span": [
+          3,
+          30
+        ]
+      },
+      "span": [
+        0,
+        31
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        31,
+        32
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "length",
+        "args": [
+          {
+            "type": "Literal",
+            "kind": "string",
+            "value": "😀",
+            "span": [
+              42,
+              56
+            ]
+          }
+        ],
+        "span": [
+          35,
+          57
+        ]
+      },
+      "span": [
+        32,
+        58
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        58,
+        59
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "aé𝄞b",
+        "span": [
+          62,
+          84
+        ]
+      },
+      "span": [
+        59,
+        85
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        85,
+        86
+      ]
+    }
+  ],
+  "comments": []
+}

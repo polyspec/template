@@ -167,13 +167,23 @@ pub struct LexerOptions {
     pub open_index: Option<usize>,
 }
 
-/// Reads a string literal starting at the quote at `start` (EXP-3). Returns the decoded value and the end offset.
+/// Reads a string literal starting at the quote at `start` (EXP-3). Returns the decoded value and the end offset. A
+/// `\uXXXX` escape of a surrogate that is not part of a pair is E_PARSE_INVALID_ESCAPE at that escape.
 pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usize), TemplateError> {
     let bytes = source.bytes();
     let quote = bytes[start];
     let mut decoded = String::new();
-    let mut pending_high: Option<u16> = None;
+    // A high surrogate escape and its offset, waiting for the low surrogate escape that must follow it.
+    let mut pending_high: Option<(u16, usize)> = None;
     let mut index = start + 1;
+    let lone = |at: usize| {
+        source.error(
+            ErrorCode::E_PARSE_INVALID_ESCAPE,
+            at,
+            at + 6,
+            "a \\u escape leaves a surrogate unpaired",
+        )
+    };
     loop {
         if index >= bytes.len() {
             return Err(source.error(
@@ -184,82 +194,72 @@ pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usiz
             ));
         }
         let byte = bytes[index];
+        let is_unicode_escape = byte == b'\\' && bytes.get(index + 1) == Some(&b'u');
+        if !is_unicode_escape && let Some((_, at)) = pending_high {
+            return Err(lone(at));
+        }
         if byte == quote {
-            flush_pending(&mut decoded, &mut pending_high);
             return Ok((decoded, index + 1));
         }
         if byte != b'\\' {
-            flush_pending(&mut decoded, &mut pending_high);
-            let char = source.text[index..].chars().next().expect("char");
+            let Some(char) = source.text.get(index..).and_then(|rest| rest.chars().next()) else {
+                return Err(source.error(ErrorCode::E_INTERNAL, index, index + 1, "a string literal splits a character"));
+            };
             decoded.push(char);
             index += char.len_utf8();
             continue;
         }
-        if bytes.get(index + 1) != Some(&b'u') {
-            flush_pending(&mut decoded, &mut pending_high);
-        }
         match bytes.get(index + 1) {
-            Some(b'\\') => {
-                decoded.push('\\');
-                index += 2;
-            }
-            Some(b'\'') => {
-                decoded.push('\'');
-                index += 2;
-            }
-            Some(b'"') => {
-                decoded.push('"');
-                index += 2;
-            }
-            Some(b'n') => {
-                decoded.push('\n');
-                index += 2;
-            }
-            Some(b'r') => {
-                decoded.push('\r');
-                index += 2;
-            }
-            Some(b't') => {
-                decoded.push('\t');
-                index += 2;
-            }
+            Some(b'\\') => decoded.push('\\'),
+            Some(b'\'') => decoded.push('\''),
+            Some(b'"') => decoded.push('"'),
+            Some(b'n') => decoded.push('\n'),
+            Some(b'r') => decoded.push('\r'),
+            Some(b't') => decoded.push('\t'),
             Some(b'u') => {
-                let hex = source.text.get(index + 2..index + 6).unwrap_or("");
-                if hex.len() != 4 || !hex.bytes().all(|b| b.is_ascii_hexdigit()) {
+                let Some(unit) = source.text.get(index + 2..index + 6).and_then(hex_unit) else {
                     return Err(source.error(ErrorCode::E_PARSE_INVALID_ESCAPE, index, index + 2, "invalid escape sequence"));
+                };
+                match (pending_high.take(), unit) {
+                    (Some((high, _)), 0xdc00..=0xdfff) => {
+                        let combined = 0x10000 + ((u32::from(high) - 0xd800) << 10) + (u32::from(unit) - 0xdc00);
+                        match char::from_u32(combined) {
+                            Some(char) => decoded.push(char),
+                            None => return Err(lone(index)),
+                        }
+                    }
+                    (Some((_, at)), _) => return Err(lone(at)),
+                    (None, 0xd800..=0xdbff) => pending_high = Some((unit, index)),
+                    (None, _) => match char::from_u32(u32::from(unit)) {
+                        Some(char) => decoded.push(char),
+                        None => return Err(lone(index)),
+                    },
                 }
-                let unit = u16::from_str_radix(hex, 16).expect("hex");
-                push_utf16_unit(&mut decoded, &mut pending_high, unit);
                 index += 6;
+                continue;
             }
             _ => return Err(source.error(ErrorCode::E_PARSE_INVALID_ESCAPE, index, index + 2, "invalid escape sequence")),
         }
+        index += 2;
     }
 }
 
-// Appends a UTF-16 code unit. A high surrogate waits for the next unit; a following low surrogate
-// combines with it into one code point. A lone surrogate becomes U+FFFD because a Rust string
-// cannot hold it.
-fn push_utf16_unit(decoded: &mut String, pending_high: &mut Option<u16>, unit: u16) {
-    if let Some(high) = pending_high.take() {
-        if (0xdc00..=0xdfff).contains(&unit) {
-            let combined = 0x10000 + (((high as u32) - 0xd800) << 10) + (unit as u32 - 0xdc00);
-            decoded.push(char::from_u32(combined).unwrap_or('\u{fffd}'));
-            return;
-        }
-        decoded.push('\u{fffd}');
+/// The code unit of four ASCII hexadecimal digits, or None.
+fn hex_unit(hex: &str) -> Option<u16> {
+    if hex.len() != 4 {
+        return None;
     }
-    if (0xd800..=0xdbff).contains(&unit) {
-        *pending_high = Some(unit);
-        return;
+    let mut unit: u16 = 0;
+    for digit in hex.bytes() {
+        let value = match digit {
+            b'0'..=b'9' => digit - b'0',
+            b'a'..=b'f' => digit - b'a' + 10,
+            b'A'..=b'F' => digit - b'A' + 10,
+            _ => return None,
+        };
+        unit = unit * 16 + u16::from(value);
     }
-    decoded.push(char::from_u32(unit as u32).unwrap_or('\u{fffd}'));
-}
-
-fn flush_pending(decoded: &mut String, pending_high: &mut Option<u16>) {
-    if pending_high.take().is_some() {
-        decoded.push('\u{fffd}');
-    }
+    Some(unit)
 }
 
 /// Expression lexer over the source text from a start offset.

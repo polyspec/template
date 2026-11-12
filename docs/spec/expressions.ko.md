@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-expressions -->
-<!-- source-sha256: dfbe8f24e858f22f665c221ac200dd2907ef32e97d235e3ca2727086fe6e919d -->
+<!-- source-sha256: 78213c2204ef36a438c502842d2970d2967c2faf67b156bcb0036670df2cd68a -->
 # 표현식
 
 [English](/spec/expressions).
@@ -22,7 +22,7 @@
 
 - **EXP-2** 표의 형태와 맞지 않는 NUMBER 토큰은 E_PARSE_INVALID_NUMBER이다. `1.`, `.5`, `1e`, `0x1F`, `1_000`이 여기에 해당한다. NUMBER 토큰의 값은 가장 가까운 IEEE 754 double이며 `1e3`의 값은 1000이다.
 
-- **EXP-3** STRING 토큰은 이스케이프 `\\`, `\'`, `\"`, `\n`, `\r`, `\t`, 그리고 16진 네 자리의 `\uXXXX`를 인식한다. UTF-16 서로게이트 쌍을 이루는 연속한 두 `\uXXXX`는 하나의 코드포인트가 된다. 그런 쌍에 속하지 않는 서로게이트(U+D800~U+DFFF)의 `\uXXXX`는 U+FFFD가 되므로, 디코딩한 문자열은 항상 유효한 유니코드 텍스트다. `\` 뒤의 다른 문자는 E_PARSE_INVALID_ESCAPE이다. 닫는 따옴표 전에 소스 끝에 도달하는 STRING 토큰은 여는 따옴표 위치에서 E_PARSE_UNTERMINATED_STRING이다. 문자열 뒤에 닫는 구분자가 없으면 태그 본문은 소스 끝까지 이어진다.
+- **EXP-3** STRING 토큰은 이스케이프 `\\`, `\'`, `\"`, `\n`, `\r`, `\t`, 그리고 16진 네 자리의 `\uXXXX`를 인식한다. UTF-16 서로게이트 쌍을 이루는 연속한 두 `\uXXXX`는 하나의 코드포인트가 된다. 그런 쌍에 속하지 않는 서로게이트(U+D800~U+DFFF)의 `\uXXXX`는 그 이스케이프 위치에서 E_PARSE_INVALID_ESCAPE이므로, 디코딩한 문자열은 항상 유효한 유니코드 텍스트이며 이스케이프가 적은 코드포인트만 담는다. 이유: 서로게이트를 U+FFFD로 바꾸면 코드포인트를 적지 않은 입력이 그럴듯한 텍스트가 된다. `\` 뒤의 다른 문자는 E_PARSE_INVALID_ESCAPE이다. 닫는 따옴표 전에 소스 끝에 도달하는 STRING 토큰은 여는 따옴표 위치에서 E_PARSE_UNTERMINATED_STRING이다. 문자열 뒤에 닫는 구분자가 없으면 태그 본문은 소스 끝까지 이어진다.
 
 - **EXP-4** `true`, `false`, `null` 토큰은 리터럴이다. 철자는 대소문자를 구분하며 `True`와 `NULL`은 IDENT 토큰이다.
 
