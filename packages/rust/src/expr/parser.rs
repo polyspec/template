@@ -113,6 +113,11 @@ impl<'a> ExpressionParser<'a> {
         self.lexer.next_token()
     }
 
+    /// E_INTERNAL at a token: a broken invariant of the lexer or the parser.
+    fn internal(&self, token: &Token, message: &str) -> TemplateError {
+        self.lexer.error(ErrorCode::E_INTERNAL, token.start, token.end, message)
+    }
+
     /// The error for a token the grammar does not accept.
     pub fn unexpected(&self, token: &Token) -> TemplateError {
         if let (Some(open), Some(close)) = (self.options.open_index, self.options.close)
@@ -157,7 +162,10 @@ impl<'a> ExpressionParser<'a> {
         if token.kind == TokenType::Eof {
             return Err(self.unexpected(&token));
         }
-        let close = self.options.close.expect("close delimiter") as char;
+        // A tag body is parsed with its close delimiter; only a standalone expression has none and ends at Eof.
+        let Some(close) = self.options.close.map(char::from) else {
+            return Err(self.internal(&token, "a tag body has no close delimiter"));
+        };
         let mut end = 0;
         for k in 0..self.options.close_count {
             let part = self.peek()?;
@@ -387,9 +395,11 @@ impl<'a> ExpressionParser<'a> {
                     args,
                     span: self.span(start, close.end),
                 }
-            } else if after.kind == TokenType::DotIdent && LoopMetaField::from_name(&after.value[1..]).is_some() {
+            } else if let Some(field) = (after.kind == TokenType::DotIdent)
+                .then(|| after.value.get(1..).and_then(LoopMetaField::from_name))
+                .flatten()
+            {
                 self.next_token()?;
-                let field = LoopMetaField::from_name(&after.value[1..]).expect("field");
                 Expr::LoopMeta {
                     r#loop: first.value,
                     field,
@@ -491,9 +501,12 @@ impl<'a> ExpressionParser<'a> {
             }
             TokenType::Str => {
                 self.next_token()?;
+                let Some(decoded) = token.decoded.clone() else {
+                    return Err(self.internal(&token, "the lexer decodes every string token"));
+                };
                 Ok(Expr::Literal {
                     kind: "string".to_string(),
-                    value: LiteralValue::String(token.decoded.expect("the lexer decodes every string token")),
+                    value: LiteralValue::String(decoded),
                     span: self.span(token.start, token.end),
                 })
             }

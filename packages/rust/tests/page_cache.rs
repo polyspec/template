@@ -1,3 +1,8 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 use polyspec_template::page_cache::PageCache;
 
 /// RT-65: a positive TTL expires after that many seconds; 0 and null mean forever.

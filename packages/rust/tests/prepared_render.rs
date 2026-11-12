@@ -1,5 +1,11 @@
 //! RT-62: a prepared render renders identical bytes on every call, and render is prepare(...).render().
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::artifact::load_artifact;

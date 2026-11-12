@@ -2,6 +2,12 @@
 //! directory that holds no file of the repository. This file holds one test, because the working directory belongs to the
 //! whole test process.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::decode_template;
 
 #[test]

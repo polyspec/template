@@ -164,7 +164,11 @@ fn locate(file: &str, root: Option<&str>) -> (PathBuf, PathBuf, String) {
             Err(error) => usage(&format!("cannot resolve --root {root}: {error}")),
         },
         None => match std::fs::canonicalize(file) {
-            Ok(path) => path.parent().map(Path::to_path_buf).unwrap_or_else(|| PathBuf::from(".")),
+            Ok(path) => match path.parent() {
+                Some(parent) => parent.to_path_buf(),
+                // CNF-4: a FILE that is the file system root has no directory; the root is the current directory.
+                None => PathBuf::from("."),
+            },
             // A FILE that cannot be resolved is read from its joined path below, where read_source reports the error.
             Err(_) => PathBuf::from("."),
         },
@@ -219,7 +223,11 @@ fn main() {
             let options = FormatOptions {
                 name,
                 delimiters,
-                indent: indent.map_or(defaults.indent.clone(), |Indent(unit)| unit),
+                // CNF-4: without --indent the default indent unit.
+                indent: match indent {
+                    Some(Indent(unit)) => unit,
+                    None => defaults.indent.clone(),
+                },
                 ..defaults
             };
             match format_bytes(&source, &options) {

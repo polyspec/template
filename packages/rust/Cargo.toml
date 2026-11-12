@@ -47,10 +47,11 @@ required-features = ["__test_support"]
 [lints]
 workspace = true
 
-# The lints of the workspace, which make lint-rust runs with cargo clippy (T27.1-64, kit K1050): every warning fails, no
-# unsafe code (config/cargo.schema.json), and no hidden error (P8): a dropped must_use value, a `let _` of a must_use or
-# untyped value, a map_err that ignores its error and an allow attribute without its reason; clippy.toml of the root
-# disallows Result::ok and the unwrap_or family.
+# The lints of the workspace, which make lint-rust runs with cargo clippy (T27.1-64, kit K1050, R-1): every warning fails,
+# no unsafe code (config/cargo.schema.json), and no hidden error (P8): a dropped must_use value, a `let _` of a must_use or
+# untyped value, a map_err that ignores its error, unwrap and expect, a cast that can truncate, wrap or lose the sign, and
+# an allow attribute without its reason, which names the rule that permits the use; clippy.toml of the root disallows
+# Result::ok and the methods that turn an absence or a failure into a value.
 [workspace]
 
 [workspace.lints.rust]
@@ -64,6 +65,11 @@ allow_attributes_without_reason = "deny"
 let_underscore_must_use = "deny"
 let_underscore_untyped = "deny"
 map_err_ignore = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+cast_possible_truncation = "deny"
+cast_possible_wrap = "deny"
+cast_sign_loss = "deny"
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }

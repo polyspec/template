@@ -1,6 +1,12 @@
 //! Host argument form (VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19),
 //! with the shared fixture of tests/fixtures/native-object/host-values.json.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::{AstProgram, EngineOptions, HostError, MapLoader, OrderedMap, RenderOptions, RenderTarget, TemplateObject, Value};

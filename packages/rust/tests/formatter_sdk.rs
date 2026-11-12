@@ -1,4 +1,10 @@
 //! FMT-16: formatter options, success and error data are public SDK values.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 mod common;
 
 use polyspec_template::{FormatError, FormatErrorReason, FormatOptions, IndentUnit, TemplateBlocks, format};
@@ -52,7 +58,11 @@ fn public_formatter_preserves_shared_results() {
     assert!(!data.cases.is_empty());
     for item in data.cases {
         let options = FormatOptions {
-            name: item.options.name.unwrap_or_else(|| "template.tpl".into()),
+            // The fixture names a template only where the case depends on the name.
+            name: match item.options.name {
+                Some(name) => name,
+                None => "template.tpl".into(),
+            },
             delimiters: item.options.delimiters,
             range: item.options.range.map(|range| range.start..range.end),
             indent: match item.options.indent {

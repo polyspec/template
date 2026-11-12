@@ -2,6 +2,12 @@
 //! serial number and file index, which it reads while the file is open, and closes the file once it has read it, so a
 //! loader that read many templates holds no descriptor of them. The test is the only one of its binary, so no other
 //! test opens a file while it counts the descriptors of the process.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 #![cfg(unix)]
 
 use polyspec_template::{FsLoader, Loader};

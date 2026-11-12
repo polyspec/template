@@ -7,7 +7,7 @@ use crate::functions::{FunctionContext, builtins, to_number};
 use crate::render::context::{Frame, RenderContext};
 use crate::value::bind::bind_value;
 use crate::value::number::MAX_SAFE;
-use crate::value::{HostError, MAX_DEPTH, StringifyError, Value, compare_values, loose_equals, strict_equals, stringify};
+use crate::value::{HostError, MAX_DEPTH, StringifyError, Value, absent_is_null, compare_values, loose_equals, strict_equals, stringify};
 use std::cmp::Ordering;
 
 /// One iterable key and value pair.
@@ -121,9 +121,9 @@ impl RuntimeBindings {
                     let key = self.stringify(context, left, frame, span)?;
                     Ok(Value::Bool(map.contains_key(&key)))
                 }
-                value if value.is_string() => {
+                Value::Str(text) | Value::Safe(text) => {
                     let needle = self.stringify(context, left, frame, span)?;
-                    Ok(Value::Bool(value.as_text().unwrap_or("").contains(&needle)))
+                    Ok(Value::Bool(text.contains(&needle)))
                 }
                 _ => Err(self.error(
                     context,
@@ -286,15 +286,12 @@ impl RuntimeBindings {
         match container {
             Value::Map(map) => {
                 if let Some(text) = key.as_text() {
-                    return Ok(map.get(text).cloned().unwrap_or(Value::Null));
+                    return Ok(absent_is_null(map.get(text)));
                 }
                 if let Value::Number(number) = key
                     && number.fract() == 0.0
                 {
-                    return Ok(map
-                        .get(&crate::value::number::number_to_string(*number))
-                        .cloned()
-                        .unwrap_or(Value::Null));
+                    return Ok(absent_is_null(map.get(&crate::value::number::number_to_string(*number))));
                 }
                 Ok(Value::Null)
             }
@@ -305,11 +302,9 @@ impl RuntimeBindings {
                 let position: Option<usize> = match key {
                     Value::Number(number) if number.fract() == 0.0 && *number >= 0.0 && *number < MAX_SAFE => list_index(*number),
                     other => match other.as_text() {
-                        Some(text) if is_index_text(text) => match text.parse::<usize>() {
-                            Ok(position) => Some(position),
-                            // EXP-19: digits beyond usize are an index beyond every list.
-                            Err(_) => None,
-                        },
+                        // EXP-19: digits beyond usize are an index beyond every list.
+                        #[allow(clippy::disallowed_methods, reason = "EXP-19: an index text beyond usize names no element")]
+                        Some(text) if is_index_text(text) => text.parse::<usize>().ok(),
                         _ => None,
                     },
                 };
@@ -326,7 +321,7 @@ impl RuntimeBindings {
                     .member(name)
                     .and_then(|value| value.map(|value| bind_value(&value)).transpose().map_err(HostError::Data))
                 {
-                    Ok(value) => Ok(value.unwrap_or(Value::Null)),
+                    Ok(value) => Ok(absent_is_null(value.as_ref())),
                     Err(HostError::Data(error)) => Err(self.error(context, frame, span, error.code, error.message)),
                     Err(HostError::Failed(message)) => Err(self.error(
                         context,
@@ -503,10 +498,8 @@ fn list_index(number: f64) -> Option<usize> {
         reason = "EXP-19: the caller checked an integral number from 0 to 2^53, which u64 holds exactly"
     )]
     let index = number as u64;
-    match usize::try_from(index) {
-        Ok(index) => Some(index),
-        Err(_) => None,
-    }
+    #[allow(clippy::disallowed_methods, reason = "EXP-19: an index beyond usize names no element")]
+    usize::try_from(index).ok()
 }
 
 fn is_index_text(text: &str) -> bool {

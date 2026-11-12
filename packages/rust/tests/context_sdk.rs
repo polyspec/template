@@ -1,4 +1,10 @@
 //! RT-74, RT-22, RT-35, ERR-2: public render state works without a program.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 use polyspec_template::{DefineEntry, Env, ErrorCode, Frame, Limits, LineIndex, OrderedMap, RenderContext, RuntimeEnvironment};
 use std::collections::HashMap;
 use std::sync::Arc;

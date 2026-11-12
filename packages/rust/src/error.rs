@@ -313,11 +313,12 @@ pub fn internal_boundary<T, E: From<TemplateError>>(template: &str, operation: i
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(operation)) {
         Ok(result) => result,
         Err(payload) => {
-            let reason = payload
-                .downcast_ref::<&str>()
-                .map(|text| (*text).to_string())
-                .or_else(|| payload.downcast_ref::<String>().cloned())
-                .unwrap_or_else(|| "a panic without a message".to_string());
+            // ERR-13: the message of the panic when it has one; a payload of another type has no text to report.
+            let reason = match (payload.downcast_ref::<&str>(), payload.downcast_ref::<String>()) {
+                (Some(text), _) => (*text).to_string(),
+                (None, Some(text)) => text.clone(),
+                (None, None) => "a panic without a message".to_string(),
+            };
             Err(TemplateError::without_position(ErrorCode::E_INTERNAL, template, format!("internal failure: {reason}")).into())
         }
     }

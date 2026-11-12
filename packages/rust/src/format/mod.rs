@@ -192,8 +192,8 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Format
     let after = analyze(formatted.as_bytes(), name, &parse_options)
         .map_err(|error| invariant(format!("formatted text does not parse: {error}")))?
         .ast;
-    let before = serde_json::to_value(&analysis.ast).expect("AST JSON");
-    let after = serde_json::to_value(&after).expect("AST JSON");
+    let before = serde_json::to_value(&analysis.ast).map_err(|error| invariant(format!("the AST has no JSON form: {error}")))?;
+    let after = serde_json::to_value(&after).map_err(|error| invariant(format!("the AST has no JSON form: {error}")))?;
     let same = if options.indent.is_none() {
         same_tree(&before, &after)
     } else {

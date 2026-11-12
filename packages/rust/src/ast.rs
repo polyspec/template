@@ -352,7 +352,12 @@ impl Serialize for LiteralValue {
             LiteralValue::Null => serializer.serialize_none(),
             LiteralValue::Bool(value) => serializer.serialize_bool(*value),
             LiteralValue::Number(value) if value.fract() == 0.0 && value.abs() <= 9007199254740991.0 => {
-                serializer.serialize_i64(*value as i64)
+                #[allow(
+                    clippy::cast_possible_truncation,
+                    reason = "AST-8: an integral value within ±(2^53 − 1), which i64 holds exactly"
+                )]
+                let integer = *value as i64;
+                serializer.serialize_i64(integer)
             }
             LiteralValue::Number(value) => serializer.serialize_f64(*value),
             LiteralValue::String(value) => serializer.serialize_str(value),
@@ -621,6 +626,10 @@ impl std::error::Error for AstDecodeError {
 // The validator of AST_SCHEMA, built on the first decode.
 static VALIDATOR: std::sync::OnceLock<jsonschema::Validator> = std::sync::OnceLock::new();
 
+#[allow(
+    clippy::expect_used,
+    reason = "AST-10: AST_SCHEMA is a constant of the crate, a draft 7 schema that every decode test compiles"
+)]
 fn validator() -> &'static jsonschema::Validator {
     VALIDATOR.get_or_init(|| {
         let schema: serde_json::Value = serde_json::from_str(AST_SCHEMA).expect("AST_SCHEMA is JSON");

@@ -1,4 +1,10 @@
 //! LEX-24: the public source context preserves UTF-8 and native byte indexes.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 mod common;
 
 use polyspec_template::{ErrorCode, LineIndex, Source, Span};

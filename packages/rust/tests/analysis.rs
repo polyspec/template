@@ -1,4 +1,10 @@
 //! EDT-10: public analysis preserves AST, tags and classified byte ranges.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 mod common;
 
 use polyspec_template::{ErrorCode, ParseOptions, RequestError, TemplateAnalysis, analyze, parse};

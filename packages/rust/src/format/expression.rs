@@ -43,7 +43,11 @@ pub fn join_tokens(tokens: &[ExpressionToken]) -> String {
         .enumerate()
         .map(|(index, token)| token.text == "!" || (token.text == "-" && !ends_operand(index.checked_sub(1).map(|i| &tokens[i]))))
         .collect();
-    let mut output = tokens.first().map_or(String::new(), |token| token.text.to_string());
+    // No token joins to the empty text.
+    let mut output = match tokens.first() {
+        Some(token) => token.text.to_string(),
+        None => String::new(),
+    };
     for index in 1..tokens.len() {
         output.push_str(separator(&tokens[index - 1], &tokens[index], unary[index - 1]));
         output.push_str(tokens[index].text);

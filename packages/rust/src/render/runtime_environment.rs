@@ -18,6 +18,7 @@ pub struct RuntimeEnvironment {
 impl RuntimeEnvironment {
     /// Creates runtime services from explicit limits and host functions. Each host function is added as `register` adds
     /// it (RT-5, FUN-43, FUN-44): a name that is no identifier or a built-in is an argument error.
+    #[allow(clippy::disallowed_methods, reason = "RT-5: absent limits are the default limits")]
     pub fn new(limits: Option<Limits>, host_functions: HashMap<String, HostFunction>) -> Result<RuntimeEnvironment, ArgumentError> {
         let mut runtime = RuntimeEnvironment {
             limits: limits.unwrap_or_default(),

@@ -1,4 +1,10 @@
 //! Native formatter harness wiring; the default SDK exposes only formatting contracts.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 #![cfg(feature = "__test_support")]
 
 use polyspec_template::__test_support::{without_line_indentation, without_spans};

@@ -251,7 +251,11 @@ impl AstProgram {
             None => DEFAULT_DELIMITERS,
         };
         Ok(AstProgram {
-            loader: options.loader.unwrap_or_else(|| Box::new(MapLoader::new())),
+            // RT-5: a program without a loader has an empty map loader.
+            loader: match options.loader {
+                Some(loader) => loader,
+                None => Box::new(MapLoader::new()),
+            },
             runtime: RuntimeEnvironment::new(options.limits, options.functions)?,
             delimiters,
             artifact_refresh: options.artifact_refresh,

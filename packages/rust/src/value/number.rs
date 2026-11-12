@@ -8,8 +8,19 @@ pub const MAX_SAFE: f64 = 9007199254740991.0;
 pub fn shortest_digits(value: f64) -> (bool, String, i32) {
     let negative = value.is_sign_negative();
     let text = format!("{:e}", value.abs());
-    let (mantissa, exponent) = text.split_once('e').expect("exponential form");
-    let exponent: i32 = exponent.parse().expect("exponent");
+    // `{:e}` writes `<mantissa>e<exponent>` with an optional `-` and at most three exponent digits (VAL-10).
+    let (mantissa, exponent_text) = match text.split_once('e') {
+        Some(parts) => parts,
+        None => (text.as_str(), "0"),
+    };
+    let (sign, exponent_digits) = match exponent_text.strip_prefix('-') {
+        Some(digits) => (-1, digits),
+        None => (1, exponent_text),
+    };
+    let exponent = sign
+        * exponent_digits
+            .bytes()
+            .fold(0i32, |number, digit| number * 10 + i32::from(digit - b'0'));
     let mut digits: String = mantissa.chars().filter(|c| *c != '.').collect();
     while digits.len() > 1 && digits.ends_with('0') {
         digits.pop();
@@ -18,6 +29,12 @@ pub fn shortest_digits(value: f64) -> (bool, String, i32) {
 }
 
 /// VAL-9: ECMAScript Number::toString.
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
+    reason = "VAL-10: at most 17 digits and an exponent within ±325; each count is cast where the branch makes it positive"
+)]
 pub fn number_to_string(value: f64) -> String {
     if value == 0.0 {
         return "0".to_string();
@@ -43,6 +60,12 @@ pub fn number_to_string(value: f64) -> String {
 }
 
 /// Positional decimal expansion without exponent.
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
+    reason = "FUN-21: at most 17 digits and an exponent within ±325; each count is cast where the branch makes it positive"
+)]
 pub fn positional(value: f64) -> (bool, String, String) {
     if value == 0.0 {
         return (false, "0".to_string(), String::new());
@@ -75,10 +98,10 @@ fn increment_digits(digits: &str) -> String {
             chars[index] = b'0';
         } else {
             chars[index] += 1;
-            return String::from_utf8(chars).expect("digits");
+            return chars.into_iter().map(char::from).collect();
         }
     }
-    format!("1{}", String::from_utf8(chars).expect("digits"))
+    format!("1{}", chars.into_iter().map(char::from).collect::<String>())
 }
 
 /// FUN-22: rounds the positional digits to `decimals` fraction digits, half away from zero.
@@ -116,14 +139,15 @@ pub fn format_number(value: f64, decimals: usize, dec: &str, thousands: &str) ->
     if negative && !all_zero { format!("-{text}") } else { text }
 }
 
-/// FUN-25: the rounded value as a number.
-pub fn round_number(value: f64, decimals: usize) -> f64 {
+/// FUN-25: the rounded value as a number. The digits of [`round_decimal`] always spell a decimal literal; a failure
+/// to read them back is an invariant failure that the caller reports as E_INTERNAL.
+pub fn round_number(value: f64, decimals: usize) -> Result<f64, std::num::ParseFloatError> {
     let (negative, integer, fraction) = round_decimal(value, decimals);
     let text = if fraction.is_empty() {
         integer
     } else {
         format!("{integer}.{fraction}")
     };
-    let result: f64 = text.parse().expect("round_decimal writes a decimal literal");
-    if negative && result != 0.0 { -result } else { result }
+    let result: f64 = text.parse()?;
+    Ok(if negative && result != 0.0 { -result } else { result })
 }

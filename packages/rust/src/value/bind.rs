@@ -70,7 +70,7 @@ fn bind_json_at(input: &serde_json::Value, level: usize) -> Result<Value, BindEr
             // With arbitrary precision the number keeps its literal text; the nearest double decides (VAL-2).
             let literal = number.to_string();
             // serde_json writes a JSON number literal, which f64 parses; an overflowing literal is infinity, which check_number rejects.
-            let value: f64 = literal.parse().expect("serde_json writes a JSON number literal, which f64 parses");
+            let value = json_number(&literal)?;
             check_number(value).map(Value::Number)
         }
         serde_json::Value::String(text) => Ok(Value::text(text.clone())),
@@ -91,6 +91,15 @@ fn bind_json_at(input: &serde_json::Value, level: usize) -> Result<Value, BindEr
             Ok(Value::map(map))
         }
     }
+}
+
+/// The nearest double of a JSON number literal; an overflowing literal is infinity, which check_number rejects (VAL-2). A
+/// literal that f64 does not read is a broken invariant of the JSON reader, E_INTERNAL.
+fn json_number(literal: &str) -> Result<f64, BindError> {
+    literal.parse::<f64>().map_err(|error| BindError {
+        code: ErrorCode::E_INTERNAL,
+        message: format!("the JSON number {literal} is not a number literal: {error}"),
+    })
 }
 
 /// Binds a value that must be a map. A null value is an empty map (RT-4).
@@ -151,22 +160,20 @@ pub fn bind_values(input: &OrderedMap) -> Result<OrderedMap, BindError> {
 /// Converts a `serde_json::Value` that generated code built from template values back into a
 /// template value. It is not host binding: the value has already passed binding or comes from
 /// template operations, so the checks of VAL-2 and VAL-20 do not apply.
-pub fn value_from_json(input: &serde_json::Value) -> Value {
-    match input {
+pub fn value_from_json(input: &serde_json::Value) -> Result<Value, BindError> {
+    Ok(match input {
         serde_json::Value::Null => Value::Null,
         serde_json::Value::Bool(value) => Value::Bool(*value),
-        serde_json::Value::Number(number) => Value::Number(
-            number
-                .to_string()
-                .parse::<f64>()
-                .expect("serde_json writes a JSON number literal, which f64 parses"),
-        ),
+        serde_json::Value::Number(number) => Value::Number(json_number(&number.to_string())?),
         serde_json::Value::String(text) => Value::text(text.clone()),
-        serde_json::Value::Array(items) => Value::list(items.iter().map(value_from_json).collect()),
-        serde_json::Value::Object(entries) => {
-            Value::map(entries.iter().map(|(key, value)| (key.clone(), value_from_json(value))).collect())
-        }
-    }
+        serde_json::Value::Array(items) => Value::list(items.iter().map(value_from_json).collect::<Result<_, _>>()?),
+        serde_json::Value::Object(entries) => Value::map(
+            entries
+                .iter()
+                .map(|(key, value)| Ok((key.clone(), value_from_json(value)?)))
+                .collect::<Result<_, BindError>>()?,
+        ),
+    })
 }
 
 /// The JSON form of a template value (the form of VAL-21 without native objects); safe strings become plain strings. A

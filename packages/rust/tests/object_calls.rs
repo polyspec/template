@@ -1,6 +1,12 @@
 //! Native objects, host function results and the internal error boundary (VAL-18 to VAL-20,
 //! FUN-45, FUN-46, ERR-13).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{
     AstProgram, BindError, EngineOptions, ErrorCode, HostError, MapLoader, OrderedMap, ParseOptions, RenderOptions, RenderTarget,
     TemplateError, TemplateObject, Value, parse,

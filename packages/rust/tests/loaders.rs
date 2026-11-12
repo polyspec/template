@@ -2,6 +2,12 @@
 //! version (RT-10), and a path resolves against the directory of the current template and fails when it leaves the root
 //! (RT-8).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{
     AstProgram, EngineOptions, ErrorCode, Loaded, Loader, MapLoader, ParseOptions, RenderOptions, RenderTarget, parse, resolve_path,
 };
@@ -14,7 +20,7 @@ fn public_parsed_template_data_and_cache_identity() {
     for from_ast in [false, true] {
         let mut loader = MapLoader::new();
         if from_ast {
-            loader.set_ast("a.tpl", tree.clone());
+            loader.set_ast("a.tpl", tree.clone()).expect("set_ast");
         } else {
             loader.set("a.tpl", source);
         }
@@ -91,7 +97,7 @@ fn map_loader_versions_source_and_ast_replacements_by_content() {
         for text in ["first", "second", "second"] {
             let tree = parse(text.as_bytes(), "a.tpl", &ParseOptions::default()).unwrap();
             if ast {
-                loader.set_ast("a.tpl", tree.clone());
+                loader.set_ast("a.tpl", tree.clone()).expect("set_ast");
             } else {
                 loader.set("a.tpl", text);
             }

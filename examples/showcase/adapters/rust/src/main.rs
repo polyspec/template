@@ -190,7 +190,7 @@ fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
             .map_err(|error| format!("compiled AST/{name}: {error}"))?;
         let ast = polyspec_template::decode_template(&text)
             .map_err(|error| format!("compiled AST/{name}: {error}"))?;
-        loader.set_ast(&name, ast);
+        loader.set_ast(&name, ast)?;
     }
     Ok(loader)
 }

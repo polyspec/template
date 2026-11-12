@@ -1,5 +1,11 @@
 //! Parser behavior that the fixtures do not cover directly.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{ErrorCode, Node, ParseOptions, RequestError, TemplateError, parse};
 
 fn code_of(source: &str, options: &ParseOptions) -> Option<ErrorCode> {

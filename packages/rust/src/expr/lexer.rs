@@ -306,13 +306,18 @@ impl<'a> ExpressionLexer<'a> {
             let token = self.read()?;
             self.lookahead = Some(token);
         }
-        Ok(self.lookahead.as_ref().expect("lookahead"))
+        match &self.lookahead {
+            Some(token) => Ok(token),
+            None => Err(self.error(ErrorCode::E_INTERNAL, self.index, self.index, "the lookahead token is missing")),
+        }
     }
 
     /// Consumes and returns the next token.
     pub fn next_token(&mut self) -> Result<Token, TemplateError> {
         self.peek()?;
-        let token = self.lookahead.take().expect("lookahead");
+        let Some(token) = self.lookahead.take() else {
+            return Err(self.error(ErrorCode::E_INTERNAL, self.index, self.index, "the lookahead token is missing"));
+        };
         self.previous = Some(token.clone());
         if matches!(token.kind, TokenType::LParen | TokenType::LBracket) {
             self.nesting_depth += 1;
@@ -331,7 +336,11 @@ impl<'a> ExpressionLexer<'a> {
 
     /// Byte offset after the last consumed token.
     pub fn consumed_end(&self) -> usize {
-        self.previous.as_ref().map_or(self.index, |token| token.end)
+        match &self.previous {
+            Some(token) => token.end,
+            // No token consumed yet: the expression starts at the current offset.
+            None => self.index,
+        }
     }
 
     fn token(&self, kind: TokenType, start: usize, end: usize) -> Token {
@@ -417,7 +426,9 @@ impl<'a> ExpressionLexer<'a> {
                 return Ok(self.token(*kind, start, self.index));
             }
         }
-        let char = self.source.text[start..].chars().next().expect("char");
+        let Some(char) = self.source.text.get(start..).and_then(|rest| rest.chars().next()) else {
+            return Err(self.error(ErrorCode::E_INTERNAL, start, start, "no character at the offset of a token"));
+        };
         Err(self.error(
             ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
             start,
@@ -483,7 +494,11 @@ impl<'a> ExpressionLexer<'a> {
             self.index = start + 3;
             return Ok(self.token(TokenType::Spread, start, self.index));
         }
-        let next = bytes.get(start + 1).copied().unwrap_or(0);
+        // The end of the source is no identifier start and no digit, like any other byte that follows the dot.
+        let next = match bytes.get(start + 1) {
+            Some(byte) => *byte,
+            None => 0,
+        };
         let adjacent = self
             .previous
             .as_ref()

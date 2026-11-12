@@ -1,5 +1,11 @@
 //! Loader failures (RT-9, RT-10, ERR-6, ERR-9) and JSON text that is not one document (VAL-12).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{
     AstProgram, EngineOptions, ErrorCode, FsLoader, Loaded, Loader, OrderedMap, RenderOptions, RenderTarget, TemplateError, read_json,
 };

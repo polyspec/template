@@ -363,7 +363,7 @@ fn a_safe_string_is_its_text() {
 fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     let ast = crate::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse");
     let mut loader = MapLoader::new();
-    loader.set_ast("x.tpl", ast.clone());
+    loader.set_ast("x.tpl", ast.clone()).expect("set_ast");
     let engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()

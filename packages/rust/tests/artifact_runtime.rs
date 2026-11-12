@@ -1,6 +1,12 @@
 //! RT-56: the artifact that the build compiler wrote loads through load_artifact and renders with the bytes of its source.
 //! The fixture is the output of compileAst of tests/fixtures/artifact-runtime.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::{OrderedMap, RenderOptions, RenderTarget, Value, artifact::load_artifact};

@@ -5,6 +5,12 @@
 //! order of a bound map is not observable through the public interface of the crate, so the merge
 //! test checks the precedence of RT-26 through the output.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::{

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 // EXP-9: arithmetic-precedence verifies multiplicative precedence in the parsed tree and value.
 //! Expression fixtures: tokens, AST and evaluation (CNF-12 to CNF-14). Each vector is the trial `expressions::<name>`, as
 //! the suite unit expressions of config/parity.json reads the results; libtest has no tests made at run time, so the

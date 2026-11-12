@@ -57,10 +57,11 @@ fn sort_list(list: &[Value], key: Option<&str>) -> Result<Vec<Value>, FunctionEr
         return Err(type_error("sort requires all numbers or all strings"));
     }
     let mut sorted = keyed;
-    sorted.sort_by(|a, b| {
-        compare_values(&a.1, &b.1)
-            .expect("sort compares only numbers or only strings, checked above")
-            .then(a.0.cmp(&b.0))
+    // FUN-36: the keys are all numbers or all strings, checked above. A number pair without an order is a NaN, which no
+    // value holds (VAL-3); it stays in input order, like equal keys.
+    sorted.sort_by(|a, b| match compare_values(&a.1, &b.1) {
+        Some(order) => order.then(a.0.cmp(&b.0)),
+        None => a.0.cmp(&b.0),
     });
     Ok(sorted.into_iter().map(|(_, _, item)| item.clone()).collect())
 }
@@ -81,34 +82,41 @@ fn values(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Funct
     }
 }
 
+/// FUN-31: the element or the code point at one end, or `null` when the list or the string is empty.
+fn end_of(args: &[Value], name: &str, last: bool) -> Result<Value, FunctionError> {
+    let found = match &args[0] {
+        Value::List(list) => {
+            if last {
+                list.last().cloned()
+            } else {
+                list.first().cloned()
+            }
+        }
+        Value::Str(text) | Value::Safe(text) => {
+            let point = if last { text.chars().last() } else { text.chars().next() };
+            point.map(|point| Value::text(point.to_string()))
+        }
+        _ => return Err(type_error(format!("{name} requires a list or a string"))),
+    };
+    // The table of first and last: an empty list or string gives null.
+    Ok(match found {
+        Some(value) => value,
+        None => Value::Null,
+    })
+}
+
 fn first(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
-    match &args[0] {
-        Value::List(list) => Ok(list.first().cloned().unwrap_or(Value::Null)),
-        value if value.is_string() => Ok(value
-            .as_text()
-            .and_then(|t| t.chars().next())
-            .map(|c| Value::text(c.to_string()))
-            .unwrap_or(Value::Null)),
-        _ => Err(type_error("first requires a list or a string")),
-    }
+    end_of(args, "first", false)
 }
 
 fn last(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
-    match &args[0] {
-        Value::List(list) => Ok(list.last().cloned().unwrap_or(Value::Null)),
-        value if value.is_string() => Ok(value
-            .as_text()
-            .and_then(|t| t.chars().last())
-            .map(|c| Value::text(c.to_string()))
-            .unwrap_or(Value::Null)),
-        _ => Err(type_error("last requires a list or a string")),
-    }
+    end_of(args, "last", true)
 }
 
 fn reverse(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
     match &args[0] {
         Value::List(list) => Ok(Value::list(list.iter().rev().cloned().collect())),
-        value if value.is_string() => Ok(Value::text(value.as_text().unwrap_or("").chars().rev().collect::<String>())),
+        Value::Str(text) | Value::Safe(text) => Ok(Value::text(text.chars().rev().collect::<String>())),
         _ => Err(type_error("reverse requires a list or a string")),
     }
 }
@@ -117,10 +125,7 @@ fn slice(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Functi
     let value = &args[0];
     let (items, is_list): (Vec<Value>, bool) = match value {
         Value::List(list) => ((**list).clone(), true),
-        other if other.is_string() => (
-            other.as_text().unwrap_or("").chars().map(|c| Value::text(c.to_string())).collect(),
-            false,
-        ),
+        Value::Str(text) | Value::Safe(text) => (text.chars().map(|c| Value::text(c.to_string())).collect(), false),
         _ => return Err(type_error("slice requires a list or a string")),
     };
     // FUN-31 to FUN-33 in i128: the arguments are within ±(2^53 − 1) (FUN-50) and the length fits a usize, so no step

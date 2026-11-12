@@ -1,6 +1,12 @@
 //! RT-70: renders of one program may run at the same time and share only the templates that the program loaded. Eight
 //! threads render one program, each with its own data, and each render produces the output of its own data.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{AstProgram, EngineOptions, MapLoader, OrderedMap, RenderOptions, RenderTarget, Value};
 
 #[test]

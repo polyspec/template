@@ -37,8 +37,8 @@ fn format_number_rounds_half_away_from_zero_on_decimal_digits() {
     assert_eq!(format_number(12345.5, 0, ".", ","), "12,346");
     assert_eq!(format_number(1234567.891, 2, ",", "."), "1.234.567,89");
     assert_eq!(format_number(999.999, 2, ".", ","), "1,000.00");
-    assert_eq!(round_number(2.675, 2), 2.68);
-    assert_eq!(round_number(-2.5, 0), -3.0);
+    assert_eq!(round_number(2.675, 2).expect("round"), 2.68);
+    assert_eq!(round_number(-2.5, 0).expect("round"), -3.0);
 }
 
 /// EXP-33: only null, false, 0, -0, the empty string, the empty list and the empty map are falsy.

@@ -548,7 +548,9 @@ impl<'a> TemplateParser<'a> {
                 let test = parser.parse_expression()?;
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
                 self.collect(&parser);
-                let frame = self.frames.last_mut().expect("frame");
+                let Some(frame) = self.frames.last_mut() else {
+                    return Err(self.fail(ErrorCode::E_INTERNAL, context.start, context.start + 1, "the open block is missing"));
+                };
                 if let Node::If { branches, .. } = &mut frame.node {
                     branches.push(IfBranch {
                         test,
@@ -579,7 +581,9 @@ impl<'a> TemplateParser<'a> {
                     ));
                 }
                 let end = self.finish_tag(&context, self.expect_close_raw(&context, body_start)?)?;
-                let frame = self.frames.last_mut().expect("frame");
+                let Some(frame) = self.frames.last_mut() else {
+                    return Err(self.fail(ErrorCode::E_INTERNAL, context.start, context.start + 1, "the open block is missing"));
+                };
                 frame.has_else = true;
                 frame.bodies.push(Vec::new());
                 frame.current = frame.bodies.len() - 1;
@@ -595,7 +599,8 @@ impl<'a> TemplateParser<'a> {
                     ));
                 };
                 let end = self.finish_tag(&context, self.expect_close_raw(&context, body_start)?)?;
-                let node = close_frame(frame, end);
+                let node = close_frame(frame, end)
+                    .map_err(|message| self.fail(ErrorCode::E_INTERNAL, context.start, context.start + 1, message))?;
                 self.push_item(Item::Node(node));
                 end
             }
@@ -637,7 +642,14 @@ impl<'a> TemplateParser<'a> {
                 "delimiter directive is not the first tag",
             ));
         }
-        let sigil = sigil.expect("accepted tag sigil");
+        let Some(sigil) = sigil else {
+            return Err(self.fail(
+                ErrorCode::E_INTERNAL,
+                context.start,
+                context.start + 1,
+                "an accepted tag has no sigil",
+            ));
+        };
         let kind = syntax_kind(sigil, sigil == ":" && crate::parser::scanner::assignment_form(bytes, body_start));
         let tag_body_start = context.open + 1;
         let tag_body_end = self.close_start(&context, end);
@@ -918,54 +930,47 @@ impl<'a> TemplateParser<'a> {
 }
 
 /// Moves the bodies of a closed frame into its node.
-fn close_frame(frame: Frame, end: usize) -> Node {
+fn close_frame(frame: Frame, end: usize) -> Result<Node, &'static str> {
     let mut bodies = frame.bodies.into_iter();
+    // Every branch tag pushed one body, so a node has one body per branch; a missing body is a broken invariant.
+    let mut next_body = || match bodies.next() {
+        Some(items) => Ok(items_to_placeholder(items)),
+        None => Err("a block has fewer bodies than branches"),
+    };
     match frame.node {
         Node::If { mut branches, span, .. } => {
             for branch in branches.iter_mut() {
-                branch.body = items_to_placeholder(bodies.next().unwrap_or_default());
+                branch.body = next_body()?;
             }
-            let r#else = if frame.has_else {
-                Some(items_to_placeholder(bodies.next().unwrap_or_default()))
-            } else {
-                None
-            };
-            Node::If {
+            let r#else = if frame.has_else { Some(next_body()?) } else { None };
+            Ok(Node::If {
                 branches,
                 r#else,
                 span: [span[0], end],
-            }
+            })
         }
         Node::For { name, iter, span, .. } => {
-            let body = items_to_placeholder(bodies.next().unwrap_or_default());
-            let empty = if frame.has_else {
-                Some(items_to_placeholder(bodies.next().unwrap_or_default()))
-            } else {
-                None
-            };
-            Node::For {
+            let body = next_body()?;
+            let empty = if frame.has_else { Some(next_body()?) } else { None };
+            Ok(Node::For {
                 name,
                 iter,
                 body,
                 empty,
                 span: [span[0], end],
-            }
+            })
         }
         Node::IfBlock { id, span, .. } => {
-            let body = items_to_placeholder(bodies.next().unwrap_or_default());
-            let r#else = if frame.has_else {
-                Some(items_to_placeholder(bodies.next().unwrap_or_default()))
-            } else {
-                None
-            };
-            Node::IfBlock {
+            let body = next_body()?;
+            let r#else = if frame.has_else { Some(next_body()?) } else { None };
+            Ok(Node::IfBlock {
                 id,
                 body,
                 r#else,
                 span: [span[0], end],
-            }
+            })
         }
-        other => other,
+        other => Ok(other),
     }
 }
 

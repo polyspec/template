@@ -1,4 +1,10 @@
 //! EDT-11: prefix analysis preserves accepted ranges and the first parser error.
+
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 mod common;
 
 use polyspec_template::{ErrorCode, ParseOptions, RequestError, analyze_prefix};
@@ -82,10 +88,14 @@ fn public_prefix_analysis_preserves_shared_contexts() {
         );
         assert_eq!(tags, item.expected.tags, "{}", item.id);
         assert_eq!(tokens, item.expected.tokens, "{}", item.id);
-        let error=result.error.map_or(serde_json::Value::Null,|error|{
-            assert!(!error.message.is_empty());
-            serde_json::json!({"code":error.code,"template":error.template,"line":error.line,"col":error.col,"offset":error.offset,"end":error.end})
-        });
+        // The fixture writes null for a prefix without an error.
+        let error = match result.error {
+            None => serde_json::Value::Null,
+            Some(error) => {
+                assert!(!error.message.is_empty());
+                serde_json::json!({"code":error.code,"template":error.template,"line":error.line,"col":error.col,"offset":error.offset,"end":error.end})
+            }
+        };
         assert_eq!(error, item.expected.error, "{}", item.id);
     }
 }

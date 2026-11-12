@@ -68,7 +68,7 @@ pub fn indent_edits(
     let mut depth: isize = 0;
     let mut line_start = 0;
     loop {
-        while step < scan.steps.len() && scan.steps[step].index < line_start as isize {
+        while step < scan.steps.len() && scan.steps[step].index < signed(line_start) {
             depth += scan.steps[step].delta;
             step += 1;
         }
@@ -79,10 +79,14 @@ pub fn indent_edits(
         if !within(&scan.kept, line_start) {
             let blank = first == bytes.len() || bytes[first] == b'\n' || bytes[first] == b'\r';
             let mut level = depth + isize::from(within(&scan.inside, line_start));
-            if dedents.contains(&(first as isize)) {
+            if dedents.contains(&signed(first)) {
                 level -= 1;
             }
-            let indentation = if blank { String::new() } else { unit.repeat(level.max(0) as usize) };
+            let indentation = if blank {
+                String::new()
+            } else {
+                unit.repeat(level.max(0).cast_unsigned())
+            };
             let selected = range.is_none_or(|range| line_start >= range.start && line_start < range.end);
             if selected && text[line_start..first] != indentation {
                 edits.push(Edit {
@@ -143,11 +147,15 @@ impl<'a> Scanner<'a> {
 
     // The offset from which a change of depth applies to the line of a tag: before the line when the tag starts it.
     fn before_line(&self, index: usize) -> isize {
-        let line_start = self.text[..index].rfind('\n').map_or(0, |at| at + 1);
+        // A tag on the first line starts the text.
+        let line_start = match self.text[..index].rfind('\n') {
+            Some(at) => at + 1,
+            None => 0,
+        };
         if self.bytes[line_start..index].iter().all(|byte| matches!(byte, b' ' | b'\t')) {
-            line_start as isize - 1
+            signed(line_start) - 1
         } else {
-            index as isize
+            signed(index)
         }
     }
 
@@ -162,7 +170,7 @@ impl<'a> Scanner<'a> {
                 has_else: false,
             });
             if self.counted {
-                self.step(tag.end as isize, 1, false);
+                self.step(signed(tag.end), 1, false);
             }
             return Ok(());
         }
@@ -184,21 +192,31 @@ impl<'a> Scanner<'a> {
                     message: "a template block without an else branch must end with the HTML elements open at its start".to_string(),
                 });
             }
-            let block = self.blocks.pop().expect("block");
+            let Some(block) = self.blocks.pop() else {
+                return Err(IndentError {
+                    index: tag.start,
+                    message: "internal failure: the open block is missing".to_string(),
+                });
+            };
             // The close tag aligns with the start of its block; the elements that every branch opened apply after it.
-            let opened = end.len() as isize - block.start.len() as isize;
+            let opened = signed(end.len()) - signed(block.start.len());
             if opened != 0 {
                 let before = self.before_line(tag.start);
                 self.step(before, -opened, false);
-                self.step(tag.end as isize, opened, false);
+                self.step(signed(tag.end), opened, false);
             }
             if self.counted {
-                self.step(tag.start as isize, -1, true);
+                self.step(signed(tag.start), -1, true);
             }
             return Ok(());
         }
         let start = {
-            let block = self.blocks.last_mut().expect("block");
+            let Some(block) = self.blocks.last_mut() else {
+                return Err(IndentError {
+                    index: tag.start,
+                    message: "internal failure: the open block is missing".to_string(),
+                });
+            };
             block.branch_end = Some(end);
             if tag.kind == TagKind::Else {
                 block.has_else = true;
@@ -207,10 +225,10 @@ impl<'a> Scanner<'a> {
         };
         // The next branch starts from the elements open at the start of the block.
         let before = self.before_line(tag.start);
-        self.step(before, start.len() as isize - self.elements.len() as isize, false);
+        self.step(before, signed(start.len()) - signed(self.elements.len()), false);
         self.elements = start;
         if self.counted {
-            self.step(tag.start as isize, 0, true);
+            self.step(signed(tag.start), 0, true);
         }
         Ok(())
     }
@@ -306,9 +324,11 @@ impl<'a> Scanner<'a> {
                 continue;
             }
             if self.bytes[position..].starts_with(b"<!--") {
-                let end = self.text[position + 4..]
-                    .find("-->")
-                    .map_or(self.bytes.len(), |at| position + 4 + at + 3);
+                // FMT: an unterminated comment extends to the end of the text and is kept as written.
+                let end = match self.text[position + 4..].find("-->") {
+                    Some(at) => position + 4 + at + 3,
+                    None => self.bytes.len(),
+                };
                 self.kept.push(position..end);
                 position = self.skip_template_tags(end)?;
                 continue;
@@ -345,13 +365,17 @@ impl<'a> Scanner<'a> {
                     }
                     Some(_) => {}
                 }
-                self.step(position as isize, -1, true);
+                self.step(signed(position), -1, true);
                 self.elements.pop();
                 if KEPT.contains(&name.as_str())
                     && !self.elements.iter().any(|element| KEPT.contains(&element.name.as_str()))
                     && let Some(start) = kept_start.take()
                 {
-                    let line_end = self.text[position..].find('\n').map_or(self.bytes.len(), |at| position + at);
+                    // The last line ends at the end of the text.
+                    let line_end = match self.text[position..].find('\n') {
+                        Some(at) => position + at,
+                        None => self.bytes.len(),
+                    };
                     self.kept.push(start..line_end);
                 }
                 raw = None;
@@ -364,7 +388,7 @@ impl<'a> Scanner<'a> {
                     name: name.clone(),
                     start: position,
                 });
-                self.step(end as isize, 1, false);
+                self.step(signed(end), 1, false);
                 if KEPT.contains(&name.as_str()) && kept_start.is_none() {
                     kept_start = Some(end);
                 }
@@ -387,4 +411,10 @@ impl<'a> Scanner<'a> {
             inside: self.inside,
         })
     }
+}
+
+/// An offset or a length of a text as a signed step index. A Rust allocation holds at most `isize::MAX` bytes, so the
+/// value never wraps.
+fn signed(index: usize) -> isize {
+    index.cast_signed()
 }

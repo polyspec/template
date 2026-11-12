@@ -1,5 +1,11 @@
 //! RT-72: the public entry points of the API resolve through the public items of the crate.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 // A use declaration resolves a public item; it fails to compile for a name the crate does not export.
 use polyspec_template::ParseOptions;
 #[allow(unused_imports, reason = "the use declarations check the public items")]

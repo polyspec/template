@@ -1,3 +1,8 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 // Compiler runtime interface declaration checks.
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -103,6 +108,10 @@ struct Operation {
 /// ownership, field order and operation placement (CMP-1).
 /// RT-69: the engine owns exactly one program, the one field that the manifest names (Engine.owns).
 #[test]
+#[allow(
+    clippy::disallowed_methods,
+    reason = "RT-67: an operation without a Rust name in the manifest keeps its canonical name"
+)]
 fn runtime_declarations_match_manifest() {
     let manifest_path = match std::env::var("TEMPLATE_INTERFACE_MANIFEST") {
         Ok(path) => path,

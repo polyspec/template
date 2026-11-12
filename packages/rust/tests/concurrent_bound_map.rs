@@ -1,6 +1,12 @@
 //! RT-70 and VAL-22: renders of one program may run at the same time, and each reads one bound map and produces the
 //! bytes of the shared fixture. Eight threads render the same bound map through one program.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::{AstProgram, BoundMap, EngineOptions, MapLoader, RenderOptions, RenderTarget, bind};

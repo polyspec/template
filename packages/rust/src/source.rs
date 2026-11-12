@@ -31,7 +31,17 @@ impl Source {
         } else {
             input
         };
-        let text = String::from_utf8(bytes.to_vec()).expect("validated");
+        // The input is UTF-8 and the BOM is a whole character, so the rest is UTF-8 too.
+        let text = match std::str::from_utf8(bytes) {
+            Ok(text) => text.to_string(),
+            Err(error) => {
+                return Err(TemplateError::without_position(
+                    ErrorCode::E_INTERNAL,
+                    name,
+                    format!("internal failure: the text after the BOM is not UTF-8: {error}"),
+                ));
+            }
+        };
         Ok(Source {
             name: name.to_string(),
             lines: LineIndex::of(bytes),

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 // EDT-9: the tags of a template are the accepted tags that the editors paint.
 //! The tokens and the format results of every conformance case (CNF-17, CNF-18), one trial per case: `tokens::<case>`
 //! and `formatting::<case>`, as the suite units tokens and formatting of config/parity.json read the results. libtest has

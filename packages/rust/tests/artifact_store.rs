@@ -1,5 +1,11 @@
 //! RT-56 ArtifactStore.loadOrRefresh: Dev builds on every call, True reuses an artifact that loads, and False never builds.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::ArtifactRefresh;

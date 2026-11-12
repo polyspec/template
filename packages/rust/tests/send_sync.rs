@@ -1,6 +1,12 @@
 //! RT-70, VAL-22: a program, its prepared renders, its bound maps and its values are `Send` and `Sync`, so a host renders
 //! one program from several threads.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{AstProgram, BoundMap, Engine, PreparedRender, Value};
 
 fn send_and_sync<T: Send + Sync>() {}

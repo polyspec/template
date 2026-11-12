@@ -1,7 +1,9 @@
 //! number, round, floor, ceil, abs, min, max, num (FUN-16, FUN-17, FUN-20 to FUN-25).
 
 use crate::error::ErrorCode;
-use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_count, arg_number, arg_string, optional, type_error};
+use crate::functions::helpers::{
+    BuiltIn, FunctionContext, FunctionError, arg_count, arg_number, arg_string, internal, optional, type_error,
+};
 use crate::value::Value;
 use crate::value::number::{format_number, round_number};
 
@@ -45,7 +47,9 @@ fn number(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Funct
 
 fn round(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {
     let places = decimals(args, 1, "round")?;
-    Ok(Value::Number(round_number(arg_number(&args[0])?, places)))
+    Ok(Value::Number(
+        round_number(arg_number(&args[0])?, places).map_err(|error| internal(&error))?,
+    ))
 }
 
 fn floor(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, FunctionError> {

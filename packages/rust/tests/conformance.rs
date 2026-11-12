@@ -1,5 +1,11 @@
 //! Conformance cases rendered in-process (CNF-6 to CNF-9).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use common::{case_delimiters, cases, json_equal};

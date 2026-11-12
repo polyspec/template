@@ -333,6 +333,15 @@ impl Value {
     }
 }
 
+/// EXP-17, EXP-19: a variable that is not bound and a key that names no value read as `null`; this is the one place of
+/// that rule.
+pub fn absent_is_null(found: Option<&Value>) -> Value {
+    match found {
+        Some(value) => value.clone(),
+        None => Value::Null,
+    }
+}
+
 /// Number of Unicode code points of a string (VAL-5).
 pub fn code_point_length(text: &str) -> usize {
     text.chars().count()
@@ -397,8 +406,8 @@ pub fn parse_numeric_string(text: &str) -> Option<f64> {
 /// EXP-34, EXP-35 loose equality.
 pub fn loose_equals(a: &Value, b: &Value) -> bool {
     match (a, b) {
-        (Value::Number(n), other) | (other, Value::Number(n)) if other.is_string() => {
-            match parse_numeric_string(other.as_text().unwrap_or("")) {
+        (Value::Number(n), Value::Str(text) | Value::Safe(text)) | (Value::Str(text) | Value::Safe(text), Value::Number(n)) => {
+            match parse_numeric_string(text) {
                 Some(parsed) => parsed == *n,
                 None => false,
             }

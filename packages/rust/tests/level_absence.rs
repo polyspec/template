@@ -1,6 +1,12 @@
 //! RT-55: the Rust crate exposes no generated-program type and no source-compiler operation. The generated programs of the
 //! Rust target come from the build compiler, so the crate keeps none of these names as public items.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use std::fs;
 use std::path::Path;
 

@@ -1,3 +1,8 @@
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
 // EDT-9: the tags of the analysis are the accepted tags that the editors paint.
 //! Tag analysis (EDT-8): the accepted tags with their kind and body ranges, and the token class of every part of them.
 

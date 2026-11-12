@@ -3,7 +3,7 @@
 use crate::ast::Template;
 use crate::error::{ErrorCode, LineIndex, Span, TemplateError};
 use crate::functions::{Env, HostFunction};
-use crate::value::{OrderedMap, Value};
+use crate::value::{OrderedMap, Value, absent_is_null};
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -107,7 +107,7 @@ impl Scope {
         if let Some(value) = self.locals.get(name) {
             return value.clone();
         }
-        frame.context.get(name).cloned().unwrap_or(Value::Null)
+        absent_is_null(frame.context.get(name))
     }
 
     /// The innermost active loop for a variable name.

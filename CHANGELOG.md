@@ -9,6 +9,7 @@
 - A `\uXXXX` escape of a surrogate that is not part of a surrogate pair is `E_PARSE_INVALID_ESCAPE` at that escape instead of U+FFFD (EXP-3); the Rust implementation follows the rule.
 - A filesystem loader reports a name that does not exist only for `ENOENT` and `ENOTDIR`; a directory, another file that is not a regular file and every other metadata error, such as `EACCES` of a directory, are `E_LOAD_FAILED` with the message of the file system (RT-10). The Rust `FsLoader` follows the rule.
 - The Rust `Program` trait requires `Send` and `Sync`, and a `PreparedRender` is `Send` and `Sync`; data-model.md and RT-70 state that Rust programs, prepared renders, bound maps and values are `Send` and `Sync`, which they are, instead of `Rc` values that stay in one thread (VAL-22, RT-70).
+- The Rust crate denies `unwrap`, `expect` and the casts that can truncate, wrap or lose the sign, and clippy.toml disallows `Option::{unwrap_or, unwrap_or_default, unwrap_or_else, map_or, map_or_else}` and `Result::{map_or, map_or_else}` besides `Result::ok` and its `unwrap_or` family (R-1). A broken invariant that used to panic is `E_INTERNAL`; every remaining use carries an `allow` whose reason names its rule. `MapLoader::set_ast` returns an error for an AST without a JSON form, and `value_from_json` returns a `Result`.
 
 ## 0.0.27
 

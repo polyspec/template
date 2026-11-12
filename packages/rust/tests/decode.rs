@@ -1,5 +1,11 @@
 //! decode_template reads the canonical AST JSON into the AST of the crate (AST-10).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::{AstProgram, EngineOptions, MapLoader, RenderOptions, RenderTarget, decode_template};
@@ -35,7 +41,7 @@ fn a_decoded_template_renders_without_its_source() {
         polyspec_template::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse")
     );
     let mut loader = MapLoader::new();
-    loader.set_ast("x.tpl", ast);
+    loader.set_ast("x.tpl", ast).expect("set_ast");
     let engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()

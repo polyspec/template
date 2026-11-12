@@ -1,5 +1,11 @@
 //! The JSON form of a template value: a native object has none, so to_json_value fails instead of writing it as null.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{HostError, TemplateObject, Value, to_json_value};
 
 #[derive(Debug)]

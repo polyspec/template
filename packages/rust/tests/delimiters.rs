@@ -1,5 +1,11 @@
 //! An invalid delimiter option is an argument error of the language, not an ERR-1 error and not a panic (ERR-13).
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 use polyspec_template::{AstProgram, EngineOptions, ParseOptions, RequestError, parse};
 
 /// LEX-21, LEX-22: a delimiter option is a string of two delimiter characters.

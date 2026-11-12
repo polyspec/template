@@ -1,6 +1,12 @@
 //! RT-59: rendering a loaded artifact parses nothing and discovers no source (the artifact directory holds no .tpl file), and
 //! two renders with the same assign give identical bytes and leave the assign unchanged.
 
+#![allow(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
+)]
+
 mod common;
 
 use polyspec_template::artifact::load_artifact;
