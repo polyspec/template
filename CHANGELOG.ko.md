@@ -32,6 +32,7 @@
 - Rust: render는 파일을 읽지 않는다(RT-77). 파일시스템 로더에서는 `prepare`와 새 `AstProgram::load`가 대상과 그 include·block 태그가 가리키는 모든 템플릿을 읽고, `render`는 프로그램의 캐시에서 가져온다. 이 둘이 로드하지 않은 템플릿은 새 kind `load_not_loaded`로 실패한다. 호스트 코드의 로더는 여전히 render 중에 불린다.
 - compiler 명세가 타입 있는 프로그램을 정한다(docs/spec/compiler.md#typed-programs). backend는 런타임의 AstProgram으로 렌더하는 선언을 내고, backend는 Rust, TypeScript, Python, PHP, Go 순서로 하나씩 옮겨진다(Wave 28).
 - Rust: 소스의 줄 인덱스와 함께 로드한 AST는 오류의 줄과 열을 말한다. `Loaded::Ast`가 `lines`를 담고, `MapLoader::set_ast_lines`가 그것을 받으며, artifact 런타임은 manifest의 `lines`를 읽는다.
+- compiler의 Rust backend는 타입 있는 프로그램을 낸다. 즉 타입 manifest의 선언과, 요청을 그것에 대해 검사하고 artifact의 AST 위에서 crate의 `AstProgram`으로 렌더하는 `GeneratedProgram`이다. 모듈에는 템플릿 제어 흐름이 없고 `polyspec-template`에만 의존한다. Rust generated runner, 생성 검사의 Rust 행, Rust showcase adapter, Rust 설치 프로젝트가 이를 쓴다.
 
 ## 0.0.27
 

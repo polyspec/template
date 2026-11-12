@@ -54,8 +54,8 @@ function lockPackages(text: string): Map<string, LockPackage> {
 }
 
 /**
- * A temporary crate `template-generated-check` that depends on packages/rust by path and on its serde_json;
- * its integration tests go into its directory `tests`. Its Cargo.lock starts as a copy of the lock of
+ * A temporary crate `template-generated-check` that depends on packages/rust by path;
+ * its integration tests go into its directory `tests`. Its Cargo.lock starts as a copy of the root Cargo.lock, the lock of
  * packages/rust; cargo adds the crate and drops the dependencies that only the tests of packages/rust use, and
  * the workspace fails when cargo chose any other package or version. Returns the directory, its manifest, the path of
  * the integration test `<test>.rs` and the environment of its cargo commands.
@@ -79,7 +79,6 @@ publish = false
 
 [dependencies]
 polyspec-template = { path = ${JSON.stringify(RUST)} }
-serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
 `);
   // rustup selects the toolchain of the nearest rust-toolchain.toml above the working directory; the workspace is outside
   // the checkout, so it carries the toolchain file of the repository and builds with the pinned Rust.
@@ -103,7 +102,10 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   // packages/rust use, such as syn of polyspec-template.
   const other = chosen.filter(([key, entry]) => {
     const original = known.get(key);
-    return !original || original.checksum !== entry.checksum || entry.dependencies.some(dependency => !original.dependencies.includes(dependency));
+    // cargo names a dependency with its version only when the lock holds several versions of it, so a dependency is
+    // compared by its name.
+    const names = (dependencies: readonly string[]): string[] => dependencies.map(dependency => dependency.split(' ')[0] ?? dependency);
+    return !original || original.checksum !== entry.checksum || names(entry.dependencies).some(dependency => !names(original.dependencies).includes(dependency));
   }).map(([key]) => key);
   if (other.length) {
     rmSync(directory, { recursive: true, force: true });

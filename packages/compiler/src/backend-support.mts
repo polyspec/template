@@ -1,6 +1,6 @@
 import type { Span } from '@polyspec/template-legacy';
 import type { TypeManifest } from './documents.mts';
-import { loweredTemplate, scalarKinds, type Expr, type ExprOf, type LoweredTemplate, type Node, type NodeOf, type Program, type ValueType, type VariableExpr } from './ir.mts';
+import { loweredTemplate, scalarKinds, type Expr, type ExprOf, type LoweredTemplate, type Node, type NodeOf, type Program, type SourceGraph, type ValueType, type VariableExpr } from './ir.mts';
 
 const scalarTypes = {
   go: { string: 'string', number: 'float64', boolean: 'bool', any: 'any', null: 'any', Template: 'string' },
@@ -525,6 +525,8 @@ export interface CompileOptions { phpNamespace?: string }
 /** What a backend emits from: the program, its type manifest, the options, the target and the template bodies. */
 export interface BackendContext {
   program: Program;
+  /** The ASTs of the source graph and the line starts of their sources, which a typed program holds. */
+  graph?: SourceGraph;
   manifest: TypeManifest;
   options: CompileOptions;
   target: Target;

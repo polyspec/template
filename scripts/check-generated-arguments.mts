@@ -4,7 +4,7 @@
 // request in every target: the output of a request that matches the declared types, and for any other request the
 // argument error of the host language with the exact text that ERR-13 defines (T24.33). The argument error passes to the
 // host unchanged and is not an ERR-1 error: an `Error` of TypeScript that is not a `TemplateError` or a built-in
-// subclass, a Go error that is not an `*errs.Error` or a bind error, `RequestError::Argument` of Rust,
+// subclass, a Go error that is not an `*errs.Error` or a bind error, `GeneratedError::Argument` of Rust,
 // `\InvalidArgumentException` of PHP and `ValueError` of Python. typed-arguments-unread declares a root record field and
 // a list that no template reads and definition data that no block merges, which generated Rust checks without holding
 // them (T24.31); typed-arguments-scoped renders a block of a template path whose argument has no root value (T24.37).
@@ -118,10 +118,10 @@ func TestGeneratedArguments(t *testing.T) { text, err := os.ReadFile(${goString(
         return `mod ${fixture.id} { include!(${rustString(source)}); }`;
       }).join('\n');
       writeFileSync(rustTest, `${modules}
-use polyspec_template::{Program, RenderOptions, RenderTarget, RequestError, RuntimeEnvironment, defines_from_json};
-fn result(rendered: Result<String, RequestError>) -> String { match rendered { Ok(output) => format!("rendered: {output}"), Err(RequestError::Argument(error)) => format!("argument: {}", error.message), Err(RequestError::Template(error)) => format!("template: {}", error.code.as_str()) } }
-fn results(path: &str, render: impl Fn(&serde_json::Value, &RenderOptions) -> Result<String, RequestError>) -> String { let vectors: Vec<serde_json::Value> = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap(); let all: Vec<String> = vectors.iter().map(|vector| { let mut options = RenderOptions::default(); options.define = defines_from_json(&vector["define"]).unwrap(); result(render(&vector["assign"], &options)) }).collect(); serde_json::to_string(&all).unwrap() }
-#[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new()).expect("an empty function map registers")); println!("${fixture.name} {}", results(${rustString(vectorsFor(fixture, 'Rust'))}, |assign, options| program.render(RenderTarget::Name("input.tpl"), assign, options)));`).join(' ')} }
+use polyspec_template::polyspec_json::{ParseOptions, Value as Json, parse};
+use polyspec_template::{EngineOptions, RenderError, RenderOptions, defines_from_json};
+fn results(path: &str, render: impl Fn(&Json, &RenderOptions) -> String) -> String { let vectors = parse(&std::fs::read(path).unwrap(), &ParseOptions::default()).unwrap(); let all: Vec<String> = vectors.items().unwrap().iter().map(|vector| { let mut options = RenderOptions::default(); options.define = defines_from_json(vector.get("define").unwrap().unwrap()).unwrap(); Json::string(&render(vector.get("assign").unwrap().unwrap(), &options)).raw().to_string() }).collect(); format!("[{}]", all.join(",")) }
+#[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(EngineOptions::default()).unwrap(); println!("${fixture.name} {}", results(${rustString(vectorsFor(fixture, 'Rust'))}, |assign, options| match program.render("input.tpl", assign, options) { Ok(output) => format!("rendered: {output}"), Err(${fixture.id}::GeneratedError::Argument(message)) => format!("argument: {message}"), Err(${fixture.id}::GeneratedError::Render(RenderError::Kind(error))) => format!("template: {}", error.code.as_str()), Err(other) => format!("host: {other}") }));`).join(' ')} }
 `);
       try {
         compare('Rust', runChecked(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));

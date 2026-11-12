@@ -140,39 +140,36 @@ func TestGeneratedProgram(t *testing.T) {
 }
 
 function checkRust() {
+  // A typed program of Rust holds the declarations and renders with the AstProgram of the core: no template control flow
+  // and no runtime operation of its own (docs/spec/compiler.md#typed-programs).
   const coverageSource = readFileSync(generatedSource(scenarios[0], 'rust'), 'utf8');
-  assert.match(coverageSource, /RuntimeBindings::new\(\)/);
-  assert.match(coverageSource, /runtime\.binary\(/);
-  assert.match(coverageSource, /runtime\.call\(/);
-  for (const duplicate of ['trait GeneratedTruthy', 'trait GeneratedContains', 'fn generated_in(', 'fn escape(', 'catch_unwind']) {
-    assert.equal(coverageSource.includes(duplicate), false, `Rust generated source duplicates or flattens runtime semantics: ${duplicate}`);
+  assert.match(coverageSource, /AstProgram::new\(/);
+  assert.match(coverageSource, /decode_template\(/);
+  for (const duplicate of ['RuntimeBindings', 'runtime.binary(', 'fn render_template', 'trait GeneratedTruthy', 'fn escape(', 'catch_unwind']) {
+    assert.equal(coverageSource.includes(duplicate), false, `Rust generated source executes templates itself: ${duplicate}`);
   }
   const rust = rustWorkspace('generated-program-rust');
   const test = rust.test('generated_program_check');
   const modules = scenarios.map((id, index) => `mod generated_${index} {
     include!(${JSON.stringify(generatedSource(id, 'rust'))});
-    pub fn execute(target: &str, assign: serde_json::Value, options: polyspec_template::RenderOptions) -> String {
-        use polyspec_template::Program;
-        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(None, std::collections::HashMap::new()).expect("an empty function map registers"));
-        program.render(polyspec_template::RenderTarget::Name(target), &assign, &options).unwrap()
+    pub fn execute(target: &str, assign: &JsonValue, options: &polyspec_template::RenderOptions) -> String {
+        GeneratedProgram::new(EngineOptions::default()).unwrap().render(target, assign, options).unwrap()
     }
-    ${index === 0 ? `pub fn execute_limited(target: &str, assign: &serde_json::Value, options: &polyspec_template::RenderOptions) -> Result<String, polyspec_template::RequestError> {
-        use polyspec_template::Program;
+    ${index === 0 ? `pub fn execute_limited(target: &str, assign: &JsonValue, options: &polyspec_template::RenderOptions) -> Result<String, GeneratedError> {
         let mut limits = polyspec_template::Limits::default();
         limits.output_bytes = 1;
-        let program = GeneratedProgram::new(polyspec_template::RuntimeEnvironment::new(Some(limits), std::collections::HashMap::new()).expect("an empty function map registers"));
-        program.render(polyspec_template::RenderTarget::Name(target), assign, options)
+        GeneratedProgram::new(EngineOptions { limits: Some(limits), ..Default::default() })?.render(target, assign, options)
     }` : ''}
 }`).join('\n');
   const cases = scenarios.map((id, index) => `#[test]
 fn generated_${index}_matches() {
-    let assign: serde_json::Value = serde_json::from_str(${JSON.stringify(fixture(id, 'data.json'))}).unwrap();
-    let define: serde_json::Value = serde_json::from_str(${JSON.stringify(fixture(id, 'define.json'))}).unwrap();
+    let assign = polyspec_template::read_json(${JSON.stringify(fixture(id, 'data.json'))}).unwrap();
+    let define = polyspec_template::read_json(${JSON.stringify(fixture(id, 'define.json'))}).unwrap();
     let mut options = polyspec_template::RenderOptions::default();
     options.define = polyspec_template::defines_from_json(&define).unwrap();
-    ${fixtureExists(id, 'env.json') ? `options.env = Some(serde_json::from_str(${JSON.stringify(fixture(id, 'env.json'))}).unwrap());` : ''}
-    assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, assign.clone(), options.clone()), ${JSON.stringify(expected(id))});
-    ${index === 0 ? `let polyspec_template::RequestError::Template(error) = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err() else { panic!("expected a template error") };
+    ${fixtureExists(id, 'env.json') ? `options.env = Some(polyspec_template::env_from_json(&polyspec_template::read_json(${JSON.stringify(fixture(id, 'env.json'))}).unwrap()).unwrap());` : ''}
+    assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, &assign, &options), ${JSON.stringify(expected(id))});
+    ${index === 0 ? `let generated_0::GeneratedError::Render(polyspec_template::RenderError::Kind(error)) = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err() else { panic!("expected a template error") };
     assert_eq!(error.code, polyspec_template::ErrorCode::E_RUNTIME_LIMIT);
     assert!(error.line > 0 && error.col > 0);` : ''}
 }`).join('\n');

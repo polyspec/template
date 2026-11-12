@@ -86,13 +86,12 @@ function checkRust() {
       ['generated_lint', compileFixture(crate.directory, 'rust'), 'page.tpl'],
     ];
     const modules = programs.map(([name, file]) => `mod ${name} {\n    include!(${JSON.stringify(file)});\n}\n`).join('');
-    const renders = programs.map(([name, , entry]) => `    let program = ${name}::GeneratedProgram::new(RuntimeEnvironment::new(None, HashMap::new()).expect("an empty function map registers"));
-    match program.render(RenderTarget::Name(${JSON.stringify(entry)}), &serde_json::Value::Null, &RenderOptions::default()) {
+    const renders = programs.map(([name, , entry]) => `    match ${name}::GeneratedProgram::new(EngineOptions::default()).and_then(|program| program.render(${JSON.stringify(entry)}, &polyspec_template::polyspec_json::Value::null(), &RenderOptions::default())) {
         Ok(output) => println!("{output}"),
         Err(error) => eprintln!("{error}"),
     }
 `).join('');
-    writeFileSync(join(crate.directory, 'src/main.rs'), `use polyspec_template::{Program, RenderOptions, RenderTarget, RuntimeEnvironment};\nuse std::collections::HashMap;\n${modules}fn main() {\n${renders}}\n`);
+    writeFileSync(join(crate.directory, 'src/main.rs'), `use polyspec_template::{EngineOptions, RenderOptions};\n${modules}fn main() {\n${renders}}\n`);
     run(CARGO, ['clippy', '--locked', '--offline', '--manifest-path', crate.manifest, '--bin', 'template-generated-check', '--', '-D', 'warnings'], { env: { CARGO_TARGET_DIR: crate.targetDirectory, CLIPPY_CONF_DIR: root } });
   } finally {
     rmSync(crate.directory, { recursive: true, force: true });

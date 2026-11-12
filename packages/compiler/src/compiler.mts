@@ -25,9 +25,10 @@ function compileParts(graphPath: string, manifestPath: string, language: string,
     throw new Error(`compiler: the PHP target requires a namespace; ${JSON.stringify(options.phpNamespace ?? null)} is not a PHP namespace`);
   }
   const manifest = typeManifestDocument.read(manifestPath);
-  const program = lowerSourceGraph(loadSourceGraph(graphPath), manifest);
+  const graph = loadSourceGraph(graphPath);
+  const program = lowerSourceGraph(graph, manifest);
   const target = backend.createTarget({ program, manifest });
-  const context = { program, manifest, options, target, templateBodies: templateBodies(program, target) };
+  const context = { program, graph, manifest, options, target, templateBodies: templateBodies(program, target) };
   // An operation returns its code, or a list of code, definitions and file starts that the program keeps only when it
   // uses them.
   return [backend.emitDeclarations(context), backend.emitRuntime(context), backend.emitTemplates(context), backend.emitEntry(context)].flat();

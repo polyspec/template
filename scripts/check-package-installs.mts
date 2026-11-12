@@ -124,17 +124,17 @@ function checkRust() {
   mkdirSync(join(directory, 'src'), { recursive: true });
   stageScenario(directory);
   cpSync(join(root, 'examples/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
-  writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, crate))}}\nserde={version="1",features=["derive"]}\nserde_json={version="1",features=["preserve_order","arbitrary_precision"]}\n`);
+  writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, crate))}}\n`);
   // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
   // resolve the development dependencies of a path dependency for an install project.
   const development = Object.keys(tomlTable(cargoManifest['dev-dependencies'], 'the [dev-dependencies] of packages/rust/Cargo.toml'));
   writeFileSync(join(directory, 'Cargo.lock'), installCargoLock(readFileSync(join(root, 'Cargo.lock'), 'utf8'), {
-    name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template', 'serde', 'serde_json'], removed: { 'polyspec-template': development }, lockPath: 'Cargo.lock',
+    name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template'], removed: { 'polyspec-template': development }, lockPath: 'Cargo.lock',
   }));
   cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   writeFileSync(join(directory, 'src/main.rs'), `mod generated { include!(concat!(env!("CARGO_MANIFEST_DIR"), "/generated.rs")); }
-use polyspec_template::{AstProgram, Engine, EngineOptions, FsLoader, Program, RenderOptions, RenderTarget, RuntimeEnvironment};
-fn main(){ let assign:serde_json::Value=serde_json::from_str(include_str!("../data.json")).unwrap(); let raw:serde_json::Value=serde_json::from_str(include_str!("../define.json")).unwrap(); let mut options=RenderOptions::default(); options.define=polyspec_template::defines_from_json(&raw).unwrap(); let expected=include_str!("../expected.html"); let ast=Engine::new(AstProgram::new(EngineOptions{loader:Some(Box::new(FsLoader::new("templates"))),..Default::default()}).unwrap()).render(RenderTarget::Name("layout"),&assign,&options).unwrap(); let program=generated::GeneratedProgram::new(RuntimeEnvironment::new(None,std::collections::HashMap::new()).expect("an empty function map registers")); let direct=program.render(RenderTarget::Name("layout"),&assign,&options).unwrap(); assert_eq!(ast,expected);assert_eq!(direct,expected);assert_eq!(ast,direct); }
+use polyspec_template::{AstProgram, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
+fn main(){ let assign=polyspec_template::read_json(include_str!("../data.json")).unwrap(); let raw=polyspec_template::read_json(include_str!("../define.json")).unwrap(); let mut options=RenderOptions::default(); options.define=polyspec_template::defines_from_json(&raw).unwrap(); let expected=include_str!("../expected.html"); let ast=Engine::new(AstProgram::new(EngineOptions{loader:Some(Box::new(FsLoader::new("templates"))),..Default::default()}).unwrap()).prepare(RenderTarget::Name("layout"),&assign,&options).unwrap().render().unwrap(); let program=generated::GeneratedProgram::new(EngineOptions::default()).unwrap(); let direct=program.render("layout",&assign,&options).unwrap(); assert_eq!(ast,expected);assert_eq!(direct,expected);assert_eq!(ast,direct); }
 `);
   run(CARGO, ['run', '--quiet', '--locked'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
 }

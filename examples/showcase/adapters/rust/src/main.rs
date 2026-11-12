@@ -38,8 +38,8 @@ mod generated {
 }
 
 use polyspec_template::{
-    AstProgram, DefineInput, Engine, EngineOptions, MapLoader, PreparedRender, RenderOptions,
-    RenderTarget, RequestError, RuntimeEnvironment,
+    AstProgram, DefineInput, EngineOptions, MapLoader, PreparedRender, RenderError, RenderOptions,
+    RenderTarget,
 };
 use render_adapter::{
     DefineEntry, DefineRegistry, Environment, RenderAdapter, RenderRequest, RepeatResult, Scenario,
@@ -49,9 +49,46 @@ use serde_json::{Map, Value};
 use sha2::{Digest, Sha256};
 use std::path::{Path, PathBuf};
 
+/// The program of a scenario: the AST program of its artifact, or the typed program that the compiler generated for it,
+/// which renders the same ASTs with the AST program of the core.
+enum Runner {
+    Ast(AstProgram),
+    CompilerCoverage(generated::compiler_coverage::GeneratedProgram),
+    EmptyState(generated::empty_state::GeneratedProgram),
+    HtmlSlot(generated::html_slot::GeneratedProgram),
+    ReactBoundary(generated::react_boundary::GeneratedProgram),
+    ScopePrecedence(generated::scope_precedence::GeneratedProgram),
+}
+
+/// Calls `$call` on the program of a runner with the arguments of a render.
+macro_rules! each_runner {
+    ($runner:expr, $call:ident, $target:expr, $assign:expr, $options:expr) => {
+        match $runner {
+            Runner::Ast(program) => program
+                .$call(RenderTarget::Name($target), $assign, $options)
+                .map_err(render_message),
+            Runner::CompilerCoverage(program) => program
+                .$call($target, $assign, $options)
+                .map_err(|error| error.to_string()),
+            Runner::EmptyState(program) => program
+                .$call($target, $assign, $options)
+                .map_err(|error| error.to_string()),
+            Runner::HtmlSlot(program) => program
+                .$call($target, $assign, $options)
+                .map_err(|error| error.to_string()),
+            Runner::ReactBoundary(program) => program
+                .$call($target, $assign, $options)
+                .map_err(|error| error.to_string()),
+            Runner::ScopePrecedence(program) => program
+                .$call($target, $assign, $options)
+                .map_err(|error| error.to_string()),
+        }
+    };
+}
+
 struct Adapter {
     root: PathBuf,
-    engine: Engine,
+    engine: Runner,
 }
 
 impl Adapter {
@@ -59,18 +96,18 @@ impl Adapter {
         let root = root.as_ref().to_path_buf();
         let generated = std::env::var("SHOWCASE_EXECUTION_MODE").as_deref() == Ok("generated");
         let engine = if generated {
-            generated_engine(
-                root.file_name()
-                    .and_then(|value| value.to_str())
-                    .unwrap_or_default(),
-            )?
+            // The scenario is the name of its directory; a directory without a UTF-8 name names no scenario.
+            let Some(scenario) = root.file_name().and_then(|value| value.to_str()) else {
+                return Err(format!("{} names no scenario", root.display()));
+            };
+            generated_engine(scenario)?
         } else {
-            Engine::new(
+            Runner::Ast(
                 AstProgram::new(EngineOptions {
                     loader: Some(Box::new(artifact_loader(&root)?)),
                     ..Default::default()
                 })
-                .expect("valid engine options"),
+                .map_err(|error| error.message)?,
             )
         };
         Ok(Adapter { root, engine })
@@ -140,33 +177,41 @@ impl Adapter {
     }
 }
 
-fn generated_runtime() -> Result<RuntimeEnvironment, String> {
-    RuntimeEnvironment::new(None, std::collections::HashMap::new()).map_err(|error| error.message)
-}
-
-fn generated_engine(scenario: &str) -> Result<Engine, String> {
+fn generated_engine(scenario: &str) -> Result<Runner, String> {
+    let options = || EngineOptions::default();
+    let failed = |error: &dyn std::fmt::Display| error.to_string();
     Ok(match scenario {
-        "compiler-coverage" => Engine::new(generated::compiler_coverage::GeneratedProgram::new(
-            generated_runtime()?,
-        )),
-        "empty-state" => Engine::new(generated::empty_state::GeneratedProgram::new(
-            generated_runtime()?,
-        )),
-        "html-slot" => Engine::new(generated::html_slot::GeneratedProgram::new(
-            generated_runtime()?,
-        )),
-        "react-boundary" => Engine::new(generated::react_boundary::GeneratedProgram::new(
-            generated_runtime()?,
-        )),
-        "scope-precedence" => Engine::new(generated::scope_precedence::GeneratedProgram::new(
-            generated_runtime()?,
-        )),
+        "compiler-coverage" => Runner::CompilerCoverage(
+            generated::compiler_coverage::GeneratedProgram::new(options())
+                .map_err(|error| failed(&error))?,
+        ),
+        "empty-state" => Runner::EmptyState(
+            generated::empty_state::GeneratedProgram::new(options())
+                .map_err(|error| failed(&error))?,
+        ),
+        "html-slot" => Runner::HtmlSlot(
+            generated::html_slot::GeneratedProgram::new(options())
+                .map_err(|error| failed(&error))?,
+        ),
+        "react-boundary" => Runner::ReactBoundary(
+            generated::react_boundary::GeneratedProgram::new(options())
+                .map_err(|error| failed(&error))?,
+        ),
+        "scope-precedence" => Runner::ScopePrecedence(
+            generated::scope_precedence::GeneratedProgram::new(options())
+                .map_err(|error| failed(&error))?,
+        ),
         _ => {
             return Err(format!(
                 "generated program is missing for scenario {scenario}"
             ));
         }
     })
+}
+
+/// The JSON value of the library for a JSON value of the adapter, through its text.
+fn library_json(value: &Value) -> Result<polyspec_template::polyspec_json::Value, String> {
+    polyspec_template::read_json(&value.to_string()).map_err(|error| error.message)
 }
 
 fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
@@ -206,9 +251,11 @@ fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
                 data: entry
                     .data
                     .clone()
-                    .map(|data| polyspec_template::bind_json(&Value::Object(data)))
-                    .transpose()
-                    .map_err(|error| error.message)?
+                    .map(|data| {
+                        polyspec_template::bind_json(&library_json(&Value::Object(data))?)
+                            .map_err(|error| error.message)
+                    })
+                    .transpose()?
                     .map(polyspec_template::DefineData::Value),
                 html: entry.html.clone(),
             },
@@ -227,7 +274,7 @@ fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
             object.insert("now".to_string(), Value::Number(number));
         }
         options.env = Some(
-            polyspec_template::env_from_json(&Value::Object(object))
+            polyspec_template::env_from_json(&library_json(&Value::Object(object))?)
                 .map_err(|error| error.message)?,
         );
     }
@@ -262,13 +309,8 @@ impl RenderAdapter for Adapter {
 
     fn render(&self, request: &RenderRequest) -> Result<String, String> {
         let options = render_options(request)?;
-        self.engine
-            .render(
-                RenderTarget::Name(&request.target),
-                &Value::Object(request.assign.clone()),
-                &options,
-            )
-            .map_err(request_message)
+        let assign = library_json(&Value::Object(request.assign.clone()))?;
+        each_runner!(&self.engine, render, &request.target, &assign, &options)
     }
 
     fn render_twice(&self, request: &RenderRequest) -> Result<RepeatResult, String> {
@@ -281,21 +323,16 @@ impl RenderAdapter for Adapter {
 impl Adapter {
     fn prepare<'a>(&'a self, request: &RenderRequest) -> Result<PreparedRender<'a>, String> {
         let options = render_options(request)?;
-        self.engine
-            .prepare(
-                RenderTarget::Name(&request.target),
-                &Value::Object(request.assign.clone()),
-                &options,
-            )
-            .map_err(request_message)
+        let assign = library_json(&Value::Object(request.assign.clone()))?;
+        each_runner!(&self.engine, prepare, &request.target, &assign, &options)
     }
 }
 
-// The text of a failed request: the message of an ERR-1 error or of an argument error (ERR-13).
-fn request_message(error: RequestError) -> String {
+// The text of a failed render: the message of an ERR-1 error or of an error of host code.
+fn render_message(error: RenderError) -> String {
     match error {
-        RequestError::Template(error) => error.message,
-        RequestError::Argument(error) => error.message,
+        RenderError::Kind(error) => error.message,
+        other => other.to_string(),
     }
 }
 
@@ -356,10 +393,10 @@ impl<T, E: std::fmt::Display> OrPanic<T> for Result<T, E> {
 }
 
 fn main() {
-    let root = std::env::args().nth(1).unwrap_or_else(|| {
+    let Some(root) = std::env::args().nth(1) else {
         eprintln!("usage: showcase-adapter-rust SCENARIO_DIR");
         std::process::exit(1);
-    });
+    };
     let adapter = Adapter::new(root).or_panic();
     let scenario = adapter.load_scenario().or_panic();
     let request = adapter.build_request(&scenario).or_panic();

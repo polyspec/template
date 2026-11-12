@@ -81,22 +81,22 @@ func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGenerat
       const rust = rustWorkspace('generated-bound-data-rust');
       const rustTest = rust.test('generated_bound_data_check');
       writeFileSync(rustTest, `mod generated { include!(${rustString(join(temporary, 'bound.rust'))}); }
-use polyspec_template::{DefineData, DefineInput, Program, RenderOptions, RenderTarget, RuntimeEnvironment, bind, merge};
-fn fixture(text: &str) -> serde_json::Value { serde_json::from_str(text).unwrap() }
+use polyspec_template::{DefineData, DefineInput, EngineOptions, RenderOptions, bind, merge};
+fn fixture(text: &str) -> polyspec_template::polyspec_json::Value { polyspec_template::read_json(text).unwrap() }
 #[test] fn generated_programs_render_bound_maps() {
-  let page = generated::GeneratedProgram::new(RuntimeEnvironment::new(None, std::collections::HashMap::new()).expect("an empty function map registers"));
+  let page = generated::GeneratedProgram::new(EngineOptions::default()).unwrap();
   let assign = fixture(${rustString(json(cases.assign))});
   let bound = bind(&assign).unwrap();
   let options = RenderOptions::default();
-  assert_eq!(page.render_bound(RenderTarget::Name("page.tpl"), &bound, &options).unwrap(), ${rustString(cases.outputs.page)});
-  assert_eq!(page.render(RenderTarget::Name("page.tpl"), &assign, &options).unwrap(), ${rustString(cases.outputs.page)});
-  let prepared = page.prepare_bound(RenderTarget::Name("page.tpl"), &bound, &options).unwrap();
+  assert_eq!(page.render_bound("page.tpl", &bound, &options).unwrap(), ${rustString(cases.outputs.page)});
+  assert_eq!(page.render("page.tpl", &assign, &options).unwrap(), ${rustString(cases.outputs.page)});
+  let prepared = page.prepare_bound("page.tpl", &bound, &options).unwrap();
   assert_eq!(prepared.render().unwrap() + &prepared.render().unwrap(), ${rustString(cases.outputs.page + cases.outputs.page)});
   let merged = merge(&bound, &bind(&fixture(${rustString(json(cases.second))})).unwrap());
-  assert_eq!(page.render_bound(RenderTarget::Name("page.tpl"), &merged, &options).unwrap(), ${rustString(cases.outputs.merged)});
+  assert_eq!(page.render_bound("page.tpl", &merged, &options).unwrap(), ${rustString(cases.outputs.merged)});
   let mut options = RenderOptions::default();
   options.define.insert("part".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Bound(bind(&fixture(${rustString(json(cases.definitionData))})).unwrap())), html: None });
-  assert_eq!(page.render(RenderTarget::Name("define.tpl"), &assign, &options).unwrap(), ${rustString(cases.outputs.define)});
+  assert_eq!(page.render("define.tpl", &assign, &options).unwrap(), ${rustString(cases.outputs.define)});
 }
 `);
       try {

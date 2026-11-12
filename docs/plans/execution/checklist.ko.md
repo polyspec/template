@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 7643035cb93ccdfa507fdb1f59e7e99f1440a2bf6b3a6af08ed53d1ea9ea12df -->
+<!-- source-sha256: 1a20a7d072cdf7635dfafc2321a7866505c124d71918bf9485a6a3d1dcbd2375 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -524,7 +524,7 @@
 | T27.1-85 | ## Unreleased의 항목(T27.1-84)으로 0.0.27 release | The version commit and the release assets | `make release-coverage` and the release of the CI run of the version commit | [o] |
 | T28.1 | legacy/packages/php-ext/src/polyspec_template_arginfo.h를 PHP 8.4의 gen_stub.php와 고정 PHP-Parser 5.0.0으로 다시 만든다. 원인: commit a0e3f22af는 컨테이너에서 5.0.0을 받지 못해 PHP-Parser 5.9.0으로 만들었다 | 다시 만든 header | 고정 PHP-Parser가 있는 기계에서 `make lint-php-ext`와 `make test-php-ext`; a0e3f22af의 header와 5.0.0이 쓰는 것 밖의 차이가 없다 | [ ] |
 | T28.2 | 타입 있는 프로그램: docs/spec/compiler.md#typed-programs의 spec과 backend 순서 | docs/spec/compiler.md(.ko), 이 계획 | `make docs-check` | [o] |
-| T28.3 | Rust backend는 코어의 AstProgram으로 렌더하는 선언을 낸다. conformance-generated-rust와 생성 검사의 Rust 행은 선언을 검사한다 | packages/compiler/src/backends/rust.mts, tests/runner/conformance-generated-rust.mts, 생성 검사 | `make conformance-generated-rust`, `make generated-native-check` | [ ] |
+| T28.3 | Rust backend는 코어의 AstProgram으로 렌더하는 선언을 낸다. conformance-generated-rust와 생성 검사의 Rust 행은 선언을 검사한다 | packages/compiler/src/backends/rust.mts, tests/runner/conformance-generated-rust.mts, 생성 검사 | `make conformance-generated-rust`, `make generated-native-check` | [v] |
 | T28.4 | TypeScript backend는 @polyspec/template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/typescript.mts, tests/runner/conformance-generated-ts.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-ts` | [ ] |
 | T28.5 | Python backend는 polyspec.template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/python.mts, tests/runner/conformance-generated-python.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-python` | [ ] |
 | T28.6 | PHP backend는 Polyspec\\Template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/php.mts, tests/runner/conformance-generated-php.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-php` | [ ] |

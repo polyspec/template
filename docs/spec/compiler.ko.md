@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: a826447d091fdd20bc78dc358571b0206823e84312ebcec564941e4402367cdc -->
+<!-- source-sha256: ccd418ffbab6b397990907028cbace26899dcb6f55dd7bbcdd1842ecba5ceb0f -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -34,7 +34,7 @@ Canonical artifact manifest는 각 template의 digest 항목과 함께 source �
 
 ## 타입 있는 프로그램
 
-타입 있는 프로그램은 템플릿의 AST와 타입 manifest의 선언이다(binding 설계 U-4). compiler는 아래 typed IR이 말하는 대로 템플릿을 타입 manifest에 대해 검사하고, backend는 대상 언어의 선언만 낸다. 즉 구조 `Assign`, `Definitions`, `Input<T>`, manifest가 선언한 record, 그리고 타입 있는 요청을 VAL-22의 bound map과 RT-26의 정의로 필드마다, 선언된 타입이 거부한 값의 필드 경로와 함께 바꾸고 artifact의 AST를 담은 `MapLoader` 위에서 런타임의 `AstProgram`으로 렌더하는 `GeneratedProgram`이다(RT-41). 생성 모듈에는 템플릿 제어 흐름, 식, 런타임 연산이 없다. 코어가 모든 템플릿을 실행하므로 타입 있는 프로그램과 AST 프로그램은 구성상 같은 바이트를 렌더하고 같은 오류로 실패한다. 생성 코드는 자기 언어의 런타임을 사용자가 설치하는 이름으로 import한다. Rust는 crate `polyspec-template`, 다른 언어는 바인딩 패키지 `@polyspec/template`, `polyspec.template`, `Polyspec\Template`, `github.com/polyspec/template/packages/go`다. 이유: 생성 제어 흐름은 코어가 한 번 하는 일을 다섯 언어로 반복했고, 런타임의 모든 규칙을 언어마다 증명해야 했다.
+타입 있는 프로그램은 템플릿의 AST와 타입 manifest의 선언이다(binding 설계 U-4). compiler는 아래 typed IR이 말하는 대로 템플릿을 타입 manifest에 대해 검사하고, backend는 대상 언어의 선언만 낸다. 즉 구조 `Assign`과 manifest가 선언한 record, 그리고 요청을 그것들에 대해 필드마다, 선언된 타입이 거부한 값의 필드 경로와 함께 검사하고 타입 있는 `Assign`을 VAL-21의 값으로 바꾸며 artifact의 AST를 담은 `MapLoader` 위에서 런타임의 `AstProgram`으로 렌더하는 `GeneratedProgram`이다(RT-41). 생성 모듈에는 템플릿 제어 흐름, 식, 런타임 연산이 없다. 코어가 모든 템플릿을 실행하므로 타입 있는 프로그램과 AST 프로그램은 구성상 같은 바이트를 렌더하고 같은 오류로 실패한다. 생성 코드는 자기 언어의 런타임을 사용자가 설치하는 이름으로 import한다. Rust는 crate `polyspec-template`, 다른 언어는 바인딩 패키지 `@polyspec/template`, `polyspec.template`, `Polyspec\Template`, `github.com/polyspec/template/packages/go`다. 이유: 생성 제어 흐름은 코어가 한 번 하는 일을 다섯 언어로 반복했고, 런타임의 모든 규칙을 언어마다 증명해야 했다.
 
 ### 이행
 
@@ -52,9 +52,9 @@ Local 변수는 직선 코드에서 마지막 assignment의 type을 가진다. B
 
 도출한 manifest는 알고 있는 각 내장 함수의 선언된 `minArgs`와 `maxArgs`를 복사한다. 동적 conformance source는 잘못된 호출이 AST 실행과 같은 위치의 `runtime_arity`를 내도록 arity 검사를 runtime에 남기며, 명시적인 정적 manifest는 lowering 중에 그 호출을 거부할 수 있다. 알 수 없는 함수는 열린 arity 호출로 남아 runtime registry에 도달하고, 구현이 없으면 일반 runtime 오류를 낸다.
 
-모든 generated module은 논리 구조 `Assign`, `Definitions`, `Input<T>`, `GeneratedProgram`을 노출한다. 다른 target의 module은 `DefinitionData<T>`, `Definition<T>`, `ArtifactManifest`도 노출한다. Rust module은 program이 definition을 선언할 때만 `Definition<T>`를 선언하고 그 template과 data는 block이 읽을 때만 두며, block이 definition data를 merge하는 template에만 `DefinitionData<T>`를, 선언된 type이 가리키는 record를, template이 읽는 `Assign`의 field를, 값을 다시 변환할 때만 `to_value`를 선언하고 `ArtifactManifest`는 선언하지 않는다. module을 private module로 포함하는 crate는 쓰이지 않는 구조, field, method를 dead code로 보고하기 때문이다. program이 읽지 않는 root field나 definition data도 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, 읽는 값과 같은 field 경로로 실패한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
+타입 있는 프로그램으로 옮기지 않은 backend의 generated module은 논리 구조 `Assign`, `Definitions`, `Input<T>`, `GeneratedProgram`을 노출한다. 다른 target의 module은 `DefinitionData<T>`, `Definition<T>`, `ArtifactManifest`도 노출한다. program이 읽지 않는 root field나 definition data도 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, 읽는 값과 같은 field 경로로 실패한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
-다섯 generated backend 모두 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 모든 구현과 `tests/cases`의 모든 canonical case에서 완료되었다.
+타입 있는 프로그램으로 옮기지 않은 generated backend는 generated template 함수에 runtime `RenderScope`를 전달한다. Include는 같은 scope를 전달하므로 내부 assign이 호출자에게 유지된다. Block은 새 scope를 만들고 root data, definition data, 명시적인 block 인자만 넣는다. Loop binding은 실행 중에만 설치하고 종료 후 이전 상태로 복원한다. 각 generated loop는 entry를 구체화하고 반복 전에 size와 마지막 index를 한 번 계산하며, 매 반복에서 현재 index, key, value, first, last metadata를 scope에 할당한다. Block의 root 전용 fallback은 IR에서 일반적인 scope 인식 동적 조회와 별도로 표현한다. Generated 지원 수준은 모든 구현과 `tests/cases`의 모든 canonical case에서 완료되었다.
 
 `RuntimeServices`는 두 program mode가 함께 사용하는 runtime interface다. 구체적인 `RuntimeEnvironment`가 자원 제한, 등록 함수, 논리 class function을 소유하고 등록을 한 번 검증하며 이 interface를 구현한다. 각 `AstProgram`과 `GeneratedProgram`은 environment 하나를 소유한다. AST에만 필요한 template loading은 AST renderer에 속하며 environment나 generated 실행 상태에는 들어가지 않는다. `RuntimeBindings`가 `RuntimeServices`를 사용하므로 generated 코드는 AST loader나 interpreter에 의존하지 않고 같은 값·오류 의미를 사용한다.
 
@@ -72,9 +72,9 @@ PHP backend는 compiler 호출자가 정하는 namespace를 요구한다. `compi
 
 Go backend는 typed template 제어 흐름을 생성하되 관찰 가능한 값 연산을 `render.RuntimeBindings`로 전달한다. 생성 함수는 `render.Context`, source line index가 있는 frame과 render chain을 공유한다. 내부 오류 전파는 code와 source position을 포함한 원래의 구조화 template 오류를 보존하고, native typed value는 runtime 경계에서 canonical value model로 bind한다.
 
-Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 값 연산을 `RuntimeBindings`에 위임한다. 검증된 artifact 데이터에서 `LineIndex`를 복원하고 `RenderContext`를 통해 출력하며 구조화 오류를 panic이 아닌 값으로 전달한다. Panic은 공개 `prepare`와 `render` operation에서만 잡아 `internal`로 보고한다(ERR-13). Typed 경계의 직렬화는 생성 record와 collection을 canonical `Value` model과 상호 변환한다. 소비자는 generated Rust program을 crate의 tree에 속한 module 파일이 아니라 `include!`로 crate에 넣는다. `build.rs`가 compile한 뒤의 `OUT_DIR`에서, 또는 commit한 파일에서 가져온다. rustfmt는 crate의 module 파일을 format하고 include된 파일은 format하지 않으며 그 배치는 compiler의 것이다. clippy는 include된 코드를 lint하며, 그 코드에는 쓰지 않는 item과 clippy 지적이 없다.
+Rust backend는 타입 있는 프로그램을 낸다. 즉 manifest의 `Assign`과 record(각각 `to_value`를 가짐), 소스의 줄 시작과 함께 canonical AST JSON으로 담은 템플릿 AST, 그리고 `GeneratedProgram`이다. `GeneratedProgram`의 `new(EngineOptions)`는 그 AST를 담은 `MapLoader`(`MapLoader::set_ast_lines`) 위에 crate의 `AstProgram`을 만들고, `render`, `prepare`, `render_bound`, `prepare_bound`, `render_values`, `render_assign`은 요청을 manifest에 대해 검사해 ERR-13의 메시지를 `GeneratedError::Argument`로 내고 그 프로그램으로 렌더한다. `program_mut`는 호스트 함수를 등록할 프로그램을 준다. 생성 모듈은 호스트가 필요한 부분만 부르므로 그 API에 규칙을 이유로 단 `dead_code` 허용을 둔다. consumer는 이를 `include!`로 crate에 가져오며, `build.rs`가 compile한 뒤의 `OUT_DIR`이나 commit된 파일에서 가져오고 crate tree의 module 파일로 두지 않는다. rustfmt는 crate의 module 파일을 포맷하고 include된 파일은 포맷하지 않으며(그 배치는 compiler의 것이다), clippy는 include된 코드를 lint하고 그 코드에는 clippy finding이 없다.
 
-Rust generated source module은 `polyspec-template`, `derive` feature를 켠 `serde`, `preserve_order`와 `arbitrary_precision` feature를 켠 `serde_json`에 직접 의존한다. 이는 generated module의 compile-time 의존성이므로 host crate가 직접 선언해야 한다. 격리 Cargo 설치 프로젝트는 압축을 푼 `.crate` package를 대상으로 generated module을 compile해 이 경계를 강제한다.
+Rust 타입 있는 프로그램은 `polyspec-template`에만 의존한다. 격리 Cargo 설치 프로젝트는 이 경계를 강제하기 위해 추출한 `.crate` package에 대해 그것을 compile한다.
 
 record를 담은 typed 값은 모든 runtime 연산에 canonical 값으로 도달한다. 함수, class 함수, method의 인자, `&&`, `||`, `??`를 제외한 연산자의 피연산자, echo의 식이 이에 해당한다. record는 선언 순서의 선언된 필드로 된 map이 되고, record의 list나 map은 모든 깊이에서 그런 map의 list나 map이 된다. 따라서 모든 backend에서 host 함수는 VAL-21 형태를 받고 연산자는 EXP-34를 적용한다. Typed member 접근과 loop는 typed record를 유지한다. 이유: AST program은 같은 데이터에 map을 넘긴다. Go backend는 record를 native object로 넘겼고, TypeScript와 PHP backend에서는 record를 함수에 넘기는 렌더가 `internal`로 실패했다. `make generated-native-check`는 `tests/fixtures/typed-values`를 typed manifest로 모든 backend에서 컴파일하고 출력을 AST program과 비교한다.
 
