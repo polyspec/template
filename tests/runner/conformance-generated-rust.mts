@@ -22,6 +22,20 @@ const integrationTest = workspace.test('generated_conformance_check');
 // Paths and expected output are embedded as exact Rust string literals.
 const quote = rustString;
 
+// The cases that this runner is known to fail, with the reason; docs/spec/compiler.md#transition states the list. The
+// compiler parses with the legacy TypeScript runtime, which reads a lone surrogate escape as U+FFFD, where EXP-3 makes it
+// parse_invalid_escape, so the AST of these cases holds no error. Remove the entries when the compiler parses with the
+// Node binding (T28.4). The run fails when a case outside the list fails and when a case of the list passes.
+const KNOWN_FAILURE_REASON = 'the compiler parses with the legacy TypeScript runtime, which reads a lone surrogate escape as U+FFFD (EXP-3); removed when the compiler parses with the Node binding (T28.4)';
+const KNOWN_FAILURES: ReadonlyMap<string, string> = new Map([
+  'errors/high-surrogate-at-quote-escape',
+  'errors/high-surrogate-before-pair-escape',
+  'errors/lone-high-surrogate-escape',
+  'errors/lone-low-surrogate-escape',
+].map(id => [id, KNOWN_FAILURE_REASON]));
+// The known failures that this run observed.
+let knownFailed = 0;
+
 const failures: string[] = [];
 const runnable: { testCase: TestCase; sourcePath: string; name: string }[] = [];
 let compilePassed = 0;
@@ -106,12 +120,22 @@ ${tests}
     } else {
       const run = await runCaseTests(rustRunArgs('generated_conformance_check', temporary), { cwd: root, env },
         new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
-      failures.push(...caseTestFailures('Rust', run));
-      if (run.status === 0 || run.failed.length > 0) executed = runnable.length - run.failed.length;
+      const failed = new Set(run.failed);
+      // A failure outside the list fails the run; a failure before any case failed is reported as it is.
+      failures.push(...caseTestFailures('Rust', { ...run, failed: run.failed.filter(id => !KNOWN_FAILURES.has(id)), status: run.failed.length > 0 && run.failed.every(id => KNOWN_FAILURES.has(id)) ? 0 : run.status }));
+      if (run.status === 0 || run.failed.length > 0) {
+        executed = runnable.length - run.failed.length;
+        for (const { testCase } of runnable) {
+          if (!KNOWN_FAILURES.has(testCase.id)) continue;
+          if (failed.has(testCase.id)) knownFailed++;
+          else failures.push(`${testCase.id}: a known failure passed; remove it from KNOWN_FAILURES (${KNOWN_FAILURE_REASON})`);
+        }
+      }
     }
   }
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
+process.stdout.write(`known failures ${knownFailed}: ${[...KNOWN_FAILURES.keys()].join(', ')} (${KNOWN_FAILURE_REASON})\n`);
 finishRun('Rust', compilePassed + executed, cases.length, failures);
