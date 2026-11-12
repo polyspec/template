@@ -2,7 +2,7 @@
 // schemas of contracts/schema/, the content of the token and format files.
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Ajv, JSONSchemaType, ValidateFunction } from 'ajv';
+import type { Ajv, JSONSchemaType, Schema, ValidateFunction } from 'ajv';
 import { caseIds, casesDir } from '../tests/runner/case-list.mts';
 import { jsonDocument, readJson } from './json-document.mts';
 
@@ -25,22 +25,23 @@ export interface ExpectedError {
 export interface ExpectedRaises {
   raises: {
     kind: string;
-    status: null;
+    status: string | null;
     category: string;
-    message: null;
+    message: string | null;
     properties: { template: string; line: number; col: number };
   };
 }
 
 /** The schema of the raises object, which the filesystem cases also use for their expected failure. */
-export const RAISES_SCHEMA: JSONSchemaType<ExpectedRaises['raises']> = {
+export const RAISES_SCHEMA: Schema = {
   type: 'object',
   required: ['kind', 'status', 'category', 'message', 'properties'],
   properties: {
     kind: { type: 'string', pattern: '^[a-z][a-z0-9_]*$' },
-    status: { type: 'null', nullable: true },
+    // A template error has no HTTP status, and ERR-3 compares no message.
+    status: { type: 'string', nullable: true },
     category: { type: 'string', enum: ['value', 'type', 'io', 'store', 'busy', 'internal'] },
-    message: { type: 'null', nullable: true },
+    message: { type: 'string', nullable: true },
     properties: {
       type: 'object',
       required: ['template', 'line', 'col'],

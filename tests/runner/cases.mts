@@ -10,7 +10,7 @@ import { caseIds, caseOptions, casesDir } from './case-list.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { isJsonObject, parsedJsonObject } from './checked.mts';
 import { root } from './drivers.mts';
-import type { JSONSchemaType } from 'ajv';
+import type { JSONSchemaType, Schema } from 'ajv';
 
 /** The expected error of a case, read and validated by the one reader of the case files. */
 export type { ExpectedError };
@@ -54,7 +54,7 @@ interface FilesystemCase {
 }
 
 const NAMES: JSONSchemaType<Record<string, string>> = { type: 'object', required: [], additionalProperties: { type: 'string' } };
-const FILESYSTEM_CASES_SCHEMA: JSONSchemaType<FilesystemCase[]> = {
+const FILESYSTEM_CASES_SCHEMA: Schema = {
   type: 'array',
   items: {
     type: 'object',
@@ -66,7 +66,7 @@ const FILESYSTEM_CASES_SCHEMA: JSONSchemaType<FilesystemCase[]> = {
       hardLinks: { ...NAMES, nullable: true },
       expected: {
         type: 'object',
-        properties: { html: { type: 'string', nullable: true }, raises: { ...RAISES_SCHEMA, nullable: true } },
+        properties: { html: { type: 'string' }, raises: RAISES_SCHEMA },
         required: [],
         additionalProperties: false,
       },
