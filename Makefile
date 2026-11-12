@@ -919,9 +919,9 @@ clean: ## Remove build outputs
 # The root Cargo workspace holds the core crate and the binding crates that binding scaffold writes (binding L-2). binding
 # is not yet a package that package-lock.json pins; until it is, BINDING names the cli (packages/ts/src/cli.ts) of a
 # binding checkout, and the targets refuse to run without it. bindings writes the generated folders of packages/ts,
-# packages/python and packages/php-ext, which Git ignores; bindings-check runs the contract check, which also compares the
+# packages/ts/wasm, packages/python, packages/php-ext and packages/go, which Git ignores; bindings-check runs the contract check, which also compares the
 # tracked binding packages with what binding scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
-BINDING_CRATES := polyspec-template-node polyspec-template-python polyspec-template-php-ext
+BINDING_CRATES := polyspec-template-node polyspec-template-wasm polyspec-template-python polyspec-template-php-ext polyspec-template-go
 BINDING ?=
 .PHONY: bindings bindings-check lint-bindings test-bindings
 bindings:

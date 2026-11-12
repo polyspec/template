@@ -2,7 +2,7 @@
 # Cargo.lock at the root pins every dependency of all of them, the commit of polyspec-binding-core included (CK-20).
 [workspace]
 resolver = "2"
-members = ["packages/rust", "packages/ts", "packages/python", "packages/php-ext"]
+members = ["packages/rust", "packages/ts", "packages/ts/wasm", "packages/python", "packages/php-ext", "packages/go/internal/ffi"]
 
 # The lints of the core crate, which make lint-rust runs with cargo clippy (T27.1-64, kit K1050, R-1): every warning fails,
 # no unsafe code (config/cargo.schema.json), and no hidden error (P8): a dropped must_use value, a `let _` of a must_use or

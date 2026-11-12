@@ -68,7 +68,7 @@ test('the legacy language packages and the binding packages are no release targe
     'legacy/packages/ts/package.json', 'legacy/packages/php/composer.json', 'legacy/packages/php-ext/composer.json',
     'legacy/packages/cli/php/composer.json', 'legacy/packages/python/pyproject.toml', 'legacy/packages/go/go.mod',
     'packages/ts/package.json', 'packages/ts/Cargo.toml', 'packages/python/pyproject.toml', 'packages/python/Cargo.toml',
-    'packages/php-ext/composer.json', 'packages/php-ext/Cargo.toml',
+    'packages/php-ext/composer.json', 'packages/php-ext/Cargo.toml', 'packages/ts/wasm/Cargo.toml', 'packages/go/go.mod', 'packages/go/internal/ffi/Cargo.toml',
   ];
   for (const file of unreleased) {
     assert.equal(CONFIG.manifests[file], undefined, `${file} is a manifest of the release`);

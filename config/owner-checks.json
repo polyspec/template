@@ -1239,7 +1239,8 @@
       "paths": [
         "packages/ts/**",
         "packages/python/**",
-        "packages/php-ext/**"
+        "packages/php-ext/**",
+        "packages/go/**"
       ],
       "targets": [
         "bindings-check"
@@ -1955,6 +1956,7 @@
         "packages/ts/**",
         "packages/python/**",
         "packages/php-ext/**",
+        "packages/go/**",
         "Cargo.lock"
       ]
     }

@@ -78,3 +78,4 @@ legacy/packages/go/go.work.sum
 # The binding packages that binding writes from packages/rust/interface.json (binding design L-1); make bindings writes
 # them again.
 /packages/*/generated/
+/packages/ts/wasm/generated/
