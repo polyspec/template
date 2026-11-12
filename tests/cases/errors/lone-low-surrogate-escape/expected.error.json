@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_INVALID_ESCAPE",
+  "code": "parse_invalid_escape",
   "template": "input.tpl",
   "line": 1,
   "col": 5

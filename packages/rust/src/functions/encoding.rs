@@ -9,7 +9,7 @@ use polyspec_ordered_json::{StringifyOptions, stringify};
 
 /// FUN-26 to FUN-28: compact JSON text of a value, written by the JSON serializer of ordered-json with its HTML-safe
 /// escapes (FUN-27). A native object is opaque (VAL-19) and has no JSON text, so a value that is or holds one fails with
-/// `E_RUNTIME_TYPE`.
+/// `runtime_type`.
 pub fn to_json(value: &Value) -> Result<String, FunctionError> {
     let json = to_json_value(value).map_err(|error| match error.code {
         ErrorCode::E_DATA_UNSUPPORTED_TYPE => type_error("json does not accept a native object"),

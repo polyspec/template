@@ -3,9 +3,10 @@
 use serde::Serialize;
 use std::fmt;
 
-/// Error codes of the specification.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[expect(non_camel_case_types, reason = "variants are the error codes by their exact names")]
+/// Error codes of the specification. A variant is named `E_` and its kind in capitals; the kind, which `as_str` returns and
+/// the serialization writes, is lowercase snake_case (ERR-1).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[expect(non_camel_case_types, reason = "ERR-1: a variant is the kind of its code in capitals")]
 pub enum ErrorCode {
     // BEGIN GENERATED ERROR CODES
     /// The source is not valid UTF-8.
@@ -93,52 +94,58 @@ pub enum ErrorCode {
     // END GENERATED ERROR CODES
 }
 
+impl Serialize for ErrorCode {
+    fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(self.as_str())
+    }
+}
+
 impl ErrorCode {
-    /// The code as its specification name.
+    /// The kind of the code, lowercase snake_case (ERR-1).
     pub fn as_str(self) -> &'static str {
         match self {
             // BEGIN GENERATED ERROR CODES
-            ErrorCode::E_LEX_INVALID_UTF8 => "E_LEX_INVALID_UTF8",
-            ErrorCode::E_PARSE_UNTERMINATED_TAG => "E_PARSE_UNTERMINATED_TAG",
-            ErrorCode::E_PARSE_UNTERMINATED_COMMENT => "E_PARSE_UNTERMINATED_COMMENT",
-            ErrorCode::E_PARSE_UNTERMINATED_STRING => "E_PARSE_UNTERMINATED_STRING",
-            ErrorCode::E_PARSE_UNEXPECTED_TOKEN => "E_PARSE_UNEXPECTED_TOKEN",
-            ErrorCode::E_PARSE_INVALID_NUMBER => "E_PARSE_INVALID_NUMBER",
-            ErrorCode::E_PARSE_INVALID_ESCAPE => "E_PARSE_INVALID_ESCAPE",
-            ErrorCode::E_PARSE_UNEXPECTED_CLOSE => "E_PARSE_UNEXPECTED_CLOSE",
-            ErrorCode::E_PARSE_UNCLOSED_BLOCK => "E_PARSE_UNCLOSED_BLOCK",
-            ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK => "E_PARSE_ELSE_OUTSIDE_BLOCK",
-            ErrorCode::E_PARSE_DUPLICATE_ELSE => "E_PARSE_DUPLICATE_ELSE",
-            ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE => "E_PARSE_ELSEIF_AFTER_ELSE",
-            ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF => "E_PARSE_ELSEIF_NOT_IN_IF",
-            ErrorCode::E_PARSE_RESERVED_NAME => "E_PARSE_RESERVED_NAME",
-            ErrorCode::E_PARSE_INVALID_PATH => "E_PARSE_INVALID_PATH",
-            ErrorCode::E_PARSE_INVALID_BLOCK_TAG => "E_PARSE_INVALID_BLOCK_TAG",
-            ErrorCode::E_PARSE_INVALID_WRAPPER => "E_PARSE_INVALID_WRAPPER",
-            ErrorCode::E_PARSE_INVALID_DIRECTIVE => "E_PARSE_INVALID_DIRECTIVE",
-            ErrorCode::E_LOAD_NOT_FOUND => "E_LOAD_NOT_FOUND",
-            ErrorCode::E_LOAD_CYCLE => "E_LOAD_CYCLE",
-            ErrorCode::E_LOAD_OUTSIDE_ROOT => "E_LOAD_OUTSIDE_ROOT",
-            ErrorCode::E_LOAD_FAILED => "E_LOAD_FAILED",
-            ErrorCode::E_DATA_NUMBER_RANGE => "E_DATA_NUMBER_RANGE",
-            ErrorCode::E_DATA_NUMBER_NOT_FINITE => "E_DATA_NUMBER_NOT_FINITE",
-            ErrorCode::E_DATA_INVALID_UTF8 => "E_DATA_INVALID_UTF8",
-            ErrorCode::E_DATA_UNSUPPORTED_TYPE => "E_DATA_UNSUPPORTED_TYPE",
-            ErrorCode::E_DATA_DEPTH => "E_DATA_DEPTH",
-            ErrorCode::E_DATA_INVALID_JSON => "E_DATA_INVALID_JSON",
-            ErrorCode::E_RUNTIME_TYPE => "E_RUNTIME_TYPE",
-            ErrorCode::E_RUNTIME_COMPARE => "E_RUNTIME_COMPARE",
-            ErrorCode::E_RUNTIME_DIV_ZERO => "E_RUNTIME_DIV_ZERO",
-            ErrorCode::E_RUNTIME_STRINGIFY => "E_RUNTIME_STRINGIFY",
-            ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION => "E_RUNTIME_UNKNOWN_FUNCTION",
-            ErrorCode::E_RUNTIME_ARITY => "E_RUNTIME_ARITY",
-            ErrorCode::E_RUNTIME_HOST_FUNCTION => "E_RUNTIME_HOST_FUNCTION",
-            ErrorCode::E_RUNTIME_UNKNOWN_LOOP => "E_RUNTIME_UNKNOWN_LOOP",
-            ErrorCode::E_RUNTIME_BLOCK_UNDEFINED => "E_RUNTIME_BLOCK_UNDEFINED",
-            ErrorCode::E_RUNTIME_BLOCK_REDEFINED => "E_RUNTIME_BLOCK_REDEFINED",
-            ErrorCode::E_RUNTIME_DEPTH => "E_RUNTIME_DEPTH",
-            ErrorCode::E_RUNTIME_LIMIT => "E_RUNTIME_LIMIT",
-            ErrorCode::E_INTERNAL => "E_INTERNAL",
+            ErrorCode::E_LEX_INVALID_UTF8 => "lex_invalid_utf8",
+            ErrorCode::E_PARSE_UNTERMINATED_TAG => "parse_unterminated_tag",
+            ErrorCode::E_PARSE_UNTERMINATED_COMMENT => "parse_unterminated_comment",
+            ErrorCode::E_PARSE_UNTERMINATED_STRING => "parse_unterminated_string",
+            ErrorCode::E_PARSE_UNEXPECTED_TOKEN => "parse_unexpected_token",
+            ErrorCode::E_PARSE_INVALID_NUMBER => "parse_invalid_number",
+            ErrorCode::E_PARSE_INVALID_ESCAPE => "parse_invalid_escape",
+            ErrorCode::E_PARSE_UNEXPECTED_CLOSE => "parse_unexpected_close",
+            ErrorCode::E_PARSE_UNCLOSED_BLOCK => "parse_unclosed_block",
+            ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK => "parse_else_outside_block",
+            ErrorCode::E_PARSE_DUPLICATE_ELSE => "parse_duplicate_else",
+            ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE => "parse_elseif_after_else",
+            ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF => "parse_elseif_not_in_if",
+            ErrorCode::E_PARSE_RESERVED_NAME => "parse_reserved_name",
+            ErrorCode::E_PARSE_INVALID_PATH => "parse_invalid_path",
+            ErrorCode::E_PARSE_INVALID_BLOCK_TAG => "parse_invalid_block_tag",
+            ErrorCode::E_PARSE_INVALID_WRAPPER => "parse_invalid_wrapper",
+            ErrorCode::E_PARSE_INVALID_DIRECTIVE => "parse_invalid_directive",
+            ErrorCode::E_LOAD_NOT_FOUND => "load_not_found",
+            ErrorCode::E_LOAD_CYCLE => "load_cycle",
+            ErrorCode::E_LOAD_OUTSIDE_ROOT => "load_outside_root",
+            ErrorCode::E_LOAD_FAILED => "load_failed",
+            ErrorCode::E_DATA_NUMBER_RANGE => "data_number_range",
+            ErrorCode::E_DATA_NUMBER_NOT_FINITE => "data_number_not_finite",
+            ErrorCode::E_DATA_INVALID_UTF8 => "data_invalid_utf8",
+            ErrorCode::E_DATA_UNSUPPORTED_TYPE => "data_unsupported_type",
+            ErrorCode::E_DATA_DEPTH => "data_depth",
+            ErrorCode::E_DATA_INVALID_JSON => "data_invalid_json",
+            ErrorCode::E_RUNTIME_TYPE => "runtime_type",
+            ErrorCode::E_RUNTIME_COMPARE => "runtime_compare",
+            ErrorCode::E_RUNTIME_DIV_ZERO => "runtime_div_zero",
+            ErrorCode::E_RUNTIME_STRINGIFY => "runtime_stringify",
+            ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION => "runtime_unknown_function",
+            ErrorCode::E_RUNTIME_ARITY => "runtime_arity",
+            ErrorCode::E_RUNTIME_HOST_FUNCTION => "runtime_host_function",
+            ErrorCode::E_RUNTIME_UNKNOWN_LOOP => "runtime_unknown_loop",
+            ErrorCode::E_RUNTIME_BLOCK_UNDEFINED => "runtime_block_undefined",
+            ErrorCode::E_RUNTIME_BLOCK_REDEFINED => "runtime_block_redefined",
+            ErrorCode::E_RUNTIME_DEPTH => "runtime_depth",
+            ErrorCode::E_RUNTIME_LIMIT => "runtime_limit",
+            ErrorCode::E_INTERNAL => "internal",
             // END GENERATED ERROR CODES
         }
     }
@@ -304,7 +311,7 @@ impl fmt::Display for RequestError {
 
 impl std::error::Error for RequestError {}
 
-/// Runs one public operation and reports a panic as `E_INTERNAL` for `template` (ERR-12, ERR-13).
+/// Runs one public operation and reports a panic as `internal` for `template` (ERR-12, ERR-13).
 ///
 /// The operations of the engine return their errors as values; a panic is an implementation
 /// defect or a panic of a host callback. Catching it here keeps the host process alive, also when

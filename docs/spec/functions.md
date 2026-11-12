@@ -15,10 +15,10 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 - **FUN-1** A function call is `name(arg, ...)`. The pipe form `a | name(b, ...)` is equivalent to `name(a, b, ...)`. A pipe without parentheses `a | name` is equivalent to `name(a)`.
 - **FUN-2** Function names are a namespace separate from variable names. A variable named `length` and the function `length` do not conflict.
-- **FUN-3** The number of arguments is checked at evaluation time. A call with fewer arguments than the required count or more than the accepted count fails with `E_RUNTIME_ARITY`.
-- **FUN-4** A call to a name that is neither a built-in function nor a registered host function fails with `E_RUNTIME_UNKNOWN_FUNCTION`.
+- **FUN-3** The number of arguments is checked at evaluation time. A call with fewer arguments than the required count or more than the accepted count fails with `runtime_arity`.
+- **FUN-4** A call to a name that is neither a built-in function nor a registered host function fails with `runtime_unknown_function`.
 - **FUN-5** String positions and lengths count Unicode code points.
-- **FUN-6** An argument whose type is not accepted by the function fails with `E_RUNTIME_TYPE` unless the function definition states another result.
+- **FUN-6** An argument whose type is not accepted by the function fails with `runtime_type` unless the function definition states another result.
 
 ## Safe strings
 
@@ -49,7 +49,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 | `lower(s)` | string | ASCII letters `A`–`Z` replaced by `a`–`z`; other characters unchanged |
 | `trim(s, chars=" \t\r\n")` | string, string | `s` without leading and trailing characters contained in `chars` |
 | `replace(s, from, to)` | string, string, string | Every literal occurrence of `from` replaced by `to`; when `from` is empty, `s` unchanged |
-| `split(s, sep)` | string, string | List of substrings separated by `sep`; empty `sep` fails with `E_RUNTIME_TYPE` |
+| `split(s, sep)` | string, string | List of substrings separated by `sep`; empty `sep` fails with `runtime_type` |
 | `truncate(s, n, suffix="...")` | string, number, string | When the length of `s` exceeds `n`, the first `n` code points followed by `suffix`; otherwise `s`; `n` is a count (FUN-50) |
 | `contains(h, n)` | string or list, any | `true` when `n` is a substring of `h`, or when a list element equals `n` by `==` |
 | `starts_with(s, p)` | string, string | `true` when `s` begins with `p` |
@@ -62,7 +62,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 | Function | Arguments | Result |
 | --- | --- | --- |
-| `length(v)` | any | Code point count of a string, element count of a list, entry count of a map, `0` for null; other types fail with `E_RUNTIME_TYPE` |
+| `length(v)` | any | Code point count of a string, element count of a list, entry count of a map, `0` for null; other types fail with `runtime_type` |
 | `keys(m)` | map or list | List of the keys of a map in insertion order; for a list, the indices as numbers |
 | `values(m)` | map or list | List of the values of a map in insertion order; a list unchanged |
 | `first(v)` | list or string | First element or first code point; `null` when empty |
@@ -74,7 +74,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 | `range(from, to, step=1)` | number, number, number | List from `from` to `to` inclusive in increments of `step` |
 | `default(v, d)` | any, any | `d` when `v` is falsy; otherwise `v` |
 
-- **FUN-14** `range` with `step` equal to `0` fails with `E_RUNTIME_TYPE`. `range` with a negative `step` counts down. `range` whose element count exceeds 1,000,000 fails with `E_RUNTIME_LIMIT`. When `step` does not reach `to`, the list is empty.
+- **FUN-14** `range` with `step` equal to `0` fails with `runtime_type`. `range` with a negative `step` counts down. `range` whose element count exceeds 1,000,000 fails with `runtime_limit`. When `step` does not reach `to`, the list is empty.
 - **FUN-15** `default` tests truthiness; `??` in an expression tests only for `null`.
 
 ### Number
@@ -90,9 +90,9 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 | `max(a, b, ...)` | numbers | Largest argument |
 | `num(v)` | any | `to_number(v)` |
 
-- **FUN-16** `number`, `round`, `floor`, `ceil`, `abs` and `num` convert their first argument with `to_number`; a value that cannot be converted fails with `E_RUNTIME_TYPE`.
+- **FUN-16** `number`, `round`, `floor`, `ceil`, `abs` and `num` convert their first argument with `to_number`; a value that cannot be converted fails with `runtime_type`.
 - **FUN-17** `min` and `max` require at least one argument and accept only numbers.
-- **FUN-50** An integer argument (the `start` and `length` of `slice`, the seconds of `date`) and a count (the `n` of `truncate`, the `decimals` of `number` and `d` of `round`) are converted with `to_number`. A value with a fractional part is `E_RUNTIME_TYPE`, and so is a negative count; a value whose magnitude is greater than 2^53 − 1 is `E_RUNTIME_LIMIT`. The argument is never truncated toward zero, rounded or clamped to a range that the implementation can hold. Reason: a fraction or a magnitude that no implementation holds exactly has no single integer, so a value that one host truncates and another rounds or saturates would give different results.
+- **FUN-50** An integer argument (the `start` and `length` of `slice`, the seconds of `date`) and a count (the `n` of `truncate`, the `decimals` of `number` and `d` of `round`) are converted with `to_number`. A value with a fractional part is `runtime_type`, and so is a negative count; a value whose magnitude is greater than 2^53 − 1 is `runtime_limit`. The argument is never truncated toward zero, rounded or clamped to a range that the implementation can hold. Reason: a fraction or a magnitude that no implementation holds exactly has no single integer, so a value that one host truncates and another rounds or saturates would give different results.
 
 ### Value
 
@@ -101,7 +101,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 | `str(v)` | any | Stringified `v` as a plain string |
 | `type(v)` | any | One of `"null"`, `"bool"`, `"number"`, `"string"`, `"list"`, `"map"` |
 
-- **FUN-18** `str` of a list or a map fails with `E_RUNTIME_STRINGIFY`.
+- **FUN-18** `str` of a list or a map fails with `runtime_stringify`.
 - **FUN-19** `type` of a safe string is `"string"`.
 
 ### Time
@@ -113,7 +113,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 ## number
 
-- **FUN-20** `x` is converted with `to_number`. `decimals` is a count (FUN-50) of at most 100; a larger count is `E_RUNTIME_LIMIT`. Reason: the result has `decimals` fraction digits, so the count bounds the text that one call writes.
+- **FUN-20** `x` is converted with `to_number`. `decimals` is a count (FUN-50) of at most 100; a larger count is `runtime_limit`. Reason: the result has `decimals` fraction digits, so the count bounds the text that one call writes.
 - **FUN-21** The shortest round-trip decimal digits of `x` are expanded to positional notation without exponent.
 - **FUN-22** The positional digit string is rounded to `decimals` fraction digits with the half-away-from-zero rule applied to the decimal digits. `number(2.675, 2)` returns `2.68`. `number(1.005, 2)` returns `1.01`. `number(-2.5)` returns `-3`.
 - **FUN-23** The integer part is grouped in threes from the right with `thousands`. The fraction part is joined with `dec`. When `decimals` is `0`, `dec` is not written.
@@ -122,7 +122,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 ## json
 
-- **FUN-26** `json(v)` returns compact JSON text without whitespace. Map keys are written in insertion order. Numbers are written by the number-to-string rule of the data model. A native object is opaque (VAL-19) and has no JSON text: `json` of a value that is or holds a native object, at any depth of its lists and maps, fails with E_RUNTIME_TYPE at the call; it never writes `null` or another stand-in for the object.
+- **FUN-26** `json(v)` returns compact JSON text without whitespace. Map keys are written in insertion order. Numbers are written by the number-to-string rule of the data model. A native object is opaque (VAL-19) and has no JSON text: `json` of a value that is or holds a native object, at any depth of its lists and maps, fails with runtime_type at the call; it never writes `null` or another stand-in for the object.
 - **FUN-27** Strings are escaped per JSON, and additionally `<` is written as `\u003c`, `>` as `\u003e`, `&` as `\u0026`, U+2028 as `\u2028` and U+2029 as `\u2029`. `/` and non-ASCII characters are written as themselves.
 - **FUN-28** The result is a plain string. An echo tag therefore escapes it, which is correct in element text and in an attribute value of either quote style. A script element receives the JSON text with `{= json(v) | raw}`; the escaping of FUN-27 keeps that text inside a script element. A safe string given to `json` is written as a JSON string of its text.
 - **FUN-49** A structural quote of JSON cannot be escaped, so JSON text is never safe in a double-quoted attribute without escaping. This is the reason FUN-28 returns a plain string.
@@ -142,12 +142,12 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 
 - **FUN-34** `sort(list, key?)` returns a new list sorted in ascending order with a stable algorithm. The input list is not modified.
 - **FUN-35** Without `key`, the elements are compared. With `key`, the value at path `key` of each element is compared; `key` is a path string such as `"price"` or `"user.name"` resolved by the lookup rule of the expression language.
-- **FUN-36** All compared values are numbers, or all are strings. Strings are compared by code point. A mix of types, or a value that is not a number or a string, fails with `E_RUNTIME_TYPE`.
+- **FUN-36** All compared values are numbers, or all are strings. Strings are compared by code point. A mix of types, or a value that is not a number or a string, fails with `runtime_type`.
 
 ## date
 
 - **FUN-37** `v` is a number of unix seconds, an integer argument (FUN-50), or a string in one of the forms `YYYY-MM-DD`, `YYYY-MM-DD HH:MM:SS`, `YYYY-MM-DDTHH:MM:SS`, each optionally followed by `Z` or `±HH:MM`. A string without offset is interpreted in `env.timezone`. A date-only string has the time `00:00:00`. An offset `±HH:MM` has `HH` from `00` to `23` and `MM` from `00` to `59`; a string with an offset outside that range is unparseable (FUN-38). The day of a string is a day of its month in the proleptic Gregorian calendar: `DD` is at most 28, 29, 30 or 31 by the month and, for February, by the leap year rule; a string that names another day, such as `2025-02-29` or `2024-04-31`, is unparseable (FUN-38), not the day that the excess reaches in the next month.
-- **FUN-38** `v` equal to `null` returns `""`. Any other type or an unparseable string fails with `E_RUNTIME_TYPE`.
+- **FUN-38** `v` equal to `null` returns `""`. Any other type or an unparseable string fails with `runtime_type`.
 - **FUN-39** The output is computed in `env.timezone`. `env.timezone` is `Z` or a fixed offset `±HH:MM`. Named time zones are not supported and no time zone database is used.
 - **FUN-40** Format tokens:
 
@@ -182,7 +182,7 @@ The machine-readable source for the function contract is [`packages/compiler/fun
 Host callbacks also receive the render environment. TypeScript, Go, Rust and Python name a `HostFunction` and a `FunctionContext` whose `env` holds `timezone` and `now`; PHP and the PHP extension pass the environment array directly as the second callable argument. These native signatures expose the same fixed offset and render clock without importing implementation modules.
 
 - **FUN-44** Registering a name that is a built-in function fails at registration time. Registering a name twice replaces the earlier function.
-- **FUN-45** The returned value is converted by the host binding rules of the data model. A value that cannot be converted fails with the corresponding `E_DATA_*` code.
-- **FUN-46** An error that `fn` reports through the error mechanism of the host language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails the render with `E_RUNTIME_HOST_FUNCTION` and the position of the call in the template. A panic of `fn` in Go or Rust is `E_INTERNAL` (ERR-13). A native object argument arrives as the original host object (VAL-18).
-- **FUN-47** Every host that renders a template registers the same function names. A template that calls a name registered in one host only fails in the other host with `E_RUNTIME_UNKNOWN_FUNCTION`.
+- **FUN-45** The returned value is converted by the host binding rules of the data model. A value that cannot be converted fails with the corresponding `data_*` code.
+- **FUN-46** An error that `fn` reports through the error mechanism of the host language, a thrown exception in TypeScript and PHP or a returned error in Go and Rust, fails the render with `runtime_host_function` and the position of the call in the template. A panic of `fn` in Go or Rust is `internal` (ERR-13). A native object argument arrives as the original host object (VAL-18).
+- **FUN-47** Every host that renders a template registers the same function names. A template that calls a name registered in one host only fails in the other host with `runtime_unknown_function`.
 - **FUN-48** A host function that returns a string returns a plain string. A host cannot return a safe string; a template applies `raw` to the result when it must be written unescaped.

@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 871e0b2bdd73e89168e6d462cb0cb8b31d35fd40e42b202b887c7367b397ef2b -->
+<!-- source-sha256: 523db9e052917b08bada93a5dada4de3417222da7baa4a8a05bbb1daab289de2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -13,6 +13,7 @@
 - Rust crate는 `unwrap`, `expect`, 그리고 값을 자르거나 넘기거나 부호를 잃을 수 있는 cast를 거부하고, clippy.toml은 `Result::ok`와 그 `unwrap_or` 계열에 더해 `Option::{unwrap_or, unwrap_or_default, unwrap_or_else, map_or, map_or_else}`와 `Result::{map_or, map_or_else}`를 금지한다(R-1). panic하던 불변식 위반은 `E_INTERNAL`이며, 남은 사용은 모두 규칙을 이유로 적은 `allow`를 가진다. `MapLoader::set_ast`는 JSON 형태가 없는 AST에 오류를 돌려주고 `value_from_json`은 `Result`를 돌려준다.
 - Rust 구현은 숫자의 텍스트를 JSON 숫자 토큰 함수인 `polyspec-ordered-json`의 `number_text`로 쓴다(VAL-9, VAL-10). `-0`은 계속 `0`이며 그 이유를 VAL-9에 적었다. 어떤 값도 갖지 않는 유한하지 않은 숫자는 쓰는 자리에서 `E_INTERNAL`이다.
 - Rust 구현은 JSON 입력을 `serde_json::Value` 대신 `polyspec_ordered_json::Value`로 받는다: `Engine::render`, `prepare`, `bind`, `bind_json`, `bind_map`, `defines_from_json`, `env_from_json`, `read_json`은 ordered-json의 값을 읽고, `to_json_value`와 `value_from_json`은 그 값을 쓰고 읽으며, `json`은 ordered-json의 HTML 안전 직렬화기로 텍스트를 쓴다(VAL-12, VAL-13, FUN-26, FUN-27). crate는 `polyspec_ordered_json`을 다시 내보낸다. 다른 JSON 타입을 가진 define 항목이나 환경의 필드는 `E_DATA_UNSUPPORTED_TYPE`다.
+- 오류 코드는 소문자 snake_case kind다(`E_DATA_DEPTH`는 `data_depth`, ERR-1): docs/spec/errors.md의 목록, 모든 명세, contract case와 fixture, Rust `ErrorCode::as_str`와 `TemplateError`의 직렬화. legacy 구현은 없어질 때까지 대문자 이름을 유지하며 `make error-codes`가 kind에서 그 이름을 쓴다.
 
 ## 0.0.27
 

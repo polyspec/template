@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_ELSEIF_AFTER_ELSE",
+  "code": "parse_elseif_after_else",
   "template": "input.tpl",
   "line": 5,
   "col": 1

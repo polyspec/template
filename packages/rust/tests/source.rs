@@ -75,7 +75,7 @@ fn public_source_contexts_preserve_the_shared_fixtures() {
             let restored = LineIndex::from_starts(item.lines.clone());
             assert_eq!(source.lines(), &restored);
             let span: Span = [item.probe.offset, item.probe.end];
-            assert_eq!(ErrorCode::E_PARSE_UNEXPECTED_TOKEN.as_str(), "E_PARSE_UNEXPECTED_TOKEN");
+            assert_eq!(ErrorCode::E_PARSE_UNEXPECTED_TOKEN.as_str(), "parse_unexpected_token");
             assert_eq!(source.length(), item.offsets.byte.len() - 1);
             for (start, offset) in item.offsets.byte.iter().enumerate() {
                 assert_eq!(source.byte_at(start).expect("native index"), *offset);

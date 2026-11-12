@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_DUPLICATE_ELSE",
+  "code": "parse_duplicate_else",
   "template": "input.tpl",
   "line": 5,
   "col": 1

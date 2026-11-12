@@ -3855,7 +3855,7 @@
     "requirements": [
       "EXP-10"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-chained-comparison",
@@ -3863,7 +3863,7 @@
     "requirements": [
       "EXP-10"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-invalid-number",
@@ -3871,7 +3871,7 @@
     "requirements": [
       "EXP-2"
     ],
-    "error": "E_PARSE_INVALID_NUMBER"
+    "error": "parse_invalid_number"
   },
   {
     "name": "error-leading-dot-number",
@@ -3879,7 +3879,7 @@
     "requirements": [
       "EXP-2"
     ],
-    "error": "E_PARSE_INVALID_NUMBER"
+    "error": "parse_invalid_number"
   },
   {
     "name": "error-invalid-escape",
@@ -3887,7 +3887,7 @@
     "requirements": [
       "EXP-3"
     ],
-    "error": "E_PARSE_INVALID_ESCAPE"
+    "error": "parse_invalid_escape"
   },
   {
     "name": "error-unterminated-string",
@@ -3895,7 +3895,7 @@
     "requirements": [
       "EXP-3"
     ],
-    "error": "E_PARSE_UNTERMINATED_STRING"
+    "error": "parse_unterminated_string"
   },
   {
     "name": "member-method-call",
@@ -4121,7 +4121,7 @@
       "EXP-8",
       "EXP-11"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-call-result-call",
@@ -4129,7 +4129,7 @@
     "requirements": [
       "EXP-8"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-empty",
@@ -4137,7 +4137,7 @@
     "requirements": [
       "EXP-8"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-dot-whitespace",
@@ -4146,7 +4146,7 @@
       "EXP-5",
       "EXP-8"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-arrow-operator",
@@ -4154,7 +4154,7 @@
     "requirements": [
       "EXP-6"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "error-brace-map",
@@ -4162,7 +4162,7 @@
     "requirements": [
       "EXP-6"
     ],
-    "error": "E_PARSE_UNEXPECTED_TOKEN"
+    "error": "parse_unexpected_token"
   },
   {
     "name": "depth-limit-parentheses",
@@ -4452,7 +4452,7 @@
     "requirements": [
       "RT-34"
     ],
-    "error": "E_RUNTIME_LIMIT"
+    "error": "runtime_limit"
   },
   {
     "name": "depth-limit-unary",
@@ -5239,6 +5239,6 @@
     "requirements": [
       "RT-34"
     ],
-    "error": "E_RUNTIME_LIMIT"
+    "error": "runtime_limit"
   }
 ]

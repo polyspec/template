@@ -1,5 +1,5 @@
 {
-  "code": "E_RUNTIME_UNKNOWN_LOOP",
+  "code": "runtime_unknown_loop",
   "template": "input.tpl",
   "line": 1,
   "col": 4

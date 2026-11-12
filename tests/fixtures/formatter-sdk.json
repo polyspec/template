@@ -84,7 +84,7 @@
         "ok": false,
         "error": {
           "reason": "parse",
-          "code": "E_PARSE_UNCLOSED_BLOCK",
+          "code": "parse_unclosed_block",
           "line": 1,
           "col": 1
         }
@@ -108,7 +108,7 @@
   "errors": [
     {
       "reason": "parse",
-      "code": "E_PARSE_UNCLOSED_BLOCK",
+      "code": "parse_unclosed_block",
       "line": 2,
       "col": 3,
       "message": "message"

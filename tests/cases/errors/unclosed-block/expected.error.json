@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_UNCLOSED_BLOCK",
+  "code": "parse_unclosed_block",
   "template": "input.tpl",
   "line": 1,
   "col": 1

@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_RESERVED_NAME",
+  "code": "parse_reserved_name",
   "template": "input.tpl",
   "line": 1,
   "col": 3

@@ -163,12 +163,12 @@ pub struct LexerOptions {
     pub close: Option<u8>,
     /// How many times the close delimiter is repeated to end the tag.
     pub close_count: usize,
-    /// Byte offset of the open delimiter, used for E_PARSE_UNTERMINATED_TAG.
+    /// Byte offset of the open delimiter, used for parse_unterminated_tag.
     pub open_index: Option<usize>,
 }
 
 /// Reads a string literal starting at the quote at `start` (EXP-3). Returns the decoded value and the end offset. A
-/// `\uXXXX` escape of a surrogate that is not part of a pair is E_PARSE_INVALID_ESCAPE at that escape.
+/// `\uXXXX` escape of a surrogate that is not part of a pair is parse_invalid_escape at that escape.
 pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usize), TemplateError> {
     let bytes = source.bytes();
     let quote = bytes[start];

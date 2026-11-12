@@ -172,7 +172,7 @@ fn formats_with_the_delimiter_option() {
 fn returns_the_parser_error_position_for_a_source_that_does_not_parse() {
     let error = format("<p>\n  {? a}\n</p>", &options()).expect_err("parse error");
     assert_eq!(error.reason, FormatErrorReason::Parse);
-    assert_eq!(error.code.as_deref(), Some("E_PARSE_UNCLOSED_BLOCK"));
+    assert_eq!(error.code.as_deref(), Some("parse_unclosed_block"));
     assert_eq!((error.line, error.col), (2, 3));
 }
 
@@ -182,7 +182,7 @@ fn formats_bytes_and_reports_bytes_that_are_not_utf8_as_a_parse_error() {
     assert_eq!(format_bytes(b"{=a}", &options()).expect("format").text, "{= a}");
     let error = format_bytes(b"<p>\n\xff</p>", &options()).expect_err("parse error");
     assert_eq!(error.reason, FormatErrorReason::Parse);
-    assert_eq!(error.code.as_deref(), Some("E_LEX_INVALID_UTF8"));
+    assert_eq!(error.code.as_deref(), Some("lex_invalid_utf8"));
     assert_eq!((error.line, error.col), (2, 1));
 }
 

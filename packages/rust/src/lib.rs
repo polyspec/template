@@ -70,7 +70,7 @@ pub struct ParseOptions {
 }
 
 /// RT-2: parses one template source without loading other templates. A delimiter option that is not a
-/// delimiter pair is an argument error, and a panic is `E_INTERNAL` (ERR-13).
+/// delimiter pair is an argument error, and a panic is `internal` (ERR-13).
 pub fn parse(source: &[u8], name: &str, options: &ParseOptions) -> Result<Template, RequestError> {
     internal_boundary(name, || parse_source(source, name, options))
 }

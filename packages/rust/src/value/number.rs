@@ -115,7 +115,7 @@ pub fn format_number(value: f64, decimals: usize, dec: &str, thousands: &str) ->
 }
 
 /// FUN-25: the rounded value as a number. The digits of [`round_decimal`] always spell a decimal literal; a failure
-/// to read them back is an invariant failure that the caller reports as E_INTERNAL.
+/// to read them back is an invariant failure that the caller reports as internal.
 pub fn round_number(value: f64, decimals: usize) -> Result<f64, std::num::ParseFloatError> {
     let (negative, integer, fraction) = round_decimal(value, decimals);
     let text = if fraction.is_empty() {

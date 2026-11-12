@@ -20,7 +20,7 @@ pub const MAX_DEPTH: usize = 64;
 pub enum HostError {
     /// A value of the host cannot be bound; the render fails with the code of the binding error.
     Data(BindError),
-    /// The host code failed; the render fails with E_RUNTIME_HOST_FUNCTION and this message.
+    /// The host code failed; the render fails with runtime_host_function and this message.
     Failed(String),
 }
 
@@ -455,9 +455,9 @@ pub fn compare_values(a: &Value, b: &Value) -> Option<Ordering> {
 /// Error of VAL-8.
 #[derive(Debug)]
 pub enum StringifyError {
-    /// A list, a map or a native object, which has no text (E_RUNTIME_STRINGIFY).
+    /// A list, a map or a native object, which has no text (runtime_stringify).
     NoText,
-    /// A number that is not finite, which no value holds (VAL-3): a broken invariant, E_INTERNAL.
+    /// A number that is not finite, which no value holds (VAL-3): a broken invariant, internal.
     NotFinite(polyspec_ordered_json::Error),
 }
 

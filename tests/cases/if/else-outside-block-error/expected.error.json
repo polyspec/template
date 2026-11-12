@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_ELSE_OUTSIDE_BLOCK",
+  "code": "parse_else_outside_block",
   "template": "input.tpl",
   "line": 2,
   "col": 1

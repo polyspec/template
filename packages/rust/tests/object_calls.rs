@@ -85,7 +85,7 @@ fn native_instance_member_and_method_are_rendered_without_copying() {
 
 #[test]
 fn member_and_result_binding_failures_point_at_the_expression() {
-    // VAL-19: a field that cannot be bound fails with its data code, an accessor failure is E_RUNTIME_HOST_FUNCTION,
+    // VAL-19: a field that cannot be bound fails with its data code, an accessor failure is runtime_host_function,
     // and a method result is bound; every error points at the lookup or the call.
     let order = Arc::new(Order { total: 1.0 });
     let cases = [

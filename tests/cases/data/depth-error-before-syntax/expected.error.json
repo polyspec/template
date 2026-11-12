@@ -1,5 +1,5 @@
 {
-  "code": "E_DATA_DEPTH",
+  "code": "data_depth",
   "template": "input.tpl",
   "line": 0,
   "col": 0

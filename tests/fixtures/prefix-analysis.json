@@ -912,7 +912,7 @@
           }
         ],
         "error": {
-          "code": "E_PARSE_UNCLOSED_BLOCK",
+          "code": "parse_unclosed_block",
           "template": "prefix.tpl",
           "line": 1,
           "col": 1,
@@ -988,7 +988,7 @@
           }
         ],
         "error": {
-          "code": "E_PARSE_UNEXPECTED_TOKEN",
+          "code": "parse_unexpected_token",
           "template": "prefix.tpl",
           "line": 1,
           "col": 14,
@@ -1036,7 +1036,7 @@
           }
         ],
         "error": {
-          "code": "E_PARSE_INVALID_NUMBER",
+          "code": "parse_invalid_number",
           "template": "prefix.tpl",
           "line": 2,
           "col": 9,
@@ -1085,7 +1085,7 @@
           }
         ],
         "error": {
-          "code": "E_PARSE_UNCLOSED_BLOCK",
+          "code": "parse_unclosed_block",
           "template": "prefix.tpl",
           "line": 1,
           "col": 1,

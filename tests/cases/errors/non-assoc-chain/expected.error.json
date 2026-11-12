@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_UNEXPECTED_TOKEN",
+  "code": "parse_unexpected_token",
   "template": "input.tpl",
   "line": 1,
   "col": 11

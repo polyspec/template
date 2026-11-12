@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Generates the error-code list of each implementation from the code tables of docs/spec/errors.md, the catalog of errors
-// (T22.6-15). Each code is a row `| `E_...` | <condition> | <position> |` of a table of ERR-7 to
-// ERR-12; the order of the rows is the order of every list. A list in a source file lies between the lines
+// (T22.6-15). Each code is a row `| `<kind>` | <condition> | <position> |` of a table of ERR-7 to
+// ERR-12, whose kind is lowercase snake_case (ERR-1); the order of the rows is the order of every list. The Rust core
+// writes the kind; the legacy implementations keep the capital name `E_<KIND>` of their API until they are removed. A
+// list in a source file lies between the lines
 // `BEGIN GENERATED ERROR CODES` and `END GENERATED ERROR CODES` in the comment syntax of its language, and the generator
 // writes only the lines between them; the PHP class and the header of the PHP extension are whole generated files. The check
 // keeps the lists equal to the catalog.
@@ -16,18 +18,23 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const CATALOG = 'docs/spec/errors.md';
 
 /** A code of the catalog and the condition that its table row states. */
-export type CatalogCode = { code: string; condition: string };
+export type CatalogCode = { code: string; kind: string; condition: string };
 
-const ROW = /^\| `(E_[A-Z0-9_]+)` \| (.+?) \| .+ \|$/;
+/** The capital name of a kind in the API of the legacy implementations: `E_` and the kind in capitals. */
+export function legacyName(kind: string): string {
+  return `E_${kind.toUpperCase()}`;
+}
+
+const ROW = /^\| `([a-z][a-z0-9_]*)` \| (.+?) \| .+ \|$/;
 
 /** The codes of the tables of the catalog text, in their order; a code that appears twice is an error. */
 export function parseCatalog(text: string): CatalogCode[] {
   const codes: CatalogCode[] = [];
   text.split('\n').forEach((line, index) => {
-    if (!line.startsWith('| `E_')) return;
+    if (!/^\| `[a-z]/.test(line)) return;
     const match = ROW.exec(line);
     if (!match?.[1] || !match[2]) throw new Error(`${CATALOG}:${index + 1}: the row ${JSON.stringify(line)} is no | code | condition | position | row`);
-    codes.push({ code: match[1], condition: match[2] });
+    codes.push({ code: legacyName(match[1]), kind: match[1], condition: match[2] });
   });
   const names = codes.map(entry => entry.code);
   const twice = names.find((name, index) => names.indexOf(name) !== index);
@@ -73,7 +80,7 @@ export const ARTIFACTS: Artifact[] = [
     file: 'packages/rust/src/error.rs',
     blocks: [
       { comment: '//', indent: '    ', lines: codes => codes.flatMap(({ code, condition }) => [`    /// ${condition}`, `    ${code},`]) },
-      { comment: '//', indent: '            ', lines: codes => codes.map(({ code }) => `            ErrorCode::${code} => "${code}",`) },
+      { comment: '//', indent: '            ', lines: codes => codes.map(({ code, kind }) => `            ErrorCode::${code} => "${kind}",`) },
     ],
   },
   {

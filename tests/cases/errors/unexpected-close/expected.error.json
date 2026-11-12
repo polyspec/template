@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_UNEXPECTED_CLOSE",
+  "code": "parse_unexpected_close",
   "template": "input.tpl",
   "line": 2,
   "col": 1

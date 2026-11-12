@@ -147,8 +147,8 @@ fn engine_renders_and_registers_functions() {
     assert_eq!(html, "<b>&lt;</b> 4 [a]");
 }
 
-/// FUN-46: an error that a host function reports fails the render with E_RUNTIME_HOST_FUNCTION at the position of its call.
-/// RT-20: exceeding the iteration limit fails with E_RUNTIME_LIMIT.
+/// FUN-46: an error that a host function reports fails the render with runtime_host_function at the position of its call.
+/// RT-20: exceeding the iteration limit fails with runtime_limit.
 #[test]
 fn engine_reports_host_failures_and_limits() {
     let mut loader = MapLoader::new();
@@ -361,7 +361,7 @@ fn the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec() {
     assert_eq!(error.message, "length is a built-in function");
 }
 
-/// RT-4: a define or an env of the request that is no object fails with E_DATA_UNSUPPORTED_TYPE, named by its message.
+/// RT-4: a define or an env of the request that is no object fails with data_unsupported_type, named by its message.
 #[test]
 fn the_request_options_that_are_no_object_fail() {
     let Err(error) = crate::defines_from_json(&ojson(serde_json::json!("b.tpl"))) else {

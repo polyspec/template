@@ -1,5 +1,5 @@
 {
-  "code": "E_DATA_NUMBER_RANGE",
+  "code": "data_number_range",
   "template": "input.tpl",
   "line": 0,
   "col": 0

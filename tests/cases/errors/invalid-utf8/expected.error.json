@@ -1,5 +1,5 @@
 {
-  "code": "E_LEX_INVALID_UTF8",
+  "code": "lex_invalid_utf8",
   "template": "input.tpl",
   "line": 1,
   "col": 4

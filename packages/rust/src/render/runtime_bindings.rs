@@ -471,7 +471,7 @@ impl RuntimeBindings {
     }
 }
 
-/// Binds the result of host code (VAL-11, FUN-45, FUN-46): a failure is E_RUNTIME_HOST_FUNCTION and
+/// Binds the result of host code (VAL-11, FUN-45, FUN-46): a failure is runtime_host_function and
 /// a value that cannot be bound fails with its data code, both at the call.
 fn host_result(
     bindings: &RuntimeBindings,

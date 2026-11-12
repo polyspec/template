@@ -1,5 +1,5 @@
 {
-  "code": "E_RUNTIME_COMPARE",
+  "code": "runtime_compare",
   "template": "input.tpl",
   "line": 1,
   "col": 4

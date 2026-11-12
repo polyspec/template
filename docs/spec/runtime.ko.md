@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: fe5632246f482171913607b82c594f0c5264419ee89fbe52650a06af1d7e5f2b -->
+<!-- source-sha256: 94a0ad61e47b6d81e5bead423ade4f53fa8049fddec072d7990ba5311ec565bc -->
 # 런타임
 
 [English](/spec/runtime).
@@ -35,7 +35,7 @@ PageCache.getOrSet(key, ttl, render)
 
 - **RT-2** `parse`는 다른 템플릿을 로드하지 않고 AST 문서에 정의된 AST를 생성한다. include와 block 태그는 렌더 중에 해석한다.
 - **RT-3** `render`는 템플릿 이름 또는 파싱된 템플릿을 받는다. 이름을 받으면 엔진이 로더로 템플릿을 로드한다. 전체 출력을 하나의 문자열로 반환한다.
-- **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이거나, 다시 binding하지 않는 bound map(VAL-22)이다. null `assign`(TypeScript의 `undefined`, Go의 `nil`도)과 PHP의 빈 배열은 빈 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다. map이 아닌 `define`이나 `env`는 `AstProgram`의 `prepare`와 `render`에서 `E_DATA_UNSUPPORTED_TYPE`과 메시지 `define is not an object` 또는 `env is not an object`로 실패한다.
+- **RT-4** `assign`은 호스트 바인딩 규칙으로 변환한 map이거나, 다시 binding하지 않는 bound map(VAL-22)이다. null `assign`(TypeScript의 `undefined`, Go의 `nil`도)과 PHP의 빈 배열은 빈 map이다. `define`은 템플릿 define map(RT-24)이다. `env`는 함수 문서에 정의된 `timezone`과 `now`를 가진 map이다. `define`과 `env`는 각각 생략할 수 있다. 생략한 `define`은 빈 map이다. map이 아닌 `define`이나 `env`는 `AstProgram`의 `prepare`와 `render`에서 `data_unsupported_type`과 메시지 `define is not an object` 또는 `env is not an object`로 실패한다.
 - **RT-5** 엔진 옵션의 `functions`와 `register`는 함수 문서에 정의된 대로 호스트 함수를 추가한다. `functions`는 이름에서 호스트 함수로 가는 map이고, 각 항목은 `register`가 추가하듯이 추가된다 (FUN-43, FUN-44). map이 아닌 `functions`나 호출할 수 없는 항목은 TypeScript, PHP, PHP 확장, Python에서 ERR-13의 인자 오류 `functions is not an object` 또는 `functions.<name> is not a function`으로 program 생성에 실패하고, Go와 Rust에서는 옵션의 타입이 함수의 map만 받는다.
 - **RT-6** 엔진 옵션의 `limits`는 RT-33의 제한 값을 덮어쓴다. 생략한 제한은 기본값을 유지한다. TypeScript, PHP, PHP 확장, Python의 옵션은 가진 key를 기본값 위에 합치고, Go와 Rust는 `Limits` 값을 기본값인 `DefaultLimits`와 `Limits::default()`에서 시작하므로 비어 있는 제한이 없다. map이 아닌 `limits`, RT-33이 나열하지 않는 key, 정수가 아닌 값은 TypeScript, PHP, PHP 확장, Python에서 ERR-13의 인자 오류 `limits is not an object`, `limits.<key> is not a limit`, `limits.<key> is not an integer`로 program 생성에 실패하고, Go와 Rust에서는 `Limits` 타입이 RT-33의 제한만 정수로 가진다.
 - **RT-61** `AstProgram`과 `GeneratedProgram` 모두 `prepare`에서 `assign`을 바인딩하고 `define`과 `env`를 해석하며 target을 선택한다. `assign`이나 템플릿 정의의 `data`로 받은 bound map(VAL-22)은 PHP extension을 포함한 모든 구현에서 다시 binding하지 않는다. 그것을 렌더한 결과는 `bind`를 실행한 시점에 bound map의 항목을 항목으로 가진 호스트 map을 렌더한 결과와 byte가 같다. `merge`의 결과이면 합친 항목을 가진 호스트 map이다. native object의 member만은 템플릿이 읽을 때 읽는다(VAL-19). typed generated program은 bound `assign`을 root record로, bound 정의 `data`를 definition data record로 여전히 변환하며, template을 호출할 때 root record, 정의 data 필드, block scope를 그 순서로 적용한다. 반환된 program별 상태는 동일한 `PreparedRender.render` 연산을 제공한다.
@@ -163,7 +163,7 @@ sequenceDiagram
 }
 ```
 
-- **RT-44** JSON 값은 `null`, boolean, number, string, array 또는 문자열 키를 가진 object다. `assign`은 루트 object다. `define.data`가 있으면 역시 object다. map이 아닌 `assign`, 즉 list, number, string, boolean은 E_DATA_UNSUPPORTED_TYPE과 메시지 `assign is not a map`으로 실패한다. `null`과 PHP의 빈 배열은 RT-4의 빈 map이다.
+- **RT-44** JSON 값은 `null`, boolean, number, string, array 또는 문자열 키를 가진 object다. `assign`은 루트 object다. `define.data`가 있으면 역시 object다. map이 아닌 `assign`, 즉 list, number, string, boolean은 data_unsupported_type과 메시지 `assign is not a map`으로 실패한다. `null`과 PHP의 빈 배열은 RT-4의 빈 map이다.
 - **RT-60** Native object instance는 `assign`에 직접 넣을 수 있다. Runtime은 원본 instance를 유지하고 member lookup으로 public field를 노출하며 `object.method(args...)`로 public instance method를 호출한다. 논리 class function은 `Class::method`로 등록하고 `Class::method(args...)`로 호출한다.
 
 ## 지원 레벨과 컴파일 artifact
@@ -217,8 +217,8 @@ flowchart TB
 ## 이름과 로딩
 
 - **RT-7** 템플릿 이름은 로더 루트 기준 상대 경로이며 구분자는 `/`이고 앞에 `/`가 없다. `render(name, ...)`으로 렌더하는 템플릿의 이름은 `name`이다. 문자열 target이 `define`의 템플릿 항목과 일치하면 그 항목의 경로를 렌더한다. 따라서 호스트는 `layout: "layouts/page.tpl"` 같은 define으로 레이아웃을 선택할 수 있다.
-- **RT-8** include나 block 태그에 쓴 경로는 그 태그를 포함한 템플릿의 디렉터리를 기준으로 해석한다. 앞에 `/`가 있는 경로는 루트를 기준으로 해석한다. `.`과 `..` 세그먼트는 정규화한다. 정규화 후 루트를 벗어나는 경로는 `E_LOAD_OUTSIDE_ROOT`로 실패한다.
-- **RT-9** 로더는 이름에 대해 소스 텍스트 또는 파싱된 AST와 버전을 반환하거나, 이름이 없음을 보고하거나, 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고한다. 없는 이름은 `E_LOAD_NOT_FOUND`로 실패한다. 실패는 `E_LOAD_FAILED`로 실패하며 오류 메시지는 로더의 메시지를 포함한다. 엔진은 호스트 함수와 마찬가지로(FUN-46) TypeScript나 PHP 로더가 던진 모든 예외를 잡는다. 로더 결과는 소스 텍스트 또는 파싱된 AST와, 빈 문자열이 아닌 문자열인 버전을 가진다. 빈 문자열은 버전이 없는 것이다. 소스 텍스트도 AST도 없거나 버전이 없는 결과는 로더의 실패다. 즉 `E_LOAD_FAILED`로 실패하며, 오류 메시지는 `template <name> cannot be loaded: the loader returned no source text and no AST` 또는 `template <name> cannot be loaded: the loader returned no version`이다. 소스 텍스트도 AST도 없고 버전도 없는 결과는 소스 텍스트의 메시지로 실패한다. 언어의 타입이 그런 결과의 일부를 불가능하게 만드는 언어는 그 일부를 타입으로 보장한다. 이유: 로더는 엔진이 호출하는 호스트 코드이므로 그 실패는 호스트 함수의 실패처럼 코드와 위치를 가진 템플릿 오류이며, 일부 구현에서만 `render` 밖으로 나가는 예외가 아니다. 없는 소스 대신 빈 소스를 렌더링하거나 버전 없이 템플릿을 보관하는 엔진은 로더가 주지 않은 템플릿을 렌더링하며, 바뀐 템플릿과 바뀌지 않은 템플릿을 구별하지 못한다(RT-40).
+- **RT-8** include나 block 태그에 쓴 경로는 그 태그를 포함한 템플릿의 디렉터리를 기준으로 해석한다. 앞에 `/`가 있는 경로는 루트를 기준으로 해석한다. `.`과 `..` 세그먼트는 정규화한다. 정규화 후 루트를 벗어나는 경로는 `load_outside_root`로 실패한다.
+- **RT-9** 로더는 이름에 대해 소스 텍스트 또는 파싱된 AST와 버전을 반환하거나, 이름이 없음을 보고하거나, 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고한다. 없는 이름은 `load_not_found`로 실패한다. 실패는 `load_failed`로 실패하며 오류 메시지는 로더의 메시지를 포함한다. 엔진은 호스트 함수와 마찬가지로(FUN-46) TypeScript나 PHP 로더가 던진 모든 예외를 잡는다. 로더 결과는 소스 텍스트 또는 파싱된 AST와, 빈 문자열이 아닌 문자열인 버전을 가진다. 빈 문자열은 버전이 없는 것이다. 소스 텍스트도 AST도 없거나 버전이 없는 결과는 로더의 실패다. 즉 `load_failed`로 실패하며, 오류 메시지는 `template <name> cannot be loaded: the loader returned no source text and no AST` 또는 `template <name> cannot be loaded: the loader returned no version`이다. 소스 텍스트도 AST도 없고 버전도 없는 결과는 소스 텍스트의 메시지로 실패한다. 언어의 타입이 그런 결과의 일부를 불가능하게 만드는 언어는 그 일부를 타입으로 보장한다. 이유: 로더는 엔진이 호출하는 호스트 코드이므로 그 실패는 호스트 함수의 실패처럼 코드와 위치를 가진 템플릿 오류이며, 일부 구현에서만 `render` 밖으로 나가는 예외가 아니다. 없는 소스 대신 빈 소스를 렌더링하거나 버전 없이 템플릿을 보관하는 엔진은 로더가 주지 않은 템플릿을 렌더링하며, 바뀐 템플릿과 바뀌지 않은 템플릿을 구별하지 못한다(RT-40).
 - **RT-10** 파일시스템 로더는 `root/name`을 읽고 파일의 수정 시각과 크기를 버전으로 사용한다. 이름이 없는 것은 파일시스템이 경로에 항목이 없다고 보고할 때뿐이다: `root/name`의 한 component의 메타데이터 읽기가 `ENOENT`로, 또는 앞 component가 디렉터리가 아니어서 `ENOTDIR`로 실패한 경우다. 그 밖의 모든 결과는 실패다(RT-9): 검색을 거부하는 디렉터리의 `EACCES`, `ELOOP`, `ENAMETOOLONG`처럼 다른 코드의 메타데이터 오류, 디렉터리나 일반 파일이 아닌 다른 파일을 가리키는 경로, 그리고 권한이 읽기를 거부하는 경우처럼 내용을 읽을 수 없는 일반 파일. 이유: 없는 이름은 로더의 정상 결과(RT-9)이므로 원인이 항목의 부재 하나뿐이고, 답하지 못하는 파일시스템이나 템플릿 파일이 아닌 항목은 host가 파일시스템의 메시지와 함께 보아야 하는 고장이다. 로더는 root 아래 `name`의 각 component를 symbolic link를 따라가지 않고 검사하며, 파일이든 어느 디렉터리든 symbolic link인 component는 실패다(RT-9). link는 따라가지 않는다. 로더는 한 파일에 한 이름을 준다. 파일의 identity는 device와 inode 번호(Windows에서는 volume serial 번호와 file index)이며, 로더가 이미 다른 이름으로 읽은 파일의 이름은 두 이름의 표기와 상관없이 실패다(RT-9). 대소문자를 구분하지 않는 파일시스템이나 hard link가 한 파일에 주는 두 표기도 포함한다. 이유: 따라간 link는 선언된 tree 밖의 파일을 읽고, 한 파일의 두 이름은 그 파일에 cache 항목 두 개를 주며 한 파일을 두 번째 이름으로 include하는 것이 RT-22의 순환 검사를 통과하게 한다. map 로더는 이름과 소스 또는 파싱된 AST를 메모리에 두고 콘텐츠 버전을 사용한다. 컴파일 artifact loader는 파싱된 AST를 보관하고 artifact 해시를 버전으로 사용한다.
 
 네이티브 로더 결과는 소스·AST 중 하나와 비어 있지 않은 버전을 사용한다. TypeScript는 `LoadedSource`·`LoadedAst`, Go는 `loader.Result`(root의 `LoadResult`), Rust는 `Loaded::Source`·`Ast`, PHP·PHP 확장은 `LoaderInterface::load`가 반환하는 배열, Python은 `LoadResult` protocol의 `LoadedSource`·`LoadedAst`를 사용한다. 메모리 로더는 생성·소스/AST 교체·조회를 공개하며 TypeScript·Go·Rust·Python에서는 `MapLoader`, PHP·PHP 확장에서는 `ArrayLoader`다. Go·Rust는 AST 교체를 `SetAST`·`set_ast`로 구분하고 나머지 SDK는 네이티브 값에 따라 처리한다. 같은 이름의 내용을 변경하면 버전이 달라지고 같은 내용을 반복하면 버전이 유지된다. 버전 텍스트는 불투명하며 SDK 사이에 같을 필요가 없다. 이 계약에서 사용하는 공개 네이티브 subpackage 타입·root 재공개는 같은 데이터 carrier이며 네이티브 대입·identity 검사로 검증한다.
@@ -230,37 +230,37 @@ flowchart TB
 - **RT-11** 렌더되는 각 템플릿 파일은 로컬 스코프 하나를 가진다. 파일 안의 블록(`{? }`, `{@ }`)은 스코프를 만들지 않는다.
 - **RT-12** 변수는 로컬 스코프에서 먼저 찾고, 다음으로 컨텍스트 데이터에서 찾는다. 루트 템플릿의 컨텍스트 데이터는 `assign`이다. block의 컨텍스트 데이터는 RT-26에 정의한다. 어디에도 없는 이름은 `null`이다.
 - **RT-13** 대입 `{:x = e}`는 `x`를 로컬 스코프에 쓴다. 로컬 변수는 같은 이름의 컨텍스트 데이터 항목을 가린다. 대입은 컨텍스트 데이터를 변경하지 않는다.
-- **RT-14** 루프 메타(`x.index_` 등)는 이름 `x`에 대해 활성인 루프에서 해석한다. 활성 루프 변수가 아닌 이름의 루프 메타는 `E_RUNTIME_UNKNOWN_LOOP`으로 실패한다.
+- **RT-14** 루프 메타(`x.index_` 등)는 이름 `x`에 대해 활성인 루프에서 해석한다. 활성 루프 변수가 아닌 이름의 루프 메타는 `runtime_unknown_loop`으로 실패한다.
 
 ## 루프
 
-- **RT-15** `{@ v = e}`는 `e`를 한 번 평가한다. list는 원소를 순서대로 키 `0`, `1`, `2`, ...와 함께 반복한다. map은 값을 삽입 순서대로 그 키와 함께 반복한다. `null`은 0회 반복한다. bool, number, string은 `E_RUNTIME_TYPE`으로 실패한다.
+- **RT-15** `{@ v = e}`는 `e`를 한 번 평가한다. list는 원소를 순서대로 키 `0`, `1`, `2`, ...와 함께 반복한다. map은 값을 삽입 순서대로 그 키와 함께 반복한다. `null`은 0회 반복한다. bool, number, string은 `runtime_type`으로 실패한다.
 - **RT-16** 각 반복은 로컬 스코프에서 `v`를 원소에 바인딩하고 `v`의 루프 메타를 설정한다: `index_`(0 기반 위치), `key_`(list 인덱스는 number, map 키는 string), `value_`(원소), `first_`(첫 반복에서 `true`), `last_`(마지막 반복에서 `true`), `size_`(원소 수).
 - **RT-17** 루프가 끝나면 `v`와 그 루프 메타는 루프 전의 값으로 복원한다. 루프 전에 바인딩되지 않았던 이름은 루프 후에도 바인딩되지 않는다.
 - **RT-18** 중첩 루프는 바깥 루프의 변수 이름을 다시 사용할 수 있다. 안쪽 바인딩과 메타는 안쪽 루프가 끝날 때까지 적용된다.
 - **RT-19** 루프의 `{:}` 분기는 루프가 0회 반복했을 때 실행한다.
-- **RT-20** 각 반복은 렌더의 반복 카운터를 증가시킨다. 반복 제한을 넘으면 `E_RUNTIME_LIMIT`으로 실패한다.
+- **RT-20** 각 반복은 렌더의 반복 카운터를 증가시킨다. 반복 제한을 넘으면 `runtime_limit`으로 실패한다.
 
 ## include
 
 - **RT-21** `{+ path}`는 해석된 경로의 템플릿을 로드하고 그 본문을 포함하는 템플릿의 로컬 스코프와 같은 컨텍스트 데이터에서 렌더한다. 포함된 템플릿의 대입은 태그 뒤에서 포함하는 템플릿에 보인다.
-- **RT-22** 현재 include와 block 체인에서 이미 렌더 중인 템플릿은 `E_LOAD_CYCLE`로 실패한다.
-- **RT-23** 각 include와 각 block은 중첩 깊이를 1 증가시킨다. 깊이 제한을 넘는 깊이는 `E_RUNTIME_DEPTH`로 실패한다.
+- **RT-22** 현재 include와 block 체인에서 이미 렌더 중인 템플릿은 `load_cycle`로 실패한다.
+- **RT-23** 각 include와 각 block은 중첩 깊이를 1 증가시킨다. 깊이 제한을 넘는 깊이는 `runtime_depth`로 실패한다.
 
 ## block
 
 - **RT-24** `define` map은 식별자를 템플릿 define에 대응시킨다. define은 문자열 경로 또는 `template: path`와 선택적인 `data`를 가진 객체다. `data`는 map이거나 bound map(VAL-22)이다. `html: string`을 가진 객체는 완성된 HTML을 제공한다. `render`에 주는 define의 템플릿 경로는 로더 루트 기준이다. 언어 간 픽스처 형식은 [저장소 도구 문서](/ko/operations/tools)에 정의한다.
-- **RT-25** `{# id}`는 `id`로 등록된 define을 렌더한다. 등록되지 않은 식별자는 `E_RUNTIME_BLOCK_UNDEFINED`로 실패한다.
+- **RT-25** `{# id}`는 `id`로 등록된 define을 렌더한다. 등록되지 않은 식별자는 `runtime_block_undefined`로 실패한다.
 - **RT-26** 템플릿 define은 새 로컬 스코프에서, 루트 `assign`, define의 `data`, 태그의 scope 인자 순으로 만든 컨텍스트 데이터로 렌더한다. 같은 이름은 뒤의 출처가 앞의 출처를 덮어쓴다. 호출하는 템플릿의 로컬 변수와 루프 메타는 보이지 않는다.
 - **RT-27** HTML 항목은 그 문자열을 이스케이프 없이 출력에 쓴다. HTML 항목에 준 scope 인자는 무시한다.
-- **RT-28** `{# id path ...}`는 `id`를 해석된 경로의 템플릿 항목으로 등록한 뒤 렌더한다. `id`가 이미 같은 경로로 등록되어 있으면 등록은 아무 일도 하지 않는다. `id`가 다른 경로나 HTML 항목으로 등록되어 있으면 태그는 `E_RUNTIME_BLOCK_REDEFINED`로 실패한다.
+- **RT-28** `{# id path ...}`는 `id`를 해석된 경로의 템플릿 항목으로 등록한 뒤 렌더한다. `id`가 이미 같은 경로로 등록되어 있으면 등록은 아무 일도 하지 않는다. `id`가 다른 경로나 HTML 항목으로 등록되어 있으면 태그는 `runtime_block_redefined`로 실패한다.
 - **RT-29** 식별자 없는 `{# path ...}`는 해석된 경로의 템플릿을 등록 없이 템플릿 항목으로 렌더한다.
 - **RT-30** scope 인자 `name:expr`은 `expr`을 호출 스코프에서 평가하고 block의 컨텍스트 데이터에 `name`을 바인딩한다. scope 인자 `name`은 `name:name`과 같다.
 - **RT-31** `{?# id}`는 `id`가 등록되어 있으면 본문을, 아니면 `{:}` 분기를 렌더한다. 같은 렌더에서 앞선 `{# id path}` 태그가 한 등록은 보인다.
 
 ## 출력
 
-- **RT-32** echo 태그는 safe 문자열을 그대로 쓴다. 그 외 값은 데이터 모델 규칙으로 문자열화한 뒤 `&` `<` `>` `"` `'`를 `&amp;` `&lt;` `&gt;` `&quot;` `&#39;`로 치환해 HTML 이스케이프한다. list나 map은 `E_RUNTIME_STRINGIFY`로 실패한다.
+- **RT-32** echo 태그는 safe 문자열을 그대로 쓴다. 그 외 값은 데이터 모델 규칙으로 문자열화한 뒤 `&` `<` `>` `"` `'`를 `&amp;` `&lt;` `&gt;` `&quot;` `&#39;`로 치환해 HTML 이스케이프한다. list나 map은 `runtime_stringify`로 실패한다.
 
 ## 제한
 
@@ -268,10 +268,10 @@ flowchart TB
 
 | 제한 | Key | 기본값 | 오류 |
 | --- | --- | --- | --- |
-| 렌더당 루프 반복 | `iterations` | 1,000,000 | `E_RUNTIME_LIMIT` |
-| include와 block 중첩 깊이 | `depth` | 32 | `E_RUNTIME_DEPTH` |
-| 바이트 단위 출력 크기 | `outputBytes` | 16 MiB | `E_RUNTIME_LIMIT` |
-| 표현식 중첩 깊이 | `expressionDepth` | 64 | `E_RUNTIME_LIMIT` |
+| 렌더당 루프 반복 | `iterations` | 1,000,000 | `runtime_limit` |
+| include와 block 중첩 깊이 | `depth` | 32 | `runtime_depth` |
+| 바이트 단위 출력 크기 | `outputBytes` | 16 MiB | `runtime_limit` |
+| 표현식 중첩 깊이 | `expressionDepth` | 64 | `runtime_limit` |
 
 TypeScript, PHP, PHP 확장, Python은 `limits` 옵션에서 각 제한을 그 key로 적고 Go와 Rust는 언어 관례에 따른 `Limits` type의 field로 적는다. Go는 `Iterations`, `Depth`, `OutputBytes`, `ExpressionDepth`, Rust는 `iterations`, `depth`, `output_bytes`, `expression_depth`이다.
 

@@ -62,7 +62,7 @@ fn a_map_loader_returns_a_held_source_with_a_version_and_nothing_for_another_nam
 }
 
 /// RT-8: a path resolves against the directory of the current template, a leading / against the root, and a path that
-/// leaves the root fails with E_LOAD_OUTSIDE_ROOT.
+/// leaves the root fails with load_outside_root.
 #[test]
 fn a_path_resolves_against_the_current_directory_and_fails_outside_the_root() {
     for (current, path, expected) in [

@@ -39,7 +39,7 @@ pub struct BuiltIn {
     pub call: fn(&[Value], &FunctionContext<'_>) -> Result<Value, FunctionError>,
 }
 
-/// Creates an E_RUNTIME_TYPE error.
+/// Creates an runtime_type error.
 pub fn type_error(message: impl Into<String>) -> FunctionError {
     FunctionError {
         code: ErrorCode::E_RUNTIME_TYPE,
@@ -80,8 +80,8 @@ pub fn arg_number(value: &Value) -> Result<f64, FunctionError> {
     to_number(value)
 }
 
-/// FUN-50: an integer argument. The value of to_number must have no fractional part (E_RUNTIME_TYPE) and a magnitude
-/// of at most 2^53 − 1 (E_RUNTIME_LIMIT); it is never truncated, rounded or clamped.
+/// FUN-50: an integer argument. The value of to_number must have no fractional part (runtime_type) and a magnitude
+/// of at most 2^53 − 1 (runtime_limit); it is never truncated, rounded or clamped.
 pub fn arg_integer(value: &Value) -> Result<i64, FunctionError> {
     let number = to_number(value)?;
     if number.fract() != 0.0 {
@@ -98,13 +98,13 @@ pub fn arg_integer(value: &Value) -> Result<i64, FunctionError> {
     Ok(number as i64)
 }
 
-/// FUN-50: a count, an integer argument that is not negative (E_RUNTIME_TYPE).
+/// FUN-50: a count, an integer argument that is not negative (runtime_type).
 pub fn arg_count(value: &Value) -> Result<usize, FunctionError> {
     let integer = arg_integer(value)?;
     usize::try_from(integer).map_err(|error| type_error(format!("{integer} is not a count: {error}")))
 }
 
-/// Stringifies an argument; a list or map is E_RUNTIME_STRINGIFY.
+/// Stringifies an argument; a list or map is runtime_stringify.
 pub fn stringify_arg(value: &Value) -> Result<String, FunctionError> {
     stringify(value).map_err(|error| match error {
         StringifyError::NoText => FunctionError {
@@ -120,7 +120,7 @@ pub fn optional(args: &[Value], index: usize) -> Option<&Value> {
     args.get(index)
 }
 
-/// E_INTERNAL: a broken invariant of a function, such as a count that its own checks bounded and that still does not fit.
+/// internal: a broken invariant of a function, such as a count that its own checks bounded and that still does not fit.
 pub fn internal(error: &dyn std::fmt::Display) -> FunctionError {
     FunctionError {
         code: ErrorCode::E_INTERNAL,

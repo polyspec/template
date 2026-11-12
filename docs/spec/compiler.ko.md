@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 7fd58d21e1f20d535ac5da0976816a8777c0a2cc0a29f3b2e72e21ce5eb1d7d7 -->
+<!-- source-sha256: 8aa5d642cd1c4bad924ebd39f601bb49dc654666e3900e59de654d7e66dc40c4 -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -42,7 +42,7 @@ Local 변수는 직선 코드에서 마지막 assignment의 type을 가진다. B
 
 동적 source graph는 parse된 template과 요청 definition schema에서 생성한 type manifest를 사용한다. 이 manifest는 참조한 함수, definition target과 block input을 선언하되 root value를 `any`로 유지하며 sample JSON에서 정적 host type을 추측하지 않는다. 적합성 gate는 host 언어 artifact를 컴파일하기 전에 parse 가능한 모든 fixture의 이 도출 과정을 검사한다.
 
-도출한 manifest는 알고 있는 각 내장 함수의 선언된 `minArgs`와 `maxArgs`를 복사한다. 동적 conformance source는 잘못된 호출이 AST 실행과 같은 위치의 `E_RUNTIME_ARITY`를 내도록 arity 검사를 runtime에 남기며, 명시적인 정적 manifest는 lowering 중에 그 호출을 거부할 수 있다. 알 수 없는 함수는 열린 arity 호출로 남아 runtime registry에 도달하고, 구현이 없으면 일반 runtime 오류를 낸다.
+도출한 manifest는 알고 있는 각 내장 함수의 선언된 `minArgs`와 `maxArgs`를 복사한다. 동적 conformance source는 잘못된 호출이 AST 실행과 같은 위치의 `runtime_arity`를 내도록 arity 검사를 runtime에 남기며, 명시적인 정적 manifest는 lowering 중에 그 호출을 거부할 수 있다. 알 수 없는 함수는 열린 arity 호출로 남아 runtime registry에 도달하고, 구현이 없으면 일반 runtime 오류를 낸다.
 
 모든 generated module은 논리 구조 `Assign`, `Definitions`, `Input<T>`, `GeneratedProgram`을 노출한다. 다른 target의 module은 `DefinitionData<T>`, `Definition<T>`, `ArtifactManifest`도 노출한다. Rust module은 program이 definition을 선언할 때만 `Definition<T>`를 선언하고 그 template과 data는 block이 읽을 때만 두며, block이 definition data를 merge하는 template에만 `DefinitionData<T>`를, 선언된 type이 가리키는 record를, template이 읽는 `Assign`의 field를, 값을 다시 변환할 때만 `to_value`를 선언하고 `ArtifactManifest`는 선언하지 않는다. module을 private module로 포함하는 crate는 쓰이지 않는 구조, field, method를 dead code로 보고하기 때문이다. program이 읽지 않는 root field나 definition data도 그 type의 값을 만들지 않고 선언된 type에 대해 검사되며, 읽는 값과 같은 field 경로로 실패한다. Generated program은 AST program과 같은 `Program.prepare(RenderRequest)`, `Program.render(RenderRequest)` operation을 구현한다. Template별 함수는 private이고 include와 block target에서 서로 직접 호출한다.
 
@@ -64,11 +64,11 @@ PHP backend는 compiler 호출자가 정하는 namespace를 요구한다. `compi
 
 Go backend는 typed template 제어 흐름을 생성하되 관찰 가능한 값 연산을 `render.RuntimeBindings`로 전달한다. 생성 함수는 `render.Context`, source line index가 있는 frame과 render chain을 공유한다. 내부 오류 전파는 code와 source position을 포함한 원래의 구조화 template 오류를 보존하고, native typed value는 runtime 경계에서 canonical value model로 bind한다.
 
-Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 값 연산을 `RuntimeBindings`에 위임한다. 검증된 artifact 데이터에서 `LineIndex`를 복원하고 `RenderContext`를 통해 출력하며 구조화 오류를 panic이 아닌 값으로 전달한다. Panic은 공개 `prepare`와 `render` operation에서만 잡아 `E_INTERNAL`로 보고한다(ERR-13). Typed 경계의 직렬화는 생성 record와 collection을 canonical `Value` model과 상호 변환한다. 소비자는 generated Rust program을 crate의 tree에 속한 module 파일이 아니라 `include!`로 crate에 넣는다. `build.rs`가 compile한 뒤의 `OUT_DIR`에서, 또는 commit한 파일에서 가져온다. rustfmt는 crate의 module 파일을 format하고 include된 파일은 format하지 않으며 그 배치는 compiler의 것이다. clippy는 include된 코드를 lint하며, 그 코드에는 쓰지 않는 item과 clippy 지적이 없다.
+Rust backend도 생성된 template 함수에서 `Result`를 직접 반환하고 값 연산을 `RuntimeBindings`에 위임한다. 검증된 artifact 데이터에서 `LineIndex`를 복원하고 `RenderContext`를 통해 출력하며 구조화 오류를 panic이 아닌 값으로 전달한다. Panic은 공개 `prepare`와 `render` operation에서만 잡아 `internal`로 보고한다(ERR-13). Typed 경계의 직렬화는 생성 record와 collection을 canonical `Value` model과 상호 변환한다. 소비자는 generated Rust program을 crate의 tree에 속한 module 파일이 아니라 `include!`로 crate에 넣는다. `build.rs`가 compile한 뒤의 `OUT_DIR`에서, 또는 commit한 파일에서 가져온다. rustfmt는 crate의 module 파일을 format하고 include된 파일은 format하지 않으며 그 배치는 compiler의 것이다. clippy는 include된 코드를 lint하며, 그 코드에는 쓰지 않는 item과 clippy 지적이 없다.
 
 Rust generated source module은 `polyspec-template`, `derive` feature를 켠 `serde`, `preserve_order`와 `arbitrary_precision` feature를 켠 `serde_json`에 직접 의존한다. 이는 generated module의 compile-time 의존성이므로 host crate가 직접 선언해야 한다. 격리 Cargo 설치 프로젝트는 압축을 푼 `.crate` package를 대상으로 generated module을 compile해 이 경계를 강제한다.
 
-record를 담은 typed 값은 모든 runtime 연산에 canonical 값으로 도달한다. 함수, class 함수, method의 인자, `&&`, `||`, `??`를 제외한 연산자의 피연산자, echo의 식이 이에 해당한다. record는 선언 순서의 선언된 필드로 된 map이 되고, record의 list나 map은 모든 깊이에서 그런 map의 list나 map이 된다. 따라서 모든 backend에서 host 함수는 VAL-21 형태를 받고 연산자는 EXP-34를 적용한다. Typed member 접근과 loop는 typed record를 유지한다. 이유: AST program은 같은 데이터에 map을 넘긴다. Go backend는 record를 native object로 넘겼고, TypeScript와 PHP backend에서는 record를 함수에 넘기는 렌더가 `E_INTERNAL`로 실패했다. `make generated-native-check`는 `tests/fixtures/typed-values`를 typed manifest로 모든 backend에서 컴파일하고 출력을 AST program과 비교한다.
+record를 담은 typed 값은 모든 runtime 연산에 canonical 값으로 도달한다. 함수, class 함수, method의 인자, `&&`, `||`, `??`를 제외한 연산자의 피연산자, echo의 식이 이에 해당한다. record는 선언 순서의 선언된 필드로 된 map이 되고, record의 list나 map은 모든 깊이에서 그런 map의 list나 map이 된다. 따라서 모든 backend에서 host 함수는 VAL-21 형태를 받고 연산자는 EXP-34를 적용한다. Typed member 접근과 loop는 typed record를 유지한다. 이유: AST program은 같은 데이터에 map을 넘긴다. Go backend는 record를 native object로 넘겼고, TypeScript와 PHP backend에서는 record를 함수에 넘기는 렌더가 `internal`로 실패했다. `make generated-native-check`는 `tests/fixtures/typed-values`를 typed manifest로 모든 backend에서 컴파일하고 출력을 AST program과 비교한다.
 
 내장 함수는 compiler가 알고 있다. 참조한 host 함수에는 manifest signature와 runtime 구현이 필요하다. Signature가 없으면 emission 전에 실패한다. Runtime 구현 누락, arity 오류, host 실패는 AST 실행과 같은 error field를 사용한다.
 

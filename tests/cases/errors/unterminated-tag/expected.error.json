@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_UNTERMINATED_TAG",
+  "code": "parse_unterminated_tag",
   "template": "input.tpl",
   "line": 1,
   "col": 3

@@ -6,8 +6,8 @@ use crate::value::Value;
 use crate::value::bind::{BindError, bind_json, check_level, check_number};
 use polyspec_ordered_json::{Error as JsonError, ParseOptions, parse};
 
-/// Parses JSON bytes into a template value. Invalid UTF-8 is `E_DATA_INVALID_UTF8`; text that is
-/// not one JSON document is `E_DATA_INVALID_JSON` (VAL-12).
+/// Parses JSON bytes into a template value. Invalid UTF-8 is `data_invalid_utf8`; text that is
+/// not one JSON document is `data_invalid_json` (VAL-12).
 pub fn parse_json_bytes(bytes: &[u8]) -> Result<Value, BindError> {
     let text = std::str::from_utf8(bytes).map_err(|error| BindError {
         code: ErrorCode::E_DATA_INVALID_UTF8,
@@ -23,7 +23,7 @@ pub fn parse_json(text: &str) -> Result<Value, BindError> {
 
 /// Parses JSON text into an ordered-json value with the checks of VAL-2, VAL-12 and VAL-20, in document order: a number
 /// outside the binding range, a `\u` escape that leaves a surrogate unpaired, arrays or objects nested deeper than the
-/// limit and text that is not one JSON document (`E_DATA_INVALID_JSON`) fail at the first occurrence. The parser stops
+/// limit and text that is not one JSON document (`data_invalid_json`) fail at the first occurrence. The parser stops
 /// at the 65th level of nesting (VAL-20), so a deep document is never read further.
 pub fn read_json(text: &str) -> Result<polyspec_ordered_json::Value, BindError> {
     let checked = check_values(text);
@@ -56,8 +56,8 @@ pub fn read_json(text: &str) -> Result<polyspec_ordered_json::Value, BindError> 
     }
 }
 
-/// VAL-12, VAL-20: a document that the JSON reader rejects is `E_DATA_INVALID_JSON`, a document nested deeper than the
-/// limit is `E_DATA_DEPTH`, and an error that is not a rejection of the text is a broken invariant, `E_INTERNAL`.
+/// VAL-12, VAL-20: a document that the JSON reader rejects is `data_invalid_json`, a document nested deeper than the
+/// limit is `data_depth`, and an error that is not a rejection of the text is a broken invariant, `internal`.
 fn json_failure(error: &JsonError) -> BindError {
     let code = match error {
         JsonError::MaximumDepthExceeded { .. } => ErrorCode::E_DATA_DEPTH,

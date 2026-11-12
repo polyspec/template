@@ -1,5 +1,5 @@
 {
-  "code": "E_RUNTIME_DEPTH",
+  "code": "runtime_depth",
   "template": "d32.tpl",
   "line": 1,
   "col": 1

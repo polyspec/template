@@ -1,1 +1,1 @@
-{"code": "E_RUNTIME_UNKNOWN_FUNCTION", "template": "input.tpl", "line": 1, "col": 4}
+{"code": "runtime_unknown_function", "template": "input.tpl", "line": 1, "col": 4}

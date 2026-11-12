@@ -33,7 +33,7 @@ fn render_prints_html_and_errors_exit_with_status_2() {
     let output = run(&["render", file.to_str().expect("path")]);
     assert_eq!(output.status.code(), Some(2));
     let error: serde_json::Value = serde_json::from_slice(&output.stderr).expect("json");
-    assert_eq!(error["code"], "E_PARSE_UNCLOSED_BLOCK");
+    assert_eq!(error["code"], "parse_unclosed_block");
 }
 
 #[test]
@@ -98,7 +98,7 @@ fn tokens_prints_the_classified_ranges_and_errors_exit_with_status_2() {
     let output = run(&["tokens", file.to_str().expect("path")]);
     assert_eq!(output.status.code(), Some(2));
     let error: serde_json::Value = serde_json::from_slice(&output.stderr).expect("json");
-    assert_eq!(error["code"], "E_PARSE_UNCLOSED_BLOCK");
+    assert_eq!(error["code"], "parse_unclosed_block");
 }
 
 #[test]

@@ -8,7 +8,7 @@ use polyspec_ordered_json::{Kind as JsonKind, Value as JsonValue};
 use std::fmt;
 use std::sync::Arc;
 
-/// Error raised while binding host data (E_DATA_* codes).
+/// Error raised while binding host data (data_* codes).
 #[derive(Debug, Clone, PartialEq)]
 pub struct BindError {
     /// Error code.
@@ -65,7 +65,7 @@ pub fn bind_json(input: &JsonValue) -> Result<Value, BindError> {
     bind_json_at(input, 0)
 }
 
-/// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, E_INTERNAL.
+/// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, internal.
 fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
     BindError {
         code: ErrorCode::E_INTERNAL,
@@ -73,7 +73,7 @@ fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
     }
 }
 
-/// VAL-12: the text of a JSON string or key; an escaped unpaired surrogate is E_DATA_INVALID_UTF8.
+/// VAL-12: the text of a JSON string or key; an escaped unpaired surrogate is data_invalid_utf8.
 fn json_text(input: &JsonValue) -> Result<String, BindError> {
     input.string_value().map_err(|error| match error {
         polyspec_ordered_json::Error::UnpairedSurrogate => BindError {
@@ -116,7 +116,7 @@ fn bind_json_at(input: &JsonValue, level: usize) -> Result<Value, BindError> {
 }
 
 /// The nearest double of a JSON number literal; an overflowing literal is infinity, which check_number rejects (VAL-2). A
-/// literal that f64 does not read is a broken invariant of the JSON reader, E_INTERNAL.
+/// literal that f64 does not read is a broken invariant of the JSON reader, internal.
 fn json_number(literal: &str) -> Result<f64, BindError> {
     literal.parse::<f64>().map_err(|error| BindError {
         code: ErrorCode::E_INTERNAL,
@@ -209,7 +209,7 @@ pub fn value_from_json(input: &JsonValue) -> Result<Value, BindError> {
 
 /// The JSON form of a template value (the form of VAL-21 without native objects) as an ordered-json value; safe strings
 /// become plain strings and numbers are written as VAL-9 writes them. A native object has no JSON form and is
-/// E_DATA_UNSUPPORTED_TYPE; a number that is not finite is a broken invariant of the value model and is E_INTERNAL.
+/// data_unsupported_type; a number that is not finite is a broken invariant of the value model and is internal.
 pub fn to_json_value(value: &Value) -> Result<JsonValue, BindError> {
     Ok(match value {
         Value::Null => JsonValue::null(),

@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_UNTERMINATED_STRING",
+  "code": "parse_unterminated_string",
   "template": "input.tpl",
   "line": 1,
   "col": 4

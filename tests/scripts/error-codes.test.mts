@@ -26,13 +26,13 @@ function literals(files: string[], quote: string): { place: string; code: string
 
 test('the catalog holds the 41 codes of the tables of docs/spec/errors.md in their order, each with its condition', { timeout: 10_000 }, () => {
   assert.equal(catalog.length, 41);
-  assert.deepEqual(catalog[0], { code: 'E_LEX_INVALID_UTF8', condition: 'The source is not valid UTF-8.' });
+  assert.deepEqual(catalog[0], { code: 'E_LEX_INVALID_UTF8', kind: 'lex_invalid_utf8', condition: 'The source is not valid UTF-8.' });
   assert.equal(catalog.at(-1)?.code, 'E_INTERNAL');
 });
 
 test('a malformed code row, a repeated code or a catalog without codes fails the generator', { timeout: 10_000 }, () => {
-  assert.throws(() => parseCatalog('| `E_A` | no position |\n'), /is no \| code \| condition \| position \| row/);
-  assert.throws(() => parseCatalog('| `E_A` | a | b |\n| `E_A` | c | d |\n'), /names E_A twice/);
+  assert.throws(() => parseCatalog('| `a` | no position |\n'), /is no \| code \| condition \| position \| row/);
+  assert.throws(() => parseCatalog('| `a` | a | b |\n| `a` | c | d |\n'), /names E_A twice/);
   assert.throws(() => parseCatalog('| Code | Condition | Position |\n'), /names no code/);
 });
 
@@ -52,7 +52,7 @@ test('replaceBlocks writes each block between its markers, keeps the markers and
 });
 
 test('every list is stable on a second render and holds a code that the catalog adds', { timeout: 10_000 }, () => {
-  const grown = [...catalog, { code: 'E_EXTRA_CODE', condition: 'An added code.' }];
+  const grown = [...catalog, { code: 'E_EXTRA_CODE', kind: 'extra_code', condition: 'An added code.' }];
   for (const artifact of ARTIFACTS) {
     const current = readFileSync(path.join(ROOT, artifact.file), 'utf8');
     const own = render(artifact, catalog, current);

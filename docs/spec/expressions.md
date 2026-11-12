@@ -19,15 +19,15 @@ This document defines the expression language used inside tags: tokens, grammar,
 | IN | `in` | Comparison operator |
 | operator | `?? ?: :: === !== == != <= >= && \|\| ... => ? : \| + - * / % ! < > ( ) [ ] ,` | Longest match |
 
-- **EXP-2** A NUMBER token whose form does not match the table, including `1.`, `.5`, `1e`, `0x1F` and `1_000`, is E_PARSE_INVALID_NUMBER. The value of a NUMBER token is the nearest IEEE 754 double; `1e3` has the value 1000.
+- **EXP-2** A NUMBER token whose form does not match the table, including `1.`, `.5`, `1e`, `0x1F` and `1_000`, is parse_invalid_number. The value of a NUMBER token is the nearest IEEE 754 double; `1e3` has the value 1000.
 
-- **EXP-3** A STRING token recognizes the escape sequences `\\`, `\'`, `\"`, `\n`, `\r`, `\t` and `\uXXXX` with four hexadecimal digits. Two consecutive `\uXXXX` escapes that form a UTF-16 surrogate pair produce one code point. A `\uXXXX` escape of a surrogate (U+D800 to U+DFFF) that is not part of such a pair is E_PARSE_INVALID_ESCAPE at that escape, so a decoded string is always valid Unicode text and holds only the code points that its escapes name. Reason: replacing the surrogate with U+FFFD would turn an input that names no code point into a plausible text. Any other character after `\` is E_PARSE_INVALID_ESCAPE. A STRING token that reaches the end of the source before its closing quote is E_PARSE_UNTERMINATED_STRING at the opening quote; a tag body extends to the end of the source when no closing delimiter follows the string.
+- **EXP-3** A STRING token recognizes the escape sequences `\\`, `\'`, `\"`, `\n`, `\r`, `\t` and `\uXXXX` with four hexadecimal digits. Two consecutive `\uXXXX` escapes that form a UTF-16 surrogate pair produce one code point. A `\uXXXX` escape of a surrogate (U+D800 to U+DFFF) that is not part of such a pair is parse_invalid_escape at that escape, so a decoded string is always valid Unicode text and holds only the code points that its escapes name. Reason: replacing the surrogate with U+FFFD would turn an input that names no code point into a plausible text. Any other character after `\` is parse_invalid_escape. A STRING token that reaches the end of the source before its closing quote is parse_unterminated_string at the opening quote; a tag body extends to the end of the source when no closing delimiter follows the string.
 
 - **EXP-4** The tokens `true`, `false` and `null` are literals. Their spelling is case-sensitive; `True` and `NULL` are IDENT tokens.
 
-- **EXP-5** DOT_IDENT and DOT_INDEX are produced only when the `.` is immediately adjacent, with no whitespace on either side, to a token that can end a postfix chain on its left (IDENT, `)`, `]`, DOT_IDENT, DOT_INDEX) and to the identifier or digits on its right. A `.` in any other position that is followed by a digit is E_PARSE_INVALID_NUMBER (EXP-2); a `.` in any other position not followed by a digit is E_PARSE_UNEXPECTED_TOKEN. `a.0.b` lexes as IDENT `a`, DOT_INDEX `.0`, DOT_IDENT `.b`.
+- **EXP-5** DOT_IDENT and DOT_INDEX are produced only when the `.` is immediately adjacent, with no whitespace on either side, to a token that can end a postfix chain on its left (IDENT, `)`, `]`, DOT_IDENT, DOT_INDEX) and to the identifier or digits on its right. A `.` in any other position that is followed by a digit is parse_invalid_number (EXP-2); a `.` in any other position not followed by a digit is parse_unexpected_token. `a.0.b` lexes as IDENT `a`, DOT_INDEX `.0`, DOT_IDENT `.b`.
 
-- **EXP-6** The following are not part of the language and are E_PARSE_UNEXPECTED_TOKEN when they appear: `->`, `\`, `new`, type casts, `$`, the bitwise operators `& ^ ~ << >>`, and a `{` `}` map literal. Member calls use `.name(...)` and logical class calls use `Class::name(...)` as defined by EXP-7 and EXP-11.
+- **EXP-6** The following are not part of the language and are parse_unexpected_token when they appear: `->`, `\`, `new`, type casts, `$`, the bitwise operators `& ^ ~ << >>`, and a `{` `}` map literal. Member calls use `.name(...)` and logical class calls use `Class::name(...)` as defined by EXP-7 and EXP-11.
 
 ## Grammar
 
@@ -55,7 +55,7 @@ bracket        = "[" [ entry { "," entry } [ "," ] ] "]" ;
 entry          = expression [ "=>" expression ] | "..." expression ;
 ```
 
-- **EXP-8** A token sequence that the grammar does not accept is E_PARSE_UNEXPECTED_TOKEN at the first token that cannot continue any production.
+- **EXP-8** A token sequence that the grammar does not accept is parse_unexpected_token at the first token that cannot continue any production.
 
 - **EXP-9** Precedence, from lowest to highest, and associativity:
 
@@ -73,9 +73,9 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 | 10 | unary `!` `-` | right |
 | 11 | postfix `.name` `.0` `[e]` and `name(...)` | left |
 
-- **EXP-10** An operator with associativity `none` cannot be chained without parentheses. `a == b == c` and `a < b < c` are E_PARSE_UNEXPECTED_TOKEN at the second operator.
+- **EXP-10** An operator with associativity `none` cannot be chained without parentheses. `a == b == c` and `a < b < c` are parse_unexpected_token at the second operator.
 
-- **EXP-11** A standalone call `f(x)` calls a function by name. A member call `a.f(x)` calls a declared method on the assigned object `a`. A class call `Order::f(x)` calls a declared logical class function. `(f)(x)` and `f(x)(y)` remain E_PARSE_UNEXPECTED_TOKEN. The parser emits `MemberCall` and `ClassCall`; execution requires the corresponding declared object method or class function. A class call starts only at an IDENT followed by the `::` token of EXP-1: `Order: :f(x)` is E_PARSE_UNEXPECTED_TOKEN, and in `c ? a : b` the `:` after the IDENT `a` separates the branches of the ternary.
+- **EXP-11** A standalone call `f(x)` calls a function by name. A member call `a.f(x)` calls a declared method on the assigned object `a`. A class call `Order::f(x)` calls a declared logical class function. `(f)(x)` and `f(x)(y)` remain parse_unexpected_token. The parser emits `MemberCall` and `ClassCall`; execution requires the corresponding declared object method or class function. A class call starts only at an IDENT followed by the `::` token of EXP-1: `Order: :f(x)` is parse_unexpected_token, and in `c ? a : b` the `:` after the IDENT `a` separates the branches of the ternary.
 
 - **EXP-12** A pipe step `left | f(a, b)` is equivalent to the call `f(left, a, b)`; `left | f` is equivalent to `f(left)`. The pipe is left-associative: `a | f | g(b)` is `g(f(a), b)`. The parser produces the call node; no pipe node exists.
 
@@ -83,9 +83,9 @@ entry          = expression [ "=>" expression ] | "..." expression ;
 
 - **EXP-14** A trailing `??` with no right operand is equivalent to `?? null`. `x ??` is `x ?? null`.
 
-- **EXP-15** A bracket literal with at least one `=>` entry is a map literal; a bracket literal without any `=>` entry is a list literal. `[]` is an empty list. In a map literal the key expression is evaluated and stringified as defined in Data model; a key that stringifies with E_RUNTIME_STRINGIFY raises that error. A later entry with the same key replaces the value of the earlier entry and keeps the earlier position.
+- **EXP-15** A bracket literal with at least one `=>` entry is a map literal; a bracket literal without any `=>` entry is a list literal. `[]` is an empty list. In a map literal the key expression is evaluated and stringified as defined in Data model; a key that stringifies with runtime_stringify raises that error. A later entry with the same key replaces the value of the earlier entry and keeps the earlier position.
 
-- **EXP-16** A spread entry `...e` in a list literal requires `e` to evaluate to a list and inserts its elements in order; in a map literal it requires a map and inserts its entries in order under EXP-15. Any other value is E_RUNTIME_TYPE.
+- **EXP-16** A spread entry `...e` in a list literal requires `e` to evaluate to a list and inserts its elements in order; in a map literal it requires a map and inserts its entries in order under EXP-15. Any other value is runtime_type.
 
 ## Variables and lookup
 
@@ -121,29 +121,29 @@ The last row includes `null`, string, bool and number containers, negative index
 | `last_` | `true` for the last element, otherwise `false` |
 | `size_` | The number of elements in the iterated value |
 
-- **EXP-22** A LoopMeta node evaluated while no enclosing loop has the variable name `loop` is E_RUNTIME_UNKNOWN_LOOP.
+- **EXP-22** A LoopMeta node evaluated while no enclosing loop has the variable name `loop` is runtime_unknown_loop.
 
 ## Operators
 
-- **EXP-23** `to_number(v)` converts a value for arithmetic: `null` is 0; `true` is 1 and `false` is 0; a number is itself; a string is trimmed of ASCII whitespace (space, tab, carriage return, line feed) and, when the remainder matches `^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?$`, converted to the nearest double, otherwise E_RUNTIME_TYPE; a list or map is E_RUNTIME_TYPE.
+- **EXP-23** `to_number(v)` converts a value for arithmetic: `null` is 0; `true` is 1 and `false` is 0; a number is itself; a string is trimmed of ASCII whitespace (space, tab, carriage return, line feed) and, when the remainder matches `^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?$`, converted to the nearest double, otherwise runtime_type; a list or map is runtime_type.
 
-- **EXP-24** `+`: a list or map operand is E_RUNTIME_STRINGIFY. Otherwise, when either operand is a string, the result is the concatenation of `stringify(left)` and `stringify(right)` as defined in Data model. When neither operand is a string, the result is the numeric sum of `to_number(left)` and `to_number(right)`.
+- **EXP-24** `+`: a list or map operand is runtime_stringify. Otherwise, when either operand is a string, the result is the concatenation of `stringify(left)` and `stringify(right)` as defined in Data model. When neither operand is a string, the result is the numeric sum of `to_number(left)` and `to_number(right)`.
 
 - **EXP-25** `-` and `*`: the numeric difference and product of `to_number` of both operands.
 
-- **EXP-26** `/`: the numeric quotient of `to_number` of both operands. A divisor equal to 0 is E_RUNTIME_DIV_ZERO.
+- **EXP-26** `/`: the numeric quotient of `to_number` of both operands. A divisor equal to 0 is runtime_div_zero.
 
-- **EXP-27** `%`: both operands are converted with `to_number` and must have integer values, otherwise E_RUNTIME_TYPE. The result is the remainder of truncated division and has the sign of the dividend. A divisor equal to 0 is E_RUNTIME_DIV_ZERO.
+- **EXP-27** `%`: both operands are converted with `to_number` and must have integer values, otherwise runtime_type. The result is the remainder of truncated division and has the sign of the dividend. A divisor equal to 0 is runtime_div_zero.
 
 - **EXP-28** Unary `-` negates `to_number(operand)`. Unary `!` returns `true` when the operand is falsy and `false` otherwise.
 
-- **EXP-29** An arithmetic result that is not finite is E_RUNTIME_TYPE.
+- **EXP-29** An arithmetic result that is not finite is runtime_type.
 
 - **EXP-30** `&&` evaluates the left operand; when it is falsy the result is `false` and the right operand is not evaluated; otherwise the result is the truthiness of the right operand. `||` evaluates the left operand; when it is truthy the result is `true` and the right operand is not evaluated; otherwise the result is the truthiness of the right operand. Both operators return a boolean.
 
 - **EXP-31** `a ?? b` returns `a` when `a` is not `null`, otherwise `b`; `b` is evaluated only when needed. `a ?: b` returns `a` when `a` is truthy, otherwise `b`. `c ? a : b` returns `a` when `c` is truthy, otherwise `b`; only the selected branch is evaluated.
 
-- **EXP-32** `left in right`: when `right` is a list, the result is `true` when some element satisfies `element == left`; when `right` is a map, the result is `true` when `stringify(left)` is a key of the map; when `right` is a string, the result is `true` when `stringify(left)` is a substring of it; any other `right` is E_RUNTIME_TYPE.
+- **EXP-32** `left in right`: when `right` is a list, the result is `true` when some element satisfies `element == left`; when `right` is a map, the result is `true` when `stringify(left)` is a key of the map; when `right` is a string, the result is `true` when `stringify(left)` is a substring of it; any other `right` is runtime_type.
 
 ## Truthiness
 
@@ -159,7 +159,7 @@ The last row includes `null`, string, bool and number containers, negative index
 
 - **EXP-37** `a === b` is `true` only when both operands have the same type and EXP-34 holds; a number and a string are never strictly equal. `a !== b` is the negation of `a === b`.
 
-- **EXP-38** `<`, `>`, `<=` and `>=` compare two numbers numerically and two strings by code point sequence. Any other pair of types is E_RUNTIME_COMPARE, including two native objects and a native object with any other value.
+- **EXP-38** `<`, `>`, `<=` and `>=` compare two numbers numerically and two strings by code point sequence. Any other pair of types is runtime_compare, including two native objects and a native object with any other value.
 
 - **EXP-39** Two native objects (VAL-19) are equal under `==` and `===` when they are the same host object, and are otherwise not equal; `!=` and `!==` are the negations. The comparison reads no member and calls no host code. The same host object is defined per host:
 
@@ -183,11 +183,11 @@ Data: `{"a": 2, "s": "3", "t": "x", "items": [10, 20], "m": {"k": 1, "2": "two"}
 | `s + 1` | `"31"` |
 | `a * s` | `6` |
 | `a + t` | `"2x"` |
-| `a * t` | E_RUNTIME_TYPE |
-| `a + items` | E_RUNTIME_STRINGIFY |
+| `a * t` | runtime_type |
+| `a + items` | runtime_stringify |
 | `7 % 3` | `1` |
 | `-7 % 3` | `-1` |
-| `a / 0` | E_RUNTIME_DIV_ZERO |
+| `a / 0` | runtime_div_zero |
 | `items.1` | `20` |
 | `items.5` | `null` |
 | `items['1']` | `20` |
@@ -199,7 +199,7 @@ Data: `{"a": 2, "s": "3", "t": "x", "items": [10, 20], "m": {"k": 1, "2": "two"}
 | `s === 3` | `false` |
 | `null == ''` | `false` |
 | `'10' < '9'` | `true` |
-| `10 < '9'` | E_RUNTIME_COMPARE |
+| `10 < '9'` | runtime_compare |
 | `a && s` | `true` |
 | `t ?? 'd'` | `"x"` |
 | `missing ??` | `null` |
@@ -212,5 +212,5 @@ Data: `{"a": 2, "s": "3", "t": "x", "items": [10, 20], "m": {"k": 1, "2": "two"}
 | `[1, ...items]` | `[1, 10, 20]` |
 | `['x' => 1, 'x' => 2]` | `{"x": 2}` |
 | `a ?? 0 \| number(2)` | `"2.00"` |
-| `a == 1 == true` | E_PARSE_UNEXPECTED_TOKEN |
-| `a.f()` | E_PARSE_UNEXPECTED_TOKEN |
+| `a == 1 == true` | parse_unexpected_token |
+| `a.f()` | parse_unexpected_token |

@@ -292,7 +292,7 @@ impl AstProgram {
                 format!("template {name} cannot be loaded: the loader returned no version"),
             ));
         }
-        // A cache that a panic of another render poisoned fails the load as E_INTERNAL instead of serving what it holds.
+        // A cache that a panic of another render poisoned fails the load as internal instead of serving what it holds.
         let poisoned = |error: PoisonError<_>| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be read: {error}"));
         if let Some((version, template)) = self.cache.lock().map_err(poisoned)?.get(name)
             && (self.artifact_refresh == ArtifactRefresh::False
@@ -459,7 +459,7 @@ impl<'e> PreparedRender<'e> {
         }
     }
 
-    /// Renders the prepared request. A panic during the render is `E_INTERNAL` (ERR-13).
+    /// Renders the prepared request. A panic during the render is `internal` (ERR-13).
     pub fn render(&self) -> Result<String, TemplateError> {
         internal_boundary(&self.name, || (self.render)())
     }
@@ -516,7 +516,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
 
 /// Parses template definitions from a JSON object of the `define.json` form (CNF-2). The data of
 /// an entry is bound as its own value (VAL-11, VAL-20). An entry field of another JSON type is
-/// E_DATA_UNSUPPORTED_TYPE; an absent field is absent.
+/// data_unsupported_type; an absent field is absent.
 pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInput>, BindError> {
     let object = json_object(value, "define is not an object")?;
     let mut defines = HashMap::new();
@@ -560,7 +560,7 @@ pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInpu
     Ok(defines)
 }
 
-/// The members of a JSON object, or E_DATA_UNSUPPORTED_TYPE with `message` for a value of another kind (RT-4).
+/// The members of a JSON object, or data_unsupported_type with `message` for a value of another kind (RT-4).
 fn json_object<'v>(value: &'v JsonValue, message: &str) -> Result<&'v polyspec_ordered_json::OrderedMap, BindError> {
     if value.kind() != JsonKind::Object {
         return Err(BindError {
@@ -571,7 +571,7 @@ fn json_object<'v>(value: &'v JsonValue, message: &str) -> Result<&'v polyspec_o
     value.members().map_err(|error| json_internal(&error))
 }
 
-/// The text of a JSON string whose kind was matched; an unpaired surrogate is E_DATA_INVALID_UTF8 (VAL-12).
+/// The text of a JSON string whose kind was matched; an unpaired surrogate is data_invalid_utf8 (VAL-12).
 fn json_text(value: &JsonValue) -> Result<String, BindError> {
     match value_from_json(value)? {
         Value::Str(text) => Ok(text),
@@ -582,7 +582,7 @@ fn json_text(value: &JsonValue) -> Result<String, BindError> {
     }
 }
 
-/// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, E_INTERNAL.
+/// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, internal.
 fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
     BindError {
         code: ErrorCode::E_INTERNAL,

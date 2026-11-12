@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_INVALID_BLOCK_TAG",
+  "code": "parse_invalid_block_tag",
   "template": "input.tpl",
   "line": 1,
   "col": 10

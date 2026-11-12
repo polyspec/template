@@ -1,5 +1,5 @@
 {
-  "code": "E_RUNTIME_STRINGIFY",
+  "code": "runtime_stringify",
   "template": "input.tpl",
   "line": 1,
   "col": 7

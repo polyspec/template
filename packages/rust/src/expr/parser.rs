@@ -113,7 +113,7 @@ impl<'a> ExpressionParser<'a> {
         self.lexer.next_token()
     }
 
-    /// E_INTERNAL at a token: a broken invariant of the lexer or the parser.
+    /// internal at a token: a broken invariant of the lexer or the parser.
     fn internal(&self, token: &Token, message: &str) -> TemplateError {
         self.lexer.error(ErrorCode::E_INTERNAL, token.start, token.end, message)
     }

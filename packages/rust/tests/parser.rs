@@ -100,12 +100,12 @@ fn a_parse_error_is_the_error_object() {
     let unpositioned = TemplateError::without_position(ErrorCode::E_LOAD_NOT_FOUND, "missing.tpl", "missing");
     assert_eq!(
         serde_json::to_value(unpositioned).expect("the error serializes"),
-        serde_json::json!({"code": "E_LOAD_NOT_FOUND", "template": "missing.tpl", "line": 0,
+        serde_json::json!({"code": "load_not_found", "template": "missing.tpl", "line": 0,
             "col": 0, "offset": 0, "end": 0, "message": "missing"})
     );
     let json = serde_json::to_string(&error).expect("the error serializes");
     assert!(
-        json.starts_with(r#"{"code":"E_PARSE_UNCLOSED_BLOCK","template":"x.tpl","line":2,"col":1,"offset":2,"end":3,"message":"#),
+        json.starts_with(r#"{"code":"parse_unclosed_block","template":"x.tpl","line":2,"col":1,"offset":2,"end":3,"message":"#),
         "{json}"
     );
 }

@@ -1,5 +1,5 @@
 {
-  "code": "E_DATA_INVALID_UTF8",
+  "code": "data_invalid_utf8",
   "template": "input.tpl",
   "line": 0,
   "col": 0

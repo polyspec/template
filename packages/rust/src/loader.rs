@@ -38,7 +38,7 @@ impl Loaded {
 /// Loads templates by name (RT-9).
 pub trait Loader: Send + Sync {
     /// Returns the template for a name, `Ok(None)` when the name does not exist, or `Err` with a
-    /// message when loading fails; the engine reports a failure as `E_LOAD_FAILED`.
+    /// message when loading fails; the engine reports a failure as `load_failed`.
     fn load(&self, name: &str) -> Result<Option<Loaded>, String>;
 }
 

@@ -7,7 +7,7 @@ This document defines how a template source is divided into text, tags and comme
 
 ## 1. Source
 
-- **LEX-1** A template source is a byte sequence encoded in UTF-8. A byte sequence that is not valid UTF-8 is rejected with `E_LEX_INVALID_UTF8`. The reported position is the first invalid byte.
+- **LEX-1** A template source is a byte sequence encoded in UTF-8. A byte sequence that is not valid UTF-8 is rejected with `lex_invalid_utf8`. The reported position is the first invalid byte.
 
 - **LEX-2** A byte order mark (`EF BB BF`) at the start of the source is removed before any other processing. The mark is not text. Byte offsets in positions and AST spans count from the first byte after the mark.
 
@@ -88,7 +88,7 @@ The sequence `\\{/}` outputs `\{/}`: the first `\` is text, and `\{` is an escap
 
 ## 4. Tag end
 
-- **LEX-10** A tag in the sigil form with the sigil `*` is a comment. A comment ends at the first `*}` after the opening `*`. The content between is not interpreted and produces no output. A comment has no statement node; the AST lists it in `Template.comments` (AST-9). A comment does not nest. A comment that does not end before the end of the source is rejected with `E_PARSE_UNTERMINATED_COMMENT`.
+- **LEX-10** A tag in the sigil form with the sigil `*` is a comment. A comment ends at the first `*}` after the opening `*`. The content between is not interpreted and produces no output. A comment has no statement node; the AST lists it in `Template.comments` (AST-9). A comment does not nest. A comment that does not end before the end of the source is rejected with `parse_unterminated_comment`.
 
 ```
 {* removed *}
@@ -98,7 +98,7 @@ multi-line
 *}
 ```
 
-- **LEX-11** Every other tag ends at the first close delimiter that is outside a string literal, is at expression nesting depth zero, and is accepted as the tag boundary by the body grammar. With the default delimiters no grammar rule accepts `}`, so the tag ends at the first `}` outside a string literal. With a close delimiter that the grammar uses, for example `]`, a `]` that closes an open `[` belongs to the body and the next `]` ends the tag: `[= a[0]]` is one echo tag. A string literal starts at `'` or `"` and ends at the same unescaped quote character; the escape rules of string literals are defined in `expressions.md`. A tag whose body reaches the end of the source without a closing `}` is rejected with `E_PARSE_UNTERMINATED_TAG`. A string literal that reaches the end of the source is rejected with `E_PARSE_UNTERMINATED_STRING`.
+- **LEX-11** Every other tag ends at the first close delimiter that is outside a string literal, is at expression nesting depth zero, and is accepted as the tag boundary by the body grammar. With the default delimiters no grammar rule accepts `}`, so the tag ends at the first `}` outside a string literal. With a close delimiter that the grammar uses, for example `]`, a `]` that closes an open `[` belongs to the body and the next `]` ends the tag: `[= a[0]]` is one echo tag. A string literal starts at `'` or `"` and ends at the same unescaped quote character; the escape rules of string literals are defined in `expressions.md`. A tag whose body reaches the end of the source without a closing `}` is rejected with `parse_unterminated_tag`. A string literal that reaches the end of the source is rejected with `parse_unterminated_string`.
 
 ```
 {= "}"}
@@ -217,7 +217,7 @@ var page = {"id":7};
 
 The first line is text: the first `{` is followed by `{`, and the second `{` is followed by a space and `m`. The second line is text for the same reason. The third line is an echo tag inside a quoted string; the quotes are text and remain in the output.
 
-- **LEX-19** The body of a wrapped tag ends at the doubled close delimiter that LEX-11 selects for the body when the doubled close delimiter is read as one closing unit; for a comment, at the first *&#125;&#125;. The &#125;&#125; must be followed by optional horizontal whitespace and the wrapper closer that matches the wrapper opener. A wrapped tag whose body reaches the end of the source is rejected with `E_PARSE_UNTERMINATED_TAG`. A wrapped tag whose &#125;&#125; is not followed by its wrapper closer is rejected with `E_PARSE_INVALID_WRAPPER` at the wrapper opener. For LEX-14, a wrapped tag is one tag and the wrapper bytes belong to it.
+- **LEX-19** The body of a wrapped tag ends at the doubled close delimiter that LEX-11 selects for the body when the doubled close delimiter is read as one closing unit; for a comment, at the first *&#125;&#125;. The &#125;&#125; must be followed by optional horizontal whitespace and the wrapper closer that matches the wrapper opener. A wrapped tag whose body reaches the end of the source is rejected with `parse_unterminated_tag`. A wrapped tag whose &#125;&#125; is not followed by its wrapper closer is rejected with `parse_invalid_wrapper` at the wrapper opener. For LEX-14, a wrapped tag is one tag and the wrapper bytes belong to it.
 
 ## 8. Delimiters
 
@@ -227,7 +227,7 @@ The first line is text: the first `{` is followed by `{`, and the second `{` is 
 
 - **LEX-22** The engine option `delimiters` selects the delimiters for every template the engine parses. Its value is a string of two characters: the open delimiter followed by the close delimiter. The default is `{}`.
 
-- **LEX-23** A directive tag selects the delimiters for the rest of the file that contains it. Its body is the sigil `%`, the word `delimiter`, and a string of two characters. The directive is written with the delimiters in effect before it. The directive is valid only as the first tag of the file, preceded by whitespace only; a directive at any other position is rejected with `E_PARSE_INVALID_DIRECTIVE`. A directive whose characters do not satisfy LEX-21, or whose body has any other form, is rejected with `E_PARSE_INVALID_DIRECTIVE`. The directive is a non-echo tag, produces no output and has no node in the AST.
+- **LEX-23** A directive tag selects the delimiters for the rest of the file that contains it. Its body is the sigil `%`, the word `delimiter`, and a string of two characters. The directive is written with the delimiters in effect before it. The directive is valid only as the first tag of the file, preceded by whitespace only; a directive at any other position is rejected with `parse_invalid_directive`. A directive whose characters do not satisfy LEX-21, or whose body has any other form, is rejected with `parse_invalid_directive`. The directive is a non-echo tag, produces no output and has no node in the AST.
 
 ```
 {% delimiter ;;}

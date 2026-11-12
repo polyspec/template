@@ -1,5 +1,5 @@
 {
-  "code": "E_PARSE_INVALID_NUMBER",
+  "code": "parse_invalid_number",
   "template": "input.tpl",
   "line": 1,
   "col": 4
