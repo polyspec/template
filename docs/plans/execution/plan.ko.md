@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: 5e6c63a6ffda9f552da70eb5920becfdd64169eb7616ce1c21b9fd533a8d01b8 -->
+<!-- source-sha256: 11087686f861bb6c6f7cefb5841776d713f949d5189bdf2b9637a406a5cf798a -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -225,3 +225,7 @@ T27.1-9-1은 Kit 0.0.64의 선택 설치를 적용하고 네이티브 린트·�
 새 소비자 bootstrap 수용은 discover 123004244111로 확인했다. 남은 공급자 수용 조건은 GitHub 출력 직렬화에서도 선택한 parity 경로를 유지하는 [이슈 18](https://github.com/polyspec/kit/issues/18)과 실제 테스트가 있는 다중 모듈 suite에서 테스트 없는 앱 모듈의 성공을 처리하는 [이슈 5](https://github.com/polyspec/kit/issues/5)다. 템플릿은 공급자의 표준 탐색과 필수 게이트를 유지한다. JSON 입력 검증, 네이티브 import 생성 선행 조건과 모든 추적 Rust 잠금 버전은 관련 회귀 단위 검사로 검증한다.
 
 릴리스 0.0.14(T27.1-31)는 154f1d15에서 archive 아홉 개와 packages.json(T27.1-30, kit K871)으로 공개되었다. 그 CLI archive는 composer.lock을 담지 않는다(T27.1-33, T27.1-33-1). 0.0.13 archive는 polyspec/template를 path ../../php로 잠가서 그 composer install이 exit 1 했다. 빈 directory에서 풀어 놓은 polyspec-template-cli-php-0.0.14.zip은 repository `{"type": "composer", "url": "https://github.com/polyspec/template/releases/download/v0.0.14/packages.json"}`와 함께 `composer install --no-dev`로 설치된다. Composer는 polyspec/template 0.0.14를 릴리스 asset의 dist와 그 asset의 sha1인 shasum fc1993089cdba9667caccd77c7feb660e4574227로 잠그고, `bin/template.php render`가 렌더한다. polyspec/template를 require하는 소비자가 게시된 파일에서 하는 설치는 hyper H27.45다.
+
+## Wave 28 — Rust 코어와 바인딩
+
+의존: Wave 27. Rust crate가 런타임의 유일한 구현이고, binding이 `packages/rust/interface.json`에서 생성하는 바인딩이 언어 패키지를 대신하며, 언어 패키지는 각 바인딩이 공유 suite를 통과할 때까지 `legacy/`에 남는다(docs/spec/runtime.md#transition). compiler는 backend 하나씩 Rust, TypeScript, Python, PHP, Go 순서로 타입 있는 프로그램(docs/spec/compiler.md#typed-programs)으로 옮긴다. 각 단계는 backend를 옮기고, 그 생성 conformance runner와 생성 제어 흐름 검사를 선언 검사로 바꾸고, 생성 실행 문단에서 그 언어를 빼는 하나의 task다. 바인딩 패키지가 필요한 단계는 바인딩이 생성된 뒤(`make bindings`) 그 runner를 돌린다. T28.1은 고정 도구가 있는 기계에서 legacy PHP 확장의 header를 그 도구로 다시 만든다.

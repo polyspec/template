@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-ext-readme -->
-<!-- source-sha256: b804ff88a81d81f2ea9def4e9b6de98c8e57910880c8533b6cf6dfa81d71808a -->
+<!-- source-sha256: 96a89f9514ea23cab439896ca4995ce52a7de633e8e96c8f17d8f4cb32b14b4e -->
 # polyspec_template PHP 확장
 
 [English](README.md).
@@ -29,6 +29,8 @@ cd src && phpize && ./configure && make
 PHP build의 gen_stub.php가 stub에서 `src/polyspec_template_arginfo.h`를 만들며, 이 header는 commit된다. stub을 바꾼 뒤에는 `make php-ext-arginfo`가 header를 다시 만들고, header가 stub과 맞지 않는 동안 빌드는 실패한다.
 
 `src/polyspec_template.stub.php`는 정적 분석용 시그니처를 담으며 런타임에 로드되지 않는다.
+
+commit a0e3f22af의 header는 5.0.0을 받을 수 없어 PHP 8.4의 gen_stub.php가 고정한 5.0.0 대신 PHP-Parser 5.9.0으로 만들어졌다. T28.1이 5.0.0으로 다시 만든다.
 
 ## 명령줄
 

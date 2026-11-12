@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 002d53db6753ec4597fc5a9a4a37026b26e0c8687cebc7ec5a067228919770ea -->
+<!-- source-sha256: 7643035cb93ccdfa507fdb1f59e7e99f1440a2bf6b3a6af08ed53d1ea9ea12df -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -522,3 +522,10 @@
 | T27.1-83 | docs/operations/editor-tools.ko.md, docs/operations/publication.ko.md, docs/plans/execution/plan.ko.md, packages/php-ext/README.ko.md의 source-sha256 marker가 영어 원문의 현재 상태를 가리킨다. 각 원문은 쌍둥이가 stamp된 뒤 바뀌었고(editor-tools.md는 e173bd2b 이후, publication.md는 9a693429 이후, plan.md는 25f4306d 이후, README.md는 a187eaca 이후), 각 쌍둥이는 그 변경대로 번역되었지만 다시 stamp되지 않았다. 바뀐 문단을 하나씩 검토해 쌍둥이가 현재 내용임을 확인하고, make documents-stamp로 이 경로들만 stamp한다 | docs/operations/editor-tools.ko.md, docs/operations/publication.ko.md, docs/plans/execution/plan.ko.md, packages/php-ext/README.ko.md | `make docs-check`; each source-sha256 marker equals the sha256 of its English source | [o] |
 | T27.1-84 | include 검사는 optional 형태가 없는 any input에 any? 값을 받아들인다. 그래서 dynamic root에서 root 이름을 읽는 include된 template이 검사를 통과한다. 원인: 검사는 caller의 any? 값을 any input에 대해 거부했는데, RT-12와 RT-13에 따르면 그런 값이 나올 수 있다. 그래서 include/reads-root-name이 "include part.tpl input c requires any, got any?"로 실패했다. Red: conformance case include/reads-root-name이 그 메시지로 실패한다 | packages/compiler/src/ir.mts, docs/spec/compiler.md, docs/spec/compiler.ko.md, tests/cases/include/reads-root-name/, CHANGELOG.md, CHANGELOG.ko.md | `node tests/runner/conformance-generated-ts.mts --case include/reads-root-name` exits 0; CI runs the case in every generated language | [o] |
 | T27.1-85 | ## Unreleased의 항목(T27.1-84)으로 0.0.27 release | The version commit and the release assets | `make release-coverage` and the release of the CI run of the version commit | [o] |
+| T28.1 | legacy/packages/php-ext/src/polyspec_template_arginfo.h를 PHP 8.4의 gen_stub.php와 고정 PHP-Parser 5.0.0으로 다시 만든다. 원인: commit a0e3f22af는 컨테이너에서 5.0.0을 받지 못해 PHP-Parser 5.9.0으로 만들었다 | 다시 만든 header | 고정 PHP-Parser가 있는 기계에서 `make lint-php-ext`와 `make test-php-ext`; a0e3f22af의 header와 5.0.0이 쓰는 것 밖의 차이가 없다 | [ ] |
+| T28.2 | 타입 있는 프로그램: docs/spec/compiler.md#typed-programs의 spec과 backend 순서 | docs/spec/compiler.md(.ko), 이 계획 | `make docs-check` | [o] |
+| T28.3 | Rust backend는 코어의 AstProgram으로 렌더하는 선언을 낸다. conformance-generated-rust와 생성 검사의 Rust 행은 선언을 검사한다 | packages/compiler/src/backends/rust.mts, tests/runner/conformance-generated-rust.mts, 생성 검사 | `make conformance-generated-rust`, `make generated-native-check` | [ ] |
+| T28.4 | TypeScript backend는 @polyspec/template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/typescript.mts, tests/runner/conformance-generated-ts.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-ts` | [ ] |
+| T28.5 | Python backend는 polyspec.template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/python.mts, tests/runner/conformance-generated-python.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-python` | [ ] |
+| T28.6 | PHP backend는 Polyspec\\Template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/php.mts, tests/runner/conformance-generated-php.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-php` | [ ] |
+| T28.7 | Go backend는 Go 바인딩의 AstProgram으로 렌더하는 선언을 낸다. 생성 실행 문단이 docs/spec/compiler.md에서 빠진다 | packages/compiler/src/backends/go.mts, tests/runner/conformance-generated-go.mts, 생성 검사, docs/spec/compiler.md(.ko) | `make bindings` 뒤 `make conformance-generated-go` | [ ] |

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 8aa5d642cd1c4bad924ebd39f601bb49dc654666e3900e59de654d7e66dc40c4 -->
+<!-- source-sha256: a826447d091fdd20bc78dc358571b0206823e84312ebcec564941e4402367cdc -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -31,6 +31,14 @@ Source compiler는 `.tpl` 파일에서 시작해 모든 정적 include와 block 
 Canonical artifact manifest는 각 template의 digest 항목과 함께 source 각 줄의 시작 byte offset을 기록한다. Generated program은 이 line index와 보존된 node·expression span을 조합해 runtime에 template source를 읽지 않고 원본 line과 column을 보고한다.
 
 각 backend는 별도 `LanguageBackend` 구현이다. Backend는 구조화한 code writer를 통해 선언부와 직접적인 template 제어 흐름을 생성한다. Scenario 이름, 고정 request data, 예상 output 또는 직렬화한 AST node interpreter를 포함하지 않는다.
+
+## 타입 있는 프로그램
+
+타입 있는 프로그램은 템플릿의 AST와 타입 manifest의 선언이다(binding 설계 U-4). compiler는 아래 typed IR이 말하는 대로 템플릿을 타입 manifest에 대해 검사하고, backend는 대상 언어의 선언만 낸다. 즉 구조 `Assign`, `Definitions`, `Input<T>`, manifest가 선언한 record, 그리고 타입 있는 요청을 VAL-22의 bound map과 RT-26의 정의로 필드마다, 선언된 타입이 거부한 값의 필드 경로와 함께 바꾸고 artifact의 AST를 담은 `MapLoader` 위에서 런타임의 `AstProgram`으로 렌더하는 `GeneratedProgram`이다(RT-41). 생성 모듈에는 템플릿 제어 흐름, 식, 런타임 연산이 없다. 코어가 모든 템플릿을 실행하므로 타입 있는 프로그램과 AST 프로그램은 구성상 같은 바이트를 렌더하고 같은 오류로 실패한다. 생성 코드는 자기 언어의 런타임을 사용자가 설치하는 이름으로 import한다. Rust는 crate `polyspec-template`, 다른 언어는 바인딩 패키지 `@polyspec/template`, `polyspec.template`, `Polyspec\Template`, `github.com/polyspec/template/packages/go`다. 이유: 생성 제어 흐름은 코어가 한 번 하는 일을 다섯 언어로 반복했고, 런타임의 모든 규칙을 언어마다 증명해야 했다.
+
+### 이행
+
+backend는 Rust, TypeScript, Python, PHP, Go 순서로 하나씩 타입 있는 프로그램으로 옮긴다. Rust가 먼저인 것은 그 프로그램이 바인딩 없이 코어 crate 위에서 돌기 때문이고, Go가 마지막인 것은 그 바인딩이 마지막에 오기 때문이다. 옮기지 않은 backend는 이 절의 나머지가 설명하는 생성 실행을 그대로 내며, 그 생성 runner와 검사도 전처럼 돈다. backend가 옮겨지면 그 생성 conformance runner(`conformance-generated-<language>`)는 각 case를 선언으로 컴파일하고 그 선언으로 렌더한다. 그 언어에 대한 생성 제어 흐름 검사(`generated-typed-locals-check`와 `generated-native-check`, `generated-arguments-check`, `generated-bound-data-check`, `typed-generator`의 그 언어 행)는 선언의 검사, 즉 거부한 값의 필드 경로, 타입 있는 값의 변환, 출력이 AST 프로그램과 같은지의 검사가 되고, 아래 문단에서 그 언어가 빠진다. 마지막 backend가 옮겨지면 이 절에서 생성 실행의 문단이 빠진다.
 
 ## 공개 구조
 

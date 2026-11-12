@@ -29,6 +29,7 @@
 - The legacy language packages, the TypeScript packages that take the legacy runtime and the code generated for them run `legacy/tests/`, the copy of the cases and fixtures that the legacy packages passed when they moved, in their native tests, the conformance runner and the generated runners; Rust runs `tests/`.
 - Rust: the kind interface comes from the crate `polyspec-binding-core` of the repository binding, the former bindgen; the binding packages are scaffolded again by binding.
 - Rust: a render reads no file (RT-77). With the filesystem loader, `prepare` and the new `AstProgram::load` read the target and every template that its include and block tags name, and `render` takes them from the cache of the program; a template that they did not load fails with the new kind `load_not_loaded`. A loader of host code is still called during a render.
+- The compiler specification states typed programs (docs/spec/compiler.md#typed-programs): a backend emits declarations that render through the AstProgram of the runtime, and the backends move one by one, in the order Rust, TypeScript, Python, PHP and Go (Wave 28).
 
 ## 0.0.27
 

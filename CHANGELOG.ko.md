@@ -30,6 +30,7 @@
 - legacy 언어 패키지, legacy 런타임을 받는 TypeScript 패키지, 그것들을 위해 생성된 코드는 네이티브 테스트, conformance runner, generated runner에서 legacy 패키지가 옮겨질 때 통과하던 case와 fixture의 사본인 `legacy/tests/`를 실행한다. Rust는 `tests/`를 실행한다.
 - Rust: kind 인터페이스는 이전 bindgen인 저장소 binding의 crate `polyspec-binding-core`에서 온다. 바인딩 패키지는 binding으로 다시 scaffold된다.
 - Rust: render는 파일을 읽지 않는다(RT-77). 파일시스템 로더에서는 `prepare`와 새 `AstProgram::load`가 대상과 그 include·block 태그가 가리키는 모든 템플릿을 읽고, `render`는 프로그램의 캐시에서 가져온다. 이 둘이 로드하지 않은 템플릿은 새 kind `load_not_loaded`로 실패한다. 호스트 코드의 로더는 여전히 render 중에 불린다.
+- compiler 명세가 타입 있는 프로그램을 정한다(docs/spec/compiler.md#typed-programs). backend는 런타임의 AstProgram으로 렌더하는 선언을 내고, backend는 Rust, TypeScript, Python, PHP, Go 순서로 하나씩 옮겨진다(Wave 28).
 
 ## 0.0.27
 

@@ -29,6 +29,8 @@ gen_stub.php of the PHP build generates `src/polyspec_template_arginfo.h` from t
 
 `src/polyspec_template.stub.php` holds the signatures for static analysis and is never loaded at runtime.
 
+The header of commit a0e3f22af was generated with PHP-Parser 5.9.0 instead of the 5.0.0 that gen_stub.php of PHP 8.4 pins, because 5.0.0 could not be downloaded; T28.1 generates it again with 5.0.0.
+
 ## Command line
 
 ```sh
