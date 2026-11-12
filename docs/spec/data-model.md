@@ -211,6 +211,23 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 - Binding a value whose depth is greater than 64 fails with data_depth. Binding stops at the 65th level and does not read deeper parts of the value. A cyclic host structure, such as a JavaScript object, a Go map or slice, or a PHP object or array that contains itself, has no finite depth and fails with data_depth through the same limit, without a separate cycle check. In PHP each call of `jsonSerialize()` also counts as one level, so an object whose `jsonSerialize()` returns the object itself fails with data_depth.
 - A list or map literal whose value would have a depth greater than 64 fails with runtime_limit at the literal. List and map literals are the only template operations that build a value deeper than their operands; a function returns a value no deeper than its arguments, and a host function result is bound.
 
+- **VAL-23** A generated binding describes a value of its language one level at a time as a `HostValue` of binding_core, and the core binds it with `value_in` (`template_value` of the interface contract, binding design U-7); the rows are the binding of the tables above, for every language at once:
+
+| `HostValue` | Value |
+| --- | --- |
+| `Null`, `Undefined` | null |
+| `Bool` | bool |
+| `Int`, `Float`, `UntypedNumber` | number under VAL-2 |
+| `Number` (an integer outside `i64`) | data_number_range |
+| `Text` | string; units that are not well-formed UTF-8, UTF-16 or code points are data_invalid_utf8 |
+| `List`, `PhpArray` whose `is_list` holds | list |
+| `Map`, `PlainObject`, `StdClass`, `PhpArray` whose `is_list` does not hold | map, in the order of the language; a key is a `Text`, and in a `PhpArray` also an `Int`, which becomes its decimal text; another key is data_unsupported_type |
+| `PhpReference` | the binding of its target |
+| `Object` | object (VAL-19): the core holds the handle of the language object and gives it back unchanged; it reads no member and calls no method of it, so a lookup of a member is `null` and a method call is runtime_unknown_function |
+| `Bytes`, `Date`, `Callable`, `Value`, `Other` | data_unsupported_type |
+
+Lists and maps nest at most as VAL-20 allows, so a value that holds itself is data_depth. An exception that language code raises while the binding answers a question of the walk reaches the caller unchanged (FUN-46). A template value leaves the core with `value_out` as one level at a time: null, bool, a number as a float, a string or a safe string as a text, a list, a map with the predicate `sequence_keys` when its keys are `"0"` to `"n-1"` in order, and an object that entered as a handle as that handle; one list or map of the value is one language object, however often the value holds it. Reason: the binding of every language is one function of the core, so the languages differ only in how they describe a value, which binding_core fixes.
+
 ## Host arguments
 
 - **VAL-21** A host function, a logical class function and an instance method receive every argument as a host value of the following form. The form is the same in the AST program and in every generated program, and it applies to the elements of a list and to the values of a map at every depth.

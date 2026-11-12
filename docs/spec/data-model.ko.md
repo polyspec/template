@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: dddeb233139c8a2c5bccf1d1e436ecedf930340e77deff94ed3d0a70ff3aa3bc -->
+<!-- source-sha256: 314bd85ee7be6ea9231dc4b35c99b7fc0505d5d4af3a4bcbc288e5c5d36ddc80 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -211,6 +211,23 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 
 - 깊이가 64보다 큰 값을 바인딩하면 data_depth로 실패한다. 바인딩은 65번째 단계에서 멈추고 값의 더 깊은 부분을 읽지 않는다. 자기 자신을 포함하는 JavaScript 객체, Go map이나 슬라이스, PHP 객체나 배열 같은 순환 호스트 구조는 유한한 깊이가 없으므로 별도의 순환 검사 없이 같은 제한에 의해 data_depth로 실패한다. PHP에서는 `jsonSerialize()` 호출 한 번도 한 단계로 센다. 따라서 `jsonSerialize()`가 객체 자신을 반환하는 객체는 data_depth로 실패한다.
 - 값의 깊이가 64보다 커지는 list 또는 map literal은 그 literal 위치에서 runtime_limit로 실패한다. list와 map literal은 피연산자보다 깊은 값을 만드는 유일한 템플릿 연산이다. 함수는 인자보다 깊지 않은 값을 반환하며 호스트 함수의 결과는 바인딩한다.
+
+- **VAL-23** 생성된 바인딩은 자기 언어의 값을 binding_core의 `HostValue`로 한 단계씩 기술하고, 코어는 그것을 `value_in`으로 바인딩한다(인터페이스 계약의 `template_value`, binding 설계 U-7). 행은 위 표들의 바인딩을 모든 언어에 대해 한 번에 적은 것이다:
+
+| `HostValue` | 값 |
+| --- | --- |
+| `Null`, `Undefined` | null |
+| `Bool` | bool |
+| `Int`, `Float`, `UntypedNumber` | VAL-2에 따른 number |
+| `Number`(`i64` 밖의 정수) | data_number_range |
+| `Text` | string. 올바른 UTF-8, UTF-16, code point가 아닌 단위는 data_invalid_utf8 |
+| `List`, `is_list`가 성립하는 `PhpArray` | list |
+| `Map`, `PlainObject`, `StdClass`, `is_list`가 성립하지 않는 `PhpArray` | 언어의 순서대로의 map. 키는 `Text`이고 `PhpArray`에서는 `Int`도 되며 그 십진 텍스트가 된다. 다른 키는 data_unsupported_type |
+| `PhpReference` | 그 대상의 바인딩 |
+| `Object` | object(VAL-19). 코어는 언어 객체의 handle을 들고 그대로 돌려준다. 그 member를 읽지도 method를 부르지도 않으므로 member 조회는 `null`이고 method 호출은 runtime_unknown_function이다 |
+| `Bytes`, `Date`, `Callable`, `Value`, `Other` | data_unsupported_type |
+
+list와 map은 VAL-20이 허용하는 만큼만 중첩되므로 자기를 담은 값은 data_depth다. 바인딩이 walk의 질문에 답하는 동안 언어 코드가 던진 예외는 바뀌지 않고 호출자에게 간다(FUN-46). 템플릿 값은 `value_out`으로 한 단계씩 코어를 나간다. null, bool, float인 number, text인 string과 safe string, list, 키가 차례로 `"0"`부터 `"n-1"`이면 predicate `sequence_keys`를 가진 map, handle로 들어온 object는 그 handle이다. 값의 한 list나 map은 값이 그것을 몇 번 담든 한 언어 객체다. 이유: 모든 언어의 바인딩이 코어의 한 함수이므로 언어는 값을 기술하는 방식만 다르고, 그 방식은 binding_core가 정한다.
 
 ## 호스트 인자
 

@@ -325,6 +325,11 @@
       "kind": "alias",
       "visibility": "public",
       "origin": "value",
+      "core_type": "polyspec_template::Value",
+      "core": {
+        "in": "polyspec_template::value_in",
+        "out": "polyspec_template::value_out"
+      },
       "out": [
         {
           "kind": "null",
@@ -3352,7 +3357,8 @@
                       "unit": "environment"
                     }
                   ],
-                  "returns": "template_value"
+                  "returns": "template_value",
+                  "async_allowed": false
                 }
               },
               "required": true
@@ -3403,7 +3409,8 @@
                       "unit": "environment"
                     }
                   ],
-                  "returns": "template_value"
+                  "returns": "template_value",
+                  "async_allowed": false
                 }
               },
               "required": true
