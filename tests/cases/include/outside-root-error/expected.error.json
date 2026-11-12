@@ -1,1 +1,13 @@
-{"code": "load_outside_root", "template": "input.tpl", "line": 1, "col": 1}
+{
+  "raises": {
+    "kind": "load_outside_root",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 1
+    }
+  }
+}

@@ -1,6 +1,13 @@
 {
-  "code": "parse_unclosed_block",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 1
+  "raises": {
+    "kind": "parse_unclosed_block",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 1
+    }
+  }
 }

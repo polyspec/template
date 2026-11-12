@@ -14,7 +14,9 @@
 //                                    write the expected file from the ts implementation
 import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { kindCategories, raisesOf } from '../../scripts/conformance-case-files.mts';
 import { parseJson } from '../../scripts/json-document.mts';
+import { casesDir } from './case-list.mts';
 import { invoke, prepare, selectLanguages } from './drivers.mts';
 import {
   describeText, filesystemCases, firstDifference, FORMAT_MODE_NAMES, formatArgs, formatOutcome, listCases, parseArgs, parseErrorOutput, renderArgs, tokensArgs,
@@ -118,7 +120,12 @@ if (options.update) {
         written++;
       } else if (options.update === 'error' && result.status === 2) {
         const error = parseErrorOutput(result.stderr);
-        writeFileSync(join(testCase.dir, 'expected.error.json'), JSON.stringify(error, null, 2) + '\n');
+        if (error === null || typeof error.code !== 'string' || typeof error.template !== 'string' || typeof error.line !== 'number' || typeof error.col !== 'number') {
+          process.stderr.write(`${testCase.id}: the error output is no error object: ${result.stderr.trim()}\n`);
+          continue;
+        }
+        const raises = raisesOf({ code: error.code, template: error.template, line: error.line, col: error.col }, kindCategories(join(casesDir, '..', '..')));
+        writeFileSync(join(testCase.dir, 'expected.error.json'), JSON.stringify(raises, null, 2) + '\n');
         written++;
       } else {
         process.stderr.write(`${testCase.id}: no ${String(options.update)} result (exit ${result.status})\n`);

@@ -1,5 +1,5 @@
 // Fixture case enumeration and comparison helpers shared by the runners.
-import { EXPECTED_ERROR_SCHEMA, type ExpectedError, expectedErrorDocument } from '../../scripts/conformance-case-files.mts';
+import { type ExpectedError, type ExpectedRaises, expectedErrorDocument, expectedErrorOf, RAISES_SCHEMA } from '../../scripts/conformance-case-files.mts';
 import { spawn } from 'node:child_process';
 import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -50,7 +50,7 @@ interface FilesystemCase {
   files: Record<string, string>;
   symbolicLinks?: Record<string, string>;
   hardLinks?: Record<string, string>;
-  expected: { html?: string; error?: ExpectedError };
+  expected: { html?: string; raises?: ExpectedRaises['raises'] };
 }
 
 const NAMES: JSONSchemaType<Record<string, string>> = { type: 'object', required: [], additionalProperties: { type: 'string' } };
@@ -66,7 +66,7 @@ const FILESYSTEM_CASES_SCHEMA: JSONSchemaType<FilesystemCase[]> = {
       hardLinks: { ...NAMES, nullable: true },
       expected: {
         type: 'object',
-        properties: { html: { type: 'string', nullable: true }, error: { ...EXPECTED_ERROR_SCHEMA, nullable: true } },
+        properties: { html: { type: 'string', nullable: true }, raises: { ...RAISES_SCHEMA, nullable: true } },
         required: [],
         additionalProperties: false,
       },
@@ -152,7 +152,7 @@ export function filesystemCases(filter?: string): { directory: string; cases: Te
       options: {},
       meta: { requirements: entry.requirements, stage: 3 },
       expectedHtml: entry.expected.html ?? null,
-      expectedError: entry.expected.error ?? null,
+      expectedError: entry.expected.raises === undefined ? null : expectedErrorOf(entry.expected.raises),
       expectedAst: null,
     });
   }
@@ -316,12 +316,20 @@ export function firstDifference(a: unknown, b: unknown, path = '$'): string | nu
   return null;
 }
 
+/**
+ * The kind of an error code that an implementation writes (ERR-1): a legacy implementation names a code `E_` and its
+ * kind in capitals until it is removed, so the runner compares the kind of either form.
+ */
+export function kindOf(code: unknown): unknown {
+  return typeof code === 'string' && /^E_[A-Z0-9_]+$/.test(code) ? code.slice(2).toLowerCase() : code;
+}
+
 export function parseErrorOutput(stderr: string): { code: unknown; template: unknown; line: unknown; col: unknown } | null {
   const text = stderr.trim();
   try {
     const parsed: unknown = JSON.parse(text);
     if (!isJsonObject(parsed)) return null;
-    return { code: parsed.code, template: parsed.template, line: parsed.line, col: parsed.col };
+    return { code: kindOf(parsed.code), template: parsed.template, line: parsed.line, col: parsed.col };
   } catch (error) {
     // Standard error that is not JSON is no error object; any other failure is a defect.
     if (error instanceof SyntaxError) return null;

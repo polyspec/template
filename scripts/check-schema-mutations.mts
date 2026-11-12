@@ -30,7 +30,7 @@ const mutations: Mutation<CaseFile[]>[] = [
     const testCase = caseById(cases, withAst.id);
     testCase.hasAst = false;
     // The expected.error.json of a parse error of part.tpl, with its position.
-    const expectedError = { code: 'E_PARSE_UNEXPECTED_TOKEN', template: 'part.tpl', line: 1, col: 1 };
+    const expectedError = { code: 'parse_unexpected_token', template: 'part.tpl', line: 1, col: 1 };
     testCase.expectedError = expectedError;
   }],
 ];

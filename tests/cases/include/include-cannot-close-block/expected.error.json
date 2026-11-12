@@ -1,1 +1,13 @@
-{"code": "parse_unexpected_close", "template": "close.tpl", "line": 1, "col": 1}
+{
+  "raises": {
+    "kind": "parse_unexpected_close",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "close.tpl",
+      "line": 1,
+      "col": 1
+    }
+  }
+}

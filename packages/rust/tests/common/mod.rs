@@ -118,3 +118,18 @@ pub fn format_record(error: &polyspec_template::TemplateError) -> (&'static str,
         code => ("parse", Some(code.as_str().to_string())),
     }
 }
+
+/// The category of a kind in the error table of the interface contract, packages/rust/interface.json (design E-1).
+pub fn kind_category(kind: &str) -> String {
+    let path = repo_root().join("packages").join("rust").join("interface.json");
+    let contract: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(&path).expect("interface.json")).expect("JSON");
+    let variant = format!("polyspec_template::ErrorCode::E_{}", kind.to_uppercase());
+    contract["errors"]["kinds"]
+        .as_array()
+        .expect("errors.kinds")
+        .iter()
+        .find(|row| row["variant"] == variant.as_str())
+        .and_then(|row| row["category"].as_str())
+        .map(str::to_string)
+        .expect("the kind is in the error table")
+}

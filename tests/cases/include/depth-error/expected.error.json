@@ -1,6 +1,13 @@
 {
-  "code": "runtime_depth",
-  "template": "d32.tpl",
-  "line": 1,
-  "col": 1
+  "raises": {
+    "kind": "runtime_depth",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "d32.tpl",
+      "line": 1,
+      "col": 1
+    }
+  }
 }

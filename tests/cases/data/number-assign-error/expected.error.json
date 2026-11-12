@@ -1,1 +1,13 @@
-{"code": "data_unsupported_type", "template": "input.tpl", "line": 0, "col": 0}
+{
+  "raises": {
+    "kind": "data_unsupported_type",
+    "status": null,
+    "category": "type",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 0,
+      "col": 0
+    }
+  }
+}

@@ -1,6 +1,13 @@
 {
-  "code": "parse_reserved_name",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 3
+  "raises": {
+    "kind": "parse_reserved_name",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 3
+    }
+  }
 }

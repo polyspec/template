@@ -1,6 +1,13 @@
 {
-  "code": "data_number_range",
-  "template": "input.tpl",
-  "line": 0,
-  "col": 0
+  "raises": {
+    "kind": "data_number_range",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 0,
+      "col": 0
+    }
+  }
 }

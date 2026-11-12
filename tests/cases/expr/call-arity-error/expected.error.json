@@ -1,1 +1,13 @@
-{"code": "runtime_arity", "template": "input.tpl", "line": 1, "col": 4}
+{
+  "raises": {
+    "kind": "runtime_arity",
+    "status": null,
+    "category": "type",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 4
+    }
+  }
+}

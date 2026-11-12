@@ -1,1 +1,13 @@
-{"code":"data_invalid_json","template":"input.tpl","line":0,"col":0}
+{
+  "raises": {
+    "kind": "data_invalid_json",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 0,
+      "col": 0
+    }
+  }
+}

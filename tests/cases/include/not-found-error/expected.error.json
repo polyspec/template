@@ -1,1 +1,13 @@
-{"code": "load_not_found", "template": "input.tpl", "line": 2, "col": 1}
+{
+  "raises": {
+    "kind": "load_not_found",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 2,
+      "col": 1
+    }
+  }
+}

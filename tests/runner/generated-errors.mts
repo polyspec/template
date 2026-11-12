@@ -1,7 +1,7 @@
 // The error of a generated case as the generated runners compare it with expected.error.json: a thrown error, or the
 // error that a generated program reported, with its code, template, line and column. An error without one of them has
 // no position, which fails the case by name instead of being compared with a stand-in position.
-import { errorField, type ExpectedError, firstDifference } from './cases.mts';
+import { errorField, type ExpectedError, firstDifference, kindOf } from './cases.mts';
 import { parsedJsonObject } from './checked.mts';
 
 /** The error of a case with its position. */
@@ -26,7 +26,7 @@ export function errorDifference(expected: ExpectedError | null, error: unknown, 
   if (typeof template !== 'string' || typeof line !== 'number' || typeof col !== 'number') {
     return `the ${step} error ${code} has no position: template ${JSON.stringify(template)}, line ${JSON.stringify(line)}, col ${JSON.stringify(col)}`;
   }
-  const actual: PositionedError = { code, template, line, col };
+  const actual: PositionedError = { code: String(kindOf(code)), template, line, col };
   return firstDifference(expected, actual);
 }
 

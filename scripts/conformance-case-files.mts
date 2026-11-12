@@ -9,7 +9,7 @@ import { jsonDocument, readJson } from './json-document.mts';
 // A JSON Schema of contracts/schema, which ajv compiles.
 const schemaObjectDocument = jsonDocument<Record<string, unknown>>('JSON Schema', { type: 'object' });
 
-/** The expected error of a case as expected.error.json holds it: the code, the template and the 1-based position. */
+/** The expected error of a case that the runners compare: the kind, the template and the 1-based position. */
 export interface ExpectedError {
   code: string;
   template: string;
@@ -17,16 +17,83 @@ export interface ExpectedError {
   col: number;
 }
 
-/** The expected.error.json of a case. */
-/** The schema of expected.error.json, which the runners also apply to the expected errors of the filesystem cases. */
-export const EXPECTED_ERROR_SCHEMA: JSONSchemaType<ExpectedError> = {
+/**
+ * The failure of a case as expected.error.json writes it (F-3 of the plan, ERR-1): `raises` with the kind, the HTTP
+ * status (none for a template error), the category of the kind, the message that a rule fixes (none here) and the
+ * properties that the case compares, the template and the position of ERR-3.
+ */
+export interface ExpectedRaises {
+  raises: {
+    kind: string;
+    status: null;
+    category: string;
+    message: null;
+    properties: { template: string; line: number; col: number };
+  };
+}
+
+/** The schema of the raises object, which the filesystem cases also use for their expected failure. */
+export const RAISES_SCHEMA: JSONSchemaType<ExpectedRaises['raises']> = {
   type: 'object',
-  required: ['code', 'template', 'line', 'col'],
-  properties: { code: { type: 'string' }, template: { type: 'string' }, line: { type: 'integer' }, col: { type: 'integer' } },
+  required: ['kind', 'status', 'category', 'message', 'properties'],
+  properties: {
+    kind: { type: 'string', pattern: '^[a-z][a-z0-9_]*$' },
+    status: { type: 'null', nullable: true },
+    category: { type: 'string', enum: ['value', 'type', 'io', 'store', 'busy', 'internal'] },
+    message: { type: 'null', nullable: true },
+    properties: {
+      type: 'object',
+      required: ['template', 'line', 'col'],
+      properties: { template: { type: 'string' }, line: { type: 'integer' }, col: { type: 'integer' } },
+      additionalProperties: false,
+    },
+  },
   additionalProperties: false,
 };
 
-export const expectedErrorDocument = jsonDocument<ExpectedError>('expected error', EXPECTED_ERROR_SCHEMA);
+const raisesDocument = jsonDocument<ExpectedRaises>('expected error', {
+  type: 'object',
+  required: ['raises'],
+  properties: { raises: RAISES_SCHEMA },
+  additionalProperties: false,
+});
+
+/** The error that a runner compares, from the raises object of a case. */
+export function expectedErrorOf(raises: ExpectedRaises['raises']): ExpectedError {
+  return { code: raises.kind, ...raises.properties };
+}
+
+/**
+ * The category of each kind, from the error table of the interface contract (packages/rust/interface.json, design E-1):
+ * a variant `polyspec_template::ErrorCode::E_<KIND>` has the kind `<kind>`.
+ */
+export function kindCategories(root: string): Map<string, string> {
+  const contract = readJson(join(root, 'packages/rust/interface.json'));
+  const rows = (contract as { errors?: { kinds?: { variant: string; category: string }[] } }).errors?.kinds;
+  if (rows === undefined) throw new Error('packages/rust/interface.json has no errors.kinds');
+  return new Map(rows.map(row => [row.variant.replace(/^.*::E_/, '').toLowerCase(), row.category]));
+}
+
+/** The expected.error.json of an error that an implementation wrote, with the category of its kind. */
+export function raisesOf(error: ExpectedError, categories: Map<string, string>): ExpectedRaises {
+  const category = categories.get(error.code);
+  if (category === undefined) throw new Error(`the kind ${error.code} is not in the error table of packages/rust/interface.json`);
+  return {
+    raises: {
+      kind: error.code,
+      status: null,
+      category,
+      message: null,
+      properties: { template: error.template, line: error.line, col: error.col },
+    },
+  };
+}
+
+/** The expected.error.json of a case, as the error that a runner compares. */
+export const expectedErrorDocument = {
+  parse: (text: string, source: string): ExpectedError => expectedErrorOf(raisesDocument.parse(text, source).raises),
+  read: (path: string): ExpectedError => expectedErrorOf(raisesDocument.read(path).raises),
+};
 
 /** The expected files of one case; an absent file is null. */
 export interface CaseFile {
@@ -69,7 +136,7 @@ export function readCaseFiles(): CaseFile[] {
 
 /** Whether the expected error is a lexical or parse error of the entry template, which has no AST. */
 function entryParseError(expectedError: ExpectedError): boolean {
-  return expectedError.template === 'input.tpl' && /^E_(LEX|PARSE)_/.test(expectedError.code);
+  return expectedError.template === 'input.tpl' && /^(lex|parse)_/.test(expectedError.code);
 }
 
 /** CNF-15: a case has expected.ast.json exactly when its entry template parses. */

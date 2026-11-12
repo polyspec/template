@@ -114,7 +114,11 @@ expected {expected}"
         let expected: serde_json::Value = serde_json::from_str(&expected).map_err(|error| format!("expected.error.json: {error}"))?;
         return match outcome {
             Outcome::Error(error) => {
-                let actual = serde_json::json!({ "code": error.code, "template": error.template, "line": error.line, "col": error.col });
+                let category = common::kind_category(error.code.as_str());
+                let actual = serde_json::json!({ "raises": {
+                    "kind": error.code, "status": null, "category": category, "message": null,
+                    "properties": { "template": error.template, "line": error.line, "col": error.col }
+                } });
                 if json_equal(&actual, &expected) {
                     Ok(())
                 } else {

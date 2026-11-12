@@ -1,6 +1,13 @@
 {
-  "code": "data_depth",
-  "template": "input.tpl",
-  "line": 0,
-  "col": 0
+  "raises": {
+    "kind": "data_depth",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 0,
+      "col": 0
+    }
+  }
 }

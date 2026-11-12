@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: 3d150e593b6dd8a16dcd83ba499683cfd488e59e5ccb31500fadc49d5e070363 -->
+<!-- source-sha256: 66c0664ef4aa1099098af90d415c35a7c045583cd2f1758a7a699c5ad84e55de -->
 # 적합성
 
 [English](/operations/conformance).
@@ -60,11 +60,11 @@ node scripts/check-rules.mts
 | `case.json` | 예 | `{"requirements": ["LEX-3"], "stage": 1}`. `requirements`는 케이스가 시험하는 명세 requirement를 나열한다. `stage`는 렉시컬·문법·표현식 케이스가 1, 함수·데이터 모델·공백 케이스가 2, include·block·래퍼·구분자·오류 케이스가 3이다. |
 | `expected.ast.json` | 예. 단 `expected.error.json`이 `input.tpl`의 렉시컬 또는 파싱 오류를 지정하면 제외 | `input.tpl`의 AST. include와 block은 전개하지 않는다. |
 | `expected.html` | 둘 중 하나 | 정확한 렌더 출력. |
-| `expected.error.json` | 둘 중 하나 | 기대 오류의 `{"code", "template", "line", "col"}`. |
+| `expected.error.json` | 둘 중 하나 | 기대 오류의 `{"raises": {"kind", "status", "category", "message", "properties": {"template", "line", "col"}}}`: kind(ERR-1), HTTP 상태 없음(`null`), `packages/rust/interface.json`의 오류 표에 있는 그 kind의 category, 메시지 없음(`null`, ERR-3), 그리고 ERR-3이 비교하는 template과 위치. |
 | `expected.tokens.json` | `expected.ast.json`이 있을 때 | `input.tpl`의 토큰(FMT-1, FMT-2). `[start, end, type]`의 JSON 배열. |
 | `expected.format.json` | `expected.ast.json`이 있을 때 | `{"indent": R, "keep": R}`. `input.tpl`을 기본 옵션(`indent`, 공백 두 개, `templateBlocks` `indent`)과 `indent: null`(`keep`)로 포맷한 결과다([포맷](/ko/spec/formatting)). `R`은 `{"text": "<포맷한 텍스트>"}` 또는 `{"error": {"reason", "code", "line", "col"}}`이다(FMT-14). |
 
-- **CNF-15** `scripts/check-schema.mts`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `E_LEX_*` 또는 `E_PARSE_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `expected.ast.json`이 있는 케이스에 `expected.tokens.json`이나 `expected.format.json`이 없을 때, 그것이 없는 케이스에 있을 때, 또는 CNF-2의 내용을 갖지 않을 때도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 파일이 없으면 전체 suite가 실패한다. 이유: CNF-9는 입력이 파싱되는 모든 케이스의 파싱, 토큰, 포맷 결과를 비교하며, 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
+- **CNF-15** `scripts/check-schema.mts`는 모든 케이스 디렉터리에서 `expected.ast.json`이 있는지 검사한다. 케이스에 `expected.ast.json`이 없고 그 `expected.error.json`이 `template`이 `input.tpl`인 `lex_*` 또는 `parse_*` 코드를 지정하지 않으면 실패하고, `expected.error.json`이 그런 오류를 지정하는데 `expected.ast.json`이 있어도 실패한다. `expected.ast.json`이 있는 케이스에 `expected.tokens.json`이나 `expected.format.json`이 없을 때, 그것이 없는 케이스에 있을 때, 또는 CNF-2의 내용을 갖지 않을 때도 실패한다. `make schema-check`와 `make docs-check`가 이를 실행하므로 파일이 없으면 전체 suite가 실패한다. 이유: CNF-9는 입력이 파싱되는 모든 케이스의 파싱, 토큰, 포맷 결과를 비교하며, 파일이 없는 케이스는 그렇지 않으면 그 비교 없이 통과한다.
 
 - **CNF-16** `tests/fixtures/filesystem/cases.json`은 파일시스템 로더(RT-10)의 filesystem 케이스를 나열한다. checkout은 symbolic link와 hard link를 담지 않으므로 케이스 디렉터리는 이 케이스를 담을 수 없다. 각 케이스는 `name`, `requirements`, `files`(template 이름에서 그 텍스트로의 map, `input.tpl` 포함), 선택적 `symbolicLinks`와 `hardLinks`(이름에서 대상 이름으로의 map), 그리고 `html` 또는 `error`(`{code, template, line, col}`)를 가진 `expected`를 가진다. `tests/runner/conformance.mts`는 각 케이스의 tree를 시스템 임시 디렉터리의 한 디렉터리에 쓰고, 선택된 모든 구현의 `render --root <directory> input.tpl`을 케이스 `filesystem/<name>`으로 실행해 결과를 CNF-7과 CNF-8로 비교한다. `--case filesystem`이 이 케이스들을 선택한다.
 
@@ -105,7 +105,7 @@ TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@poly
 
 - **CNF-7** HTML 비교는 stdout의 바이트와 `expected.html`의 바이트를 비교한다.
 
-- **CNF-8** 오류 비교는 stderr JSON의 `code`, `template`, `line`, `col`을 `expected.error.json`과 비교한다. `expected.error.json`이 있는 케이스는 종료 상태가 2일 때만 통과한다.
+- **CNF-8** 오류 비교는 stderr JSON의 `code`, `template`, `line`, `col`을 `expected.error.json`의 kind와 properties와 비교한다. legacy 구현의 코드 `E_<KIND>`는 그 kind로 비교한다(ERR-1). `expected.error.json`이 있는 케이스는 종료 상태가 2일 때만 통과한다.
 
 - **CNF-17** 토큰 비교는 `tokens`의 stdout을 파싱하고, 종료 상태가 0이며 배열이 `expected.tokens.json`과 원소마다 같기를 요구한다.
 

@@ -1,1 +1,13 @@
-{"code": "runtime_block_redefined", "template": "input.tpl", "line": 2, "col": 1}
+{
+  "raises": {
+    "kind": "runtime_block_redefined",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 2,
+      "col": 1
+    }
+  }
+}

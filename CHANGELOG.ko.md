@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c214ed5cbbd4b27486aee6080861c435b1ac51261c85e13e9440d2f19538aad2 -->
+<!-- source-sha256: b69cb26e4b90136a1593f16f42eaee5bece8c33c2e4d4806ba18d86105118aa2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -19,6 +19,7 @@
 - Rust 명령행 인터페이스는 기본으로 꺼진 feature `cli`로 빌드하므로 라이브러리는 `clap` 없이 빌드된다. make build-rust, conformance driver, 단위 시험은 이 feature를 켠다.
 - Rust crate의 모든 실패는 kind를 가진 `TemplateError`다: `ArgumentError`, `RequestError`, `FormatError`, `FormatErrorReason`, `AstDecodeError`, `PathError`는 없어졌다. 새 kind `argument_delimiters`, `argument_function_name`, `argument_source_range`, `argument_indent`, `format_invariant`, `format_html`, `ast_invalid`(ERR-15)가 kind 없던 실패를 명명하고, `resolve_path`는 `load_outside_root`로 실패한다. 명령행은 format 오류의 FMT-14 record를 kind에서 쓴다.
 - 키가 차례대로 `"0"`부터 `"n-1"`인 map과 빈 map은 PHP host 코드에 `stdClass` 객체로 도착하므로 list가 아니라 같은 map으로 다시 바인딩된다(VAL-21). 인터페이스 계약은 그 행, ERR-15의 kind와 그것을 내는 member를 적고, bindgen을 기다리는 두 행(entry 순서를 지키는 Go map 형태와 값 kind `native`)을 표시해 둔다.
+- 실패하는 case는 expected.error.json과 filesystem case에 실패를 `{"raises": {"kind", "status", "category", "message", "properties"}}`로 적는다: kind, 상태 없음, 인터페이스 계약 오류 표의 그 kind의 category, 메시지 없음, template과 위치(CNF-2, CNF-8). 러너는 kind를 비교하고 legacy 코드 `E_<KIND>`는 그 kind로 비교한다. expected.ast.json 존재 검사는 kind `lex_*`와 `parse_*`를 읽는다.
 
 ## 0.0.27
 

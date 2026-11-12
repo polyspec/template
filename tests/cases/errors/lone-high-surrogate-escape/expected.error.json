@@ -1,6 +1,13 @@
 {
-  "code": "parse_invalid_escape",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 6
+  "raises": {
+    "kind": "parse_invalid_escape",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 6
+    }
+  }
 }

@@ -1,6 +1,13 @@
 {
-  "code": "parse_unexpected_token",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 11
+  "raises": {
+    "kind": "parse_unexpected_token",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 11
+    }
+  }
 }

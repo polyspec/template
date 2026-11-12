@@ -1,6 +1,13 @@
 {
-  "code": "parse_else_outside_block",
-  "template": "input.tpl",
-  "line": 2,
-  "col": 1
+  "raises": {
+    "kind": "parse_else_outside_block",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 2,
+      "col": 1
+    }
+  }
 }

@@ -1,6 +1,13 @@
 {
-  "code": "parse_unterminated_tag",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 3
+  "raises": {
+    "kind": "parse_unterminated_tag",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 3
+    }
+  }
 }

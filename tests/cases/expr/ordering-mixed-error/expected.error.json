@@ -1,6 +1,13 @@
 {
-  "code": "runtime_compare",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 4
+  "raises": {
+    "kind": "runtime_compare",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 4
+    }
+  }
 }

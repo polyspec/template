@@ -1,6 +1,13 @@
 {
-  "code": "parse_elseif_after_else",
-  "template": "input.tpl",
-  "line": 5,
-  "col": 1
+  "raises": {
+    "kind": "parse_elseif_after_else",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 5,
+      "col": 1
+    }
+  }
 }

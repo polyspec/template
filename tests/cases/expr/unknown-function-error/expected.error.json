@@ -1,1 +1,13 @@
-{"code": "runtime_unknown_function", "template": "input.tpl", "line": 1, "col": 4}
+{
+  "raises": {
+    "kind": "runtime_unknown_function",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 4
+    }
+  }
+}

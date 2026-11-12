@@ -1,1 +1,13 @@
-{"code": "load_cycle", "template": "b.tpl", "line": 2, "col": 1}
+{
+  "raises": {
+    "kind": "load_cycle",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "b.tpl",
+      "line": 2,
+      "col": 1
+    }
+  }
+}

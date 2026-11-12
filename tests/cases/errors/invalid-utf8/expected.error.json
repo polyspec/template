@@ -1,6 +1,13 @@
 {
-  "code": "lex_invalid_utf8",
-  "template": "input.tpl",
-  "line": 1,
-  "col": 4
+  "raises": {
+    "kind": "lex_invalid_utf8",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 1,
+      "col": 4
+    }
+  }
 }

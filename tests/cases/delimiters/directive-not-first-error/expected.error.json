@@ -1,6 +1,13 @@
 {
-  "code": "parse_invalid_directive",
-  "template": "input.tpl",
-  "line": 2,
-  "col": 1
+  "raises": {
+    "kind": "parse_invalid_directive",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 2,
+      "col": 1
+    }
+  }
 }

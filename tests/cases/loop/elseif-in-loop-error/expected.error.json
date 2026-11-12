@@ -1,6 +1,13 @@
 {
-  "code": "parse_elseif_not_in_if",
-  "template": "input.tpl",
-  "line": 2,
-  "col": 1
+  "raises": {
+    "kind": "parse_elseif_not_in_if",
+    "status": null,
+    "category": "value",
+    "message": null,
+    "properties": {
+      "template": "input.tpl",
+      "line": 2,
+      "col": 1
+    }
+  }
 }
