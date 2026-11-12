@@ -23,7 +23,7 @@ from polyspec.template import (
     bind_value,
 )
 
-FIXTURE = Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "native-object"
+FIXTURE = Path(__file__).resolve().parents[4] / "legacy" / "tests" / "fixtures" / "native-object"
 HOST_VALUES = json.loads((FIXTURE / "host-values.json").read_text(encoding="utf-8"))
 
 

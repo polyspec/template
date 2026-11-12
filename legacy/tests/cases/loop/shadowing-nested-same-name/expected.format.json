@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ v = outer}\n  {@ v = v.items}\n    {= v}\n  {/}\n  [{= v.index_}:{= v.n}]\n{/}\n"
+  },
+  "keep": {
+    "text": "{@ v = outer}\n{@ v = v.items}\n{= v}\n{/}\n[{= v.index_}:{= v.n}]\n{/}\n"
+  }
+}

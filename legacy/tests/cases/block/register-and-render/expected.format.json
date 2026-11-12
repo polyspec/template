@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{# head parts/head.tpl}\n{# head}\n"
+  },
+  "keep": {
+    "text": "{# head parts/head.tpl}\n{# head}\n"
+  }
+}

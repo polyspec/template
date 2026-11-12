@@ -29,7 +29,7 @@ final class SdkTest extends TestCase
     private static function fixture(): array
     {
         /** @var Fixture $fixture */
-        $fixture = Support::json(Support::read(Support::repoRoot() . '/tests/fixtures/formatter-sdk.json'));
+        $fixture = Support::json(Support::read(Support::repoRoot() . '/legacy/tests/fixtures/formatter-sdk.json'));
 
         return $fixture;
     }

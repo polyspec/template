@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= abs(-3.5)}\n{= abs(2)}\n{= abs(-0)}\n"
+  },
+  "keep": {
+    "text": "{= abs(-3.5)}\n{= abs(2)}\n{= abs(-0)}\n"
+  }
+}

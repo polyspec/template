@@ -12,7 +12,8 @@ declare global {
 }
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-const casesDir = join(root, 'tests', 'cases');
+// The browser build is the legacy TypeScript package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
+const casesDir = join(root, 'legacy', 'tests', 'cases');
 const CASE_FILES = new Set(['case.json', 'data.json', 'define.json', 'env.json', 'options.json']);
 
 interface BrowserCase {

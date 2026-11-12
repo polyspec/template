@@ -1,0 +1,11 @@
+{
+  "requirements": [
+    "VAL-9",
+    "VAL-10",
+    "EXP-2",
+    "EXP-24",
+    "EXP-28",
+    "AST-8"
+  ],
+  "stage": 1
+}

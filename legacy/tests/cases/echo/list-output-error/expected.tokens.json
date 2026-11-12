@@ -1,0 +1,6 @@
+[
+  [3,4,"delimiter"],
+  [4,5,"keyword"],
+  [6,11,"variable"],
+  [11,12,"delimiter"]
+]

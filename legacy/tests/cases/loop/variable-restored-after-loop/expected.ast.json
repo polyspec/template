@@ -1,0 +1,161 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "item",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "x",
+        "span": [
+          9,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "For",
+      "name": "item",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          24,
+          29
+        ]
+      },
+      "body": [
+        {
+          "type": "Echo",
+          "expr": {
+            "type": "Var",
+            "name": "item",
+            "span": [
+              34,
+              38
+            ]
+          },
+          "span": [
+            31,
+            39
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "\n",
+          "span": [
+            39,
+            40
+          ]
+        }
+      ],
+      "empty": null,
+      "span": [
+        14,
+        43
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "item",
+        "span": [
+          47,
+          51
+        ]
+      },
+      "span": [
+        44,
+        52
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        52,
+        53
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "other",
+        "span": [
+          56,
+          61
+        ]
+      },
+      "span": [
+        53,
+        62
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        62,
+        63
+      ]
+    },
+    {
+      "type": "For",
+      "name": "other",
+      "iter": {
+        "type": "Var",
+        "name": "items",
+        "span": [
+          74,
+          79
+        ]
+      },
+      "body": [],
+      "empty": null,
+      "span": [
+        63,
+        83
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "[",
+      "span": [
+        84,
+        85
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "other",
+        "span": [
+          88,
+          93
+        ]
+      },
+      "span": [
+        85,
+        94
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "]\n",
+      "span": [
+        94,
+        96
+      ]
+    }
+  ],
+  "comments": []
+}

@@ -3,7 +3,7 @@
 
 [한국어](/ko/operations/conformance).
 
-The conformance suite verifies that every implementation produces the same AST, the same output and the same error fields for the cases in `tests/cases/`.
+The conformance suite verifies that every implementation produces the same AST, the same output and the same error fields for the cases in `tests/cases/`. During the transition (docs/spec/runtime.md#transition) the legacy language packages, the TypeScript packages that take the legacy runtime and the code that the compiler generates for them run `legacy/tests/`, a copy of `tests/cases/` and of `tests/fixtures/` as the legacy packages passed them when they moved, with the expected errors in the former form `{code, template, line, col}`; the Rust crate runs `tests/`. A change of behavior changes `tests/` only.
 
 
 The rules below (CNF-n) are the rules of the conformance suite itself: the layout of a case, the command line that every implementation provides to the suite, the comparison and the runners. They are not requirements of the language.

@@ -25,7 +25,7 @@ final class SourceTest extends TestCase
     private static function fixture(): array
     {
         /** @var array{valid: list<ValidSource>, invalid: list<InvalidSource>} $fixture The committed fixture is also schema-checked by the source contract unit. */
-        $fixture = Support::json(Support::read(Support::repoRoot() . '/tests/fixtures/source-context.json'));
+        $fixture = Support::json(Support::read(Support::repoRoot() . '/legacy/tests/fixtures/source-context.json'));
         self::assertNotEmpty($fixture['valid']);
         self::assertNotEmpty($fixture['invalid']);
 

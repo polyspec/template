@@ -1,0 +1,15 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Include",
+      "path": "d01.tpl",
+      "span": [
+        0,
+        11
+      ]
+    }
+  ],
+  "comments": []
+}

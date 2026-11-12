@@ -1244,6 +1244,20 @@
       "targets": [
         "bindings-check"
       ]
+    },
+    {
+      "paths": [
+        "legacy/tests/**"
+      ],
+      "targets": [
+        "conformance-cases",
+        "test-ts",
+        "test-go",
+        "test-php",
+        "test-python",
+        "test-php-ext",
+        "template-test-language"
+      ]
     }
   ],
   "inputs": [
@@ -1607,7 +1621,8 @@
     {
       "check": "make conformance-cases",
       "paths": [
-        "tests/cases/**"
+        "tests/cases/**",
+        "legacy/tests/**"
       ]
     },
     {

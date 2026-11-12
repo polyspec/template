@@ -16,7 +16,7 @@ final class RequestPathTest extends TestCase
 {
     public function testRendersALoadedArtifactTheSameWay(): void
     {
-        $program = AstProgram::loadArtifact(Support::repoRoot() . '/tests/fixtures/artifact-runtime/artifact');
+        $program = AstProgram::loadArtifact(Support::repoRoot() . '/legacy/tests/fixtures/artifact-runtime/artifact');
         $assign = ['x' => 'a<b'];
         $first = $program->render('page.tpl', $assign);
         self::assertSame($first, $program->render('page.tpl', $assign));

@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { SafeString, type Value } from '../src/value/value.js';
 
 export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '..', '..');
-export const casesDir = join(repoRoot, 'tests', 'cases');
-export const exprFixture = join(repoRoot, 'tests', 'fixtures', 'expr', 'cases.json');
+export const casesDir = join(repoRoot, 'legacy', 'tests', 'cases');
+export const exprFixture = join(repoRoot, 'legacy', 'tests', 'fixtures', 'expr', 'cases.json');
 
 // Converts a template value into plain JSON data for comparison.
 export function toJsonValue(value: Value): unknown {

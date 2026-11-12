@@ -20,7 +20,7 @@ final class PrefixAnalysisTest extends TestCase
          *   id: string, name: string, source: string, delimiters?: string, expected: array<string, mixed>
          * }>} $fixture
          */
-        $fixture = Support::json(Support::read(Support::repoRoot() . '/tests/fixtures/prefix-analysis.json'));
+        $fixture = Support::json(Support::read(Support::repoRoot() . '/legacy/tests/fixtures/prefix-analysis.json'));
         self::assertNotEmpty($fixture['cases']);
         foreach ($fixture['cases'] as $item) {
             $options = isset($item['delimiters']) ? ['delimiters' => $item['delimiters']] : [];

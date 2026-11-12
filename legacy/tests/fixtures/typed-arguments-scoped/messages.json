@@ -1,0 +1,4 @@
+[
+  {"assign": {"title": "T"}, "define": {}, "result": "rendered: T|T"},
+  {"assign": {"title": 1}, "define": {}, "result": "argument: assign.title is not a string"}
+]

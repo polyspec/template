@@ -1,10 +1,10 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: 6dbedd451f199e90056d1dd259b7f5104815679035859114905016b878413f72 -->
+<!-- source-sha256: 1e9d1e862cf2e424f84e26535c0e5d9fdc9439cbe529ad0dc9ee540da8242f77 -->
 # 적합성
 
 [English](/operations/conformance).
 
-적합성 스위트는 모든 구현이 `tests/cases/`의 케이스에 대해 같은 AST, 같은 출력, 같은 오류 필드를 만드는지 검증한다.
+적합성 스위트는 모든 구현이 `tests/cases/`의 케이스에 대해 같은 AST, 같은 출력, 같은 오류 필드를 만드는지 검증한다. 이행 기간(docs/spec/runtime.md#transition)에는 legacy 언어 패키지, legacy 런타임을 받는 TypeScript 패키지, compiler가 그것들을 위해 생성한 코드가 `legacy/tests/`를 실행한다. 이는 legacy 패키지가 옮겨질 때 통과하던 `tests/cases/`와 `tests/fixtures/`의 사본이며 기대 오류는 이전 형태 `{code, template, line, col}`이다. Rust crate는 `tests/`를 실행한다. 동작의 변경은 `tests/`만 바꾼다.
 
 
 아래 규칙(CNF-n)은 conformance suite 자체의 규칙이다. case의 구조, 모든 구현이 suite에 제공하는 명령줄, 비교, runner를 정한다. 언어의 requirement가 아니다.

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "[{= trim(s)}]\n[{= trim('xxaxx', 'x')}]\n[{= trim(s, ' ')}]\n"
+  },
+  "keep": {
+    "text": "[{= trim(s)}]\n[{= trim('xxaxx', 'x')}]\n[{= trim(s, ' ')}]\n"
+  }
+}

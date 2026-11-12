@@ -1,0 +1,12 @@
+{
+  "requirements": [
+    "GRM-6",
+    "RT-32",
+    "EXP-17",
+    "AST-1",
+    "AST-2",
+    "AST-3",
+    "AST-8"
+  ],
+  "stage": 1
+}

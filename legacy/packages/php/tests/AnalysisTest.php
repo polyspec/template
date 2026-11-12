@@ -14,7 +14,7 @@ final class AnalysisTest extends TestCase
     public function testPreservesSharedAnalysisContexts(): void
     {
         /** @var array{cases: list<array{id: string, name: string, source: string, expected: array<string, mixed>}>} $fixture */
-        $fixture = Support::json(Support::read(Support::repoRoot() . '/tests/fixtures/analysis-context.json'));
+        $fixture = Support::json(Support::read(Support::repoRoot() . '/legacy/tests/fixtures/analysis-context.json'));
         self::assertNotEmpty($fixture['cases']);
         foreach ($fixture['cases'] as $item) {
             $result = AstProgram::analyze($item['source'], $item['name']);

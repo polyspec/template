@@ -6,7 +6,7 @@ import { repoRoot } from './helpers.js';
 
 describe('prepared render (RT-62)', () => {
   it('renders the same bytes on every call and equals the single-call render', () => {
-    const program = loadArtifact(join(repoRoot, 'tests', 'fixtures', 'artifact-runtime', 'artifact'));
+    const program = loadArtifact(join(repoRoot, 'legacy', 'tests', 'fixtures', 'artifact-runtime', 'artifact'));
     const prepared = program.prepare('page.tpl', { x: 'a<b' });
     const first = prepared.render();
     expect(prepared.render()).toBe(first);

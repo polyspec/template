@@ -53,14 +53,14 @@ final class AstDecodeTest extends TestCase
     /** AST-10: decoding class-call data does not require a registered host class. */
     public function testPublicDecoderPreservesClassCallAstFields(): void
     {
-        $text = Support::read(Support::repoRoot() . '/tests/fixtures/ast-decode/class-call.json');
+        $text = Support::read(Support::repoRoot() . '/legacy/tests/fixtures/ast-decode/class-call.json');
         self::assertEquals(Support::json($text), AstProgram::decodeTemplate($text));
     }
 
     /** AST-4, AST-10: every operator and loop metadata literal retains its canonical value. */
     public function testPublicDecoderPreservesCanonicalEnumLiterals(): void
     {
-        $text = Support::read(Support::repoRoot() . '/tests/fixtures/ast-decode/enum-literals.json');
+        $text = Support::read(Support::repoRoot() . '/legacy/tests/fixtures/ast-decode/enum-literals.json');
         self::assertEquals(Support::json($text), AstProgram::decodeTemplate($text));
     }
 
@@ -76,7 +76,7 @@ final class AstDecodeTest extends TestCase
     /** Every invalid AST of the shared fixture fails with the JSON Pointer of its invalid node, which the message names. */
     public function testDecodeFailsNamingTheJsonPointerOfTheInvalidNode(): void
     {
-        $fixture = Support::readJson(Support::repoRoot() . '/tests/fixtures/ast-decode/invalid.json');
+        $fixture = Support::readJson(Support::repoRoot() . '/legacy/tests/fixtures/ast-decode/invalid.json');
         self::assertIsArray($fixture);
         self::assertNotEmpty($fixture['cases'], 'invalid.json has no case');
         foreach ($fixture['cases'] as $case) {

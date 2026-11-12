@@ -1,12 +1,12 @@
 // Fixture case enumeration and comparison helpers shared by the runners.
-import { type ExpectedError, type ExpectedRaises, expectedErrorDocument, expectedErrorOf, RAISES_SCHEMA } from '../../scripts/conformance-case-files.mts';
+import { type ExpectedError, type ExpectedRaises, expectedErrorDocument, expectedErrorOf, legacyExpectedError, RAISES_SCHEMA } from '../../scripts/conformance-case-files.mts';
 import { spawn } from 'node:child_process';
 import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, relative } from 'node:path';
 import readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
-import { caseIds, caseOptions, casesDir } from './case-list.mts';
+import { caseIds, caseOptions, casesDir, legacyCasesDir } from './case-list.mts';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { isJsonObject, parsedJsonObject } from './checked.mts';
 import { root } from './drivers.mts';
@@ -50,7 +50,8 @@ interface FilesystemCase {
   files: Record<string, string>;
   symbolicLinks?: Record<string, string>;
   hardLinks?: Record<string, string>;
-  expected: { html?: string; raises?: ExpectedRaises['raises'] };
+  // A legacy case (legacy/tests/fixtures/filesystem/cases.json) writes its failure in the former form `error`.
+  expected: { html?: string; raises?: ExpectedRaises['raises']; error?: ExpectedError };
 }
 
 const NAMES: JSONSchemaType<Record<string, string>> = { type: 'object', required: [], additionalProperties: { type: 'string' } };
@@ -66,7 +67,16 @@ const FILESYSTEM_CASES_SCHEMA: Schema = {
       hardLinks: { ...NAMES, nullable: true },
       expected: {
         type: 'object',
-        properties: { html: { type: 'string' }, raises: RAISES_SCHEMA },
+        properties: {
+          html: { type: 'string' },
+          raises: RAISES_SCHEMA,
+          error: {
+            type: 'object',
+            required: ['code', 'template', 'line', 'col'],
+            properties: { code: { type: 'string' }, template: { type: 'string' }, line: { type: 'integer' }, col: { type: 'integer' } },
+            additionalProperties: false,
+          },
+        },
         required: [],
         additionalProperties: false,
       },
@@ -97,14 +107,14 @@ function expectedFormatOf(text: string, where: string): Record<FormatMode, unkno
 // Returns the cases that the arguments of a generated runner select: every case without arguments,
 // or one case or group with `--case group/name | group`. Other arguments and a filter that selects
 // no case end the process, so a run never passes without running a case.
-export function generatedCases(argv: readonly string[]): { cases: TestCase[]; filtered: boolean } {
+export function generatedCases(argv: readonly string[], directory: string = casesDir): { cases: TestCase[]; filtered: boolean } {
   let filter: string | undefined;
   if (argv.length === 2 && argv[0] === '--case') filter = argv[1];
   else if (argv.length !== 0) {
     process.stderr.write('usage: conformance-generated-<language>.mts [--case group/name | group]\n');
     process.exit(2);
   }
-  const cases = listCases(filter);
+  const cases = listCases(filter, directory);
   if (cases.length === 0) {
     process.stderr.write(`no cases found${filter === undefined ? '' : ` for ${filter}`}\n`);
     process.exit(1);
@@ -112,25 +122,35 @@ export function generatedCases(argv: readonly string[]): { cases: TestCase[]; fi
   return { cases, filtered: filter !== undefined };
 }
 
-export function listCases(filter?: string): TestCase[] {
-  if (!existsSync(casesDir)) return [];
-  return caseIds()
-    .filter(id => existsSync(join(casesDir, id, 'input.tpl')) && (!filter || id === filter || id.split('/')[0] === filter))
-    .map(id => loadCase(id, join(casesDir, id)));
+export function listCases(filter?: string, directory: string = casesDir): TestCase[] {
+  if (!existsSync(directory)) return [];
+  return caseIds(directory)
+    .filter(id => existsSync(join(directory, id, 'input.tpl')) && (!filter || id === filter || id.split('/')[0] === filter))
+    .map(id => loadCase(id, join(directory, id), directory));
 }
 
 const filesystemCasesFile = join(root, 'tests', 'fixtures', 'filesystem', 'cases.json');
+
+/** The case set of a language: the legacy packages run the copy that they passed when they moved (docs/spec/runtime.md#transition). */
+export interface CaseSet {
+  cases: string;
+  filesystem: string;
+}
+export const CASE_SETS: { current: CaseSet; legacy: CaseSet } = {
+  current: { cases: casesDir, filesystem: filesystemCasesFile },
+  legacy: { cases: legacyCasesDir, filesystem: join(root, 'legacy', 'tests', 'fixtures', 'filesystem', 'cases.json') },
+};
 
 /**
  * Writes the file trees of the filesystem cases (CNF-16) into one new directory of the system temporary directory and
  * returns the cases that `filter` selects in the form of `listCases`, with the id `filesystem/<name>`, and
  * the directory, which the caller removes. A file tree holds symbolic and hard links, which a checkout does not hold.
  */
-export function filesystemCases(filter?: string): { directory: string; cases: TestCase[] } {
+export function filesystemCases(filter?: string, file: string = filesystemCasesFile): { directory: string; cases: TestCase[] } {
   // The real path, because a CLI compares the root with its working directory, which the system reports resolved.
   const directory = realpathSync(mkdtempSync(join(tmpdir(), 'template-filesystem-cases-')));
   const cases: TestCase[] = [];
-  for (const entry of filesystemCasesDocument.read(filesystemCasesFile)) {
+  for (const entry of filesystemCasesDocument.read(file)) {
     const id = `filesystem/${entry.name}`;
     if (filter && id !== filter && filter !== 'filesystem') continue;
     const dir = join(directory, entry.name);
@@ -152,7 +172,7 @@ export function filesystemCases(filter?: string): { directory: string; cases: Te
       options: {},
       meta: { requirements: entry.requirements, stage: 3 },
       expectedHtml: entry.expected.html ?? null,
-      expectedError: entry.expected.raises === undefined ? null : expectedErrorOf(entry.expected.raises),
+      expectedError: entry.expected.raises !== undefined ? expectedErrorOf(entry.expected.raises) : entry.expected.error !== undefined ? legacyExpectedError(entry.expected.error) : null,
       expectedAst: null,
     });
   }
@@ -163,7 +183,7 @@ function readIf(path: string): string | null {
   return existsSync(path) ? readFileSync(path, 'utf8') : null;
 }
 
-function loadCase(id: string, dir: string): TestCase {
+function loadCase(id: string, dir: string, directory: string): TestCase {
   const expectedHtml = readIf(join(dir, 'expected.html'));
   const expectedError = readIf(join(dir, 'expected.error.json'));
   const expectedAst = readIf(join(dir, 'expected.ast.json'));
@@ -177,7 +197,7 @@ function loadCase(id: string, dir: string): TestCase {
     hasData: existsSync(join(dir, 'data.json')),
     hasDefine: existsSync(join(dir, 'define.json')),
     hasEnv: existsSync(join(dir, 'env.json')),
-    options: caseOptions(id),
+    options: caseOptions(id, directory),
     meta: existsSync(join(dir, 'case.json')) ? caseMetaDocument.read(join(dir, 'case.json')) : { requirements: [], stage: 0 },
     expectedHtml,
     expectedError: expectedError === null ? null : expectedErrorDocument.parse(expectedError, join(dir, 'expected.error.json')),

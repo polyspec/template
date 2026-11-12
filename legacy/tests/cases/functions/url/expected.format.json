@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= url(s)}\n{= url('x') | raw}\n{= url(123)}\n"
+  },
+  "keep": {
+    "text": "{= url(s)}\n{= url('x') | raw}\n{= url(123)}\n"
+  }
+}

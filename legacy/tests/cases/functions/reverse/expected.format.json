@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= json(reverse(l)) | raw}\n{= reverse('ab😀')}\n"
+  },
+  "keep": {
+    "text": "{= json(reverse(l)) | raw}\n{= reverse('ab😀')}\n"
+  }
+}

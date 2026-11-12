@@ -8,11 +8,17 @@ import { jsonDocument } from '../../scripts/json-document.mts';
 
 export const casesDir = join(resolve(dirname(fileURLToPath(import.meta.url)), '..', '..'), 'tests', 'cases');
 
-/** The ids `group/name` of every case directory, sorted. */
-export function caseIds(): string[] {
-  return readdirSync(casesDir, { withFileTypes: true })
+/**
+ * The cases of the legacy language packages (docs/spec/runtime.md#transition): a copy of tests/cases as the legacy
+ * packages passed them when they moved, with their expected errors in the former form `{code, template, line, col}`.
+ */
+export const legacyCasesDir = join(resolve(dirname(fileURLToPath(import.meta.url)), '..', '..'), 'legacy', 'tests', 'cases');
+
+/** The ids `group/name` of every case directory of `directory`, sorted. */
+export function caseIds(directory: string = casesDir): string[] {
+  return readdirSync(directory, { withFileTypes: true })
     .filter(group => group.isDirectory())
-    .flatMap(group => readdirSync(join(casesDir, group.name), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => `${group.name}/${entry.name}`))
+    .flatMap(group => readdirSync(join(directory, group.name), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => `${group.name}/${entry.name}`))
     .sort((a, b) => a.localeCompare(b));
 }
 
@@ -32,6 +38,6 @@ export function readCaseOptions(path: string): CaseOptions {
 }
 
 /** The content of the options.json of a case; a case without options.json has no options. */
-export function caseOptions(id: string): CaseOptions {
-  return readCaseOptions(join(casesDir, id, 'options.json'));
+export function caseOptions(id: string, directory: string = casesDir): CaseOptions {
+  return readCaseOptions(join(directory, id, 'options.json'));
 }

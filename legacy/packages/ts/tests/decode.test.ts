@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { AstDecodeError, decodeTemplate, parse } from '../src/index.js';
 import { AstProgram, Engine, MapLoader, decodeTemplate as renderDecodeTemplate } from '../src/render.js';
-import { caseIds, casesDir } from '../../../../tests/runner/case-list.mts';
+import { caseIds, legacyCasesDir as casesDir } from '../../../../tests/runner/case-list.mts';
 import { repoRoot } from './helpers.js';
 
 // The invalid ASTs that every runtime fails with the same JSON Pointer (AST-10).
@@ -44,7 +44,7 @@ describe('decodeTemplate', () => {
   });
 
   it('reads the expected.ast.json of every conformance case as the AST that parse returns', () => {
-    const files = caseIds().map(id => join(casesDir, id, 'expected.ast.json')).filter(existsSync);
+    const files = caseIds(casesDir).map(id => join(casesDir, id, 'expected.ast.json')).filter(existsSync);
     expect(files.length).toBeGreaterThan(0);
     for (const file of files) {
       const text = readFileSync(file, 'utf8');

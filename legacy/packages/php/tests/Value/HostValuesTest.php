@@ -23,7 +23,7 @@ final class HostValuesTest extends TestCase
 {
     private static function fixtureDirectory(): string
     {
-        return Support::repoRoot() . '/tests/fixtures/native-object';
+        return Support::repoRoot() . '/legacy/tests/fixtures/native-object';
     }
 
     /**

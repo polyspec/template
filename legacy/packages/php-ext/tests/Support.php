@@ -16,7 +16,7 @@ final class Support
 
     public static function casesDirectory(): string
     {
-        return self::repositoryRoot() . '/tests/cases';
+        return self::repositoryRoot() . '/legacy/tests/cases';
     }
 
     /**

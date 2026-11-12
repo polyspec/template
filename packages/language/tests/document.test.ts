@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { parse, TemplateError, type Node } from '@polyspec/template-legacy';
 import { describe, expect, it } from 'vitest';
-import { caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
+import { caseOptions, legacyCasesDir as casesDir } from '../../../tests/runner/case-list.mts';
 import { openDocument, type TemplateDocument } from '../src/index.js';
 import { repositoryRoot, templateFiles } from './helpers.js';
 
@@ -213,10 +213,10 @@ function blockSpans(nodes: readonly Node[], blocks: string[], branches: string[]
 }
 
 describe('agreement with the AST', () => {
-  const files = templateFiles(join(repositoryRoot, 'tests/cases'));
+  const files = templateFiles(casesDir);
   for (const file of files) {
     const source = readFileSync(file, 'utf8');
-    const { delimiters } = caseOptions(relative(casesDir, dirname(file)));
+    const { delimiters } = caseOptions(relative(casesDir, dirname(file)), casesDir);
     const options = delimiters === undefined ? {} : { delimiters };
     it(file.slice(repositoryRoot.length + 1), () => {
       const document = openDocument(source, options);

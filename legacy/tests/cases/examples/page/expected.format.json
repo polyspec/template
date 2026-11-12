@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<!DOCTYPE html>\n<html lang=\"{= meta.lang}\">\n  <head>\n    {:og_image = meta.og_image ?? links.assets + '/og.png'}\n    <title>{= title | default(meta.site)}</title>\n    {+ parts/head.tpl}\n  </head>\n  <body>\n    <script nonce=\"{= nonce}\">\nvar page = {= json(page) | raw};\n$(function () { init({ debug: false }); });\n</script>\n    {?# content}\n      <main>{# content}</main>\n    {:}\n      <main class=\"empty\">No content</main>\n    {/}\n    {# parts/footer.tpl links year:date(now(), 'Y')}\n  </body>\n</html>\n"
+  },
+  "keep": {
+    "text": "<!DOCTYPE html>\n<html lang=\"{= meta.lang}\">\n<head>\n{:og_image = meta.og_image ?? links.assets + '/og.png'}\n<title>{= title | default(meta.site)}</title>\n{+ parts/head.tpl}\n</head>\n<body>\n<script nonce=\"{= nonce}\">\nvar page = {= json(page) | raw};\n$(function () { init({ debug: false }); });\n</script>\n{?# content}\n<main>{# content}</main>\n{:}\n<main class=\"empty\">No content</main>\n{/}\n{# parts/footer.tpl links year:date(now(), 'Y')}\n</body>\n</html>\n"
+  }
+}

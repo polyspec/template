@@ -1,0 +1,40 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Block",
+      "id": null,
+      "path": "card.tpl",
+      "scope": [
+        {
+          "name": "title",
+          "expr": {
+            "type": "Var",
+            "name": "t",
+            "span": [
+              22,
+              23
+            ]
+          }
+        },
+        {
+          "name": "no",
+          "expr": {
+            "type": "Var",
+            "name": "n",
+            "span": [
+              30,
+              31
+            ]
+          }
+        }
+      ],
+      "span": [
+        0,
+        34
+      ]
+    }
+  ],
+  "comments": []
+}

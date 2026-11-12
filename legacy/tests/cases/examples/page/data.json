@@ -1,0 +1,13 @@
+{
+  "meta": { "lang": "ko", "site": "MaxShop", "og_image": null },
+  "title": null,
+  "nonce": "abc123",
+  "links": { "assets": "https://cdn.example.com", "home": "/" },
+  "page": { "id": 7, "name": "Tom & \"Jerry\"", "ratio": 0.1 },
+  "category": { "name": "" },
+  "products": [
+    { "seq": 101, "name": "A <b>Bold</b>", "price": 12345.5, "image": null, "tags": ["new", "hot"] },
+    { "seq": 102, "name": "B", "price": 1000, "image": "https://cdn.example.com/b.png", "tags": [] },
+    { "seq": 103, "name": "C", "price": 5, "image": null, "tags": null }
+  ]
+}

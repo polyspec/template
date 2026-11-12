@@ -1,0 +1,27 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "input.tpl",
+  "fields": {
+    "title": "string",
+    "page": "Page",
+    "tags": "list<string>"
+  },
+  "records": {
+    "Page": {
+      "name": "string"
+    }
+  },
+  "defines": {
+    "card": {
+      "template": "part.tpl"
+    }
+  },
+  "functions": {},
+  "templates": {
+    "input.tpl": {},
+    "part.tpl": {
+      "title": "string"
+    }
+  }
+}

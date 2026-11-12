@@ -26,6 +26,7 @@
 - Rust: a lookup with a key of a type that names no entry of a map, a list or a native object, such as `m[true]` or `list[1.5]`, is `runtime_type` instead of `null`; a missing key and an index out of range stay `null` (EXP-19).
 - Rust: the JSON library is the crate `polyspec-json` of the repository json, the former ordered-json; the crate re-exports it as `polyspec_json`, and the contract names its `json_value` as a unit of the library json.
 - The TypeScript backend of the compiler imports the binding package `@polyspec/template` again, the name that a user of the generated code sees; the compiler takes `@polyspec/template-legacy` as a development dependency and is no release target during the transition.
+- The legacy language packages, the TypeScript packages that take the legacy runtime and the code generated for them run `legacy/tests/`, the copy of the cases and fixtures that the legacy packages passed when they moved, in their native tests, the conformance runner and the generated runners; Rust runs `tests/`.
 
 ## 0.0.27
 

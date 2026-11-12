@@ -31,7 +31,7 @@ export function analysisFixtures(file: string, kind: 'full' | 'prefix'): Case[] 
         } },
       },
     } } },
-  }).read(fileURLToPath(new URL(`../../../../tests/fixtures/${file}`, import.meta.url))).cases;
+  }).read(fileURLToPath(new URL(`../../../../legacy/tests/fixtures/${file}`, import.meta.url))).cases;
 }
 
 export function projectRanges(source: Source, result: { tags: readonly SyntaxTag[]; tokens: readonly SyntaxToken[] }) {

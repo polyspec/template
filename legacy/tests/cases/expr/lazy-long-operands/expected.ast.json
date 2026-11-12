@@ -1,0 +1,315 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Literal",
+          "kind": "bool",
+          "value": false,
+          "span": [
+            3,
+            8
+          ]
+        },
+        "right": {
+          "type": "Binary",
+          "op": "==",
+          "left": {
+            "type": "Binary",
+            "op": "/",
+            "left": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                12,
+                13
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 0,
+              "span": [
+                16,
+                17
+              ]
+            },
+            "span": [
+              12,
+              17
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "span": [
+              21,
+              93
+            ]
+          },
+          "span": [
+            12,
+            93
+          ]
+        },
+        "span": [
+          3,
+          93
+        ]
+      },
+      "span": [
+        0,
+        94
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        94,
+        95
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "||",
+        "left": {
+          "type": "Literal",
+          "kind": "bool",
+          "value": true,
+          "span": [
+            98,
+            102
+          ]
+        },
+        "right": {
+          "type": "Binary",
+          "op": "==",
+          "left": {
+            "type": "Binary",
+            "op": "/",
+            "left": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                106,
+                107
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 0,
+              "span": [
+                110,
+                111
+              ]
+            },
+            "span": [
+              106,
+              111
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "span": [
+              115,
+              187
+            ]
+          },
+          "span": [
+            106,
+            187
+          ]
+        },
+        "span": [
+          98,
+          187
+        ]
+      },
+      "span": [
+        95,
+        188
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        188,
+        189
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Binary",
+        "op": "??",
+        "left": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "set",
+          "span": [
+            192,
+            197
+          ]
+        },
+        "right": {
+          "type": "Binary",
+          "op": "==",
+          "left": {
+            "type": "Binary",
+            "op": "/",
+            "left": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                201,
+                202
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 0,
+              "span": [
+                205,
+                206
+              ]
+            },
+            "span": [
+              201,
+              206
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "span": [
+              210,
+              282
+            ]
+          },
+          "span": [
+            201,
+            282
+          ]
+        },
+        "span": [
+          192,
+          282
+        ]
+      },
+      "span": [
+        189,
+        283
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "|",
+      "span": [
+        283,
+        284
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Ternary",
+        "test": {
+          "type": "Literal",
+          "kind": "bool",
+          "value": true,
+          "span": [
+            287,
+            291
+          ]
+        },
+        "then": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "yes",
+          "span": [
+            294,
+            299
+          ]
+        },
+        "else": {
+          "type": "Binary",
+          "op": "==",
+          "left": {
+            "type": "Binary",
+            "op": "/",
+            "left": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                302,
+                303
+              ]
+            },
+            "right": {
+              "type": "Literal",
+              "kind": "number",
+              "value": 0,
+              "span": [
+                306,
+                307
+              ]
+            },
+            "span": [
+              302,
+              307
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "span": [
+              311,
+              383
+            ]
+          },
+          "span": [
+            302,
+            383
+          ]
+        },
+        "span": [
+          287,
+          383
+        ]
+      },
+      "span": [
+        284,
+        384
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        384,
+        385
+      ]
+    }
+  ],
+  "comments": []
+}

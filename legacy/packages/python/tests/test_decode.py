@@ -69,7 +69,7 @@ class DecodeTemplateTest(unittest.TestCase):
 
     def test_decode_fails_naming_the_json_pointer_of_the_invalid_node(self):
         fixture = json.loads(
-            (ROOT / "tests/fixtures/ast-decode/invalid.json").read_text(
+            (ROOT / "legacy/tests/fixtures/ast-decode/invalid.json").read_text(
                 encoding="utf-8"
             )
         )
@@ -84,7 +84,7 @@ class DecodeTemplateTest(unittest.TestCase):
 
     def test_public_decoder_preserves_class_call_ast_fields(self):
         # AST-10: this shape is valid without registering a host class to render it.
-        text = (ROOT / "tests/fixtures/ast-decode/class-call.json").read_text(
+        text = (ROOT / "legacy/tests/fixtures/ast-decode/class-call.json").read_text(
             encoding="utf-8"
         )
         self.assertEqual(
@@ -93,7 +93,7 @@ class DecodeTemplateTest(unittest.TestCase):
 
     def test_public_decoder_preserves_canonical_enum_literals(self):
         # AST-4, AST-10: every operator and loop metadata literal retains its canonical value.
-        text = (ROOT / "tests/fixtures/ast-decode/enum-literals.json").read_text(
+        text = (ROOT / "legacy/tests/fixtures/ast-decode/enum-literals.json").read_text(
             encoding="utf-8"
         )
         self.assertEqual(

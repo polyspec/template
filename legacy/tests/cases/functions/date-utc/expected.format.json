@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= date(now(), 'Y-m-d H:i:s P D')}\n"
+  },
+  "keep": {
+    "text": "{= date(now(), 'Y-m-d H:i:s P D')}\n"
+  }
+}

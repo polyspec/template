@@ -6,17 +6,17 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { caseIds, caseOptions, casesDir } from '../../../../tests/runner/case-list.mts';
+import { caseIds, caseOptions, legacyCasesDir as casesDir } from '../../../../tests/runner/case-list.mts';
 import { analyze, Source } from '../src/index.js';
 
-it.each(caseIds())('%s', id => {
+it.each(caseIds(casesDir))('%s', id => {
   const dir = join(casesDir, id);
   const expectedPath = join(dir, 'expected.tokens.json');
   if (!existsSync(join(dir, 'expected.ast.json'))) {
     expect(existsSync(expectedPath)).toBe(false);
     return;
   }
-  const { delimiters } = caseOptions(id);
+  const { delimiters } = caseOptions(id, casesDir);
   const source = new Uint8Array(readFileSync(join(dir, 'input.tpl')));
   const { tokens } = analyze(source, 'input.tpl', delimiters === undefined ? {} : { delimiters });
   const text = Source.fromBytes('input.tpl', source);

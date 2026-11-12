@@ -25,6 +25,7 @@ from polyspec.template.source import Source
 CASES = json.loads(
     (
         Path(__file__).resolve().parents[4]
+        / "legacy"
         / "tests"
         / "fixtures"
         / "expr"

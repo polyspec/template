@@ -8,7 +8,7 @@ from polyspec.template import ParseOptions, Source, TemplateError, analyze_prefi
 
 FIXTURE = json.loads(
     (
-        Path(__file__).resolve().parents[4] / "tests/fixtures/prefix-analysis.json"
+        Path(__file__).resolve().parents[4] / "legacy/tests/fixtures/prefix-analysis.json"
     ).read_text(encoding="utf-8")
 )
 

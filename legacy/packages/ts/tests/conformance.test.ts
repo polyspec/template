@@ -5,7 +5,7 @@ import { expect, it } from 'vitest';
 import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError, type DefineInput, type RenderOptions } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
 import { jsonDocument } from '../../../../scripts/json-document.mts';
-import { caseIds, caseOptions, casesDir } from '../../../../tests/runner/case-list.mts';
+import { caseIds, caseOptions, legacyCasesDir as casesDir } from '../../../../tests/runner/case-list.mts';
 import { toJsonValue } from './helpers.js';
 
 interface Case {
@@ -14,7 +14,7 @@ interface Case {
 }
 
 function listCases(): Case[] {
-  return caseIds().map(id => ({ id, dir: join(casesDir, id) }));
+  return caseIds(casesDir).map(id => ({ id, dir: join(casesDir, id) }));
 }
 
 function readIf(path: string): Uint8Array | null {
@@ -43,7 +43,7 @@ const envDocument = jsonDocument<NonNullable<RenderOptions['env']>>('environment
 });
 
 function run(testCase: Case): { html: string } | { error: TemplateError } {
-  const { delimiters } = caseOptions(testCase.id);
+  const { delimiters } = caseOptions(testCase.id, casesDir);
   try {
     const engine = new Engine(new AstProgram({ loader: new FsLoader(testCase.dir), ...(delimiters ? { delimiters } : {}) }));
     const assign = readIf(join(testCase.dir, 'data.json'));
@@ -69,7 +69,7 @@ it.each(listCases().map(testCase => [testCase.id, testCase] as const))('%s', (_i
   const expectedAst = readIf(join(testCase.dir, 'expected.ast.json'));
   const expectedHtml = readIf(join(testCase.dir, 'expected.html'));
   const expectedError = readIf(join(testCase.dir, 'expected.error.json'));
-  const options = caseOptions(testCase.id);
+  const options = caseOptions(testCase.id, casesDir);
   if (expectedAst) {
     const source = new Uint8Array(readFileSync(join(testCase.dir, 'input.tpl')));
     const ast = parse(source, 'input.tpl', options.delimiters ? { delimiters: options.delimiters } : {});

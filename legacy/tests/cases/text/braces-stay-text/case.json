@@ -1,0 +1,12 @@
+{
+  "requirements": [
+    "LEX-5",
+    "LEX-6",
+    "LEX-7",
+    "FMT-3",
+    "FMT-9",
+    "FMT-10",
+    "AST-8"
+  ],
+  "stage": 1
+}

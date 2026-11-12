@@ -9,7 +9,7 @@ from polyspec.template import formatter
 
 FIXTURE = json.loads(
     (
-        Path(__file__).resolve().parents[4] / "tests/fixtures/formatter-sdk.json"
+        Path(__file__).resolve().parents[4] / "legacy/tests/fixtures/formatter-sdk.json"
     ).read_text(encoding="utf-8")
 )
 

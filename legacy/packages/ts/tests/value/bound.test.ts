@@ -15,7 +15,7 @@ function entriesOf(value: unknown) {
   return entries;
 }
 
-const fixtureDir = join(repoRoot, 'tests', 'fixtures', 'bound-data');
+const fixtureDir = join(repoRoot, 'legacy', 'tests', 'fixtures', 'bound-data');
 const cases = boundDataCasesDocument.read(join(fixtureDir, 'cases.json'));
 
 const templates = Object.fromEntries(

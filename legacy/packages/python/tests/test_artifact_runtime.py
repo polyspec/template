@@ -14,6 +14,6 @@ REPO = Path(__file__).resolve().parents[4]
 class ArtifactRuntime(unittest.TestCase):
     def test_load_artifact_renders_the_source_bytes(self):
         program = load_artifact(
-            str(REPO / "tests" / "fixtures" / "artifact-runtime" / "artifact")
+            str(REPO / "legacy" / "tests" / "fixtures" / "artifact-runtime" / "artifact")
         )
         self.assertEqual(program.render("page.tpl", {"x": "a<b"}), "<p>a&lt;b</p>")

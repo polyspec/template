@@ -27,6 +27,7 @@
 - Rust: map, list, native object의 항목을 가리킬 수 없는 타입의 키로 하는 조회(`m[true]`, `list[1.5]` 등)는 `null` 대신 `runtime_type`이다. 없는 키와 범위 밖 인덱스는 그대로 `null`이다(EXP-19).
 - Rust: JSON 라이브러리는 이전 ordered-json인 저장소 json의 crate `polyspec-json`이다. crate는 그것을 `polyspec_json`으로 다시 내보내고, 계약은 `json_value`를 라이브러리 json의 unit으로 적는다.
 - compiler의 TypeScript backend는 다시 생성 코드 사용자가 보는 이름인 바인딩 패키지 `@polyspec/template`을 import한다. compiler는 `@polyspec/template-legacy`를 개발 의존으로 받고 이행 기간에는 릴리스 대상이 아니다.
+- legacy 언어 패키지, legacy 런타임을 받는 TypeScript 패키지, 그것들을 위해 생성된 코드는 네이티브 테스트, conformance runner, generated runner에서 legacy 패키지가 옮겨질 때 통과하던 case와 fixture의 사본인 `legacy/tests/`를 실행한다. Rust는 `tests/`를 실행한다.
 
 ## 0.0.27
 

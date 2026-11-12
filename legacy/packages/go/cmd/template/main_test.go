@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-var casesDir = filepath.Join("..", "..", "..", "..", "..", "tests", "cases")
+var casesDir = filepath.Join("..", "..", "..", "..", "..", "legacy", "tests", "cases")
 
 func TestParseCommand(t *testing.T) {
 	var stdout, stderr bytes.Buffer

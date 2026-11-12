@@ -1,0 +1,5244 @@
+[
+  {
+    "name": "literal-number",
+    "expr": "42",
+    "requirements": [
+      "EXP-1",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "NUMBER",
+        "value": "42"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "number",
+      "value": 42,
+      "span": [
+        0,
+        2
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 42
+      }
+    ]
+  },
+  {
+    "name": "literal-exponent",
+    "expr": "1e3",
+    "requirements": [
+      "EXP-1",
+      "EXP-2",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "NUMBER",
+        "value": "1e3"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "number",
+      "value": 1000,
+      "span": [
+        0,
+        3
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 1000
+      }
+    ]
+  },
+  {
+    "name": "literal-fraction-exponent",
+    "expr": "2.5e-1",
+    "requirements": [
+      "EXP-1",
+      "EXP-2",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "NUMBER",
+        "value": "2.5e-1"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "number",
+      "value": 0.25,
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 0.25
+      }
+    ]
+  },
+  {
+    "name": "literal-string-escapes",
+    "expr": "'a\\nb'",
+    "requirements": [
+      "EXP-1",
+      "EXP-3",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "STRING",
+        "value": "'a\\nb'"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "string",
+      "value": "a\nb",
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": "a\nb"
+      }
+    ]
+  },
+  {
+    "name": "literal-string-double-quotes",
+    "expr": "\"a\\\"b\"",
+    "requirements": [
+      "EXP-1",
+      "EXP-3",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "STRING",
+        "value": "\"a\\\"b\""
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "string",
+      "value": "a\"b",
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": "a\"b"
+      }
+    ]
+  },
+  {
+    "name": "literal-unicode-escape",
+    "expr": "'\\u00e9'",
+    "requirements": [
+      "EXP-1",
+      "EXP-3",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "STRING",
+        "value": "'\\u00e9'"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "string",
+      "value": "é",
+      "span": [
+        0,
+        8
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": "é"
+      }
+    ]
+  },
+  {
+    "name": "literal-null",
+    "expr": "null",
+    "requirements": [
+      "EXP-1",
+      "EXP-4",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "NULL",
+        "value": "null"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "null",
+      "value": null,
+      "span": [
+        0,
+        4
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "literal-true",
+    "expr": "true",
+    "requirements": [
+      "EXP-1",
+      "EXP-4",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "TRUE",
+        "value": "true"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "bool",
+      "value": true,
+      "span": [
+        0,
+        4
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "literal-false",
+    "expr": "false",
+    "requirements": [
+      "EXP-1",
+      "EXP-4",
+      "EXP-7"
+    ],
+    "tokens": [
+      {
+        "type": "FALSE",
+        "value": "false"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "bool",
+      "value": false,
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "var",
+    "expr": "a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-17"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Var",
+      "name": "a",
+      "span": [
+        0,
+        1
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 5
+        },
+        "value": 5
+      },
+      {
+        "data": {},
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "member-path",
+    "expr": "a.b.c",
+    "requirements": [
+      "EXP-1",
+      "EXP-5",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "DOT_IDENT",
+        "value": ".b"
+      },
+      {
+        "type": "DOT_IDENT",
+        "value": ".c"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Member",
+      "object": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            0,
+            1
+          ]
+        },
+        "key": "b",
+        "span": [
+          0,
+          3
+        ]
+      },
+      "key": "c",
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": {
+            "b": {
+              "c": 1
+            }
+          }
+        },
+        "value": 1
+      },
+      {
+        "data": {
+          "a": {
+            "b": null
+          }
+        },
+        "value": null
+      },
+      {
+        "data": {
+          "a": "x"
+        },
+        "value": null
+      },
+      {
+        "data": {},
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "dot-index",
+    "expr": "a.0",
+    "requirements": [
+      "EXP-1",
+      "EXP-5",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "DOT_INDEX",
+        "value": ".0"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Member",
+      "object": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "key": "0",
+      "span": [
+        0,
+        3
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": [
+            7,
+            8
+          ]
+        },
+        "value": 7
+      },
+      {
+        "data": {
+          "a": {
+            "0": "z"
+          }
+        },
+        "value": "z"
+      },
+      {
+        "data": {
+          "a": []
+        },
+        "value": null
+      }
+    ]
+  },
+  {
+    "name": "bracket-index",
+    "expr": "a[i]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "IDENT",
+        "value": "i"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Index",
+      "object": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "index": {
+        "type": "Var",
+        "name": "i",
+        "span": [
+          2,
+          3
+        ]
+      },
+      "span": [
+        0,
+        4
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": [
+            1,
+            2
+          ],
+          "i": 1
+        },
+        "value": 2
+      },
+      {
+        "data": {
+          "a": {
+            "k": 3
+          },
+          "i": "k"
+        },
+        "value": 3
+      },
+      {
+        "data": {
+          "a": [
+            1
+          ],
+          "i": "0"
+        },
+        "value": 1
+      },
+      {
+        "data": {
+          "a": [
+            1
+          ],
+          "i": 5
+        },
+        "value": null
+      },
+      {
+        "data": {
+          "a": [
+            1
+          ],
+          "i": -1
+        },
+        "value": null
+      },
+      {
+        "data": {
+          "a": {
+            "1": "x"
+          },
+          "i": 1
+        },
+        "value": "x"
+      }
+    ]
+  },
+  {
+    "name": "index-string-literal",
+    "expr": "m['k']",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-18",
+      "EXP-19"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "m"
+      },
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "STRING",
+        "value": "'k'"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Index",
+      "object": {
+        "type": "Var",
+        "name": "m",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "index": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "k",
+        "span": [
+          2,
+          5
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "m": {
+            "k": 9
+          }
+        },
+        "value": 9
+      }
+    ]
+  },
+  {
+    "name": "call",
+    "expr": "upper(s)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "upper"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "s"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Call",
+      "name": "upper",
+      "args": [
+        {
+          "type": "Var",
+          "name": "s",
+          "span": [
+            6,
+            7
+          ]
+        }
+      ],
+      "span": [
+        0,
+        8
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "s": "ab"
+        },
+        "value": "AB"
+      }
+    ]
+  },
+  {
+    "name": "call-trailing-comma",
+    "expr": "join([1, 2,], '-')",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "join"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "STRING",
+        "value": "'-'"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Call",
+      "name": "join",
+      "args": [
+        {
+          "type": "List",
+          "items": [
+            {
+              "type": "Literal",
+              "kind": "number",
+              "value": 1,
+              "span": [
+                6,
+                7
+              ]
+            },
+            {
+              "type": "Literal",
+              "kind": "number",
+              "value": 2,
+              "span": [
+                9,
+                10
+              ]
+            }
+          ],
+          "span": [
+            5,
+            12
+          ]
+        },
+        {
+          "type": "Literal",
+          "kind": "string",
+          "value": "-",
+          "span": [
+            14,
+            17
+          ]
+        }
+      ],
+      "span": [
+        0,
+        18
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": "1-2"
+      }
+    ]
+  },
+  {
+    "name": "call-then-member",
+    "expr": "first(l).n",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11",
+      "EXP-18"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "first"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "l"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "DOT_IDENT",
+        "value": ".n"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Member",
+      "object": {
+        "type": "Call",
+        "name": "first",
+        "args": [
+          {
+            "type": "Var",
+            "name": "l",
+            "span": [
+              6,
+              7
+            ]
+          }
+        ],
+        "span": [
+          0,
+          8
+        ]
+      },
+      "key": "n",
+      "span": [
+        0,
+        10
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "l": [
+            {
+              "n": 9
+            }
+          ]
+        },
+        "value": 9
+      }
+    ]
+  },
+  {
+    "name": "pipe",
+    "expr": "a | upper",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-12"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "PIPE",
+        "value": "|"
+      },
+      {
+        "type": "IDENT",
+        "value": "upper"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Call",
+      "name": "upper",
+      "args": [
+        {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            0,
+            1
+          ]
+        }
+      ],
+      "span": [
+        0,
+        9
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": "x"
+        },
+        "value": "X"
+      }
+    ]
+  },
+  {
+    "name": "pipe-args",
+    "expr": "a | slice(1, 2)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-12"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "PIPE",
+        "value": "|"
+      },
+      {
+        "type": "IDENT",
+        "value": "slice"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Call",
+      "name": "slice",
+      "args": [
+        {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            0,
+            1
+          ]
+        },
+        {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            10,
+            11
+          ]
+        },
+        {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            13,
+            14
+          ]
+        }
+      ],
+      "span": [
+        0,
+        15
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": "abcdef"
+        },
+        "value": "bc"
+      },
+      {
+        "data": {
+          "a": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        "value": [
+          2,
+          3
+        ]
+      }
+    ]
+  },
+  {
+    "name": "pipe-chain",
+    "expr": "a | trim | upper",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-12"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "PIPE",
+        "value": "|"
+      },
+      {
+        "type": "IDENT",
+        "value": "trim"
+      },
+      {
+        "type": "PIPE",
+        "value": "|"
+      },
+      {
+        "type": "IDENT",
+        "value": "upper"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Call",
+      "name": "upper",
+      "args": [
+        {
+          "type": "Call",
+          "name": "trim",
+          "args": [
+            {
+              "type": "Var",
+              "name": "a",
+              "span": [
+                0,
+                1
+              ]
+            }
+          ],
+          "span": [
+            0,
+            8
+          ]
+        }
+      ],
+      "span": [
+        0,
+        16
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": " x "
+        },
+        "value": "X"
+      }
+    ]
+  },
+  {
+    "name": "pipe-lowest-precedence",
+    "expr": "a ?? 'n' | upper",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-13"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "COALESCE",
+        "value": "??"
+      },
+      {
+        "type": "STRING",
+        "value": "'n'"
+      },
+      {
+        "type": "PIPE",
+        "value": "|"
+      },
+      {
+        "type": "IDENT",
+        "value": "upper"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Call",
+      "name": "upper",
+      "args": [
+        {
+          "type": "Binary",
+          "op": "??",
+          "left": {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              0,
+              1
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "n",
+            "span": [
+              5,
+              8
+            ]
+          },
+          "span": [
+            0,
+            8
+          ]
+        }
+      ],
+      "span": [
+        0,
+        16
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": null
+        },
+        "value": "N"
+      },
+      {
+        "data": {
+          "a": "q"
+        },
+        "value": "Q"
+      }
+    ]
+  },
+  {
+    "name": "add-numbers",
+    "expr": "a + 1",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-23",
+      "EXP-24"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "PLUS",
+        "value": "+"
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "+",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          4,
+          5
+        ]
+      },
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 2
+        },
+        "value": 3
+      },
+      {
+        "data": {
+          "a": "2"
+        },
+        "value": "21"
+      },
+      {
+        "data": {
+          "a": null
+        },
+        "value": 1
+      },
+      {
+        "data": {
+          "a": true
+        },
+        "value": 2
+      },
+      {
+        "data": {
+          "a": 0.5
+        },
+        "value": 1.5
+      }
+    ]
+  },
+  {
+    "name": "add-concat",
+    "expr": "'x' + 1",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-24"
+    ],
+    "tokens": [
+      {
+        "type": "STRING",
+        "value": "'x'"
+      },
+      {
+        "type": "PLUS",
+        "value": "+"
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "+",
+      "left": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "x",
+        "span": [
+          0,
+          3
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          6,
+          7
+        ]
+      },
+      "span": [
+        0,
+        7
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": "x1"
+      }
+    ]
+  },
+  {
+    "name": "subtract-strings",
+    "expr": "'6' - 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-23",
+      "EXP-25"
+    ],
+    "tokens": [
+      {
+        "type": "STRING",
+        "value": "'6'"
+      },
+      {
+        "type": "MINUS",
+        "value": "-"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "-",
+      "left": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "6",
+        "span": [
+          0,
+          3
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 2,
+        "span": [
+          6,
+          7
+        ]
+      },
+      "span": [
+        0,
+        7
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 4
+      }
+    ]
+  },
+  {
+    "name": "multiply",
+    "expr": "a * b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-25"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "STAR",
+        "value": "*"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "*",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          4,
+          5
+        ]
+      },
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 3,
+          "b": 2
+        },
+        "value": 6
+      },
+      {
+        "data": {
+          "a": "6",
+          "b": "2"
+        },
+        "value": 12
+      },
+      {
+        "data": {
+          "a": 0.5,
+          "b": 3
+        },
+        "value": 1.5
+      }
+    ]
+  },
+  {
+    "name": "divide",
+    "expr": "7 / 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-26"
+    ],
+    "tokens": [
+      {
+        "type": "NUMBER",
+        "value": "7"
+      },
+      {
+        "type": "SLASH",
+        "value": "/"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "/",
+      "left": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 7,
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 2,
+        "span": [
+          4,
+          5
+        ]
+      },
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 3.5
+      }
+    ]
+  },
+  {
+    "name": "modulo",
+    "expr": "-7 % 3",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-27"
+    ],
+    "tokens": [
+      {
+        "type": "MINUS",
+        "value": "-"
+      },
+      {
+        "type": "NUMBER",
+        "value": "7"
+      },
+      {
+        "type": "PERCENT",
+        "value": "%"
+      },
+      {
+        "type": "NUMBER",
+        "value": "3"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "%",
+      "left": {
+        "type": "Unary",
+        "op": "-",
+        "operand": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 7,
+          "span": [
+            1,
+            2
+          ]
+        },
+        "span": [
+          0,
+          2
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 3,
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": -1
+      }
+    ]
+  },
+  {
+    "name": "arithmetic-precedence",
+    "expr": "1 + 2 * 3 - 4 / 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9"
+    ],
+    "tokens": [
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "PLUS",
+        "value": "+"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "STAR",
+        "value": "*"
+      },
+      {
+        "type": "NUMBER",
+        "value": "3"
+      },
+      {
+        "type": "MINUS",
+        "value": "-"
+      },
+      {
+        "type": "NUMBER",
+        "value": "4"
+      },
+      {
+        "type": "SLASH",
+        "value": "/"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "-",
+      "left": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            0,
+            1
+          ]
+        },
+        "right": {
+          "type": "Binary",
+          "op": "*",
+          "left": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 2,
+            "span": [
+              4,
+              5
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 3,
+            "span": [
+              8,
+              9
+            ]
+          },
+          "span": [
+            4,
+            9
+          ]
+        },
+        "span": [
+          0,
+          9
+        ]
+      },
+      "right": {
+        "type": "Binary",
+        "op": "/",
+        "left": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 4,
+          "span": [
+            12,
+            13
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            16,
+            17
+          ]
+        },
+        "span": [
+          12,
+          17
+        ]
+      },
+      "span": [
+        0,
+        17
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 5
+      }
+    ]
+  },
+  {
+    "name": "grouping",
+    "expr": "(a + b) * 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9"
+    ],
+    "tokens": [
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "PLUS",
+        "value": "+"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "STAR",
+        "value": "*"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "*",
+      "left": {
+        "type": "Binary",
+        "op": "+",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            1,
+            2
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            5,
+            6
+          ]
+        },
+        "span": [
+          1,
+          6
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 2,
+        "span": [
+          10,
+          11
+        ]
+      },
+      "span": [
+        0,
+        11
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": 2
+        },
+        "value": 6
+      }
+    ]
+  },
+  {
+    "name": "unary-minus",
+    "expr": "-a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-28"
+    ],
+    "tokens": [
+      {
+        "type": "MINUS",
+        "value": "-"
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Unary",
+      "op": "-",
+      "operand": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          1,
+          2
+        ]
+      },
+      "span": [
+        0,
+        2
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 3
+        },
+        "value": -3
+      },
+      {
+        "data": {
+          "a": "3"
+        },
+        "value": -3
+      },
+      {
+        "data": {
+          "a": null
+        },
+        "value": 0
+      }
+    ]
+  },
+  {
+    "name": "unary-not",
+    "expr": "!a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-28",
+      "EXP-33"
+    ],
+    "tokens": [
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Unary",
+      "op": "!",
+      "operand": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          1,
+          2
+        ]
+      },
+      "span": [
+        0,
+        2
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 0
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": "0"
+        },
+        "value": false
+      },
+      {
+        "data": {
+          "a": []
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": {}
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": " "
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "less-than",
+    "expr": "a < b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "LT",
+        "value": "<"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "<",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          4,
+          5
+        ]
+      },
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": 2
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": "10",
+          "b": "9"
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": "ab",
+          "b": "abc"
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "greater-than",
+    "expr": "a > b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "GT",
+        "value": ">"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": ">",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          4,
+          5
+        ]
+      },
+      "span": [
+        0,
+        5
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 2,
+          "b": 1
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": 1,
+          "b": 1
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "less-equal",
+    "expr": "a <= b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "LE",
+        "value": "<="
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "<=",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": 1
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "greater-equal",
+    "expr": "a >= b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-38"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "GE",
+        "value": ">="
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": ">=",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 0,
+          "b": 1
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "equality",
+    "expr": "a == b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-34",
+      "EXP-35"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "EQ",
+        "value": "=="
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "==",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": "1"
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": null,
+          "b": ""
+        },
+        "value": false
+      },
+      {
+        "data": {
+          "a": [
+            1
+          ],
+          "b": [
+            1
+          ]
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": {
+            "x": 1,
+            "y": 2
+          },
+          "b": {
+            "y": 2,
+            "x": 1
+          }
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": true,
+          "b": 1
+        },
+        "value": false
+      },
+      {
+        "data": {
+          "a": "a",
+          "b": "a"
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "not-equal",
+    "expr": "a != b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-36"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "NE",
+        "value": "!="
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "!=",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": 2
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": 1,
+          "b": "1"
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "strict-equality",
+    "expr": "a === b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-37"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "SEQ",
+        "value": "==="
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "===",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          6,
+          7
+        ]
+      },
+      "span": [
+        0,
+        7
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": "1"
+        },
+        "value": false
+      },
+      {
+        "data": {
+          "a": 1,
+          "b": 1
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "strict-not-equal",
+    "expr": "a !== b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-37"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "SNE",
+        "value": "!=="
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "!==",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          6,
+          7
+        ]
+      },
+      "span": [
+        0,
+        7
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": "1"
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "logical-and-or",
+    "expr": "a && b || c",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9",
+      "EXP-30"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "AND",
+        "value": "&&"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "OR",
+        "value": "||"
+      },
+      {
+        "type": "IDENT",
+        "value": "c"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "||",
+      "left": {
+        "type": "Binary",
+        "op": "&&",
+        "left": {
+          "type": "Var",
+          "name": "a",
+          "span": [
+            0,
+            1
+          ]
+        },
+        "right": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            5,
+            6
+          ]
+        },
+        "span": [
+          0,
+          6
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "c",
+        "span": [
+          10,
+          11
+        ]
+      },
+      "span": [
+        0,
+        11
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1,
+          "b": 0,
+          "c": "x"
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": 1,
+          "b": 2,
+          "c": 0
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "a": 0,
+          "b": 1,
+          "c": 0
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "logical-result-boolean",
+    "expr": "1 && 2",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-30"
+    ],
+    "tokens": [
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "AND",
+        "value": "&&"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "&&",
+      "left": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 2,
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "coalesce",
+    "expr": "a ?? b ?? 'd'",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "COALESCE",
+        "value": "??"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "COALESCE",
+        "value": "??"
+      },
+      {
+        "type": "STRING",
+        "value": "'d'"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "??",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Binary",
+        "op": "??",
+        "left": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            5,
+            6
+          ]
+        },
+        "right": {
+          "type": "Literal",
+          "kind": "string",
+          "value": "d",
+          "span": [
+            10,
+            13
+          ]
+        },
+        "span": [
+          5,
+          13
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": null,
+          "b": null
+        },
+        "value": "d"
+      },
+      {
+        "data": {
+          "a": 0
+        },
+        "value": 0
+      },
+      {
+        "data": {
+          "a": null,
+          "b": false
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "coalesce-trailing",
+    "expr": "a ??",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-14"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "COALESCE",
+        "value": "??"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "??",
+      "left": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Literal",
+        "kind": "null",
+        "value": null,
+        "span": [
+          4,
+          4
+        ]
+      },
+      "span": [
+        0,
+        4
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": null
+      },
+      {
+        "data": {
+          "a": ""
+        },
+        "value": ""
+      }
+    ]
+  },
+  {
+    "name": "elvis",
+    "expr": "a ?: 'd'",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "ELVIS",
+        "value": "?:"
+      },
+      {
+        "type": "STRING",
+        "value": "'d'"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": null,
+      "else": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "d",
+        "span": [
+          5,
+          8
+        ]
+      },
+      "span": [
+        0,
+        8
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": ""
+        },
+        "value": "d"
+      },
+      {
+        "data": {
+          "a": "x"
+        },
+        "value": "x"
+      }
+    ]
+  },
+  {
+    "name": "ternary",
+    "expr": "a ? 'y' : 'n'",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "STRING",
+        "value": "'y'"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "STRING",
+        "value": "'n'"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "y",
+        "span": [
+          4,
+          7
+        ]
+      },
+      "else": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "n",
+        "span": [
+          10,
+          13
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1
+        },
+        "value": "y"
+      },
+      {
+        "data": {
+          "a": 0
+        },
+        "value": "n"
+      }
+    ]
+  },
+  {
+    "name": "ternary-nested-right",
+    "expr": "a ? 1 : b ? 2 : 3",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-9",
+      "EXP-31"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "NUMBER",
+        "value": "2"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "NUMBER",
+        "value": "3"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": {
+        "type": "Literal",
+        "kind": "number",
+        "value": 1,
+        "span": [
+          4,
+          5
+        ]
+      },
+      "else": {
+        "type": "Ternary",
+        "test": {
+          "type": "Var",
+          "name": "b",
+          "span": [
+            8,
+            9
+          ]
+        },
+        "then": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 2,
+          "span": [
+            12,
+            13
+          ]
+        },
+        "else": {
+          "type": "Literal",
+          "kind": "number",
+          "value": 3,
+          "span": [
+            16,
+            17
+          ]
+        },
+        "span": [
+          8,
+          17
+        ]
+      },
+      "span": [
+        0,
+        17
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 0,
+          "b": 1
+        },
+        "value": 2
+      },
+      {
+        "data": {
+          "a": 0,
+          "b": 0
+        },
+        "value": 3
+      },
+      {
+        "data": {
+          "a": 1,
+          "b": 0
+        },
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "ternary-identifier-branches",
+    "expr": "c ? a : b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-31"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "c"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "c",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          4,
+          5
+        ]
+      },
+      "else": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          8,
+          9
+        ]
+      },
+      "span": [
+        0,
+        9
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "c": true,
+          "a": 1,
+          "b": 2
+        },
+        "value": 1
+      },
+      {
+        "data": {
+          "c": false,
+          "a": 1,
+          "b": 2
+        },
+        "value": 2
+      }
+    ]
+  },
+  {
+    "name": "in-operator",
+    "expr": "x in l",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-32"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "x"
+      },
+      {
+        "type": "IN",
+        "value": "in"
+      },
+      {
+        "type": "IDENT",
+        "value": "l"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Binary",
+      "op": "in",
+      "left": {
+        "type": "Var",
+        "name": "x",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "right": {
+        "type": "Var",
+        "name": "l",
+        "span": [
+          5,
+          6
+        ]
+      },
+      "span": [
+        0,
+        6
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "x": 2,
+          "l": [
+            1,
+            2
+          ]
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "x": "2",
+          "l": [
+            1,
+            2
+          ]
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "x": "a",
+          "l": "cat"
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "x": "k",
+          "l": {
+            "k": 1
+          }
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "x": 2,
+          "l": {
+            "2": 1
+          }
+        },
+        "value": true
+      },
+      {
+        "data": {
+          "x": 3,
+          "l": []
+        },
+        "value": false
+      }
+    ]
+  },
+  {
+    "name": "list-literal",
+    "expr": "[1, 'a', null]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
+    "tokens": [
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "STRING",
+        "value": "'a'"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "NULL",
+        "value": "null"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "List",
+      "items": [
+        {
+          "type": "Literal",
+          "kind": "number",
+          "value": 1,
+          "span": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "Literal",
+          "kind": "string",
+          "value": "a",
+          "span": [
+            4,
+            7
+          ]
+        },
+        {
+          "type": "Literal",
+          "kind": "null",
+          "value": null,
+          "span": [
+            9,
+            13
+          ]
+        }
+      ],
+      "span": [
+        0,
+        14
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": [
+          1,
+          "a",
+          null
+        ]
+      }
+    ]
+  },
+  {
+    "name": "empty-list",
+    "expr": "[]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
+    "tokens": [
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "List",
+      "items": [],
+      "span": [
+        0,
+        2
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": []
+      }
+    ]
+  },
+  {
+    "name": "map-literal",
+    "expr": "['a' => 1, 'b' => x]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
+    "tokens": [
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "STRING",
+        "value": "'a'"
+      },
+      {
+        "type": "ARROW",
+        "value": "=>"
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "STRING",
+        "value": "'b'"
+      },
+      {
+        "type": "ARROW",
+        "value": "=>"
+      },
+      {
+        "type": "IDENT",
+        "value": "x"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Map",
+      "entries": [
+        {
+          "key": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "a",
+            "span": [
+              1,
+              4
+            ]
+          },
+          "value": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              8,
+              9
+            ]
+          }
+        },
+        {
+          "key": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "b",
+            "span": [
+              11,
+              14
+            ]
+          },
+          "value": {
+            "type": "Var",
+            "name": "x",
+            "span": [
+              18,
+              19
+            ]
+          }
+        }
+      ],
+      "span": [
+        0,
+        20
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "x": 2
+        },
+        "value": {
+          "a": 1,
+          "b": 2
+        }
+      }
+    ]
+  },
+  {
+    "name": "map-numeric-key",
+    "expr": "[1 => 'a']",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-15"
+    ],
+    "tokens": [
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "ARROW",
+        "value": "=>"
+      },
+      {
+        "type": "STRING",
+        "value": "'a'"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Map",
+      "entries": [
+        {
+          "key": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              1,
+              2
+            ]
+          },
+          "value": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "a",
+            "span": [
+              6,
+              9
+            ]
+          }
+        }
+      ],
+      "span": [
+        0,
+        10
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": {
+          "1": "a"
+        }
+      }
+    ]
+  },
+  {
+    "name": "spread-list",
+    "expr": "[0, ...l]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-16"
+    ],
+    "tokens": [
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "NUMBER",
+        "value": "0"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "SPREAD",
+        "value": "..."
+      },
+      {
+        "type": "IDENT",
+        "value": "l"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "List",
+      "items": [
+        {
+          "type": "Literal",
+          "kind": "number",
+          "value": 0,
+          "span": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "Spread",
+          "expr": {
+            "type": "Var",
+            "name": "l",
+            "span": [
+              7,
+              8
+            ]
+          },
+          "span": [
+            4,
+            8
+          ]
+        }
+      ],
+      "span": [
+        0,
+        9
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "l": [
+            1,
+            2
+          ]
+        },
+        "value": [
+          0,
+          1,
+          2
+        ]
+      }
+    ]
+  },
+  {
+    "name": "spread-map",
+    "expr": "[...m, 'z' => 1]",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-16"
+    ],
+    "tokens": [
+      {
+        "type": "LBRACKET",
+        "value": "["
+      },
+      {
+        "type": "SPREAD",
+        "value": "..."
+      },
+      {
+        "type": "IDENT",
+        "value": "m"
+      },
+      {
+        "type": "COMMA",
+        "value": ","
+      },
+      {
+        "type": "STRING",
+        "value": "'z'"
+      },
+      {
+        "type": "ARROW",
+        "value": "=>"
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "RBRACKET",
+        "value": "]"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Map",
+      "entries": [
+        {
+          "type": "Spread",
+          "expr": {
+            "type": "Var",
+            "name": "m",
+            "span": [
+              4,
+              5
+            ]
+          },
+          "span": [
+            1,
+            5
+          ]
+        },
+        {
+          "key": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "z",
+            "span": [
+              7,
+              10
+            ]
+          },
+          "value": {
+            "type": "Literal",
+            "kind": "number",
+            "value": 1,
+            "span": [
+              14,
+              15
+            ]
+          }
+        }
+      ],
+      "span": [
+        0,
+        16
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "m": {
+            "a": 1
+          }
+        },
+        "value": {
+          "a": 1,
+          "z": 1
+        }
+      },
+      {
+        "data": {
+          "m": {
+            "z": 0
+          }
+        },
+        "value": {
+          "z": 1
+        }
+      }
+    ]
+  },
+  {
+    "name": "error-non-associative",
+    "expr": "a == b == c",
+    "requirements": [
+      "EXP-10"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-chained-comparison",
+    "expr": "a < b < c",
+    "requirements": [
+      "EXP-10"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-invalid-number",
+    "expr": "1.",
+    "requirements": [
+      "EXP-2"
+    ],
+    "error": "E_PARSE_INVALID_NUMBER"
+  },
+  {
+    "name": "error-leading-dot-number",
+    "expr": ".5",
+    "requirements": [
+      "EXP-2"
+    ],
+    "error": "E_PARSE_INVALID_NUMBER"
+  },
+  {
+    "name": "error-invalid-escape",
+    "expr": "'\\q'",
+    "requirements": [
+      "EXP-3"
+    ],
+    "error": "E_PARSE_INVALID_ESCAPE"
+  },
+  {
+    "name": "error-unterminated-string",
+    "expr": "'abc",
+    "requirements": [
+      "EXP-3"
+    ],
+    "error": "E_PARSE_UNTERMINATED_STRING"
+  },
+  {
+    "name": "member-method-call",
+    "expr": "a.f(x)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "DOT_IDENT",
+        "value": ".f"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "x"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "MemberCall",
+      "object": {
+        "type": "Var",
+        "name": "a",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "method": "f",
+      "args": [
+        {
+          "type": "Var",
+          "name": "x",
+          "span": [
+            4,
+            5
+          ]
+        }
+      ],
+      "span": [
+        0,
+        6
+      ]
+    }
+  },
+  {
+    "name": "class-function-call",
+    "expr": "Order::status_label(x)",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "Order"
+      },
+      {
+        "type": "DOUBLE_COLON",
+        "value": "::"
+      },
+      {
+        "type": "IDENT",
+        "value": "status_label"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "x"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "ClassCall",
+      "className": "Order",
+      "method": "status_label",
+      "args": [
+        {
+          "type": "Var",
+          "name": "x",
+          "span": [
+            20,
+            21
+          ]
+        }
+      ],
+      "span": [
+        0,
+        22
+      ]
+    }
+  },
+  {
+    "name": "ternary-class-call-branch",
+    "expr": "c ? Order::label(a) : b",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "EXP-11",
+      "EXP-31"
+    ],
+    "tokens": [
+      {
+        "type": "IDENT",
+        "value": "c"
+      },
+      {
+        "type": "QUESTION",
+        "value": "?"
+      },
+      {
+        "type": "IDENT",
+        "value": "Order"
+      },
+      {
+        "type": "DOUBLE_COLON",
+        "value": "::"
+      },
+      {
+        "type": "IDENT",
+        "value": "label"
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "COLON",
+        "value": ":"
+      },
+      {
+        "type": "IDENT",
+        "value": "b"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Ternary",
+      "test": {
+        "type": "Var",
+        "name": "c",
+        "span": [
+          0,
+          1
+        ]
+      },
+      "then": {
+        "type": "ClassCall",
+        "className": "Order",
+        "method": "label",
+        "args": [
+          {
+            "type": "Var",
+            "name": "a",
+            "span": [
+              17,
+              18
+            ]
+          }
+        ],
+        "span": [
+          4,
+          19
+        ]
+      },
+      "else": {
+        "type": "Var",
+        "name": "b",
+        "span": [
+          22,
+          23
+        ]
+      },
+      "span": [
+        0,
+        23
+      ]
+    }
+  },
+  {
+    "name": "error-class-call-separated-colons",
+    "expr": "Order: :status_label(x)",
+    "requirements": [
+      "EXP-8",
+      "EXP-11"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-call-result-call",
+    "expr": "f(x)(y)",
+    "requirements": [
+      "EXP-8"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-empty",
+    "expr": "",
+    "requirements": [
+      "EXP-8"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-dot-whitespace",
+    "expr": "a . b",
+    "requirements": [
+      "EXP-5",
+      "EXP-8"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-arrow-operator",
+    "expr": "a->b",
+    "requirements": [
+      "EXP-6"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "error-brace-map",
+    "expr": "{'a': 1}",
+    "requirements": [
+      "EXP-6"
+    ],
+    "error": "E_PARSE_UNEXPECTED_TOKEN"
+  },
+  {
+    "name": "depth-limit-parentheses",
+    "expr": "(((((((((((((((((((((((((((((((1)))))))))))))))))))))))))))))))",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "RT-34"
+    ],
+    "tokens": [
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "LPAREN",
+        "value": "("
+      },
+      {
+        "type": "NUMBER",
+        "value": "1"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "RPAREN",
+        "value": ")"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Literal",
+      "kind": "number",
+      "value": 1,
+      "span": [
+        31,
+        32
+      ]
+    },
+    "cases": [
+      {
+        "data": {},
+        "value": 1
+      }
+    ]
+  },
+  {
+    "name": "error-depth-parentheses",
+    "expr": "((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))",
+    "requirements": [
+      "RT-34"
+    ],
+    "error": "E_RUNTIME_LIMIT"
+  },
+  {
+    "name": "depth-limit-unary",
+    "expr": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a",
+    "requirements": [
+      "EXP-1",
+      "EXP-7",
+      "RT-34"
+    ],
+    "tokens": [
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "BANG",
+        "value": "!"
+      },
+      {
+        "type": "IDENT",
+        "value": "a"
+      },
+      {
+        "type": "EOF",
+        "value": ""
+      }
+    ],
+    "ast": {
+      "type": "Unary",
+      "op": "!",
+      "operand": {
+        "type": "Unary",
+        "op": "!",
+        "operand": {
+          "type": "Unary",
+          "op": "!",
+          "operand": {
+            "type": "Unary",
+            "op": "!",
+            "operand": {
+              "type": "Unary",
+              "op": "!",
+              "operand": {
+                "type": "Unary",
+                "op": "!",
+                "operand": {
+                  "type": "Unary",
+                  "op": "!",
+                  "operand": {
+                    "type": "Unary",
+                    "op": "!",
+                    "operand": {
+                      "type": "Unary",
+                      "op": "!",
+                      "operand": {
+                        "type": "Unary",
+                        "op": "!",
+                        "operand": {
+                          "type": "Unary",
+                          "op": "!",
+                          "operand": {
+                            "type": "Unary",
+                            "op": "!",
+                            "operand": {
+                              "type": "Unary",
+                              "op": "!",
+                              "operand": {
+                                "type": "Unary",
+                                "op": "!",
+                                "operand": {
+                                  "type": "Unary",
+                                  "op": "!",
+                                  "operand": {
+                                    "type": "Unary",
+                                    "op": "!",
+                                    "operand": {
+                                      "type": "Unary",
+                                      "op": "!",
+                                      "operand": {
+                                        "type": "Unary",
+                                        "op": "!",
+                                        "operand": {
+                                          "type": "Unary",
+                                          "op": "!",
+                                          "operand": {
+                                            "type": "Unary",
+                                            "op": "!",
+                                            "operand": {
+                                              "type": "Unary",
+                                              "op": "!",
+                                              "operand": {
+                                                "type": "Unary",
+                                                "op": "!",
+                                                "operand": {
+                                                  "type": "Unary",
+                                                  "op": "!",
+                                                  "operand": {
+                                                    "type": "Unary",
+                                                    "op": "!",
+                                                    "operand": {
+                                                      "type": "Unary",
+                                                      "op": "!",
+                                                      "operand": {
+                                                        "type": "Unary",
+                                                        "op": "!",
+                                                        "operand": {
+                                                          "type": "Unary",
+                                                          "op": "!",
+                                                          "operand": {
+                                                            "type": "Unary",
+                                                            "op": "!",
+                                                            "operand": {
+                                                              "type": "Unary",
+                                                              "op": "!",
+                                                              "operand": {
+                                                                "type": "Unary",
+                                                                "op": "!",
+                                                                "operand": {
+                                                                  "type": "Unary",
+                                                                  "op": "!",
+                                                                  "operand": {
+                                                                    "type": "Unary",
+                                                                    "op": "!",
+                                                                    "operand": {
+                                                                      "type": "Unary",
+                                                                      "op": "!",
+                                                                      "operand": {
+                                                                        "type": "Unary",
+                                                                        "op": "!",
+                                                                        "operand": {
+                                                                          "type": "Unary",
+                                                                          "op": "!",
+                                                                          "operand": {
+                                                                            "type": "Unary",
+                                                                            "op": "!",
+                                                                            "operand": {
+                                                                              "type": "Unary",
+                                                                              "op": "!",
+                                                                              "operand": {
+                                                                                "type": "Unary",
+                                                                                "op": "!",
+                                                                                "operand": {
+                                                                                  "type": "Unary",
+                                                                                  "op": "!",
+                                                                                  "operand": {
+                                                                                    "type": "Unary",
+                                                                                    "op": "!",
+                                                                                    "operand": {
+                                                                                      "type": "Unary",
+                                                                                      "op": "!",
+                                                                                      "operand": {
+                                                                                        "type": "Unary",
+                                                                                        "op": "!",
+                                                                                        "operand": {
+                                                                                          "type": "Unary",
+                                                                                          "op": "!",
+                                                                                          "operand": {
+                                                                                            "type": "Unary",
+                                                                                            "op": "!",
+                                                                                            "operand": {
+                                                                                              "type": "Unary",
+                                                                                              "op": "!",
+                                                                                              "operand": {
+                                                                                                "type": "Unary",
+                                                                                                "op": "!",
+                                                                                                "operand": {
+                                                                                                  "type": "Unary",
+                                                                                                  "op": "!",
+                                                                                                  "operand": {
+                                                                                                    "type": "Unary",
+                                                                                                    "op": "!",
+                                                                                                    "operand": {
+                                                                                                      "type": "Unary",
+                                                                                                      "op": "!",
+                                                                                                      "operand": {
+                                                                                                        "type": "Unary",
+                                                                                                        "op": "!",
+                                                                                                        "operand": {
+                                                                                                          "type": "Unary",
+                                                                                                          "op": "!",
+                                                                                                          "operand": {
+                                                                                                            "type": "Unary",
+                                                                                                            "op": "!",
+                                                                                                            "operand": {
+                                                                                                              "type": "Unary",
+                                                                                                              "op": "!",
+                                                                                                              "operand": {
+                                                                                                                "type": "Unary",
+                                                                                                                "op": "!",
+                                                                                                                "operand": {
+                                                                                                                  "type": "Unary",
+                                                                                                                  "op": "!",
+                                                                                                                  "operand": {
+                                                                                                                    "type": "Unary",
+                                                                                                                    "op": "!",
+                                                                                                                    "operand": {
+                                                                                                                      "type": "Unary",
+                                                                                                                      "op": "!",
+                                                                                                                      "operand": {
+                                                                                                                        "type": "Unary",
+                                                                                                                        "op": "!",
+                                                                                                                        "operand": {
+                                                                                                                          "type": "Unary",
+                                                                                                                          "op": "!",
+                                                                                                                          "operand": {
+                                                                                                                            "type": "Unary",
+                                                                                                                            "op": "!",
+                                                                                                                            "operand": {
+                                                                                                                              "type": "Unary",
+                                                                                                                              "op": "!",
+                                                                                                                              "operand": {
+                                                                                                                                "type": "Unary",
+                                                                                                                                "op": "!",
+                                                                                                                                "operand": {
+                                                                                                                                  "type": "Var",
+                                                                                                                                  "name": "a",
+                                                                                                                                  "span": [
+                                                                                                                                    62,
+                                                                                                                                    63
+                                                                                                                                  ]
+                                                                                                                                },
+                                                                                                                                "span": [
+                                                                                                                                  61,
+                                                                                                                                  63
+                                                                                                                                ]
+                                                                                                                              },
+                                                                                                                              "span": [
+                                                                                                                                60,
+                                                                                                                                63
+                                                                                                                              ]
+                                                                                                                            },
+                                                                                                                            "span": [
+                                                                                                                              59,
+                                                                                                                              63
+                                                                                                                            ]
+                                                                                                                          },
+                                                                                                                          "span": [
+                                                                                                                            58,
+                                                                                                                            63
+                                                                                                                          ]
+                                                                                                                        },
+                                                                                                                        "span": [
+                                                                                                                          57,
+                                                                                                                          63
+                                                                                                                        ]
+                                                                                                                      },
+                                                                                                                      "span": [
+                                                                                                                        56,
+                                                                                                                        63
+                                                                                                                      ]
+                                                                                                                    },
+                                                                                                                    "span": [
+                                                                                                                      55,
+                                                                                                                      63
+                                                                                                                    ]
+                                                                                                                  },
+                                                                                                                  "span": [
+                                                                                                                    54,
+                                                                                                                    63
+                                                                                                                  ]
+                                                                                                                },
+                                                                                                                "span": [
+                                                                                                                  53,
+                                                                                                                  63
+                                                                                                                ]
+                                                                                                              },
+                                                                                                              "span": [
+                                                                                                                52,
+                                                                                                                63
+                                                                                                              ]
+                                                                                                            },
+                                                                                                            "span": [
+                                                                                                              51,
+                                                                                                              63
+                                                                                                            ]
+                                                                                                          },
+                                                                                                          "span": [
+                                                                                                            50,
+                                                                                                            63
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        "span": [
+                                                                                                          49,
+                                                                                                          63
+                                                                                                        ]
+                                                                                                      },
+                                                                                                      "span": [
+                                                                                                        48,
+                                                                                                        63
+                                                                                                      ]
+                                                                                                    },
+                                                                                                    "span": [
+                                                                                                      47,
+                                                                                                      63
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  "span": [
+                                                                                                    46,
+                                                                                                    63
+                                                                                                  ]
+                                                                                                },
+                                                                                                "span": [
+                                                                                                  45,
+                                                                                                  63
+                                                                                                ]
+                                                                                              },
+                                                                                              "span": [
+                                                                                                44,
+                                                                                                63
+                                                                                              ]
+                                                                                            },
+                                                                                            "span": [
+                                                                                              43,
+                                                                                              63
+                                                                                            ]
+                                                                                          },
+                                                                                          "span": [
+                                                                                            42,
+                                                                                            63
+                                                                                          ]
+                                                                                        },
+                                                                                        "span": [
+                                                                                          41,
+                                                                                          63
+                                                                                        ]
+                                                                                      },
+                                                                                      "span": [
+                                                                                        40,
+                                                                                        63
+                                                                                      ]
+                                                                                    },
+                                                                                    "span": [
+                                                                                      39,
+                                                                                      63
+                                                                                    ]
+                                                                                  },
+                                                                                  "span": [
+                                                                                    38,
+                                                                                    63
+                                                                                  ]
+                                                                                },
+                                                                                "span": [
+                                                                                  37,
+                                                                                  63
+                                                                                ]
+                                                                              },
+                                                                              "span": [
+                                                                                36,
+                                                                                63
+                                                                              ]
+                                                                            },
+                                                                            "span": [
+                                                                              35,
+                                                                              63
+                                                                            ]
+                                                                          },
+                                                                          "span": [
+                                                                            34,
+                                                                            63
+                                                                          ]
+                                                                        },
+                                                                        "span": [
+                                                                          33,
+                                                                          63
+                                                                        ]
+                                                                      },
+                                                                      "span": [
+                                                                        32,
+                                                                        63
+                                                                      ]
+                                                                    },
+                                                                    "span": [
+                                                                      31,
+                                                                      63
+                                                                    ]
+                                                                  },
+                                                                  "span": [
+                                                                    30,
+                                                                    63
+                                                                  ]
+                                                                },
+                                                                "span": [
+                                                                  29,
+                                                                  63
+                                                                ]
+                                                              },
+                                                              "span": [
+                                                                28,
+                                                                63
+                                                              ]
+                                                            },
+                                                            "span": [
+                                                              27,
+                                                              63
+                                                            ]
+                                                          },
+                                                          "span": [
+                                                            26,
+                                                            63
+                                                          ]
+                                                        },
+                                                        "span": [
+                                                          25,
+                                                          63
+                                                        ]
+                                                      },
+                                                      "span": [
+                                                        24,
+                                                        63
+                                                      ]
+                                                    },
+                                                    "span": [
+                                                      23,
+                                                      63
+                                                    ]
+                                                  },
+                                                  "span": [
+                                                    22,
+                                                    63
+                                                  ]
+                                                },
+                                                "span": [
+                                                  21,
+                                                  63
+                                                ]
+                                              },
+                                              "span": [
+                                                20,
+                                                63
+                                              ]
+                                            },
+                                            "span": [
+                                              19,
+                                              63
+                                            ]
+                                          },
+                                          "span": [
+                                            18,
+                                            63
+                                          ]
+                                        },
+                                        "span": [
+                                          17,
+                                          63
+                                        ]
+                                      },
+                                      "span": [
+                                        16,
+                                        63
+                                      ]
+                                    },
+                                    "span": [
+                                      15,
+                                      63
+                                    ]
+                                  },
+                                  "span": [
+                                    14,
+                                    63
+                                  ]
+                                },
+                                "span": [
+                                  13,
+                                  63
+                                ]
+                              },
+                              "span": [
+                                12,
+                                63
+                              ]
+                            },
+                            "span": [
+                              11,
+                              63
+                            ]
+                          },
+                          "span": [
+                            10,
+                            63
+                          ]
+                        },
+                        "span": [
+                          9,
+                          63
+                        ]
+                      },
+                      "span": [
+                        8,
+                        63
+                      ]
+                    },
+                    "span": [
+                      7,
+                      63
+                    ]
+                  },
+                  "span": [
+                    6,
+                    63
+                  ]
+                },
+                "span": [
+                  5,
+                  63
+                ]
+              },
+              "span": [
+                4,
+                63
+              ]
+            },
+            "span": [
+              3,
+              63
+            ]
+          },
+          "span": [
+            2,
+            63
+          ]
+        },
+        "span": [
+          1,
+          63
+        ]
+      },
+      "span": [
+        0,
+        63
+      ]
+    },
+    "cases": [
+      {
+        "data": {
+          "a": 1
+        },
+        "value": true
+      }
+    ]
+  },
+  {
+    "name": "error-depth-unary",
+    "expr": "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!a",
+    "requirements": [
+      "RT-34"
+    ],
+    "error": "E_RUNTIME_LIMIT"
+  }
+]

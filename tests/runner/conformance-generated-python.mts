@@ -7,6 +7,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
+import { legacyCasesDir } from './case-list.mts';
 import { caseTypeManifest, runProcessCases } from './generated-cases.mts';
 import { parsedCaseResult } from './generated-errors.mts';
 import { runBoundedStep } from './bounded.mts';
@@ -63,6 +64,7 @@ except Exception as error:  # noqa: BLE001  a failure of the generated program i
 const interpreter = pythonPackageCommand();
 const environment = { ...process.env, ...pythonEnvironment() };
 
+// The generated code runs on the legacy package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
 await runProcessCases('Python', temporary, async (testCase, id) => {
   const typePath = join(temporary, `${id}.types.json`);
   const graphPath = join(temporary, `${id}.ast`);
@@ -79,4 +81,4 @@ await runProcessCases('Python', temporary, async (testCase, id) => {
     testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], options, 'the case process');
   if (result.status !== 0) throw new Error(result.stderr || `${interpreter} exited with ${result.status}`);
   return parsedCaseResult(result.stdout, 'Python');
-});
+}, legacyCasesDir);

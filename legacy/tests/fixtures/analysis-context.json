@@ -1,0 +1,875 @@
+{
+  "cases": [
+    {
+      "id": "syntax-1",
+      "source": "{* note *}{= (user.name ?? null) | upper(1, \"x\")}{@ item = items}{/}{: count += 1}{? a in b}{:? !c}{:}{/}{?# side}{/}{+ parts/head.tpl}{# card cards/card.tpl title:page.title x}",
+      "name": "analysis.tpl",
+      "expected": {
+        "ast": {
+          "type": "Template",
+          "name": "analysis.tpl",
+          "body": [
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Call",
+                "name": "upper",
+                "args": [
+                  {
+                    "type": "Binary",
+                    "op": "??",
+                    "left": {
+                      "type": "Member",
+                      "object": {
+                        "type": "Var",
+                        "name": "user",
+                        "span": [
+                          14,
+                          18
+                        ]
+                      },
+                      "key": "name",
+                      "span": [
+                        14,
+                        23
+                      ]
+                    },
+                    "right": {
+                      "type": "Literal",
+                      "kind": "null",
+                      "value": null,
+                      "span": [
+                        27,
+                        31
+                      ]
+                    },
+                    "span": [
+                      14,
+                      31
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1,
+                    "span": [
+                      41,
+                      42
+                    ]
+                  },
+                  {
+                    "type": "Literal",
+                    "kind": "string",
+                    "value": "x",
+                    "span": [
+                      44,
+                      47
+                    ]
+                  }
+                ],
+                "span": [
+                  13,
+                  48
+                ]
+              },
+              "span": [
+                10,
+                49
+              ]
+            },
+            {
+              "type": "For",
+              "name": "item",
+              "iter": {
+                "type": "Var",
+                "name": "items",
+                "span": [
+                  59,
+                  64
+                ]
+              },
+              "body": [],
+              "empty": null,
+              "span": [
+                49,
+                68
+              ]
+            },
+            {
+              "type": "Set",
+              "name": "count",
+              "expr": {
+                "type": "Binary",
+                "op": "+",
+                "left": {
+                  "type": "Var",
+                  "name": "count",
+                  "span": [
+                    71,
+                    76
+                  ]
+                },
+                "right": {
+                  "type": "Literal",
+                  "kind": "number",
+                  "value": 1,
+                  "span": [
+                    80,
+                    81
+                  ]
+                },
+                "span": [
+                  71,
+                  82
+                ]
+              },
+              "span": [
+                68,
+                82
+              ]
+            },
+            {
+              "type": "If",
+              "branches": [
+                {
+                  "test": {
+                    "type": "Binary",
+                    "op": "in",
+                    "left": {
+                      "type": "Var",
+                      "name": "a",
+                      "span": [
+                        85,
+                        86
+                      ]
+                    },
+                    "right": {
+                      "type": "Var",
+                      "name": "b",
+                      "span": [
+                        90,
+                        91
+                      ]
+                    },
+                    "span": [
+                      85,
+                      91
+                    ]
+                  },
+                  "body": [],
+                  "span": [
+                    82,
+                    92
+                  ]
+                },
+                {
+                  "test": {
+                    "type": "Unary",
+                    "op": "!",
+                    "operand": {
+                      "type": "Var",
+                      "name": "c",
+                      "span": [
+                        97,
+                        98
+                      ]
+                    },
+                    "span": [
+                      96,
+                      98
+                    ]
+                  },
+                  "body": [],
+                  "span": [
+                    92,
+                    99
+                  ]
+                }
+              ],
+              "else": [],
+              "span": [
+                82,
+                105
+              ]
+            },
+            {
+              "type": "IfBlock",
+              "id": "side",
+              "body": [],
+              "else": null,
+              "span": [
+                105,
+                117
+              ]
+            },
+            {
+              "type": "Include",
+              "path": "parts/head.tpl",
+              "span": [
+                117,
+                135
+              ]
+            },
+            {
+              "type": "Block",
+              "id": "card",
+              "path": "cards/card.tpl",
+              "scope": [
+                {
+                  "name": "title",
+                  "expr": {
+                    "type": "Member",
+                    "object": {
+                      "type": "Var",
+                      "name": "page",
+                      "span": [
+                        164,
+                        168
+                      ]
+                    },
+                    "key": "title",
+                    "span": [
+                      164,
+                      174
+                    ]
+                  }
+                },
+                {
+                  "name": "x",
+                  "expr": {
+                    "type": "Var",
+                    "name": "x",
+                    "span": [
+                      175,
+                      176
+                    ]
+                  }
+                }
+              ],
+              "span": [
+                135,
+                177
+              ]
+            }
+          ],
+          "comments": [
+            {
+              "type": "Comment",
+              "value": " note ",
+              "span": [
+                0,
+                10
+              ]
+            }
+          ]
+        },
+        "tags": [
+          {
+            "start": 0,
+            "end": 10,
+            "echo": false,
+            "kind": "comment",
+            "bodyStart": 1,
+            "bodyEnd": 9
+          },
+          {
+            "start": 10,
+            "end": 49,
+            "echo": true,
+            "kind": "echo",
+            "bodyStart": 11,
+            "bodyEnd": 48
+          },
+          {
+            "start": 49,
+            "end": 65,
+            "echo": false,
+            "kind": "for",
+            "bodyStart": 50,
+            "bodyEnd": 64
+          },
+          {
+            "start": 65,
+            "end": 68,
+            "echo": false,
+            "kind": "close",
+            "bodyStart": 66,
+            "bodyEnd": 67
+          },
+          {
+            "start": 68,
+            "end": 82,
+            "echo": false,
+            "kind": "assignment",
+            "bodyStart": 69,
+            "bodyEnd": 81
+          },
+          {
+            "start": 82,
+            "end": 92,
+            "echo": false,
+            "kind": "if",
+            "bodyStart": 83,
+            "bodyEnd": 91
+          },
+          {
+            "start": 92,
+            "end": 99,
+            "echo": false,
+            "kind": "elseif",
+            "bodyStart": 93,
+            "bodyEnd": 98
+          },
+          {
+            "start": 99,
+            "end": 102,
+            "echo": false,
+            "kind": "else",
+            "bodyStart": 100,
+            "bodyEnd": 101
+          },
+          {
+            "start": 102,
+            "end": 105,
+            "echo": false,
+            "kind": "close",
+            "bodyStart": 103,
+            "bodyEnd": 104
+          },
+          {
+            "start": 105,
+            "end": 114,
+            "echo": false,
+            "kind": "ifblock",
+            "bodyStart": 106,
+            "bodyEnd": 113
+          },
+          {
+            "start": 114,
+            "end": 117,
+            "echo": false,
+            "kind": "close",
+            "bodyStart": 115,
+            "bodyEnd": 116
+          },
+          {
+            "start": 117,
+            "end": 135,
+            "echo": false,
+            "kind": "include",
+            "bodyStart": 118,
+            "bodyEnd": 134
+          },
+          {
+            "start": 135,
+            "end": 177,
+            "echo": false,
+            "kind": "block",
+            "bodyStart": 136,
+            "bodyEnd": 176
+          }
+        ],
+        "tokens": [
+          {
+            "start": 0,
+            "end": 10,
+            "kind": "comment"
+          },
+          {
+            "start": 10,
+            "end": 11,
+            "kind": "delimiter"
+          },
+          {
+            "start": 11,
+            "end": 12,
+            "kind": "keyword"
+          },
+          {
+            "start": 13,
+            "end": 14,
+            "kind": "operator"
+          },
+          {
+            "start": 14,
+            "end": 18,
+            "kind": "variable"
+          },
+          {
+            "start": 18,
+            "end": 23,
+            "kind": "property"
+          },
+          {
+            "start": 24,
+            "end": 26,
+            "kind": "operator"
+          },
+          {
+            "start": 27,
+            "end": 31,
+            "kind": "keyword"
+          },
+          {
+            "start": 31,
+            "end": 32,
+            "kind": "operator"
+          },
+          {
+            "start": 33,
+            "end": 34,
+            "kind": "operator"
+          },
+          {
+            "start": 35,
+            "end": 40,
+            "kind": "function"
+          },
+          {
+            "start": 40,
+            "end": 41,
+            "kind": "operator"
+          },
+          {
+            "start": 41,
+            "end": 42,
+            "kind": "number"
+          },
+          {
+            "start": 42,
+            "end": 43,
+            "kind": "operator"
+          },
+          {
+            "start": 44,
+            "end": 47,
+            "kind": "string"
+          },
+          {
+            "start": 47,
+            "end": 48,
+            "kind": "operator"
+          },
+          {
+            "start": 48,
+            "end": 49,
+            "kind": "delimiter"
+          },
+          {
+            "start": 49,
+            "end": 50,
+            "kind": "delimiter"
+          },
+          {
+            "start": 50,
+            "end": 51,
+            "kind": "keyword"
+          },
+          {
+            "start": 52,
+            "end": 56,
+            "kind": "variable"
+          },
+          {
+            "start": 57,
+            "end": 58,
+            "kind": "operator"
+          },
+          {
+            "start": 59,
+            "end": 64,
+            "kind": "variable"
+          },
+          {
+            "start": 64,
+            "end": 65,
+            "kind": "delimiter"
+          },
+          {
+            "start": 65,
+            "end": 66,
+            "kind": "delimiter"
+          },
+          {
+            "start": 66,
+            "end": 67,
+            "kind": "keyword"
+          },
+          {
+            "start": 67,
+            "end": 68,
+            "kind": "delimiter"
+          },
+          {
+            "start": 68,
+            "end": 69,
+            "kind": "delimiter"
+          },
+          {
+            "start": 69,
+            "end": 70,
+            "kind": "keyword"
+          },
+          {
+            "start": 71,
+            "end": 76,
+            "kind": "variable"
+          },
+          {
+            "start": 77,
+            "end": 79,
+            "kind": "operator"
+          },
+          {
+            "start": 80,
+            "end": 81,
+            "kind": "number"
+          },
+          {
+            "start": 81,
+            "end": 82,
+            "kind": "delimiter"
+          },
+          {
+            "start": 82,
+            "end": 83,
+            "kind": "delimiter"
+          },
+          {
+            "start": 83,
+            "end": 84,
+            "kind": "keyword"
+          },
+          {
+            "start": 85,
+            "end": 86,
+            "kind": "variable"
+          },
+          {
+            "start": 87,
+            "end": 89,
+            "kind": "keyword"
+          },
+          {
+            "start": 90,
+            "end": 91,
+            "kind": "variable"
+          },
+          {
+            "start": 91,
+            "end": 92,
+            "kind": "delimiter"
+          },
+          {
+            "start": 92,
+            "end": 93,
+            "kind": "delimiter"
+          },
+          {
+            "start": 93,
+            "end": 95,
+            "kind": "keyword"
+          },
+          {
+            "start": 96,
+            "end": 97,
+            "kind": "operator"
+          },
+          {
+            "start": 97,
+            "end": 98,
+            "kind": "variable"
+          },
+          {
+            "start": 98,
+            "end": 99,
+            "kind": "delimiter"
+          },
+          {
+            "start": 99,
+            "end": 100,
+            "kind": "delimiter"
+          },
+          {
+            "start": 100,
+            "end": 101,
+            "kind": "keyword"
+          },
+          {
+            "start": 101,
+            "end": 102,
+            "kind": "delimiter"
+          },
+          {
+            "start": 102,
+            "end": 103,
+            "kind": "delimiter"
+          },
+          {
+            "start": 103,
+            "end": 104,
+            "kind": "keyword"
+          },
+          {
+            "start": 104,
+            "end": 105,
+            "kind": "delimiter"
+          },
+          {
+            "start": 105,
+            "end": 106,
+            "kind": "delimiter"
+          },
+          {
+            "start": 106,
+            "end": 108,
+            "kind": "keyword"
+          },
+          {
+            "start": 109,
+            "end": 113,
+            "kind": "variable"
+          },
+          {
+            "start": 113,
+            "end": 114,
+            "kind": "delimiter"
+          },
+          {
+            "start": 114,
+            "end": 115,
+            "kind": "delimiter"
+          },
+          {
+            "start": 115,
+            "end": 116,
+            "kind": "keyword"
+          },
+          {
+            "start": 116,
+            "end": 117,
+            "kind": "delimiter"
+          },
+          {
+            "start": 117,
+            "end": 118,
+            "kind": "delimiter"
+          },
+          {
+            "start": 118,
+            "end": 119,
+            "kind": "keyword"
+          },
+          {
+            "start": 120,
+            "end": 134,
+            "kind": "path"
+          },
+          {
+            "start": 134,
+            "end": 135,
+            "kind": "delimiter"
+          },
+          {
+            "start": 135,
+            "end": 136,
+            "kind": "delimiter"
+          },
+          {
+            "start": 136,
+            "end": 137,
+            "kind": "keyword"
+          },
+          {
+            "start": 138,
+            "end": 142,
+            "kind": "path"
+          },
+          {
+            "start": 143,
+            "end": 157,
+            "kind": "path"
+          },
+          {
+            "start": 158,
+            "end": 174,
+            "kind": "path"
+          },
+          {
+            "start": 175,
+            "end": 176,
+            "kind": "path"
+          },
+          {
+            "start": 176,
+            "end": 177,
+            "kind": "delimiter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "syntax-2",
+      "source": "{% delimiter []}[= a]",
+      "name": "analysis.tpl",
+      "expected": {
+        "ast": {
+          "type": "Template",
+          "name": "analysis.tpl",
+          "body": [
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Var",
+                "name": "a",
+                "span": [
+                  19,
+                  20
+                ]
+              },
+              "span": [
+                16,
+                21
+              ]
+            }
+          ],
+          "comments": []
+        },
+        "tags": [
+          {
+            "start": 0,
+            "end": 16,
+            "echo": false,
+            "kind": "directive",
+            "bodyStart": 1,
+            "bodyEnd": 15
+          },
+          {
+            "start": 16,
+            "end": 21,
+            "echo": true,
+            "kind": "echo",
+            "bodyStart": 17,
+            "bodyEnd": 20
+          }
+        ],
+        "tokens": [
+          {
+            "start": 0,
+            "end": 1,
+            "kind": "delimiter"
+          },
+          {
+            "start": 1,
+            "end": 2,
+            "kind": "keyword"
+          },
+          {
+            "start": 3,
+            "end": 12,
+            "kind": "keyword"
+          },
+          {
+            "start": 13,
+            "end": 15,
+            "kind": "string"
+          },
+          {
+            "start": 15,
+            "end": 16,
+            "kind": "delimiter"
+          },
+          {
+            "start": 16,
+            "end": 17,
+            "kind": "delimiter"
+          },
+          {
+            "start": 17,
+            "end": 18,
+            "kind": "keyword"
+          },
+          {
+            "start": 19,
+            "end": 20,
+            "kind": "variable"
+          },
+          {
+            "start": 20,
+            "end": 21,
+            "kind": "delimiter"
+          }
+        ]
+      }
+    },
+    {
+      "id": "syntax-3",
+      "source": "﻿한글é😀\n{= title}",
+      "name": "analysis.tpl",
+      "expected": {
+        "ast": {
+          "type": "Template",
+          "name": "analysis.tpl",
+          "body": [
+            {
+              "type": "Text",
+              "value": "한글é😀\n",
+              "span": [
+                0,
+                13
+              ]
+            },
+            {
+              "type": "Echo",
+              "expr": {
+                "type": "Var",
+                "name": "title",
+                "span": [
+                  16,
+                  21
+                ]
+              },
+              "span": [
+                13,
+                22
+              ]
+            }
+          ],
+          "comments": []
+        },
+        "tags": [
+          {
+            "start": 13,
+            "end": 22,
+            "echo": true,
+            "kind": "echo",
+            "bodyStart": 14,
+            "bodyEnd": 21
+          }
+        ],
+        "tokens": [
+          {
+            "start": 13,
+            "end": 14,
+            "kind": "delimiter"
+          },
+          {
+            "start": 14,
+            "end": 15,
+            "kind": "keyword"
+          },
+          {
+            "start": 16,
+            "end": 21,
+            "kind": "variable"
+          },
+          {
+            "start": 21,
+            "end": 22,
+            "kind": "delimiter"
+          }
+        ]
+      }
+    }
+  ]
+}

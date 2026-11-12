@@ -18,7 +18,7 @@ import (
 // Host argument form (VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19),
 // with the shared fixture of tests/fixtures/native-object/host-values.json.
 
-var nativeFixtureDir = filepath.Join("..", "..", "..", "tests", "fixtures", "native-object")
+var nativeFixtureDir = filepath.Join("..", "..", "..", "legacy", "tests", "fixtures", "native-object")
 
 type valueOrder struct{ Label string }
 

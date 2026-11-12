@@ -7,7 +7,7 @@ import { boundDataCasesDocument } from '../../../../scripts/fixture-documents.mt
 import { AstProgram, MapLoader, bind } from '../src/index.js';
 import { repoRoot } from './helpers.js';
 
-const fixtureDir = join(repoRoot, 'tests', 'fixtures', 'bound-data');
+const fixtureDir = join(repoRoot, 'legacy', 'tests', 'fixtures', 'bound-data');
 const cases = boundDataCasesDocument.read(join(fixtureDir, 'cases.json'));
 const templates = Object.fromEntries(
   ['page.tpl', 'define.tpl', 'part.tpl', 'empty.tpl', 'result.tpl'].map(name => [name, readFileSync(join(fixtureDir, name), 'utf8')]),

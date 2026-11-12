@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "a\n{* c *}    \nb\n"
+  },
+  "keep": {
+    "text": "a\n    {* c *}    \nb\n"
+  }
+}

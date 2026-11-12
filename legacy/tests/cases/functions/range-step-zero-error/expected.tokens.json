@@ -1,0 +1,15 @@
+[
+  [0,1,"delimiter"],
+  [1,2,"keyword"],
+  [3,8,"function"],
+  [8,9,"operator"],
+  [9,10,"number"],
+  [10,11,"operator"],
+  [12,13,"number"],
+  [13,14,"operator"],
+  [15,16,"number"],
+  [16,17,"operator"],
+  [18,19,"operator"],
+  [20,24,"function"],
+  [24,25,"delimiter"]
+]

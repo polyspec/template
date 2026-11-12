@@ -85,12 +85,12 @@ final class Support
 
     public static function casesDir(): string
     {
-        return self::repoRoot() . '/tests/cases';
+        return self::repoRoot() . '/legacy/tests/cases';
     }
 
     public static function exprFixture(): string
     {
-        return self::repoRoot() . '/tests/fixtures/expr/cases.json';
+        return self::repoRoot() . '/legacy/tests/fixtures/expr/cases.json';
     }
 
     /**

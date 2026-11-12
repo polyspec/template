@@ -1,0 +1,32 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>ab</p>\n<p>c</p>\n",
+      "span": [
+        0,
+        46
+      ]
+    }
+  ],
+  "comments": [
+    {
+      "type": "Comment",
+      "value": " note ",
+      "span": [
+        4,
+        14
+      ]
+    },
+    {
+      "type": "Comment",
+      "value": " standalone ",
+      "span": [
+        20,
+        36
+      ]
+    }
+  ]
+}

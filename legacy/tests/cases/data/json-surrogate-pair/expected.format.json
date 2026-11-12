@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= a}|{= length(a)}\n"
+  },
+  "keep": {
+    "text": "{= a}|{= length(a)}\n"
+  }
+}

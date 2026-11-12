@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{? level == 1}\n  one\n{:? level == 2}\n  two\n{:? level == 3}\n  three\n{/}\n"
+  },
+  "keep": {
+    "text": "{? level == 1}\none\n{:? level == 2}\ntwo\n{:? level == 3}\nthree\n{/}\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= json(sort(objs, 'p')) | raw}\n{= json(sort(objs, 'n')) | raw}\n{= json(sort(nested, 'u.name')) | raw}\n{= json(sort(stable, 'k')) | raw}\n"
+  },
+  "keep": {
+    "text": "{= json(sort(objs, 'p')) | raw}\n{= json(sort(objs, 'n')) | raw}\n{= json(sort(nested, 'u.name')) | raw}\n{= json(sort(stable, 'k')) | raw}\n"
+  }
+}

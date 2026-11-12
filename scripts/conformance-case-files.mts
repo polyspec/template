@@ -1,6 +1,6 @@
 // Reads the expected files of the conformance cases and checks the presence rules of CNF-2 and CNF-15 and, with the
 // schemas of contracts/schema/, the content of the token and format files.
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Ajv, JSONSchemaType, Schema, ValidateFunction } from 'ajv';
 import { caseIds, casesDir } from '../tests/runner/case-list.mts';
@@ -90,10 +90,24 @@ export function raisesOf(error: ExpectedError, categories: Map<string, string>):
   };
 }
 
-/** The expected.error.json of a case, as the error that a runner compares. */
+/** The former form of expected.error.json, which the cases of the legacy packages keep: the code `E_<KIND>`. */
+const legacyErrorDocument = jsonDocument<ExpectedError>('expected error of a legacy case', {
+  type: 'object',
+  required: ['code', 'template', 'line', 'col'],
+  properties: { code: { type: 'string', pattern: '^E_[A-Z0-9_]+$' }, template: { type: 'string' }, line: { type: 'integer' }, col: { type: 'integer' } },
+  additionalProperties: false,
+});
+
+/** The error of a legacy case, with the kind of its code `E_<KIND>`. */
+export function legacyExpectedError(error: ExpectedError): ExpectedError {
+  return { ...error, code: error.code.slice(2).toLowerCase() };
+}
+
+/** The expected.error.json of a case, as the error that a runner compares; a legacy case has the former form. */
 export const expectedErrorDocument = {
-  parse: (text: string, source: string): ExpectedError => expectedErrorOf(raisesDocument.parse(text, source).raises),
-  read: (path: string): ExpectedError => expectedErrorOf(raisesDocument.read(path).raises),
+  parse: (text: string, source: string): ExpectedError =>
+    /"raises"\s*:/.test(text) ? expectedErrorOf(raisesDocument.parse(text, source).raises) : legacyExpectedError(legacyErrorDocument.parse(text, source)),
+  read: (path: string): ExpectedError => expectedErrorDocument.parse(readFileSync(path, 'utf8'), path),
 };
 
 /** The expected files of one case; an absent file is null. */

@@ -1,0 +1,46 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Set",
+      "name": "item",
+      "expr": {
+        "type": "Literal",
+        "kind": "string",
+        "value": "X",
+        "span": [
+          9,
+          12
+        ]
+      },
+      "span": [
+        0,
+        13
+      ]
+    },
+    {
+      "type": "Block",
+      "id": null,
+      "path": "card.tpl",
+      "scope": [
+        {
+          "name": "item",
+          "expr": {
+            "type": "Var",
+            "name": "item",
+            "span": [
+              26,
+              30
+            ]
+          }
+        }
+      ],
+      "span": [
+        14,
+        31
+      ]
+    }
+  ],
+  "comments": []
+}

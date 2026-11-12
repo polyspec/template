@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= t | upper | truncate(1, '!')}\n"
+  },
+  "keep": {
+    "text": "{= t | upper | truncate(1, '!')}\n"
+  }
+}

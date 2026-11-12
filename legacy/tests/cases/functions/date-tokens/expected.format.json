@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= date(now(), 'Y y m n d j H G i s D l N w M F U P')}\n{= date(now(), '\\\\Y=Y')}\n"
+  },
+  "keep": {
+    "text": "{= date(now(), 'Y y m n d j H G i s D l N w M F U P')}\n{= date(now(), '\\\\Y=Y')}\n"
+  }
+}

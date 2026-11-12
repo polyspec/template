@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= default(a, 'x')}\n{= default(b, 'x')}\n{= default(c, 'x')}\n{= default(d, 'x')}\n{= default(e, 'x')}\n{= a ?? 'y'}\n[{= b ?? 'y'}]\n"
+  },
+  "keep": {
+    "text": "{= default(a, 'x')}\n{= default(b, 'x')}\n{= default(c, 'x')}\n{= default(d, 'x')}\n{= default(e, 'x')}\n{= a ?? 'y'}\n[{= b ?? 'y'}]\n"
+  }
+}

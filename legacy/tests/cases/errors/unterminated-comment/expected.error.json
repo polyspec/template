@@ -1,0 +1,6 @@
+{
+  "code": "E_PARSE_UNTERMINATED_COMMENT",
+  "template": "input.tpl",
+  "line": 1,
+  "col": 3
+}

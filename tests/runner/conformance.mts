@@ -4,22 +4,25 @@
 // (CNF-9). A case whose input parses (expected.ast.json) compares tokens and formatted text in every language; an
 // implementation without the subcommand fails the case.
 // Each case prints `<case> [<lang>] pass|fail (<ms> ms)` when it finishes in a language; the
-// summary table follows the last case. Each CLI call has its own timeout (drivers.mts).
+// summary table follows the last case. Each CLI call has its own timeout (drivers.mts). Rust runs the cases of tests/,
+// and the legacy language packages run the copy of the cases that they passed when they moved (legacy/tests/,
+// docs/spec/runtime.md#transition); a case that one set does not hold shows `-` for its languages.
 //
 // Options:
 //   --langs ts,go,rust,php,php-ext   languages to run (default: every language whose package exists)
 //   --case group/name | group        run one case or one group
 //   --list                           print the cases and exit
 //   --update ast|html|error|tokens|format
-//                                    write the expected file from the ts implementation
+//                                    write the expected file of tests/cases from the rust implementation
 import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { kindCategories, raisesOf } from '../../scripts/conformance-case-files.mts';
 import { parseJson } from '../../scripts/json-document.mts';
 import { casesDir } from './case-list.mts';
 import { invoke, prepare, selectLanguages } from './drivers.mts';
+import type { TestCase } from './cases.mts';
 import {
-  describeText, filesystemCases, firstDifference, FORMAT_MODE_NAMES, formatArgs, formatOutcome, listCases, parseArgs, parseErrorOutput, renderArgs, tokensArgs,
+  CASE_SETS, describeText, filesystemCases, firstDifference, FORMAT_MODE_NAMES, formatArgs, formatOutcome, listCases, parseArgs, parseErrorOutput, renderArgs, tokensArgs,
   tokensText, type FormatMode, type FormatOutcome,
 } from './cases.mts';
 
@@ -43,10 +46,22 @@ for (let i = 0; i < argv.length; i++) {
 
 // The filesystem cases (CNF-16) run after the fixture cases, from file trees in a temporary directory; --update writes
 // only the expected files of fixture cases.
+/** The case set that a language runs: the legacy packages run the legacy copy. */
+const setOf = (language: string): 'current' | 'legacy' => (language === 'rust' ? 'current' : 'legacy');
 const fixtureCases = listCases(options.case);
 const filesystem = filesystemCases(options.case);
-process.once('exit', () => rmSync(filesystem.directory, { recursive: true, force: true }));
-const cases = [...fixtureCases, ...filesystem.cases];
+const legacyFixtureCases = listCases(options.case, CASE_SETS.legacy.cases);
+const legacyFilesystem = filesystemCases(options.case, CASE_SETS.legacy.filesystem);
+process.once('exit', () => {
+  rmSync(filesystem.directory, { recursive: true, force: true });
+  rmSync(legacyFilesystem.directory, { recursive: true, force: true });
+});
+const caseSets: Record<'current' | 'legacy', Map<string, TestCase>> = {
+  current: new Map([...fixtureCases, ...filesystem.cases].map(testCase => [testCase.id, testCase])),
+  legacy: new Map([...legacyFixtureCases, ...legacyFilesystem.cases].map(testCase => [testCase.id, testCase])),
+};
+const ids = [...new Set([...caseSets.current.keys(), ...caseSets.legacy.keys()])];
+const cases = ids.map(id => caseSets.current.get(id) ?? caseSets.legacy.get(id)).filter(testCase => testCase !== undefined);
 if (options.list) {
   for (const testCase of cases) process.stdout.write(`${testCase.id}  stage ${testCase.meta.stage}  ${testCase.meta.requirements.join(' ')}\n`);
   process.stdout.write(`${cases.length} cases\n`);
@@ -69,11 +84,11 @@ if (options.update) {
     process.stderr.write(`invalid --update value: ${String(options.update)}\n`);
     process.exit(1);
   }
-  if (!languages.includes('ts')) {
-    process.stderr.write('--update requires ts among the selected languages\n');
+  if (!languages.includes('rust')) {
+    process.stderr.write('--update requires rust among the selected languages\n');
     process.exit(1);
   }
-  const language = 'ts';
+  const language = 'rust';
   let written = 0;
   let failedUpdates = 0;
   for (const testCase of fixtureCases) {
@@ -139,9 +154,16 @@ if (options.update) {
 const failures: string[] = [];
 // Each row holds the outcome of every language in the order of `languages`.
 const results: { id: string; outcomes: string[] }[] = [];
-for (const testCase of cases) {
-  const row: { id: string; outcomes: string[] } = { id: testCase.id, outcomes: [] };
+let total = 0;
+for (const id of ids) {
+  const row: { id: string; outcomes: string[] } = { id, outcomes: [] };
   for (const language of languages) {
+    const testCase = caseSets[setOf(language)].get(id);
+    if (testCase === undefined) {
+      row.outcomes.push('-');
+      continue;
+    }
+    total++;
     const started = performance.now();
     const problems: string[] = [];
     if (testCase.expectedAst) {
@@ -233,7 +255,6 @@ process.stdout.write(`${'case'.padEnd(width)}  ${languages.map(l => l.padEnd(7))
 for (const row of results) {
   process.stdout.write(`${row.id.padEnd(width)}  ${row.outcomes.map(outcome => outcome.padEnd(7)).join('')}\n`);
 }
-const total = results.length * languages.length;
 process.stdout.write(`${total - failures.length}/${total} passed (${results.length} cases, ${languages.length} languages)\n`);
 for (const failure of failures) process.stderr.write(`${failure}\n`);
 process.exit(failures.length ? 1 : 0);

@@ -17,7 +17,7 @@ import (
 
 // Bound data (VAL-22, ERR-14, RT-61) with the shared fixture of tests/fixtures/bound-data/cases.json.
 
-var boundFixtureDir = filepath.Join("..", "..", "..", "tests", "fixtures", "bound-data")
+var boundFixtureDir = filepath.Join("..", "..", "..", "legacy", "tests", "fixtures", "bound-data")
 
 type boundPosition struct {
 	Template string `json:"template"`

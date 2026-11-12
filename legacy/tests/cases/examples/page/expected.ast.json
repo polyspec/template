@@ -1,0 +1,357 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<!DOCTYPE html>\n<html lang=\"",
+      "span": [
+        0,
+        28
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Member",
+        "object": {
+          "type": "Var",
+          "name": "meta",
+          "span": [
+            31,
+            35
+          ]
+        },
+        "key": "lang",
+        "span": [
+          31,
+          40
+        ]
+      },
+      "span": [
+        28,
+        41
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\">\n<head>\n",
+      "span": [
+        41,
+        51
+      ]
+    },
+    {
+      "type": "Set",
+      "name": "og_image",
+      "expr": {
+        "type": "Binary",
+        "op": "??",
+        "left": {
+          "type": "Member",
+          "object": {
+            "type": "Var",
+            "name": "meta",
+            "span": [
+              64,
+              68
+            ]
+          },
+          "key": "og_image",
+          "span": [
+            64,
+            77
+          ]
+        },
+        "right": {
+          "type": "Binary",
+          "op": "+",
+          "left": {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "links",
+              "span": [
+                81,
+                86
+              ]
+            },
+            "key": "assets",
+            "span": [
+              81,
+              93
+            ]
+          },
+          "right": {
+            "type": "Literal",
+            "kind": "string",
+            "value": "/og.png",
+            "span": [
+              96,
+              105
+            ]
+          },
+          "span": [
+            81,
+            105
+          ]
+        },
+        "span": [
+          64,
+          105
+        ]
+      },
+      "span": [
+        51,
+        106
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "<title>",
+      "span": [
+        107,
+        114
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "default",
+        "args": [
+          {
+            "type": "Var",
+            "name": "title",
+            "span": [
+              117,
+              122
+            ]
+          },
+          {
+            "type": "Member",
+            "object": {
+              "type": "Var",
+              "name": "meta",
+              "span": [
+                133,
+                137
+              ]
+            },
+            "key": "site",
+            "span": [
+              133,
+              142
+            ]
+          }
+        ],
+        "span": [
+          117,
+          143
+        ]
+      },
+      "span": [
+        114,
+        144
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</title>\n",
+      "span": [
+        144,
+        153
+      ]
+    },
+    {
+      "type": "Include",
+      "path": "parts/head.tpl",
+      "span": [
+        153,
+        171
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</head>\n<body>\n<script nonce=\"",
+      "span": [
+        172,
+        202
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "nonce",
+        "span": [
+          205,
+          210
+        ]
+      },
+      "span": [
+        202,
+        211
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\">\nvar page = ",
+      "span": [
+        211,
+        225
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "page",
+                "span": [
+                  233,
+                  237
+                ]
+              }
+            ],
+            "span": [
+              228,
+              238
+            ]
+          }
+        ],
+        "span": [
+          228,
+          244
+        ]
+      },
+      "span": [
+        225,
+        245
+      ]
+    },
+    {
+      "type": "Text",
+      "value": ";\n$(function () { init({ debug: false }); });\n</script>\n",
+      "span": [
+        245,
+        301
+      ]
+    },
+    {
+      "type": "IfBlock",
+      "id": "content",
+      "body": [
+        {
+          "type": "Text",
+          "value": "<main>",
+          "span": [
+            314,
+            320
+          ]
+        },
+        {
+          "type": "Block",
+          "id": "content",
+          "path": null,
+          "scope": [],
+          "span": [
+            320,
+            331
+          ]
+        },
+        {
+          "type": "Text",
+          "value": "</main>\n",
+          "span": [
+            331,
+            339
+          ]
+        }
+      ],
+      "else": [
+        {
+          "type": "Text",
+          "value": "<main class=\"empty\">No content</main>\n",
+          "span": [
+            343,
+            381
+          ]
+        }
+      ],
+      "span": [
+        301,
+        384
+      ]
+    },
+    {
+      "type": "Block",
+      "id": null,
+      "path": "parts/footer.tpl",
+      "scope": [
+        {
+          "name": "links",
+          "expr": {
+            "type": "Var",
+            "name": "links",
+            "span": [
+              405,
+              410
+            ]
+          }
+        },
+        {
+          "name": "year",
+          "expr": {
+            "type": "Call",
+            "name": "date",
+            "args": [
+              {
+                "type": "Call",
+                "name": "now",
+                "args": [],
+                "span": [
+                  421,
+                  426
+                ]
+              },
+              {
+                "type": "Literal",
+                "kind": "string",
+                "value": "Y",
+                "span": [
+                  428,
+                  431
+                ]
+              }
+            ],
+            "span": [
+              416,
+              432
+            ]
+          }
+        }
+      ],
+      "span": [
+        385,
+        433
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</body>\n</html>\n",
+      "span": [
+        434,
+        450
+      ]
+    }
+  ],
+  "comments": []
+}

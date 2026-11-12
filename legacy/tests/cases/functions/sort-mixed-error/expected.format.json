@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= sort([1, 'a']) | json}\n"
+  },
+  "keep": {
+    "text": "{= sort([1, 'a']) | json}\n"
+  }
+}

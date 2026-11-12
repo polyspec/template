@@ -1,0 +1,163 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "m",
+                "span": [
+                  8,
+                  9
+                ]
+              }
+            ],
+            "span": [
+              3,
+              10
+            ]
+          }
+        ],
+        "span": [
+          3,
+          16
+        ]
+      },
+      "span": [
+        0,
+        17
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        17,
+        18
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "Var",
+                "name": "s",
+                "span": [
+                  26,
+                  27
+                ]
+              }
+            ],
+            "span": [
+              21,
+              28
+            ]
+          }
+        ],
+        "span": [
+          21,
+          34
+        ]
+      },
+      "span": [
+        18,
+        35
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        35,
+        36
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Call",
+        "name": "raw",
+        "args": [
+          {
+            "type": "Call",
+            "name": "json",
+            "args": [
+              {
+                "type": "List",
+                "items": [
+                  {
+                    "type": "Literal",
+                    "kind": "number",
+                    "value": 1e+21,
+                    "span": [
+                      45,
+                      49
+                    ]
+                  },
+                  {
+                    "type": "Unary",
+                    "op": "-",
+                    "operand": {
+                      "type": "Literal",
+                      "kind": "number",
+                      "value": 1e+21,
+                      "span": [
+                        52,
+                        56
+                      ]
+                    },
+                    "span": [
+                      51,
+                      56
+                    ]
+                  }
+                ],
+                "span": [
+                  44,
+                  57
+                ]
+              }
+            ],
+            "span": [
+              39,
+              58
+            ]
+          }
+        ],
+        "span": [
+          39,
+          64
+        ]
+      },
+      "span": [
+        36,
+        65
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "\n",
+      "span": [
+        65,
+        66
+      ]
+    }
+  ],
+  "comments": []
+}

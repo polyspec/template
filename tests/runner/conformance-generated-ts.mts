@@ -11,6 +11,7 @@ import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { inWorker, runStep, seconds, stepProgress } from './bounded.mts';
 import { generatedCases, type TestCase } from './cases.mts';
+import { legacyCasesDir } from './case-list.mts';
 import { caseTypeManifest, compileStep, finishRun, renderFailure } from './generated-cases.mts';
 import type { RenderMessage } from './generated-ts-render.mts';
 import { tsc } from '../../scripts/tools.mts';
@@ -19,7 +20,7 @@ import { nodeWorkspace } from '../../scripts/temporary-workspace.mts';
 // The time limit of the render of one case.
 const RENDER_TIMEOUT_MS = 30_000;
 
-// The generated sources import @polyspec/template-legacy, which the workspace holds as a copy of the installed package.
+// The generated sources import @polyspec/template, which the workspace holds as a copy of the installed legacy package.
 const temporary = nodeWorkspace('generated-conformance-ts');
 const sources = join(temporary, 'source');
 const output = join(temporary, 'output');
@@ -28,7 +29,8 @@ mkdirSync(sources);
 const pending: { testCase: TestCase; id: string; sourcePath: string }[] = [];
 const failures: string[] = [];
 let passed = 0;
-const { cases } = generatedCases(process.argv.slice(2));
+// The generated code runs on the legacy package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
+const { cases } = generatedCases(process.argv.slice(2), legacyCasesDir);
 const progress = stepProgress();
 try {
   for (const testCase of cases) {

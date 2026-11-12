@@ -22,7 +22,7 @@ final class BoundMapTest extends TestCase
 {
     private static function fixtureDirectory(): string
     {
-        return Support::repoRoot() . '/tests/fixtures/bound-data';
+        return Support::repoRoot() . '/legacy/tests/fixtures/bound-data';
     }
 
     /**

@@ -1,0 +1,13 @@
+{
+  "indent": {
+    "error": {
+      "reason": "html",
+      "code": null,
+      "line": 1,
+      "col": 1
+    }
+  },
+  "keep": {
+    "text": "<p>\n{+ missing.tpl}\n"
+  }
+}

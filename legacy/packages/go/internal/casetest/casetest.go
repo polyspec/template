@@ -29,7 +29,7 @@ func Dir(t testing.TB) string {
 	}
 	for {
 		if _, err := os.Stat(filepath.Join(directory, "go.mod")); err == nil {
-			return filepath.Join(directory, "..", "..", "..", "tests", "cases")
+			return filepath.Join(directory, "..", "..", "..", "legacy", "tests", "cases")
 		}
 		parent := filepath.Dir(directory)
 		if parent == directory {

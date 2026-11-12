@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= length('😀a')}\n{= 'Ａ' < '😀'}\n{= 'a' < 'B'}\n{= 'ab' < 'abc'}\n"
+  },
+  "keep": {
+    "text": "{= length('😀a')}\n{= 'Ａ' < '😀'}\n{= 'a' < 'B'}\n{= 'ab' < 'abc'}\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= range(1, 2, 0) | json}\n"
+  },
+  "keep": {
+    "text": "{= range(1, 2, 0) | json}\n"
+  }
+}

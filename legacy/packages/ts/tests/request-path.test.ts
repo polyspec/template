@@ -7,7 +7,7 @@ import { repoRoot } from './helpers.js';
 
 describe('request path (RT-59)', () => {
   it('renders a loaded artifact twice with identical bytes and an unchanged assign', () => {
-    const program = loadArtifact(join(repoRoot, 'tests', 'fixtures', 'artifact-runtime', 'artifact'));
+    const program = loadArtifact(join(repoRoot, 'legacy', 'tests', 'fixtures', 'artifact-runtime', 'artifact'));
     const assign = { x: 'a<b' };
     const first = program.render('page.tpl', assign);
     expect(program.render('page.tpl', assign)).toBe(first);

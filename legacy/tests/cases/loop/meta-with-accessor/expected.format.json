@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ row = rows}\n  {= row.value_.name}\n{/}\n"
+  },
+  "keep": {
+    "text": "{@ row = rows}\n{= row.value_.name}\n{/}\n"
+  }
+}

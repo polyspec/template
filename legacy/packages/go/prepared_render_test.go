@@ -9,7 +9,7 @@ import (
 // TestPreparedRenderIsTheSingleCallRender checks RT-62: a prepared render renders identical bytes on every call, and Render
 // is Prepare(...).Render().
 func TestPreparedRenderIsTheSingleCallRender(t *testing.T) {
-	program, err := template.LoadArtifact("../../../tests/fixtures/artifact-runtime/artifact")
+	program, err := template.LoadArtifact("../../../legacy/tests/fixtures/artifact-runtime/artifact")
 	if err != nil {
 		t.Fatal(err)
 	}

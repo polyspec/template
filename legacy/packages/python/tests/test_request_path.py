@@ -8,6 +8,7 @@ from polyspec.template import load_artifact
 
 ARTIFACT = (
     Path(__file__).resolve().parents[4]
+    / "legacy"
     / "tests"
     / "fixtures"
     / "artifact-runtime"

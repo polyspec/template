@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "<p>{* a *}</p>\n{@ i = items}{* in loop *}{/}\n<!-- {{*é*}} -->\n{ **}\n"
+  },
+  "keep": {
+    "text": "<p>{* a *}</p>\n{@ i = items}{* in loop *}{/}\n<!-- {{*é*}} -->\n{ **}\n"
+  }
+}

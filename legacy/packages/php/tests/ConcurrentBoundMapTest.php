@@ -18,7 +18,7 @@ final class ConcurrentBoundMapTest extends TestCase
 {
     public function testInterleavedRendersReadOneBoundMap(): void
     {
-        $directory = Support::repoRoot() . '/tests/fixtures/bound-data';
+        $directory = Support::repoRoot() . '/legacy/tests/fixtures/bound-data';
         $cases = Support::readJson($directory . '/cases.json');
         $bound = BoundMap::bind($cases['assign']);
         $first = new AstProgram(new FilesystemLoader($directory));

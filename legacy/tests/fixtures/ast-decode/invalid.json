@@ -1,0 +1,28 @@
+{
+  "comment": "Template ASTs that are invalid against contracts/schema/ast.schema.json, each with the JSON Pointer of its invalid node: the deepest instance location of the schema errors (AST-10). The decode test of every runtime reads this file.",
+  "cases": [
+    {"name": "a root that is not an object", "ast": [], "path": ""},
+    {"name": "a missing field of the root", "ast": {"type": "Template", "name": "x", "body": []}, "path": ""},
+    {"name": "a root of another type", "ast": {"type": "Text", "name": "x", "body": [], "comments": []}, "path": "/type"},
+    {"name": "a node that is not an object", "ast": {"type": "Template", "name": "x", "body": [1], "comments": []}, "path": "/body/0"},
+    {"name": "an unknown node type", "ast": {"type": "Template", "name": "x", "body": [{"type": "Bogus", "span": [0, 1]}], "comments": []}, "path": "/body/0/type"},
+    {"name": "a field of no node", "ast": {"type": "Template", "name": "x", "body": [{"type": "Text", "value": "a", "span": [0, 1], "extra": 1}], "comments": []}, "path": "/body/0"},
+    {"name": "a missing span of an expression", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Var", "name": "a"}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr"},
+    {"name": "an invalid identifier inside an expression", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Binary", "op": "+", "left": {"type": "Var", "name": "1a", "span": [0, 1]}, "right": {"type": "Var", "name": "b", "span": [0, 1]}, "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/left/name"},
+    {"name": "a branch without its test", "ast": {"type": "Template", "name": "x", "body": [{"type": "If", "branches": [{"body": [], "span": [0, 1]}], "else": null, "span": [0, 1]}], "comments": []}, "path": "/body/0/branches/0"},
+    {"name": "an if without a branch", "ast": {"type": "Template", "name": "x", "body": [{"type": "If", "branches": [], "else": null, "span": [0, 1]}], "comments": []}, "path": "/body/0/branches"},
+    {"name": "an else that is neither null nor a node list", "ast": {"type": "Template", "name": "x", "body": [{"type": "If", "branches": [{"test": {"type": "Var", "name": "a", "span": [0, 1]}, "body": [], "span": [0, 1]}], "else": 1, "span": [0, 1]}], "comments": []}, "path": "/body/0/else"},
+    {"name": "an invalid node inside an else", "ast": {"type": "Template", "name": "x", "body": [{"type": "If", "branches": [{"test": {"type": "Var", "name": "a", "span": [0, 1]}, "body": [], "span": [0, 1]}], "else": [{"type": "Text", "value": 1, "span": [0, 1]}], "span": [0, 1]}], "comments": []}, "path": "/body/0/else/0/value"},
+    {"name": "an include with an empty path", "ast": {"type": "Template", "name": "x", "body": [{"type": "Include", "path": "", "span": [0, 1]}], "comments": []}, "path": "/body/0/path"},
+    {"name": "a block id that is no identifier", "ast": {"type": "Template", "name": "x", "body": [{"type": "Block", "id": "1a", "path": null, "scope": [], "span": [0, 1]}], "comments": []}, "path": "/body/0/id"},
+    {"name": "a literal whose value is not of its kind", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Literal", "kind": "number", "value": "1", "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/value"},
+    {"name": "a literal of an unknown kind", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Literal", "kind": "date", "value": "1", "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/kind"},
+    {"name": "an invalid then of a ternary", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Ternary", "test": {"type": "Var", "name": "a", "span": [0, 1]}, "then": {"type": "Var", "name": "b"}, "else": {"type": "Var", "name": "c", "span": [0, 1]}, "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/then"},
+    {"name": "a list item of an unknown type", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "List", "items": [{"type": "Bogus", "span": [0, 1]}], "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/items/0/type"},
+    {"name": "a spread without its expression", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Map", "entries": [{"type": "Spread", "span": [0, 1]}], "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/entries/0"},
+    {"name": "a map entry with a field of no entry", "ast": {"type": "Template", "name": "x", "body": [{"type": "Echo", "expr": {"type": "Map", "entries": [{"key": {"type": "Var", "name": "a", "span": [0, 1]}, "value": {"type": "Var", "name": "b", "span": [0, 1]}, "extra": 1}], "span": [0, 1]}, "span": [0, 1]}], "comments": []}, "path": "/body/0/expr/entries/0"},
+    {"name": "a negative span offset", "ast": {"type": "Template", "name": "x", "body": [{"type": "Text", "value": "a", "span": [-1, 1]}], "comments": []}, "path": "/body/0/span/0"},
+    {"name": "a span of three offsets", "ast": {"type": "Template", "name": "x", "body": [{"type": "Text", "value": "a", "span": [0, 1, 2]}], "comments": []}, "path": "/body/0/span"},
+    {"name": "a comment without its value", "ast": {"type": "Template", "name": "x", "body": [], "comments": [{"type": "Comment", "span": [0, 1]}]}, "path": "/comments/0"}
+  ]
+}

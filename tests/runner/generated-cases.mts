@@ -61,10 +61,10 @@ export function renderFailure(testCase: TestCase, rendered: { html?: string | un
  * process and returns the result that the process printed (its `html` decoded). The run prints each case with its elapsed time,
  * removes `temporary` and exits with the status of the run.
  */
-export async function runProcessCases(label: string, temporary: string, execute: (testCase: TestCase, id: string) => Promise<CaseResult>): Promise<never> {
+export async function runProcessCases(label: string, temporary: string, execute: (testCase: TestCase, id: string) => Promise<CaseResult>, directory: string): Promise<never> {
   const failures: string[] = [];
   let passed = 0;
-  const { cases, filtered } = generatedCases(process.argv.slice(2));
+  const { cases, filtered } = generatedCases(process.argv.slice(2), directory);
   const progress = stepProgress();
   try {
     for (const testCase of cases) {

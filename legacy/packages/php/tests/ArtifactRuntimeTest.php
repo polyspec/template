@@ -15,7 +15,7 @@ final class ArtifactRuntimeTest extends TestCase
 {
     public function testLoadArtifactRendersTheSourceBytes(): void
     {
-        $directory = Support::repoRoot() . '/tests/fixtures/artifact-runtime/artifact';
+        $directory = Support::repoRoot() . '/legacy/tests/fixtures/artifact-runtime/artifact';
         self::assertSame('<p>a&lt;b</p>', AstProgram::loadArtifact($directory)->render('page.tpl', ['x' => 'a<b']));
     }
 }

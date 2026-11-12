@@ -1,0 +1,116 @@
+{
+  "schema": 3,
+  "root": "any",
+  "entry": "input.tpl",
+  "fields": {},
+  "records": {},
+  "defines": {
+    "card": {
+      "template": "part.tpl"
+    }
+  },
+  "functions": {
+    "Order::suffix": {
+      "implementation": "host",
+      "args": [
+        "string"
+      ],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "string"
+    },
+    "Order::fail": {
+      "implementation": "host",
+      "args": [
+        "string"
+      ],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "string"
+    },
+    "Order::missing": {
+      "implementation": "host",
+      "args": [
+        "string"
+      ],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "string"
+    },
+    "describe": {
+      "implementation": "host",
+      "args": [],
+      "minArgs": 0,
+      "maxArgs": -1,
+      "returns": "any",
+      "runtimeArity": true
+    },
+    "mutate": {
+      "implementation": "host",
+      "args": [],
+      "minArgs": 0,
+      "maxArgs": -1,
+      "returns": "any",
+      "runtimeArity": true
+    },
+    "pick": {
+      "implementation": "host",
+      "args": [],
+      "minArgs": 0,
+      "maxArgs": -1,
+      "returns": "any",
+      "runtimeArity": true
+    },
+    "Order::describe": {
+      "implementation": "host",
+      "args": [],
+      "minArgs": 0,
+      "maxArgs": -1,
+      "returns": "any",
+      "runtimeArity": true
+    },
+    "raw": {
+      "implementation": "builtin",
+      "args": [],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "runtimeArity": true
+    },
+    "json": {
+      "implementation": "builtin",
+      "args": [],
+      "minArgs": 1,
+      "maxArgs": 1,
+      "returns": "any",
+      "runtimeArity": true
+    },
+    "contains": {
+      "implementation": "builtin",
+      "args": [],
+      "minArgs": 2,
+      "maxArgs": 2,
+      "returns": "any",
+      "runtimeArity": true
+    }
+  },
+  "templates": {
+    "input.tpl": {},
+    "unknown-member.tpl": {},
+    "unknown-class.tpl": {},
+    "throw-member.tpl": {},
+    "throw-class.tpl": {},
+    "member-type.tpl": {},
+    "member-arity.tpl": {},
+    "part.tpl": {
+      "o": "any?"
+    },
+    "include.tpl": {},
+    "block.tpl": {},
+    "define.tpl": {},
+    "arguments.tpl": {},
+    "mutation.tpl": {},
+    "equality.tpl": {},
+    "compare.tpl": {}
+  }
+}

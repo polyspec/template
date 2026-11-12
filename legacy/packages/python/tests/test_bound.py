@@ -19,7 +19,7 @@ from polyspec.template import (
     merge,
 )
 
-FIXTURE = Path(__file__).resolve().parents[4] / "tests" / "fixtures" / "bound-data"
+FIXTURE = Path(__file__).resolve().parents[4] / "legacy" / "tests" / "fixtures" / "bound-data"
 CASES = json.loads((FIXTURE / "cases.json").read_text(encoding="utf-8"))
 
 

@@ -1,0 +1,15 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "{= title}\n\\{/}\n",
+      "span": [
+        0,
+        17
+      ]
+    }
+  ],
+  "comments": []
+}

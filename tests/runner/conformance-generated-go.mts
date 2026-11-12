@@ -7,6 +7,7 @@ import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { goString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
+import { legacyCasesDir } from './case-list.mts';
 import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
@@ -19,7 +20,8 @@ const q = goString;
 const failures: string[] = [];
 const runnable: TestCase[] = [];
 let passed = 0;
-const { cases } = generatedCases(process.argv.slice(2));
+// The generated code runs on the legacy package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
+const { cases } = generatedCases(process.argv.slice(2), legacyCasesDir);
 const progress = stepProgress();
 try {
   for (const testCase of cases) {

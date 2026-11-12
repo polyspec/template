@@ -1,0 +1,21 @@
+{
+  "schema": 3,
+  "root": "Assign",
+  "entry": "input.tpl",
+  "fields": {
+    "title": "string"
+  },
+  "records": {},
+  "defines": {
+    "card": {
+      "template": "part.tpl"
+    }
+  },
+  "functions": {},
+  "templates": {
+    "input.tpl": {},
+    "part.tpl": {
+      "name": "string"
+    }
+  }
+}

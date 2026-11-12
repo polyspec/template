@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{@ a = xs}{@ b = ys}\n    {= a}{= b}\n  {/}{/}\n"
+  },
+  "keep": {
+    "text": "{@ a = xs}{@ b = ys}\n{= a}{= b}\n{/}{/}\n"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "Template",
+  "name": "input.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "fallback\n",
+      "span": [
+        0,
+        9
+      ]
+    }
+  ],
+  "comments": []
+}

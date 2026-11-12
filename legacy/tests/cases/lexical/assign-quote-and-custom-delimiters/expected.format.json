@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "prefix{:a = \"}{}{}\"}|{= a}|suffix\n"
+  },
+  "keep": {
+    "text": "prefix{:a = \"}{}{}\"}|{= a}|suffix\n"
+  }
+}

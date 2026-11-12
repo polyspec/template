@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{?# a}yes{:}no{/}\n{?# b}yes{:}no{/}\n"
+  },
+  "keep": {
+    "text": "{?# a}yes{:}no{/}\n{?# b}yes{:}no{/}\n"
+  }
+}

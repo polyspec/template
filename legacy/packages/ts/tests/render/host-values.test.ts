@@ -7,7 +7,7 @@ import { hostValuesDocument } from '../../../../../scripts/fixture-documents.mts
 import { AstProgram, MapLoader, TemplateError } from '../../src/index.js';
 import { repoRoot } from '../helpers.js';
 
-const fixtureDir = join(repoRoot, 'tests', 'fixtures', 'native-object');
+const fixtureDir = join(repoRoot, 'legacy', 'tests', 'fixtures', 'native-object');
 const expected = hostValuesDocument.read(join(fixtureDir, 'host-values.json'));
 
 class Order {

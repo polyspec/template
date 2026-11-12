@@ -5,7 +5,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, it } from 'vitest';
-import { caseIds, caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
+import { caseIds, caseOptions, legacyCasesDir as casesDir } from '../../../tests/runner/case-list.mts';
 import { formatBytes } from '../src/cli/main.js';
 import type { FormatOptions, FormatResult } from '../src/index.js';
 
@@ -18,9 +18,9 @@ function outcome(result: FormatResult): Expected {
 }
 
 // Each case is a top-level test named by its id, as the suite unit formatting of config/parity.json reads the results.
-it.each(caseIds())('%s', id => {
+it.each(caseIds(casesDir))('%s', id => {
   const dir = join(casesDir, id);
-  const { delimiters } = caseOptions(id);
+  const { delimiters } = caseOptions(id, casesDir);
   const options: FormatOptions = delimiters === undefined ? {} : { delimiters };
   const expectedPath = join(dir, 'expected.format.json');
   const bytes = readFileSync(join(dir, 'input.tpl'));

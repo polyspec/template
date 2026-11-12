@@ -17,7 +17,7 @@ final class Support
 
     public static function casesDir(): string
     {
-        return self::repoRoot() . '/tests/cases';
+        return self::repoRoot() . '/legacy/tests/cases';
     }
 
     public static function read(string $path): string

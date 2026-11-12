@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileFiles } from '../../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from '../../scripts/php-program.mts';
+import { legacyCasesDir } from './case-list.mts';
 import { caseTypeManifest, runProcessCases } from './generated-cases.mts';
 import { parsedCaseResult } from './generated-errors.mts';
 import { runBoundedStep } from './bounded.mts';
@@ -50,6 +51,7 @@ try {
 }
 `);
 
+// The generated code runs on the legacy package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
 await runProcessCases('PHP', temporary, async (testCase, id) => {
   const typePath = join(temporary, `${id}.types.json`);
   const graphPath = join(temporary, `${id}.ast`);
@@ -66,4 +68,4 @@ await runProcessCases('PHP', temporary, async (testCase, id) => {
   const actual = parsedCaseResult(result.stdout, 'PHP');
   // The runner prints the HTML in base64, so that its bytes reach the comparison unchanged.
   return actual.html === undefined ? actual : { ...actual, html: Buffer.from(actual.html, 'base64').toString('utf8') };
-});
+}, legacyCasesDir);

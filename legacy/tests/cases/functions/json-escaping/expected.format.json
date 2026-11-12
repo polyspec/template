@@ -1,0 +1,8 @@
+{
+  "indent": {
+    "text": "{= json(m) | raw}\n{= json(s) | raw}\n{= json([1e21, -1e21]) | raw}\n"
+  },
+  "keep": {
+    "text": "{= json(m) | raw}\n{= json(s) | raw}\n{= json([1e21, -1e21]) | raw}\n"
+  }
+}

@@ -8,7 +8,7 @@ import json
 import unittest
 from pathlib import Path
 
-CASES = Path(__file__).resolve().parents[4] / "tests" / "cases"
+CASES = Path(__file__).resolve().parents[4] / "legacy" / "tests" / "cases"
 
 
 def case_directories() -> list[Path]:

@@ -39,7 +39,7 @@ final class AstDecoderClassTest extends TestCase
     public function testEveryInvalidAstFailsAtItsNodeWithTheReasonOfTheLibrary(): void
     {
         $fixture = json_decode(
-            (string) file_get_contents(Support::repositoryRoot() . '/tests/fixtures/ast-decode/invalid.json'),
+            (string) file_get_contents(Support::repositoryRoot() . '/legacy/tests/fixtures/ast-decode/invalid.json'),
             true,
             512,
             JSON_THROW_ON_ERROR,

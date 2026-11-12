@@ -10,7 +10,7 @@ import (
 // source (the artifact directory holds no .tpl file), and two renders with the same assign give identical bytes and leave
 // the assign unchanged.
 func TestRequestPathRendersALoadedArtifactTheSameWay(t *testing.T) {
-	program, err := template.LoadArtifact("../../../tests/fixtures/artifact-runtime/artifact")
+	program, err := template.LoadArtifact("../../../legacy/tests/fixtures/artifact-runtime/artifact")
 	if err != nil {
 		t.Fatal(err)
 	}

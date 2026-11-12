@@ -1,0 +1,340 @@
+{
+  "valid": [
+    {
+      "id": "empty",
+      "name": "empty.tpl",
+      "input": "",
+      "rawHex": "",
+      "text": "",
+      "hex": "",
+      "lines": [
+        0
+      ],
+      "offsets": {
+        "byte": [
+          0
+        ],
+        "utf16": [
+          0
+        ],
+        "codepoint": [
+          0
+        ]
+      },
+      "probe": {
+        "offset": 0,
+        "end": 0,
+        "line": 1,
+        "col": 1
+      }
+    },
+    {
+      "id": "ascii",
+      "name": "ascii.tpl",
+      "input": "one\ntwo",
+      "rawHex": "6f6e650a74776f",
+      "text": "one\ntwo",
+      "hex": "6f6e650a74776f",
+      "lines": [
+        0,
+        4
+      ],
+      "offsets": {
+        "byte": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "utf16": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "codepoint": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "probe": {
+        "offset": 4,
+        "end": 7,
+        "line": 2,
+        "col": 1
+      }
+    },
+    {
+      "id": "unicode",
+      "name": "unicode.tpl",
+      "input": "a\né😀x",
+      "rawHex": "610ac3a9f09f988078",
+      "text": "a\né😀x",
+      "hex": "610ac3a9f09f988078",
+      "lines": [
+        0,
+        2
+      ],
+      "offsets": {
+        "byte": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "utf16": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          8,
+          9
+        ],
+        "codepoint": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          9
+        ]
+      },
+      "probe": {
+        "offset": 2,
+        "end": 9,
+        "line": 2,
+        "col": 1
+      }
+    },
+    {
+      "id": "bom",
+      "name": "bom.tpl",
+      "input": "﻿a\né😀x",
+      "rawHex": "efbbbf610ac3a9f09f988078",
+      "text": "a\né😀x",
+      "hex": "610ac3a9f09f988078",
+      "lines": [
+        0,
+        2
+      ],
+      "offsets": {
+        "byte": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "utf16": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          8,
+          9
+        ],
+        "codepoint": [
+          0,
+          1,
+          2,
+          4,
+          8,
+          9
+        ]
+      },
+      "probe": {
+        "offset": 2,
+        "end": 9,
+        "line": 2,
+        "col": 1
+      }
+    },
+    {
+      "id": "two-bom",
+      "name": "two-bom.tpl",
+      "input": "﻿﻿a",
+      "rawHex": "efbbbfefbbbf61",
+      "text": "﻿a",
+      "hex": "efbbbf61",
+      "lines": [
+        0
+      ],
+      "offsets": {
+        "byte": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "utf16": [
+          0,
+          3,
+          4
+        ],
+        "codepoint": [
+          0,
+          3,
+          4
+        ]
+      },
+      "probe": {
+        "offset": 0,
+        "end": 4,
+        "line": 1,
+        "col": 1
+      }
+    },
+    {
+      "id": "crlf",
+      "name": "crlf.tpl",
+      "input": "é\r\n😀\n",
+      "rawHex": "c3a90d0af09f98800a",
+      "text": "é\r\n😀\n",
+      "hex": "c3a90d0af09f98800a",
+      "lines": [
+        0,
+        4,
+        9
+      ],
+      "offsets": {
+        "byte": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "utf16": [
+          0,
+          2,
+          3,
+          4,
+          8,
+          8,
+          9
+        ],
+        "codepoint": [
+          0,
+          2,
+          3,
+          4,
+          8,
+          9
+        ]
+      },
+      "probe": {
+        "offset": 9,
+        "end": 9,
+        "line": 3,
+        "col": 1
+      }
+    },
+    {
+      "id": "nul",
+      "name": "nul.tpl",
+      "input": "a\u0000b",
+      "rawHex": "610062",
+      "text": "a\u0000b",
+      "hex": "610062",
+      "lines": [
+        0
+      ],
+      "offsets": {
+        "byte": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "utf16": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "codepoint": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "probe": {
+        "offset": 0,
+        "end": 3,
+        "line": 1,
+        "col": 1
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "id": "continuation",
+      "hex": "61ff",
+      "offset": 1,
+      "line": 1,
+      "col": 2
+    },
+    {
+      "id": "overlong",
+      "hex": "c080",
+      "offset": 0,
+      "line": 1,
+      "col": 1
+    },
+    {
+      "id": "surrogate",
+      "hex": "eda080",
+      "offset": 0,
+      "line": 1,
+      "col": 1
+    },
+    {
+      "id": "truncated",
+      "hex": "f09f98",
+      "offset": 0,
+      "line": 1,
+      "col": 1
+    },
+    {
+      "id": "bom-invalid",
+      "hex": "efbbbf610aff",
+      "offset": 5,
+      "line": 2,
+      "col": 1
+    }
+  ]
+}

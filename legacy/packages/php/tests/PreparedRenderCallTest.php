@@ -15,7 +15,7 @@ final class PreparedRenderCallTest extends TestCase
 {
     public function testPreparedRenderIsTheSingleCallRender(): void
     {
-        $program = AstProgram::loadArtifact(Support::repoRoot() . '/tests/fixtures/artifact-runtime/artifact');
+        $program = AstProgram::loadArtifact(Support::repoRoot() . '/legacy/tests/fixtures/artifact-runtime/artifact');
         $prepared = $program->prepare('page.tpl', ['x' => 'a<b']);
         $first = $prepared->render();
         self::assertSame($first, $prepared->render());

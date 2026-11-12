@@ -1,0 +1,38 @@
+{
+  "type": "Template",
+  "name": "page.tpl",
+  "body": [
+    {
+      "type": "Text",
+      "value": "<p>",
+      "span": [
+        0,
+        3
+      ]
+    },
+    {
+      "type": "Echo",
+      "expr": {
+        "type": "Var",
+        "name": "x",
+        "span": [
+          6,
+          7
+        ]
+      },
+      "span": [
+        3,
+        8
+      ]
+    },
+    {
+      "type": "Text",
+      "value": "</p>",
+      "span": [
+        8,
+        12
+      ]
+    }
+  ],
+  "comments": []
+}

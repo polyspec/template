@@ -245,7 +245,7 @@ class PrefixAnalysis(unittest.TestCase):
 
 FIXTURE = json.loads(
     (
-        Path(__file__).resolve().parents[4] / "tests/fixtures/analysis-context.json"
+        Path(__file__).resolve().parents[4] / "legacy/tests/fixtures/analysis-context.json"
     ).read_text(encoding="utf-8")
 )
 
