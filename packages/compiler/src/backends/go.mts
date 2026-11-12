@@ -10,7 +10,7 @@ import {
   fieldName, FunctionLocals, functionName, goString, goType, inputName, typeKey,
   type BackendContext, type Descriptor, type MergedLocal, type Part, type Target,
 } from '../backend-support.mts';
-import type { Span } from '@polyspec/template';
+import type { Span } from '@polyspec/template-legacy';
 import { loweredTemplate, type Definition, type Expr, type LoweredTemplate, type Node, type NodeOf, type Program, type ValueType } from '../ir.mts';
 import { packageRoot } from '../package-root.mts';
 

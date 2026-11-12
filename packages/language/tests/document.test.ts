@@ -2,7 +2,7 @@
 // indentation, and the agreement of its constructs with the AST spans.
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { parse, TemplateError, type Node } from '@polyspec/template';
+import { parse, TemplateError, type Node } from '@polyspec/template-legacy';
 import { describe, expect, it } from 'vitest';
 import { caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
 import { openDocument, type TemplateDocument } from '../src/index.js';

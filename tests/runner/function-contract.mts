@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict';
-import type { Expr, Template } from '@polyspec/template';
+import type { Expr, Template } from '@polyspec/template-legacy';
 import type { TypeManifest } from '../../packages/compiler/src/documents.mts';
 import { lowerSourceGraph, type SourceGraph } from '../../packages/compiler/src/ir.mts';
 

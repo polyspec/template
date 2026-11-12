@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The environment of the Python package (T23.2), packages/python/.venv, and the python of its bin. The Makefile reads it
+// The environment of the Python package (T23.2), legacy/packages/python/.venv, and the python of its bin. The Makefile reads it
 // with `node scripts/python-venv.mts` and scripts/python-toolchain.mts imports it, so the path is written once. It imports
 // only node: modules, so make reads it before make install-packages.
 import { posix } from 'node:path';
@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 /** The environment of the Python package relative to the root. */
 export function pythonPackageEnvironment(): string {
-  return 'packages/python/.venv';
+  return 'legacy/packages/python/.venv';
 }
 
 /** The python of the environment of the Python package relative to the root. */

@@ -7,7 +7,7 @@ import type {
   LoadedSource, LoopMetaExpression, MapLiteral, Member, MemberCall,
   ParseFunction, RuntimeLimit, RuntimeLoopMeta, SetNode, SourceSpan,
   SyntaxTokenKind, TagRange, Ternary, Text, Unary, Var,
-} from '@polyspec/template';
+} from '@polyspec/template-legacy';
 import { format } from '@polyspec/template-language';
 
 // The language service's published callable implements the shared SDK contract.
@@ -23,7 +23,7 @@ export type SignatureTypes = [
   SyntaxTokenKind, TagRange, Ternary, Text, Unary, Var,
 ];
 
-import { Source } from '@polyspec/template';
+import { Source } from '@polyspec/template-legacy';
 export function sourceContext() {
   const source = Source.fromBytes('example.tpl', new Uint8Array([97, 10, 98]));
   const text = Source.fromText(source.name, source.text);
@@ -61,8 +61,8 @@ export const outputFields: Record<keyof Output, true> = { write: true, toString:
 export const parseConfiguration: ParseOptions = { delimiters: '[]' };
 export const delimiterPair: Delimiters = { open: '[', close: ']' };
 
-import type { EngineOptions, RenderOptions, Env, FunctionContext, HostFunction, ArtifactRefresh } from '@polyspec/template';
-import { MapLoader } from '@polyspec/template';
+import type { EngineOptions, RenderOptions, Env, FunctionContext, HostFunction, ArtifactRefresh } from '@polyspec/template-legacy';
+import { MapLoader } from '@polyspec/template-legacy';
 export const callbackEnvironment: Env = { timezone: '+09:00', now: 123 };
 export const callbackContext: FunctionContext = { env: callbackEnvironment };
 export const hostCallback: HostFunction = (_args, context) => context.env.now;
@@ -74,12 +74,12 @@ export const engineConfiguration: EngineOptions = {
 };
 export const renderConfiguration: RenderOptions = { env: callbackEnvironment, define: { layout: { html: 'ready' } } };
 
-import { NativeObject, SafeString, type Value, type ListValue, type MapValue } from '@polyspec/template';
+import { NativeObject, SafeString, type Value, type ListValue, type MapValue } from '@polyspec/template-legacy';
 export const safeText = new SafeString('<i>');
 export const safePayload: string = safeText.text;
 export const nativeValues: ListValue = [null, true, 12.5, 'é😀', safeText, [], new Map(), new NativeObject({ field: 'value' })];
 export const orderedValues: MapValue = new Map<string, Value>([['first', nativeValues], ['second', false]]);
 export const collectionValue: Value = orderedValues;
 
-import * as nodeSDK from "@polyspec/template/node";
-export const completeNodeSDK: typeof import("@polyspec/template") = nodeSDK;
+import * as nodeSDK from "@polyspec/template-legacy/node";
+export const completeNodeSDK: typeof import("@polyspec/template-legacy") = nodeSDK;

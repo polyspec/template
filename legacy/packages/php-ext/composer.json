@@ -1,0 +1,20 @@
+{
+    "name": "polyspec/template-php-ext",
+    "version": "0.0.27",
+    "description": "PHP extension, built by PIE, that renders templates with an independent C implementation of the specification",
+    "type": "php-ext",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.4"
+    },
+    "php-ext": {
+        "extension-name": "polyspec_template",
+        "build-path": "src"
+    },
+    "config": {
+        "platform": {
+            "php": "8.4.1"
+        },
+        "sort-packages": true
+    }
+}

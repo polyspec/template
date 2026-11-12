@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generates the validator of the template AST of packages/ts (AST-10, T25.6-2): ajv's standalone validation code
+// Generates the validator of the template AST of legacy/packages/ts (AST-10, T25.6-2): ajv's standalone validation code
 // (ajv/dist/standalone) of contracts/schema/ast.schema.json, compiled with the options of decodeTemplate, bundled by esbuild
 // with the modules of ajv/dist/runtime that the code requires into one ES module without imports. The package therefore
 // has no runtime dependency on ajv, compiles no code at run time (no `new Function`, so a Content-Security-Policy without
@@ -17,7 +17,7 @@ import { build } from 'esbuild';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SCHEMA = join(root, 'contracts/schema/ast.schema.json');
-const OUTPUT = join(root, 'packages/ts/src/ast-validator.mjs');
+const OUTPUT = join(root, 'legacy/packages/ts/src/ast-validator.mjs');
 
 const schemaText = readFileSync(SCHEMA, 'utf8');
 const schema: unknown = JSON.parse(schemaText);

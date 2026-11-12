@@ -1,5 +1,5 @@
 // Expression spacing: joins the expression tokens of one tag with the separators of the formatting style.
-import type { SyntaxToken } from '@polyspec/template';
+import type { SyntaxToken } from '@polyspec/template-legacy';
 
 /** An expression token: its text and the EDT-8 class that the parser gives it. */
 export interface ExpressionToken {

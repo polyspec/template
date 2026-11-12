@@ -75,9 +75,9 @@ function documented(lines: string[], index: number): boolean {
 
 // ---------------------------------------------------------------- TypeScript
 
-group = 'packages/ts';
+group = 'legacy/packages/ts';
 
-const typescriptRoot = join(root, 'packages/ts/src');
+const typescriptRoot = join(root, 'legacy/packages/ts/src');
 const typescriptEntries = ['index.ts', 'render.ts', 'node/index.ts'];
 
 // Resolves a module specifier of a file to a source path inside the package.
@@ -209,9 +209,9 @@ for (const symbol of typescriptSurface()) checkTypescriptSymbol(symbol.file, sym
 
 // ---------------------------------------------------------------- Go
 
-group = 'packages/go';
+group = 'legacy/packages/go';
 
-const goRoot = join(root, 'packages/go');
+const goRoot = join(root, 'legacy/packages/go');
 const goDeclaration = /^(?:func|type|var|const)\s+([A-Z]\w*)/;
 const goMethod = /^func\s+\([^)]*?\*?(\w+)\)\s+([A-Z]\w*)/;
 
@@ -276,9 +276,9 @@ if (existsSync(goRoot)) {
 
 // ---------------------------------------------------------------- PHP
 
-group = 'packages/php';
+group = 'legacy/packages/php';
 
-// The classes of the API table of packages/php/README.md.
+// The classes of the API table of legacy/packages/php/README.md.
 const phpClasses = [
   'Engine.php',
   'TemplateError.php',
@@ -292,9 +292,9 @@ const phpType = /^\s*(?:final\s+|abstract\s+)?(class|interface|trait|enum)\s+([A
 const phpMethod = /^\s*public\s+(?:static\s+)?function\s+([A-Za-z_]\w*)/;
 
 for (const relativePath of phpClasses) {
-  const file = join(root, 'packages/php/src', relativePath);
+  const file = join(root, 'legacy/packages/php/src', relativePath);
   if (!existsSync(file)) {
-    findings.push(`packages/php/src/${relativePath}:1: the file of a public class does not exist`);
+    findings.push(`legacy/packages/php/src/${relativePath}:1: the file of a public class does not exist`);
     continue;
   }
   const lines = readFileSync(file, 'utf8').split('\n');
@@ -337,9 +337,9 @@ function startsWithComment(file: string): boolean {
 }
 
 const fileGroups: [string, string[]][] = [
-  ['packages/ts/src', ['.ts']],
+  ['legacy/packages/ts/src', ['.ts']],
   ['packages/rust/src', ['.rs']],
-  ['packages/php/src', ['.php']],
+  ['legacy/packages/php/src', ['.php']],
 ];
 for (const [directory, extensions] of fileGroups) {
   for (const file of sources(directory, extensions)) {
@@ -351,7 +351,7 @@ for (const [directory, extensions] of fileGroups) {
 
 // A Go package carries its comment on one of its files.
 const goPackages = new Set(
-  sources('packages/go', ['.go'])
+  sources('legacy/packages/go', ['.go'])
     .filter(file => !file.endsWith('_test.go'))
     .map(file => dirname(file)),
 );

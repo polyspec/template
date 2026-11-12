@@ -12,7 +12,7 @@ import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { goWorkspace } from '../../scripts/temporary-workspace.mts';
 
-// A module of the system temporary directory that uses the module of packages/go from that directory.
+// A module of the system temporary directory that uses the module of legacy/packages/go from that directory.
 const temporary = goWorkspace('generated-conformance-go');
 // Paths and expected output are embedded as exact Go string literals.
 const q = goString;

@@ -1,7 +1,7 @@
 // FMT-16: published formatter data carries native options, results and error fields.
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import type { FormatError, FormatOptions } from '@polyspec/template';
+import type { FormatError, FormatOptions } from '@polyspec/template-legacy';
 import { format } from '@polyspec/template-language';
 import { jsonDocument } from '../../../scripts/json-document.mts';
 

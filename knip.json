@@ -23,7 +23,7 @@
     "composer"
   ],
   "workspaces": {
-    "packages/ts": {
+    "legacy/packages/ts": {
       "entry": [
         "src/index.ts",
         "src/render.ts",

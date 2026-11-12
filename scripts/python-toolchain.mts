@@ -1,8 +1,8 @@
 // The Python interpreters of the checks that run Python (T22.4-20, T22.5-5). The interpreter is
 // var/tools/mise/shims/python3, the shim of the python of mise.toml, which `make install-tools` installs with mise at the
 // digest of mise.lock (T24.12, kit K127). No check runs the `python3` of PATH or of the machine (AGENTS, Idempotency:
-// Toolchains). A program that imports `polyspec.template` runs the python of packages/python/.venv, where `make python-package`
-// installs packages/python and the link of kit makes its package folder a link to the sources of the checkout, so it
+// Toolchains). A program that imports `polyspec.template` runs the python of legacy/packages/python/.venv, where `make python-package`
+// installs legacy/packages/python and the link of kit makes its package folder a link to the sources of the checkout, so it
 // imports the package from those sources through its environment, with no changed import path (PRINCIPLES S3).
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -17,7 +17,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 /** The pinned interpreter of the checkout: the shim var/tools/mise/shims/python3 of the python of mise.toml. */
 export const pythonInterpreter = join(toolsDirectory(root), 'mise/shims/python3');
 
-/** The python of the environment of the Python package, where `make python-package` installs packages/python. */
+/** The python of the environment of the Python package, where `make python-package` installs legacy/packages/python. */
 export const pythonPackageInterpreter = join(root, pythonPackageCommandPath());
 
 /** The minor release of the python of mise.toml, such as `3.14` of `python = "3.14.8"`. */
@@ -45,7 +45,7 @@ export function pythonCommand(interpreter: string = pythonInterpreter, fix: stri
   return interpreter;
 }
 
-/** The python of packages/python/.venv, checked as pythonCommand checks it; missing, it fails with the fix make python-package. */
+/** The python of legacy/packages/python/.venv, checked as pythonCommand checks it; missing, it fails with the fix make python-package. */
 export function pythonPackageCommand(): string {
   return pythonCommand(pythonPackageInterpreter, 'make python-package');
 }

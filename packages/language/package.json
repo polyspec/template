@@ -26,6 +26,6 @@
     "node": ">=26.12.0"
   },
   "dependencies": {
-    "@polyspec/template": "0.0.27"
+    "@polyspec/template-legacy": "0.0.27"
   }
 }

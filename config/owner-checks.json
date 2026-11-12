@@ -12,7 +12,8 @@
         "docs/**",
         "*.md",
         "contracts/schema/*.md",
-        "packages/*/README*.md"
+        "packages/*/README*.md",
+        "legacy/packages/*/README*.md"
       ],
       "targets": [
         "docs-check",
@@ -84,7 +85,7 @@
     },
     {
       "paths": [
-        "packages/cli/php/**"
+        "legacy/packages/cli/php/**"
       ],
       "targets": [
         "test-php",
@@ -266,10 +267,15 @@
         "packages/*/package.json",
         "packages/*/composer.json",
         "packages/rust/Cargo.toml",
+        "Cargo.toml",
         "**/Cargo.lock",
-        "packages/go/go.mod",
+        "legacy/packages/go/go.mod",
         "config/release.json",
-        "packages/python/pylock.toml"
+        "legacy/packages/python/pylock.toml",
+        "legacy/packages/*/package.json",
+        "legacy/packages/*/composer.json",
+        "legacy/packages/cli/php/composer.json",
+        "legacy/packages/python/pyproject.toml"
       ],
       "targets": [
         "release-coverage"
@@ -601,7 +607,7 @@
     },
     {
       "paths": [
-        "packages/ts/**"
+        "legacy/packages/ts/**"
       ],
       "targets": [
         "test-ts",
@@ -666,7 +672,7 @@
     },
     {
       "paths": [
-        "packages/go/**"
+        "legacy/packages/go/**"
       ],
       "targets": [
         "test-go",
@@ -681,7 +687,9 @@
     },
     {
       "paths": [
-        "packages/rust/**"
+        "packages/rust/**",
+        "Cargo.toml",
+        "Cargo.lock"
       ],
       "targets": [
         "test-rust",
@@ -696,7 +704,7 @@
     },
     {
       "paths": [
-        "packages/php/**"
+        "legacy/packages/php/**"
       ],
       "targets": [
         "test-php",
@@ -711,7 +719,7 @@
     },
     {
       "paths": [
-        "packages/python/**"
+        "legacy/packages/python/**"
       ],
       "targets": [
         "conformance",
@@ -729,7 +737,7 @@
     },
     {
       "paths": [
-        "packages/php-ext/**"
+        "legacy/packages/php-ext/**"
       ],
       "targets": [
         "template-test-ext",
@@ -747,7 +755,7 @@
         ".mise/**",
         "rust-toolchain.toml",
         ".github/workflows/*.yml",
-        "packages/go/go.mod"
+        "legacy/packages/go/go.mod"
       ],
       "tests": [
         "tests/scripts/toolchain-files.test.mts"
@@ -772,7 +780,7 @@
     },
     {
       "paths": [
-        "packages/python/build-requirements.txt"
+        "legacy/packages/python/build-requirements.txt"
       ],
       "targets": [
         "template-install-check"
@@ -909,7 +917,7 @@
     {
       "paths": [
         "ruff.toml",
-        "packages/python/pyproject.toml"
+        "legacy/packages/python/pyproject.toml"
       ],
       "targets": [
         "lint-python"
@@ -961,9 +969,9 @@
     },
     {
       "paths": [
-        "packages/php/src/**",
-        "packages/php-ext/src/**",
-        "packages/python/src/**"
+        "legacy/packages/php/src/**",
+        "legacy/packages/php-ext/src/**",
+        "legacy/packages/python/src/**"
       ],
       "tests": [
         "tests/scripts/error-codes.test.mts"
@@ -1031,7 +1039,7 @@
     },
     {
       "paths": [
-        "packages/php-ext/**"
+        "legacy/packages/php-ext/**"
       ],
       "targets": [
         "lint-php-ext",
@@ -1082,10 +1090,10 @@
     {
       "paths": [
         "tests/fixtures/public-types/**",
-        "packages/ts/api-extractor.json",
-        "packages/ts/src/**",
-        "packages/ts/package.json",
-        "packages/ts/tsconfig.json"
+        "legacy/packages/ts/api-extractor.json",
+        "legacy/packages/ts/src/**",
+        "legacy/packages/ts/package.json",
+        "legacy/packages/ts/tsconfig.json"
       ],
       "targets": [
         "template-test-scripts"
@@ -1119,7 +1127,7 @@
     {
       "paths": [
         "tests/scripts/go-public-api.test.mts",
-        "packages/go/**"
+        "legacy/packages/go/**"
       ],
       "targets": [
         "template-test-scripts"
@@ -1130,8 +1138,8 @@
     },
     {
       "paths": [
-        "packages/php/src/**",
-        "packages/php-ext/src/polyspec_template.stub.php",
+        "legacy/packages/php/src/**",
+        "legacy/packages/php-ext/src/polyspec_template.stub.php",
         "scripts/php-toolchain.mts",
         "config/toolchain.json"
       ],
@@ -1144,7 +1152,7 @@
       "paths": [
         "tests/scripts/ast-public-api.test.mts",
         "contracts/schema/ast.schema.json",
-        "packages/ts/src/ast.ts",
+        "legacy/packages/ts/src/ast.ts",
         "tests/runner/case-list.mts",
         "tests/cases/**",
         "tests/fixtures/ast-decode/**"
@@ -1199,7 +1207,7 @@
     {
       "paths": [
         "tests/scripts/python-public-api.test.mts",
-        "packages/python/src/**",
+        "legacy/packages/python/src/**",
         "scripts/python-toolchain.mts",
         "scripts/python-venv.mts",
         "scripts/toml.mts",
@@ -1226,6 +1234,16 @@
         "tests/scripts/php-toolchain.test.mts",
         "tests/scripts/function-contract-registries.test.mts"
       ]
+    },
+    {
+      "paths": [
+        "packages/ts/**",
+        "packages/python/**",
+        "packages/php-ext/**"
+      ],
+      "targets": [
+        "bindings-check"
+      ]
     }
   ],
   "inputs": [
@@ -1237,7 +1255,8 @@
         "contracts/schema/*.md",
         "packages/*/README*.md",
         "config/documents.json",
-        "config/checklist.json"
+        "config/checklist.json",
+        "legacy/packages/*/README*.md"
       ]
     },
     {
@@ -1308,7 +1327,7 @@
         "scripts/check-showcase-contract.mts",
         "examples/showcase/adapters/**",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml"
       ]
     },
@@ -1352,7 +1371,7 @@
     {
       "check": "make template-lint-go-format",
       "paths": [
-        "packages/go/**",
+        "legacy/packages/go/**",
         "packages/compiler/backends/go/**"
       ]
     },
@@ -1367,7 +1386,7 @@
     {
       "check": "make lint-go",
       "paths": [
-        "packages/go/**",
+        "legacy/packages/go/**",
         "examples/showcase/adapters/go/**"
       ]
     },
@@ -1381,7 +1400,9 @@
       "check": "make lint-rust",
       "paths": [
         "packages/rust/**",
-        "examples/showcase/adapters/rust/**"
+        "examples/showcase/adapters/rust/**",
+        "Cargo.toml",
+        "Cargo.lock"
       ]
     },
     {
@@ -1399,20 +1420,20 @@
     {
       "check": "make template-lint-php-format",
       "paths": [
-        "packages/php/**"
+        "legacy/packages/php/**"
       ]
     },
     {
       "check": "make lint-php",
       "paths": [
-        "packages/php/**",
-        "packages/php-ext/**"
+        "legacy/packages/php/**",
+        "legacy/packages/php-ext/**"
       ]
     },
     {
       "check": "make template-test-ts-unit",
       "paths": [
-        "packages/ts/**",
+        "legacy/packages/ts/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**",
@@ -1425,13 +1446,13 @@
     {
       "check": "make template-test-ts-types",
       "paths": [
-        "packages/ts/**"
+        "legacy/packages/ts/**"
       ]
     },
     {
       "check": "make template-test-ts-types-node",
       "paths": [
-        "packages/ts/**"
+        "legacy/packages/ts/**"
       ]
     },
     {
@@ -1440,7 +1461,7 @@
         "tests/fixtures/formatter-sdk.json",
         "scripts/json-document.mts",
         "packages/language/**",
-        "packages/ts/src/**",
+        "legacy/packages/ts/src/**",
         "scripts/editor-fixtures.mts"
       ]
     },
@@ -1461,7 +1482,7 @@
       "paths": [
         "packages/lsp/**",
         "packages/language/src/**",
-        "packages/ts/src/**",
+        "legacy/packages/ts/src/**",
         "scripts/editor-fixtures.mts"
       ]
     },
@@ -1514,14 +1535,14 @@
     {
       "check": "make template-test-go-vet",
       "paths": [
-        "packages/go/**"
+        "legacy/packages/go/**"
       ]
     },
     {
       "check": "make template-test-go-backend-vet",
       "paths": [
         "packages/compiler/backends/go/**",
-        "packages/go/**",
+        "legacy/packages/go/**",
         "go.work",
         "go.work.sum"
       ]
@@ -1529,7 +1550,7 @@
     {
       "check": "make template-test-go-unit",
       "paths": [
-        "packages/go/**",
+        "legacy/packages/go/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**",
@@ -1542,7 +1563,9 @@
     {
       "check": "make template-test-rust-clippy",
       "paths": [
-        "packages/rust/**"
+        "packages/rust/**",
+        "Cargo.toml",
+        "Cargo.lock"
       ]
     },
     {
@@ -1555,15 +1578,17 @@
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
         "tests/fixtures/prefix-analysis.json",
-        "tests/fixtures/formatter-sdk.json"
+        "tests/fixtures/formatter-sdk.json",
+        "Cargo.toml",
+        "Cargo.lock"
       ]
     },
     {
       "check": "make test-php",
       "paths": [
         "composer.{json,lock}",
-        "packages/php/**",
-        "packages/cli/php/**",
+        "legacy/packages/php/**",
+        "legacy/packages/cli/php/**",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "scripts/composer-install.mts",
         "contracts/schema/ast.schema.json",
@@ -1588,7 +1613,7 @@
     {
       "check": "make conformance-generated-ts",
       "paths": [
-        "packages/ts/**",
+        "legacy/packages/ts/**",
         "packages/compiler/**",
         "tests/runner/{conformance-generated-ts,generated-ts-render,bounded,cases}.mts"
       ]
@@ -1596,7 +1621,7 @@
     {
       "check": "make conformance-generated-go",
       "paths": [
-        "packages/go/**",
+        "legacy/packages/go/**",
         "packages/compiler/**",
         "tests/runner/{conformance-generated-go,bounded,cases}.mts"
       ]
@@ -1612,7 +1637,7 @@
     {
       "check": "make conformance-generated-php",
       "paths": [
-        "packages/php/**",
+        "legacy/packages/php/**",
         "packages/compiler/**",
         "tests/runner/{conformance-generated-php,bounded,cases}.mts"
       ]
@@ -1632,7 +1657,7 @@
         "scripts/check-generated-native-calls.mts",
         "scripts/language-checks.mts",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml"
       ]
     },
@@ -1644,7 +1669,7 @@
         "scripts/check-generated-typed-values.mts",
         "scripts/language-checks.mts",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml"
       ]
     },
@@ -1667,7 +1692,7 @@
         "scripts/check-generated-arguments.mts",
         "scripts/language-checks.mts",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml"
       ]
     },
@@ -1679,21 +1704,21 @@
         "scripts/check-generated-bound-data.mts",
         "scripts/language-checks.mts",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml"
       ]
     },
     {
       "check": "make template-test-ext-conformance",
       "paths": [
-        "packages/php-ext/**",
+        "legacy/packages/php-ext/**",
         "tests/runner/{conformance,cases,drivers}.mts"
       ]
     },
     {
       "check": "make test-php-ext",
       "paths": [
-        "packages/php-ext/**",
+        "legacy/packages/php-ext/**",
         "tests/fixtures/source-context.json",
         "tests/fixtures/analysis-context.json",
         "tests/fixtures/prefix-analysis.json",
@@ -1708,7 +1733,7 @@
         "scripts/check-typed-generator.mts",
         "scripts/language-checks.mts",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml"
       ]
     },
@@ -1763,9 +1788,9 @@
         "scripts/language-checks.mts",
         "packages/{ts,go,rust,php}/**",
         "scripts/python-toolchain.mts",
-        "packages/python/**",
+        "legacy/packages/python/**",
         "mise.toml",
-        "packages/python/build-requirements.txt"
+        "legacy/packages/python/build-requirements.txt"
       ]
     },
     {
@@ -1773,7 +1798,7 @@
       "paths": [
         "tests/browser/**",
         "tests/browser/playwright.config.ts",
-        "packages/ts/**"
+        "legacy/packages/ts/**"
       ]
     },
     {
@@ -1809,7 +1834,7 @@
     {
       "check": "make test-python",
       "paths": [
-        "packages/python/**",
+        "legacy/packages/python/**",
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**"
       ]
@@ -1817,7 +1842,7 @@
     {
       "check": "make conformance-python",
       "paths": [
-        "packages/python/**",
+        "legacy/packages/python/**",
         "tests/runner/{conformance,cases,drivers}.mts",
         "scripts/publish-build.mts"
       ]
@@ -1825,7 +1850,7 @@
     {
       "check": "make conformance-generated-python",
       "paths": [
-        "packages/python/**",
+        "legacy/packages/python/**",
         "packages/compiler/**",
         "tests/runner/{conformance-generated-python,bounded,cases}.mts"
       ]
@@ -1833,7 +1858,7 @@
     {
       "check": "make lint-python",
       "paths": [
-        "packages/python/**",
+        "legacy/packages/python/**",
         "config/toolchain.json",
         "mise.toml",
         "mise.lock"
@@ -1844,12 +1869,12 @@
       "paths": [
         "docs/spec/errors.md",
         "scripts/generate-error-codes.mts",
-        "packages/ts/src/errors.ts",
-        "packages/go/errs/errs.go",
+        "legacy/packages/ts/src/errors.ts",
+        "legacy/packages/go/errs/errs.go",
         "packages/rust/src/error.rs",
-        "packages/python/src/polyspec/template/errors.py",
-        "packages/php/src/ErrorCode.php",
-        "packages/php-ext/src/pt_error_codes.h"
+        "legacy/packages/python/src/polyspec/template/errors.py",
+        "legacy/packages/php/src/ErrorCode.php",
+        "legacy/packages/php-ext/src/pt_error_codes.h"
       ]
     },
     {
@@ -1867,26 +1892,26 @@
         "scripts/generate-showcase-contract.mts",
         "scripts/check-showcase-contract.mts",
         "tests/fixtures/public-types/**",
-        "packages/ts/api-extractor.json",
+        "legacy/packages/ts/api-extractor.json",
         "packages/compiler/interface.json",
         "tests/scripts/rust-public-api.test.mts",
         "packages/rust/src/**",
         "packages/rust/tests/fixtures/public-api/**",
         "tests/scripts/go-public-api.test.mts",
-        "packages/go/**",
-        "packages/php/src/**",
-        "packages/php-ext/src/polyspec_template.stub.php",
+        "legacy/packages/go/**",
+        "legacy/packages/php/src/**",
+        "legacy/packages/php-ext/src/polyspec_template.stub.php",
         "tests/scripts/ast-public-api.test.mts",
         "contracts/schema/ast.schema.json",
-        "packages/ts/src/ast.ts",
+        "legacy/packages/ts/src/ast.ts",
         "tests/runner/case-list.mts",
         "tests/cases/**",
         "tests/fixtures/ast-decode/**",
-        "packages/ts/src/**",
-        "packages/ts/package.json",
-        "packages/ts/tsconfig.json",
+        "legacy/packages/ts/src/**",
+        "legacy/packages/ts/package.json",
+        "legacy/packages/ts/tsconfig.json",
         "tests/scripts/python-public-api.test.mts",
-        "packages/python/src/**",
+        "legacy/packages/python/src/**",
         "scripts/php-toolchain.mts",
         "config/toolchain.json",
         "tests/scripts/php-toolchain.test.mts",
@@ -1894,6 +1919,16 @@
         "scripts/python-venv.mts",
         "scripts/toml.mts",
         "mise.toml"
+      ]
+    },
+    {
+      "check": "make bindings-check",
+      "paths": [
+        "packages/rust/interface.json",
+        "packages/ts/**",
+        "packages/python/**",
+        "packages/php-ext/**",
+        "Cargo.lock"
       ]
     }
   ]

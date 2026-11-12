@@ -15,7 +15,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // A runner compiles the case and, for Go and Rust, a test binary.
 const COMPILES = { timeout: 300_000 };
 
-// The runners compile with the build of packages/ts and run PHP with the Composer packages of the root composer.json. The test
+// The runners compile with the build of legacy/packages/ts and run PHP with the Composer packages of the root composer.json. The test
 // builds and installs them itself, which does nothing when their inputs are unchanged (T19.6).
 before(() => {
   const build = spawnSync(process.execPath, [path.join(ROOT, 'scripts/build-package.mts'), '--package', 'ts'], { cwd: ROOT, encoding: 'utf8' });

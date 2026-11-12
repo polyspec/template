@@ -213,6 +213,10 @@ flowchart TB
   GeneratedCompiler["generated-compiler: typed source + load"] --> CoreRuntime
 ```
 
+## Transition
+
+The former language packages are in `legacy/packages/ts` (the private npm package `@polyspec/template-legacy`), `legacy/packages/go`, `legacy/packages/php`, `legacy/packages/php-ext`, `legacy/packages/python` and `legacy/packages/cli/php`, and the bindings that bindgen generates from `packages/rust/interface.json` take `packages/`. The legacy packages keep their API and their own implementation, are no release target, and run their tests, lints and shared cases from their new paths; the TypeScript packages that are no runtime (`packages/compiler`, `packages/language`, `packages/lsp`, `packages/codemirror` and `packages/vscode`) take the TypeScript runtime as `@polyspec/template-legacy`. Each legacy package is removed by a change of its own (V-6 (5)) once the generated binding of its language passes the shared suite with no failure and no skip and the package tests of the legacy package pass against the binding with no change beyond the `changes` of the interface contract. Until then this repository holds two implementations of each language, an exception to PRINCIPLES S6 whose end is that removal; every difference between the API of a legacy package and the interface contract is an entry of `changes` of `packages/rust/interface.json` with its rule.
+
 ## Names and loading
 
 - **RT-7** A template name is a path relative to the loader root, with `/` as separator, without a leading `/`. The name of a template rendered by `render(name, ...)` is `name`. When a string target matches a template entry in `define`, the entry path is rendered; this lets the host select a layout with a definition such as `layout: "layouts/page.tpl"`.

@@ -20,6 +20,7 @@ const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 interface ReleaseConfig {
   packages: { kind: string; directory: string; name: string; product: string; runtime: string }[];
   manifests: Record<string, string>;
+  notReleased: Record<string, string>;
   goModules: Record<string, string>;
 }
 const STRINGS: JSONSchemaType<Record<string, string>> = { type: 'object', required: [], additionalProperties: { type: 'string' } };
@@ -38,9 +39,10 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
       },
     },
     manifests: STRINGS,
+    notReleased: STRINGS,
     goModules: STRINGS,
   },
-  required: ['packages', 'manifests', 'goModules'],
+  required: ['packages', 'manifests', 'notReleased', 'goModules'],
 };
 const CONFIG = jsonDocument<ReleaseConfig>('release configuration', RELEASE_SCHEMA).read(path.join(ROOT, 'config/release.json'));
 
@@ -59,48 +61,35 @@ test('the packages of the release are the names that their manifests declare', (
   }
 });
 
-test('the Python package is released as a wheel named by its pyproject.toml', () => {
-  const file = 'packages/python/pyproject.toml';
-  const wheel = CONFIG.packages.find(item => item.kind === 'wheel');
-  assert.deepEqual(wheel, {
-    kind: 'wheel', directory: 'packages/python', name: tomlValue(file, 'project', 'name'), product: 'template', runtime: 'python',
-  }, `${file}: the wheel package names another project than [project] name`);
-  assert.equal(CONFIG.manifests[file], 'archive', `${file}: the wheel is released as an archive, so its version is set by the tag`);
+test('the legacy language packages and the binding packages are no release target', () => {
+  // docs/spec/runtime.md#transition: the legacy packages leave the release until they are removed, and the binding
+  // packages that bindgen scaffolds are released once the generated bindings pass the shared suite (V-6 (2)).
+  const unreleased = [
+    'legacy/packages/ts/package.json', 'legacy/packages/php/composer.json', 'legacy/packages/php-ext/composer.json',
+    'legacy/packages/cli/php/composer.json', 'legacy/packages/python/pyproject.toml', 'legacy/packages/go/go.mod',
+    'packages/ts/package.json', 'packages/ts/Cargo.toml', 'packages/python/pyproject.toml', 'packages/python/Cargo.toml',
+    'packages/php-ext/composer.json', 'packages/php-ext/Cargo.toml',
+  ];
+  for (const file of unreleased) {
+    assert.equal(CONFIG.manifests[file], undefined, `${file} is a manifest of the release`);
+    assert.equal(typeof CONFIG.notReleased[file], 'string', `${file} names no reason in notReleased`);
+  }
+  assert.deepEqual(CONFIG.packages.filter(item => item.directory.startsWith('legacy/') || ['packages/ts', 'packages/python', 'packages/php-ext'].includes(item.directory)), []);
+  assert.deepEqual(CONFIG.goModules, {});
 });
 
-test('the PHP command line is released separately from the runtime library', { timeout: 1000 }, () => {
-  const file = 'packages/cli/php/composer.json';
+test('the legacy TypeScript package is private under its own name', () => {
+  const file = 'legacy/packages/ts/package.json';
   const manifest = parsedJsonObject(read(file), file);
-  assert.deepEqual(CONFIG.packages.find(item => item.directory === 'packages/cli/php'), {
-    kind: 'composer', directory: 'packages/cli/php', name: manifest.name, product: 'template-cli', runtime: 'php',
-  });
-  assert.equal(CONFIG.manifests[file], 'archive');
-  assert.equal(manifest.repositories, undefined, 'the CLI installs from released dependencies');
-});
-
-test('the Composer packages of the release are the packages of its packages.json', { timeout: 1000 }, () => {
-  // Kit writes packages.json, the Composer repository of the release, from the Composer packages of config/release.json
-  // (kit K871); a consumer reads the runtime library, the command line and the extension from it.
-  const composer = CONFIG.packages.filter(item => item.kind === 'composer');
-  assert.deepEqual(composer.map(item => item.name), ['polyspec/template', 'polyspec/template-cli', 'polyspec/template-php-ext']);
-  for (const { directory } of composer) assert.equal(CONFIG.manifests[`${directory}/composer.json`], 'archive', `${directory}: packages.json takes the version of the tag`);
+  assert.equal(manifest.name, '@polyspec/template-legacy');
+  assert.equal(manifest.private, true, `${file}: npm publishes no legacy package`);
 });
 
 test('the PHP extension reports the version of its composer.json', { timeout: 1000 }, () => {
-  const header = 'packages/php-ext/src/php_polyspec_template.h';
-  const manifest = 'packages/php-ext/composer.json';
+  const header = 'legacy/packages/php-ext/src/php_polyspec_template.h';
+  const manifest = 'legacy/packages/php-ext/composer.json';
   const reported = /^#define PHP_POLYSPEC_TEMPLATE_VERSION "([^"]*)"$/m.exec(read(header))?.[1];
   assert.equal(reported, parsedJsonObject(read(manifest), manifest).version, `${header}: PHP_POLYSPEC_TEMPLATE_VERSION is not the version of ${manifest}`);
-});
-
-test('no Composer package directory tracks a composer.lock', { timeout: 5000 }, () => {
-  // The archive of a Composer package is its directory at the tagged commit, so a tracked lock ships with it; a lock of the
-  // monorepo locks the other packages by their path in the checkout, which an unpacked archive does not hold. The
-  // development dependencies of every package resolve from the root composer.lock.
-  const directories = CONFIG.packages.filter(item => item.kind === 'composer').map(item => item.directory);
-  const tracked = spawnSync('git', ['ls-files', '--', ...directories.map(directory => `${directory}/composer.lock`)], { cwd: ROOT, encoding: 'utf8' });
-  assert.equal(tracked.status, 0, tracked.stderr);
-  assert.deepEqual(tracked.stdout.split('\n').filter(Boolean), []);
 });
 
 test('the development root requires the json-schema fork by a release and its lock pins the tag', () => {
@@ -137,7 +126,7 @@ test('the Go module is released by its directory tag with the module path of its
 test('every tracked Cargo lock agrees with the local runtime version', () => {
   const name = tomlValue('packages/rust/Cargo.toml', 'package', 'name');
   const version = tomlValue('packages/rust/Cargo.toml', 'package', 'version');
-  const files = spawnSync('git', ['ls-files', '-z', '**/Cargo.lock'], { cwd: ROOT, encoding: 'utf8' });
+  const files = spawnSync('git', ['ls-files', '-z', '*Cargo.lock'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(files.status, 0, files.stderr);
   const locks = files.stdout.split('\0').filter(Boolean);
   assert.ok(locks.length > 0, 'tracked Rust locks exist');

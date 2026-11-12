@@ -2,13 +2,13 @@
 // Builds immutable package artifacts and verifies AST/generated installation outside the workspace.
 // The install projects read no source of the network and use the toolchains of the checkout (T19.1): the Go install project
 // resolves modules only from the proxy of the run and the module cache that make install filled, verifies no checksum against a database of the network and runs the
-// installed Go toolchain of the go directive of packages/go/go.mod; the Rust install project builds with the toolchain
-// of rust-toolchain.toml and a lock derived from packages/rust/Cargo.lock; the PHP install project reads only the
+// installed Go toolchain of the go directive of legacy/packages/go/go.mod; the Rust install project builds with the toolchain
+// of rust-toolchain.toml and a lock derived from Cargo.lock; the PHP install project reads only the
 // archive of the run, by its own composer.json, and resolves its dependencies among the packages of
 // the composer.lock of the development root, not on Packagist, whose archives it takes from the Composer cache that make install
 // filled, with the network disabled; the Python install project builds the wheel of the package with the build requirements of
 // the wheelhouse of the main checkout (pip download --require-hashes in make install), reads no index, and installs the dependencies of
-// packages/python/pylock.toml from the uv cache that make install filled, then that wheel.
+// legacy/packages/python/pylock.toml from the uv cache that make install filled, then that wheel.
 // Each command is a step without a time limit that prints its start, its output and its result with
 // its elapsed time on standard error and is judged by its exit status.
 import assert from 'node:assert/strict';
@@ -50,17 +50,17 @@ function checkTypeScript() {
   writeFileSync(join(directory, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
   // npm names the archive <name without @, / as ->-<version>.tgz; the name is computed, not read from the output of npm,
   // whose wording a release of npm may change (T19.11).
-  const manifest = npmManifestDocument.read(join(root, 'packages/ts/package.json'));
+  const manifest = npmManifestDocument.read(join(root, 'legacy/packages/ts/package.json'));
   const archive = `${manifest.name.replace(/^@/, '').replace('/', '-')}-${manifest.version}.tgz`;
-  run('npm', ['pack', join(root, 'packages/ts'), '--pack-destination', artifacts, '--silent']);
+  run('npm', ['pack', join(root, 'legacy/packages/ts'), '--pack-destination', artifacts, '--silent']);
   assert.ok(existsSync(join(artifacts, archive)), `npm pack wrote no ${archive} into ${artifacts}`);
   run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', join(artifacts, archive)], { cwd: directory });
   stageScenario(directory);
   cpSync(join(root, 'examples/showcase/adapters/generated/javascript/scope-precedence.js'), join(directory, 'generated.mjs'));
   writeFileSync(join(directory, 'check.mjs'), `import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { AstProgram, Engine, parseJson } from '@polyspec/template';
-import { FsLoader } from '@polyspec/template/node';
+import { AstProgram, Engine, parseJson } from '@polyspec/template-legacy';
+import { FsLoader } from '@polyspec/template-legacy/node';
 import { GeneratedProgram } from './generated.mjs';
 const assign = parseJson(readFileSync('data.json', 'utf8'));
 const define = JSON.parse(readFileSync('define.json', 'utf8'));
@@ -75,19 +75,19 @@ assert.equal(ast, expected); assert.equal(generated, expected); assert.equal(ast
 function checkGo() {
   const version = 'v0.0.1';
   const module = 'github.com/polyspec/template/packages/go';
-  const goVersion = captured(/^go (\S+)$/m.exec(readFileSync(join(root, 'packages/go/go.mod'), 'utf8')), 1, 'the go directive of packages/go/go.mod');
+  const goVersion = captured(/^go (\S+)$/m.exec(readFileSync(join(root, 'legacy/packages/go/go.mod'), 'utf8')), 1, 'the go directive of legacy/packages/go/go.mod');
   const proxy = join(temporary, 'go-proxy');
   const endpoint = join(proxy, module, '@v');
   const zipRoot = join(temporary, 'go-zip', `${module}@${version}`);
   mkdirSync(endpoint, { recursive: true });
   mkdirSync(zipRoot, { recursive: true });
-  const tracked = run('git', ['ls-files', 'packages/go']).split('\n').filter(Boolean);
+  const tracked = run('git', ['ls-files', 'legacy/packages/go']).split('\n').filter(Boolean);
   for (const path of tracked) {
-    const destination = join(zipRoot, relative('packages/go', path));
+    const destination = join(zipRoot, relative('legacy/packages/go', path));
     mkdirSync(resolve(destination, '..'), { recursive: true });
     cpSync(join(root, path), destination);
   }
-  cpSync(join(root, 'packages/go/go.mod'), join(endpoint, `${version}.mod`));
+  cpSync(join(root, 'legacy/packages/go/go.mod'), join(endpoint, `${version}.mod`));
   writeFileSync(join(endpoint, `${version}.info`), JSON.stringify({ Version: version, Time: '2026-09-12T00:00:00Z' }));
   writeFileSync(join(endpoint, 'list'), `${version}\n`);
   run('zip', ['-q', '-r', join(endpoint, `${version}.zip`), `${module}@${version}`], { cwd: join(temporary, 'go-zip') });
@@ -102,7 +102,7 @@ import ("encoding/json"; "fmt"; "os"; template "github.com/polyspec/template/pac
 func definitions(data []byte) map[string]template.DefineInput { var raw map[string]json.RawMessage; if err:=json.Unmarshal(data,&raw);err!=nil{panic(err)}; out:=map[string]template.DefineInput{}; for name,value:=range raw { var path string; if json.Unmarshal(value,&path)==nil { out[name]=template.DefineInput{Template:path}; continue }; var entry struct{Template string \`json:"template"\`;Data any \`json:"data"\`;HTML *string \`json:"html"\`}; if err:=json.Unmarshal(value,&entry);err!=nil{panic(err)}; out[name]=template.DefineInput{Template:entry.Template,Data:entry.Data,HTML:entry.HTML} }; return out }
 func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(data);if err!=nil{panic(err)}; defineBytes,_:=os.ReadFile("define.json"); options:=template.RenderOptions{Define:definitions(defineBytes)}; expected,_:=os.ReadFile("expected.html"); astProgram,err:=template.NewAstProgram(template.Options{Loader:template.NewFSLoader(os.DirFS("templates"))});if err!=nil{panic(err)}; ast,err:=astProgram.Render("layout",assign,options);if err!=nil{panic(err)}; generatedProgram,err:=generated.NewGeneratedProgram(template.Options{});if err!=nil{panic(err)}; direct,err:=generatedProgram.Render("layout",assign,options);if err!=nil{panic(err)}; for _,result:=range []struct{name,actual string}{{"AST program",ast},{"generated program",direct}}{ if result.actual!=string(expected){fmt.Fprintf(os.Stderr,"Go %s output differs\\nexpected: %q\\nactual:   %q\\n",result.name,string(expected),result.actual);os.Exit(1)} };fmt.Print("ok")}
 `);
-  // The modules that packages/go requires come from the module cache of the checkout, which the go mod download of make
+  // The modules that legacy/packages/go requires come from the module cache of the checkout, which the go mod download of make
   // install filled (T25.6-1): its cache/download directory is a module proxy (go help goproxy), listed after the proxy of
   // the run, which serves only the package.
   const downloads = join(run('go', ['env', 'GOMODCACHE']).trim(), 'cache/download');
@@ -128,8 +128,8 @@ function checkRust() {
   // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
   // resolve the development dependencies of a path dependency for an install project.
   const development = Object.keys(tomlTable(cargoManifest['dev-dependencies'], 'the [dev-dependencies] of packages/rust/Cargo.toml'));
-  writeFileSync(join(directory, 'Cargo.lock'), installCargoLock(readFileSync(join(root, 'packages/rust/Cargo.lock'), 'utf8'), {
-    name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template', 'serde', 'serde_json'], removed: { 'polyspec-template': development }, lockPath: 'packages/rust/Cargo.lock',
+  writeFileSync(join(directory, 'Cargo.lock'), installCargoLock(readFileSync(join(root, 'Cargo.lock'), 'utf8'), {
+    name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template', 'serde', 'serde_json'], removed: { 'polyspec-template': development }, lockPath: 'Cargo.lock',
   }));
   cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   writeFileSync(join(directory, 'src/main.rs'), `mod generated { include!(concat!(env!("CARGO_MANIFEST_DIR"), "/generated.rs")); }
@@ -140,7 +140,7 @@ fn main(){ let assign:serde_json::Value=serde_json::from_str(include_str!("../da
 }
 
 function checkPhp() {
-  const packageDirectory = join(root, 'packages/php');
+  const packageDirectory = join(root, 'legacy/packages/php');
   const offline = { COMPOSER_DISABLE_NETWORK: '1' };
   run('composer', ['archive', '--format=zip', `--dir=${artifacts}`, '--file=polyspec-template'], { cwd: packageDirectory, env: offline });
   const directory = join(temporary, 'php');
@@ -173,14 +173,14 @@ $assign=Json::parse(file_get_contents(__DIR__.'/data.json')); $raw=Json::parse(f
 function checkPython() {
   // pip builds in the directory it is given and writes build/ and egg-info there, so it builds a copy of the tracked files.
   const source = join(temporary, 'python-source');
-  for (const path of run('git', ['ls-files', 'packages/python']).split('\n').filter(Boolean)) {
-    const destination = join(source, relative('packages/python', path));
+  for (const path of run('git', ['ls-files', 'legacy/packages/python']).split('\n').filter(Boolean)) {
+    const destination = join(source, relative('legacy/packages/python', path));
     mkdirSync(resolve(destination, '..'), { recursive: true });
     cpSync(join(root, path), destination);
   }
   const python = pythonCommand();
   const pip = { ...pythonEnvironment(), PIP_NO_INDEX: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' };
-  const version = tomlString(tomlTable(readToml(join(source, 'pyproject.toml')).project, 'the [project] of packages/python/pyproject.toml').version, 'the version of packages/python/pyproject.toml');
+  const version = tomlString(tomlTable(readToml(join(source, 'pyproject.toml')).project, 'the [project] of legacy/packages/python/pyproject.toml').version, 'the version of legacy/packages/python/pyproject.toml');
   const archive = join(artifacts, `polyspec_template-${version}-py3-none-any.whl`);
   run(python, ['-m', 'pip', 'wheel', '--no-deps', '--no-index', '--find-links', wheelhouseDirectory(root), '--wheel-dir', artifacts, source], { env: pip });
   assert.ok(existsSync(archive), `pip wheel wrote no ${archive} into ${artifacts}`);
@@ -188,9 +188,9 @@ function checkPython() {
   mkdirSync(directory);
   run(python, ['-m', 'venv', join(directory, 'venv')]);
   const installed = join(directory, 'venv/bin/python');
-  // The dependencies that packages/python/pylock.toml pins, from the uv cache that make install filled (make
+  // The dependencies that legacy/packages/python/pylock.toml pins, from the uv cache that make install filled (make
   // python-package), then the wheel alone.
-  run(join(toolsDirectory(root), 'mise/shims/uv'), ['pip', 'install', '--python', installed, '--offline', '--link-mode', 'copy', '-r', join(root, 'packages/python/pylock.toml')]);
+  run(join(toolsDirectory(root), 'mise/shims/uv'), ['pip', 'install', '--python', installed, '--offline', '--link-mode', 'copy', '-r', join(root, 'legacy/packages/python/pylock.toml')]);
   run(installed, ['-m', 'pip', 'install', '--no-deps', '--no-index', archive], { env: pip });
   stageScenario(directory);
   cpSync(join(root, 'examples/showcase/adapters/generated/typed', `${showcasePythonModule('scope-precedence')}.py`), join(directory, 'generated.py'));

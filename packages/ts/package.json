@@ -1,46 +1,21 @@
 {
   "name": "@polyspec/template",
   "version": "0.0.27",
-  "description": "Template language implementation: lexer, parser, renderer, functions and CLI",
+  "description": "The template library of polyspec for Node",
   "license": "MIT",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "main": "./generated/index.cjs",
+  "types": "./generated/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    },
-    "./render": {
-      "types": "./dist/render.d.ts",
-      "import": "./dist/render.mjs",
-      "require": "./dist/render.cjs"
-    },
-    "./decode": {
-      "types": "./dist/decode.d.ts",
-      "import": "./dist/decode.mjs",
-      "require": "./dist/decode.cjs"
-    },
-    "./node": {
-      "types": "./dist/node/index.d.ts",
-      "import": "./dist/node.mjs",
-      "require": "./dist/node.cjs"
+      "types": "./generated/index.d.ts",
+      "import": "./generated/index.mjs",
+      "require": "./generated/index.cjs"
     }
   },
   "files": [
-    "dist",
-    "bin"
-  ],
-  "bin": {
-    "template": "./bin/template.mjs"
-  },
-  "sideEffects": false,
-  "engines": {
-    "node": ">=26.12.0"
-  },
-  "devDependencies": {
-    "ajv": "^8.20.0"
-  }
+    "generated/index.cjs",
+    "generated/index.mjs",
+    "generated/index.d.ts",
+    "generated/*.node"
+  ]
 }

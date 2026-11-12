@@ -1,10 +1,10 @@
 // Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from the source AST.
-import { analyze, DelimiterOptionError, parse, TemplateError, type FormatError, type FormatOptions, type FormatResult } from '@polyspec/template';
+import { analyze, DelimiterOptionError, parse, TemplateError, type FormatError, type FormatOptions, type FormatResult } from '@polyspec/template-legacy';
 import { formatBody } from './body.js';
 import { indentEdits } from './indent.js';
 import { sameTree, withoutLineIndentation } from './invariant.js';
 
-export type { FormatError, FormatOptions, FormatResult } from '@polyspec/template';
+export type { FormatError, FormatOptions, FormatResult } from '@polyspec/template-legacy';
 
 interface Edit {
   start: number;

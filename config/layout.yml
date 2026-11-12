@@ -65,11 +65,26 @@ rules:
     paths: ["packages/**/integration", "packages/**/conformance", "!packages/vscode/tests/integration"]
     message: "K244: an integration or conformance suite lives in tests/integration/<runtime> or tests/conformance/<runtime> of the root"
 
-  # K245 exception: packages/python/docs/documentation-manifest.json, of role package, names the AGENTS.md and the CHANGELOG.md
+  # K245 exception: legacy/packages/python/docs/documentation-manifest.json, of role package, names the AGENTS.md and the CHANGELOG.md
   # (with their Korean twins) of the package as its development procedure and its history. Those two files stay with the
-  # package until the manifest and K245 agree.
+  # package until the manifest and K245 agree, and the package is removed (docs/spec/runtime.md#transition).
   - id: management-files-at-root
     kind: file_absent
     level: error
-    paths: ["packages/**/AGENTS*.md", "packages/**/CHANGELOG*.md", "packages/**/Makefile", "!packages/python/AGENTS*.md", "!packages/python/CHANGELOG*.md"]
+    paths: ["packages/**/AGENTS*.md", "packages/**/CHANGELOG*.md", "packages/**/Makefile", "legacy/packages/**/AGENTS*.md", "legacy/packages/**/CHANGELOG*.md", "legacy/packages/**/Makefile", "!legacy/packages/python/AGENTS*.md", "!legacy/packages/python/CHANGELOG*.md"]
     message: "K245: AGENTS, CHANGELOG and Makefile lie at the root; a package states its rules and changes there"
+
+  # S6 exception of the transition (docs/spec/runtime.md#transition): legacy/ holds the language packages that the
+  # generated bindings replace, under their former paths, until each is removed by a change of its own (V-6 (5)).
+  - id: layout-root-folders
+    paths: ["*", "!packages", "!contracts", "!docs", "!scripts", "!tests", "!examples", "!benchmarks", "!config", "!.github", "!.githooks", "!.kit", "!.mise", "!.claude", "!legacy"]
+
+  # The stub of the legacy PHP extension stays beside its C sources until the package is removed (V-6 (5)).
+  - id: php-ext-stub-place
+    paths: ["**/*.stub.php", "!packages/php-ext/src/*.stub.php", "!legacy/packages/php-ext/src/*.stub.php"]
+
+  # The manifests of the binding crates are files that bindgen scaffold writes with lints of their own, which deny unsafe
+  # code outside the FFI sites and an allow attribute without its reason; bindings-check compares them with what bindgen
+  # writes (CK-19), so they do not take the lints of the workspace.
+  - id: lint-cargo-lints
+    paths: ["**/Cargo.toml", "!tests/kit/fixture/**", "!packages/ts/Cargo.toml", "!packages/python/Cargo.toml", "!packages/php-ext/Cargo.toml"]

@@ -46,10 +46,10 @@ function pairs(source: string, expression: RegExp, normalize = (value: string): 
 }
 
 const files: Record<string, string[]> = {
-  typescript: ['packages/ts/src/functions/encoding.ts', 'packages/ts/src/functions/string.ts', 'packages/ts/src/functions/collection.ts', 'packages/ts/src/functions/number.ts', 'packages/ts/src/functions/date.ts'],
-  go: ['packages/go/internal/functions/encoding.go', 'packages/go/internal/functions/string.go', 'packages/go/internal/functions/collection.go', 'packages/go/internal/functions/number.go', 'packages/go/internal/functions/date.go'],
+  typescript: ['legacy/packages/ts/src/functions/encoding.ts', 'legacy/packages/ts/src/functions/string.ts', 'legacy/packages/ts/src/functions/collection.ts', 'legacy/packages/ts/src/functions/number.ts', 'legacy/packages/ts/src/functions/date.ts'],
+  go: ['legacy/packages/go/internal/functions/encoding.go', 'legacy/packages/go/internal/functions/string.go', 'legacy/packages/go/internal/functions/collection.go', 'legacy/packages/go/internal/functions/number.go', 'legacy/packages/go/internal/functions/date.go'],
   rust: ['packages/rust/src/functions/encoding.rs', 'packages/rust/src/functions/string.rs', 'packages/rust/src/functions/collection.rs', 'packages/rust/src/functions/number.rs', 'packages/rust/src/functions/date.rs'],
-  python: ['packages/python/src/polyspec/template/functions.py'],
+  python: ['legacy/packages/python/src/polyspec/template/functions.py'],
 };
 const patterns: Record<string, RegExp[]> = {
   typescript: [/([a-z][a-z0-9_]*):\s*\{\s*min:\s*(\d+),\s*max:\s*(Infinity|-?\d+)/gs],

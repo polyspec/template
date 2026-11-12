@@ -2,8 +2,8 @@
 // any other failure instead of reporting it as an error of the source.
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@polyspec/template', async original => {
-  const actual = await original<typeof import('@polyspec/template')>();
+vi.mock('@polyspec/template-legacy', async original => {
+  const actual = await original<typeof import('@polyspec/template-legacy')>();
   return {
     ...actual,
     analyze: (...args: Parameters<typeof actual.analyze>) => {

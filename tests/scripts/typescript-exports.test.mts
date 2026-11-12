@@ -21,7 +21,7 @@ function declarationModel(config: string) {
 }
 
 test('the public declaration model has no inaccessible signature types', { timeout: 30_000 }, () => {
-  const result = declarationModel('packages/ts/api-extractor.json');
+  const result = declarationModel('legacy/packages/ts/api-extractor.json');
   assert.equal(result.status, 0, result.stdout + result.stderr);
   interface Item { canonicalReference?: string; members?: Item[] }
   const model = jsonDocument<Item>('native API model', {
@@ -34,9 +34,9 @@ test('the public declaration model has no inaccessible signature types', { timeo
     for (const member of item.members ?? []) visit(member);
   }
   visit(model);
-  assert.ok(references.has('@polyspec/template!Output:interface'), 'the type-only output export names its instance contract');
-  assert.ok(!references.has('@polyspec/template!Output:constructor(1)'), 'the SDK does not publish buffer construction');
-  assert.ok(!references.has('@polyspec/template!BoundMap:constructor(1)'), 'bound maps are created only by bind and merge');
+  assert.ok(references.has('@polyspec/template-legacy!Output:interface'), 'the type-only output export names its instance contract');
+  assert.ok(!references.has('@polyspec/template-legacy!Output:constructor(1)'), 'the SDK does not publish buffer construction');
+  assert.ok(!references.has('@polyspec/template-legacy!BoundMap:constructor(1)'), 'bound maps are created only by bind and merge');
 });
 
 test('the declaration check rejects a public class with a private implementation base', { timeout: 30_000 }, () => {

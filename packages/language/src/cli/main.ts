@@ -1,7 +1,7 @@
 // Command line interface template-fmt: prints, rewrites or checks formatted templates.
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { buffer } from 'node:stream/consumers';
-import { parse, TemplateError } from '@polyspec/template';
+import { parse, TemplateError } from '@polyspec/template-legacy';
 import { format, type FormatOptions, type FormatResult } from '../format.js';
 import { parseArguments, USAGE } from './args.js';
 import { collectFiles } from './files.js';

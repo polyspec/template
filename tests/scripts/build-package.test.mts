@@ -145,7 +145,7 @@ test('the inputs of a package include the builds of the workspace packages that 
   const result = spawnSync(process.execPath, [BUILD, '--package', 'vscode', '--print-inputs'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
   const inputs = result.stdout.split('\n');
-  for (const file of ['packages/vscode/src/extension.ts', 'package-lock.json', 'packages/lsp/dist/main.mjs', 'packages/language/dist/index.mjs', 'packages/ts/dist/index.mjs']) {
+  for (const file of ['packages/vscode/src/extension.ts', 'package-lock.json', 'packages/lsp/dist/main.mjs', 'packages/language/dist/index.mjs', 'legacy/packages/ts/dist/index.mjs']) {
     assert.ok(inputs.includes(file), `the inputs of vscode do not include ${file}`);
   }
 });

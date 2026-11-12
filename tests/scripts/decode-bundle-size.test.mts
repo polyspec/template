@@ -1,10 +1,10 @@
 // Tests the size of the code that a browser bundle takes for decodeTemplate (T24.32). A browser client decodes each template that it
-// fetches with decodeTemplate, and an esbuild bundle of that import alone from @polyspec/template/render 0.0.8
+// fetches with decodeTemplate, and an esbuild bundle of that import alone from @polyspec/template-legacy/render 0.0.8
 // was 127,057 bytes minified, 13,479 gzip: the standalone validator of the AST schema with every $ref inlined (110,656
 // bytes) and the runtime chunk that every entry shares (15.5 KB). With each definition of the schema as one function (ajv
 // inlineRefs: false) and the decode entry in a chunk without the runtime, the bundle of either entry is 86,538 bytes
 // minified, 7,490 gzip. The budget is about 4 % and 5 % above those numbers; it fails a change that brings the runtime or
-// the inlined copies back. The package is the build of packages/ts, which make build-ts writes.
+// the inlined copies back. The package is the build of legacy/packages/ts, which make build-ts writes.
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import test from 'node:test';
@@ -32,7 +32,7 @@ async function bundleOf(specifier: string): Promise<{ minified: number; gzip: nu
   return { minified: output.contents.byteLength, gzip: gzipSync(output.contents, { level: 9 }).byteLength };
 }
 
-for (const specifier of ['@polyspec/template/decode', '@polyspec/template/render']) {
+for (const specifier of ['@polyspec/template-legacy/decode', '@polyspec/template-legacy/render']) {
   test(`a browser bundle of decodeTemplate from ${specifier} stays within ${MINIFIED_BUDGET} bytes minified and ${GZIP_BUDGET} gzip`, async () => {
     const size = await bundleOf(specifier);
     assert.ok(size.minified <= MINIFIED_BUDGET && size.gzip <= GZIP_BUDGET, `${specifier}: ${size.minified} bytes minified, ${size.gzip} gzip`);

@@ -89,12 +89,12 @@ The runner passes each option as one argument, `--name=value`, so that a value t
 
 | Implementation | Command |
 | --- | --- |
-| ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
-| go | `packages/go/template` |
-| rust | `packages/rust/target/release/template` |
+| ts | `node legacy/packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
+| go | `legacy/packages/go/template` |
+| rust | `target/release/template` |
 | php | `php vendor/bin/template.php` |
 | php-ext | `php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php` |
-| python | `packages/python/.venv/bin/python -m polyspec.template.cli` (`make python-package` installs `packages/python` into `packages/python/.venv`) |
+| python | `legacy/packages/python/.venv/bin/python -m polyspec.template.cli` (`make python-package` installs `legacy/packages/python` into `legacy/packages/python/.venv`) |
 
 The formatter of TypeScript is the package `@polyspec/template-language`, which depends on `@polyspec/template`, so its command `template-language` provides `format` and the command `template` the other subcommands.
 

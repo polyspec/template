@@ -87,7 +87,8 @@ if (packageName === undefined || packageBuild === undefined) {
 }
 const packageId = packageName;
 const commands = packageBuild;
-const pkg = join(root, 'packages', packageId);
+// The TypeScript runtime is the legacy package of the transition (docs/spec/runtime.md#transition).
+const pkg = packageId === 'ts' ? join(root, 'legacy', 'packages', 'ts') : join(root, 'packages', packageId);
 const dist = resolve(values.dist ?? join(pkg, 'dist'));
 const stamp = `${dist}.inputs.json`;
 /** The fields of a package.json that the build reads. */

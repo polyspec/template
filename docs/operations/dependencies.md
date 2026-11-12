@@ -7,7 +7,7 @@ Use the latest stable release that supports the declared runtime range. "Latest"
 
 ## Scope
 
-A registry dependency is a direct dependency that a registry resolves: an entry of `dependencies` or `devDependencies` of the root `package.json`, or of `require` or `require-dev` of a Composer manifest: the root `composer.json`, `packages/php-ext/composer.json` and `packages/cli/php/composer.json`. The root `package.json` is the only npm manifest that declares dependencies: it holds the development tools of every package, and the packages of `packages/` declare only their runtime dependencies. A `file:`, `link:` or `workspace:` dependency is a package of this repository, and `php`, `ext-*`, `lib-*` and `composer-*` are platform requirements. No registry resolves them, so "latest stable" has no meaning for them.
+A registry dependency is a direct dependency that a registry resolves: an entry of `dependencies` or `devDependencies` of the root `package.json`, or of `require` or `require-dev` of a Composer manifest: the root `composer.json`, `legacy/packages/php-ext/composer.json` and `legacy/packages/cli/php/composer.json`. The root `package.json` is the only npm manifest that declares dependencies: it holds the development tools of every package, and the packages of `packages/` declare only their runtime dependencies. A `file:`, `link:` or `workspace:` dependency is a package of this repository, and `php`, `ext-*`, `lib-*` and `composer-*` are platform requirements. No registry resolves them, so "latest stable" has no meaning for them.
 
 ## Exceptions
 
@@ -19,6 +19,6 @@ The policy applies to supported runtimes as well as tools. A test dependency can
 
 ## The Python lock
 
-`packages/python/pylock.toml` locks the dependencies of the Python package. uv pip compile writes it from its sources, `packages/python/pyproject.toml` and `packages/python/constraints.txt`, and its header names the command.
+`legacy/packages/python/pylock.toml` locks the dependencies of the Python package. uv pip compile writes it from its sources, `legacy/packages/python/pyproject.toml` and `legacy/packages/python/constraints.txt`, and its header names the command.
 
 Changing a version follows one sequence: establish the compatibility and security conditions, update the manifest and lock together with npm or Composer, run the affected package tests and documentation build, then run the clean-checkout release gate. A passing build cannot excuse a known vulnerability or an unexplained old pin.

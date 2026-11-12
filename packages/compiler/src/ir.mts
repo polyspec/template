@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, posix, resolve } from 'node:path';
-import { AstDecodeError, decodeTemplate, type Expr as SourceExpr, type Node as SourceNode, type Span, type Template } from '@polyspec/template';
+import { AstDecodeError, decodeTemplate, type Expr as SourceExpr, type Node as SourceNode, type Span, type Template } from '@polyspec/template-legacy';
 import { astManifestDocument, type AstManifest, type FunctionSignature, type TypeManifest } from './documents.mts';
 
 type BinaryOp = Extract<SourceExpr, { type: 'Binary' }>['op'];

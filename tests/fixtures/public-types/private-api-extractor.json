@@ -1,5 +1,5 @@
 {
-  "extends": "../../../packages/ts/api-extractor.json",
+  "extends": "../../../legacy/packages/ts/api-extractor.json",
   "mainEntryPointFilePath": "<projectFolder>/../../tests/fixtures/public-types/private-base.d.ts",
   "compiler": {
     "overrideTsconfig": {

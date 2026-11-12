@@ -32,7 +32,7 @@ The table records the status of each feature.
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
 
-Release [0.0.12](https://github.com/polyspec/template/releases/tag/v0.0.12) is public at main commit 86edcaa1, with nine archives published on 2026-10-27 at 04:40:32 UTC. The Go module tag `packages/go/v0.0.12` names the same commit.
+Release [0.0.12](https://github.com/polyspec/template/releases/tag/v0.0.12) is public at main commit 86edcaa1, with nine archives published on 2026-10-27 at 04:40:32 UTC. The Go module tag `legacy/packages/go/v0.0.12` names the same commit.
 
 Verification: [CI 40450000056](https://github.com/polyspec/template/actions/runs/40450000056) passed all thirteen workers and ci-passed; [gates 40450000190](https://github.com/polyspec/template/actions/runs/40450000190) passed. Parity ran 253 bindings twice and passed 5,622 cases with no remaining API or binding findings. CI execution took 8m06s plus an 8s queue. The dependency review covers 50 registry dependencies and eight locks without unaccepted newer releases or advisories.
 

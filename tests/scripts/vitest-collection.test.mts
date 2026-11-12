@@ -1,5 +1,5 @@
 // Tests the vitest collection of the root (T26.7-46): vitest lists no test file under var/, where the mise state keeps
-// copies of the template, and it lists packages/ts/tests/smoke.test.ts exactly once.
+// copies of the template, and it lists legacy/packages/ts/tests/smoke.test.ts exactly once.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
@@ -7,7 +7,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const SMOKE = 'packages/ts/tests/smoke.test.ts';
+const SMOKE = 'legacy/packages/ts/tests/smoke.test.ts';
 
 test('vitest collects no test file under var/ and runs the smoke test once', { timeout: 120000 }, () => {
   const vitest = path.join(ROOT, 'node_modules/vitest/vitest.mjs');

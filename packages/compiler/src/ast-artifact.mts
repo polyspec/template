@@ -1,7 +1,7 @@
 // Builds and verifies one canonical AST artifact graph.
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
-import { parse, type Node, type Template } from '@polyspec/template';
+import { parse, type Node, type Template } from '@polyspec/template-legacy';
 import { astManifestDocument, DocumentSchemaError, type AstFile, type AstManifest } from './documents.mts';
 import { contractPath, hash, json } from './artifact-support.mts';
 const lineIndex = (bytes: Buffer): number[] => {

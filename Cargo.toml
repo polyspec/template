@@ -1,0 +1,31 @@
+# One workspace: the core crate and the binding crates, which bindgen scaffold writes (bindgen design L-2). One
+# Cargo.lock at the root pins every dependency of all of them, the commit of polyspec-bindgen-core included (CK-20).
+[workspace]
+resolver = "2"
+members = ["packages/rust", "packages/ts", "packages/python", "packages/php-ext"]
+
+# The lints of the core crate, which make lint-rust runs with cargo clippy (T27.1-64, kit K1050, R-1): every warning fails,
+# no unsafe code (config/cargo.schema.json), and no hidden error (P8): a dropped must_use value, a `let _` of a must_use or
+# untyped value, a map_err that ignores its error, unwrap and expect, a cast that can truncate, wrap or lose the sign, and
+# an allow attribute without its reason, which names the rule that permits the use; clippy.toml of the root disallows
+# Result::ok and the methods that turn an absence or a failure into a value.
+
+[workspace.lints.rust]
+warnings = "deny"
+unsafe_code = "deny"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+allow_attributes_without_reason = "deny"
+let_underscore_must_use = "deny"
+let_underscore_untyped = "deny"
+map_err_ignore = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+cast_possible_truncation = "deny"
+cast_possible_wrap = "deny"
+cast_sign_loss = "deny"
+
+[profile.release]
+debug = false

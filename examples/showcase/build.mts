@@ -8,7 +8,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import type { Engine as TemplateEngine, RenderOptions, Template } from '@polyspec/template';
+import type { Engine as TemplateEngine, RenderOptions, Template } from '@polyspec/template-legacy';
 import { invoke, prepare, selectLanguages, root } from '../../tests/runner/drivers.mts';
 import { isObject, list, manifestFiles, object, readJson, text, type JsonObject } from './json.mts';
 import { scenarioIds } from '../../scripts/showcase-documents.mts';
@@ -177,7 +177,7 @@ if (!languages.includes('ts')) {
 }
 for (const language of languages) prepare(language);
 
-const { AstProgram, Engine, MapLoader, decodeTemplate } = await import('@polyspec/template');
+const { AstProgram, Engine, MapLoader, decodeTemplate } = await import('@polyspec/template-legacy');
 const scenarios = listScenarios();
 if (!scenarios.length) {
   process.stderr.write('no showcase scenarios found\n');

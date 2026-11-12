@@ -3,7 +3,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { Formatter } from '@polyspec/template';
+import type { Formatter } from '@polyspec/template-legacy';
 import { format as formatImplementation, type FormatResult } from '../src/index.js';
 
 const format: Formatter = formatImplementation;

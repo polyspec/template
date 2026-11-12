@@ -66,7 +66,7 @@
       "kind": "policy",
       "reason": "names the Python module of the generated program of a showcase scenario, as adapters/python.py imports it"
     },
-    "packages/cli/php/bin/template.php": {
+    "legacy/packages/cli/php/bin/template.php": {
       "kind": "ecosystem",
       "tool": "symfony/console parses the conformance command line (CNF-4) on the PHP package"
     },
@@ -82,7 +82,7 @@
       "kind": "ecosystem",
       "tool": "node runs the built vscode-languageserver entry of the language server"
     },
-    "packages/ts/bin/template.mjs": {
+    "legacy/packages/ts/bin/template.mjs": {
       "kind": "ecosystem",
       "tool": "node:util parseArgs parses the conformance command line (CNF-4)"
     },
@@ -244,7 +244,7 @@
     },
     "scripts/generate-ast-validator.mts": {
       "kind": "ecosystem",
-      "tool": "ajv standalone code generation and esbuild bundle the AST validator of packages/ts"
+      "tool": "ajv standalone code generation and esbuild bundle the AST validator of legacy/packages/ts"
     },
     "scripts/generate-compiler-interface.mts": {
       "kind": "policy",

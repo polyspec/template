@@ -11,9 +11,9 @@ function compile(file: string) {
   const directory = mkdtempSync(join(tmpdir(), 'template-go-api-'));
   try {
     const source = join(directory, 'consumer.go');
-    copyFileSync(`packages/go/testdata/public-api/${file}`, source);
+    copyFileSync(`legacy/packages/go/testdata/public-api/${file}`, source);
     return spawnSync('go', ['build', '-o', join(directory, 'consumer.a'), source], {
-      cwd: resolve('packages/go'), encoding: 'utf8',
+      cwd: resolve('legacy/packages/go'), encoding: 'utf8',
       env: { ...process.env, GOPROXY: 'off', GOTOOLCHAIN: 'local' },
     });
   } finally {

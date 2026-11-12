@@ -1,5 +1,5 @@
 import { join, posix } from 'node:path';
-import type { Expr, Node, Template } from '@polyspec/template';
+import type { Expr, Node, Template } from '@polyspec/template-legacy';
 import { functionContractDocument, type DefinitionDeclaration, type FunctionSignature, type TypeManifest } from './documents.mts';
 import { packageRoot } from './package-root.mts';
 

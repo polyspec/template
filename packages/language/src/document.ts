@@ -1,5 +1,5 @@
 // Language service document: one analysis of a template text and every editor result of the document.
-import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template';
+import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template-legacy';
 import { format, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
 import { indexOfByte } from './positions.js';

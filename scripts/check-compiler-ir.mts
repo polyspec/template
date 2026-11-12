@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import type { Expr as SourceExpr, Span, Template } from '@polyspec/template';
+import type { Expr as SourceExpr, Span, Template } from '@polyspec/template-legacy';
 import { typeManifestDocument, type TypeManifest } from '../packages/compiler/src/documents.mts';
 import { lowerSourceGraph, type Expr, type LoweredTemplate, type Node, type NodeOf, type Program, type SourceGraph } from '../packages/compiler/src/ir.mts';
 

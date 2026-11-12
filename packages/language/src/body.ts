@@ -1,5 +1,5 @@
 // Tag body formatting: writes the body of each tag kind in the formatting style (GRM-2).
-import type { SyntaxTag, SyntaxToken } from '@polyspec/template';
+import type { SyntaxTag, SyntaxToken } from '@polyspec/template-legacy';
 import { joinTokens, type ExpressionToken } from './expression.js';
 
 /** The tag kinds that the parser reports for accepted tags. */

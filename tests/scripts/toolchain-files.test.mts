@@ -3,7 +3,7 @@
 // - Node.js is the node of mise.toml, which `make install-tools TOOLS=npm` installs into var/tools and the Makefile starts as
 //   $(NODE) (kit K171), and every CI job runs the bootstrap action of template, which starts with the Node.js of mise.toml (kit K992);
 // - npm is the npm:npm of mise.toml, which devEngines of package.json names (kit K938), installed by `make install-tools TOOLS=npm` into var/tools/bin,
-//   and Go the go of mise.toml, which the go directive of packages/go/go.mod equals, installed by `make
+//   and Go the go of mise.toml, which the go directive of legacy/packages/go/go.mod equals, installed by `make
 //   install-tools` with mise and run by its shim of var/tools/mise/shims (T24.12); the Makefile puts both directories first on
 //   PATH, and the Makefile exports GOTOOLCHAIN=local, so go never downloads another toolchain;
 // - Rust is the toolchain of `rust-toolchain.toml` with the components that `make lint` and `make test-rust` use,
@@ -73,9 +73,9 @@ function textOf(value: TomlValue | undefined, name: string): string {
   return value;
 }
 
-// The go directive of packages/go/go.mod.
+// The go directive of legacy/packages/go/go.mod.
 function goDirective(): string {
-  return captured(/^go (\S+)$/m.exec(read('packages/go/go.mod')), 1, 'the go directive of packages/go/go.mod');
+  return captured(/^go (\S+)$/m.exec(read('legacy/packages/go/go.mod')), 1, 'the go directive of legacy/packages/go/go.mod');
 }
 
 // The steps of a job that use an action of `prefix`, such as actions/setup-node@.
@@ -202,7 +202,7 @@ test('every recipe line runs the npm of var/tools/bin and the go of mise, with e
   const go = `go${goDirective()}`;
   for (const make of makes) {
     assert.equal(recipe('$(NPM) --version', {}, make), npm, `${make}: the recipe line $(NPM) --version runs another npm than ${npm} of var/tools/bin`);
-    assert.equal(recipe('cd packages/go && go env GOVERSION', {}, make), go, `${make}: a shell line with go runs another go than ${go} of the shims of mise`);
+    assert.equal(recipe('cd legacy/packages/go && go env GOVERSION', {}, make), go, `${make}: a shell line with go runs another go than ${go} of the shims of mise`);
   }
   const simple = read('Makefile').split('\n').filter(line => /^\t@?(npm|go|gofmt)\b/.test(line) && !/[;&|<>$`'"(){}*?[\]\\#=~]/.test(line));
   assert.deepEqual(simple, [], 'recipe lines without shell syntax that start npm, go or gofmt with the PATH that make started with');
@@ -222,12 +222,12 @@ test('the path of every Go module that go get resolves names its directory in th
   }
 });
 
-test('Go is the go of mise.toml, which the go directive of packages/go/go.mod equals, and go downloads no other toolchain', () => {
+test('Go is the go of mise.toml, which the go directive of legacy/packages/go/go.mod equals, and go downloads no other toolchain', () => {
   const expected = `go${goDirective()}`;
-  assert.equal(`go${textOf(MISE_TOOLS.go, 'the go of mise.toml')}`, expected, 'the go of mise.toml differs from the go directive of packages/go/go.mod');
+  assert.equal(`go${textOf(MISE_TOOLS.go, 'the go of mise.toml')}`, expected, 'the go of mise.toml differs from the go directive of legacy/packages/go/go.mod');
   for (const tool of ['go', 'gofmt']) assert.equal(recipe(`command -v ${tool} || true`), path.join(SHIMS, tool), `${tool} of the recipes is not the shim of mise; run make install-tools`);
   const actual = recipe('cd . && go env GOVERSION', { GOTOOLCHAIN: 'auto' });
-  assert.equal(actual, expected, `go of the recipes: expected ${expected} (packages/go/go.mod), actual ${actual}; run make install-tools`);
+  assert.equal(actual, expected, `go of the recipes: expected ${expected} (legacy/packages/go/go.mod), actual ${actual}; run make install-tools`);
   assert.equal(recipe('echo "$GOTOOLCHAIN"', { GOTOOLCHAIN: 'auto' }), 'local', 'the recipes of the Makefile let go download a toolchain');
 });
 

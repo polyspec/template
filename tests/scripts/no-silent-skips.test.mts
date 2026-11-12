@@ -43,8 +43,9 @@ test('no test of the packages skips itself', () => {
       else if (/\.(test\.(ts|mjs)|spec\.ts)$/.test(entry.name)) files.push(file);
     }
   };
-  for (const name of readdirSync(path.join(ROOT, 'packages'))) {
-    const tests = path.join(ROOT, 'packages', name, 'tests');
+  const packageDirectories = ['packages', 'legacy/packages'].flatMap(parent => readdirSync(path.join(ROOT, parent)).map(name => path.join(ROOT, parent, name)));
+  for (const directory of packageDirectories) {
+    const tests = path.join(directory, 'tests');
     try { walk(tests); } catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error; }
   }
   const skipping = files.filter(file => /\b(?:describe|it|test)\.(?:skip|skipIf|runIf|todo)\b/.test(readFileSync(file, 'utf8')));

@@ -206,7 +206,7 @@
             "version": "0.0.27",
             "dist": {
                 "type": "path",
-                "url": "packages/php",
+                "url": "legacy/packages/php",
                 "reference": "d3e7b5934cf5a40608fc823bb5cf633df1e1b67d"
             },
             "require": {
@@ -1024,7 +1024,7 @@
             "version": "0.0.27",
             "dist": {
                 "type": "path",
-                "url": "packages/cli/php",
+                "url": "legacy/packages/cli/php",
                 "reference": "94f4c6479cd76a2b79d4a64cb691e5ebf2204105"
             },
             "require": {

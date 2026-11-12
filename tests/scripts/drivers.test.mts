@@ -20,8 +20,8 @@ test('prepare builds the CLI of a language also when its binary is present', asy
   const directory = mkdtempSync(path.join(tmpdir(), 'template-drivers-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   copyDriverFiles(directory);
-  mkdirSync(path.join(directory, 'packages/go'), { recursive: true });
-  writeFileSync(path.join(directory, 'packages/go/template'), 'a binary built from older sources\n');
+  mkdirSync(path.join(directory, 'legacy/packages/go'), { recursive: true });
+  writeFileSync(path.join(directory, 'legacy/packages/go/template'), 'a binary built from older sources\n');
   const { drivers, prepare } = await importDriverCopy(directory);
   let builds = 0;
   drivers.go.build = () => { builds++; };

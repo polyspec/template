@@ -51,7 +51,7 @@ test('native decoder round-trip fixtures exercise every AST shape and field', { 
 });
 
 test('TypeScript AST public interfaces expose exactly the schema fields', { timeout: 30_000 }, () => {
-  const { program, errors } = parseSync('ast.ts', readFileSync('packages/ts/src/ast.ts', 'utf8'));
+  const { program, errors } = parseSync('ast.ts', readFileSync('legacy/packages/ts/src/ast.ts', 'utf8'));
   assert.deepEqual(errors, []);
   const interfaces = new Map(program.body.flatMap(statement => {
     if (statement.type !== 'ExportNamedDeclaration' || statement.declaration?.type !== 'TSInterfaceDeclaration') return [];

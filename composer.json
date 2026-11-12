@@ -15,9 +15,9 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Polyspec\\Template\\Tests\\": "packages/php/tests/",
-            "Polyspec\\Template\\Cli\\Tests\\": "packages/cli/php/tests/",
-            "Polyspec\\Template\\Native\\Tests\\": "packages/php-ext/tests/",
+            "Polyspec\\Template\\Tests\\": "legacy/packages/php/tests/",
+            "Polyspec\\Template\\Cli\\Tests\\": "legacy/packages/cli/php/tests/",
+            "Polyspec\\Template\\Native\\Tests\\": "legacy/packages/php-ext/tests/",
             "Polyspec\\Showcase\\Adapter\\": "examples/showcase/adapters/generated/php-adapter/",
             "Polyspec\\Showcase\\Adapter\\Php\\": "examples/showcase/adapters/php/",
             "Polyspec\\Showcase\\Generated\\CompilerCoverage\\": "examples/showcase/adapters/generated/php/compiler-coverage/",
@@ -30,11 +30,11 @@
     "repositories": [
         {
             "type": "path",
-            "url": "packages/php"
+            "url": "legacy/packages/php"
         },
         {
             "type": "path",
-            "url": "packages/cli/php"
+            "url": "legacy/packages/cli/php"
         },
         {
             "type": "vcs",

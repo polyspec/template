@@ -107,5 +107,5 @@ test('a nested .editorconfig applies after the root file to the files of its fol
   ];
   assert.deepEqual(rulesOf('tests/cases/a/input.tpl', declared), {});
   assert.deepEqual(rulesOf('tests/other/input.tpl', declared), { trim_trailing_whitespace: 'true' });
-  assert.deepEqual(rulesOf('packages/go/main.go', declared), { trim_trailing_whitespace: 'true', indent_style: 'tab' });
+  assert.deepEqual(rulesOf('legacy/packages/go/main.go', declared), { trim_trailing_whitespace: 'true', indent_style: 'tab' });
 });

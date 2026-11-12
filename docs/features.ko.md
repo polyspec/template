@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: ae351068a5d5399184e4ad09d246cf77469fe6f3371cfefb3a2342e212dcf6c5 -->
+<!-- source-sha256: 85f01ebada8d53a949a8749647e0aa892f8e5cdd41d14e54171e5ea454118f82 -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다.
@@ -33,7 +33,7 @@
 
 implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.
 
-[0.0.12](https://github.com/polyspec/template/releases/tag/v0.0.12)는 main 커밋 86edcaa1에서 공개됐으며 2026-10-27 04:40:32 UTC에 archive 9개를 발행했다. Go module tag `packages/go/v0.0.12`도 같은 커밋을 가리킨다.
+[0.0.12](https://github.com/polyspec/template/releases/tag/v0.0.12)는 main 커밋 86edcaa1에서 공개됐으며 2026-10-27 04:40:32 UTC에 archive 9개를 발행했다. Go module tag `legacy/packages/go/v0.0.12`도 같은 커밋을 가리킨다.
 
 검증: [CI 40450000056](https://github.com/polyspec/template/actions/runs/40450000056)의 worker 13개와 ci-passed, [gates 40450000190](https://github.com/polyspec/template/actions/runs/40450000190)가 통과했다. parity는 binding 253개를 두 번 실행해 사례 5,622개를 통과했고 API·binding 지적은 없다. CI 실행 8분 06초와 대기 8초가 걸렸다. 의존성 검토는 레지스트리 의존성 50개와 lock 8개에 수용하지 않은 새 안정 버전 미달이나 취약점 권고가 없음을 확인했다.
 

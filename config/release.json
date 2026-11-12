@@ -8,13 +8,6 @@
   "packages": [
     {
       "kind": "npm",
-      "directory": "packages/ts",
-      "name": "@polyspec/template",
-      "product": "template",
-      "runtime": "ts"
-    },
-    {
-      "kind": "npm",
       "directory": "packages/language",
       "name": "@polyspec/template-language",
       "product": "template-language",
@@ -40,59 +33,37 @@
       "name": "@polyspec/template-compiler",
       "product": "template-compiler",
       "runtime": "ts"
-    },
-    {
-      "kind": "composer",
-      "directory": "packages/php",
-      "name": "polyspec/template",
-      "product": "template",
-      "runtime": "php"
-    },
-    {
-      "kind": "composer",
-      "directory": "packages/cli/php",
-      "name": "polyspec/template-cli",
-      "product": "template-cli",
-      "runtime": "php"
-    },
-    {
-      "kind": "composer",
-      "directory": "packages/php-ext",
-      "name": "polyspec/template-php-ext",
-      "product": "template",
-      "runtime": "php-ext"
-    },
-    {
-      "kind": "wheel",
-      "directory": "packages/python",
-      "name": "polyspec-template",
-      "product": "template",
-      "runtime": "python"
     }
   ],
   "manifests": {
     "package.json": "version",
-    "packages/ts/package.json": "archive",
     "packages/language/package.json": "archive",
     "packages/lsp/package.json": "archive",
     "packages/codemirror/package.json": "archive",
     "packages/compiler/package.json": "archive",
     "packages/vscode/package.json": "version",
-    "packages/php/composer.json": "archive",
-    "packages/php-ext/composer.json": "archive",
-    "packages/rust/Cargo.toml": "git-tag",
-    "packages/python/pyproject.toml": "archive",
-    "packages/cli/php/composer.json": "archive"
+    "packages/rust/Cargo.toml": "git-tag"
   },
   "notReleased": {
     "composer.json": "the development root of the Composer packages of packages/, never published",
     "packages/vscode/tests/integration/harness/package.json": "the harness of the VS Code integration test",
     "examples/showcase/adapters/rust/Cargo.toml": "the Rust adapter of the showcase",
-    "examples/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository"
+    "examples/showcase/adapters/go/go.mod": "the Go adapter of the showcase, a module local to the repository",
+    "legacy/packages/cli/php/composer.json": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
+    "legacy/packages/php-ext/composer.json": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
+    "legacy/packages/php/composer.json": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
+    "legacy/packages/python/pyproject.toml": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
+    "legacy/packages/ts/package.json": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
+    "Cargo.toml": "the root Cargo workspace; the crate is released by packages/rust/Cargo.toml",
+    "packages/php-ext/Cargo.toml": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
+    "packages/php-ext/composer.json": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
+    "packages/python/Cargo.toml": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
+    "packages/python/pyproject.toml": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
+    "packages/ts/Cargo.toml": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
+    "packages/ts/package.json": "a binding package of bindgen, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
+    "legacy/packages/go/go.mod": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)"
   },
-  "goModules": {
-    "packages/go": "github.com/polyspec/template/packages/go"
-  },
+  "goModules": {},
   "annotatedTags": true,
   "packageFiles": [
     "package.json",

@@ -37,7 +37,7 @@ test('a malformed code row, a repeated code or a catalog without codes fails the
 });
 
 test('the Go identifier of each code is the constant that the Go package declares for it', { timeout: 10_000 }, () => {
-  const declared = new Map([...readFileSync(path.join(ROOT, 'packages/go/errs/errs.go'), 'utf8').matchAll(/(\w+)\s+Code = "(E_\w+)"/g)]
+  const declared = new Map([...readFileSync(path.join(ROOT, 'legacy/packages/go/errs/errs.go'), 'utf8').matchAll(/(\w+)\s+Code = "(E_\w+)"/g)]
     .map(match => [match[2], match[1]]));
   for (const { code } of catalog) assert.equal(goName(code), declared.get(code), code);
 });
@@ -66,15 +66,15 @@ test('every list of the tree matches the catalog', { timeout: 10_000 }, () => {
 });
 
 test('the PHP package and the PHP extension raise each error through the generated constants', { timeout: 10_000 }, () => {
-  const php = sources('packages/php/src', ['.php']).filter(file => file !== 'packages/php/src/ErrorCode.php');
+  const php = sources('legacy/packages/php/src', ['.php']).filter(file => file !== 'legacy/packages/php/src/ErrorCode.php');
   // The generated declarations of ErrorCode in the arginfo header raise nothing; gen_stub writes them from the stub.
-  const ext = sources('packages/php-ext/src', ['.c', '.h'])
-    .filter(file => file !== 'packages/php-ext/src/pt_error_codes.h' && file !== 'packages/php-ext/src/polyspec_template_arginfo.h');
+  const ext = sources('legacy/packages/php-ext/src', ['.c', '.h'])
+    .filter(file => file !== 'legacy/packages/php-ext/src/pt_error_codes.h' && file !== 'legacy/packages/php-ext/src/polyspec_template_arginfo.h');
   assert.deepEqual([...literals(php, "'"), ...literals(php, '"'), ...literals(ext, '"')], []);
 });
 
 test('the Python package raises only codes of the catalog', { timeout: 10_000 }, () => {
-  const python = literals(sources('packages/python/src/polyspec/template', ['.py']), '"');
+  const python = literals(sources('legacy/packages/python/src/polyspec/template', ['.py']), '"');
   assert.ok(python.length > 0, 'the Python package names its codes as string literals');
   assert.deepEqual(python.filter(({ code }) => !codes.has(code)), []);
 });

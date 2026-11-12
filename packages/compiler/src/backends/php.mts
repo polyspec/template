@@ -3,7 +3,7 @@
 // templates as static methods of GeneratedTemplates, the helpers that the program uses as static methods of
 // GeneratedRuntime, and GeneratedExecution and GeneratedProgram. Every file follows PSR-12: one statement per line,
 // braces on every control structure, four spaces of indentation, and PascalCase classes with camelCase methods.
-import type { Span } from '@polyspec/template';
+import type { Span } from '@polyspec/template-legacy';
 import {
   baseTarget, definition, dependent, emitExpression, emitNodes, fieldName, file, optional, phpLiteral, phpType,
   definitionDescriptors, layoutLine, usedDefinitions, type BackendContext, type CodeDefinition, type GroupKind, type Part, type Target,

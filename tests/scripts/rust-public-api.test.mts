@@ -23,8 +23,8 @@ function compile(file: string) {
     return spawnSync(rustc, [
       '--edition=2024', '--crate-type=lib', '--error-format=json',
       '--crate-name=public_api_probe', '--out-dir', output,
-      '-L', 'dependency=packages/rust/target/release/deps',
-      '--extern', 'polyspec_template=packages/rust/target/release/libpolyspec_template.rlib',
+      '-L', 'dependency=target/release/deps',
+      '--extern', 'polyspec_template=target/release/libpolyspec_template.rlib',
       `packages/rust/tests/fixtures/public-api/${file}`,
     ], { encoding: 'utf8' });
   } finally {

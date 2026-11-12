@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { analyze, AstProgram, MapLoader } from '@polyspec/template';
+import { analyze, AstProgram, MapLoader } from '@polyspec/template-legacy';
 import { root } from '../../tests/runner/drivers.mts';
 import { showcasePhpDirectory } from './php-namespace.mts';
 import { list, manifestFiles, number, object, readJson, text } from './json.mts';

@@ -167,27 +167,27 @@ rules-check:
 
 # ---- Lint: each tool reads the configuration files of this repository (kit K1050) ----------------------------------------
 # .oxlintrc.json and knip.json, .golangci.yml, clippy.toml with the [lints] of each Cargo.toml, phpcs.xml.dist and
-# phpstan.dist.neon, ruff.toml and [tool.vulture] of packages/python/pyproject.toml.
+# phpstan.dist.neon, ruff.toml and [tool.vulture] of legacy/packages/python/pyproject.toml.
 .PHONY: lint-ts lint-go lint-rust lint-php lint-python lint-php-ext build-php-ext test-php-ext
 lint-ts: ## Lint the TypeScript: oxlint and knip, the type check of each tsconfig and API Extractor of each package with an api-extractor.json; offline
 	$(NODE) $(KIT)/lint-ts.$(KIT_EXT)
 lint-go: ## Lint the Go: golangci-lint and deadcode -test in each Go module; offline
 	$(NODE) $(KIT)/lint-go.$(KIT_EXT)
-lint-rust: ## Lint the Rust: cargo clippy in each Cargo workspace
-	$(NODE) $(KIT)/lint-rust.$(KIT_EXT) --locked
+lint-rust: ## Lint the Rust: cargo clippy in each Cargo workspace, without the binding crates (lint-bindings)
+	$(NODE) $(KIT)/lint-rust.$(KIT_EXT) --locked $(foreach crate,$(BINDING_CRATES),--exclude $(crate))
 lint-php: ## Lint the PHP: phpcs, and PHPStan on each Composer package; offline
 	$(NODE) $(KIT)/lint-php.$(KIT_EXT) --memory-limit=-1
 lint-python: ## Lint the Python: ruff check, ruff format --check and vulture on each package; offline
 	$(NODE) $(KIT)/lint-python.$(KIT_EXT)
 
-# The C PHP extension of packages/php-ext (S10): the build with phpize, the check of its names, its stub and its arginfo
+# The C PHP extension of legacy/packages/php-ext (S10): the build with phpize, the check of its names, its stub and its arginfo
 # header, and the declaration test before its unit tests.
-lint-php-ext: ## Check the names, the stub and the stub hash of the arginfo header of packages/php-ext (S10); offline
-	$(NODE) $(KIT)/php-extension.$(KIT_EXT) check --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php
-build-php-ext: ## Build packages/php-ext with phpize into $(EXT_LIBRARY) after the arginfo check; ONLINE (gen_stub.php may fetch its PHP-Parser once)
-	$(ONLINE) $(NODE) $(KIT)/php-extension.$(KIT_EXT) build --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php
+lint-php-ext: ## Check the names, the stub and the stub hash of the arginfo header of legacy/packages/php-ext (S10); offline
+	$(NODE) $(KIT)/php-extension.$(KIT_EXT) check --extension legacy/packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library legacy/packages/php
+build-php-ext: ## Build legacy/packages/php-ext with phpize into $(EXT_LIBRARY) after the arginfo check; ONLINE (gen_stub.php may fetch its PHP-Parser once)
+	$(ONLINE) $(NODE) $(KIT)/php-extension.$(KIT_EXT) build --extension legacy/packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library legacy/packages/php
 test-php-ext: build-php-ext ## Compare the declarations of the built extension with the PHP library, then run its unit tests; offline
-	$(NODE) $(KIT)/php-extension.$(KIT_EXT) test --extension packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library packages/php -- --roots packages/php packages/php-ext
+	$(NODE) $(KIT)/php-extension.$(KIT_EXT) test --extension legacy/packages/php-ext --build-dir var/php-ext --skip vendor --skip node_modules --library legacy/packages/php -- --roots legacy/packages/php legacy/packages/php-ext
 
 # ---- Git hooks and merges -------------------------------------------------------------------------------------------------
 # .githooks/pre-commit and .githooks/commit-msg are template's own hooks (HOOK_DECLARATION); make hooks points
@@ -316,14 +316,14 @@ python-venv: ## Make the virtual environment DIR from the python3 of mise.toml w
 
 SHOWCASE_LANGS  ?= ts,go,rust,php,php-ext,python
 
-TS_DIR   := packages/ts
-GO_DIR   := packages/go
+TS_DIR   := legacy/packages/ts
+GO_DIR   := legacy/packages/go
 # The Go that the Go backend of the compiler writes as it is, one definition per file; the folder is in no module, so go
 # vet checks its files as one package and resolves their imports through go.work.
 GO_BACKEND_DIR := packages/compiler/backends/go
 RUST_DIR := packages/rust
-PHP_DIR  := packages/php
-EXT_DIR  := packages/php-ext
+PHP_DIR  := legacy/packages/php
+EXT_DIR  := legacy/packages/php-ext
 # The builds that the checks run, published by scripts/publish-build.mts only when their bytes change: cargo links
 # target/release again on every build, and macOS checks a new executable file on its first run (T19.6-1). The C PHP
 # extension is built by phpize as polyspec_template.so on every platform (T21.4); kit's `make build-php-ext` builds it (S10).
@@ -422,7 +422,7 @@ template-lint-go-format:
 template-lint-go-modules:
 	@failed=; for module in $$(git ls-files ':(glob)**/go.mod'); do dir=$$(dirname $$module); echo "[go-modules] go mod tidy -diff in $$dir"; (cd $$dir && $(GO) mod tidy -diff) || failed="$$failed $$dir"; done; test -z "$$failed" || { echo "go mod tidy -diff fails in:$$failed"; exit 1; }
 template-lint-rust-format:
-	$(CARGO) fmt --manifest-path $(RUST_DIR)/Cargo.toml --check
+	$(CARGO) fmt -p polyspec-template --check
 template-lint-showcase-format: typed-generator
 	$(CARGO) fmt --manifest-path $(SHOWCASE_RUST)/Cargo.toml --check
 template-lint-showcase-warnings: typed-generator
@@ -484,8 +484,8 @@ release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language te
 template-install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
 
-# The validator of the template AST of packages/ts is ajv's standalone validation code of contracts/schema/ast.schema.json
-# (T25.6-2): make ast-validator generates packages/ts/src/ast-validator.mjs before the build of the package, which makes the
+# The validator of the template AST of legacy/packages/ts is ajv's standalone validation code of contracts/schema/ast.schema.json
+# (T25.6-2): make ast-validator generates legacy/packages/ts/src/ast-validator.mjs before the build of the package, which makes the
 # file when the schema or the generator is newer; the file is generated output and is not tracked. The package has no runtime
 # dependency on ajv and compiles no schema at run time.
 build-ts: template-build-ts ## Build the TypeScript package
@@ -494,14 +494,14 @@ template-build-ts: ast-validator
 	$(NODE) scripts/build-package.mts --package ts
 
 .PHONY: ast-validator
-ast-validator: packages/ts/src/ast-validator.mjs ## Generate the AST validator of packages/ts from contracts/schema/ast.schema.json
-packages/ts/src/ast-validator.mjs: contracts/schema/ast.schema.json scripts/generate-ast-validator.mts
+ast-validator: legacy/packages/ts/src/ast-validator.mjs ## Generate the AST validator of legacy/packages/ts from contracts/schema/ast.schema.json
+legacy/packages/ts/src/ast-validator.mjs: contracts/schema/ast.schema.json scripts/generate-ast-validator.mts
 	$(NODE) scripts/generate-ast-validator.mts
 
 # build-go builds every module of go.work, the showcase adapter among them, which imports the generated programs that
 # typed-generator writes (T27.1-40).
 build-go: template-build-go typed-generator ## Build the Go CLI and every module of go.work
-	$(NODE) $(KIT)/runtime-targets.$(KIT_EXT) build --roots packages/go examples/showcase/adapters/go -- go build ./...
+	$(NODE) $(KIT)/runtime-targets.$(KIT_EXT) build --roots legacy/packages/go examples/showcase/adapters/go -- go build ./...
 
 template-build-go:
 	cd $(GO_DIR) && $(GO) build -o template ./cmd/template && cd $(CURDIR) && $(NODE) scripts/publish-build.mts $(GO_DIR)/template var/build/template-go
@@ -509,7 +509,7 @@ template-build-go:
 build-rust: template-build-rust typed-generator ## Build the Rust CLI
 
 template-build-rust:
-	$(CARGO) build --locked --release --features cli --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts $(RUST_DIR)/target/release/template var/build/template-rust
+	$(CARGO) build --locked --release --features cli --manifest-path $(RUST_DIR)/Cargo.toml && $(NODE) scripts/publish-build.mts target/release/template var/build/template-rust
 
 build-php: template-build-php ## Install the Composer packages of the development root composer.json into vendor/
 
@@ -559,7 +559,7 @@ template-test-scripts: build-rust typed-generator compiler-interface-generate bu
 
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
-# packages/ts and packages/language, whose declarations tsc reads.
+# legacy/packages/ts and packages/language, whose declarations tsc reads.
 # Each project is a prerequisite of one command, so a failed one keeps the others running (T19.8).
 typecheck: typecheck-infrastructure typecheck-docs typecheck-scenarios ## Type check of the TypeScript infrastructure (tsconfig.json, S9)
 .PHONY: typecheck-infrastructure typecheck-docs typecheck-scenarios
@@ -570,7 +570,7 @@ typecheck-docs: build-ts template-build-language
 typecheck-scenarios: build-ts template-build-language
 	$(TSC) -p examples/site/scenarios/tsconfig.json
 
-# The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template,
+# The type-aware lint of kit reads the same declarations: a module that imports @polyspec/template-legacy,
 # @polyspec/template-language or @polyspec/template-lsp (the VS Code extension) resolves its types from the dist that
 # package.json exports, so the lint runs after those builds; without the dist of the server each of its values is an
 # error type to oxlint-tsgolint.
@@ -689,18 +689,18 @@ conformance-python: build-ts ## Conformance suite of TypeScript and Python
 	$(NODE) tests/runner/conformance.mts --langs ts,python
 
 # The Python package is installed, non-editable, into the virtual environment PYTHON_VENV (scripts/python-venv.mts). The link
-# of kit then makes its installed package folder a link to packages/python/src/polyspec/template (kit K765), so its
+# of kit then makes its installed package folder a link to legacy/packages/python/src/polyspec/template (kit K765), so its
 # tests and the conformance driver (tests/runner/drivers.mts) import
 # polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). kit's python-venv makes the environment from the
-# python of mise.toml, and the uv of mise.toml installs into it the dependencies that packages/python/pylock.toml pins by
+# python of mise.toml, and the uv of mise.toml installs into it the dependencies that legacy/packages/python/pylock.toml pins by
 # version and digest, then the package offline, with its build requirement from the wheelhouse that make install of the
 # main checkout fills: a linked worktree downloads nothing and reads it as it runs the tools of the main checkout (kit K519).
 # make install makes the environment, so the locked dependencies are downloaded there (AGENTS, Idempotency: Network). The
 # stamp is remade when the project, its lock or its build requirements change; a change of the sources needs no install,
-# since the installed package folder is a link to them. The tests are discovered with packages/python as the top level: the directory
+# since the installed package folder is a link to them. The tests are discovered with legacy/packages/python as the top level: the directory
 # tests is a package, so a test imports the shared case listing tests/cases.py relatively, as it does when a run
 # names one test file by its path.
-PYTHON_PACKAGE := packages/python
+PYTHON_PACKAGE := legacy/packages/python
 # make reads the environment when it parses the Makefile, before make install-tools TOOLS=npm has installed the node of
 # the checkout, so the node of the machine that starts the bootstrap reads it (kit K171).
 PYTHON_BOOTSTRAP_NODE := $(if $(wildcard $(KIT_TOOLS)/bin/node),$(KIT_TOOLS)/bin/node,node)
@@ -712,7 +712,7 @@ UV := $(KIT_TOOLS)/mise/shims/uv
 WHEELHOUSE := $(or $(KIT_MAIN_CHECKOUT),$(CURDIR))/var/python/wheelhouse
 
 .PHONY: python-package
-python-package: $(PYTHON_VENV)/.installed ## Make the environment of the Python package with packages/python installed and its package folder linked to the checkout; offline
+python-package: $(PYTHON_VENV)/.installed ## Make the environment of the Python package with legacy/packages/python installed and its package folder linked to the checkout; offline
 
 $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.txt
 	rm -rf $(PYTHON_VENV)
@@ -913,5 +913,25 @@ generated-lint-check: build-php typed-generator ## Lint the generated Go, Rust, 
 	$(NODE) scripts/check-generated-lint.mts
 
 clean: ## Remove build outputs
-	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
+	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* legacy/packages/*/dist.inputs.json legacy/packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
+# ---- Bindings: generated from packages/rust/interface.json by bindgen ------------------------------------------------
+# The root Cargo workspace holds the core crate and the binding crates that bindgen scaffold writes (bindgen L-2). bindgen
+# is not yet a package that package-lock.json pins; until it is, BINDGEN names the cli (packages/ts/src/cli.ts) of a
+# bindgen checkout, and the targets refuse to run without it. bindings writes the generated folders of packages/ts,
+# packages/python and packages/php-ext, which Git ignores; bindings-check runs the contract check, which also compares the
+# tracked binding packages with what bindgen scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
+BINDING_CRATES := polyspec-template-node polyspec-template-python polyspec-template-php-ext
+BINDGEN ?=
+.PHONY: bindings bindings-check lint-bindings test-bindings
+bindings:
+	@test -n "$(BINDGEN)" || { echo "bindings: set BINDGEN to the cli of bindgen"; exit 1; }
+	$(NODE) $(BINDGEN) generate --root $(CURDIR)
+bindings-check:
+	@test -n "$(BINDGEN)" || { echo "bindings-check: set BINDGEN to the cli of bindgen"; exit 1; }
+	$(NODE) $(BINDGEN) check $(CURDIR)/packages/rust/interface.json
+# The lint and the tests of the binding crates, after make bindings writes their generated folders.
+lint-bindings: bindings
+	$(CARGO) clippy --locked $(foreach crate,$(BINDING_CRATES),-p $(crate)) --all-targets -- -D warnings
+test-bindings: bindings
+	$(CARGO) test --locked $(foreach crate,$(BINDING_CRATES),-p $(crate))

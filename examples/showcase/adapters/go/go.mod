@@ -9,4 +9,4 @@ require (
 	golang.org/x/text v0.43.0 // indirect
 )
 
-replace github.com/polyspec/template/packages/go => ../../../../packages/go
+replace github.com/polyspec/template/packages/go => ../../../../legacy/packages/go

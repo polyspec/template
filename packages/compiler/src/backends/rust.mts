@@ -1,4 +1,4 @@
-import type { Span } from '@polyspec/template';
+import type { Span } from '@polyspec/template-legacy';
 import {
   baseTarget, definition, descriptor, emitExpression, emitNodes, fieldName, functionName, indent, rustString, rustType,
   type BackendContext, type Descriptor, type Part, type Target,

@@ -84,7 +84,7 @@ try {
   rejected++;
   // VAL-22: a public operation added to the TypeScript bound map class is rejected.
   const boundSource = join(directory, 'bound.ts');
-  writeFileSync(boundSource, readFileSync(resolve(root, 'packages/ts/src/value/bound.ts'), 'utf8').replace('  static {', '  entries(): number {\n    return 0;\n  }\n\n  static {'));
+  writeFileSync(boundSource, readFileSync(resolve(root, 'legacy/packages/ts/src/value/bound.ts'), 'utf8').replace('  static {', '  entries(): number {\n    return 0;\n  }\n\n  static {'));
   const boundResult = spawnSync(process.execPath, ['scripts/check-compiler-interface.mts'], {
     cwd: root,
     env: { ...process.env, TEMPLATE_TS_BOUND_SOURCE: boundSource },

@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { parse, TemplateError } from '../packages/ts/dist/index.mjs';
+import { parse, TemplateError } from '../legacy/packages/ts/dist/index.mjs';
 import { listCases, typeDefinitions } from '../tests/runner/cases.mts';
 import { deriveTypeManifest } from '../packages/compiler/src/type-manifest.mts';
 

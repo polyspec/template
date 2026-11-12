@@ -45,7 +45,7 @@ try {
       runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
       const tsRunner = join(temporary, 'typed.mjs');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
-import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template';
+import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template-legacy';
 ${tsDescribe}
 const expected = ${JSON.stringify(expected)};
 const runtime = new RuntimeEnvironment();
@@ -99,7 +99,7 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
       runChecked('php', ['-r', `${phpProgramAutoload(phpString(join(root, 'vendor/autoload.php')), phpNamespace, phpString(phpDirectory))} function describe_value(mixed $value): string { if ($value === null) return 'null'; if (is_bool($value)) return 'bool(' . ($value ? 'true' : 'false') . ')'; if (is_float($value)) return 'number(' . $value . ')'; if (is_string($value)) return 'string(' . $value . ')'; if (is_array($value) && array_is_list($value)) return 'list(' . implode(',', array_map('describe_value', $value)) . ')'; if (is_array($value)) { $parts = []; foreach ($value as $key => $item) $parts[] = $key . '=' . describe_value($item); return 'map(' . implode(',', $parts) . ')'; } return 'unexpected(' . get_debug_type($value) . ')'; } $runtime = new Polyspec\\Template\\Render\\RuntimeEnvironment(); $runtime->register('describe', static fn (array $args): string => implode(',', array_map('describe_value', $args))); $actual = (new \\${phpNamespace}\\GeneratedProgram($runtime))->render('input.tpl', ['page' => ['title' => 'T', 'count' => 2], 'rows' => [['name' => 'a'], ['name' => 'b']], 'tags' => ['x' => 1]]); if ($actual !== ${phpString(expected)}) throw new RuntimeException('PHP generated typed values differ: ' . $actual);`], root);
     },
     Python: () => {
-      // Python: the generated program renders through Engine like the AST program; the python of packages/python/.venv imports the package (scripts/python-toolchain.mts).
+      // Python: the generated program renders through Engine like the AST program; the python of legacy/packages/python/.venv imports the package (scripts/python-toolchain.mts).
       runPythonCheck(temporary, {
         'generated.py': compileSource(graphManifest, types, 'python'),
         'expected.html': expected,

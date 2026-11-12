@@ -4,12 +4,12 @@
 // checks, such as the owner check of every tracked path, and compiled by a concurrent `cargo test` of the crate.
 //
 // - nodeWorkspace: an ES module directory whose node_modules holds copies of installed packages of this repository, so
-//   that tsc and Node.js resolve `@polyspec/template` from it as from the checkout. No symbolic link (AGENTS).
+//   that tsc and Node.js resolve `@polyspec/template-legacy` from it as from the checkout. No symbolic link (AGENTS).
 // - rustWorkspace: a crate that depends on packages/rust by path, with the versions of its Cargo.lock and the
 //   rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
 //   checkout (T18.7).
-// - goWorkspace: a module that is a member of a Go workspace (go.work) together with packages/go, as the Go adapter of
-//   the showcase is, so Go resolves the module of packages/go from that directory and checks its dependencies by its
+// - goWorkspace: a module that is a member of a Go workspace (go.work) together with legacy/packages/go, as the Go adapter of
+//   the showcase is, so Go resolves the module of legacy/packages/go from that directory and checks its dependencies by its
 //   go.sum (T25.6-1).
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -21,7 +21,7 @@ import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts'
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RUST = join(root, 'packages/rust');
-const GO = join(root, 'packages/go');
+const GO = join(root, 'legacy/packages/go');
 function home(): string {
   const value = process.env.HOME;
   if (value === undefined) throw new Error('HOME is not set; the cargo of the checks is $HOME/.cargo/bin/cargo');
@@ -35,7 +35,7 @@ export function temporaryDirectory(name: string): string {
 }
 
 /** A temporary ES module directory with copies of the installed `packages`. */
-export function nodeWorkspace(name: string, packages: readonly string[] = ['@polyspec/template']): string {
+export function nodeWorkspace(name: string, packages: readonly string[] = ['@polyspec/template-legacy']): string {
   const directory = temporaryDirectory(name);
   writeFileSync(join(directory, 'package.json'), `${JSON.stringify({ private: true, type: 'module' })}\n`);
   for (const name of packages) {
@@ -85,7 +85,7 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   mkdirSync(join(directory, 'src'));
   writeFileSync(join(directory, 'src/lib.rs'), '');
   mkdirSync(join(directory, 'tests'));
-  const original = readFileSync(join(RUST, 'Cargo.lock'), 'utf8');
+  const original = readFileSync(join(root, 'Cargo.lock'), 'utf8');
   writeFileSync(join(directory, 'Cargo.lock'), original);
   const targetDirectory = join(RUST, 'target');
   const env = { ...process.env, CARGO_TARGET_DIR: targetDirectory };
@@ -93,7 +93,7 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   // --offline: the crates come from the registry of CARGO_HOME, into which make install downloads every Cargo.lock.
   if (metadata.error || metadata.status !== 0) {
     rmSync(directory, { recursive: true, force: true });
-    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of packages/rust/Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error ? metadata.error.message : metadata.stderr}`);
+    throw new Error(`cargo metadata --offline of ${directory} failed; a crate of Cargo.lock is not in the registry of CARGO_HOME, run make install: ${metadata.error ? metadata.error.message : metadata.stderr}`);
   }
   const known = lockPackages(original);
   const chosen = [...lockPackages(readFileSync(join(directory, 'Cargo.lock'), 'utf8'))].filter(([key]) => !key.startsWith('template-generated-check '));
@@ -105,14 +105,14 @@ serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision
   }).map(([key]) => key);
   if (other.length) {
     rmSync(directory, { recursive: true, force: true });
-    throw new Error(`the lock of ${directory} holds packages that packages/rust/Cargo.lock does not: ${other.join(', ')}`);
+    throw new Error(`the lock of ${directory} holds packages that Cargo.lock does not: ${other.join(', ')}`);
   }
   return { directory, manifest, env, targetDirectory, test: file => join(directory, 'tests', `${file}.rs`) };
 }
 
 /**
- * A temporary Go module that uses the module of packages/go from that directory: both are the modules of the go.work of
- * the temporary directory, so the module requires nothing and Go checks the dependencies of packages/go by its go.sum.
+ * A temporary Go module that uses the module of legacy/packages/go from that directory: both are the modules of the go.work of
+ * the temporary directory, so the module requires nothing and Go checks the dependencies of legacy/packages/go by its go.sum.
  */
 export function goWorkspace(name: string): string {
   const directory = temporaryDirectory(name);

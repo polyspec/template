@@ -15,6 +15,8 @@ import { runStepSync } from '../../scripts/test-progress/step.mts';
 
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const packages = join(root, 'packages');
+// The language packages of the transition (docs/spec/runtime.md#transition).
+const legacyPackages = join(root, 'legacy', 'packages');
 
 const environment = (): NodeJS.ProcessEnv => ({ ...process.env, PATH: `${process.env.HOME}/.cargo/bin:${process.env.PATH}` });
 
@@ -52,7 +54,7 @@ export type Language = 'ts' | 'go' | 'rust' | 'php' | 'python' | 'php-ext';
 /** @public the tests of tests/scripts import a copy of this module by a computed path, which knip does not resolve. */
 export const drivers: Record<Language, Driver> = {
   ts: {
-    dir: join(packages, 'ts'),
+    dir: join(legacyPackages, 'ts'),
     // make template-build-language builds the template package first and then the formatter package.
     build() {
       build('ts', 'make', ['template-build-language'], root);
@@ -61,14 +63,14 @@ export const drivers: Record<Language, Driver> = {
     // command template-language runs `format` and the command template runs the other subcommands (CNF-5).
     command(args) {
       if (args[0] === 'format') return ['node', [join(packages, 'language', 'bin', 'template-language.mjs'), ...args]];
-      return ['node', [join(packages, 'ts', 'bin', 'template.mjs'), ...args]];
+      return ['node', [join(legacyPackages, 'ts', 'bin', 'template.mjs'), ...args]];
     },
   },
   go: {
-    dir: join(packages, 'go'),
+    dir: join(legacyPackages, 'go'),
     build() {
-      build('go', 'go', ['build', '-o', 'template', './cmd/template'], join(packages, 'go'));
-      publishBuild(join(packages, 'go', 'template'), published.go);
+      build('go', 'go', ['build', '-o', 'template', './cmd/template'], join(legacyPackages, 'go'));
+      publishBuild(join(legacyPackages, 'go', 'template'), published.go);
     },
     command(args) {
       return [published.go, args];
@@ -78,28 +80,28 @@ export const drivers: Record<Language, Driver> = {
     dir: join(packages, 'rust'),
     build() {
       build('rust', 'cargo', ['build', '--locked', '--release', '--features', 'cli', '--bin', 'template'], join(packages, 'rust'));
-      publishBuild(join(packages, 'rust', 'target', 'release', 'template'), published.rust);
+      publishBuild(join(root, 'target', 'release', 'template'), published.rust);
     },
     command(args) {
       return [published.rust, args];
     },
   },
   php: {
-    dir: join(packages, 'php'),
+    dir: join(legacyPackages, 'php'),
     build() {
       build('php', process.execPath, [join(root, 'scripts/composer-install.mts'), root], root);
     },
     command(args) {
-      // The command line is the bin of its own package (packages/cli/php), which the development root requires by its path;
+      // The command line is the bin of its own package (legacy/packages/cli/php), which the development root requires by its path;
       // the proxy of vendor/bin runs it on the autoloader of the root.
       return ['php', [join(root, 'vendor', 'bin', 'template.php'), ...args]];
     },
   },
-  // The command is the python of packages/python/.venv, where make python-package installs packages/python and links its
+  // The command is the python of legacy/packages/python/.venv, where make python-package installs legacy/packages/python and links its
   // package folder to the checkout, so it imports polyspec.template from the sources of the checkout with no changed import path (PRINCIPLES S3). The build is make
   // python-package, which makes that environment and does nothing when it is current.
   python: {
-    dir: join(packages, 'python'),
+    dir: join(legacyPackages, 'python'),
     build() {
       build('python', 'make', ['python-package'], root);
     },
@@ -108,7 +110,7 @@ export const drivers: Record<Language, Driver> = {
     },
   },
   'php-ext': {
-    dir: join(packages, 'php-ext'),
+    dir: join(legacyPackages, 'php-ext'),
     build() {
       // The bin of the command line package, which the development root requires by its path, runs the library's command
       // line on the classes of the extension.

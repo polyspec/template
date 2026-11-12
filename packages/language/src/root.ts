@@ -1,7 +1,7 @@
 // Template root: the marker `template-root.json`, the root of a document by nearest ancestor and the
 // diagnostics of the include and block paths that name no regular file under the root. Files are reached only through
 // an injected host, so the language service stays free of Node.js.
-import { PathError, resolvePath, type Template } from '@polyspec/template';
+import { PathError, resolvePath, type Template } from '@polyspec/template-legacy';
 import type { Diagnostic } from './document.js';
 
 /** The file name of the marker that declares a template root. */

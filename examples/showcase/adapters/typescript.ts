@@ -13,7 +13,7 @@ import {
   type DefineInput,
   type Env,
   type Template,
-} from '@polyspec/template';
+} from '@polyspec/template-legacy';
 import type {
   DefineRegistry,
   Environment,

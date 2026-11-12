@@ -11,8 +11,8 @@
       ],
       "sources": "src",
       "forbiddenModules": [
-        "@polyspec/template",
-        "@polyspec/template/**"
+        "@polyspec/template-legacy",
+        "@polyspec/template-legacy/**"
       ]
     },
     {

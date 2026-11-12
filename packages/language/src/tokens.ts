@@ -1,5 +1,5 @@
 // Highlight tokens: the legend of the token types that the parser gives every part of an accepted tag (EDT-8).
-import type { SyntaxToken } from '@polyspec/template';
+import type { SyntaxToken } from '@polyspec/template-legacy';
 
 /** The token types of EDT-8, in the order of the LSP semantic token legend. */
 export const TOKEN_TYPES = ['delimiter', 'keyword', 'variable', 'property', 'function', 'string', 'number', 'operator', 'comment', 'path'] as const satisfies readonly SyntaxToken['kind'][];

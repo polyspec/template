@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-conformance -->
-<!-- source-sha256: 66c0664ef4aa1099098af90d415c35a7c045583cd2f1758a7a699c5ad84e55de -->
+<!-- source-sha256: 6dbedd451f199e90056d1dd259b7f5104815679035859114905016b878413f72 -->
 # 적합성
 
 [English](/operations/conformance).
@@ -90,12 +90,12 @@ node scripts/check-rules.mts
 
 | 구현 | 명령 |
 | --- | --- |
-| ts | `node packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
-| go | `packages/go/template` |
-| rust | `packages/rust/target/release/template` |
+| ts | `node legacy/packages/ts/bin/template.mjs`; `format`: `node packages/language/bin/template-language.mjs` |
+| go | `legacy/packages/go/template` |
+| rust | `target/release/template` |
 | php | `php vendor/bin/template.php` |
 | php-ext | `php -d extension=var/php-ext/polyspec_template.so vendor/bin/template.php` |
-| python | `packages/python/.venv/bin/python -m polyspec.template.cli`(`make python-package`가 `packages/python`을 `packages/python/.venv`에 설치한다) |
+| python | `legacy/packages/python/.venv/bin/python -m polyspec.template.cli`(`make python-package`가 `legacy/packages/python`을 `legacy/packages/python/.venv`에 설치한다) |
 
 TypeScript의 포매터는 `@polyspec/template`에 의존하는 패키지 `@polyspec/template-language`이므로, 그 명령 `template-language`가 `format`을 제공하고 명령 `template`이 나머지 하위 명령을 제공한다.
 

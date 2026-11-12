@@ -1169,7 +1169,7 @@
       }
     },
     "javascript-esm": {
-      "entry": "@polyspec/template/render",
+      "entry": "@polyspec/template-legacy/render",
       "boundMap": {
         "type": "BoundMap",
         "operations": {

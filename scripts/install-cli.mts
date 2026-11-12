@@ -36,11 +36,11 @@ if (action === 'uninstall') {
   mkdirSync(next, { recursive: true });
   try {
     const language = join(root, 'packages', 'language');
-    const template = join(root, 'packages', 'ts');
+    const template = join(root, 'legacy', 'packages', 'ts');
     writeFileSync(join(next, 'package.json'), `${JSON.stringify({
       private: true,
-      dependencies: { '@polyspec/template-language': `file:${language}`, '@polyspec/template': `file:${template}` },
-      overrides: { '@polyspec/template': `file:${template}` },
+      dependencies: { '@polyspec/template-language': `file:${language}`, '@polyspec/template-legacy': `file:${template}` },
+      overrides: { '@polyspec/template-legacy': `file:${template}` },
     }, null, 2)}\n`);
     writeFileSync(join(next, '.npmrc'), 'install-links=true\nbin-links=false\n');
     process.stdout.write(`install-cli: npm install in ${next}\n`);

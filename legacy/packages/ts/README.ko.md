@@ -1,0 +1,97 @@
+<!-- doc-id: packages-template-ts-readme -->
+<!-- source-sha256: ad4a2089776d9e4fcc3cab452f9de6e658910403fab4d88255967abf46845b0a -->
+# @polyspec/template-legacy
+
+[English](README.md).
+
+템플릿 언어의 TypeScript 구현: 렉서, 파서, 렌더러, 내장 함수, 명령줄 인터페이스. 패키지는 Node.js와 브라우저에서 실행된다.
+
+## 설치
+
+```sh
+npm install @polyspec/template-legacy
+```
+
+## 서버에서 렌더
+
+Node 진입점은 전체 SDK를 재공개하고 파일시스템·artifact 서비스를 더한다. 두 module 형식에서 전체·render-only 진입점과 runtime·불투명한 bound-map identity를 공유한다.
+
+```ts
+import { AstProgram, Engine, FsLoader } from '@polyspec/template-legacy/node';
+
+const program = new AstProgram({ loader: new FsLoader('templates') });
+program.register('greet', ([name]) => `Hello, ${name}`);
+const engine = new Engine(program);
+const assign = { title: 'Home' };
+const html = engine.render('layout', assign, {
+  define: { layout: 'layout.tpl', content: 'pages/home.tpl' },
+  env: { timezone: '+09:00', now: Math.floor(Date.now() / 1000) },
+});
+```
+
+## 브라우저에서 렌더
+
+```ts
+import { AstProgram, Engine, MapLoader, parseJson } from '@polyspec/template-legacy';
+
+const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': '<b>{= name}</b>' }) }));
+const assign = parseJson(document.getElementById('state').textContent);
+document.getElementById('card').innerHTML = engine.render('card.tpl', assign);
+```
+
+`parseJson`은 JSON 텍스트의 키 순서를 보존하고 ±(2^53 − 1) 밖의 숫자, 짝이 없는 surrogate escape, 64단계보다 깊은 중첩을 거부한다. 하나의 JSON 문서가 아닌 텍스트는 `E_DATA_INVALID_JSON`이다. `JSON.parse`는 어느 것도 하지 않는다.
+
+## 파싱된 템플릿 렌더
+
+`@polyspec/template-legacy/render`는 파싱된 템플릿(AST JSON)을 받는 엔진을 내보내며 렉서와 파서를 포함하지 않는다.
+
+```ts
+import { AstProgram, Engine, MapLoader, decodeTemplate } from '@polyspec/template-legacy/render';
+
+const cardAst = decodeTemplate(cardAstJson);
+const engine = new Engine(new AstProgram({ loader: new MapLoader({ 'card.tpl': cardAst }) }));
+```
+
+`decodeTemplate`은 AST JSON의 모든 노드를 AST 스키마로 검사하며, 실패하면 `path`가 잘못된 노드의 JSON Pointer인 `AstDecodeError`를 던진다(AST-10).
+
+`@polyspec/template-legacy/decode`는 `decodeTemplate`과 `AstDecodeError`만 내보낸다. `decodeTemplate`만 import하는 bundle에는 어느 진입점도 패키지의 다른 코드를 가져오지 않는다: minify 약 87 KB, gzip 7.5 KB이며 거의 모두가 스키마의 validator다.
+
+## API
+
+| 내보내기 | 설명 |
+| --- | --- |
+| `parse(source, name, { delimiters })` | 템플릿 하나를 AST로 파싱한다. `source`는 문자열 또는 UTF-8 바이트다. |
+| `decodeTemplate(json)` | 텍스트 또는 파싱된 값인 AST JSON을 `contracts/schema/ast.schema.json`으로 검사해 `Template`으로 읽는다. `AstDecodeError`는 `path`에 잘못된 노드의 JSON Pointer를 담는다(AST-10). `@polyspec/template-legacy/render`와 `@polyspec/template-legacy/decode`도 내보낸다. |
+| `analyze(source, name, { delimiters })` | 한 번 파싱해 AST, 파서 태그 범위, 읽은 표현식 token 범위를 반환한다. |
+| `analyzePrefix(source, name, { delimiters })` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환하며 성공하면 null이다. 잘못된 UTF-8과 구분자 옵션은 예외를 던진다. 성공한 부분 분석 결과는 `ast`(Go는 `AST`)에 완전한 AST도 제공하며 파서 오류가 있으면 해당 필드는 null 또는 네이티브 부재 값이다. |
+| `new AstProgram({ loader, functions, limits, delimiters })` | AST program을 생성한다. `loader`의 기본값은 빈 `MapLoader`다. |
+| `new Engine(program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. |
+| `engine.render(nameOrAst, assign, { define, env })` | 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 경로나 HTML 항목을 제공한다. |
+| `bind(value)`, `merge(first, second)` | `bind`는 데이터를 한 번 검사하고 `BoundMap`을 반환한다. `merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `render`와 `prepare`는 bound map을 `assign`과 정의 `data`로 받고 다시 binding하지 않는다. 다른 위치에서는 `E_DATA_UNSUPPORTED_TYPE`으로 실패한다(VAL-22). 오류에는 template과 위치가 없다(ERR-14). 두 entry와 두 module format은 하나의 bound map type을 공유한다. |
+| `astProgram.register(name, fn)` | 호스트 함수 `(args, { env }) => value`를 등록한다. 인자는 VAL-21 형태다. safe 문자열은 `string`, list는 새 배열, map은 항목 순서의 새 `Map`이며, native object는 list나 map 안에 있어도 원본 class 인스턴스로 전달된다. |
+| `MapLoader`, `FsLoader` | 메모리 로더와 파일시스템 로더. 로더가 던진 예외는 렌더를 `E_LOAD_FAILED`로 실패시키며, `FsLoader`는 읽을 수 없는 일반 파일을 이 방식으로 보고한다. |
+| `parseJson`, `parseJsonBytes` | assign 데이터용 순서 보존 JSON 파서. |
+| `TemplateError` | `code`, `template`, `line`, `col`, `offset`, `end`, `message`를 가진 오류. |
+| `SafeString` | echo 태그가 이스케이프 없이 쓰는 문자열. |
+
+## 명령줄
+
+```sh
+node bin/template.mjs parse [--root DIR] [--delimiters OC] FILE
+node bin/template.mjs render [--data F] [--define F] [--env F] [--root DIR] [--delimiters OC] FILE
+node bin/template.mjs tokens [--root DIR] [--delimiters OC] FILE
+```
+
+`parse`는 AST JSON을 출력한다. `render`는 출력을 인쇄한다. `tokens`는 템플릿의 토큰을 UTF-8 바이트 오프셋의 `[start, end, type]`으로 출력한다([포맷](../../../docs/spec/formatting.ko.md), FMT-1, FMT-2). 템플릿 오류는 stderr에 오류 JSON을 출력하고 상태 2로 종료한다.
+## 개발
+
+```sh
+make build-ts
+make test-ts
+```
+
+테스트는 `tests/`에 있다. 저장소의 적합성 케이스와 표현식 픽스처를 인프로세스로 실행한다.
+
+패키지는 공개 서명에 쓰이는 AST·로더·런타임 타입의 이름을 export한다. `SetNode`는 AST 대입, `LoopMetaExpression`은 AST 메타데이터 표현식, `RuntimeLoopMeta`는 활성 루프 메타데이터, `SourceSpan`은 오류의 소스 범위를 나타낸다. 이들은 타입 export이다. `RenderAstProgram`은 render 전용 진입점의 `AstProgram` 타입이며 루트 런타임 export에 생성자를 추가하지 않는다. 소비자는 구현 파일 경로 없이 패키지 진입점에서 이 타입들을 import할 수 있다.
+
+`Source.fromBytes`와 `Source.fromText`는 맨 앞 BOM 하나를 제거한 검증된 UTF-8을 복사해 보관한다. 소스는 `name`, `text`, `bytes`, `lines`, `length`를 제공하며 `byteAt`과 `span`은 UTF-16 인덱스를 UTF-8 바이트 오프셋으로 변환한다. `Source.lineIndex`와 `Source.position`은 바이트 위치를 찾고 `error`는 바이트 오프셋으로 위치가 있는 템플릿 오류를 만든다. 잘못된 UTF-8과 짝이 없는 텍스트 서로게이트는 거부한다.

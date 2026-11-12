@@ -19,7 +19,7 @@ import { nodeWorkspace } from '../../scripts/temporary-workspace.mts';
 // The time limit of the render of one case.
 const RENDER_TIMEOUT_MS = 30_000;
 
-// The generated sources import @polyspec/template, which the workspace holds as a copy of the installed package.
+// The generated sources import @polyspec/template-legacy, which the workspace holds as a copy of the installed package.
 const temporary = nodeWorkspace('generated-conformance-ts');
 const sources = join(temporary, 'source');
 const output = join(temporary, 'output');

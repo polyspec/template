@@ -1,7 +1,7 @@
 // The types that the compiler IR gives `??` and `+` (EXP-24, EXP-31): `a ?? b` is optional only when b is, and `+` never gives null.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { Expr, Span } from '@polyspec/template';
+import type { Expr, Span } from '@polyspec/template-legacy';
 import type { TypeManifest } from '../../packages/compiler/src/documents.mts';
 import { lowerSourceGraph, type NodeOf, type SourceGraph } from '../../packages/compiler/src/ir.mts';
 

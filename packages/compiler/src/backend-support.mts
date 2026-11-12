@@ -1,4 +1,4 @@
-import type { Span } from '@polyspec/template';
+import type { Span } from '@polyspec/template-legacy';
 import type { TypeManifest } from './documents.mts';
 import { loweredTemplate, scalarKinds, type Expr, type ExprOf, type LoweredTemplate, type Node, type NodeOf, type Program, type ValueType, type VariableExpr } from './ir.mts';
 

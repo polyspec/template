@@ -4,7 +4,7 @@
 // The environment variable TEMPLATE_SOURCE_ROOT adds an explicit external template tree to the same checks.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { analyze, parse, TemplateError } from '@polyspec/template';
+import { analyze, parse, TemplateError } from '@polyspec/template-legacy';
 import { describe, expect, it } from 'vitest';
 import { readCaseOptions } from '../../../tests/runner/case-list.mts';
 import { format } from '../src/index.js';

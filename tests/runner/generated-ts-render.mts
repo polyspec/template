@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parentPort, workerData } from 'node:worker_threads';
-import { BindError, parseJsonBytes } from '../../packages/ts/dist/index.mjs';
+import { BindError, parseJsonBytes } from '../../legacy/packages/ts/dist/index.mjs';
 
 /** The case that the runner passes as workerData. */
 export interface RenderCase {
