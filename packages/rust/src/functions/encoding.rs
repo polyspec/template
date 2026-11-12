@@ -1,52 +1,21 @@
 //! escape, raw, json, url, nl2br, str, type (FUN-10, FUN-11, FUN-18, FUN-19, FUN-26 to FUN-30).
 
+use crate::error::ErrorCode;
 use crate::escape::escape_html;
 use crate::functions::helpers::{BuiltIn, FunctionContext, FunctionError, arg_string, internal, stringify_arg, type_error};
 use crate::value::Value;
-use crate::value::number::number_to_string;
+use crate::value::bind::to_json_value;
+use polyspec_ordered_json::{StringifyOptions, stringify};
 
-fn json_string(text: &str) -> String {
-    let mut result = String::from("\"");
-    for char in text.chars() {
-        match char {
-            '"' => result.push_str("\\\""),
-            '\\' => result.push_str("\\\\"),
-            '\n' => result.push_str("\\n"),
-            '\r' => result.push_str("\\r"),
-            '\t' => result.push_str("\\t"),
-            '\u{8}' => result.push_str("\\b"),
-            '\u{c}' => result.push_str("\\f"),
-            '<' => result.push_str("\\u003c"),
-            '>' => result.push_str("\\u003e"),
-            '&' => result.push_str("\\u0026"),
-            '\u{2028}' => result.push_str("\\u2028"),
-            '\u{2029}' => result.push_str("\\u2029"),
-            other if (other as u32) < 0x20 => result.push_str(&format!("\\u{:04x}", other as u32)),
-            other => result.push(other),
-        }
-    }
-    result.push('"');
-    result
-}
-
-/// FUN-26 to FUN-28: compact JSON text of a value. A native object is opaque (VAL-19) and has no JSON
-/// text, so a value that is or holds one fails with `E_RUNTIME_TYPE`.
+/// FUN-26 to FUN-28: compact JSON text of a value, written by the JSON serializer of ordered-json with its HTML-safe
+/// escapes (FUN-27). A native object is opaque (VAL-19) and has no JSON text, so a value that is or holds one fails with
+/// `E_RUNTIME_TYPE`.
 pub fn to_json(value: &Value) -> Result<String, FunctionError> {
-    Ok(match value {
-        Value::Null => "null".to_string(),
-        Value::Bool(value) => value.to_string(),
-        Value::Number(number) => number_to_string(*number).map_err(|error| internal(&error))?,
-        Value::Str(text) | Value::Safe(text) => json_string(text),
-        Value::List(list) => format!("[{}]", list.iter().map(to_json).collect::<Result<Vec<_>, _>>()?.join(",")),
-        Value::Map(map) => {
-            let parts = map
-                .iter()
-                .map(|(key, value)| Ok(format!("{}:{}", json_string(key), to_json(value)?)))
-                .collect::<Result<Vec<String>, FunctionError>>()?;
-            format!("{{{}}}", parts.join(","))
-        }
-        Value::Object(_) => return Err(type_error("json does not accept a native object")),
-    })
+    let json = to_json_value(value).map_err(|error| match error.code {
+        ErrorCode::E_DATA_UNSUPPORTED_TYPE => type_error("json does not accept a native object"),
+        _ => internal(&error),
+    })?;
+    Ok(stringify(&json, &StringifyOptions { html_safe: Some(true) }))
 }
 
 /// FUN-29: percent-encodes every byte except the unreserved characters.

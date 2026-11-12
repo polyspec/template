@@ -82,7 +82,11 @@ fn a_path_resolves_against_the_current_directory_and_fails_outside_the_root() {
     })
     .expect("valid engine options");
     let error = program
-        .render(RenderTarget::Name("o.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("o.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_LOAD_OUTSIDE_ROOT);
 }
@@ -113,4 +117,10 @@ fn map_loader_versions_source_and_ast_replacements_by_content() {
         assert_ne!(versions[0], versions[1]);
         assert_eq!(versions[1], versions[2]);
     }
+}
+
+/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
+    use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
+    parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
 }

@@ -91,3 +91,9 @@ fn directories(dir: &Path) -> Vec<PathBuf> {
 fn file_name(path: &Path) -> String {
     path.file_name().expect("file name").to_string_lossy().to_string()
 }
+
+/// The ordered-json value of a JSON value that a test writes with `serde_json::json!` or reads from a fixture.
+pub fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
+    use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
+    parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
+}

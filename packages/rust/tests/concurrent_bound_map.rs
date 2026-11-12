@@ -33,7 +33,7 @@ fn concurrent_renders_read_one_bound_map() {
     let cases: serde_json::Value =
         serde_json::from_str(&std::fs::read_to_string(fixture_dir().join("cases.json")).expect("cases.json")).expect("JSON");
     let expected = cases["outputs"]["page"].as_str().expect("page output").to_string();
-    let bound: BoundMap = bind(&cases["assign"]).expect("bind");
+    let bound: BoundMap = bind(&common::ojson(cases["assign"].clone())).expect("bind");
     let program = program();
     let options = RenderOptions::default();
     std::thread::scope(|scope| {

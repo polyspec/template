@@ -191,7 +191,11 @@ fn a_panic_is_reported_as_an_internal_error() {
     let mut program = program(&["{= boom()}"]);
     program.register("boom", Box::new(|_, _| panic!("host defect"))).unwrap();
     let error = program
-        .render(RenderTarget::Name("page0.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("page0.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!(
         (error.code, error.template.as_str(), error.line),
@@ -199,7 +203,11 @@ fn a_panic_is_reported_as_an_internal_error() {
     );
     assert!(error.message.contains("host defect"));
     let prepared = program
-        .prepare(RenderTarget::Name("page0.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .prepare(
+            RenderTarget::Name("page0.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap();
     assert_eq!(prepared.render().unwrap_err().code, ErrorCode::E_INTERNAL);
     let error = render(&program, 0, OrderedMap::new()).unwrap_err();
@@ -211,4 +219,10 @@ fn a_panic_is_reported_as_an_internal_error() {
             .unwrap(),
         "1"
     );
+}
+
+/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
+    use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
+    parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
 }

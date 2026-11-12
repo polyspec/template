@@ -19,7 +19,7 @@ fn prepared_render_is_the_single_call_render() {
         .join("artifact-runtime")
         .join("artifact");
     let program = load_artifact(&directory).expect("load the artifact");
-    let assign = serde_json::json!({ "x": "a<b" });
+    let assign = common::ojson(serde_json::json!({ "x": "a<b" }));
     let options = RenderOptions::default();
     let prepared = program.prepare(RenderTarget::Name("page.tpl"), &assign, &options).expect("prepare");
     let first = prepared.render().expect("render");

@@ -102,7 +102,11 @@ fn builtins_declare_arity() {
         })
         .expect("engine");
         let error = program
-            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .render(
+                RenderTarget::Name("a.tpl"),
+                &ojson(serde_json::json!({})),
+                &RenderOptions::default(),
+            )
             .expect_err(source);
         assert_eq!(error.code, ErrorCode::E_RUNTIME_ARITY, "{source}");
     }
@@ -136,7 +140,7 @@ fn engine_renders_and_registers_functions() {
     let html = engine
         .render(
             RenderTarget::Name("a.tpl"),
-            &serde_json::json!({ "x": "<" }),
+            &ojson(serde_json::json!({ "x": "<" })),
             &RenderOptions::default(),
         )
         .expect("render");
@@ -161,12 +165,20 @@ fn engine_reports_host_failures_and_limits() {
     .expect("valid engine options");
     engine.register("boom", Box::new(|_, _| Err("no".into()))).expect("register");
     let error = engine
-        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("a.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_RUNTIME_HOST_FUNCTION);
     assert_eq!(error.line, 2);
     let error = engine
-        .render(RenderTarget::Name("b.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("b.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_RUNTIME_LIMIT);
 }
@@ -210,11 +222,19 @@ fn render_limits_default_output_and_abort() {
         .expect("valid engine options")
     };
     let html = program(4)
-        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("a.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .expect("render");
     assert_eq!(html, "abcd");
     let error = program(3)
-        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("a.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!((error.code, error.line, error.col), (ErrorCode::E_RUNTIME_LIMIT, 1, 3));
 }
@@ -240,7 +260,11 @@ fn host_function_rules() {
         .register("tag", Box::new(|_, _| Ok(Value::text("<b>".to_string()))))
         .expect("register");
     let html = engine
-        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("a.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .expect("render");
     assert_eq!(html, "&lt;b&gt;");
     assert!(engine.register("upper", Box::new(|_, _| Ok(Value::Null))).is_err());
@@ -251,14 +275,22 @@ fn host_function_rules() {
         .register("two", Box::new(|_, _| Ok(Value::text("second".to_string()))))
         .expect("register");
     let html = engine
-        .render(RenderTarget::Name("b.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("b.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .expect("render");
     assert_eq!(html, "second");
     engine
         .register("big", Box::new(|_, _| Ok(Value::list(vec![Value::Number(1e19)]))))
         .expect("register");
     let error = engine
-        .render(RenderTarget::Name("c.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("c.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_DATA_NUMBER_RANGE);
     let other = AstProgram::new(EngineOptions {
@@ -267,7 +299,11 @@ fn host_function_rules() {
     })
     .expect("valid engine options");
     let error = other
-        .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+        .render(
+            RenderTarget::Name("a.tpl"),
+            &ojson(serde_json::json!({})),
+            &RenderOptions::default(),
+        )
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION);
 }
@@ -328,12 +364,12 @@ fn the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec() {
 /// RT-4: a define or an env of the request that is no object fails with E_DATA_UNSUPPORTED_TYPE, named by its message.
 #[test]
 fn the_request_options_that_are_no_object_fail() {
-    let Err(error) = crate::defines_from_json(&serde_json::json!("b.tpl")) else {
+    let Err(error) = crate::defines_from_json(&ojson(serde_json::json!("b.tpl"))) else {
         panic!("a define that is no object");
     };
     assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
     assert_eq!(error.message, "define is not an object");
-    let Err(error) = crate::env_from_json(&serde_json::json!(0)) else {
+    let Err(error) = crate::env_from_json(&ojson(serde_json::json!(0))) else {
         panic!("an env that is no object");
     };
     assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
@@ -353,7 +389,11 @@ fn a_safe_string_is_its_text() {
     .expect("valid engine options");
     assert_eq!(
         program
-            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .render(
+                RenderTarget::Name("a.tpl"),
+                &ojson(serde_json::json!({})),
+                &RenderOptions::default()
+            )
             .expect("render"),
         "true|&lt;b&gt;!|&lt;i&gt;"
     );
@@ -373,7 +413,7 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
         engine
             .render(
                 RenderTarget::Name("x.tpl"),
-                &serde_json::json!({ "a": 2 }),
+                &ojson(serde_json::json!({ "a": 2 })),
                 &RenderOptions::default()
             )
             .expect("render"),
@@ -381,7 +421,11 @@ fn engine_renders_a_parsed_template_and_reparses_new_versions() {
     );
     assert_eq!(
         engine
-            .render(RenderTarget::Ast(&ast), &serde_json::json!({ "a": 2 }), &RenderOptions::default())
+            .render(
+                RenderTarget::Ast(&ast),
+                &ojson(serde_json::json!({ "a": 2 })),
+                &RenderOptions::default()
+            )
             .expect("render"),
         "3"
     );
@@ -397,7 +441,7 @@ fn render_targets_give_the_same_output() {
         ..Default::default()
     })
     .expect("valid engine options");
-    let assign = serde_json::json!({ "x": 1 });
+    let assign = ojson(serde_json::json!({ "x": 1 }));
     assert_eq!(
         engine
             .render(RenderTarget::Name("a.tpl"), &assign, &RenderOptions::default())
@@ -437,7 +481,11 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
         .expect("valid engine options");
         let render = || {
             program
-                .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+                .render(
+                    RenderTarget::Name("a.tpl"),
+                    &ojson(serde_json::json!({})),
+                    &RenderOptions::default(),
+                )
                 .unwrap()
         };
         assert_eq!(render(), "1");
@@ -480,7 +528,11 @@ fn the_parse_is_reused_while_the_version_stays_the_same() {
     .expect("valid engine options");
     let render = || {
         program
-            .render(RenderTarget::Name("a.tpl"), &serde_json::json!({}), &RenderOptions::default())
+            .render(
+                RenderTarget::Name("a.tpl"),
+                &ojson(serde_json::json!({})),
+                &RenderOptions::default(),
+            )
             .unwrap()
     };
     assert_eq!(render(), "1");
@@ -498,4 +550,9 @@ fn date_text_with_a_multibyte_character_in_the_time_is_not_a_date() {
     assert!(to_unix_seconds(&Value::text("2024-01-01T12:34:56\u{e9}"), 0).is_err());
     assert_eq!(parse_offset("+\u{e9}:00"), None);
     assert_eq!(parse_offset("+0\u{e9}:0"), None);
+}
+
+/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_ordered_json::Value {
+    polyspec_ordered_json::parse(value.to_string().as_bytes(), &polyspec_ordered_json::ParseOptions::default()).expect("JSON")
 }

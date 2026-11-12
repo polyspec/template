@@ -10,9 +10,10 @@ use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderC
 use crate::render::runtime_environment::RuntimeEnvironment;
 use crate::render::statements::Renderer;
 use crate::source::Source;
-use crate::value::bind::{BindError, bind_json, bind_map, bind_values};
+use crate::value::bind::{BindError, bind_json, bind_map, bind_values, value_from_json};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
 use crate::value::{OrderedMap, Value};
+use polyspec_ordered_json::{Kind as JsonKind, Value as JsonValue};
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::sync::{Mutex, PoisonError};
@@ -91,7 +92,7 @@ impl RenderOptions {
 
 /// The assign of one request: JSON data that is bound, or a bound map that is not bound again (VAL-22).
 enum Root<'a> {
-    Json(&'a serde_json::Value),
+    Json(&'a JsonValue),
     Bound(&'a BoundMap),
 }
 
@@ -116,15 +117,10 @@ impl RenderTarget<'_> {
 /// A complete AST or generated template program.
 pub trait Program: Send + Sync {
     /// Prepares a reusable render request.
-    fn prepare(
-        &self,
-        target: RenderTarget<'_>,
-        assign: &serde_json::Value,
-        options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RequestError>;
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RequestError>;
 
     /// Renders one request.
-    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError>;
+    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RequestError>;
 
     /// Prepares a reusable render request whose assign is a bound map, which is not bound again (VAL-22).
     fn prepare_bound(
@@ -162,14 +158,14 @@ impl Engine {
     pub fn prepare(
         &self,
         target: RenderTarget<'_>,
-        assign: &serde_json::Value,
+        assign: &JsonValue,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'_>, RequestError> {
         self.program.prepare(target, assign, options)
     }
 
     /// Renders a request through the selected program.
-    pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError> {
+    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RequestError> {
         self.program.render(target, assign, options)
     }
 
@@ -328,7 +324,7 @@ impl AstProgram {
     pub fn prepare<'e>(
         &'e self,
         target: RenderTarget<'_>,
-        assign: &serde_json::Value,
+        assign: &JsonValue,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, TemplateError> {
         let name = target.name();
@@ -377,7 +373,7 @@ impl AstProgram {
     }
 
     /// Renders a template with data given as JSON.
-    pub fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> {
         self.prepare(target, assign, options)?.render()
     }
 
@@ -418,16 +414,11 @@ impl AstProgram {
 }
 
 impl Program for AstProgram {
-    fn prepare(
-        &self,
-        target: RenderTarget<'_>,
-        assign: &serde_json::Value,
-        options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RequestError> {
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RequestError> {
         Ok(AstProgram::prepare(self, target, assign, options)?)
     }
 
-    fn render(&self, target: RenderTarget<'_>, assign: &serde_json::Value, options: &RenderOptions) -> Result<String, RequestError> {
+    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RequestError> {
         Ok(AstProgram::render(self, target, assign, options)?)
     }
 
@@ -524,56 +515,88 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
 }
 
 /// Parses template definitions from a JSON object of the `define.json` form (CNF-2). The data of
-/// an entry is bound as its own value (VAL-11, VAL-20).
-pub fn defines_from_json(value: &serde_json::Value) -> Result<HashMap<String, DefineInput>, BindError> {
-    let Some(object) = value.as_object() else {
-        return Err(BindError {
-            code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
-            message: "define is not an object".to_string(),
-        });
-    };
+/// an entry is bound as its own value (VAL-11, VAL-20). An entry field of another JSON type is
+/// E_DATA_UNSUPPORTED_TYPE; an absent field is absent.
+pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInput>, BindError> {
+    let object = json_object(value, "define is not an object")?;
     let mut defines = HashMap::new();
-    for (id, entry) in object {
-        if let Some(template) = entry.as_str() {
+    for (key, entry) in object.iter() {
+        let id = json_text(key)?;
+        if entry.kind() == JsonKind::String {
             defines.insert(
-                id.clone(),
+                id,
                 DefineInput {
-                    template: Some(template.to_string()),
+                    template: Some(json_text(entry)?),
                     data: None,
                     html: None,
                 },
             );
             continue;
         }
-        let Some(fields) = entry.as_object() else {
-            return Err(BindError {
-                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
-                message: format!("define {id} is not a path or object"),
-            });
+        let fields = json_object(entry, &format!("define {id} is not a path or object"))?;
+        let text_field = |name: &str| -> Result<Option<String>, BindError> {
+            match fields.get(name).map_err(|error| json_internal(&error))? {
+                None => Ok(None),
+                Some(field) if field.kind() == JsonKind::String => Ok(Some(json_text(field)?)),
+                Some(_) => Err(BindError {
+                    code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                    message: format!("define {id}: {name} is not a string"),
+                }),
+            }
+        };
+        let data = match fields.get("data").map_err(|error| json_internal(&error))? {
+            None => None,
+            Some(data) => Some(DefineData::Value(bind_json(data)?)),
         };
         defines.insert(
             id.clone(),
             DefineInput {
-                template: fields.get("template").and_then(|v| v.as_str()).map(str::to_string),
-                data: fields.get("data").map(bind_json).transpose()?.map(DefineData::Value),
-                html: fields.get("html").and_then(|v| v.as_str()).map(str::to_string),
+                template: text_field("template")?,
+                data,
+                html: text_field("html")?,
             },
         );
     }
     Ok(defines)
 }
 
-/// Parses an environment from a JSON object of the `env.json` form.
-pub fn env_from_json(value: &serde_json::Value) -> Result<Env, BindError> {
-    let Some(object) = value.as_object() else {
+/// The members of a JSON object, or E_DATA_UNSUPPORTED_TYPE with `message` for a value of another kind (RT-4).
+fn json_object<'v>(value: &'v JsonValue, message: &str) -> Result<&'v polyspec_ordered_json::OrderedMap, BindError> {
+    if value.kind() != JsonKind::Object {
         return Err(BindError {
             code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
-            message: "env is not an object".to_string(),
+            message: message.to_string(),
         });
-    };
-    let timezone = match object.get("timezone") {
+    }
+    value.members().map_err(|error| json_internal(&error))
+}
+
+/// The text of a JSON string whose kind was matched; an unpaired surrogate is E_DATA_INVALID_UTF8 (VAL-12).
+fn json_text(value: &JsonValue) -> Result<String, BindError> {
+    match value_from_json(value)? {
+        Value::Str(text) => Ok(text),
+        _ => Err(BindError {
+            code: ErrorCode::E_INTERNAL,
+            message: "internal failure: a JSON string is not a string value".to_string(),
+        }),
+    }
+}
+
+/// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, E_INTERNAL.
+fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
+    BindError {
+        code: ErrorCode::E_INTERNAL,
+        message: format!("internal failure: {error}"),
+    }
+}
+
+/// Parses an environment from a JSON object of the `env.json` form (RT-4, FUN-42): `timezone` is a string and `now` a
+/// number of the value model (VAL-2); an absent `timezone` is `Z` and an absent `now` is the current time.
+pub fn env_from_json(value: &JsonValue) -> Result<Env, BindError> {
+    let object = json_object(value, "env is not an object")?;
+    let timezone = match object.get("timezone").map_err(|error| json_internal(&error))? {
         None => "Z".to_string(),
-        Some(serde_json::Value::String(text)) => text.clone(),
+        Some(text) if text.kind() == JsonKind::String => json_text(text)?,
         Some(_) => {
             return Err(BindError {
                 code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
@@ -581,12 +604,17 @@ pub fn env_from_json(value: &serde_json::Value) -> Result<Env, BindError> {
             });
         }
     };
-    let now = match object.get("now") {
+    let now = match object.get("now").map_err(|error| json_internal(&error))? {
         None => current_time()?,
-        Some(serde_json::Value::Number(number)) => number.as_f64().ok_or_else(|| BindError {
-            code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
-            message: format!("env.now {number} is not a number of the value model"),
-        })?,
+        Some(number) if number.kind() == JsonKind::Number => match bind_json(number)? {
+            Value::Number(now) => now,
+            _ => {
+                return Err(BindError {
+                    code: ErrorCode::E_INTERNAL,
+                    message: "internal failure: a JSON number is not a number value".to_string(),
+                });
+            }
+        },
         Some(_) => {
             return Err(BindError {
                 code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,

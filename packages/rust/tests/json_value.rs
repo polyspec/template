@@ -25,8 +25,5 @@ impl TemplateObject for Host {
 fn a_native_object_has_no_json_form() {
     let error = to_json_value(&Value::List(vec![Value::object(Host)].into())).expect_err("a native object has no JSON form");
     assert_eq!(error.code.as_str(), "E_DATA_UNSUPPORTED_TYPE");
-    assert_eq!(
-        to_json_value(&Value::text("a")).expect("a string has a JSON form"),
-        serde_json::json!("a")
-    );
+    assert_eq!(to_json_value(&Value::text("a")).expect("a string has a JSON form").raw(), "\"a\"");
 }

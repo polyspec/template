@@ -59,7 +59,7 @@ fn definition(data: DefineData) -> RenderOptions {
 }
 
 fn bound(input: &serde_json::Value) -> BoundMap {
-    bind(input).expect("bind")
+    bind(&common::ojson(input.clone())).expect("bind")
 }
 
 fn expect_bind_failure(result: Result<BoundMap, TemplateError>, code: ErrorCode) {
@@ -83,7 +83,10 @@ fn a_bound_map_renders_the_bytes_of_the_host_map() {
             .unwrap(),
         output(&cases, "page")
     );
-    assert_eq!(program.render(page, &cases["assign"], &options).unwrap(), output(&cases, "page"));
+    assert_eq!(
+        program.render(page, &common::ojson(cases["assign"].clone()), &options).unwrap(),
+        output(&cases, "page")
+    );
     let assign = bound(&cases["assign"]);
     let prepared = program.prepare_bound(RenderTarget::Name("page.tpl"), &assign, &options).unwrap();
     assert_eq!(prepared.render().unwrap(), output(&cases, "page"));
@@ -148,14 +151,24 @@ fn a_bound_map_is_definition_data() {
     let bound_data = definition(DefineData::Bound(bound(&cases["definitionData"])));
     assert_eq!(
         program
-            .render(RenderTarget::Name("define.tpl"), &cases["assign"], &bound_data)
+            .render(
+                RenderTarget::Name("define.tpl"),
+                &common::ojson(cases["assign"].clone()),
+                &bound_data
+            )
             .unwrap(),
         output(&cases, "define")
     );
-    let host_data = definition(DefineData::Value(polyspec_template::bind_json(&cases["definitionData"]).unwrap()));
+    let host_data = definition(DefineData::Value(
+        polyspec_template::bind_json(&common::ojson(cases["definitionData"].clone())).unwrap(),
+    ));
     assert_eq!(
         program
-            .render(RenderTarget::Name("define.tpl"), &cases["assign"], &host_data)
+            .render(
+                RenderTarget::Name("define.tpl"),
+                &common::ojson(cases["assign"].clone()),
+                &host_data
+            )
             .unwrap(),
         output(&cases, "define")
     );
@@ -177,17 +190,17 @@ fn null_and_an_empty_map_give_an_empty_bound_map() {
 #[test]
 fn bind_reports_the_code_of_the_failed_check_without_a_position() {
     for input in [serde_json::json!(5), serde_json::json!([1]), serde_json::json!("{\"a\":1}")] {
-        expect_bind_failure(bind(&input), ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+        expect_bind_failure(bind(&common::ojson(input)), ErrorCode::E_DATA_UNSUPPORTED_TYPE);
     }
     expect_bind_failure(
-        bind(&serde_json::json!({ "n": 9007199254740992u64 })),
+        bind(&common::ojson(serde_json::json!({ "n": 9007199254740992u64 }))),
         ErrorCode::E_DATA_NUMBER_RANGE,
     );
     let mut deep = serde_json::json!(1);
     for _ in 0..65 {
         deep = serde_json::json!([deep]);
     }
-    expect_bind_failure(bind(&serde_json::json!({ "deep": deep })), ErrorCode::E_DATA_DEPTH);
+    expect_bind_failure(bind(&common::ojson(serde_json::json!({ "deep": deep }))), ErrorCode::E_DATA_DEPTH);
     let mut host = OrderedMap::new();
     host.insert("n".to_string(), Value::Number(f64::NAN));
     expect_bind_failure(bind(&host), ErrorCode::E_DATA_NUMBER_NOT_FINITE);

@@ -11,16 +11,19 @@ Rust implementation of the template language: lexer, parser, renderer, built-in 
 use polyspec_template::{AstProgram, DefineInput, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget, Value};
 
 let mut program = AstProgram::new(EngineOptions { loader: Some(Box::new(FsLoader::new("templates"))), ..Default::default() })?;
-program.register("greet", Box::new(|args, _| Ok(Value::text(format!("Hello, {}", args[0].as_text().unwrap_or(""))))))?;
+program.register("greet", Box::new(|args, _| match args[0].as_text() {
+    Some(name) => Ok(Value::text(format!("Hello, {name}"))),
+    None => Err("greet requires a string".into()),
+}))?;
 let engine = Engine::new(program);
-let assign = serde_json::json!({ "title": "Home" });
+let assign = polyspec_template::read_json(r#"{ "title": "Home" }"#)?;
 let mut options = RenderOptions::default();
 options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
 options.define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
 let html = engine.render(RenderTarget::Name("layout"), &assign, &options)?;
 ```
 
-Assign data is a `serde_json::Value`; objects keep their document order and integer literals outside the safe range are rejected.
+Assign data is a JSON value of the crate `polyspec-ordered-json`, which the crate re-exports; objects keep their document order and numbers outside the safe range are rejected (VAL-12).
 
 ## API
 
@@ -34,14 +37,14 @@ Assign data is a `serde_json::Value`; objects keep their document order and inte
 | `AstProgram::new(EngineOptions)` | Creates an AST program with a loader, host functions, limits and delimiters, or returns an `ArgumentError` for a delimiter option that is not a delimiter pair. |
 | `Engine::new(Program)` | Creates an engine that delegates to one AST or generated program. A generated program comes into the crate with `include!` (from `OUT_DIR` after `build.rs`, or from a committed file), never as a module file, so `cargo fmt` leaves its layout to the compiler and clippy lints it. |
 | `Engine::render(target, assign, &RenderOptions)` | Renders a template name or a parsed template to a string. `assign` contains variables and `define` supplies template or HTML entries. |
-| `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind` checks a `&serde_json::Value`, a `&OrderedMap` or a `&BoundMap` once and returns a `BoundMap`; `merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `render_bound` and `prepare_bound` take a bound map as assign, and `DefineData::Bound` gives one as definition data, without binding it again (VAL-22). A `BoundMap` is not `Send`. Errors have no template and no position (ERR-14). |
+| `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind` checks a `&polyspec_ordered_json::Value`, a `&OrderedMap` or a `&BoundMap` once and returns a `BoundMap`; `merge` combines two bound maps, and an entry of `second` replaces the entry of `first` with the same key. `render_bound` and `prepare_bound` take a bound map as assign, and `DefineData::Bound` gives one as definition data, without binding it again (VAL-22). A `BoundMap` is `Send` and `Sync`. Errors have no template and no position (ERR-14). |
 | `AstProgram::register(name, function)` | Registers a host function `Fn(&[Value], &FunctionContext) -> Result<Value, HostError>`. `Err("message".into())` fails the call with `E_RUNTIME_HOST_FUNCTION`; the returned value is checked like host data. A safe string argument arrives as `Value::Str` (VAL-21). |
 | `AstProgram::render_values(target, OrderedMap, &RenderOptions)` | Renders a root map built from `Value`s, which may hold `Value::Object` native objects. Numbers, depth and safe strings are checked like JSON data. |
 | `TemplateObject` | A native object: `member(key)` returns `Ok(Some(value))`, `Ok(None)` for no public field, or a `HostError`; `call(method, args)` returns `None` for no public method. |
 | `Value::downcast_object::<T>()` | Returns the original `TemplateObject` of type `T` that a template passed to a host function, a class function or a method. |
 | `internal_boundary` | Every public parse, prepare and render operation reports a panic as `E_INTERNAL` instead of unwinding into the host. |
 | `MapLoader`, `FsLoader` | In-memory and filesystem loaders. `Loader::load` returns `Result<Option<Loaded>, String>`; `Err` fails the render with `E_LOAD_FAILED`, and `FsLoader` returns it for a regular file that cannot be read. |
-| `parse_json`, `parse_json_bytes`, `read_json` | JSON parsing into template values or into a checked `serde_json::Value`. Numbers outside ±(2^53 − 1), unpaired surrogate escapes, nesting deeper than 64 levels and text that is not one JSON document (`E_DATA_INVALID_JSON`) fail with their data codes. |
+| `parse_json`, `parse_json_bytes`, `read_json` | JSON parsing into template values or into a checked `polyspec_ordered_json::Value`. Numbers outside ±(2^53 − 1), unpaired surrogate escapes, nesting deeper than 64 levels and text that is not one JSON document (`E_DATA_INVALID_JSON`) fail with their data codes. |
 | `TemplateError` | Error with `code`, `template`, `line`, `col`, `offset`, `end`, `message`. |
 | `Value::text`, `Value::safe_text`, `Value::list`, `Value::map` | Constructors for text, safe text, list and map values. Lists and maps share storage when values are cloned. |
 | `Value::Safe` | A string that the echo tag writes without escaping. |

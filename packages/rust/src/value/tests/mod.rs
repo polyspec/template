@@ -99,11 +99,11 @@ fn binding_checks_the_numeric_value_and_not_its_spelling() {
         ErrorCode::E_DATA_NUMBER_NOT_FINITE
     );
     assert_eq!(
-        bind_json(&serde_json::json!(9007199254740992u64)).unwrap_err().code,
+        bind_json(&ojson(serde_json::json!(9007199254740992u64))).unwrap_err().code,
         ErrorCode::E_DATA_NUMBER_RANGE
     );
     assert_eq!(
-        bind_json(&serde_json::json!(-9007199254740991i64)).expect("bind"),
+        bind_json(&ojson(serde_json::json!(-9007199254740991i64))).expect("bind"),
         Value::Number(-9007199254740991.0)
     );
     assert_eq!(
@@ -130,14 +130,14 @@ fn json_text_fails_at_the_first_violation_in_document_order() {
 
 #[test]
 fn binding_limits_the_nesting_depth() {
-    // VAL-20: 64 levels bind, 65 fail, and a deep or unterminated text fails before serde_json reads it.
+    // VAL-20: 64 levels bind, 65 fail, and a deep or unterminated text fails at the 65th level.
     let nested = |levels: usize| format!("{}{}", "[".repeat(levels), "]".repeat(levels));
     assert!(parse_json(&nested(64)).is_ok());
     assert_eq!(parse_json(&nested(65)).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
     assert_eq!(parse_json(&"[".repeat(200_000)).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
-    let mut deep = serde_json::Value::Null;
-    for _ in 0..1000 {
-        deep = serde_json::Value::Array(vec![deep]);
+    let mut deep = polyspec_ordered_json::Value::null();
+    for _ in 0..200 {
+        deep = polyspec_ordered_json::Value::array(&[deep]).expect("array");
     }
     assert_eq!(bind_json(&deep).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
     let mut value = Value::Null;
@@ -161,4 +161,9 @@ fn json_bytes_that_are_not_utf8_are_invalid_utf8() {
             "{bytes:?}"
         );
     }
+}
+
+/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_ordered_json::Value {
+    polyspec_ordered_json::parse(value.to_string().as_bytes(), &polyspec_ordered_json::ParseOptions::default()).expect("JSON")
 }

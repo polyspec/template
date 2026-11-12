@@ -1,9 +1,10 @@
-//! Host binding of `serde_json::Value` and of host-built values (VAL-2, VAL-3, VAL-20),
+//! Host binding of JSON values of ordered-json and of host-built values (VAL-2, VAL-3, VAL-20),
 //! and the binding error.
 
 use crate::error::ErrorCode;
 use crate::value::number::MAX_SAFE;
 use crate::value::{MAX_DEPTH, OrderedMap, Value};
+use polyspec_ordered_json::{Kind as JsonKind, Value as JsonValue};
 use std::fmt;
 use std::sync::Arc;
 
@@ -57,36 +58,57 @@ pub fn check_level(level: usize) -> Result<(), BindError> {
     Ok(())
 }
 
-/// Converts a `serde_json::Value` into a template value (VAL-13).
-pub fn bind_json(input: &serde_json::Value) -> Result<Value, BindError> {
+/// Converts a JSON value of ordered-json into a template value (VAL-12): numbers under VAL-2, strings that are Unicode
+/// text, object members in document order with the last value of a repeated key in the first position, and the depth
+/// limit of VAL-20.
+pub fn bind_json(input: &JsonValue) -> Result<Value, BindError> {
     bind_json_at(input, 0)
 }
 
-fn bind_json_at(input: &serde_json::Value, level: usize) -> Result<Value, BindError> {
-    match input {
-        serde_json::Value::Null => Ok(Value::Null),
-        serde_json::Value::Bool(value) => Ok(Value::Bool(*value)),
-        serde_json::Value::Number(number) => {
-            // With arbitrary precision the number keeps its literal text; the nearest double decides (VAL-2).
-            let literal = number.to_string();
-            // serde_json writes a JSON number literal, which f64 parses; an overflowing literal is infinity, which check_number rejects.
-            let value = json_number(&literal)?;
-            check_number(value).map(Value::Number)
+/// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, E_INTERNAL.
+fn json_internal(error: &polyspec_ordered_json::Error) -> BindError {
+    BindError {
+        code: ErrorCode::E_INTERNAL,
+        message: format!("internal failure: {error}"),
+    }
+}
+
+/// VAL-12: the text of a JSON string or key; an escaped unpaired surrogate is E_DATA_INVALID_UTF8.
+fn json_text(input: &JsonValue) -> Result<String, BindError> {
+    input.string_value().map_err(|error| match error {
+        polyspec_ordered_json::Error::UnpairedSurrogate => BindError {
+            code: ErrorCode::E_DATA_INVALID_UTF8,
+            message: "a \\u escape leaves a surrogate unpaired".to_string(),
+        },
+        other => json_internal(&other),
+    })
+}
+
+fn bind_json_at(input: &JsonValue, level: usize) -> Result<Value, BindError> {
+    match input.kind() {
+        JsonKind::Null => Ok(Value::Null),
+        JsonKind::Boolean => Ok(Value::Bool(input.boolean_value().map_err(|error| json_internal(&error))?)),
+        JsonKind::Number => {
+            // The nearest double of the literal decides (VAL-2).
+            let literal = input.number_literal().map_err(|error| json_internal(&error))?;
+            check_number(json_number(literal)?).map(Value::Number)
         }
-        serde_json::Value::String(text) => Ok(Value::text(text.clone())),
-        serde_json::Value::Array(items) => {
+        JsonKind::String => Ok(Value::text(json_text(input)?)),
+        JsonKind::Array => {
             check_level(level + 1)?;
+            let items = input.items().map_err(|error| json_internal(&error))?;
             let mut list = Vec::with_capacity(items.len());
             for item in items {
                 list.push(bind_json_at(item, level + 1)?);
             }
             Ok(Value::list(list))
         }
-        serde_json::Value::Object(entries) => {
+        JsonKind::Object => {
             check_level(level + 1)?;
-            let mut map = OrderedMap::with_capacity(entries.len());
-            for (key, value) in entries {
-                map.insert(key.clone(), bind_json_at(value, level + 1)?);
+            let members = input.members().map_err(|error| json_internal(&error))?;
+            let mut map = OrderedMap::new();
+            for (key, value) in members.iter() {
+                map.insert(json_text(key)?, bind_json_at(value, level + 1)?);
             }
             Ok(Value::map(map))
         }
@@ -103,8 +125,8 @@ fn json_number(literal: &str) -> Result<f64, BindError> {
 }
 
 /// Binds a value that must be a map. A null value is an empty map (RT-4).
-pub fn bind_map(input: &serde_json::Value) -> Result<OrderedMap, BindError> {
-    if input.is_null() {
+pub fn bind_map(input: &JsonValue) -> Result<OrderedMap, BindError> {
+    if input.kind() == JsonKind::Null {
         return Ok(OrderedMap::new());
     }
     match bind_json(input)? {
@@ -157,45 +179,55 @@ pub fn bind_values(input: &OrderedMap) -> Result<OrderedMap, BindError> {
     bind_entries(input, 1)
 }
 
-/// Converts a `serde_json::Value` that generated code built from template values back into a
-/// template value. It is not host binding: the value has already passed binding or comes from
-/// template operations, so the checks of VAL-2 and VAL-20 do not apply.
-pub fn value_from_json(input: &serde_json::Value) -> Result<Value, BindError> {
-    Ok(match input {
-        serde_json::Value::Null => Value::Null,
-        serde_json::Value::Bool(value) => Value::Bool(*value),
-        serde_json::Value::Number(number) => Value::Number(json_number(&number.to_string())?),
-        serde_json::Value::String(text) => Value::text(text.clone()),
-        serde_json::Value::Array(items) => Value::list(items.iter().map(value_from_json).collect::<Result<_, _>>()?),
-        serde_json::Value::Object(entries) => Value::map(
-            entries
+/// Converts a JSON value that generated code built from template values back into a template value. It is not host
+/// binding: the value has already passed binding or comes from template operations, so the checks of VAL-2 and VAL-20 do
+/// not apply.
+pub fn value_from_json(input: &JsonValue) -> Result<Value, BindError> {
+    Ok(match input.kind() {
+        JsonKind::Null => Value::Null,
+        JsonKind::Boolean => Value::Bool(input.boolean_value().map_err(|error| json_internal(&error))?),
+        JsonKind::Number => Value::Number(json_number(input.number_literal().map_err(|error| json_internal(&error))?)?),
+        JsonKind::String => Value::text(json_text(input)?),
+        JsonKind::Array => Value::list(
+            input
+                .items()
+                .map_err(|error| json_internal(&error))?
                 .iter()
-                .map(|(key, value)| Ok((key.clone(), value_from_json(value)?)))
+                .map(value_from_json)
+                .collect::<Result<_, _>>()?,
+        ),
+        JsonKind::Object => Value::map(
+            input
+                .members()
+                .map_err(|error| json_internal(&error))?
+                .iter()
+                .map(|(key, value)| Ok((json_text(key)?, value_from_json(value)?)))
                 .collect::<Result<_, BindError>>()?,
         ),
     })
 }
 
-/// The JSON form of a template value (the form of VAL-21 without native objects); safe strings become plain strings. A
-/// native object has no JSON form and is E_DATA_UNSUPPORTED_TYPE; a number that is not finite is a broken invariant of the
-/// value model and is E_INTERNAL.
-pub fn to_json_value(value: &Value) -> Result<serde_json::Value, BindError> {
+/// The JSON form of a template value (the form of VAL-21 without native objects) as an ordered-json value; safe strings
+/// become plain strings and numbers are written as VAL-9 writes them. A native object has no JSON form and is
+/// E_DATA_UNSUPPORTED_TYPE; a number that is not finite is a broken invariant of the value model and is E_INTERNAL.
+pub fn to_json_value(value: &Value) -> Result<JsonValue, BindError> {
     Ok(match value {
-        Value::Null => serde_json::Value::Null,
-        Value::Bool(value) => serde_json::Value::Bool(*value),
-        Value::Number(number) => serde_json::Number::from_f64(*number)
-            .map(serde_json::Value::Number)
-            .ok_or_else(|| BindError {
-                code: ErrorCode::E_INTERNAL,
-                message: format!("the number value {number} is not finite"),
-            })?,
-        Value::Str(text) | Value::Safe(text) => serde_json::Value::String(text.to_string()),
-        Value::List(list) => serde_json::Value::Array(list.iter().map(to_json_value).collect::<Result<_, _>>()?),
-        Value::Map(map) => serde_json::Value::Object(
-            map.iter()
-                .map(|(key, value)| Ok((key.clone(), to_json_value(value)?)))
-                .collect::<Result<_, BindError>>()?,
-        ),
+        Value::Null => JsonValue::null(),
+        Value::Bool(value) => JsonValue::boolean(*value),
+        Value::Number(number) => JsonValue::from_f64(*number).map_err(|error| json_internal(&error))?,
+        Value::Str(text) | Value::Safe(text) => JsonValue::string(text),
+        Value::List(list) => {
+            JsonValue::array(&list.iter().map(to_json_value).collect::<Result<Vec<_>, _>>()?).map_err(|error| json_internal(&error))?
+        }
+        Value::Map(map) => {
+            let mut members = polyspec_ordered_json::OrderedMap::new();
+            for (key, value) in map.iter() {
+                members
+                    .insert(JsonValue::string(key), to_json_value(value)?)
+                    .map_err(|error| json_internal(&error))?;
+            }
+            JsonValue::object(&members).map_err(|error| json_internal(&error))?
+        }
         Value::Object(_) => {
             return Err(BindError {
                 code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,

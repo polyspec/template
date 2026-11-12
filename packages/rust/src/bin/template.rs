@@ -132,7 +132,7 @@ fn fail(error: TemplateError) -> ! {
     exit(2);
 }
 
-fn read_json(root: &Path, path: &str, template: &str) -> serde_json::Value {
+fn read_json(root: &Path, path: &str, template: &str) -> polyspec_template::polyspec_ordered_json::Value {
     let bytes = match std::fs::read(root.join(path)) {
         Ok(bytes) => bytes,
         Err(error) => usage(&format!("cannot read {path}: {error}")),
@@ -279,7 +279,8 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
     );
     let assign = match &data {
         Some(path) => read_json(root, path, name),
-        None => serde_json::Value::Object(Default::default()),
+        // RT-4: no data is an empty map.
+        None => polyspec_template::polyspec_ordered_json::Value::null(),
     };
     let mut render_options = RenderOptions::default();
     if let Some(path) = &define {

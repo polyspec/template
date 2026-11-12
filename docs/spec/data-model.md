@@ -88,7 +88,7 @@ The native safe-text carrier is `SafeString` with its text payload in TypeScript
 
 - **VAL-11** Host binding converts a value of the host language into a template value. Binding is applied to assign data, to template definition data, to scope arguments computed by the host, to the return value of a host function, a logical class function and an instance method, and to the value of a native object member that a template reads (VAL-19). The conversion tables of the implementations (VAL-12 and VAL-13) are the complete set of accepted inputs; any other input is E_DATA_UNSUPPORTED_TYPE. VAL-17 to VAL-21 apply in every host. A bound map (VAL-22) has passed binding, so `render` uses it as `assign` or as definition data without binding it again (RT-61).
 
-- **VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data.
+- **VAL-12** JSON text is the reference form of assign data. Every implementation accepts JSON text and produces the same values. Each implementation parses JSON text with a parser that preserves document order and applies the number rule of VAL-2 and the depth limit of VAL-20; the TypeScript implementation provides this parser in the package and does not use `JSON.parse` for assign data, and the Rust implementation reads JSON text and JSON values with the crate `polyspec-ordered-json`, the JSON library, and applies the rules of this table to its values.
 
 | JSON | Value |
 | --- | --- |
@@ -162,12 +162,12 @@ The rows are tried in this order, so a `stdClass` subclass that implements `Json
 
 | Input | Value |
 | --- | --- |
-| `serde_json::Value::Null` | null |
-| `serde_json::Value::Bool` | bool |
-| `serde_json::Value::Number` | number under VAL-2 |
-| `serde_json::Value::String` | string |
-| `serde_json::Value::Array` | list |
-| `serde_json::Value::Object` | map, in insertion order; the `preserve_order` feature of `serde_json` is required |
+| `polyspec_ordered_json::Value` of kind `Null` | null |
+| `polyspec_ordered_json::Value` of kind `Boolean` | bool |
+| `polyspec_ordered_json::Value` of kind `Number` | number under VAL-2, from the nearest double of its literal |
+| `polyspec_ordered_json::Value` of kind `String` | string; a string that holds an escaped unpaired surrogate is E_DATA_INVALID_UTF8 |
+| `polyspec_ordered_json::Value` of kind `Array` | list |
+| `polyspec_ordered_json::Value` of kind `Object` | map, in document order; a repeated key keeps its first position and its last value; a key follows the `String` row |
 | `Value` that the host builds and passes to `render_values`, or that a host function, a logical class function or a `TemplateObject` returns | the same value after the checks of VAL-2, VAL-3 and VAL-20 |
 | `Value::Object` | object (VAL-19); the `TemplateObject` is retained |
 

@@ -105,7 +105,7 @@ pub fn parse_expression(text: &str) -> Result<Expr, TemplateError> {
 }
 
 /// Evaluates a bare expression AST against root data given as JSON.
-pub fn evaluate_expression(expr: &Expr, data: &serde_json::Value) -> Result<Value, TemplateError> {
+pub fn evaluate_expression(expr: &Expr, data: &polyspec_ordered_json::Value) -> Result<Value, TemplateError> {
     let engine = AstProgram::new(Default::default())
         .map_err(|error| TemplateError::without_position(ErrorCode::E_INTERNAL, "expression", error.message))?;
     let root = bind_map(data).map_err(|error| TemplateError::without_position(error.code, "expression", error.message))?;

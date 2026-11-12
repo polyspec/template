@@ -64,7 +64,7 @@ fn ast_program_protocols() {
     assert_eq!(services.limits().output_bytes, program.runtime.limits().output_bytes);
     assert!(program.loader.load("a.tpl").unwrap().is_some());
     assert_eq!(program.artifact_refresh, ArtifactRefresh::True);
-    let assign = serde_json::json!({});
+    let assign = ojson(serde_json::json!({}));
     let options = RenderOptions::default();
     let protocol: &dyn Program = &program;
     assert_eq!(
@@ -146,4 +146,10 @@ fn isolated_state_positioned_errors_and_bounded_output() {
         (error.code, error.template.as_str(), error.line, error.col, error.offset, error.end),
         (ErrorCode::E_RUNTIME_LIMIT, "part.tpl", 2, 1, 2, 3)
     );
+}
+
+/// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
+fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
+    use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
+    parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
 }

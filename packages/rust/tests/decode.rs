@@ -50,7 +50,7 @@ fn a_decoded_template_renders_without_its_source() {
     let output = engine
         .render(
             RenderTarget::Name("x.tpl"),
-            &serde_json::json!({ "a": 2 }),
+            &common::ojson(serde_json::json!({ "a": 2 })),
             &RenderOptions::default(),
         )
         .expect("render");
