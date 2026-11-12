@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
 )
 
 // TestAParseErrorIsTheErrorObject: a parse error is an *errs.Error with the fields of ERR-1, code, template, line, col,

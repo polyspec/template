@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/value"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/functions"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // FUN-39: the output is computed in the fixed offset of the time zone; FUN-40: the format tokens.

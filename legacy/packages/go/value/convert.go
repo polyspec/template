@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/polyspec/template/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/errs"
 )
 
 // Source is a typed value that generated code declares with its template value: a record becomes

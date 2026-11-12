@@ -10,10 +10,10 @@ import (
 	"strings"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/loader"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/loader"
 )
 
 // TestDecodeTemplateReadsTheCanonicalAST: DecodeTemplate reads the expected.ast.json of every conformance case that

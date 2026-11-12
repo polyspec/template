@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // EscapeHTML replaces the five characters of RT-32.

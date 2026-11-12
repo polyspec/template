@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-go-readme -->
-# github.com/polyspec/template/packages/go
+# github.com/polyspec/template/legacy/packages/go
 
 [한국어](README.ko.md).
 
@@ -8,7 +8,7 @@ Go implementation of the template language: lexer, parser, renderer, built-in fu
 ## Install
 
 ```sh
-go get github.com/polyspec/template/packages/go
+go get github.com/polyspec/template/legacy/packages/go
 ```
 
 ## Render
@@ -20,7 +20,7 @@ import (
   "fmt"
   "os"
 
-  template "github.com/polyspec/template/packages/go"
+  template "github.com/polyspec/template/legacy/packages/go"
 )
 
 func main() {

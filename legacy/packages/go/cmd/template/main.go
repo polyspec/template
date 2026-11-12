@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"strings"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/value"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 const usageText = "usage: template parse [--root DIR] [--delimiters OC] FILE\n" +

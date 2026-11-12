@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/polyspec/template/packages/go/internal/functions"
+	"github.com/polyspec/template/legacy/packages/go/internal/functions"
 )
 
 var identifier = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_]*$`)

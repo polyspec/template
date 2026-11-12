@@ -269,10 +269,10 @@ export function createTarget({ program }: { program: Program }): Target {
 
 const imports: [name: string, path: string][] = [
   ['bytes', '"bytes"'], ['json', '"encoding/json"'], ['errors', '"errors"'], ['fmt', '"fmt"'],
-  ['template', 'template "github.com/polyspec/template/packages/go"'],
-  ['ast', '"github.com/polyspec/template/packages/go/ast"'], ['errs', '"github.com/polyspec/template/packages/go/errs"'],
-  ['render', '"github.com/polyspec/template/packages/go/render"'],
-  ['value', '"github.com/polyspec/template/packages/go/value"'], ['time', '"time"'], ['utf8', '"unicode/utf8"'],
+  ['template', 'template "github.com/polyspec/template/legacy/packages/go"'],
+  ['ast', '"github.com/polyspec/template/legacy/packages/go/ast"'], ['errs', '"github.com/polyspec/template/legacy/packages/go/errs"'],
+  ['render', '"github.com/polyspec/template/legacy/packages/go/render"'],
+  ['value', '"github.com/polyspec/template/legacy/packages/go/value"'], ['time', '"time"'], ['utf8', '"unicode/utf8"'],
 ];
 
 export function emitDeclarations(context: BackendContext): Part[] {

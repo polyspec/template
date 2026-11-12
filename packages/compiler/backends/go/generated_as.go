@@ -1,6 +1,6 @@
 package generated
 
-import "github.com/polyspec/template/packages/go/value"
+import "github.com/polyspec/template/legacy/packages/go/value"
 
 func generatedAs[T any](input value.Value) (T, error) {
 	if result, ok := input.(T); ok {

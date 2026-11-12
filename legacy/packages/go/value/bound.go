@@ -3,7 +3,7 @@ package value
 import (
 	"errors"
 
-	"github.com/polyspec/template/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/errs"
 )
 
 // BoundMap is a map that host binding checked once (VAL-22). Its entries are unexported, so host

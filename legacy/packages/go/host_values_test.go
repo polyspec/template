@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/value"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/functions"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // Host argument form (VAL-21), native object equality (EXP-39) and opaque native objects (VAL-19),

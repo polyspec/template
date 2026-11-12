@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // Env is the render environment (FUN-39, FUN-42).

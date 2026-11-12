@@ -3,7 +3,7 @@ package template_test
 import (
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
+	template "github.com/polyspec/template/legacy/packages/go"
 )
 
 // TestRequestPathRendersALoadedArtifactTheSameWay checks RT-59: rendering a loaded artifact parses nothing and discovers no

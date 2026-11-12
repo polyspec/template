@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
 )
 
 // DepthLimit is the expression nesting limit (RT-33).

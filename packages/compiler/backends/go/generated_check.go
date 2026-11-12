@@ -3,7 +3,7 @@ package generated
 import (
 	"fmt"
 
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 type generatedType struct {

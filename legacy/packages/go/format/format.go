@@ -10,11 +10,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/lexer"
-	"github.com/polyspec/template/packages/go/internal/parser"
-	"github.com/polyspec/template/packages/go/render"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/internal/parser"
+	"github.com/polyspec/template/legacy/packages/go/render"
 )
 
 // Range is a byte range [Start, End) of the source.

@@ -5,7 +5,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // VAL-9: a number is converted to text by the shortest round-trip digits in positional or exponent form; VAL-10: the digits come from the platform.

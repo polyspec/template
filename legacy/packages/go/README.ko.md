@@ -1,6 +1,6 @@
 <!-- doc-id: packages-template-go-readme -->
 <!-- source-sha256: 6dc7bbeb6389bc9dc762ddbaed0d72d30ef7577542f47fd5a3bd4cf1bbdc6f77 -->
-# github.com/polyspec/template/packages/go
+# github.com/polyspec/template/legacy/packages/go
 
 [English](README.md).
 
@@ -9,7 +9,7 @@
 ## 설치
 
 ```sh
-go get github.com/polyspec/template/packages/go
+go get github.com/polyspec/template/legacy/packages/go
 ```
 
 ## 렌더
@@ -21,7 +21,7 @@ import (
   "fmt"
   "os"
 
-  template "github.com/polyspec/template/packages/go"
+  template "github.com/polyspec/template/legacy/packages/go"
 )
 
 func main() {

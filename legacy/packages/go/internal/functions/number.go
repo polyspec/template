@@ -3,7 +3,7 @@ package functions
 import (
 	"math"
 
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 func finite(v float64) (value.Value, error) {

@@ -1,9 +1,9 @@
 package consumer
 
 import (
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/render"
-	"github.com/polyspec/template/packages/go/source"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/render"
+	"github.com/polyspec/template/legacy/packages/go/source"
 )
 
 // Analyze uses only the public parser and its nameable result types.

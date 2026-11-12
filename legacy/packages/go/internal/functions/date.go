@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 var dayShort = []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}

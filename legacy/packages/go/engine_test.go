@@ -5,10 +5,10 @@ import (
 	"reflect"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/render"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/functions"
+	"github.com/polyspec/template/legacy/packages/go/render"
 )
 
 func TestEngineRender(t *testing.T) {

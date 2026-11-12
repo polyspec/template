@@ -9,10 +9,10 @@ import (
 	"testing"
 	"testing/fstest"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/loader"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/loader"
 )
 
 // RT-8: a path resolves against the directory of the current template, a leading / against the root, and a path that

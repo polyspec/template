@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/casetest"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
 )
 
 // EDT-10: public analysis preserves AST, tags and classified byte ranges.

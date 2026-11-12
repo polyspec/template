@@ -3,9 +3,9 @@ package render
 import (
 	"errors"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/loader"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/loader"
 )
 
 // renderer renders statement nodes (RT-11 to RT-32).

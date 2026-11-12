@@ -1,8 +1,8 @@
 package generated
 
 import (
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/render"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/render"
 )
 
 func generatedIndex[T any](runtime *render.RuntimeBindings, input, key any, frame *render.Frame, span ast.Span) T {

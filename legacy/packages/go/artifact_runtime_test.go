@@ -3,7 +3,7 @@ package template_test
 import (
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
+	template "github.com/polyspec/template/legacy/packages/go"
 )
 
 // TestLoadArtifactRendersTheSourceBytes checks RT-56: the artifact that the build compiler wrote loads through LoadArtifact

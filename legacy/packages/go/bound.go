@@ -1,6 +1,6 @@
 package template
 
-import "github.com/polyspec/template/packages/go/value"
+import "github.com/polyspec/template/legacy/packages/go/value"
 
 // BoundMap is a map that host binding checked once (VAL-22); its zero value is the empty bound map.
 type BoundMap = value.BoundMap

@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
 )
 
 // TokenType is a token type name of CNF-13; CLOSE is the tag end.

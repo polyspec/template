@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/source"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/source"
 )
 
 type sourceCase struct {

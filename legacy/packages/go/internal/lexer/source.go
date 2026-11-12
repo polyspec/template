@@ -3,7 +3,7 @@ package lexer
 
 import (
 	"fmt"
-	"github.com/polyspec/template/packages/go/source"
+	"github.com/polyspec/template/legacy/packages/go/source"
 )
 
 // Source is the same context that the public source package constructs.

@@ -1,5 +1,5 @@
 package consumer
 
-import "github.com/polyspec/template/packages/go/render"
+import "github.com/polyspec/template/legacy/packages/go/render"
 
 var _ = render.NewEvaluator

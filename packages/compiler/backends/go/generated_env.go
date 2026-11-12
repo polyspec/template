@@ -3,7 +3,7 @@ package generated
 import (
 	"time"
 
-	template "github.com/polyspec/template/packages/go"
+	template "github.com/polyspec/template/legacy/packages/go"
 )
 
 func generatedEnv(options template.RenderOptions) template.Env {

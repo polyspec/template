@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 363f95272ca0cd7a67f1438ef696c405a19e91c7476c0d71b60008ad5493085c -->
+<!-- source-sha256: 0ddfd4583036466a1eebb6818237d04a3299449d36276b8b14bdbfdc55017c9f -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -38,7 +38,7 @@ Canonical artifact manifest는 각 template의 digest 항목과 함께 source �
 
 ### 이행
 
-backend는 Rust, TypeScript, Python, PHP, Go 순서로 하나씩 타입 있는 프로그램으로 옮긴다. Rust가 먼저인 것은 그 프로그램이 바인딩 없이 코어 crate 위에서 돌기 때문이고, Go가 마지막인 것은 그 바인딩이 마지막에 오기 때문이다. 옮기지 않은 backend는 이 절의 나머지가 설명하는 생성 실행을 그대로 내며, 그 생성 runner와 검사도 전처럼 돈다. backend가 옮겨지면 그 생성 conformance runner(`conformance-generated-<language>`)는 각 case를 선언으로 컴파일하고 그 선언으로 렌더한다. 그 언어에 대한 생성 제어 흐름 검사(`generated-typed-locals-check`와 `generated-native-check`, `generated-arguments-check`, `generated-bound-data-check`, `typed-generator`의 그 언어 행)는 선언의 검사, 즉 거부한 값의 필드 경로, 타입 있는 값의 변환, 출력이 AST 프로그램과 같은지의 검사가 되고, 아래 문단에서 그 언어가 빠진다. 마지막 backend가 옮겨지면 이 절에서 생성 실행의 문단이 빠진다. compiler가 legacy TypeScript 런타임으로 파싱하는 동안 Rust generated runner는 알려진 실패 목록을 가진다. `errors/high-surrogate-at-quote-escape`, `errors/high-surrogate-before-pair-escape`, `errors/lone-high-surrogate-escape`, `errors/lone-low-surrogate-escape` 네 case이며, 그 런타임은 짝 없는 surrogate escape를 U+FFFD로 읽지만 EXP-3은 그것을 `parse_invalid_escape`로 정한다. runner는 실행마다 알려진 실패의 수를 출력하고, 목록 밖의 case가 실패하거나 목록의 case가 통과하면 실패한다. 이 목록은 compiler가 Node 바인딩으로 파싱할 때 TypeScript backend와 함께 제거된다.
+backend는 Rust, TypeScript, Python, PHP, Go 순서로 하나씩 타입 있는 프로그램으로 옮긴다. Rust가 먼저인 것은 그 프로그램이 바인딩 없이 코어 crate 위에서 돌기 때문이고, Go가 마지막인 것은 그 바인딩이 마지막에 오기 때문이다. 옮기지 않은 backend는 이 절의 나머지가 설명하는 생성 실행을 그대로 내며, 그 생성 runner와 검사도 전처럼 돈다. backend가 옮겨지면 그 생성 conformance runner(`conformance-generated-<language>`)는 각 case를 선언으로 컴파일하고 그 선언으로 렌더한다. 그 언어에 대한 생성 제어 흐름 검사(`generated-typed-locals-check`와 `generated-native-check`, `generated-arguments-check`, `generated-bound-data-check`, `typed-generator`의 그 언어 행)는 선언의 검사, 즉 거부한 값의 필드 경로, 타입 있는 값의 변환, 출력이 AST 프로그램과 같은지의 검사가 되고, 아래 문단에서 그 언어가 빠진다. 마지막 backend가 옮겨지면 이 절에서 생성 실행의 문단이 빠진다. compiler가 legacy TypeScript 런타임으로 파싱하는 동안 Rust generated runner는 알려진 실패 목록을 가진다. `errors/high-surrogate-at-quote-escape`, `errors/high-surrogate-before-pair-escape`, `errors/lone-high-surrogate-escape`, `errors/lone-low-surrogate-escape` 네 case이며, 그 런타임은 짝 없는 surrogate escape를 U+FFFD로 읽지만 EXP-3은 그것을 `parse_invalid_escape`로 정한다. runner는 실행마다 알려진 실패의 수를 출력하고, 목록 밖의 case가 실패하거나 목록의 case가 통과하면 실패한다. 이 목록은 compiler가 Node 바인딩으로 파싱할 때 TypeScript backend와 함께 제거된다. Go backend가 옮겨지기 전까지(T28.7) 그 생성 실행은 legacy Go 런타임을 그 폴더의 module 경로 `github.com/polyspec/template/legacy/packages/go`로 import한다. 바인딩 module이 `github.com/polyspec/template/packages/go`를 가지며, 한 레포에 같은 경로의 module이 둘이면 Go 도구가 깨지기 때문이다.
 
 ## 공개 구조
 

@@ -1,6 +1,6 @@
 package generated
 
-import "github.com/polyspec/template/packages/go/value"
+import "github.com/polyspec/template/legacy/packages/go/value"
 
 func generatedValue(input any) value.Value {
 	switch item := input.(type) {

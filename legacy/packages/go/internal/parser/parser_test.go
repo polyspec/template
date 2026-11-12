@@ -5,10 +5,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/lexer"
-	"github.com/polyspec/template/packages/go/internal/parser"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/internal/parser"
 )
 
 func parse(t *testing.T, text string) *ast.Template {

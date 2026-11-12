@@ -8,12 +8,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/internal/expr"
-	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/internal/lexer"
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/internal/expr"
+	"github.com/polyspec/template/legacy/packages/go/internal/functions"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 type exprCase struct {

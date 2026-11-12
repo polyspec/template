@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/value"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 func readIf(path string) []byte {

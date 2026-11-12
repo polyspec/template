@@ -7,12 +7,12 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/functions"
-	"github.com/polyspec/template/packages/go/internal/parser"
-	"github.com/polyspec/template/packages/go/loader"
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/functions"
+	"github.com/polyspec/template/legacy/packages/go/internal/parser"
+	"github.com/polyspec/template/legacy/packages/go/loader"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // Delimiters names the public opening/closing pair used by parser adapters.

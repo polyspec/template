@@ -1,8 +1,8 @@
 // Package consumer contains standalone SDK visibility probes compiled outside the module.
 package consumer
 
-import template "github.com/polyspec/template/packages/go"
-import "github.com/polyspec/template/packages/go/value"
+import template "github.com/polyspec/template/legacy/packages/go"
+import "github.com/polyspec/template/legacy/packages/go/value"
 
 // Configuration carriers remain nameable without importing implementation packages.
 var Environment = template.Env{Timezone: "+09:00", Now: 123}

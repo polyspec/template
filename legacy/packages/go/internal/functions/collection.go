@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // RangeLimit is the element limit of range (FUN-14).

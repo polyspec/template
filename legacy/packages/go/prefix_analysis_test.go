@@ -9,9 +9,9 @@ import (
 	"sort"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/internal/casetest"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
 )
 
 // EDT-11: prefix analysis preserves accepted ranges and the first parser error.

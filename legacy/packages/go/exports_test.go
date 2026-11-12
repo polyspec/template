@@ -3,8 +3,8 @@ package template_test
 import (
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/value"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // RT-72: the public entry points of the API resolve through the exported names of the package.

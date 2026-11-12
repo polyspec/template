@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/internal/parser"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/internal/parser"
 )
 
 func TestDelimiterOptions(t *testing.T) {

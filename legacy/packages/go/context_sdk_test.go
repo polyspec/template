@@ -2,11 +2,11 @@ package template_test
 
 import (
 	"errors"
-	template "github.com/polyspec/template/packages/go"
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/render"
-	"github.com/polyspec/template/packages/go/value"
+	template "github.com/polyspec/template/legacy/packages/go"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/render"
+	"github.com/polyspec/template/legacy/packages/go/value"
 	"reflect"
 	"testing"
 )

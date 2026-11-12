@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/polyspec/template/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/ast"
 )
 
 // Result is a loaded template: source text or a parsed AST, and a version.

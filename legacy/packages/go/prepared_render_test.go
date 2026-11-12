@@ -3,7 +3,7 @@ package template_test
 import (
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
+	template "github.com/polyspec/template/legacy/packages/go"
 )
 
 // TestPreparedRenderIsTheSingleCallRender checks RT-62: a prepared render renders identical bytes on every call, and Render

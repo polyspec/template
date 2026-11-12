@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/internal/lexer"
-	"github.com/polyspec/template/packages/go/internal/parser"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/internal/parser"
 )
 
 // FMT-1, GRM-2: every part of every form of a tag body is classified.

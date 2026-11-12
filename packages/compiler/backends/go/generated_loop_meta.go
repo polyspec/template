@@ -1,6 +1,6 @@
 package generated
 
-import "github.com/polyspec/template/packages/go/render"
+import "github.com/polyspec/template/legacy/packages/go/render"
 
 func generatedLoopMeta(scope *render.Scope, name string) *render.LoopMeta {
 	result := scope.LoopMeta(name)

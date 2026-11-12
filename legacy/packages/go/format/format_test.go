@@ -11,9 +11,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/polyspec/template/packages/go/internal/casetest"
-	"github.com/polyspec/template/packages/go/internal/lexer"
-	"github.com/polyspec/template/packages/go/internal/parser"
+	"github.com/polyspec/template/legacy/packages/go/internal/casetest"
+	"github.com/polyspec/template/legacy/packages/go/internal/lexer"
+	"github.com/polyspec/template/legacy/packages/go/internal/parser"
 )
 
 var repositoryRoot = filepath.Join("..", "..", "..", "..")

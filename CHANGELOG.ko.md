@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: aec7e86bab3bc597e101fb2ba36cfff01e85474290fc4098cdc73219d85fa89d -->
+<!-- source-sha256: b491b8acb8b9c5f112642a75f79491b0163dec2e43798e440b083ec73e73885d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- legacy Go module은 그 폴더의 module 경로 `github.com/polyspec/template/legacy/packages/go`를 가지며, compiler의 Go backend, 예제 adapter, 스크립트가 그 경로로 import한다. `github.com/polyspec/template/packages/go`는 바인딩 module만의 경로다.
 - 정수 인자(`slice`의 start와 length, `date`의 초)와 개수(`truncate`의 n, `number`의 decimals, `round`의 d)를 절단하거나 반올림하거나 범위로 맞추지 않는다: 소수는 `E_RUNTIME_TYPE`, 음수 개수는 `E_RUNTIME_TYPE`, 크기가 2^53 − 1을 넘으면 `E_RUNTIME_LIMIT`다(FUN-50). `number`와 `round`는 소수 자리를 최대 100개 쓴다(FUN-20). 날짜 텍스트는 그 달의 날을 적어야 한다: `2025-02-29`와 `2024-04-31`은 다음 달 첫날이 아니라 날짜가 아니다(FUN-37). Rust 구현이 이 규칙을 따르며 다른 구현은 바뀌지 않았다.
 - 서로게이트 쌍에 속하지 않는 서로게이트의 `\uXXXX` 이스케이프는 U+FFFD가 아니라 그 이스케이프 위치에서 `E_PARSE_INVALID_ESCAPE`다(EXP-3). Rust 구현이 이 규칙을 따른다.
 - 파일시스템 로더는 `ENOENT`와 `ENOTDIR`일 때만 이름이 없다고 보고한다. 디렉터리, 일반 파일이 아닌 다른 파일, 그리고 디렉터리의 `EACCES` 같은 다른 모든 메타데이터 오류는 파일시스템의 메시지와 함께 `E_LOAD_FAILED`다(RT-10). Rust `FsLoader`가 이 규칙을 따른다.

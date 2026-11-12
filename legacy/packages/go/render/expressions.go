@@ -3,9 +3,9 @@ package render
 import (
 	"fmt"
 
-	"github.com/polyspec/template/packages/go/ast"
-	"github.com/polyspec/template/packages/go/errs"
-	"github.com/polyspec/template/packages/go/value"
+	"github.com/polyspec/template/legacy/packages/go/ast"
+	"github.com/polyspec/template/legacy/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/value"
 )
 
 // evaluator evaluates expressions (docs/spec/expressions.md).

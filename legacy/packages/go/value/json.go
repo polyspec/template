@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/polyspec/template/packages/go/errs"
+	"github.com/polyspec/template/legacy/packages/go/errs"
 )
 
 // ParseJSON decodes JSON text into a value, preserving document order and applying VAL-2, VAL-12

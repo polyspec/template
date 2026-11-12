@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	template "github.com/polyspec/template/packages/go"
+	template "github.com/polyspec/template/legacy/packages/go"
 )
 
 // TestLoadOrRefreshPolicies checks RT-56 ArtifactStore.loadOrRefresh: dev builds on every call, true reuses an artifact that

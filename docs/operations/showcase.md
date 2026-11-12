@@ -93,7 +93,7 @@ import (
   "fmt"
   "os"
 
-  template "github.com/polyspec/template/packages/go"
+  template "github.com/polyspec/template/legacy/packages/go"
 )
 
 func read(path string) []byte {

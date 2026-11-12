@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-showcase -->
-<!-- source-sha256: 43edcc5bc5982c42f7a5171b2a6b3cba6d055facb3059717d8c180e38f803dac -->
+<!-- source-sha256: 8f216e27c72508964a3485524e07c1d36ad9de0b55dd7729348b03e4ace897ac -->
 # 예제 사이트
 
 [English](/operations/showcase).
@@ -92,7 +92,7 @@ import (
   "fmt"
   "os"
 
-  template "github.com/polyspec/template/packages/go"
+  template "github.com/polyspec/template/legacy/packages/go"
 )
 
 func read(path string) []byte {
