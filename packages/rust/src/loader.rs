@@ -35,11 +35,19 @@ impl Loaded {
     }
 }
 
+/// The failure of a loader (RT-9).
+#[derive(Debug)]
+pub enum LoadError {
+    /// A loader of the implementation, such as [`FsLoader`], judged the load failed: `load_failed` with this cause.
+    Failed(String),
+    /// The error of host code, which reaches the caller of `render` unchanged (FUN-46).
+    Host(crate::HostError),
+}
+
 /// Loads templates by name (RT-9).
 pub trait Loader: Send + Sync {
-    /// Returns the template for a name, `Ok(None)` when the name does not exist, or `Err` with a
-    /// message when loading fails; the engine reports a failure as `load_failed`.
-    fn load(&self, name: &str) -> Result<Option<Loaded>, String>;
+    /// Returns the template for a name, `Ok(None)` when the name does not exist, or the failure of the load.
+    fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError>;
 }
 
 /// FNV-1a hash of bytes, used as the version of in-memory sources.
@@ -86,7 +94,7 @@ impl MapLoader {
 }
 
 impl Loader for MapLoader {
-    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError> {
         Ok(self.entries.get(name).cloned())
     }
 }
@@ -160,7 +168,13 @@ impl FsLoader {
 /// every other metadata error, a symbolic link at any component, a name that is not a regular file, a regular file that
 /// cannot be read and a file that the loader read under another name are failures.
 impl Loader for FsLoader {
-    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError> {
+        self.load_file(name).map_err(LoadError::Failed)
+    }
+}
+
+impl FsLoader {
+    fn load_file(&self, name: &str) -> Result<Option<Loaded>, String> {
         let segments: Vec<&str> = name.split('/').collect();
         let mut path = self.root.clone();
         let mut found = None;

@@ -16,12 +16,14 @@ use std::sync::Arc;
 pub const MAX_DEPTH: usize = 64;
 
 /// A failure that host code reports to the engine (FUN-46, VAL-19).
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug)]
 pub enum HostError {
     /// A value of the host cannot be bound; the render fails with the code of the binding error.
     Data(BindError),
-    /// The host code failed; the render fails with runtime_host_function and this message.
-    Failed(String),
+    /// An exception of language code, which a generated binding holds; it reaches the caller of `render` unchanged.
+    Raised(bindgen_core::Raised),
+    /// The error of Rust host code; it reaches the caller of `render` unchanged.
+    Callback(Box<dyn std::error::Error + Send + Sync>),
 }
 
 impl From<BindError> for HostError {
@@ -32,13 +34,13 @@ impl From<BindError> for HostError {
 
 impl From<String> for HostError {
     fn from(message: String) -> HostError {
-        HostError::Failed(message)
+        HostError::Callback(message.into())
     }
 }
 
 impl From<&str> for HostError {
     fn from(message: &str) -> HostError {
-        HostError::Failed(message.to_string())
+        HostError::Callback(message.into())
     }
 }
 

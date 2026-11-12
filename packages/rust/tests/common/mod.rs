@@ -133,3 +133,11 @@ pub fn kind_category(kind: &str) -> String {
         .map(str::to_string)
         .expect("the kind is in the error table")
 }
+
+/// The template error of a render failure; a test that expects a kind fails on the error of host code (FUN-46).
+pub fn kind(error: polyspec_template::RenderError) -> polyspec_template::TemplateError {
+    match error {
+        polyspec_template::RenderError::Kind(error) => error,
+        other => panic!("expected a template error, got the error of host code: {other}"),
+    }
+}

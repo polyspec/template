@@ -133,7 +133,7 @@ The SDK contract names exact native value, binding, error, collection and callba
 | `array` for which `array_is_list()` is true | list |
 | other `array` | map; each key is converted to a string; an integer key `1` becomes the key `"1"`; a string key that is not valid UTF-8 is data_invalid_utf8 |
 | bound map (VAL-22) | data_unsupported_type, except as `assign` and as definition `data` (VAL-22) |
-| object implementing `JsonSerializable` | the binding of the value that `jsonSerialize()` returns; an exception thrown by `jsonSerialize()` is runtime_host_function with the message of the exception |
+| object implementing `JsonSerializable` | the binding of the value that `jsonSerialize()` returns; an exception thrown by `jsonSerialize()` reaches the caller unchanged (FUN-46) |
 | other instance of `stdClass` or of a subclass of `stdClass` | map of its public properties, in the order of `get_mangled_object_vars()`; a property name that is not valid UTF-8 is data_invalid_utf8 |
 | `Closure` | data_unsupported_type |
 | other object | object (VAL-19); the original instance is retained |
@@ -194,8 +194,8 @@ A bound map (VAL-22) is a type of its own that none of these inputs can hold, so
 
 - **VAL-19** A native object is an opaque template value. It is truthy and cannot be stringified, iterated, spread or written as JSON (FUN-26): echoing it fails with `runtime_stringify`, and a loop over it, a spread of it and `json` of a value that holds it fail with `runtime_type`.
 
-- Lookup (`o.name`, `o['name']`, EXP-18) with a string key reads a public field or property of the original instance and binds its value (VAL-11). A name that is not a public field or property returns `null`, and so does every key that is not a string. A field value that cannot be bound fails with its `data_*` code, and an accessor that raises an error fails with runtime_host_function; both errors point at the lookup expression (ERR-5).
-- A member call `o.name(args)` invokes a public method of the original instance with the arguments (VAL-18) and binds its result. A name that is not a public method is runtime_unknown_function, including a private or protected method and a name that only a dynamic dispatch hook such as PHP `__call` would handle. A method that rejects its arguments or raises an error is runtime_host_function. A result that cannot be bound fails with its `data_*` code at the call.
+- Lookup (`o.name`, `o['name']`, EXP-18) with a string key reads a public field or property of the original instance and binds its value (VAL-11). A name that is not a public field or property returns `null`, and so does every key that is not a string. A field value that cannot be bound fails with its `data_*` code, and the error of an accessor reaches the caller unchanged (FUN-46); the binding error points at the lookup expression (ERR-5).
+- A member call `o.name(args)` invokes a public method of the original instance with the arguments (VAL-18) and binds its result. A name that is not a public method is runtime_unknown_function, including a private or protected method and a name that only a dynamic dispatch hook such as PHP `__call` would handle. The error of a method that rejects its arguments or raises an error reaches the caller unchanged (FUN-46). A result that cannot be bound fails with its `data_*` code at the call.
 - Visibility is a property of the declaration. It does not depend on the code that calls `render`: a template sees the same members when `render` is called inside the class of the object.
 
 | Host | Public field or property | Public method |

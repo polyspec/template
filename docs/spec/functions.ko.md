@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-functions -->
-<!-- source-sha256: 3793ed9cb2be3411ee59b541271a0eb6da877c3cd970e50de60faf82836770eb -->
+<!-- source-sha256: 00f6e3a188a213d40a0df6e19815ec474fccc5ff8f1c71cd3ffbc94ab889595b -->
 # 함수
 
 [English](/spec/functions).
@@ -184,6 +184,6 @@ Host callback은 렌더 환경도 받는다. TypeScript·Go·Rust·Python은 `Ho
 
 - **FUN-44** 내장 함수 이름의 등록은 등록 시점에 실패한다. 같은 이름을 두 번 등록하면 앞의 함수를 교체한다.
 - **FUN-45** 반환값은 데이터 모델의 호스트 바인딩 규칙으로 변환한다. 변환할 수 없는 값은 해당 `data_*` 코드로 실패한다.
-- **FUN-46** `fn`이 호스트 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 보고한 오류는 템플릿 안 호출 위치와 함께 `runtime_host_function`으로 렌더를 실패시킨다. Go나 Rust에서 `fn`의 panic은 `internal`이다(ERR-13). Native object 인자는 원본 호스트 객체로 도착한다(VAL-18).
+- **FUN-46** `fn`이 호스트 언어의 오류 방식, 즉 던진 예외나 반환한 오류로 보고한 오류는 렌더를 끝내며, 같은 오류 객체가 바뀌지 않고 `render` 호출자에게 도달한다: 엔진은 그것을 감싸거나 바꾸거나 호출 위치를 붙이지 않는다. 이유: 그 오류는 라이브러리가 아니라 호스트 코드의 것이므로 클래스와 데이터를 유지한다. 감싸면 원래 오류를 지키는 두 번째 장치가 필요하고 그 형태가 언어마다 달라진다. TypeScript, Go, PHP, PHP 확장, Python의 legacy 구현은 없어질 때까지 호출 위치와 함께 `runtime_host_function`으로 보고한다. Go나 Rust에서 `fn`의 panic은 `internal`이다(ERR-13). Native object 인자는 원본 호스트 객체로 도착한다(VAL-18).
 - **FUN-47** 템플릿을 렌더하는 모든 호스트는 같은 함수 이름을 등록한다. 한 호스트에만 등록된 이름을 호출하는 템플릿은 다른 호스트에서 `runtime_unknown_function`으로 실패한다.
 - **FUN-48** 문자열을 반환하는 호스트 함수는 일반 문자열을 반환한다. 호스트는 safe 문자열을 반환할 수 없다. 이스케이프 없이 써야 하면 템플릿이 결과에 `raw`를 적용한다.

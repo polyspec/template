@@ -6,8 +6,8 @@
 
 use clap::{Args, Parser, Subcommand};
 use polyspec_template::{
-    AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderOptions, RenderTarget, TemplateError,
-    analyze, defines_from_json, env_from_json, format_bytes, parse, read_json as parse_json_text,
+    AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderError, RenderOptions, RenderTarget,
+    TemplateError, analyze, defines_from_json, env_from_json, format_bytes, parse, read_json as parse_json_text,
 };
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -326,6 +326,13 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
     }
     match engine.render(RenderTarget::Name(name), &assign, &render_options) {
         Ok(output) => write_stdout(&output),
-        Err(error) => fail_request(error),
+        Err(RenderError::Kind(error)) => fail_request(error),
+        // The command registers no host function and loads with FsLoader, so no host code reports an error; one that
+        // does is a broken invariant of the command (ERR-13).
+        Err(error @ (RenderError::Raised(_) | RenderError::Callback(_))) => fail(TemplateError::without_position(
+            polyspec_template::ErrorCode::E_INTERNAL,
+            name,
+            format!("internal failure: host code reported an error in the command: {error}"),
+        )),
     }
 }

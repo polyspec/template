@@ -119,12 +119,12 @@ fn isolated_state_positioned_errors_and_bounded_output() {
         lines: Some(LineIndex::from_starts(vec![0, 2])),
         context: root,
     };
-    let error = context.fail(ErrorCode::E_RUNTIME_TYPE, None, None, "unpositioned");
+    let error = kind(context.fail(ErrorCode::E_RUNTIME_TYPE, None, None, "unpositioned"));
     assert_eq!(
         (error.template.as_str(), error.line, error.col, error.offset, error.end),
         ("entry.tpl", 0, 0, 0, 0)
     );
-    let error = context.fail(ErrorCode::E_RUNTIME_TYPE, Some(&frame), Some([2, 3]), "positioned");
+    let error = kind(context.fail(ErrorCode::E_RUNTIME_TYPE, Some(&frame), Some([2, 3]), "positioned"));
     assert_eq!(
         (error.template.as_str(), error.line, error.col, error.offset, error.end),
         ("part.tpl", 2, 1, 2, 3)
@@ -132,7 +132,7 @@ fn isolated_state_positioned_errors_and_bounded_output() {
     context.enter("entry.tpl", None, None).unwrap();
     assert_eq!(context.chain, vec!["entry.tpl"]);
     assert_eq!(
-        context.enter("entry.tpl", Some(&frame), Some([2, 3])).unwrap_err().code,
+        kind(context.enter("entry.tpl", Some(&frame), Some([2, 3])).unwrap_err()).code,
         ErrorCode::E_LOAD_CYCLE
     );
     assert_eq!(context.chain, vec!["entry.tpl"]);
@@ -141,7 +141,7 @@ fn isolated_state_positioned_errors_and_bounded_output() {
     context.write("é", &frame, [2, 3]).unwrap();
     assert_eq!(context.output, "é");
     assert_eq!(other.output, "");
-    let error = context.write("x", &frame, [2, 3]).unwrap_err();
+    let error = kind(context.write("x", &frame, [2, 3]).unwrap_err());
     assert_eq!(
         (error.code, error.template.as_str(), error.line, error.col, error.offset, error.end),
         (ErrorCode::E_RUNTIME_LIMIT, "part.tpl", 2, 1, 2, 3)
@@ -152,4 +152,12 @@ fn isolated_state_positioned_errors_and_bounded_output() {
 fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
     use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
     parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
+}
+
+/// The template error of a render failure; a test that expects a kind fails on the error of host code (FUN-46).
+fn kind(error: polyspec_template::RenderError) -> polyspec_template::TemplateError {
+    match error {
+        polyspec_template::RenderError::Kind(error) => error,
+        other => panic!("expected a template error, got the error of host code: {other}"),
+    }
 }

@@ -36,10 +36,10 @@ pub mod __test_support {
 pub use ast::{
     BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp, decode_template,
 };
-pub use error::{ErrorCode, LineIndex, Span, TemplateError, internal_boundary};
+pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
 pub use format::{FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{Env, FunctionContext, HostFunction};
-pub use loader::{FsLoader, Loaded, Loader, MapLoader, resolve_path};
+pub use loader::{FsLoader, LoadError, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{DefineEntry, Frame, Limits, LoopMeta, ParsedTemplate, RenderContext, RuntimeServices, Scope};
 pub use render::engine::{
     ArtifactRefresh, AstProgram, DefineInput, Engine, EngineOptions, PreparedRender, Program, RenderOptions, RenderTarget,

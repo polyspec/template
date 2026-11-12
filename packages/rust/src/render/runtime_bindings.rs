@@ -1,7 +1,7 @@
 //! Shared runtime value, function and error semantics for AST and generated programs.
 
 use crate::ast::{BinaryOp, UnaryOp};
-use crate::error::{ErrorCode, Span, TemplateError};
+use crate::error::{ErrorCode, RenderError, Span};
 use crate::escape::escape_html;
 use crate::functions::{FunctionContext, builtins, to_number};
 use crate::render::context::{Frame, RenderContext};
@@ -36,7 +36,7 @@ impl RuntimeBindings {
         operand: &Value,
         frame: &Frame,
         span: Span,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         match operator {
             UnaryOp::Not => Ok(Value::Bool(!self.truthy(operand))),
             UnaryOp::Negate => {
@@ -55,7 +55,7 @@ impl RuntimeBindings {
         right: &Value,
         frame: &Frame,
         span: Span,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         match operator {
             BinaryOp::Add => {
                 if matches!(left, Value::List(_) | Value::Map(_)) || matches!(right, Value::List(_) | Value::Map(_)) {
@@ -144,7 +144,7 @@ impl RuntimeBindings {
     }
 
     /// Converts one value to text at its source location.
-    pub fn stringify(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<String, TemplateError> {
+    pub fn stringify(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<String, RenderError> {
         stringify(value).map_err(|error| match error {
             StringifyError::NoText => self.error(
                 context,
@@ -160,7 +160,7 @@ impl RuntimeBindings {
     }
 
     /// Applies echo escaping while preserving safe text.
-    pub fn escape(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<String, TemplateError> {
+    pub fn escape(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<String, RenderError> {
         match value {
             Value::Safe(text) => Ok(text.clone()),
             Value::Str(text) => Ok(escape_html(text).into_owned()),
@@ -169,12 +169,12 @@ impl RuntimeBindings {
     }
 
     /// Converts one value to a number.
-    pub fn number(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<f64, TemplateError> {
+    pub fn number(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<f64, RenderError> {
         to_number(value).map_err(|error| self.error(context, frame, span, error.code, error.message))
     }
 
     /// Rejects non-finite arithmetic results.
-    pub fn finite(&self, context: &RenderContext<'_>, value: f64, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
+    pub fn finite(&self, context: &RenderContext<'_>, value: f64, frame: &Frame, span: Span) -> Result<Value, RenderError> {
         if value.is_finite() {
             Ok(Value::Number(value))
         } else {
@@ -199,7 +199,7 @@ impl RuntimeBindings {
         right: &Value,
         frame: &Frame,
         span: Span,
-    ) -> Result<Ordering, TemplateError> {
+    ) -> Result<Ordering, RenderError> {
         compare_values(left, right).ok_or_else(|| {
             self.error(
                 context,
@@ -219,7 +219,7 @@ impl RuntimeBindings {
         key: &str,
         frame: &Frame,
         span: Span,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         self.index(context, container, &Value::text(key), frame, span)
     }
 
@@ -232,7 +232,7 @@ impl RuntimeBindings {
         args: Vec<Value>,
         frame: &Frame,
         span: Span,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         let Value::Object(object) = container else {
             return Err(self.error(
                 context,
@@ -250,7 +250,7 @@ impl RuntimeBindings {
                 ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
                 format!("{method} is not a function"),
             )),
-            Some(result) => host_result(self, context, method, result, frame, span),
+            Some(result) => host_result(self, context, result, frame, span),
         }
     }
 
@@ -263,7 +263,7 @@ impl RuntimeBindings {
         args: Vec<Value>,
         frame: &Frame,
         span: Span,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         let Some(function) = context.services.class_function(class_name, method) else {
             return Err(self.error(
                 context,
@@ -274,7 +274,7 @@ impl RuntimeBindings {
             ));
         };
         let result = function(&host_arguments(&args), &FunctionContext { env: &context.env });
-        host_result(self, context, &format!("{class_name}::{method}"), result, frame, span)
+        host_result(self, context, result, frame, span)
     }
 
     /// Reads a dynamic list or map key, or a public field of a native object (EXP-19, VAL-19).
@@ -285,7 +285,7 @@ impl RuntimeBindings {
         key: &Value,
         frame: &Frame,
         span: Span,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         match container {
             Value::Map(map) => {
                 if let Some(text) = key.as_text() {
@@ -327,14 +327,7 @@ impl RuntimeBindings {
                     .and_then(|value| value.map(|value| bind_value(&value)).transpose().map_err(HostError::Data))
                 {
                     Ok(value) => Ok(absent_is_null(value.as_ref())),
-                    Err(HostError::Data(error)) => Err(self.error(context, frame, span, error.code, error.message)),
-                    Err(HostError::Failed(message)) => Err(self.error(
-                        context,
-                        frame,
-                        span,
-                        ErrorCode::E_RUNTIME_HOST_FUNCTION,
-                        format!("{name} failed: {message}"),
-                    )),
+                    Err(error) => Err(host_failure(self, context, error, frame, span)),
                 }
             }
             _ => Ok(Value::Null),
@@ -342,7 +335,7 @@ impl RuntimeBindings {
     }
 
     /// Checks the depth of a value that a list or map literal built (VAL-20).
-    pub fn depth(&self, context: &RenderContext<'_>, value: Value, frame: &Frame, span: Span) -> Result<Value, TemplateError> {
+    pub fn depth(&self, context: &RenderContext<'_>, value: Value, frame: &Frame, span: Span) -> Result<Value, RenderError> {
         if value.depth_within(MAX_DEPTH) {
             Ok(value)
         } else {
@@ -357,13 +350,7 @@ impl RuntimeBindings {
     }
 
     /// Normalizes a loop operand.
-    pub fn entries(
-        &self,
-        context: &RenderContext<'_>,
-        value: &Value,
-        frame: &Frame,
-        span: Span,
-    ) -> Result<Vec<RuntimeEntry>, TemplateError> {
+    pub fn entries(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<Vec<RuntimeEntry>, RenderError> {
         match value {
             Value::Null => Ok(Vec::new()),
             Value::List(list) => Ok(list
@@ -383,7 +370,7 @@ impl RuntimeBindings {
     }
 
     /// Validates and expands one list spread operand.
-    pub fn list_spread(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<Vec<Value>, TemplateError> {
+    pub fn list_spread(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<Vec<Value>, RenderError> {
         match value {
             Value::List(list) => Ok(list.to_vec()),
             _ => Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a list requires a list")),
@@ -397,7 +384,7 @@ impl RuntimeBindings {
         value: &Value,
         frame: &Frame,
         span: Span,
-    ) -> Result<crate::value::OrderedMap, TemplateError> {
+    ) -> Result<crate::value::OrderedMap, RenderError> {
         match value {
             Value::Map(map) => Ok((**map).clone()),
             _ => Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a map requires a map")),
@@ -405,14 +392,7 @@ impl RuntimeBindings {
     }
 
     /// Invokes a built-in or host function and binds its result.
-    pub fn call(
-        &self,
-        context: &RenderContext<'_>,
-        name: &str,
-        args: Vec<Value>,
-        frame: &Frame,
-        span: Span,
-    ) -> Result<Value, TemplateError> {
+    pub fn call(&self, context: &RenderContext<'_>, name: &str, args: Vec<Value>, frame: &Frame, span: Span) -> Result<Value, RenderError> {
         let function_context = FunctionContext { env: &context.env };
         if let Some(builtin) = builtins().get(name) {
             if args.len() < builtin.min || args.len() > builtin.max {
@@ -441,11 +421,11 @@ impl RuntimeBindings {
             ));
         };
         let result = host(&host_arguments(&args), &function_context);
-        host_result(self, context, name, result, frame, span)
+        host_result(self, context, result, frame, span)
     }
 
     /// Checks expression and iteration limits.
-    pub fn limit(&self, context: &RenderContext<'_>, kind: &str, count: usize, frame: &Frame, span: Span) -> Result<(), TemplateError> {
+    pub fn limit(&self, context: &RenderContext<'_>, kind: &str, count: usize, frame: &Frame, span: Span) -> Result<(), RenderError> {
         let limits = context.services.limits();
         let (maximum, message) = if kind == "expression" {
             (limits.expression_depth, "expression nesting exceeds")
@@ -466,31 +446,33 @@ impl RuntimeBindings {
         span: Span,
         code: ErrorCode,
         message: impl Into<String>,
-    ) -> TemplateError {
+    ) -> RenderError {
         context.fail(code, Some(frame), Some(span), message)
     }
 }
 
-/// Binds the result of host code (VAL-11, FUN-45, FUN-46): a failure is runtime_host_function and
-/// a value that cannot be bound fails with its data code, both at the call.
+/// Binds the result of host code (VAL-11, FUN-45, FUN-46): a value that cannot be bound fails with its data code at the
+/// call, and the error of host code reaches the caller unchanged.
 fn host_result(
     bindings: &RuntimeBindings,
     context: &RenderContext<'_>,
-    name: &str,
     result: Result<Value, HostError>,
     frame: &Frame,
     span: Span,
-) -> Result<Value, TemplateError> {
+) -> Result<Value, RenderError> {
     match result.and_then(|value| bind_value(&value).map_err(HostError::Data)) {
         Ok(value) => Ok(value),
-        Err(HostError::Data(error)) => Err(bindings.error(context, frame, span, error.code, error.message)),
-        Err(HostError::Failed(message)) => Err(bindings.error(
-            context,
-            frame,
-            span,
-            ErrorCode::E_RUNTIME_HOST_FUNCTION,
-            format!("{name} failed: {message}"),
-        )),
+        Err(error) => Err(host_failure(bindings, context, error, frame, span)),
+    }
+}
+
+/// The render failure of a host error (FUN-46): a binding error at the call or the lookup, or the error of host code
+/// unchanged.
+fn host_failure(bindings: &RuntimeBindings, context: &RenderContext<'_>, error: HostError, frame: &Frame, span: Span) -> RenderError {
+    match error {
+        HostError::Data(error) => bindings.error(context, frame, span, error.code, error.message),
+        HostError::Raised(raised) => RenderError::Raised(raised),
+        HostError::Callback(error) => RenderError::Callback(error),
     }
 }
 

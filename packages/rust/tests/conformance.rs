@@ -77,7 +77,10 @@ fn render_case(dir: &Path) -> Result<Outcome, Failed> {
         Some(Ok(env)) => options.env = Some(env_from_json(&env).map_err(|error| format!("env.json: {error:?}"))?),
         Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "env"))),
     }
-    match engine.render(RenderTarget::Name("input.tpl"), &assign, &options) {
+    match engine
+        .render(RenderTarget::Name("input.tpl"), &assign, &options)
+        .map_err(common::kind)
+    {
         Ok(html) => Ok(Outcome::Html(html)),
         Err(error) if error.code.as_str().starts_with("argument_") => {
             Err(format!("an AST program reported an argument error: {error}").into())

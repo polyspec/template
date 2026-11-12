@@ -65,6 +65,10 @@ fn program(sources: &[&str]) -> AstProgram {
 }
 
 fn render(program: &AstProgram, index: usize, root: OrderedMap) -> Result<String, TemplateError> {
+    render_failure(program, index, root).map_err(kind)
+}
+
+fn render_failure(program: &AstProgram, index: usize, root: OrderedMap) -> Result<String, polyspec_template::RenderError> {
     program.render_values(RenderTarget::Name(&format!("page{index}.tpl")), root, &RenderOptions::default())
 }
 
@@ -85,19 +89,22 @@ fn native_instance_member_and_method_are_rendered_without_copying() {
 
 #[test]
 fn member_and_result_binding_failures_point_at_the_expression() {
-    // VAL-19: a field that cannot be bound fails with its data code, an accessor failure is runtime_host_function,
-    // and a method result is bound; every error points at the lookup or the call.
+    // VAL-19: a field that cannot be bound fails with its data code and a method result is bound; every error points at
+    // the lookup or the call. FUN-46: the error of an accessor reaches the caller unchanged.
     let order = Arc::new(Order { total: 1.0 });
     let cases = [
         ("x{= order.huge}", ErrorCode::E_DATA_NUMBER_RANGE, 5),
         ("x{= order['invalid']}", ErrorCode::E_DATA_INVALID_UTF8, 5),
-        ("x{= order.broken}", ErrorCode::E_RUNTIME_HOST_FUNCTION, 5),
         ("x{= order.nan()}", ErrorCode::E_DATA_NUMBER_NOT_FINITE, 5),
         ("x{= order.absent()}", ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, 5),
     ];
     for (source, code, col) in cases {
         let error = render(&program(&[source]), 0, order_root(&order)).unwrap_err();
         assert_eq!((error.code, error.line, error.col), (code, 1, col), "{source}");
+    }
+    match render_failure(&program(&["x{= order.broken}"]), 0, order_root(&order)) {
+        Err(polyspec_template::RenderError::Callback(error)) => assert_eq!(error.to_string(), "accessor failed"),
+        other => panic!("expected the error of the accessor, got {other:?}"),
     }
 }
 
@@ -196,6 +203,7 @@ fn a_panic_is_reported_as_an_internal_error() {
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),
         )
+        .map_err(kind)
         .unwrap_err();
     assert_eq!(
         (error.code, error.template.as_str(), error.line),
@@ -209,7 +217,7 @@ fn a_panic_is_reported_as_an_internal_error() {
             &RenderOptions::default(),
         )
         .unwrap();
-    assert_eq!(prepared.render().unwrap_err().code, ErrorCode::E_INTERNAL);
+    assert_eq!(kind(prepared.render().unwrap_err()).code, ErrorCode::E_INTERNAL);
     let error = render(&program, 0, OrderedMap::new()).unwrap_err();
     assert_eq!(error.code, ErrorCode::E_INTERNAL);
     let template = parse(b"{= 1}", "after.tpl", &ParseOptions::default()).unwrap();
@@ -225,4 +233,25 @@ fn a_panic_is_reported_as_an_internal_error() {
 fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
     use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
     parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
+}
+
+/// The template error of a render failure; a test that expects a kind fails on the error of host code (FUN-46).
+fn kind(error: polyspec_template::RenderError) -> TemplateError {
+    match error {
+        polyspec_template::RenderError::Kind(error) => error,
+        other => panic!("expected a template error, got the error of host code: {other}"),
+    }
+}
+
+/// FUN-46: an exception of language code that a generated binding holds reaches the caller of render as the same handle,
+/// from a host function, an accessor and a method alike.
+#[test]
+fn a_raised_exception_reaches_the_caller_unchanged() {
+    let raised = || bindgen_core::Raised::from_generated(bindgen_core::Handle::new(7));
+    let mut program = program(&["{= raise()}"]);
+    program.register("raise", Box::new(move |_, _| Err(HostError::Raised(raised())))).unwrap();
+    match render_failure(&program, 0, OrderedMap::new()) {
+        Err(polyspec_template::RenderError::Raised(found)) => assert_eq!(found, raised()),
+        other => panic!("expected the raised exception, got {other:?}"),
+    }
 }

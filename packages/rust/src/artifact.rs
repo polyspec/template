@@ -30,7 +30,7 @@ struct ArtifactLoader {
 }
 
 impl Loader for ArtifactLoader {
-    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, crate::loader::LoadError> {
         Ok(self.templates.get(name).map(|(ast, version)| Loaded::Ast {
             ast: ast.clone(),
             version: version.clone(),

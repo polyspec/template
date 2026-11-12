@@ -68,6 +68,10 @@ fn fixture_dir() -> PathBuf {
 }
 
 fn render(target: &str, names: &[String]) -> Result<String, polyspec_template::TemplateError> {
+    render_values(target, names).map_err(common::kind)
+}
+
+fn render_values(target: &str, names: &[String]) -> Result<String, polyspec_template::RenderError> {
     let mut loader = MapLoader::new();
     for name in names {
         loader.set(name, &std::fs::read_to_string(fixture_dir().join(name)).expect("fixture template"));

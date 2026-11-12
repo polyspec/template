@@ -1,7 +1,7 @@
 //! Render state: frames, scopes, loop metas, template definitions and limits (docs/spec/runtime.md).
 
 use crate::ast::Template;
-use crate::error::{ErrorCode, LineIndex, Span, TemplateError};
+use crate::error::{ErrorCode, LineIndex, RenderError, Span, TemplateError};
 use crate::functions::{Env, HostFunction};
 use crate::value::{OrderedMap, Value, absent_is_null};
 use std::collections::HashMap;
@@ -152,16 +152,16 @@ impl<'e> RenderContext<'e> {
     }
 
     /// Creates an error at a span of a frame, or without position.
-    pub fn fail(&self, code: ErrorCode, frame: Option<&Frame>, span: Option<Span>, message: impl Into<String>) -> TemplateError {
-        match (frame, span) {
+    pub fn fail(&self, code: ErrorCode, frame: Option<&Frame>, span: Option<Span>, message: impl Into<String>) -> RenderError {
+        RenderError::Kind(match (frame, span) {
             (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
             (Some(frame), None) => TemplateError::without_position(code, &frame.name, message),
             _ => TemplateError::without_position(code, &self.entry, message),
-        }
+        })
     }
 
     /// Writes output, checking the size limit (RT-35).
-    pub fn write(&mut self, text: &str, frame: &Frame, span: Span) -> Result<(), TemplateError> {
+    pub fn write(&mut self, text: &str, frame: &Frame, span: Span) -> Result<(), RenderError> {
         let limits = self.services.limits();
         if self.output.len() + text.len() > limits.output_bytes {
             return Err(self.fail(
@@ -176,7 +176,7 @@ impl<'e> RenderContext<'e> {
     }
 
     /// Enters a template (RT-22, RT-23).
-    pub fn enter(&mut self, name: &str, frame: Option<&Frame>, span: Option<Span>) -> Result<(), TemplateError> {
+    pub fn enter(&mut self, name: &str, frame: Option<&Frame>, span: Option<Span>) -> Result<(), RenderError> {
         if self.chain.iter().any(|entry| entry == name) {
             return Err(self.fail(ErrorCode::E_LOAD_CYCLE, frame, span, format!("{name} is already being rendered")));
         }

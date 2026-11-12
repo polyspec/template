@@ -107,6 +107,9 @@ serde_path_to_error = "0.1.20"
 winapi-util = "0.1.11"
 
 [dev-dependencies]
+# Only generated code makes a Raised; the tests make one through the feature `construct` to check that it reaches the
+# caller unchanged (FUN-46).
+polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core", features = ["construct"] }
 libtest-mimic = "0.8.2"
 syn = { version = "3", features = ["full"] }
 

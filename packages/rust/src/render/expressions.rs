@@ -1,7 +1,7 @@
 //! Expression evaluation (docs/spec/expressions.md).
 
 use crate::ast::{BinaryOp, Expr, LoopMetaField, MapEntry};
-use crate::error::{ErrorCode, Span, TemplateError};
+use crate::error::{ErrorCode, RenderError, Span};
 use crate::render::context::{Frame, RenderContext, Scope};
 use crate::render::runtime_bindings::RuntimeBindings;
 use crate::value::{OrderedMap, Value};
@@ -23,12 +23,12 @@ impl<'c, 'e> Evaluator<'c, 'e> {
         }
     }
 
-    fn fail(&self, frame: &Frame, span: Span, code: ErrorCode, message: impl Into<String>) -> TemplateError {
+    fn fail(&self, frame: &Frame, span: Span, code: ErrorCode, message: impl Into<String>) -> RenderError {
         self.runtime.error(self.context, frame, span, code, message)
     }
 
     /// Evaluates an expression.
-    pub fn evaluate(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, TemplateError> {
+    pub fn evaluate(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, RenderError> {
         self.depth += 1;
         if let Err(error) = self.runtime.limit(self.context, "expression", self.depth, frame, expr.span()) {
             self.depth -= 1;
@@ -39,7 +39,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
         result
     }
 
-    fn evaluate_node(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, TemplateError> {
+    fn evaluate_node(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, RenderError> {
         match expr {
             Expr::Literal { value, .. } => Ok(match value {
                 crate::ast::LiteralValue::Null => Value::Null,
@@ -180,7 +180,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
         span: Span,
         frame: &Frame,
         scope: &mut Scope,
-    ) -> Result<Value, TemplateError> {
+    ) -> Result<Value, RenderError> {
         match op {
             BinaryOp::And => {
                 let left = self.evaluate(left, frame, scope)?;

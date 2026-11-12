@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: fa1a707ac4f142ab3c4d65b58732356d2b32e826bba9e57bc9edca29ccab75cd -->
+<!-- source-sha256: 9e54598ed6976d3f9fbda8ef8945b79adcc96cdd4ef6335727142f41394c5376 -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -134,7 +134,7 @@ SDK 계약은 TypeScript·Go·Rust·PHP·PHP 확장·Python의 정확한 네이�
 | `array_is_list()`가 true인 `array` | list |
 | 그 외 `array` | map. 각 키를 string으로 변환. 정수 키 `1`은 키 `"1"`이 된다. 유효한 UTF-8이 아닌 string 키는 data_invalid_utf8 |
 | bound map(VAL-22) | data_unsupported_type. `assign`과 정의 `data`일 때는 예외다(VAL-22). |
-| `JsonSerializable`을 구현한 객체 | `jsonSerialize()`가 반환한 값의 바인딩. `jsonSerialize()`가 던진 예외는 그 예외의 message를 가진 runtime_host_function |
+| `JsonSerializable`을 구현한 객체 | `jsonSerialize()`가 반환한 값의 바인딩. `jsonSerialize()`가 던진 예외는 바뀌지 않고 호출자에게 도달한다(FUN-46) |
 | 그 외 `stdClass` 또는 `stdClass` 하위 클래스의 인스턴스 | `get_mangled_object_vars()` 순서의 public 프로퍼티 map. 유효한 UTF-8이 아닌 프로퍼티 이름은 data_invalid_utf8 |
 | `Closure` | data_unsupported_type |
 | 그 외 객체 | object(VAL-19). 원본 인스턴스를 유지한다 |
@@ -195,8 +195,8 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 
 - **VAL-19** Native object는 템플릿의 불투명한 값이다. Truthy이며 stringify·반복·spread할 수 없고 JSON으로 쓸 수 없다(FUN-26): 그것을 echo하면 `runtime_stringify`로 실패하고, 그것에 대한 loop, 그것의 spread, 그것을 담은 값의 `json`은 `runtime_type`으로 실패한다.
 
-- string 키의 lookup(`o.name`, `o['name']`, EXP-18)은 원본 인스턴스의 public field 또는 property를 읽고 그 값을 바인딩한다(VAL-11). public field나 property가 아닌 이름은 `null`을 반환하며 string이 아닌 모든 키도 같다. 바인딩할 수 없는 field 값은 그 `data_*` 코드로 실패하고, 오류를 발생시킨 accessor는 runtime_host_function으로 실패한다. 두 오류 모두 lookup 표현식을 가리킨다(ERR-5).
-- Member call `o.name(args)`은 원본 인스턴스의 public method를 인자와 함께 호출하고(VAL-18) 결과를 바인딩한다. public method가 아닌 이름은 runtime_unknown_function이며, private 또는 protected method와 PHP `__call` 같은 동적 dispatch hook만 처리하는 이름도 포함한다. 인자를 거부하거나 오류를 발생시킨 method는 runtime_host_function이다. 바인딩할 수 없는 결과는 그 `data_*` 코드로 호출 위치에서 실패한다.
+- string 키의 lookup(`o.name`, `o['name']`, EXP-18)은 원본 인스턴스의 public field 또는 property를 읽고 그 값을 바인딩한다(VAL-11). public field나 property가 아닌 이름은 `null`을 반환하며 string이 아닌 모든 키도 같다. 바인딩할 수 없는 field 값은 그 `data_*` 코드로 실패하고, accessor의 오류는 바뀌지 않고 호출자에게 도달한다(FUN-46). 바인딩 오류는 lookup 표현식을 가리킨다(ERR-5).
+- Member call `o.name(args)`은 원본 인스턴스의 public method를 인자와 함께 호출하고(VAL-18) 결과를 바인딩한다. public method가 아닌 이름은 runtime_unknown_function이며, private 또는 protected method와 PHP `__call` 같은 동적 dispatch hook만 처리하는 이름도 포함한다. 인자를 거부하거나 오류를 발생시킨 method의 오류는 바뀌지 않고 호출자에게 도달한다(FUN-46). 바인딩할 수 없는 결과는 그 `data_*` 코드로 호출 위치에서 실패한다.
 - 가시성은 선언의 속성이다. `render`를 호출하는 코드에 의존하지 않는다. 객체의 class 안에서 `render`를 호출해도 템플릿은 같은 member를 본다.
 
 | 호스트 | public field 또는 property | public method |

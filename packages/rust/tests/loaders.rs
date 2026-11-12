@@ -87,6 +87,7 @@ fn a_path_resolves_against_the_current_directory_and_fails_outside_the_root() {
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),
         )
+        .map_err(kind)
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_LOAD_OUTSIDE_ROOT);
 }
@@ -123,4 +124,12 @@ fn map_loader_versions_source_and_ast_replacements_by_content() {
 fn ojson(value: serde_json::Value) -> polyspec_template::polyspec_ordered_json::Value {
     use polyspec_template::polyspec_ordered_json::{ParseOptions, parse};
     parse(value.to_string().as_bytes(), &ParseOptions::default()).expect("JSON")
+}
+
+/// The template error of a render failure; a test that expects a kind fails on the error of host code (FUN-46).
+fn kind(error: polyspec_template::RenderError) -> polyspec_template::TemplateError {
+    match error {
+        polyspec_template::RenderError::Kind(error) => error,
+        other => panic!("expected a template error, got the error of host code: {other}"),
+    }
 }

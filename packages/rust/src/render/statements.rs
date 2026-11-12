@@ -1,7 +1,7 @@
 //! Statement rendering: text, echo, if, loop, assignment, include, block (RT-11 to RT-32).
 
 use crate::ast::{Expr, IfBranch, Node, ScopeItem};
-use crate::error::{ErrorCode, Span, TemplateError};
+use crate::error::{ErrorCode, RenderError, Span};
 use crate::loader::resolve_path;
 use crate::render::context::{DefineEntry, Frame, LoopMeta, RenderContext, Scope};
 use crate::render::engine::AstProgram;
@@ -22,19 +22,19 @@ impl<'c, 'e> Renderer<'c, 'e> {
         Renderer { context, program }
     }
 
-    fn evaluate(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, TemplateError> {
+    fn evaluate(&mut self, expr: &Expr, frame: &Frame, scope: &mut Scope) -> Result<Value, RenderError> {
         Evaluator::new(self.context).evaluate(expr, frame, scope)
     }
 
     /// Renders a list of nodes.
-    pub fn render_nodes(&mut self, nodes: &[Node], frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
+    pub fn render_nodes(&mut self, nodes: &[Node], frame: &Frame, scope: &mut Scope) -> Result<(), RenderError> {
         for node in nodes {
             self.render_node(node, frame, scope)?;
         }
         Ok(())
     }
 
-    fn render_node(&mut self, node: &Node, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
+    fn render_node(&mut self, node: &Node, frame: &Frame, scope: &mut Scope) -> Result<(), RenderError> {
         match node {
             Node::Text { value, span } => self.context.write(value, frame, *span),
             Node::Echo { expr, span } => {
@@ -84,7 +84,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
         }
     }
 
-    fn render_if(&mut self, branches: &[IfBranch], r#else: Option<&[Node]>, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
+    fn render_if(&mut self, branches: &[IfBranch], r#else: Option<&[Node]>, frame: &Frame, scope: &mut Scope) -> Result<(), RenderError> {
         for branch in branches {
             let test = self.evaluate(&branch.test, frame, scope)?;
             if RuntimeBindings::new().truthy(&test) {
@@ -97,7 +97,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
         Ok(())
     }
 
-    fn render_for(&mut self, node: ForLoop<'_>, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
+    fn render_for(&mut self, node: ForLoop<'_>, frame: &Frame, scope: &mut Scope) -> Result<(), RenderError> {
         let ForLoop {
             name,
             iter,
@@ -157,14 +157,14 @@ impl<'c, 'e> Renderer<'c, 'e> {
         result
     }
 
-    fn resolve(&self, path: &str, frame: &Frame, span: Span) -> Result<String, TemplateError> {
+    fn resolve(&self, path: &str, frame: &Frame, span: Span) -> Result<String, RenderError> {
         resolve_path(&frame.name, path).map_err(|error| {
             self.context
                 .fail(ErrorCode::E_LOAD_OUTSIDE_ROOT, Some(frame), Some(span), error.message)
         })
     }
 
-    fn render_include(&mut self, path: &str, span: Span, frame: &Frame, scope: &mut Scope) -> Result<(), TemplateError> {
+    fn render_include(&mut self, path: &str, span: Span, frame: &Frame, scope: &mut Scope) -> Result<(), RenderError> {
         let name = self.resolve(path, frame, span)?;
         let template = self.program.load_template(&name, Some(frame), Some(span))?;
         self.context.enter(&name, Some(frame), Some(span))?;
@@ -186,7 +186,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
         span: Span,
         frame: &Frame,
         scope: &mut Scope,
-    ) -> Result<(), TemplateError> {
+    ) -> Result<(), RenderError> {
         let entry: DefineEntry = match (id, path) {
             (Some(id), None) => match self.context.registry.get(id) {
                 Some(entry) => entry.clone(),

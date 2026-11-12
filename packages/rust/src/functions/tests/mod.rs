@@ -107,6 +107,7 @@ fn builtins_declare_arity() {
                 &ojson(serde_json::json!({})),
                 &RenderOptions::default(),
             )
+            .map_err(kind)
             .expect_err(source);
         assert_eq!(error.code, ErrorCode::E_RUNTIME_ARITY, "{source}");
     }
@@ -171,14 +172,18 @@ fn engine_reports_host_failures_and_limits() {
             &RenderOptions::default(),
         )
         .unwrap_err();
-    assert_eq!(error.code, ErrorCode::E_RUNTIME_HOST_FUNCTION);
-    assert_eq!(error.line, 2);
+    // FUN-46: the error of the host function reaches the caller unchanged.
+    match error {
+        crate::RenderError::Callback(error) => assert_eq!(error.to_string(), "no"),
+        other => panic!("expected the error of the host function, got {other:?}"),
+    }
     let error = engine
         .render(
             RenderTarget::Name("b.tpl"),
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),
         )
+        .map_err(kind)
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_RUNTIME_LIMIT);
 }
@@ -235,6 +240,7 @@ fn render_limits_default_output_and_abort() {
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),
         )
+        .map_err(kind)
         .unwrap_err();
     assert_eq!((error.code, error.line, error.col), (ErrorCode::E_RUNTIME_LIMIT, 1, 3));
 }
@@ -291,6 +297,7 @@ fn host_function_rules() {
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),
         )
+        .map_err(kind)
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_DATA_NUMBER_RANGE);
     let other = AstProgram::new(EngineOptions {
@@ -304,6 +311,7 @@ fn host_function_rules() {
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),
         )
+        .map_err(kind)
         .unwrap_err();
     assert_eq!(error.code, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION);
 }
@@ -462,7 +470,7 @@ fn render_targets_give_the_same_output() {
 struct SharedLoader(Arc<Mutex<MapLoader>>);
 
 impl Loader for SharedLoader {
-    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, crate::loader::LoadError> {
         self.0.lock().unwrap().load(name)
     }
 }
@@ -501,7 +509,7 @@ struct VersionedLoader {
 }
 
 impl Loader for VersionedLoader {
-    fn load(&self, name: &str) -> Result<Option<Loaded>, String> {
+    fn load(&self, name: &str) -> Result<Option<Loaded>, crate::loader::LoadError> {
         if name != "a.tpl" {
             return Ok(None);
         }
@@ -555,4 +563,12 @@ fn date_text_with_a_multibyte_character_in_the_time_is_not_a_date() {
 /// The ordered-json value of a JSON value that a test writes with `serde_json::json!`.
 fn ojson(value: serde_json::Value) -> polyspec_ordered_json::Value {
     polyspec_ordered_json::parse(value.to_string().as_bytes(), &polyspec_ordered_json::ParseOptions::default()).expect("JSON")
+}
+
+/// The template error of a render failure; a test that expects a kind fails on the error of host code (FUN-46).
+fn kind(error: crate::RenderError) -> crate::TemplateError {
+    match error {
+        crate::RenderError::Kind(error) => error,
+        other => panic!("expected a template error, got the error of host code: {other}"),
+    }
 }

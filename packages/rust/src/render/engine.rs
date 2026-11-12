@@ -1,9 +1,9 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::Template;
-use crate::error::{ErrorCode, Span, TemplateError, internal_boundary};
+use crate::error::{ErrorCode, RenderError, Span, TemplateError, internal_boundary};
 use crate::functions::{Env, HostFunction};
-use crate::loader::{Loaded, Loader, MapLoader, resolve_path};
+use crate::loader::{LoadError, Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
 use crate::parser::scanner::{DEFAULT_DELIMITERS, Delimiters, parse_delimiters};
 use crate::render::context::{DefineEntry, Frame, Limits, ParsedTemplate, RenderContext, RuntimeServices, Scope};
@@ -12,7 +12,7 @@ use crate::render::statements::Renderer;
 use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values, value_from_json};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
-use crate::value::{OrderedMap, Value};
+use crate::value::{HostError, OrderedMap, Value};
 use polyspec_ordered_json::{Kind as JsonKind, Value as JsonValue};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -117,10 +117,10 @@ impl RenderTarget<'_> {
 /// A complete AST or generated template program.
 pub trait Program: Send + Sync {
     /// Prepares a reusable render request.
-    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError>;
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RenderError>;
 
     /// Renders one request.
-    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError>;
+    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError>;
 
     /// Prepares a reusable render request whose assign is a bound map, which is not bound again (VAL-22).
     fn prepare_bound(
@@ -128,10 +128,10 @@ pub trait Program: Send + Sync {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError>;
+    ) -> Result<PreparedRender<'_>, RenderError>;
 
     /// Renders one request whose assign is a bound map, which is not bound again (VAL-22).
-    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError>;
+    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError>;
 }
 
 /// Delegates requests to one complete program.
@@ -160,12 +160,12 @@ impl Engine {
         target: RenderTarget<'_>,
         assign: &JsonValue,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError> {
+    ) -> Result<PreparedRender<'_>, RenderError> {
         self.program.prepare(target, assign, options)
     }
 
     /// Renders a request through the selected program.
-    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError> {
         self.program.render(target, assign, options)
     }
 
@@ -175,12 +175,12 @@ impl Engine {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError> {
+    ) -> Result<PreparedRender<'_>, RenderError> {
         self.program.prepare_bound(target, assign, options)
     }
 
     /// Renders a request whose assign is a bound map through the selected program (VAL-22).
-    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError> {
         self.program.render_bound(target, assign, options)
     }
 }
@@ -202,7 +202,7 @@ pub struct AstProgram {
 /// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render.
 pub struct PreparedRender<'e> {
     name: String,
-    render: Box<dyn Fn() -> Result<String, TemplateError> + Send + Sync + 'e>,
+    render: Box<dyn Fn() -> Result<String, RenderError> + Send + Sync + 'e>,
 }
 
 struct AstPreparedExecution<'e> {
@@ -220,7 +220,7 @@ impl AstProgram {
         &self,
         target: RenderTarget<'_>,
         registry: &HashMap<String, DefineEntry>,
-    ) -> Result<(String, Arc<ParsedTemplate>), TemplateError> {
+    ) -> Result<(String, Arc<ParsedTemplate>), RenderError> {
         let target_name = match target {
             RenderTarget::Name(name) => match registry.get(name) {
                 Some(DefineEntry::Template { template, .. }) => template.clone(),
@@ -270,20 +270,27 @@ impl AstProgram {
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
-    pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Arc<ParsedTemplate>, TemplateError> {
-        let fail = |code: ErrorCode, message: String| match (from, span) {
-            (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
-            _ => TemplateError::without_position(code, name, message),
+    pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Arc<ParsedTemplate>, RenderError> {
+        let fail = |code: ErrorCode, message: String| {
+            RenderError::Kind(match (from, span) {
+                (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
+                _ => TemplateError::without_position(code, name, message),
+            })
         };
         let loaded = match self.loader.load(name) {
             Ok(Some(loaded)) => loaded,
             Ok(None) => return Err(fail(ErrorCode::E_LOAD_NOT_FOUND, format!("template {name} does not exist"))),
-            Err(message) => {
+            // RT-9: a loader of the implementation judged the load failed.
+            Err(LoadError::Failed(message)) => {
                 return Err(fail(
                     ErrorCode::E_LOAD_FAILED,
                     format!("template {name} cannot be loaded: {message}"),
                 ));
             }
+            // RT-9, FUN-46: the error of a host loader reaches the caller unchanged.
+            Err(LoadError::Host(HostError::Data(error))) => return Err(fail(error.code, error.message)),
+            Err(LoadError::Host(HostError::Raised(raised))) => return Err(RenderError::Raised(raised)),
+            Err(LoadError::Host(HostError::Callback(error))) => return Err(RenderError::Callback(error)),
         };
         // RT-9: a loaded template holds a non-empty version; the type holds a source or an AST.
         if loaded.version().is_empty() {
@@ -326,7 +333,7 @@ impl AstProgram {
         target: RenderTarget<'_>,
         assign: &JsonValue,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'e>, TemplateError> {
+    ) -> Result<PreparedRender<'e>, RenderError> {
         let name = target.name();
         internal_boundary(&name, || self.prepare_request(&name, target, Root::Json(assign), options))
     }
@@ -337,7 +344,7 @@ impl AstProgram {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'e>, TemplateError> {
+    ) -> Result<PreparedRender<'e>, RenderError> {
         let name = target.name();
         internal_boundary(&name, || self.prepare_request(&name, target, Root::Bound(assign), options))
     }
@@ -348,7 +355,7 @@ impl AstProgram {
         target: RenderTarget<'_>,
         assign: Root<'_>,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'e>, TemplateError> {
+    ) -> Result<PreparedRender<'e>, RenderError> {
         let bound = (|| -> Result<BoundRequest, BindError> {
             let root = match assign {
                 Root::Json(json) => Arc::new(bind_map(json)?),
@@ -373,18 +380,18 @@ impl AstProgram {
     }
 
     /// Renders a template with data given as JSON.
-    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError> {
         self.prepare(target, assign, options)?.render()
     }
 
     /// Renders a template whose assign is a bound map, which is not bound again (VAL-22).
-    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError> {
         self.prepare_bound(target, assign, options)?.render()
     }
 
     /// Renders a native value map while retaining assigned native objects. The map is bound
     /// under VAL-13: numbers, depth and safe strings are checked like every other host value.
-    pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, TemplateError> {
+    pub fn render_values(&self, target: RenderTarget<'_>, assign: OrderedMap, options: &RenderOptions) -> Result<String, RenderError> {
         let name = target.name();
         internal_boundary(&name, || self.render_bound_values(&name, target, &assign, options))
     }
@@ -395,7 +402,7 @@ impl AstProgram {
         target: RenderTarget<'_>,
         assign: &OrderedMap,
         options: &RenderOptions,
-    ) -> Result<String, TemplateError> {
+    ) -> Result<String, RenderError> {
         let bind_failure = |error: BindError| TemplateError::without_position(error.code, name, error.message);
         let assign = bind_values(assign).map_err(bind_failure)?;
         let registry = bind_defines(&options.define).map_err(bind_failure)?;
@@ -414,11 +421,11 @@ impl AstProgram {
 }
 
 impl Program for AstProgram {
-    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, TemplateError> {
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RenderError> {
         AstProgram::prepare(self, target, assign, options)
     }
 
-    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, TemplateError> {
+    fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError> {
         AstProgram::render(self, target, assign, options)
     }
 
@@ -427,11 +434,11 @@ impl Program for AstProgram {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, TemplateError> {
+    ) -> Result<PreparedRender<'_>, RenderError> {
         AstProgram::prepare_bound(self, target, assign, options)
     }
 
-    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, TemplateError> {
+    fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError> {
         AstProgram::render_bound(self, target, assign, options)
     }
 }
@@ -452,7 +459,7 @@ impl RuntimeServices for AstProgram {
 
 impl<'e> PreparedRender<'e> {
     /// Creates a prepared operation for the entry template `name` from compiled program state.
-    pub fn new(name: &str, render: impl Fn() -> Result<String, TemplateError> + Send + Sync + 'e) -> PreparedRender<'e> {
+    pub fn new(name: &str, render: impl Fn() -> Result<String, RenderError> + Send + Sync + 'e) -> PreparedRender<'e> {
         PreparedRender {
             name: name.to_string(),
             render: Box::new(render),
@@ -460,13 +467,13 @@ impl<'e> PreparedRender<'e> {
     }
 
     /// Renders the prepared request. A panic during the render is `internal` (ERR-13).
-    pub fn render(&self) -> Result<String, TemplateError> {
+    pub fn render(&self) -> Result<String, RenderError> {
         internal_boundary(&self.name, || (self.render)())
     }
 }
 
 impl AstPreparedExecution<'_> {
-    fn render(&self) -> Result<String, TemplateError> {
+    fn render(&self) -> Result<String, RenderError> {
         let mut context = RenderContext::new(self.engine, Arc::clone(&self.root), self.env.clone(), &self.target_name);
         context.registry = self.registry.clone();
         context.enter(&self.target_name, None, None)?;

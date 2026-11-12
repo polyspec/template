@@ -77,7 +77,7 @@ pub enum ErrorCode {
     E_RUNTIME_UNKNOWN_FUNCTION,
     /// A call has an argument count outside the function's range.
     E_RUNTIME_ARITY,
-    /// Host code that the engine called reported an error (FUN-46, VAL-19): a registered function, a logical class function, an instance method, a member accessor, or `jsonSerialize()`.
+    /// A legacy implementation reports an error of host code that the engine called (FUN-46, VAL-19); the Rust core passes such an error to the caller unchanged and never reports this code.
     E_RUNTIME_HOST_FUNCTION,
     /// A loop meta names a loop that is not enclosing the expression.
     E_RUNTIME_UNKNOWN_LOOP,
@@ -282,6 +282,18 @@ impl fmt::Display for TemplateError {
 }
 
 impl std::error::Error for TemplateError {}
+
+/// The failure of an operation that calls host code (FUN-46, RT-9): a template error with its kind, or the error of host
+/// code, which reaches the caller unchanged: an exception of language code (`Raised`) or the error of a Rust callback
+/// (`Callback`).
+pub type RenderError = bindgen_core::Failure<TemplateError>;
+
+/// A template error is the kind arm of a render failure.
+impl From<TemplateError> for bindgen_core::Failure<TemplateError> {
+    fn from(error: TemplateError) -> bindgen_core::Failure<TemplateError> {
+        bindgen_core::Failure::Kind(error)
+    }
+}
 
 /// The kind of a template error is the kind of its code (ERR-1); a template error has no HTTP status and no OS error
 /// number.
