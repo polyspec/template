@@ -407,7 +407,11 @@
         {
           "kind": "native",
           "make": {
-            "todo": "the value kind native of bindgen: the core holds the handle and gives back the same object (VAL-18)"
+            "php": "native",
+            "python": "native",
+            "node": "native",
+            "go": "native",
+            "wasm": "native"
           }
         }
       ],
@@ -487,6 +491,14 @@
           ]
         },
         {
+          "php": "object",
+          "cases": [
+            {
+              "kind": "native"
+            }
+          ]
+        },
+        {
           "python": "None",
           "cases": [
             {
@@ -549,6 +561,14 @@
           ]
         },
         {
+          "python": "object",
+          "cases": [
+            {
+              "kind": "native"
+            }
+          ]
+        },
+        {
           "node": "null",
           "cases": [
             {
@@ -598,6 +618,14 @@
             {
               "kind": "map",
               "read": "builtin"
+            }
+          ]
+        },
+        {
+          "node": "object",
+          "cases": [
+            {
+              "kind": "native"
             }
           ]
         },
@@ -655,6 +683,14 @@
           ]
         },
         {
+          "go": "any",
+          "cases": [
+            {
+              "kind": "native"
+            }
+          ]
+        },
+        {
           "wasm": "null",
           "cases": [
             {
@@ -704,6 +740,14 @@
             {
               "kind": "map",
               "read": "builtin"
+            }
+          ]
+        },
+        {
+          "wasm": "object",
+          "cases": [
+            {
+              "kind": "native"
             }
           ]
         }
