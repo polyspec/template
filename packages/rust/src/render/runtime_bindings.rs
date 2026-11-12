@@ -501,16 +501,23 @@ fn host_arguments(args: &[Value]) -> Vec<Value> {
     args.iter().map(Value::host_argument).collect()
 }
 
-    /// EXP-19: a key whose type names no entry of the container: runtime_type.
-fn key_type(runtime: &RuntimeBindings, context: &RenderContext<'_>, container: &str, key: &Value, frame: &Frame, span: Span) -> RenderError {
-        let found = match key {
-            Value::Number(_) => "a fractional number",
-            other => other.value_type().name(),
-        };
-        let expected = match container {
-            "map" => "a map key is a string or an integer",
-            "list" => "a list index is an integer or an index text",
-            _ => "a member name of a native object is a string",
-        };
-        runtime.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, format!("{expected}, not {found}"))
-    }
+/// EXP-19: a key whose type names no entry of the container: runtime_type.
+fn key_type(
+    runtime: &RuntimeBindings,
+    context: &RenderContext<'_>,
+    container: &str,
+    key: &Value,
+    frame: &Frame,
+    span: Span,
+) -> RenderError {
+    let found = match key {
+        Value::Number(_) => "a fractional number",
+        other => other.value_type().name(),
+    };
+    let expected = match container {
+        "map" => "a map key is a string or an integer",
+        "list" => "a list index is an integer or an index text",
+        _ => "a member name of a native object is a string",
+    };
+    runtime.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, format!("{expected}, not {found}"))
+}
