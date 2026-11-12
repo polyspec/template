@@ -28,6 +28,7 @@
 - Rust: JSON 라이브러리는 이전 ordered-json인 저장소 json의 crate `polyspec-json`이다. crate는 그것을 `polyspec_json`으로 다시 내보내고, 계약은 `json_value`를 라이브러리 json의 unit으로 적는다.
 - compiler의 TypeScript backend는 다시 생성 코드 사용자가 보는 이름인 바인딩 패키지 `@polyspec/template`을 import한다. compiler는 `@polyspec/template-legacy`를 개발 의존으로 받고 이행 기간에는 릴리스 대상이 아니다.
 - legacy 언어 패키지, legacy 런타임을 받는 TypeScript 패키지, 그것들을 위해 생성된 코드는 네이티브 테스트, conformance runner, generated runner에서 legacy 패키지가 옮겨질 때 통과하던 case와 fixture의 사본인 `legacy/tests/`를 실행한다. Rust는 `tests/`를 실행한다.
+- Rust: kind 인터페이스는 이전 bindgen인 저장소 binding의 crate `polyspec-binding-core`에서 온다. 바인딩 패키지는 binding으로 다시 scaffold된다.
 
 ## 0.0.27
 

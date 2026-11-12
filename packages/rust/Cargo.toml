@@ -7,7 +7,7 @@ description = "Template language implementation: lexer, parser, renderer, functi
 license = "MIT"
 publish = false
 # The interface contract of the bindings ships in the crate package, so that a library that takes or gives a template_value
-# reads it from the package that Cargo resolved (bindgen design I-1, T-3).
+# reads it from the package that Cargo resolved (binding design I-1, T-3).
 include = ["/src/**", "/Cargo.toml", "/interface.json", "/README.md"]
 
 [features]
@@ -65,9 +65,9 @@ workspace = true
 # (VAL-9, VAL-12, FUN-26), the AST JSON (AST-7, AST-10), the artifact manifest (RT-56) and the output of the command
 # line: the one JSON reader and writer of polyspec.
 polyspec-json = { git = "https://github.com/polyspec/json.git", branch = "v1/rust-core" }
-# The kind interface that the generated bindings read from the core error (bindgen design E-1, I-2 (3)); Cargo.lock pins the
-# commit of the bindgen repository, the source of the generated binding crates too.
-polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core" }
+# The kind interface that the generated bindings read from the core error (binding design E-1, I-2 (3)); Cargo.lock pins the
+# commit of the binding repository, the source of the generated binding crates too.
+polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", branch = "v1/rust-core" }
 clap = { version = "4", features = ["derive"], optional = true }
 
 # The volume serial number and file index of an open file, the identity of a file of FsLoader on Windows; the standard
@@ -78,7 +78,7 @@ winapi-util = "0.1.11"
 [dev-dependencies]
 # Only generated code makes a Raised; the tests make one through the feature `construct` to check that it reaches the
 # caller unchanged (FUN-46).
-polyspec-bindgen-core = { git = "https://github.com/polyspec/bindgen.git", branch = "v1/rust-core", features = ["construct"] }
+polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", branch = "v1/rust-core", features = ["construct"] }
 libtest-mimic = "0.8.2"
 # The JSON of the test fixtures and of the expected results that the tests compare.
 serde = { version = "1", features = ["derive"] }

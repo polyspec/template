@@ -295,18 +295,18 @@ impl std::error::Error for TemplateError {}
 /// The failure of an operation that calls host code (FUN-46, RT-9): a template error with its kind, or the error of host
 /// code, which reaches the caller unchanged: an exception of language code (`Raised`) or the error of a Rust callback
 /// (`Callback`).
-pub type RenderError = bindgen_core::Failure<TemplateError>;
+pub type RenderError = binding_core::Failure<TemplateError>;
 
 /// A template error is the kind arm of a render failure.
-impl From<TemplateError> for bindgen_core::Failure<TemplateError> {
-    fn from(error: TemplateError) -> bindgen_core::Failure<TemplateError> {
-        bindgen_core::Failure::Kind(error)
+impl From<TemplateError> for binding_core::Failure<TemplateError> {
+    fn from(error: TemplateError) -> binding_core::Failure<TemplateError> {
+        binding_core::Failure::Kind(error)
     }
 }
 
 /// The kind of a template error is the kind of its code (ERR-1); a template error has no HTTP status and no OS error
 /// number.
-impl bindgen_core::Kinds for TemplateError {
+impl binding_core::Kinds for TemplateError {
     fn kind(&self) -> &'static str {
         self.code.as_str()
     }

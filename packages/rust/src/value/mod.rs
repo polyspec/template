@@ -21,7 +21,7 @@ pub enum HostError {
     /// A value of the host cannot be bound; the render fails with the code of the binding error.
     Data(BindError),
     /// An exception of language code, which a generated binding holds; it reaches the caller of `render` unchanged.
-    Raised(bindgen_core::Raised),
+    Raised(binding_core::Raised),
     /// The error of Rust host code; it reaches the caller of `render` unchanged.
     Callback(Box<dyn std::error::Error + Send + Sync>),
 }

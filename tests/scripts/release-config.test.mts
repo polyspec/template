@@ -63,7 +63,7 @@ test('the packages of the release are the names that their manifests declare', (
 
 test('the legacy language packages and the binding packages are no release target', () => {
   // docs/spec/runtime.md#transition: the legacy packages leave the release until they are removed, and the binding
-  // packages that bindgen scaffolds are released once the generated bindings pass the shared suite (V-6 (2)).
+  // packages that binding scaffolds are released once the generated bindings pass the shared suite (V-6 (2)).
   const unreleased = [
     'legacy/packages/ts/package.json', 'legacy/packages/php/composer.json', 'legacy/packages/php-ext/composer.json',
     'legacy/packages/cli/php/composer.json', 'legacy/packages/python/pyproject.toml', 'legacy/packages/go/go.mod',

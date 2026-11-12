@@ -915,21 +915,21 @@ generated-lint-check: build-php typed-generator ## Lint the generated Go, Rust, 
 clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* legacy/packages/*/dist.inputs.json legacy/packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
-# ---- Bindings: generated from packages/rust/interface.json by bindgen ------------------------------------------------
-# The root Cargo workspace holds the core crate and the binding crates that bindgen scaffold writes (bindgen L-2). bindgen
-# is not yet a package that package-lock.json pins; until it is, BINDGEN names the cli (packages/ts/src/cli.ts) of a
-# bindgen checkout, and the targets refuse to run without it. bindings writes the generated folders of packages/ts,
+# ---- Bindings: generated from packages/rust/interface.json by binding ------------------------------------------------
+# The root Cargo workspace holds the core crate and the binding crates that binding scaffold writes (binding L-2). binding
+# is not yet a package that package-lock.json pins; until it is, BINDING names the cli (packages/ts/src/cli.ts) of a
+# binding checkout, and the targets refuse to run without it. bindings writes the generated folders of packages/ts,
 # packages/python and packages/php-ext, which Git ignores; bindings-check runs the contract check, which also compares the
-# tracked binding packages with what bindgen scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
+# tracked binding packages with what binding scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
 BINDING_CRATES := polyspec-template-node polyspec-template-python polyspec-template-php-ext
-BINDGEN ?=
+BINDING ?=
 .PHONY: bindings bindings-check lint-bindings test-bindings
 bindings:
-	@test -n "$(BINDGEN)" || { echo "bindings: set BINDGEN to the cli of bindgen"; exit 1; }
-	$(NODE) $(BINDGEN) generate --root $(CURDIR)
+	@test -n "$(BINDING)" || { echo "bindings: set BINDING to the cli of binding"; exit 1; }
+	$(NODE) $(BINDING) generate --root $(CURDIR)
 bindings-check:
-	@test -n "$(BINDGEN)" || { echo "bindings-check: set BINDGEN to the cli of bindgen"; exit 1; }
-	$(NODE) $(BINDGEN) check $(CURDIR)/packages/rust/interface.json
+	@test -n "$(BINDING)" || { echo "bindings-check: set BINDING to the cli of binding"; exit 1; }
+	$(NODE) $(BINDING) check $(CURDIR)/packages/rust/interface.json
 # The lint and the tests of the binding crates, after make bindings writes their generated folders.
 lint-bindings: bindings
 	$(CARGO) clippy --locked $(foreach crate,$(BINDING_CRATES),-p $(crate)) --all-targets -- -D warnings

@@ -247,7 +247,7 @@ fn kind(error: polyspec_template::RenderError) -> TemplateError {
 /// from a host function, an accessor and a method alike.
 #[test]
 fn a_raised_exception_reaches_the_caller_unchanged() {
-    let raised = || bindgen_core::Raised::from_generated(bindgen_core::Handle::new(7));
+    let raised = || binding_core::Raised::from_generated(binding_core::Handle::new(7));
     let mut program = program(&["{= raise()}"]);
     program
         .register("raise", Box::new(move |_, _| Err(HostError::Raised(raised()))))

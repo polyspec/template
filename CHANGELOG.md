@@ -27,6 +27,7 @@
 - Rust: the JSON library is the crate `polyspec-json` of the repository json, the former ordered-json; the crate re-exports it as `polyspec_json`, and the contract names its `json_value` as a unit of the library json.
 - The TypeScript backend of the compiler imports the binding package `@polyspec/template` again, the name that a user of the generated code sees; the compiler takes `@polyspec/template-legacy` as a development dependency and is no release target during the transition.
 - The legacy language packages, the TypeScript packages that take the legacy runtime and the code generated for them run `legacy/tests/`, the copy of the cases and fixtures that the legacy packages passed when they moved, in their native tests, the conformance runner and the generated runners; Rust runs `tests/`.
+- Rust: the kind interface comes from the crate `polyspec-binding-core` of the repository binding, the former bindgen; the binding packages are scaffolded again by binding.
 
 ## 0.0.27
 

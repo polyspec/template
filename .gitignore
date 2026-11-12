@@ -75,6 +75,6 @@ legacy/packages/go/go.work.sum
 # The local Claude Code settings of each developer, which the repository never tracks (T27.1-47)
 /.claude/settings.local.json
 
-# The binding packages that bindgen writes from packages/rust/interface.json (bindgen design L-1); make bindings writes
+# The binding packages that binding writes from packages/rust/interface.json (binding design L-1); make bindings writes
 # them again.
 /packages/*/generated/

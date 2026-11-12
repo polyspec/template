@@ -83,8 +83,8 @@ rules:
   - id: php-ext-stub-place
     paths: ["**/*.stub.php", "!packages/php-ext/src/*.stub.php", "!legacy/packages/php-ext/src/*.stub.php"]
 
-  # The manifests of the binding crates are files that bindgen scaffold writes with lints of their own, which deny unsafe
-  # code outside the FFI sites and an allow attribute without its reason; bindings-check compares them with what bindgen
+  # The manifests of the binding crates are files that binding scaffold writes with lints of their own, which deny unsafe
+  # code outside the FFI sites and an allow attribute without its reason; bindings-check compares them with what binding
   # writes (CK-19), so they do not take the lints of the workspace.
   - id: lint-cargo-lints
     paths: ["**/Cargo.toml", "!tests/kit/fixture/**", "!packages/ts/Cargo.toml", "!packages/python/Cargo.toml", "!packages/php-ext/Cargo.toml"]

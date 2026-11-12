@@ -1,5 +1,5 @@
-# One workspace: the core crate and the binding crates, which bindgen scaffold writes (bindgen design L-2). One
-# Cargo.lock at the root pins every dependency of all of them, the commit of polyspec-bindgen-core included (CK-20).
+# One workspace: the core crate and the binding crates, which binding scaffold writes (binding design L-2). One
+# Cargo.lock at the root pins every dependency of all of them, the commit of polyspec-binding-core included (CK-20).
 [workspace]
 resolver = "2"
 members = ["packages/rust", "packages/ts", "packages/python", "packages/php-ext"]

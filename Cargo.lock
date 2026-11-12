@@ -1131,6 +1131,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "polyspec-binding-core"
+version = "0.0.1"
+source = "git+https://github.com/polyspec/binding.git?branch=v1%2Frust-core#06e9bc4a52c520ca7847e1f25b1f9e62fb44f9df"
+dependencies = [
+ "indexmap",
+ "tokio-util",
+]
+
+[[package]]
 name = "polyspec-json"
 version = "0.0.25"
 source = "git+https://github.com/polyspec/json.git?branch=v1%2Frust-core#d7074976a790af82512d5a502cdabd936de9a955"
@@ -1147,7 +1156,7 @@ version = "0.0.27"
 dependencies = [
  "clap",
  "libtest-mimic",
- "polyspec-bindgen-core",
+ "polyspec-binding-core",
  "polyspec-json",
  "serde",
  "serde_json",
@@ -1162,7 +1171,8 @@ dependencies = [
  "napi",
  "napi-build",
  "napi-derive",
- "polyspec-bindgen-core",
+ "polyspec-binding-core",
+ "polyspec-json",
  "polyspec-template",
 ]
 
@@ -1171,7 +1181,8 @@ name = "polyspec-template-php-ext"
 version = "0.0.27"
 dependencies = [
  "ext-php-rs",
- "polyspec-bindgen-core",
+ "polyspec-binding-core",
+ "polyspec-json",
  "polyspec-template",
 ]
 
@@ -1179,7 +1190,8 @@ dependencies = [
 name = "polyspec-template-python"
 version = "0.0.27"
 dependencies = [
- "polyspec-bindgen-core",
+ "polyspec-binding-core",
+ "polyspec-json",
  "polyspec-template",
  "pyo3",
 ]

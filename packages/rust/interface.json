@@ -4305,7 +4305,7 @@
     {
       "id": "change-go-maps",
       "rule": "VAL-4",
-      "reason": "U-7 (bindgen design): a template map reaches Go code as the built-in Go map form of the binding, map[string]any, which has no entry order; the order of a map that comes back from Go is the order of its keys as Go hands them over",
+      "reason": "U-7 (binding design): a template map reaches Go code as the built-in Go map form of the binding, map[string]any, which has no entry order; the order of a map that comes back from Go is the order of its keys as Go hands them over",
       "symbol": "host arguments",
       "from": {
         "go": "a map arrives as *template.OrderedMap, which keeps the entry order"
@@ -4340,7 +4340,7 @@
     {
       "id": "change-package-names",
       "rule": "P-1",
-      "reason": "P-1 (bindgen design): one name form in every repository: Composer polyspec/template, PHP Polyspec\\Template, PyPI polyspec-template with the module polyspec.template, npm @polyspec/template, Go module packages/go",
+      "reason": "P-1 (binding design): one name form in every repository: Composer polyspec/template, PHP Polyspec\\Template, PyPI polyspec-template with the module polyspec.template, npm @polyspec/template, Go module packages/go",
       "symbol": "package",
       "from": {
         "php": "polyspec/template-php-ext and the extension polyspec_template",
