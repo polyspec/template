@@ -560,6 +560,14 @@ template-test-php: build-php
 template-test-scripts: build-rust typed-generator compiler-interface-generate build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- --test-concurrency=1 tests/scripts/
 
+# The script tests that FILES names, with the environment of the Makefile: a test that starts a tool of var/tools through
+# its mise shim needs the MISE_* settings that the Makefile exports, which a node --test started by hand does not have
+# (mise then refuses mise.toml as not trusted). It builds nothing: a test that reads a build names its target (HR-85).
+.PHONY: template-test-script
+template-test-script: ## Run the script tests FILES (tests/scripts/<name>.test.mts ...) with the environment of the Makefile; offline
+	$(if $(strip $(FILES)),,$(error make template-test-script needs FILES, the test files to run))
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- --test-concurrency=1 $(FILES)
+
 # The infrastructure of scripts/, tests/runner, tests/scripts, tests/browser and examples/showcase is TypeScript, which Node.js
 # runs by type stripping; tsc checks it with the strict options of tsconfig.json (S9). Some of it imports the build of
 # legacy/packages/ts and packages/language, whose declarations tsc reads.
