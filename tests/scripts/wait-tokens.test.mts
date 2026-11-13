@@ -30,8 +30,9 @@ test('every member that waits calls a core function that takes the wait token fi
     const token = TOKENS[String(member['wait'])];
     const core = isObject(member['core']) ? member['core'] : {};
     const name = String(core['path']).split('::').at(-1);
-    const receiver = typeof core['receiver'] === 'string' ? `${core['receiver'].replace(/\s+/gu, '')},\\s*` : '';
-    const declared = new RegExp(`\\bpub fn ${name}(<[^>]*>)?\\(\\s*${receiver.replace('&', '&\\s*')}\\w+:\\s*(binding_core::)?${token}\\b`, 'u');
+    // A receiver `&self` or `&mut self` may name a lifetime, as `&'e self`.
+    const receiver = typeof core['receiver'] === 'string' ? `${core['receiver'].replace(/\s+/gu, '').replace('&', "&\\s*('\\w+\\s+)?").replace('mut', 'mut\\s+')},\\s*` : '';
+    const declared = new RegExp(`\\bpub fn ${name}(<[^>]*>)?\\(\\s*${receiver}\\w+:\\s*(binding_core::)?${token}\\b`, 'u');
     if (!declared.test(source)) findings.push(`${String(member['id'])} (${String(member['wait'])}) calls ${String(core['path'])}, which does not take ${token} first`);
   }
   assert.deepEqual(findings, []);

@@ -38,8 +38,8 @@ mod generated {
 }
 
 use polyspec_template::{
-    AstProgram, DefineInput, EngineOptions, MapLoader, PreparedRender, RenderError, RenderOptions,
-    RenderTarget,
+    AstProgram, DefineInput, EngineOptions, MapLoader, PreparedRender, Program, RenderError,
+    RenderOptions, RenderTarget,
 };
 use render_adapter::{
     DefineEntry, DefineRegistry, Environment, RenderAdapter, RenderRequest, RepeatResult, Scenario,
@@ -64,8 +64,9 @@ enum Runner {
 macro_rules! each_runner {
     ($runner:expr, $call:ident, $target:expr, $assign:expr, $options:expr) => {
         match $runner {
-            Runner::Ast(program) => program
-                .$call(RenderTarget::Name($target), $assign, $options)
+            // The showcase loads its templates from a map loader, which reads no file, so the call holds
+            // no Io token and goes through the trait Program.
+            Runner::Ast(program) => Program::$call(program, RenderTarget::Name($target), $assign, $options)
                 .map_err(render_message),
             Runner::CompilerCoverage(program) => program
                 .$call($target, $assign, $options)

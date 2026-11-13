@@ -9,6 +9,7 @@
 
 mod common;
 
+use binding_core::Io;
 use polyspec_template::polyspec_json::Value as Json;
 use polyspec_template::{AstProgram, EngineOptions, ErrorCode, FsLoader, RenderOptions, RenderTarget};
 use std::path::PathBuf;
@@ -64,7 +65,12 @@ fn prepare_loads_the_templates_that_the_render_needs() {
     );
     let program = program(&root);
     let prepared = program
-        .prepare(RenderTarget::Name("page.tpl"), &Json::null(), &RenderOptions::default())
+        .prepare(
+            Io::for_generated_call(),
+            RenderTarget::Name("page.tpl"),
+            &Json::null(),
+            &RenderOptions::default(),
+        )
         .expect("prepare");
     std::fs::remove_dir_all(&root).expect("cleanup");
     assert_eq!(prepared.render().expect("prepared render"), "<a|bc>");
@@ -83,7 +89,12 @@ fn a_missing_include_fails_the_render_that_reaches_it() {
     let root = directory("missing", &[("page.tpl", "{? flag}{+ missing.tpl}{/}ok")]);
     let program = program(&root);
     let prepared = program
-        .prepare(RenderTarget::Name("page.tpl"), &Json::null(), &RenderOptions::default())
+        .prepare(
+            Io::for_generated_call(),
+            RenderTarget::Name("page.tpl"),
+            &Json::null(),
+            &RenderOptions::default(),
+        )
         .expect("prepare");
     assert_eq!(prepared.render().expect("the include is not reached"), "ok");
     let assign = polyspec_template::polyspec_json::parse(br#"{"flag": true}"#, &Default::default()).expect("JSON");

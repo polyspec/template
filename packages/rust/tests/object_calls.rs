@@ -7,6 +7,7 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
+use binding_core::Io;
 use polyspec_template::{
     AstProgram, BindError, EngineOptions, ErrorCode, HostError, MapLoader, OrderedMap, ParseOptions, RenderOptions, RenderTarget,
     TemplateError, TemplateObject, Value, parse,
@@ -212,6 +213,7 @@ fn a_panic_is_reported_as_an_internal_error() {
     assert!(error.message.contains("host defect"));
     let prepared = program
         .prepare(
+            Io::for_generated_call(),
             RenderTarget::Name("page0.tpl"),
             &ojson(serde_json::json!({})),
             &RenderOptions::default(),

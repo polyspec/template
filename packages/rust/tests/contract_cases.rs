@@ -11,6 +11,7 @@
 
 mod common;
 
+use binding_core::Io;
 use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
@@ -674,7 +675,11 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
         }
         "engine.load" => {
             let engine = run.engine(arg("receiver")?)?;
-            done(engine.load(RenderTarget::Name(&name("name")?), &run.render_options(case)?))
+            done(engine.load(
+                Io::for_generated_call(),
+                RenderTarget::Name(&name("name")?),
+                &run.render_options(case)?,
+            ))
         }
         "engine.prepare" | "engine.prepare_bound" | "prepared_render.render" => prepared(run, group, case),
         "parse" => {
@@ -749,11 +754,11 @@ fn prepared(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
     let made = match maker.as_str() {
         "engine.prepare" => {
             json = json_value(required(args, "assign")?)?;
-            engine.prepare(RenderTarget::Name(&target), &json, &options)
+            engine.prepare(Io::for_generated_call(), RenderTarget::Name(&target), &json, &options)
         }
         "engine.prepare_bound" => {
             bound = run.bound(required(args, "assign")?)?;
-            engine.prepare_bound(RenderTarget::Name(&target), &bound, &options)
+            engine.prepare_bound(Io::for_generated_call(), RenderTarget::Name(&target), &bound, &options)
         }
         other => return fail(format!("{other} makes no prepared render")),
     };

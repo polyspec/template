@@ -13,6 +13,7 @@ use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values, value_from_json};
 use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
 use crate::value::{OrderedMap, Value};
+use binding_core::Io;
 use polyspec_json::{Kind as JsonKind, Value as JsonValue};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -387,8 +388,9 @@ impl AstProgram {
     /// RT-77: loads the template of a target and every template that its include and block tags name, by their path or
     /// by a template definition of `options.define`, transitively, into the cache that a render reads. It reads files
     /// with a loader that reads files: call it where blocking I/O is expected. The target itself must load; a template
-    /// that another names and that fails to load fails the render that reaches it, at its tag.
-    pub fn load(&self, target: RenderTarget<'_>, options: &RenderOptions) -> Result<(), RenderError> {
+    /// that another names and that fails to load fails the render that reaches it, at its tag. The token `Io` proves that
+    /// the call runs where blocking I/O is allowed (binding I-2 (4), B-5 (a)).
+    pub fn load(&self, _io: Io, target: RenderTarget<'_>, options: &RenderOptions) -> Result<(), RenderError> {
         let name = target.name();
         internal_boundary(&name, || {
             let registry =
@@ -437,26 +439,40 @@ impl AstProgram {
         Ok(())
     }
 
-    /// Prepares a render request for repeated use.
+    /// Prepares a render request for repeated use. It loads the templates with the loader (RT-77), so it takes the token
+    /// `Io`, which proves that the call runs where blocking I/O is allowed (binding I-2 (4), B-5 (a)).
     pub fn prepare<'e>(
         &'e self,
+        _io: Io,
         target: RenderTarget<'_>,
         assign: &JsonValue,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, RenderError> {
-        let name = target.name();
-        internal_boundary(&name, || self.prepare_request(&name, target, Root::Json(assign), options, true))
+        self.prepare_root(target, Root::Json(assign), options)
     }
 
-    /// Prepares a render request whose assign is a bound map, which is not bound again (VAL-22).
+    /// Prepares a render request whose assign is a bound map, which is not bound again (VAL-22). It takes the token `Io`
+    /// as `prepare` does.
     pub fn prepare_bound<'e>(
         &'e self,
+        _io: Io,
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'e>, RenderError> {
+        self.prepare_root(target, Root::Bound(assign), options)
+    }
+
+    /// The preparation of `prepare` and `prepare_bound`, which the trait `Program` calls for a caller that holds no
+    /// token, such as `Engine` and a generated program over a map loader.
+    fn prepare_root<'e>(
+        &'e self,
+        target: RenderTarget<'_>,
+        assign: Root<'_>,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender<'e>, RenderError> {
         let name = target.name();
-        internal_boundary(&name, || self.prepare_request(&name, target, Root::Bound(assign), options, true))
+        internal_boundary(&name, || self.prepare_request(&name, target, assign, options, true))
     }
 
     fn prepare_request<'e>(
@@ -543,7 +559,7 @@ impl AstProgram {
 
 impl Program for AstProgram {
     fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RenderError> {
-        AstProgram::prepare(self, target, assign, options)
+        self.prepare_root(target, Root::Json(assign), options)
     }
 
     fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError> {
@@ -556,7 +572,7 @@ impl Program for AstProgram {
         assign: &BoundMap,
         options: &RenderOptions,
     ) -> Result<PreparedRender<'_>, RenderError> {
-        AstProgram::prepare_bound(self, target, assign, options)
+        self.prepare_root(target, Root::Bound(assign), options)
     }
 
     fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError> {

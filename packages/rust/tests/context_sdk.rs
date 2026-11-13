@@ -5,6 +5,7 @@
     clippy::expect_used,
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
+use binding_core::Io;
 use polyspec_template::{DefineEntry, Env, ErrorCode, Frame, Limits, LineIndex, OrderedMap, RenderContext, RuntimeEnvironment};
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -78,7 +79,7 @@ fn ast_program_protocols() {
     assert_eq!(protocol.render(RenderTarget::Name("a.tpl"), &assign, &options).unwrap(), "host|box");
     assert_eq!(
         program
-            .prepare(RenderTarget::Name("a.tpl"), &assign, &options)
+            .prepare(Io::for_generated_call(), RenderTarget::Name("a.tpl"), &assign, &options)
             .unwrap()
             .render()
             .unwrap(),

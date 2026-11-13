@@ -6,6 +6,7 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
+use binding_core::Io;
 use polyspec_template::{
     AstProgram, EngineOptions, ErrorCode, FsLoader, LoadError, Loaded, Loader, OrderedMap, RenderError, RenderOptions, RenderTarget,
     read_json,
@@ -55,7 +56,7 @@ fn render(loader: Box<dyn Loader>, target: &str) -> Result<String, RenderError> 
     })
     .expect("valid engine options");
     // RT-77: load reads the templates of a loader that reads files; the render reads none.
-    program.load(RenderTarget::Name(target), &RenderOptions::default())?;
+    program.load(Io::for_generated_call(), RenderTarget::Name(target), &RenderOptions::default())?;
     program.render_values(RenderTarget::Name(target), OrderedMap::new(), &RenderOptions::default())
 }
 

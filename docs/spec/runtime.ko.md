@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: a3b0f7ea4c1466aff15562e338509f920e4fbf74051f60d2bf8201c7c994b728 -->
+<!-- source-sha256: 34299c862458afb62c60b266702ef7916616b92dbb4bdf09f131b646a9b5f90a -->
 # 런타임
 
 [English](/spec/runtime).
@@ -229,7 +229,7 @@ flowchart TB
 
 - **RT-75** 파일시스템 로더는 읽은 파일을 `load`가 반환하기 전에 닫으므로, 템플릿을 몇 개 로드하든 로더의 파일이 열린 채 남지 않는다. 이유: 많은 템플릿을 로드하거나 오래 실행되는 process가 자기 file descriptor를 소진해서는 안 된다.
 
-- **RT-77** render는 파일을 읽지 않는다. 파일을 읽는 로더, 즉 구현의 파일시스템 로더(RT-10)는 그것을 선언하고(Rust에서는 `blocking_io`), 프로그램은 그 로더를 `prepare`와 `load(name, options)`에서만 부른다. 이 둘은 대상과, 로드한 템플릿의 include 태그나 block 태그가 경로로 또는 `options.define`의 템플릿 정의로 가리키는 모든 템플릿을 전이적으로 로드해 RT-76의 갱신 정책을 적용한 채 프로그램의 캐시에 둔다. `render`, `PreparedRender.render`, include와 block의 render는 그런 템플릿을 그 캐시에서만 가져오며, 캐시에 없는 이름은 `load_not_loaded`(ERR-9)로 실패한다. 호스트 코드가 제공한 로더는 전처럼 render 중에 호출 스레드에서 동기로 불린다. 이유: render는 호출자의 스레드에서, Node.js에서는 이벤트 루프의 스레드에서 실행되므로 그 안의 파일 읽기는 다른 모든 요청을 막는다. 읽기는 호출자가 blocking I/O를 예상하는 곳에서 일어난다.
+- **RT-77** render는 파일을 읽지 않는다. 파일을 읽는 로더, 즉 구현의 파일시스템 로더(RT-10)는 그것을 선언하고(Rust에서는 `blocking_io`), 프로그램은 그 로더를 `prepare`와 `load(name, options)`에서만 부른다. 이 둘은 대상과, 로드한 템플릿의 include 태그나 block 태그가 경로로 또는 `options.define`의 템플릿 정의로 가리키는 모든 템플릿을 전이적으로 로드해 RT-76의 갱신 정책을 적용한 채 프로그램의 캐시에 둔다. `render`, `PreparedRender.render`, include와 block의 render는 그런 템플릿을 그 캐시에서만 가져오며, 캐시에 없는 이름은 `load_not_loaded`(ERR-9)로 실패한다. 호스트 코드가 제공한 로더는 전처럼 render 중에 호출 스레드에서 동기로 불린다. Rust에서 `AstProgram::load`, `AstProgram::prepare`, `AstProgram::prepare_bound`는 receiver 다음 첫 인자로 token `binding_core::Io`를 받는다. 그 token은 생성된 바인딩이나 시험만 만들므로, 그 호출은 blocking I/O가 허락된 곳에서 돈다는 증거가 된다(binding I-2 (4), B-5 (a)). `Engine`과 map loader 위의 생성된 program이 prepare에 쓰는 trait `Program`은 token을 받지 않는다. 이유: render는 호출자의 스레드에서, Node.js에서는 이벤트 루프의 스레드에서 실행되므로 그 안의 파일 읽기는 다른 모든 요청을 막는다. 읽기는 호출자가 blocking I/O를 예상하는 곳에서 일어난다.
 
 ## 스코프
 

@@ -13,6 +13,7 @@
 
 mod common;
 
+use binding_core::Io;
 use polyspec_template::{
     AstProgram, BoundMap, DefineData, DefineInput, EngineOptions, ErrorCode, MapLoader, OrderedMap, RenderOptions, RenderTarget,
     TemplateError, Value, bind, merge,
@@ -88,7 +89,9 @@ fn a_bound_map_renders_the_bytes_of_the_host_map() {
         output(&cases, "page")
     );
     let assign = bound(&cases["assign"]);
-    let prepared = program.prepare_bound(RenderTarget::Name("page.tpl"), &assign, &options).unwrap();
+    let prepared = program
+        .prepare_bound(Io::for_generated_call(), RenderTarget::Name("page.tpl"), &assign, &options)
+        .unwrap();
     assert_eq!(prepared.render().unwrap(), output(&cases, "page"));
     assert_eq!(prepared.render().unwrap(), output(&cases, "page"));
 }
