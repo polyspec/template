@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: fa0025db427102e4830846dcfa0d2c610403736420113cf563afae4a70032e0a -->
+<!-- source-sha256: 5ac440362d53dac964abe2f87384bd7be1eb6cd67ab1a40364b2821d58948c48 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `make lint-ts`와 `make test-ts`가 통과한다. legacy TypeScript 시험은 compiler를 `packages/compiler/src`에서 import한다. 아무도 읽지 않는 복사본 `legacy/tests/fixtures/public-types`를 지웠다. `examples/showcase/adapters/tsconfig.json`은 타입 있는 TypeScript 프로그램이 import하는 이름 `@polyspec/template`을 legacy 런타임으로 잇는다. TypeScript backend가 옮겨질 때까지(T28.4) 생성 검사의 임시 workspace가 legacy 런타임을 그 이름으로 복사하는 것과 같다. interface 계약의 오류 표는 type assertion 대신 JSON Schema로 읽고, 쓰이지 않는 import 둘을 지웠다(T28.14).
 - legacy PHP와 Python 시험이 phpcs와 ruff format을 통과한다. `legacy/` 경로로 줄 한도보다 길어진 PHP 네 줄과 Python 시험 일곱 파일을 나눴다(T28.13).
 - Cargo.lock은 `polyspec-binding-core`를 binding 8faad21로 고정하고, `packages/ts`, `packages/python`, `packages/php-ext`는 그 commit의 `binding scaffold`가 쓰는 것이다. binding-core의 feature `lock`과 macOS에서 PHP 확장을 link하는 `packages/php-ext/build.rs`다(CK-19, CK-20). kind `format_invariant`의 category는 `packages/rust/interface.json`에서 `internal`이다. 어떤 입력도 닿지 않는 formatter의 불변식(FMT-1)이므로 binding check는 더 이상 그 입력 case를 요구하지 않는다(T28.12).
 - Rust 식 parser는 이항 연산자를 precedence climbing으로 읽어, 여섯 단계마다 frame을 하나씩 쓰지 않고 모든 단계에 frame 하나를 쓴다. 그래서 중첩 한계(RT-34)의 식이 debug build에서 2 MiB stack의 thread로 parse된다. `parse::runtime_limit`, `analyze::runtime_limit`, `engine.load::runtime_limit`, `engine.prepare::runtime_limit` case는 `cargo test`가 시험마다 주는 그런 thread를 넘쳐 실행을 멈췄다. AST와 그 span, 오류는 바뀌지 않는다(T28.11).

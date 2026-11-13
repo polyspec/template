@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { compileAst } from '../../compiler/src/ast-artifact.mts';
+import { compileAst } from '../../../../packages/compiler/src/ast-artifact.mts';
 import { loadArtifact } from '../src/node/index.js';
 
 describe('artifact-runtime (RT-56)', () => {

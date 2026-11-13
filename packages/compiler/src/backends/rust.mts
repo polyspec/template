@@ -1,5 +1,5 @@
 import {
-  baseTarget, definition, descriptor, fieldName, rustString, rustType, type BackendContext, type Descriptor, type Part, type Target,
+  baseTarget, definition, descriptor, rustString, rustType, type BackendContext, type Descriptor, type Part, type Target,
 } from '../backend-support.mts';
 import { loweredTemplate, type Program } from '../ir.mts';
 

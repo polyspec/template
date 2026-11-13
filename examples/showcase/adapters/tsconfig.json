@@ -5,7 +5,12 @@
       "node"
     ],
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@polyspec/template": [
+        "../../../legacy/packages/ts/src/index.ts"
+      ]
+    }
   },
   "include": [
     "typescript.ts",

@@ -1,7 +1,7 @@
 // The language service document: diagnostics, tags, tokens, constructs, folding, highlights, matching tags and line
 // indentation, and the agreement of its constructs with the AST spans.
 import { readFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, relative } from 'node:path';
 import { parse, TemplateError, type Node } from '@polyspec/template-legacy';
 import { describe, expect, it } from 'vitest';
 import { caseOptions, legacyCasesDir as casesDir } from '../../../tests/runner/case-list.mts';

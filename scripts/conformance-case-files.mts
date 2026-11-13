@@ -2,9 +2,27 @@
 // schemas of contracts/schema/, the content of the token and format files.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Ajv, JSONSchemaType, Schema, ValidateFunction } from 'ajv';
+import type { Ajv, Schema, ValidateFunction } from 'ajv';
 import { caseIds, casesDir } from '../tests/runner/case-list.mts';
 import { jsonDocument, readJson } from './json-document.mts';
+
+// The error table of the interface contract: the variant and the category of each row of errors.kinds (design E-1).
+const errorTableDocument = jsonDocument<{ errors: { kinds: { variant: string; category: string }[] } }>('interface contract with an error table', {
+  type: 'object',
+  required: ['errors'],
+  properties: {
+    errors: {
+      type: 'object',
+      required: ['kinds'],
+      properties: {
+        kinds: {
+          type: 'array',
+          items: { type: 'object', required: ['variant', 'category'], properties: { variant: { type: 'string' }, category: { type: 'string' } } },
+        },
+      },
+    },
+  },
+});
 
 // A JSON Schema of contracts/schema, which ajv compiles.
 const schemaObjectDocument = jsonDocument<Record<string, unknown>>('JSON Schema', { type: 'object' });
@@ -69,9 +87,7 @@ export function expectedErrorOf(raises: ExpectedRaises['raises']): ExpectedError
  * a variant `polyspec_template::ErrorCode::<Kind>` has the kind of its name in snake_case (binding E-3).
  */
 export function kindCategories(root: string): Map<string, string> {
-  const contract = readJson(join(root, 'packages/rust/interface.json'));
-  const rows = (contract as { errors?: { kinds?: { variant: string; category: string }[] } }).errors?.kinds;
-  if (rows === undefined) throw new Error('packages/rust/interface.json has no errors.kinds');
+  const rows = errorTableDocument.read(join(root, 'packages/rust/interface.json')).errors.kinds;
   return new Map(rows.map(row => [row.variant.replace(/^.*::/, '').replace(/(?<=[a-z0-9])(?=[A-Z])/g, '_').toLowerCase(), row.category]));
 }
 

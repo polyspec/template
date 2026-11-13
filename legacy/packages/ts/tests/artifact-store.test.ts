@@ -3,8 +3,8 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { compileAst } from '../../compiler/src/ast-artifact.mts';
-import { compileGeneratedArtifact, generatedManifestPath } from '../../compiler/src/generated-artifact.mts';
+import { compileAst } from '../../../../packages/compiler/src/ast-artifact.mts';
+import { compileGeneratedArtifact, generatedManifestPath } from '../../../../packages/compiler/src/generated-artifact.mts';
 import { loadOrRefresh } from '../src/node/index.js';
 
 function fixtureRoot(): { source: string; output: string } {
