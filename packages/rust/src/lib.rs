@@ -48,7 +48,7 @@ pub mod fault {
 
 pub use ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp};
 pub use ast_json::{decode_template, encode_template};
-pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
+pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, TemplateErrorObject, internal_boundary};
 pub use format::{
     DEFAULT_FORMAT_NAME, DEFAULT_TEMPLATE_BLOCKS, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes,
 };

@@ -813,6 +813,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Template",
       "fields": [
         {
           "name": [
@@ -854,6 +855,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Comment",
       "fields": [
         {
           "name": [
@@ -886,6 +888,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::IfBranch",
       "fields": [
         {
           "name": [
@@ -931,6 +934,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::ScopeItem",
       "fields": [
         {
           "name": [
@@ -1401,6 +1405,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::UnaryOp",
       "variants": [
         {
           "name": [
@@ -1426,6 +1431,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::BinaryOp",
       "variants": [
         {
           "name": [
@@ -1548,6 +1554,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::LoopMetaField",
       "variants": [
         {
           "name": [
@@ -2103,6 +2110,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::TagKind",
       "variants": [
         {
           "name": [
@@ -2188,6 +2196,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::TokenKind",
       "variants": [
         {
           "name": [
@@ -2261,6 +2270,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::SyntaxTag",
       "fields": [
         {
           "name": [
@@ -2320,6 +2330,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::SyntaxToken",
       "fields": [
         {
           "name": [
@@ -2356,6 +2367,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::TemplateAnalysis",
       "fields": [
         {
           "name": [
@@ -2400,6 +2412,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::PrefixAnalysis",
       "fields": [
         {
           "name": [
@@ -2464,6 +2477,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::TemplateErrorObject",
       "fields": [
         {
           "name": [
@@ -2526,6 +2540,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::TemplateBlocks",
       "variants": [
         {
           "name": [
@@ -2551,6 +2566,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::FormatOptions",
       "fields": [
         {
           "name": [
@@ -2627,6 +2643,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Formatted",
       "fields": [
         {
           "name": [
@@ -2654,6 +2671,7 @@
       "kind": "enum",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::ArtifactRefresh",
       "variants": [
         {
           "name": [
@@ -2684,6 +2702,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Limits",
       "fields": [
         {
           "name": [
@@ -2726,6 +2745,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Environment",
       "fields": [
         {
           "name": [
@@ -2753,6 +2773,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::DefineInput",
       "fields": [
         {
           "name": [
@@ -2802,6 +2823,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::ParseOptions",
       "fields": [
         {
           "name": [
@@ -2827,6 +2849,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::RenderOptions",
       "fields": [
         {
           "name": [
@@ -2867,6 +2890,7 @@
       "kind": "record",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::EngineOptions",
       "fields": [
         {
           "name": [

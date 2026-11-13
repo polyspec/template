@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 340447c8f61ba445350a9c60c72c66a20688a4c8fd0d2d5be5756133164821ca -->
+<!-- source-sha256: 2d5693a1c1bac3f9a469730e55fe82fdfd055b83ad03527eee28bbdd8c9a7aa5 -->
 # polyspec-template
 
 [English](README.md).
@@ -35,7 +35,7 @@ assign 데이터는 crate가 다시 내보내는 crate `polyspec-json`의 JSON �
 | `encode_template(ast)` | `Template`의 canonical AST JSON 텍스트(AST-7)를 polyspec-json으로 쓴다. |
 | `decode_template(json)` | AST JSON 텍스트를 polyspec-json으로 읽어 `contracts/schema/ast.schema.json`의 규칙으로 검사한 뒤 `parse`가 반환하는 `Template`으로 읽는다. 잘못된 AST와 JSON이 아닌 텍스트는 kind `ast_invalid`의 `TemplateError`이며 메시지가 잘못된 노드의 JSON Pointer를 적는다(AST-10, ERR-15). |
 | `analyze(source, name, &ParseOptions)` | `parse`처럼 파싱하고, 받아들인 모든 태그(`TagKind`, 범위, 본문 범위)와 그 모든 부분의 EDT-8 분류(`SyntaxToken`)를 앞의 BOM을 뺀 바이트 오프셋으로 함께 반환한다. |
-| `analyze_prefix(source, name, &ParseOptions)` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환한다. 잘못된 UTF-8이나 옵션은 `TemplateError`를 반환한다. 성공한 부분 분석 결과는 `ast`(Go는 `AST`)에 완전한 AST도 제공하며 파서 오류가 있으면 해당 필드는 null 또는 네이티브 부재 값이다. |
+| `analyze_prefix(source, name, &ParseOptions)` | 받아들인 태그·토큰과 첫 파서 오류를 `PrefixAnalysis.error`로 반환한다. 이 값은 `TemplateErrorObject`이며, data로서의 ERR-1 오류 객체이고 `code`는 code의 text다. 잘못된 UTF-8이나 옵션은 `TemplateError`를 반환한다. 성공한 부분 분석 결과는 `ast`(Go는 `AST`)에 완전한 AST도 제공하며 파서 오류가 있으면 해당 필드는 null 또는 네이티브 부재 값이다. |
 | `format(source, &FormatOptions)` | 태그 안의 공백과, HTML 요소와 템플릿 블록에 따른 줄 들여쓰기를 정리한다. `FormatOptions`는 들여쓰기 단위(`IndentUnit`, 기본값 공백 두 칸; `None`은 모든 줄을 유지), `TemplateBlocks::Indent` 또는 `Flat`, 구분자, 바이트 범위를 정한다. 결과가 같은 AST로 파싱될 때만 텍스트를 돌려주고, 아니면 파서 오류, `format_invariant`, `format_html`의 `TemplateError`를 돌려준다(FMT-14, ERR-15). |
 | `AstProgram::new(EngineOptions)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 kind `argument_delimiters`의 `TemplateError`를 돌려준다. |
 | `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. Generated program은 module 파일이 아니라 `include!`로(`build.rs` 뒤의 `OUT_DIR`에서, 또는 commit한 파일에서) crate에 들어오므로 `cargo fmt`는 그 배치를 compiler에 맡기고 clippy가 이를 lint한다. |

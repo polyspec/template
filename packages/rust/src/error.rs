@@ -241,6 +241,40 @@ pub struct TemplateError {
     pub message: String,
 }
 
+/// The error object of ERR-1 as data: the record `template_error_object` of the interface contract, which
+/// `PrefixAnalysis::error` holds (EDT-11). `code` is the text of the code, the kind of the error, as ERR-1 states it.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TemplateErrorObject {
+    /// The code of the error in lowercase snake_case, its kind.
+    pub code: String,
+    /// Name of the template in which the error is located.
+    pub template: String,
+    /// 1-based line, or 0 when the error has no position.
+    pub line: usize,
+    /// 1-based byte column, or 0 when the error has no position.
+    pub col: usize,
+    /// Start byte offset of the related token or node.
+    pub offset: usize,
+    /// End byte offset of the related token or node.
+    pub end: usize,
+    /// Free text.
+    pub message: String,
+}
+
+impl From<TemplateError> for TemplateErrorObject {
+    fn from(error: TemplateError) -> TemplateErrorObject {
+        TemplateErrorObject {
+            code: error.code.as_str().to_string(),
+            template: error.template,
+            line: error.line,
+            col: error.col,
+            offset: error.offset,
+            end: error.end,
+            message: error.message,
+        }
+    }
+}
+
 impl TemplateError {
     /// Creates an error located at a byte span of a template with a known line index.
     pub fn at(code: ErrorCode, template: &str, lines: Option<&LineIndex>, span: Span, message: impl Into<String>) -> TemplateError {

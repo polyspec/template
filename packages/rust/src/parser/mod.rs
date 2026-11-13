@@ -6,7 +6,7 @@ pub mod scanner;
 pub mod standalone;
 
 use crate::ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, Node, Template};
-use crate::error::{ErrorCode, TemplateError};
+use crate::error::{ErrorCode, TemplateError, TemplateErrorObject};
 use crate::expr::lexer::{LexerOptions, Token, TokenType};
 use crate::expr::parser::ExpressionParser;
 use crate::parser::block_tag::RawTagReader;
@@ -161,7 +161,7 @@ pub struct PrefixAnalysis {
     /// Classified ranges belonging to the accepted tags.
     pub tokens: Vec<SyntaxToken>,
     /// The first parse error, or none for a source that parses.
-    pub error: Option<TemplateError>,
+    pub error: Option<TemplateErrorObject>,
 }
 
 // The EDT-8 class of an expression token, which depends on its neighbours for names.
@@ -362,7 +362,7 @@ impl<'a> TemplateParser<'a> {
                 ast: None,
                 tags: self.tags,
                 tokens: self.tokens,
-                error: Some(error),
+                error: Some(error.into()),
             },
         }
     }
