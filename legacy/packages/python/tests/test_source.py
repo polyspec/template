@@ -9,7 +9,8 @@ from polyspec.template.errors import LineIndex, Span, line_index_of, position_of
 
 FIXTURE = json.loads(
     (
-        Path(__file__).resolve().parents[4] / "legacy/tests/fixtures/source-context.json"
+        Path(__file__).resolve().parents[4]
+        / "legacy/tests/fixtures/source-context.json"
     ).read_text(encoding="utf-8")
 )
 

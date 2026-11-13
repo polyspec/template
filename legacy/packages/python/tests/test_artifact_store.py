@@ -10,7 +10,11 @@ from pathlib import Path
 from polyspec.template import load_or_refresh
 
 FIXTURE = (
-    Path(__file__).resolve().parents[4] / "legacy" / "tests" / "fixtures" / "artifact-runtime"
+    Path(__file__).resolve().parents[4]
+    / "legacy"
+    / "tests"
+    / "fixtures"
+    / "artifact-runtime"
 )
 
 

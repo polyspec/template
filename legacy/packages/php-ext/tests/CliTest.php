@@ -12,8 +12,8 @@ use PHPUnit\Framework\TestCase;
 final class CliTest extends TestCase
 {
     /**
-     * The bin of the command line package (legacy/packages/cli/php) through the proxy of vendor/bin of the development root,
-     * which runs it on the autoloader of the root.
+     * The bin of the command line package (legacy/packages/cli/php) through the proxy of vendor/bin of the development
+     * root, which runs it on the autoloader of the root.
      */
     private static function command(): string
     {

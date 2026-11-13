@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 7735d9239a8b389d7794d34410f22dc4919e9fae2b51190c6c3921a161e454f6 -->
+<!-- source-sha256: fa0025db427102e4830846dcfa0d2c610403736420113cf563afae4a70032e0a -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- legacy PHP와 Python 시험이 phpcs와 ruff format을 통과한다. `legacy/` 경로로 줄 한도보다 길어진 PHP 네 줄과 Python 시험 일곱 파일을 나눴다(T28.13).
 - Cargo.lock은 `polyspec-binding-core`를 binding 8faad21로 고정하고, `packages/ts`, `packages/python`, `packages/php-ext`는 그 commit의 `binding scaffold`가 쓰는 것이다. binding-core의 feature `lock`과 macOS에서 PHP 확장을 link하는 `packages/php-ext/build.rs`다(CK-19, CK-20). kind `format_invariant`의 category는 `packages/rust/interface.json`에서 `internal`이다. 어떤 입력도 닿지 않는 formatter의 불변식(FMT-1)이므로 binding check는 더 이상 그 입력 case를 요구하지 않는다(T28.12).
 - Rust 식 parser는 이항 연산자를 precedence climbing으로 읽어, 여섯 단계마다 frame을 하나씩 쓰지 않고 모든 단계에 frame 하나를 쓴다. 그래서 중첩 한계(RT-34)의 식이 debug build에서 2 MiB stack의 thread로 parse된다. `parse::runtime_limit`, `analyze::runtime_limit`, `engine.load::runtime_limit`, `engine.prepare::runtime_limit` case는 `cargo test`가 시험마다 주는 그런 thread를 넘쳐 실행을 멈췄다. AST와 그 span, 오류는 바뀌지 않는다(T28.11).
 - Rust `ErrorCode`의 variant는 kind를 UpperCamelCase로 쓴 이름이다. 예: `parse_unterminated_tag`는 `ErrorCode::ParseUnterminatedTag`. 그래서 `packages/rust/interface.json`의 `errors.kinds` variant를 snake_case로 쓰면 그 kind가 된다(binding E-3). 이름이 `E_<KIND>`일 때 binding 8faad21의 binding check는 kind를 `e_<kind>`로 얻었고, `contracts/core-cases.json`의 어떤 case도 그 kind를 내지 않아 CK-22를 282번 보고했다. 이제 6번 보고한다(T28.8).

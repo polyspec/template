@@ -69,6 +69,10 @@ final class ArtifactStoreTest extends TestCase
         self::assertSame('<p>b</p>', $program->render('page.tpl', ['x' => 'b']));
         self::assertSame(1, $builds);
         $this->expectException(\RuntimeException::class);
-        AstProgram::loadOrRefresh(Support::repoRoot() . '/legacy/tests/fixtures/artifact-runtime/none', 'false', $build);
+        AstProgram::loadOrRefresh(
+            Support::repoRoot() . '/legacy/tests/fixtures/artifact-runtime/none',
+            'false',
+            $build,
+        );
     }
 }
