@@ -3222,6 +3222,51 @@
       "options": {}
     },
     {
+      "id": "data_invalid_utf8",
+      "rule": "VAL-12",
+      "raises": {
+        "kind": "data_invalid_utf8",
+        "status": null,
+        "category": "value"
+      },
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= s}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": [
+          [
+            "s",
+            {
+              "kind": "text",
+              "value": {
+                "ill_formed": "a"
+              }
+            }
+          ]
+        ]
+      },
+      "options": {}
+    },
+    {
       "id": "data_unsupported_type",
       "rule": "ERR-10",
       "raises": {
@@ -7631,6 +7676,51 @@
             {
               "kind": "number",
               "value": "1e400"
+            }
+          ]
+        ]
+      },
+      "options": {}
+    },
+    {
+      "id": "data_invalid_utf8",
+      "rule": "VAL-12",
+      "raises": {
+        "kind": "data_invalid_utf8",
+        "status": null,
+        "category": "value"
+      },
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= s}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": [
+          [
+            "s",
+            {
+              "kind": "text",
+              "value": {
+                "ill_formed": "a"
+              }
             }
           ]
         ]
