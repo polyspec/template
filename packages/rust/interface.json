@@ -4475,5 +4475,126 @@
       "to": null
     }
   ],
-  "cases": []
+  "cases": [
+    {
+      "member": "fs_loader.new",
+      "file": "contracts/core-cases.json",
+      "group": "fs_loader.new"
+    },
+    {
+      "member": "map_loader.new",
+      "file": "contracts/core-cases.json",
+      "group": "map_loader.new"
+    },
+    {
+      "member": "map_loader.set",
+      "file": "contracts/core-cases.json",
+      "group": "map_loader.set"
+    },
+    {
+      "member": "map_loader.set_ast",
+      "file": "contracts/core-cases.json",
+      "group": "map_loader.set_ast"
+    },
+    {
+      "member": "map_loader.set_ast_lines",
+      "file": "contracts/core-cases.json",
+      "group": "map_loader.set_ast_lines"
+    },
+    {
+      "member": "engine.new",
+      "file": "contracts/core-cases.json",
+      "group": "engine.new"
+    },
+    {
+      "member": "engine.register",
+      "file": "contracts/core-cases.json",
+      "group": "engine.register"
+    },
+    {
+      "member": "engine.register_class",
+      "file": "contracts/core-cases.json",
+      "group": "engine.register_class"
+    },
+    {
+      "member": "engine.render",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render"
+    },
+    {
+      "member": "engine.render_json",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render_json"
+    },
+    {
+      "member": "engine.render_bound",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render_bound"
+    },
+    {
+      "member": "engine.load",
+      "file": "contracts/core-cases.json",
+      "group": "engine.load"
+    },
+    {
+      "member": "engine.prepare",
+      "file": "contracts/core-cases.json",
+      "group": "engine.prepare"
+    },
+    {
+      "member": "engine.prepare_bound",
+      "file": "contracts/core-cases.json",
+      "group": "engine.prepare_bound"
+    },
+    {
+      "member": "prepared_render.render",
+      "file": "contracts/core-cases.json",
+      "group": "prepared_render.render"
+    },
+    {
+      "member": "parse",
+      "file": "contracts/core-cases.json",
+      "group": "parse"
+    },
+    {
+      "member": "analyze",
+      "file": "contracts/core-cases.json",
+      "group": "analyze"
+    },
+    {
+      "member": "analyze_prefix",
+      "file": "contracts/core-cases.json",
+      "group": "analyze_prefix"
+    },
+    {
+      "member": "format",
+      "file": "contracts/core-cases.json",
+      "group": "format"
+    },
+    {
+      "member": "resolve_path",
+      "file": "contracts/core-cases.json",
+      "group": "resolve_path"
+    },
+    {
+      "member": "encode_template",
+      "file": "contracts/core-cases.json",
+      "group": "encode_template"
+    },
+    {
+      "member": "decode_template",
+      "file": "contracts/core-cases.json",
+      "group": "decode_template"
+    },
+    {
+      "member": "bind",
+      "file": "contracts/core-cases.json",
+      "group": "bind"
+    },
+    {
+      "member": "merge",
+      "file": "contracts/core-cases.json",
+      "group": "merge"
+    }
+  ]
 }

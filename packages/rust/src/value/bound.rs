@@ -22,6 +22,7 @@ mod sealed {
     pub enum Source<'a> {
         Json(&'a polyspec_json::Value),
         Values(&'a OrderedMap),
+        Value(&'a crate::value::Value),
         Bound(&'a BoundMap),
     }
 
@@ -43,6 +44,12 @@ mod sealed {
         }
     }
 
+    impl<'a> Sealed<'a> for &'a crate::value::Value {
+        fn source(self) -> Source<'a> {
+            Source::Value(self)
+        }
+    }
+
     impl<'a> Sealed<'a> for &'a BoundMap {
         fn source(self) -> Source<'a> {
             Source::Bound(self)
@@ -52,16 +59,18 @@ mod sealed {
 
 use sealed::{Sealed, Source};
 
-/// A host value that `bind` accepts (VAL-13): JSON data of polyspec-json, a map of values that the host built, or a
-/// bound map.
+/// A host value that `bind` accepts (VAL-13): JSON data of polyspec-json, a map of values that the host built, a value
+/// that the host built, or a bound map.
 pub trait BindInput<'a>: Sealed<'a> {}
 
 impl<'a> BindInput<'a> for &'a polyspec_json::Value {}
 impl<'a> BindInput<'a> for &'a OrderedMap {}
+impl<'a> BindInput<'a> for &'a Value {}
 impl<'a> BindInput<'a> for &'a BoundMap {}
 
 /// Applies host binding to a value and returns a bound map (VAL-22). A bound map gives a bound map
-/// with the same entries. Its errors have no template and no position (ERR-14).
+/// with the same entries. A value is a map, or null, which is no data (RT-4); a value of another type is
+/// data_unsupported_type. Its errors have no template and no position (ERR-14).
 pub fn bind<'a>(input: impl BindInput<'a>) -> Result<BoundMap, TemplateError> {
     let failure = |error: BindError| TemplateError::without_position(error.code, "", error.message);
     internal_boundary("", || {
@@ -70,6 +79,15 @@ pub fn bind<'a>(input: impl BindInput<'a>) -> Result<BoundMap, TemplateError> {
             // The values that `render` uses as assign (RT-4) bind like assign.
             Source::Json(json) => Arc::new(bind_map(json).map_err(failure)?),
             Source::Values(map) => Arc::new(bind_values(map).map_err(failure)?),
+            Source::Value(Value::Null) => Arc::new(OrderedMap::new()),
+            Source::Value(Value::Map(map)) => Arc::new(bind_values(map).map_err(failure)?),
+            Source::Value(_) => {
+                return Err(TemplateError::without_position(
+                    crate::ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                    "",
+                    "the value is not a map",
+                ));
+            }
         };
         Ok(BoundMap { entries })
     })

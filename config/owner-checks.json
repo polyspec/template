@@ -687,6 +687,15 @@
     },
     {
       "paths": [
+        "contracts/core-cases.json"
+      ],
+      "targets": [
+        "test-rust",
+        "bindings-check"
+      ]
+    },
+    {
+      "paths": [
         "packages/rust/**",
         "Cargo.toml",
         "Cargo.lock"
@@ -1598,6 +1607,7 @@
       "check": "make template-test-rust-unit",
       "paths": [
         "packages/rust/**",
+        "contracts/core-cases.json",
         "tests/fixtures/{bound-data,expr,native-object}/**",
         "contracts/schema/ast.schema.json",
         "tests/fixtures/ast-decode/**",
@@ -1953,6 +1963,7 @@
       "check": "make bindings-check",
       "paths": [
         "packages/rust/interface.json",
+        "contracts/core-cases.json",
         "packages/ts/**",
         "packages/python/**",
         "packages/php-ext/**",

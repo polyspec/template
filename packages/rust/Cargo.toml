@@ -32,6 +32,12 @@ name = "cases"
 path = "tests/cases.rs"
 harness = false
 
+# The contract cases of contracts/core-cases.json run against the core, one test per case through libtest-mimic.
+[[test]]
+name = "contract_cases"
+path = "tests/contract_cases.rs"
+harness = false
+
 # The command line interface runs the binary, which the feature cli builds.
 [[test]]
 name = "cli"
@@ -82,5 +88,7 @@ polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", branc
 libtest-mimic = "0.8.2"
 # The JSON of the test fixtures and of the expected results that the tests compare.
 serde = { version = "1", features = ["derive"] }
-serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision"] }
+# unbounded_depth: a contract case of data_depth nests a value deeper than the limit of VAL-20, which as a case value is
+# deeper than the 128 levels that serde_json reads by default.
+serde_json = { version = "1", features = ["preserve_order", "arbitrary_precision", "unbounded_depth"] }
 syn = { version = "3", features = ["full"] }
