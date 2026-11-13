@@ -9,7 +9,7 @@ pub mod string;
 
 pub use helpers::{BuiltIn, Env, FunctionContext, to_number};
 
-use crate::error::ErrorCode;
+use crate::error::TemplateError;
 use crate::value::bind::BindError;
 use crate::value::{HostError, Value};
 use binding_core::Failure;
@@ -26,18 +26,19 @@ pub type Environment = Env;
 
 /// A host function in the form of the interface contract (binding GN-6d), which a generated binding gives
 /// `AstProgram::register_function` and `AstProgram::register_class_function`: the arguments and the environment of the
-/// call, and a template value or a failure (FUN-43, FUN-46).
-pub type ContractFunction = Box<dyn Fn(&[Value], &Environment) -> Result<Value, Failure<ErrorCode>> + Send + Sync>;
+/// call, and a template value or a failure of the core error that `errors.code` of the contract names (FUN-43, FUN-46,
+/// CNF-20).
+pub type ContractFunction = Box<dyn Fn(&[Value], &Environment) -> Result<Value, Failure<TemplateError>> + Send + Sync>;
 
-/// The host function of the runtime that calls a function of the contract. `Failure::Kind` is a binding failure of its
-/// code, as a returned value that binding refuses is (VAL-19); `Failure::Raised` and `Failure::Callback` are the error
-/// of host code, which reaches the caller of `render` unchanged (FUN-46).
+/// The host function of the runtime that calls a function of the contract. `Failure::Kind` is a binding failure of the
+/// code and the message of its error, as a returned value that binding refuses is (VAL-19); `Failure::Raised` and
+/// `Failure::Callback` are the error of host code, which reaches the caller of `render` unchanged (FUN-46).
 pub fn contract_host_function(function: ContractFunction) -> HostFunction {
     Box::new(move |args: &[Value], context: &FunctionContext<'_>| {
         function(args, context.env).map_err(|failure| match failure {
-            Failure::Kind(code) => HostError::Data(BindError {
-                code,
-                message: format!("the host function failed with {}", code.as_str()),
+            Failure::Kind(error) => HostError::Data(BindError {
+                code: error.code,
+                message: error.message,
             }),
             Failure::Raised(raised) => HostError::Raised(raised),
             Failure::Callback(error) => HostError::Callback(error),
