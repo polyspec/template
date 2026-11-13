@@ -19,10 +19,10 @@ use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
     ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineData, DefineInput, Definitions, EngineOptions, Env,
-    Environment, Expr, FormatOptions, FsLoader, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError, Loaded,
-    Loader, LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
-    SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind,
-    decode_template, encode_template, format, merge, parse, resolve_path, value_in,
+    Environment, Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError,
+    Loaded, Loader, LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget,
+    ScopeItem, Span, SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze,
+    analyze_prefix, bind, decode_template, encode_template, format, merge, parse, resolve_path, value_in,
 };
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -854,8 +854,20 @@ impl Run {
         let Some(value) = value else {
             return Ok(options);
         };
+        only(value, &["loader", "functions", "limits", "delimiters", "artifact_refresh"])?;
         if let Some(loader) = key(value, "loader").filter(|loader| !loader.is_null()) {
             options.loader = Some(self.loader(loader)?);
+        }
+        // RT-5, CNF-19: the functions of the options are an object of their entries, each a function fixture.
+        if let Some(functions) = key(value, "functions") {
+            let Some(entries) = functions.as_object() else {
+                return fail(format!("functions is no object of its entries: {functions}"));
+            };
+            let mut named = Functions::new();
+            for (name, function) in entries {
+                named.insert(name.clone(), host_function(function, &self.unexpected)?);
+            }
+            options.functions = Some(named);
         }
         if let Some(limits) = key(value, "limits").filter(|limits| !limits.is_null()) {
             options.limits = Some(Limits {

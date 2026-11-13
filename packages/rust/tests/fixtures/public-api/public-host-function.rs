@@ -12,9 +12,11 @@ pub fn host_function() -> HostFunction {
 pub fn configurations() -> (polyspec_template::EngineOptions<'static>, polyspec_template::RenderOptions) {
     use polyspec_template::{ArtifactRefresh, EngineOptions, Limits, RenderOptions};
     let _policies = [ArtifactRefresh::Dev, ArtifactRefresh::True, ArtifactRefresh::False];
+    let mut functions = polyspec_template::Functions::new();
+    functions.insert("custom".into(), Box::new(|_, environment| Ok(Value::text(environment.timezone.clone()))));
     let engine = EngineOptions {
         loader: Some(Box::new(polyspec_template::MapLoader::new())),
-        functions: std::collections::HashMap::from([("custom".into(), host_function())]),
+        functions: Some(functions),
         limits: Some(Limits { output_bytes: 128, ..Default::default() }),
         delimiters: Some("[]".into()), artifact_refresh: Some(ArtifactRefresh::False),
     };

@@ -172,6 +172,17 @@
       }
     },
     {
+      "id": "a_host_function_of_the_options",
+      "rule": "RT-5",
+      "options": {
+        "functions": {
+          "greet": {
+            "function": []
+          }
+        }
+      }
+    },
+    {
       "id": "argument_delimiters",
       "rule": "ERR-15",
       "options": {
@@ -179,6 +190,22 @@
       },
       "raises": {
         "kind": "argument_delimiters",
+        "status": null,
+        "category": "value"
+      }
+    },
+    {
+      "id": "argument_function_name",
+      "rule": "RT-5",
+      "options": {
+        "functions": {
+          "upper": {
+            "function": []
+          }
+        }
+      },
+      "raises": {
+        "kind": "argument_function_name",
         "status": null,
         "category": "value"
       }
@@ -2174,6 +2201,66 @@
       },
       "options": {},
       "result": "y\n"
+    },
+    {
+      "id": "a_host_function_of_the_options",
+      "rule": "RT-5",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= greet('a')}\n"
+                  }
+                }
+              ]
+            },
+            "functions": {
+              "greet": {
+                "function": [
+                  {
+                    "args": {
+                      "0": [
+                        {
+                          "kind": "text",
+                          "value": "a"
+                        }
+                      ],
+                      "1": {
+                        "timezone": "Z",
+                        "now": 0
+                      }
+                    },
+                    "result": {
+                      "kind": "text",
+                      "value": "hi a"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": []
+      },
+      "options": {
+        "env": {
+          "timezone": "Z",
+          "now": 0
+        }
+      },
+      "result": "hi a\n"
     }
   ],
   "engine.render_json": [

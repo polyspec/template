@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-showcase -->
-<!-- source-sha256: 8f216e27c72508964a3485524e07c1d36ad9de0b55dd7729348b03e4ace897ac -->
+<!-- source-sha256: 512b6b668dfc828038c9cfb85461bda910eed1492418b2e79778358b26d784a9 -->
 # 예제 사이트
 
 [English](/operations/showcase).
@@ -144,7 +144,7 @@ fn render() -> Result<String, Box<dyn std::error::Error>> {
     })?);
 
     let options = RenderOptions {
-        define: defines_from_json(&define_json)?,
+        define: Some(defines_from_json(&define_json)?),
         ..Default::default()
     };
     engine.render(RenderTarget::Name("layout"), &assign, &options)

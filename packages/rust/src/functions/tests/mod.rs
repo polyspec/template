@@ -5,8 +5,8 @@ use crate::functions::date::{format_date, parse_offset, to_unix_seconds};
 use crate::functions::encoding::{percent_encode, to_json};
 use crate::value::{OrderedMap, Value};
 use crate::{
-    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, HostFunction, Limits, Loaded, Loader, MapLoader, RenderOptions, RenderTarget,
-    RuntimeEnvironment,
+    ArtifactRefresh, AstProgram, EngineOptions, ErrorCode, Functions, HostFunction, Limits, Loaded, Loader, MapLoader, RenderOptions,
+    RenderTarget, RuntimeEnvironment,
 };
 use std::sync::{Arc, Mutex};
 
@@ -324,9 +324,13 @@ fn the_functions_of_the_options_are_registered_as_register_registers_them() {
         Box::new(|_, _| Ok(Value::Null))
     }
     let functions = |name: &str| std::collections::HashMap::from([(name.to_string(), no_op())]);
-    let options = |name: &str| EngineOptions {
-        functions: functions(name),
-        ..Default::default()
+    let options = |name: &str| {
+        let mut functions = Functions::new();
+        functions.insert(name.to_string(), Box::new(|_, _| Ok(Value::Null)));
+        EngineOptions {
+            functions: Some(functions),
+            ..Default::default()
+        }
     };
     let error = AstProgram::new(options("not a name")).err().expect("a name that is no identifier");
     assert_eq!(error.message, "\"not a name\" is not an identifier");
@@ -356,12 +360,10 @@ fn the_options_of_a_program_hold_only_the_limits_and_functions_of_the_spec() {
         (iterations, depth, output_bytes, expression_depth),
         (1_000_000, 32, 16 * 1024 * 1024, 64)
     );
-    fn no_op() -> HostFunction {
-        Box::new(|_, _| Ok(Value::Null))
-    }
-    let functions = std::collections::HashMap::from([("length".to_string(), no_op())]);
+    let mut functions = Functions::new();
+    functions.insert("length".to_string(), Box::new(|_, _| Ok(Value::Null)));
     let error = AstProgram::new(EngineOptions {
-        functions,
+        functions: Some(functions),
         ..Default::default()
     })
     .err()

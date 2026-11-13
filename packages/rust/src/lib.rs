@@ -56,8 +56,8 @@ pub use functions::{ContractFunction, Env, Environment, FunctionContext, HostFun
 pub use loader::{FsLoader, LoadError, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{DefineEntry, Frame, Limits, LoopMeta, ParsedTemplate, RenderContext, RuntimeServices, Scope};
 pub use render::engine::{
-    ArtifactRefresh, AstProgram, DEFAULT_ARTIFACT_REFRESH, DefineInput, Definitions, Engine, EngineOptions, PreparedRender, Program,
-    RenderOptions, RenderTarget, defines_from_json, env_from_json,
+    ArtifactRefresh, AstProgram, DEFAULT_ARTIFACT_REFRESH, DefineInput, Definitions, Engine, EngineOptions, Functions, PreparedRender,
+    Program, RenderOptions, RenderTarget, defines_from_json, env_from_json,
 };
 pub use render::runtime_bindings::{RuntimeBindings, RuntimeEntry};
 pub use render::runtime_environment::RuntimeEnvironment;

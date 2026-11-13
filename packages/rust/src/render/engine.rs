@@ -40,14 +40,18 @@ impl Default for ArtifactRefresh {
     }
 }
 
+/// The host functions of the options of a program by their names, in the form of the interface contract: the type of
+/// `engine_options.functions`, a `map` of the function type of `engine.register` (RT-5, CNF-20).
+pub type Functions = binding_core::OrderedMap<ContractFunction>;
+
 /// AstProgram options. `'a` is the lifetime of the loader, the callback that the record `engine_options` of the
 /// interface contract holds (CNF-20).
 #[derive(Default)]
 pub struct EngineOptions<'a> {
     /// Template loader; an empty map loader when absent.
     pub loader: Option<Box<dyn Loader + 'a>>,
-    /// Host functions.
-    pub functions: HashMap<String, HostFunction>,
+    /// Host functions by their names (RT-5); `None` is no function.
+    pub functions: Option<Functions>,
     /// Limits; defaults when absent.
     pub limits: Option<Limits>,
     /// Delimiters as a two-character string; `{}` when absent.
@@ -271,13 +275,22 @@ impl AstProgram {
                 .ok_or_else(|| TemplateError::argument(ErrorCode::ArgumentDelimiters, "", format!("{value:?} is not a delimiter pair")))?,
             None => DEFAULT_DELIMITERS,
         };
+        let mut runtime = RuntimeEnvironment::new(options.limits, HashMap::new())?;
+        // RT-5: each function of the options is added as `register_function` adds it (FUN-43, FUN-44).
+        if let Some(functions) = options.functions {
+            for (name, function) in functions {
+                runtime
+                    .register(&name, contract_host_function(function))
+                    .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))?;
+            }
+        }
         Ok(AstProgram {
             // RT-5: a program without a loader has an empty map loader.
             loader: match options.loader {
                 Some(loader) => loader,
                 None => Box::new(MapLoader::new()),
             },
-            runtime: RuntimeEnvironment::new(options.limits, options.functions)?,
+            runtime,
             delimiters,
             // RT-40: a program whose options name no policy has the default policy.
             artifact_refresh: match options.artifact_refresh {

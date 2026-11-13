@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: 47c7611f530fec4df157b3efba36da4b59d1e13899fbab45f0b73d396892b7de -->
+<!-- source-sha256: aa5d8834f169a789c12838720935f34329a17fc2ab0cbd0edac15b13137db2ba -->
 # polyspec-template
 
 [English](README.md).
@@ -18,9 +18,10 @@ program.register("greet", Box::new(|args, _| match args[0].as_text() {
 }))?;
 let engine = Engine::new(program);
 let assign = polyspec_template::read_json(r#"{ "title": "Home" }"#)?;
-let mut options = RenderOptions::default();
-options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
-options.define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
+let mut define = polyspec_template::Definitions::new();
+define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
+define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
+let options = RenderOptions { define: Some(define), ..Default::default() };
 // RT-77: prepare가 파일 로더로 템플릿을 읽고, 준비된 요청의 render는 파일을 읽지 않는다.
 let html = engine.prepare(RenderTarget::Name("layout"), &assign, &options)?.render()?;
 ```

@@ -17,9 +17,10 @@ program.register("greet", Box::new(|args, _| match args[0].as_text() {
 }))?;
 let engine = Engine::new(program);
 let assign = polyspec_template::read_json(r#"{ "title": "Home" }"#)?;
-let mut options = RenderOptions::default();
-options.define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
-options.define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
+let mut define = polyspec_template::Definitions::new();
+define.insert("layout".to_string(), DefineInput { template: Some("layout.tpl".to_string()), ..Default::default() });
+define.insert("content".to_string(), DefineInput { template: Some("pages/home.tpl".to_string()), ..Default::default() });
+let options = RenderOptions { define: Some(define), ..Default::default() };
 // RT-77: prepare reads the templates with the file loader; the render of the prepared request reads no file.
 let html = engine.prepare(RenderTarget::Name("layout"), &assign, &options)?.render()?;
 ```

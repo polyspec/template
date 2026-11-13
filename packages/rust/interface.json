@@ -2908,6 +2908,30 @@
         },
         {
           "name": [
+            "functions"
+          ],
+          "type": {
+            "map": {
+              "function": {
+                "parameters": [
+                  {
+                    "list": "template_value"
+                  },
+                  {
+                    "unit": "environment"
+                  }
+                ],
+                "returns": "template_value",
+                "async_allowed": false
+              }
+            }
+          },
+          "default": {
+            "empty": "map"
+          }
+        },
+        {
+          "name": [
             "limits"
           ],
           "type": {
@@ -3368,7 +3392,8 @@
             }
           ],
           "raises": [
-            "polyspec_template::ErrorCode::ArgumentDelimiters"
+            "polyspec_template::ErrorCode::ArgumentDelimiters",
+            "polyspec_template::ErrorCode::ArgumentFunctionName"
           ],
           "wait": "none",
           "core": {

@@ -145,7 +145,7 @@ fn render() -> Result<String, Box<dyn std::error::Error>> {
     })?);
 
     let options = RenderOptions {
-        define: defines_from_json(&define_json)?,
+        define: Some(defines_from_json(&define_json)?),
         ..Default::default()
     };
     engine.render(RenderTarget::Name("layout"), &assign, &options)
