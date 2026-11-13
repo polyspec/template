@@ -470,7 +470,7 @@ template-install-php: ## Install the locked PHP dependency graph of the developm
 
 template-install-python: ## Download the hashed wheel build requirements and install the locked Python environment
 	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download --require-hashes --no-deps --only-binary=:all: --dest $(WHEELHOUSE) -r $(PYTHON_PACKAGE)/build-requirements.txt
-	$(MAKE) python-package
+	$(MAKE) template-python-environment
 
 template-install-parity: template-install-node template-install-rust template-install-go template-install-php template-install-python ## Install every native graph in this checkout, without depending on other CI workers
 
@@ -712,16 +712,23 @@ endif
 UV := $(KIT_TOOLS)/mise/shims/uv
 WHEELHOUSE := $(or $(KIT_MAIN_CHECKOUT),$(CURDIR))/var/python/wheelhouse
 
-.PHONY: python-package
+.PHONY: python-package template-python-environment
 python-package: $(PYTHON_VENV)/.installed ## Make the environment of the Python package with legacy/packages/python installed and its package folder linked to the checkout; offline
 
 $(PYTHON_VENV)/.installed: $(PYTHON_PACKAGE)/pyproject.toml $(PYTHON_PACKAGE)/pylock.toml $(PYTHON_PACKAGE)/build-requirements.txt
+	$(MAKE) template-python-environment
+
+# The environment is made again each time the target runs: the stamp states that the environment is installed, not that the
+# wheels of the lock are in the uv cache of the checkout (var/tools/mise/cache/uv), which a later install of var/tools
+# empties. make template-install-python runs this target, so an install fills that cache whatever the stamp says, and
+# tests/scripts/package-installs.test.mts reads the wheels from it offline (T28.44).
+template-python-environment:
 	rm -rf $(PYTHON_VENV)
 	$(MAKE) python-venv DIR=$(PYTHON_VENV)
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --link-mode copy -r $(PYTHON_PACKAGE)/pylock.toml
 	$(UV) pip install --python $(PYTHON_VENV)/bin/python --offline --no-index --find-links $(WHEELHOUSE) --link-mode copy --no-deps $(PYTHON_PACKAGE)
 	$(MAKE) --no-print-directory install-link
-	touch $@
+	touch $(PYTHON_VENV)/.installed
 
 test-python: template-test-python ## Unit tests of the Python package
 
