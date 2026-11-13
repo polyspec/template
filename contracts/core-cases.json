@@ -1,5 +1,5 @@
 {
-  "comment": "The contract cases of the Rust core and of the bindings generated from it (binding design K-1, G-5), one group per member of packages/rust/interface.json; packages/rust/tests/contract_cases.rs runs each case against the core. The keys of a case are the parameter names of its member. An instance is {\"new\": <member that gives it>, \"receiver\", \"args\", \"then\": [steps]}; a callback is {\"callback\": {\"<callback member>\": [rows]}} and a function {\"function\": [rows]}, a row being {\"args\", \"result\"} with \"once\" for a row that answers one call, and a call that no row answers fails the case. A template_value and a json_value are {\"kind\", \"value\"}, a map being its [key, value] pairs in order and a number of a json_value its literal; {\"host\": \"object\"} is a native object; a source is its text or {\"hex\"}; a variant is {\"type\": \"<case value>\", fields}, a record an object of its fields, an enum the value of its variant and bytes {\"hex\"} (CNF-19); a path is relative to the directory of the case. A failure is raises: its kind, its status and its category (ERR-1, B-4); a result is the returned value, and after observes the returned instance. A case that names faults arms those fault injection points before its call (G-5, X-1): a kind of the category internal, which no input reaches, has the case of its point and no input case. The group template_value holds the cases of the value alias, {id, value, raises}: value_in refuses the value with the kind, one of the in_raises of the alias (binding design U-7).",
+  "comment": "The contract cases of the Rust core and of the bindings generated from it (binding design K-1, G-5), one group per member of packages/rust/interface.json; packages/rust/tests/contract_cases.rs runs each case against the core. The keys of a case are the parameter names of its member. An instance is {\"new\": <member that gives it>, \"receiver\", \"args\", \"then\": [steps]}; a callback is {\"callback\": {\"<callback member>\": [rows]}} and a function {\"function\": [rows]}, a row being {\"args\", \"result\"} with \"once\" for a row that answers one call, and a call that no row answers fails the case. A template_value and a json_value are {\"kind\", \"value\"}, a map being its [key, value] pairs in order and a number of a json_value its literal; a map<T> of the contract, such as define, is an object of its entries in order; {\"host\": \"object\"} is a native object; a source is its text or {\"hex\"}; a variant is {\"type\": \"<case value>\", fields}, a record an object of its fields, an enum the value of its variant and bytes {\"hex\"} (CNF-19); a path is relative to the directory of the case. A failure is raises: its kind, its status and its category (ERR-1, B-4); a result is the returned value, and after observes the returned instance. A case that names faults arms those fault injection points before its call (G-5, X-1): a kind of the category internal, which no input reaches, has the case of its point and no input case. The group template_value holds the cases of the value alias, {id, value, raises}: value_in refuses the value with the kind, one of the in_raises of the alias (binding design U-7).",
   "fs_loader.new": [
     {
       "id": "a_root_that_holds_no_file",
@@ -629,26 +629,23 @@
         "value": []
       },
       "options": {
-        "define": [
-          [
-            "head",
-            {
-              "template": "head.tpl",
-              "data": {
-                "kind": "map",
-                "value": [
-                  [
-                    "title",
-                    {
-                      "kind": "text",
-                      "value": "T"
-                    }
-                  ]
+        "define": {
+          "head": {
+            "template": "head.tpl",
+            "data": {
+              "kind": "map",
+              "value": [
+                [
+                  "title",
+                  {
+                    "kind": "text",
+                    "value": "T"
+                  }
                 ]
-              }
+              ]
             }
-          ]
-        ]
+          }
+        }
       },
       "result": "<h1>T</h1>\n"
     },
@@ -1709,12 +1706,9 @@
         "value": []
       },
       "options": {
-        "define": [
-          [
-            "head",
-            {}
-          ]
-        ]
+        "define": {
+          "head": {}
+        }
       }
     },
     {
@@ -3296,12 +3290,9 @@
         "value": []
       },
       "options": {
-        "define": [
-          [
-            "head",
-            {}
-          ]
-        ]
+        "define": {
+          "head": {}
+        }
       }
     },
     {
@@ -5436,12 +5427,9 @@
         }
       },
       "options": {
-        "define": [
-          [
-            "head",
-            {}
-          ]
-        ]
+        "define": {
+          "head": {}
+        }
       }
     },
     {
@@ -6746,12 +6734,9 @@
       },
       "name": "page.tpl",
       "options": {
-        "define": [
-          [
-            "head",
-            {}
-          ]
-        ]
+        "define": {
+          "head": {}
+        }
       }
     },
     {
@@ -7762,12 +7747,9 @@
         "value": []
       },
       "options": {
-        "define": [
-          [
-            "head",
-            {}
-          ]
-        ]
+        "define": {
+          "head": {}
+        }
       }
     },
     {
@@ -9302,12 +9284,9 @@
         }
       },
       "options": {
-        "define": [
-          [
-            "head",
-            {}
-          ]
-        ]
+        "define": {
+          "head": {}
+        }
       }
     },
     {

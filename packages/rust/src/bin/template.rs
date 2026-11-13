@@ -307,7 +307,7 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
     let mut render_options = RenderOptions::default();
     if let Some(path) = &define {
         render_options.define = match defines_from_json(&read_json(root, path, name)) {
-            Ok(define) => define,
+            Ok(define) => Some(define),
             Err(error) => bind_failure(name, error),
         };
     }

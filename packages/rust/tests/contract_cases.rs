@@ -18,9 +18,9 @@ use binding_core::{Handle, HostText, HostValue, HostValues, Io, Raised};
 use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
-    ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineData, DefineInput, EngineOptions, Env, Environment,
-    Expr, FormatOptions, FsLoader, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError, Loaded, Loader,
-    LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
+    ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineData, DefineInput, Definitions, EngineOptions, Env,
+    Environment, Expr, FormatOptions, FsLoader, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError, Loaded,
+    Loader, LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
     SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind,
     decode_template, encode_template, format, merge, parse, resolve_path, value_in,
 };
@@ -924,12 +924,14 @@ impl Run {
         let Some(value) = key(case, "options") else {
             return Ok(options);
         };
+        // CNF-19: a `map<T>` is an object of its entries in order.
         if let Some(define) = key(value, "define") {
-            let Some(pairs) = define.as_array() else {
-                return fail(format!("define is no list of pairs: {define}"));
+            let Some(entries) = define.as_object() else {
+                return fail(format!("define is no object of its entries: {define}"));
             };
-            for pair in pairs {
-                let entry = &pair[1];
+            let mut definitions = Definitions::new();
+            for (id, entry) in entries {
+                only(entry, &["template", "data", "html"])?;
                 let field = |name: &str| match key(entry, name).filter(|field| !field.is_null()) {
                     Some(field) => text(field, name).map(Some),
                     None => Ok(None),
@@ -938,8 +940,8 @@ impl Run {
                     Some(data) => Some(DefineData::Value(template_value(data)?)),
                     None => None,
                 };
-                options.define.insert(
-                    text(&pair[0], "a define id")?,
+                definitions.insert(
+                    id.clone(),
                     DefineInput {
                         template: field("template")?,
                         data,
@@ -947,6 +949,7 @@ impl Run {
                     },
                 );
             }
+            options.define = Some(definitions);
         }
         if let Some(env) = key(value, "env").filter(|env| !env.is_null()) {
             options.env = Some(Env {

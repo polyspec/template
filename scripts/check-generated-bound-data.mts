@@ -95,7 +95,9 @@ fn fixture(text: &str) -> polyspec_template::polyspec_json::Value { polyspec_tem
   let merged = merge(&bound, &bind(&fixture(${rustString(json(cases.second))})).unwrap());
   assert_eq!(page.render_bound("page.tpl", &merged, &options).unwrap(), ${rustString(cases.outputs.merged)});
   let mut options = RenderOptions::default();
-  options.define.insert("part".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Bound(bind(&fixture(${rustString(json(cases.definitionData))})).unwrap())), html: None });
+  let mut define = polyspec_template::Definitions::new();
+  define.insert("part".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Bound(bind(&fixture(${rustString(json(cases.definitionData))})).unwrap())), html: None });
+  options.define = Some(define);
   assert_eq!(page.render("define.tpl", &assign, &options).unwrap(), ${rustString(cases.outputs.define)});
 }
 `);

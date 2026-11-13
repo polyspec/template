@@ -68,11 +68,15 @@ pub struct DefineInput {
     pub html: Option<String>,
 }
 
+/// The template definitions of a render by their identifiers, in the order in which they were given: the type of
+/// `render_options.define` of the interface contract, a `map<define_input>` (RT-24, CNF-20).
+pub type Definitions = binding_core::OrderedMap<DefineInput>;
+
 /// Render options.
 #[derive(Debug, Clone, Default)]
 pub struct RenderOptions {
-    /// Template definitions.
-    pub define: HashMap<String, DefineInput>,
+    /// Template definitions; `None` is no definition (RT-4).
+    pub define: Option<Definitions>,
     /// Environment; `Z` and the current time when absent.
     pub env: Option<Env>,
 }
@@ -409,7 +413,7 @@ impl AstProgram {
         let name = target.name();
         internal_boundary(&name, || {
             let registry =
-                bind_defines(&options.define).map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
+                bind_defines(options.define.as_ref()).map_err(|error| TemplateError::without_position(error.code, &name, error.message))?;
             let (target_name, template) = self.resolve_target(target, &registry, true)?;
             self.preload(&target_name, &template, &registry)
         })
@@ -503,7 +507,7 @@ impl AstProgram {
                 Root::Json(json) => Arc::new(bind_map(json)?),
                 Root::Bound(bound) => bound_root(bound),
             };
-            let registry = bind_defines(&options.define)?;
+            let registry = bind_defines(options.define.as_ref())?;
             let env = options.environment()?;
             Ok(BoundRequest { root, registry, env })
         })();
@@ -557,7 +561,7 @@ impl AstProgram {
     ) -> Result<String, RenderError> {
         let bind_failure = |error: BindError| TemplateError::without_position(error.code, name, error.message);
         let assign = bind_values(assign).map_err(bind_failure)?;
-        let registry = bind_defines(&options.define).map_err(bind_failure)?;
+        let registry = bind_defines(options.define.as_ref()).map_err(bind_failure)?;
         let env = options.environment().map_err(bind_failure)?;
         let (target_name, template) = self.resolve_target(target, &registry, false)?;
         AstPreparedExecution {
@@ -640,11 +644,15 @@ impl AstPreparedExecution<'_> {
     }
 }
 
-fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String, DefineEntry>, BindError> {
+fn bind_defines(defines: Option<&Definitions>) -> Result<HashMap<String, DefineEntry>, BindError> {
     let mut registry = HashMap::new();
-    for (id, input) in defines {
+    // RT-4: an omitted `define` is an empty map.
+    let Some(defines) = defines else {
+        return Ok(registry);
+    };
+    for (id, input) in defines.iter() {
         if let Some(html) = &input.html {
-            registry.insert(id.clone(), DefineEntry::Html(html.clone()));
+            registry.insert(id.to_string(), DefineEntry::Html(html.clone()));
         } else if let Some(template) = &input.template {
             let name = resolve_path("", template).map_err(|error| BindError {
                 code: ErrorCode::DataUnsupportedType,
@@ -662,7 +670,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
                     }
                 },
             };
-            registry.insert(id.clone(), DefineEntry::Template { template: name, data });
+            registry.insert(id.to_string(), DefineEntry::Template { template: name, data });
         } else {
             return Err(BindError {
                 code: ErrorCode::DataUnsupportedType,
@@ -676,9 +684,9 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
 /// Parses template definitions from a JSON object of the `define.json` form (CNF-2). The data of
 /// an entry is bound as its own value (VAL-11, VAL-20). An entry field of another JSON type is
 /// data_unsupported_type; an absent field is absent.
-pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInput>, BindError> {
+pub fn defines_from_json(value: &JsonValue) -> Result<Definitions, BindError> {
     let object = json_object(value, "define is not an object")?;
-    let mut defines = HashMap::new();
+    let mut defines = Definitions::new();
     for (key, entry) in object.iter() {
         let id = json_text(key)?;
         if entry.kind() == JsonKind::String {

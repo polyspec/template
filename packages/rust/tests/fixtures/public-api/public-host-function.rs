@@ -19,7 +19,7 @@ pub fn configurations() -> (polyspec_template::EngineOptions<'static>, polyspec_
         delimiters: Some("[]".into()), artifact_refresh: Some(ArtifactRefresh::False),
     };
     let request = RenderOptions {
-        define: std::collections::HashMap::new(), env: Some(Env { timezone: "+09:00".into(), now: 123.0 }),
+        define: None, env: Some(Env { timezone: "+09:00".into(), now: 123.0 }),
     };
     (engine, request)
 }

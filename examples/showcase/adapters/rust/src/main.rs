@@ -244,8 +244,9 @@ fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
 /// The render options of a request: its definitions with their bound data, and its environment.
 fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
     let mut options = RenderOptions::default();
+    let mut define = polyspec_template::Definitions::new();
     for (id, entry) in &request.define {
-        options.define.insert(
+        define.insert(
             id.clone(),
             DefineInput {
                 template: entry.template.clone(),
@@ -262,6 +263,7 @@ fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
             },
         );
     }
+    options.define = Some(define);
     if let Some(environment) = &request.env {
         // The env of the library from the fields that env.json holds: an absent timezone is Z and an absent now is the
         // current time, as for the other adapters.

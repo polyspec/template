@@ -113,16 +113,20 @@ function definitionsCheck(program: Program): string {
     return `            ${rustString(id)} => { if input.html.is_some() { if ${declared.html ? 'false' : 'true'} || input.template.is_some() || input.data.is_some() { return Err(format!("define.{id} has an invalid html entry")); } } else if input.template.as_deref() != Some(${rustString(declared.template ?? '')}) { return Err(format!("define.{id} has an invalid template")); }${declared.template ? data : ''} }`;
   });
   // Without a declared definition every entry of a request fails, so the check fails on the first one.
-  if (cases.length === 0) return `fn generated_check_definitions(define: &std::collections::HashMap<String, polyspec_template::DefineInput>) -> Result<(), String> {
-    match define.keys().next() {
-        Some(id) => Err(format!("define.{id} is not declared")),
+  if (cases.length === 0) return `fn generated_check_definitions(define: Option<&polyspec_template::Definitions>) -> Result<(), String> {
+    match define.and_then(|define| define.iter().next()) {
+        Some((id, _)) => Err(format!("define.{id} is not declared")),
         None => Ok(()),
     }
 }`;
-  return `fn generated_check_definitions(define: &std::collections::HashMap<String, polyspec_template::DefineInput>) -> Result<(), String> {
-    for (id, input) in define {
+  return `fn generated_check_definitions(define: Option<&polyspec_template::Definitions>) -> Result<(), String> {
+    // RT-4: an omitted define is an empty map.
+    let Some(define) = define else {
+        return Ok(());
+    };
+    for (id, input) in define.iter() {
         let _: &polyspec_template::DefineInput = input;
-        match id.as_str() {
+        match id {
 ${cases.join('\n')}
             _ => return Err(format!("define.{id} is not declared")),
         }
@@ -174,26 +178,26 @@ impl GeneratedProgram {
     pub fn render(&self, target: &str, assign: &JsonValue, options: &RenderOptions) -> Result<String, GeneratedError> {
         let root = polyspec_template::bind_json(assign).map_err(|error| TemplateError::without_position(error.code, target, error.message))?;
         generated_check_assign(&root).map_err(GeneratedError::Argument)?;
-        generated_check_definitions(&options.define).map_err(GeneratedError::Argument)?;
+        generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         Ok(self.program.render(RenderTarget::Name(target), assign, options)?)
     }
     /// Prepares a request whose assign is JSON data for repeated renders, after checking it against the declarations.
     pub fn prepare(&self, target: &str, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, GeneratedError> {
         let root = polyspec_template::bind_json(assign).map_err(|error| TemplateError::without_position(error.code, target, error.message))?;
         generated_check_assign(&root).map_err(GeneratedError::Argument)?;
-        generated_check_definitions(&options.define).map_err(GeneratedError::Argument)?;
+        generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         Ok(Program::prepare(&self.program, RenderTarget::Name(target), assign, options)?)
     }
     /// Renders a request whose assign is a bound map (VAL-22), after checking it against the declarations.
     pub fn render_bound(&self, target: &str, assign: &BoundMap, options: &RenderOptions) -> Result<String, GeneratedError> {
         generated_check_assign(&Value::Map(polyspec_template::bound_root(assign))).map_err(GeneratedError::Argument)?;
-        generated_check_definitions(&options.define).map_err(GeneratedError::Argument)?;
+        generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         Ok(self.program.render_bound(RenderTarget::Name(target), assign, options)?)
     }
     /// Prepares a request whose assign is a bound map (VAL-22), after checking it against the declarations.
     pub fn prepare_bound(&self, target: &str, assign: &BoundMap, options: &RenderOptions) -> Result<PreparedRender<'_>, GeneratedError> {
         generated_check_assign(&Value::Map(polyspec_template::bound_root(assign))).map_err(GeneratedError::Argument)?;
-        generated_check_definitions(&options.define).map_err(GeneratedError::Argument)?;
+        generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         Ok(Program::prepare_bound(&self.program, RenderTarget::Name(target), assign, options)?)
     }
     /// Renders a request whose assign is a map of values that the host built, native objects included (VAL-13, VAL-18),
@@ -201,12 +205,12 @@ impl GeneratedProgram {
     pub fn render_values(&self, target: &str, assign: polyspec_template::OrderedMap, options: &RenderOptions) -> Result<String, GeneratedError> {
         let root = polyspec_template::bind_values(&assign).map_err(|error| TemplateError::without_position(error.code, target, error.message))?;
         generated_check_assign(&Value::map(root)).map_err(GeneratedError::Argument)?;
-        generated_check_definitions(&options.define).map_err(GeneratedError::Argument)?;
+        generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         Ok(self.program.render_values(RenderTarget::Name(target), assign, options)?)
     }
     /// Renders a request whose assign is the typed \`Assign\`.
     pub fn render_assign(&self, target: &str, assign: &Assign, options: &RenderOptions) -> Result<String, GeneratedError> {
-        generated_check_definitions(&options.define).map_err(GeneratedError::Argument)?;
+        generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         let Value::Map(map) = assign.to_value() else { return Err(GeneratedError::Argument("assign is not an object".to_string())); };
         Ok(self.program.render_values(RenderTarget::Name(target), (*map).clone(), options)?)
     }

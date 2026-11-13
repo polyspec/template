@@ -84,7 +84,7 @@ mod ${name} {
         let assign = polyspec_template::read_json(text).map_err(super::ActualError::bind)?;
         let mut options = polyspec_template::RenderOptions::default();
         ${testCase.hasDefine ? `let define = polyspec_template::read_json(include_str!(${quote(resolve(join(testCase.dir, 'define.json')))})).map_err(super::ActualError::bind)?;
-        options.define = polyspec_template::defines_from_json(&define).map_err(super::ActualError::bind)?;` : ''}
+        options.define = Some(polyspec_template::defines_from_json(&define).map_err(super::ActualError::bind)?);` : ''}
         ${testCase.hasEnv ? `let env = polyspec_template::read_json(include_str!(${quote(resolve(join(testCase.dir, 'env.json')))})).map_err(super::ActualError::bind)?;
         options.env = Some(polyspec_template::env_from_json(&env).map_err(super::ActualError::bind)?);` : ''}
         let program = GeneratedProgram::new(polyspec_template::EngineOptions::default()).map_err(actual)?;

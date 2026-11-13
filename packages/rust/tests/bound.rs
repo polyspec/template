@@ -15,10 +15,9 @@ mod common;
 
 use binding_core::Io;
 use polyspec_template::{
-    AstProgram, BoundMap, DefineData, DefineInput, EngineOptions, ErrorCode, MapLoader, OrderedMap, RenderOptions, RenderTarget,
-    TemplateError, Value, bind, merge,
+    AstProgram, BoundMap, DefineData, DefineInput, Definitions, EngineOptions, ErrorCode, MapLoader, OrderedMap, RenderOptions,
+    RenderTarget, TemplateError, Value, bind, merge,
 };
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 fn fixture_dir() -> PathBuf {
@@ -46,15 +45,17 @@ fn program() -> AstProgram {
 }
 
 fn definition(data: DefineData) -> RenderOptions {
+    let mut define = Definitions::new();
+    define.insert(
+        "part".to_string(),
+        DefineInput {
+            template: Some("part.tpl".to_string()),
+            data: Some(data),
+            html: None,
+        },
+    );
     RenderOptions {
-        define: HashMap::from([(
-            "part".to_string(),
-            DefineInput {
-                template: Some("part.tpl".to_string()),
-                data: Some(data),
-                html: None,
-            },
-        )]),
+        define: Some(define),
         env: None,
     }
 }

@@ -69,7 +69,7 @@ fn render_case(dir: &Path) -> Result<Outcome, Failed> {
     let mut options = RenderOptions::default();
     match read_json(&dir.join("define.json"))? {
         None => {}
-        Some(Ok(define)) => options.define = defines_from_json(&define).map_err(|error| format!("define.json: {error:?}"))?,
+        Some(Ok(define)) => options.define = Some(defines_from_json(&define).map_err(|error| format!("define.json: {error:?}"))?),
         Some(Err(code)) => return Ok(Outcome::Error(TemplateError::without_position(code, "input.tpl", "define"))),
     }
     match read_json(&dir.join("env.json"))? {

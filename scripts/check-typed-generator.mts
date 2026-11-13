@@ -166,7 +166,7 @@ fn generated_${index}_matches() {
     let assign = polyspec_template::read_json(${JSON.stringify(fixture(id, 'data.json'))}).unwrap();
     let define = polyspec_template::read_json(${JSON.stringify(fixture(id, 'define.json'))}).unwrap();
     let mut options = polyspec_template::RenderOptions::default();
-    options.define = polyspec_template::defines_from_json(&define).unwrap();
+    options.define = Some(polyspec_template::defines_from_json(&define).unwrap());
     ${fixtureExists(id, 'env.json') ? `options.env = Some(polyspec_template::env_from_json(&polyspec_template::read_json(${JSON.stringify(fixture(id, 'env.json'))}).unwrap()).unwrap());` : ''}
     assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, &assign, &options), ${JSON.stringify(expected(id))});
     ${index === 0 ? `let generated_0::GeneratedError::Render(polyspec_template::RenderError::Kind(error)) = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err() else { panic!("expected a template error") };
