@@ -472,7 +472,9 @@ impl<'a> ExpressionParser<'a> {
                 self.next_token()?;
                 Ok(Expr::Literal {
                     kind: "bool".to_string(),
-                    value: LiteralValue::Bool(token.kind == TokenType::True),
+                    value: LiteralValue::Bool {
+                        value: token.kind == TokenType::True,
+                    },
                     span: self.span(token.start, token.end),
                 })
             }
@@ -491,7 +493,7 @@ impl<'a> ExpressionParser<'a> {
                 };
                 Ok(Expr::Literal {
                     kind: "number".to_string(),
-                    value: LiteralValue::Number(value),
+                    value: LiteralValue::Number { value },
                     span: self.span(token.start, token.end),
                 })
             }
@@ -502,7 +504,7 @@ impl<'a> ExpressionParser<'a> {
                 };
                 Ok(Expr::Literal {
                     kind: "string".to_string(),
-                    value: LiteralValue::String(decoded),
+                    value: LiteralValue::String { value: decoded },
                     span: self.span(token.start, token.end),
                 })
             }
@@ -566,7 +568,7 @@ impl<'a> ExpressionParser<'a> {
         let mut map_entries = Vec::new();
         for entry in entries {
             match entry {
-                BracketEntry::Spread(expr) => map_entries.push(MapEntry::Spread(expr)),
+                BracketEntry::Spread(expr) => map_entries.push(MapEntry::Spread { expr }),
                 BracketEntry::Pair(key, value) => map_entries.push(MapEntry::Entry { key, value }),
                 BracketEntry::Plain(key) => {
                     let start = key.span()[0];

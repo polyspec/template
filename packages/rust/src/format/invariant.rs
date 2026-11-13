@@ -122,7 +122,7 @@ fn expr(expr: &mut Expr) {
                         self::expr(key);
                         self::expr(value);
                     }
-                    MapEntry::Spread(spread) => self::expr(spread),
+                    MapEntry::Spread { expr: spread } => self::expr(spread),
                 }
             }
         }

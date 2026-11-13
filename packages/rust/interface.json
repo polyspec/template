@@ -930,22 +930,10 @@
         },
         {
           "name": [
-            "value"
+            "expr"
           ],
           "type": {
             "unit": "expr"
-          },
-          "required": true
-        },
-        {
-          "name": [
-            "span"
-          ],
-          "type": {
-            "tuple": [
-              "uint",
-              "uint"
-            ]
           },
           "required": true
         }
@@ -960,6 +948,7 @@
       "kind": "variant",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Node",
       "tag": [
         "type"
       ],
@@ -1290,6 +1279,7 @@
       "kind": "variant",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::LiteralValue",
       "tag": [
         "type"
       ],
@@ -1346,6 +1336,7 @@
       "kind": "variant",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::MapEntry",
       "tag": [
         "type"
       ],
@@ -1594,6 +1585,7 @@
       "kind": "variant",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Expr",
       "tag": [
         "type"
       ],
@@ -2927,6 +2919,7 @@
       "kind": "variant",
       "visibility": "public",
       "origin": "generated",
+      "core_type": "polyspec_template::Loaded",
       "tag": [
         "type"
       ],
@@ -2936,9 +2929,9 @@
           "fields": [
             {
               "name": [
-                "source"
+                "bytes"
               ],
-              "type": "source",
+              "type": "bytes",
               "required": true
             },
             {

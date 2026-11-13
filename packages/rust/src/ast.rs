@@ -250,11 +250,20 @@ pub enum LiteralValue {
     /// `null`.
     Null,
     /// `true` or `false`.
-    Bool(bool),
+    Bool {
+        /// The value.
+        value: bool,
+    },
     /// A number.
-    Number(f64),
+    Number {
+        /// The value.
+        value: f64,
+    },
     /// The decoded string.
-    String(String),
+    String {
+        /// The value.
+        value: String,
+    },
 }
 
 /// Loop meta fields.
@@ -312,7 +321,10 @@ pub enum MapEntry {
         value: Expr,
     },
     /// A spread `...expr` of a map.
-    Spread(Expr),
+    Spread {
+        /// The spread expression.
+        expr: Expr,
+    },
 }
 
 /// Expression nodes. `Spread` appears only inside `List` items and `Map` entries.

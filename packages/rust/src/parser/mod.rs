@@ -852,7 +852,7 @@ impl<'a> TemplateParser<'a> {
             let end = self.finish_tag(context, self.expect_close_raw(context, after_operator)?)?;
             let one = Expr::Literal {
                 kind: "number".to_string(),
-                value: LiteralValue::Number(1.0),
+                value: LiteralValue::Number { value: 1.0 },
                 span: [operator_start, after_operator],
             };
             let op = if operator == "++" { BinaryOp::Add } else { BinaryOp::Subtract };

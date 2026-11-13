@@ -226,13 +226,13 @@ fn write_expr(out: &mut String, expr: &Expr) -> Result<(), TemplateError> {
             key(out, &mut first, "value");
             match value {
                 LiteralValue::Null => out.push_str("null"),
-                LiteralValue::Bool(value) => out.push_str(if *value { "true" } else { "false" }),
+                LiteralValue::Bool { value } => out.push_str(if *value { "true" } else { "false" }),
                 // AST-7: the number token of the value, as VAL-9 writes it.
-                LiteralValue::Number(value) => out.push_str(
+                LiteralValue::Number { value } => out.push_str(
                     &number_text(*value)
                         .map_err(|error| TemplateError::without_position(ErrorCode::Internal, "", format!("internal failure: {error}")))?,
                 ),
-                LiteralValue::String(value) => text(out, value),
+                LiteralValue::String { value } => text(out, value),
             }
             span(out, &mut first, *at);
         }
@@ -364,7 +364,7 @@ fn write_expr(out: &mut String, expr: &Expr) -> Result<(), TemplateError> {
                     out.push('}');
                     Ok(())
                 }
-                MapEntry::Spread(expr) => write_expr(out, expr),
+                MapEntry::Spread { expr } => write_expr(out, expr),
             })?;
             span(out, &mut first, *at);
         }
@@ -761,7 +761,7 @@ fn decode_expr(value: &Json, path: &str) -> Decoded<Expr> {
             let literal = match (kind.as_str(), found.kind()) {
                 ("null", Kind::Null) => LiteralValue::Null,
                 ("bool", Kind::Boolean) => match found.boolean_value() {
-                    Ok(value) => LiteralValue::Bool(value),
+                    Ok(value) => LiteralValue::Bool { value },
                     Err(error) => return invalid(&value_path, format!("internal failure: {error}")),
                 },
                 ("number", Kind::Number) => {
@@ -770,11 +770,13 @@ fn decode_expr(value: &Json, path: &str) -> Decoded<Expr> {
                         Err(error) => return invalid(&value_path, format!("internal failure: {error}")),
                     };
                     match literal.parse::<f64>() {
-                        Ok(number) if number.is_finite() => LiteralValue::Number(number),
+                        Ok(number) if number.is_finite() => LiteralValue::Number { value: number },
                         _ => return invalid(&value_path, format!("{literal} has no finite 64-bit float")),
                     }
                 }
-                ("string", Kind::String) => LiteralValue::String(string(found, &value_path)?),
+                ("string", Kind::String) => LiteralValue::String {
+                    value: string(found, &value_path)?,
+                },
                 ("null" | "bool" | "number" | "string", _) => {
                     return invalid(&value_path, format!("the value is not of the kind {kind}"));
                 }
@@ -922,7 +924,7 @@ fn decode_expr(value: &Json, path: &str) -> Decoded<Expr> {
                 .map(|(index, item)| {
                     let item_path = at(&entries_path, index);
                     if is_spread(item) {
-                        return decode_spread(item, &item_path).map(MapEntry::Spread);
+                        return decode_spread(item, &item_path).map(|expr| MapEntry::Spread { expr });
                     }
                     let fields = object(item, &item_path, &["key", "value"])?;
                     Ok(MapEntry::Entry {

@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 912b197419b774e7ff9b0e9518feeca3efb9a3235b1915cca730d75c8c229927 -->
+<!-- source-sha256: e53596ceca4b47d4e3bbe53111ada2f55ea1423dd0112ceaf1d8b9e2240e48c3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `packages/rust/interface.json`의 AST와 loader의 variant unit과 record는 코어 타입의 꼴을 가진다(binding T-9, GN-6v, GN-6a). `node`, `expr`, `literal_value`, `map_entry`, `loaded`는 `core_type`에 Rust enum을 적는다. 코어 variant `LiteralValue::Bool`, `Number`, `String`은 `value`를, `MapEntry::Spread`는 `expr`을 이름 있는 field로 가지므로, 모든 case는 계약의 field로 된 struct variant다. `scope_item`은 `value`와 `span` 대신 코어와 `docs/spec/ast.md`의 field `name`과 `expr`을 가진다. `loaded`의 case `source`는 binding이 parameter로만 받는 `source` 대신 코어의 `Vec<u8>`인 bytes 타입의 `bytes`를 가진다. `tests/scripts/contract-core-shapes.test.mts`는 variant와 record를 `ast.rs`와 `loader.rs`의 enum과 struct와 비교한다(T28.28).
 - `make fmt-check`는 binding package를 포함한 root workspace의 모든 crate가 rustfmt의 꼴인지 `cargo fmt --all --check`로 검사하고, `polyspec-template`만 검사하던 `template-lint-rust-format`을 대신한다. `CHECK_TARGETS`, `lint`, `.github/workflows/ci.yml`의 Rust job, `packages/rust`의 owner 규칙이 그것을 적고, `tests/scripts/suite-parity.test.mts`가 그것을 요구한다(T28.27).
 - 생성물의 refresh true는 그 컴파일이 읽는 compiler 파일이 바뀌면 생성물을 다시 만든다. `compileGeneratedArtifact`는 `inputs`를 받아 그 digest를 `inputDigest`로 기록한다. showcase의 typed generator는 `packages/compiler/src`, `packages/compiler/backends`, `packages/compiler/functions.json`의 파일을 넘기고, JavaScript 생성물에는 TypeScript 생성물을 넘긴다. 전에는 Rust backend가 바뀐 checkout이 `examples/showcase/adapters/generated/typed/`에 이전 backend의 생성 Rust program을 그대로 두어, 빈 checkout은 통과하는데 `make lint-rust`가 거기서 E0061로 실패했다. inputs 없는 호출자는 T27.1-78의 manifest를 그대로 쓴다(T28.26).
 - wait가 `blocking_io`인 member `engine.load`, `engine.prepare`, `engine.prepare_bound`의 코어 함수 `AstProgram::load`, `AstProgram::prepare`, `AstProgram::prepare_bound`는 receiver 다음 첫 인자로 `binding_core::Io`를 받는다(binding I-2 (4), B-5 (a), GN-6m). 그래서 생성된 바인딩은 RT-77의 파일 읽기로 호출이 멈출 수 있는 곳에서 token을 넘긴다. `Engine`, map loader 위의 생성된 program(`packages/compiler/src/backends/rust.mts`), showcase가 부르는 trait `Program`은 token을 받지 않는다. `tests/scripts/wait-tokens.test.mts`는 기다리는 member마다 token을 요구한다(T28.25).

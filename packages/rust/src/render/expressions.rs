@@ -43,9 +43,9 @@ impl<'c, 'e> Evaluator<'c, 'e> {
         match expr {
             Expr::Literal { value, .. } => Ok(match value {
                 crate::ast::LiteralValue::Null => Value::Null,
-                crate::ast::LiteralValue::Bool(b) => Value::Bool(*b),
-                crate::ast::LiteralValue::Number(n) => Value::Number(*n),
-                crate::ast::LiteralValue::String(s) => Value::text(s.clone()),
+                crate::ast::LiteralValue::Bool { value } => Value::Bool(*value),
+                crate::ast::LiteralValue::Number { value } => Value::Number(*value),
+                crate::ast::LiteralValue::String { value } => Value::text(value.clone()),
             }),
             Expr::Var { name, .. } => Ok(scope.lookup(frame, name)),
             Expr::LoopMeta { r#loop, field, span } => {
@@ -147,7 +147,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 let mut map = OrderedMap::new();
                 for entry in entries {
                     match entry {
-                        MapEntry::Spread(spread) => {
+                        MapEntry::Spread { expr: spread } => {
                             let span = spread.span();
                             let inner = match spread {
                                 Expr::Spread { expr, .. } => expr,
