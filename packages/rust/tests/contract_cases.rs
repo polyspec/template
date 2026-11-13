@@ -18,11 +18,11 @@ use binding_core::{Handle, HostText, HostValue, HostValues, Io, Raised};
 use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
-    ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineData, DefineInput, Definitions, EngineOptions, Env,
-    Environment, Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError,
-    Loaded, Loader, LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget,
-    ScopeItem, Span, SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze,
-    analyze_prefix, bind, decode_template, encode_template, format, merge, parse, resolve_path, value_in,
+    ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineInput, Definitions, EngineOptions, Env, Environment,
+    Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError, Loaded, Loader,
+    LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
+    SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind,
+    decode_template, encode_template, format, merge, parse, resolve_path, value_in,
 };
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -943,13 +943,13 @@ impl Run {
             };
             let mut definitions = Definitions::new();
             for (id, entry) in entries {
-                only(entry, &["template", "data", "html"])?;
+                only(entry, &["template", "data", "bound", "html"])?;
                 let field = |name: &str| match key(entry, name).filter(|field| !field.is_null()) {
                     Some(field) => text(field, name).map(Some),
                     None => Ok(None),
                 };
                 let data = match key(entry, "data").filter(|data| !data.is_null()) {
-                    Some(data) => Some(DefineData::Value(template_value(data)?)),
+                    Some(data) => Some(template_value(data)?),
                     None => None,
                 };
                 definitions.insert(
@@ -957,6 +957,10 @@ impl Run {
                     DefineInput {
                         template: field("template")?,
                         data,
+                        bound: match optional(entry, "bound") {
+                            Some(bound) => Some(self.bound(bound)?),
+                            None => None,
+                        },
                         html: field("html")?,
                     },
                 );

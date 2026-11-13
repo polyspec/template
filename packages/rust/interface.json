@@ -2801,6 +2801,20 @@
         },
         {
           "name": [
+            "bound"
+          ],
+          "type": {
+            "optional": {
+              "unit": "bound_map"
+            }
+          },
+          "default": {
+            "literal": null
+          },
+          "reason": "RT-24"
+        },
+        {
+          "name": [
             "html"
           ],
           "type": {

@@ -257,8 +257,8 @@ fn render_options(request: &RenderRequest) -> Result<RenderOptions, String> {
                         polyspec_template::bind_json(&library_json(&Value::Object(data))?)
                             .map_err(|error| error.message)
                     })
-                    .transpose()?
-                    .map(polyspec_template::DefineData::Value),
+                    .transpose()?,
+                bound: None,
                 html: entry.html.clone(),
             },
         );

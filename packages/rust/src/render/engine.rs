@@ -11,7 +11,7 @@ use crate::render::runtime_environment::RuntimeEnvironment;
 use crate::render::statements::Renderer;
 use crate::source::Source;
 use crate::value::bind::{BindError, bind_json, bind_map, bind_values, value_from_json};
-use crate::value::bound::{BoundMap, DefineData, bind_data, bound_root};
+use crate::value::bound::{BoundMap, bind_data, bound_root};
 use crate::value::{OrderedMap, Value};
 use binding_core::Io;
 use polyspec_json::{Kind as JsonKind, Value as JsonValue};
@@ -65,9 +65,10 @@ pub struct EngineOptions<'a> {
 pub struct DefineInput {
     /// Root-relative template path.
     pub template: Option<String>,
-    /// Entry data: a value that is bound like assign data, so it may hold native objects (VAL-11,
-    /// VAL-13), or a bound map that is not bound again (VAL-22).
-    pub data: Option<DefineData>,
+    /// Entry data as a value that is bound like assign data, so it may hold native objects (VAL-11, VAL-13).
+    pub data: Option<Value>,
+    /// Entry data as a bound map, which is not bound again (VAL-22). A definition gives `data` or `bound`, not both.
+    pub bound: Option<BoundMap>,
     /// Pre-rendered HTML.
     pub html: Option<String>,
 }
@@ -671,17 +672,19 @@ fn bind_defines(defines: Option<&Definitions>) -> Result<HashMap<String, DefineE
                 code: ErrorCode::DataUnsupportedType,
                 message: format!("define {id}: {}", error.message),
             })?;
-            let data = match &input.data {
+            let bound = bind_data(input.data.as_ref(), input.bound.as_ref()).map_err(|error| BindError {
+                code: error.code,
+                message: format!("define {id}: {}", error.message),
+            })?;
+            let data = match bound {
                 None => None,
-                Some(data) => match bind_data(data)? {
-                    Value::Map(map) => Some(map),
-                    _ => {
-                        return Err(BindError {
-                            code: ErrorCode::DataUnsupportedType,
-                            message: format!("define {id}: data is not a map"),
-                        });
-                    }
-                },
+                Some(Value::Map(map)) => Some(map),
+                Some(_) => {
+                    return Err(BindError {
+                        code: ErrorCode::DataUnsupportedType,
+                        message: format!("define {id}: data is not a map"),
+                    });
+                }
             };
             registry.insert(id.to_string(), DefineEntry::Template { template: name, data });
         } else {
@@ -708,6 +711,7 @@ pub fn defines_from_json(value: &JsonValue) -> Result<Definitions, BindError> {
                 DefineInput {
                     template: Some(json_text(entry)?),
                     data: None,
+                    bound: None,
                     html: None,
                 },
             );
@@ -726,13 +730,14 @@ pub fn defines_from_json(value: &JsonValue) -> Result<Definitions, BindError> {
         };
         let data = match fields.get("data").map_err(|error| json_internal(&error))? {
             None => None,
-            Some(data) => Some(DefineData::Value(bind_json(data)?)),
+            Some(data) => Some(bind_json(data)?),
         };
         defines.insert(
             id.clone(),
             DefineInput {
                 template: text_field("template")?,
                 data,
+                bound: None,
                 html: text_field("html")?,
             },
         );

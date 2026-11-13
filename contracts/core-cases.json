@@ -677,6 +677,144 @@
       "result": "<h1>T</h1>\n"
     },
     {
+      "id": "a_template_definition_with_a_bound_map",
+      "rule": "RT-24",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{# head}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "head.tpl",
+                    "source": "<h1>{= title}</h1>\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": []
+      },
+      "options": {
+        "define": {
+          "head": {
+            "template": "head.tpl",
+            "bound": {
+              "new": "bind",
+              "args": {
+                "value": {
+                  "kind": "map",
+                  "value": [
+                    [
+                      "title",
+                      {
+                        "kind": "text",
+                        "value": "T"
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "result": "<h1>T</h1>\n"
+    },
+    {
+      "id": "a_template_definition_with_data_and_a_bound_map",
+      "rule": "RT-24",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{# head}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "head.tpl",
+                    "source": "<h1>{= title}</h1>\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": []
+      },
+      "options": {
+        "define": {
+          "head": {
+            "template": "head.tpl",
+            "data": {
+              "kind": "map",
+              "value": [
+                [
+                  "title",
+                  {
+                    "kind": "text",
+                    "value": "T"
+                  }
+                ]
+              ]
+            },
+            "bound": {
+              "new": "bind",
+              "args": {
+                "value": {
+                  "kind": "map",
+                  "value": [
+                    [
+                      "title",
+                      {
+                        "kind": "text",
+                        "value": "T"
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "raises": {
+        "kind": "data_unsupported_type",
+        "status": null,
+        "category": "type"
+      }
+    },
+    {
       "id": "a_host_loader_gives_the_templates",
       "rule": "RT-9",
       "receiver": {

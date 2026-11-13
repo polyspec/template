@@ -9,9 +9,16 @@ use std::sync::Arc;
 /// A map that passed host binding (VAL-22). `bind` and `merge` create it; its entries are private.
 ///
 /// It is `Send` and `Sync`: template values share their lists and maps through `Arc`, so one bound map
-/// renders in several threads at once (RT-70).
+/// renders in several threads at once (RT-70). A clone holds the same entries.
+#[derive(Clone)]
 pub struct BoundMap {
     entries: Arc<OrderedMap>,
+}
+
+impl std::fmt::Debug for BoundMap {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.debug_struct("BoundMap").finish_non_exhaustive()
+    }
 }
 
 mod sealed {
@@ -106,41 +113,18 @@ pub fn merge(first: &BoundMap, second: &BoundMap) -> BoundMap {
     }
 }
 
-/// The data of a template definition (RT-24): a value that is bound like assign data, or a bound
-/// map that is not bound again (VAL-22).
-pub enum DefineData {
-    /// A value that the host built.
-    Value(Value),
-    /// A bound map.
-    Bound(BoundMap),
-}
-
-impl Clone for DefineData {
-    fn clone(&self) -> DefineData {
-        match self {
-            DefineData::Value(value) => DefineData::Value(value.clone()),
-            DefineData::Bound(bound) => DefineData::Bound(BoundMap {
-                entries: Arc::clone(&bound.entries),
-            }),
-        }
-    }
-}
-
-impl std::fmt::Debug for DefineData {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            DefineData::Value(value) => formatter.debug_tuple("Value").field(value).finish(),
-            DefineData::Bound(_) => formatter.write_str("Bound"),
-        }
-    }
-}
-
-/// Binds the data of a template definition (RT-24): a bound map gives its entries as a map
-/// without binding them again (VAL-22). Generated programs call it.
-pub fn bind_data(data: &DefineData) -> Result<Value, BindError> {
-    match data {
-        DefineData::Value(value) => bind_value(value),
-        DefineData::Bound(bound) => Ok(Value::Map(Arc::clone(&bound.entries))),
+/// Binds the data of a template definition (RT-24): `data`, a value, is bound like assign data, and `bound`, a bound
+/// map, gives its entries as a map without binding them again (VAL-22). A definition has one of the two or none; both
+/// are data_unsupported_type, because neither is the data more than the other. Generated programs call it.
+pub fn bind_data(data: Option<&Value>, bound: Option<&BoundMap>) -> Result<Option<Value>, BindError> {
+    match (data, bound) {
+        (Some(_), Some(_)) => Err(BindError {
+            code: crate::ErrorCode::DataUnsupportedType,
+            message: "the definition gives both \"data\" and \"bound\"".to_string(),
+        }),
+        (Some(data), None) => bind_value(data).map(Some),
+        (None, Some(bound)) => Ok(Some(Value::Map(Arc::clone(&bound.entries)))),
+        (None, None) => Ok(None),
     }
 }
 

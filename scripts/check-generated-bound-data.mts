@@ -81,7 +81,7 @@ func TestGeneratedBoundDefinitionData(t *testing.T) { program, err := NewGenerat
       const rust = rustWorkspace('generated-bound-data-rust');
       const rustTest = rust.test('generated_bound_data_check');
       writeFileSync(rustTest, `mod generated { include!(${rustString(join(temporary, 'bound.rust'))}); }
-use polyspec_template::{DefineData, DefineInput, EngineOptions, RenderOptions, bind, merge};
+use polyspec_template::{DefineInput, EngineOptions, RenderOptions, bind, merge};
 fn fixture(text: &str) -> polyspec_template::polyspec_json::Value { polyspec_template::read_json(text).unwrap() }
 #[test] fn generated_programs_render_bound_maps() {
   let page = generated::GeneratedProgram::new(EngineOptions::default()).unwrap();
@@ -96,7 +96,7 @@ fn fixture(text: &str) -> polyspec_template::polyspec_json::Value { polyspec_tem
   assert_eq!(page.render_bound("page.tpl", &merged, &options).unwrap(), ${rustString(cases.outputs.merged)});
   let mut options = RenderOptions::default();
   let mut define = polyspec_template::Definitions::new();
-  define.insert("part".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: Some(DefineData::Bound(bind(&fixture(${rustString(json(cases.definitionData))})).unwrap())), html: None });
+  define.insert("part".to_string(), DefineInput { template: Some("part.tpl".to_string()), data: None, bound: Some(bind(&fixture(${rustString(json(cases.definitionData))})).unwrap()), html: None });
   options.define = Some(define);
   assert_eq!(page.render("define.tpl", &assign, &options).unwrap(), ${rustString(cases.outputs.define)});
 }

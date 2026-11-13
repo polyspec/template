@@ -109,8 +109,8 @@ function definitionsCheck(program: Program): string {
   const cases = [...program.definitions].map(([id, declared]) => {
     const inputs = declared.template ? [...loweredTemplate(program, declared.template).inputs] : [];
     const dataCheck = inputs.map(([name, type]) => `if let Some(value) = map.get(${rustString(name)}) { let path = &format!("define.{id}.data.${name}"); ${checkOf(descriptor(type.source), 'value')}?; }`).join('\n');
-    const data = ` else if let Some(data) = &input.data { match polyspec_template::bind_data(data) { Ok(Value::Map(${dataCheck ? 'map' : '_'})) => { ${dataCheck} } Ok(_) => return Err(format!("define.{id}.data is not an object")), Err(error) => return Err(error.message) } }`;
-    return `            ${rustString(id)} => { if input.html.is_some() { if ${declared.html ? 'false' : 'true'} || input.template.is_some() || input.data.is_some() { return Err(format!("define.{id} has an invalid html entry")); } } else if input.template.as_deref() != Some(${rustString(declared.template ?? '')}) { return Err(format!("define.{id} has an invalid template")); }${declared.template ? data : ''} }`;
+    const data = ` else if input.data.is_some() || input.bound.is_some() { match polyspec_template::bind_data(input.data.as_ref(), input.bound.as_ref()) { Ok(Some(Value::Map(${dataCheck ? 'map' : '_'}))) => { ${dataCheck} } Ok(_) => return Err(format!("define.{id}.data is not an object")), Err(error) => return Err(error.message) } }`;
+    return `            ${rustString(id)} => { if input.html.is_some() { if ${declared.html ? 'false' : 'true'} || input.template.is_some() || input.data.is_some() || input.bound.is_some() { return Err(format!("define.{id} has an invalid html entry")); } } else if input.template.as_deref() != Some(${rustString(declared.template ?? '')}) { return Err(format!("define.{id} has an invalid template")); }${declared.template ? data : ''} }`;
   });
   // Without a declared definition every entry of a request fails, so the check fails on the first one.
   if (cases.length === 0) return `fn generated_check_definitions(define: Option<&polyspec_template::Definitions>) -> Result<(), String> {

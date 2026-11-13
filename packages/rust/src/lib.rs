@@ -62,7 +62,7 @@ pub use render::engine::{
 pub use render::runtime_bindings::{RuntimeBindings, RuntimeEntry};
 pub use render::runtime_environment::RuntimeEnvironment;
 pub use value::bind::{BindError, bind_json, bind_map, bind_value, bind_values, to_json_value, value_from_json};
-pub use value::bound::{BindInput, BoundMap, DefineData, bind, bind_data, bound_root, merge};
+pub use value::bound::{BindInput, BoundMap, bind, bind_data, bound_root, merge};
 pub use value::host::{HostObject, ValueOut, value_in, value_out};
 pub use value::json::{parse_json, parse_json_bytes, read_json};
 pub use value::{HostError, MAX_DEPTH, OrderedMap, TemplateObject, Value, ValueType};

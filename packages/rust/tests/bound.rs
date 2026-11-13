@@ -15,7 +15,7 @@ mod common;
 
 use binding_core::Io;
 use polyspec_template::{
-    AstProgram, BoundMap, DefineData, DefineInput, Definitions, EngineOptions, ErrorCode, MapLoader, OrderedMap, RenderOptions,
+    AstProgram, BoundMap, DefineInput, Definitions, EngineOptions, ErrorCode, MapLoader, OrderedMap, RenderError, RenderOptions,
     RenderTarget, TemplateError, Value, bind, merge,
 };
 use std::path::PathBuf;
@@ -44,13 +44,14 @@ fn program() -> AstProgram {
     .expect("valid engine options")
 }
 
-fn definition(data: DefineData) -> RenderOptions {
+fn definition(data: Option<Value>, bound: Option<BoundMap>) -> RenderOptions {
     let mut define = Definitions::new();
     define.insert(
         "part".to_string(),
         DefineInput {
             template: Some("part.tpl".to_string()),
-            data: Some(data),
+            data,
+            bound,
             html: None,
         },
     );
@@ -152,7 +153,7 @@ fn merge_follows_the_precedence_of_rt_26() {
 fn a_bound_map_is_definition_data() {
     let cases = cases();
     let program = program();
-    let bound_data = definition(DefineData::Bound(bound(&cases["definitionData"])));
+    let bound_data = definition(None, Some(bound(&cases["definitionData"])));
     assert_eq!(
         program
             .render(
@@ -163,9 +164,10 @@ fn a_bound_map_is_definition_data() {
             .unwrap(),
         output(&cases, "define")
     );
-    let host_data = definition(DefineData::Value(
-        polyspec_template::bind_json(&common::ojson(cases["definitionData"].clone())).unwrap(),
-    ));
+    let host_data = definition(
+        Some(polyspec_template::bind_json(&common::ojson(cases["definitionData"].clone())).unwrap()),
+        None,
+    );
     assert_eq!(
         program
             .render(
@@ -176,6 +178,28 @@ fn a_bound_map_is_definition_data() {
             .unwrap(),
         output(&cases, "define")
     );
+}
+
+/// RT-24: a definition gives its data as a value or as a bound map; one that gives both fails with
+/// data_unsupported_type, named by its message.
+#[test]
+fn a_definition_with_a_value_and_a_bound_map_fails() {
+    let cases = cases();
+    let both = definition(
+        Some(polyspec_template::bind_json(&common::ojson(cases["definitionData"].clone())).unwrap()),
+        Some(bound(&cases["definitionData"])),
+    );
+    let failure = program()
+        .render(RenderTarget::Name("define.tpl"), &common::ojson(cases["assign"].clone()), &both)
+        .err()
+        .expect("a definition with data and bound fails");
+    match failure {
+        RenderError::Kind(error) => {
+            assert_eq!(error.code, ErrorCode::DataUnsupportedType, "{error:?}");
+            assert_eq!(error.message, "define part: the definition gives both \"data\" and \"bound\"");
+        }
+        other => panic!("the render failed with {other}"),
+    }
 }
 
 #[test]

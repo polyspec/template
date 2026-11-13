@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-runtime -->
-<!-- source-sha256: 0b164ebda231785fc08b6da30ac948d3e13efba334315e25f11458dfd50616a0 -->
+<!-- source-sha256: f15f728a6890991f1a40bc5f08c49a93fee44e313c671e1601585956da40c5f2 -->
 # 런타임
 
 [English](/spec/runtime).
@@ -255,7 +255,7 @@ flowchart TB
 
 ## block
 
-- **RT-24** `define` map은 식별자를 템플릿 define에 대응시킨다. define은 문자열 경로 또는 `template: path`와 선택적인 `data`를 가진 객체다. `data`는 map이거나 bound map(VAL-22)이다. `html: string`을 가진 객체는 완성된 HTML을 제공한다. `render`에 주는 define의 템플릿 경로는 로더 루트 기준이다. 언어 간 픽스처 형식은 [저장소 도구 문서](/ko/operations/tools)에 정의한다.
+- **RT-24** `define` map은 식별자를 템플릿 define에 대응시킨다. define은 문자열 경로 또는 `template: path`와 선택적인 `data`를 가진 객체다. `data`는 map이거나 bound map(VAL-22)이다. `html: string`을 가진 객체는 완성된 HTML을 제공한다. Rust 코어와 그 interface 계약에서 생성된 바인딩은 define의 data를 두 field 중 하나로 준다. map은 `data`, bound map은 `bound`다. 계약의 field는 타입이 하나이기 때문이다. 둘 다 준 define은 `data_unsupported_type`으로 실패한다. 어느 쪽도 다른 쪽보다 더 data가 아니기 때문이다. `render`에 주는 define의 템플릿 경로는 로더 루트 기준이다. 언어 간 픽스처 형식은 [저장소 도구 문서](/ko/operations/tools)에 정의한다.
 - **RT-25** `{# id}`는 `id`로 등록된 define을 렌더한다. 등록되지 않은 식별자는 `runtime_block_undefined`로 실패한다.
 - **RT-26** 템플릿 define은 새 로컬 스코프에서, 루트 `assign`, define의 `data`, 태그의 scope 인자 순으로 만든 컨텍스트 데이터로 렌더한다. 같은 이름은 뒤의 출처가 앞의 출처를 덮어쓴다. 호출하는 템플릿의 로컬 변수와 루프 메타는 보이지 않는다.
 - **RT-27** HTML 항목은 그 문자열을 이스케이프 없이 출력에 쓴다. HTML 항목에 준 scope 인자는 무시한다.
