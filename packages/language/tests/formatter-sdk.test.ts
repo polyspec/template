@@ -4,20 +4,14 @@ import { describe, expect, it } from 'vitest';
 import { format, type FormatError, type FormatOptions } from '@polyspec/template-language';
 import { jsonDocument } from '../../../scripts/json-document.mts';
 
-// The fixture is shared with the packages of legacy/ and written in their form (FMT-9): its `indent: null` keeps the
-// indentation of every line, which this package takes as `keepIndentation` (FMT-18).
-type FixtureOptions = Omit<FormatOptions, 'indent' | 'keepIndentation'> & { indent?: string | null };
-function formatOptions({ indent, ...rest }: FixtureOptions): FormatOptions {
-  if (indent === undefined) return rest;
-  return indent === null ? { ...rest, keepIndentation: true } : { ...rest, indent };
-}
-
-const fixture = jsonDocument<{ cases: { id: string; source: string; options: FixtureOptions; expected: unknown }[]; errors: FormatError[] }>('formatter SDK data', {
+// The fixture tests/fixtures/formatter-sdk.json holds the options of FMT-17 and FMT-18 and the kinds of ERR-1; the
+// packages of legacy/ read their own copy under legacy/tests/fixtures.
+const fixture = jsonDocument<{ cases: { id: string; source: string; options: FormatOptions; expected: unknown }[]; errors: FormatError[] }>('formatter SDK data', {
   type: 'object', required: ['cases', 'errors'], properties: {
     cases: { type: 'array', minItems: 1, items: { type: 'object', required: ['id', 'source', 'options', 'expected'], properties: {
       id: { type: 'string' }, source: { type: 'string' }, options: { type: 'object', properties: {
         name: { type: 'string' }, delimiters: { type: 'string' }, templateBlocks: { enum: ['indent', 'flat'] },
-        indent: { type: ['string', 'null'] }, range: { type: 'object', required: ['start', 'end'], properties: {
+        indent: { type: 'string' }, keepIndentation: { type: 'boolean' }, range: { type: 'object', required: ['start', 'end'], properties: {
           start: { type: 'integer', minimum: 0 }, end: { type: 'integer', minimum: 0 },
         } },
       } }, expected: { type: 'object', required: ['ok'], properties: { ok: { type: 'boolean' } } },
@@ -31,7 +25,7 @@ const fixture = jsonDocument<{ cases: { id: string; source: string; options: Fix
 
 describe('formatter SDK data', () => {
   it.each(fixture.cases)('preserves $id', item => {
-    const result = format(item.source, formatOptions(item.options));
+    const result = format(item.source, item.options);
     if (result.ok) expect(result).toEqual(item.expected);
     else {
       const { message, ...error } = result.error;

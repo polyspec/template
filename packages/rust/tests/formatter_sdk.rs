@@ -9,9 +9,6 @@ mod common;
 
 use polyspec_template::{ErrorCode, FormatOptions, TemplateBlocks, TemplateError, format};
 
-fn default_indent() -> serde_json::Value {
-    serde_json::json!("  ")
-}
 #[derive(serde::Deserialize)]
 struct Range {
     start: usize,
@@ -24,8 +21,8 @@ struct Options {
     delimiters: Option<String>,
     range: Option<Range>,
     template_blocks: Option<String>,
-    #[serde(default = "default_indent")]
-    indent: serde_json::Value,
+    indent: Option<String>,
+    keep_indentation: Option<bool>,
 }
 #[derive(serde::Deserialize)]
 struct Case {
@@ -62,14 +59,9 @@ fn public_formatter_preserves_shared_results() {
             name: item.options.name,
             delimiters: item.options.delimiters,
             range: item.options.range.map(|range| [range.start, range.end]),
-            // The fixture is written in the form that the legacy packages read: its `indent: null` keeps the indentation
-            // of every line, which the core takes as `keep_indentation` (FMT-18).
-            indent: match &item.options.indent {
-                serde_json::Value::Null => None,
-                serde_json::Value::String(value) => Some(value.clone()),
-                _ => panic!("invalid fixture indent"),
-            },
-            keep_indentation: Some(item.options.indent.is_null()),
+            // FMT-17, FMT-18: the fixture gives the options in the form of the contract.
+            indent: item.options.indent,
+            keep_indentation: item.options.keep_indentation,
             template_blocks: match item.options.template_blocks.as_deref() {
                 None => None,
                 Some("indent") => Some(TemplateBlocks::Indent),

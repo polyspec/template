@@ -51,7 +51,7 @@
       "id": "keep-indentation",
       "source": "<main>\n  {? ok}\n    {=x}\n  {/}\n</main>",
       "options": {
-        "indent": null
+        "keepIndentation": true
       },
       "expected": {
         "ok": true,
