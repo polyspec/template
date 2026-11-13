@@ -245,14 +245,27 @@ fn kind(error: polyspec_template::RenderError) -> TemplateError {
     }
 }
 
-/// FUN-46: an exception of language code that a generated binding holds reaches the caller of render as the same handle,
-/// from a host function, an accessor and a method alike.
+/// What a binding keeps for an exception of a test.
+#[derive(Debug)]
+struct Thrown;
+
+impl binding_core::NativeObject for Thrown {}
+
+/// FUN-46: an exception of language code that a generated binding holds reaches the caller of render as the same
+/// `Native`, from a host function, an accessor and a method alike.
 #[test]
 fn a_raised_exception_reaches_the_caller_unchanged() {
-    let raised = || binding_core::Raised::from_generated(binding_core::Handle::new(7));
+    let thrown = binding_core::Raised::from_generated(binding_core::Native::new(Thrown));
+    let raised = move || thrown.clone();
     let mut program = program(&["{= raise()}"]);
     program
-        .register("raise", Box::new(move |_, _| Err(HostError::Raised(raised()))))
+        .register(
+            "raise",
+            Box::new({
+                let raised = raised.clone();
+                move |_, _| Err(HostError::Raised(raised()))
+            }),
+        )
         .unwrap();
     match render_failure(&program, 0, OrderedMap::new()) {
         Err(polyspec_template::RenderError::Raised(found)) => assert_eq!(found, raised()),

@@ -84,7 +84,7 @@ fn bytes_of(value: &Json) -> Result<Vec<u8>, Failed> {
         .collect()
 }
 
-/// A native object of a test (VAL-19): it has no member and no method, as an object that entered as a handle.
+/// A native object of a test (VAL-19): it has no member and no method, as an object that entered as a `Native`.
 #[derive(Debug)]
 struct Native;
 

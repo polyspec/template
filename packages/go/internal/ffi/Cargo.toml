@@ -4,6 +4,7 @@ name = "polyspec-template-go"
 version = "0.0.27"
 edition = "2021"
 rust-version = "1.99.0"
+license = "MIT"
 publish = false
 
 [lib]
@@ -15,6 +16,7 @@ crate-type = ["staticlib"]
 panic-test = []
 fault-test = ["polyspec-template/fault-test"]
 codec-test = []
+thrown-count-test = []
 
 [dependencies]
 polyspec-template = { path = "../../../rust" }

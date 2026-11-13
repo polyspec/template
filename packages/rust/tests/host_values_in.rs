@@ -7,9 +7,20 @@
     reason = "a test states its expectation with unwrap and expect; a failure there is the failure of the test"
 )]
 
-use binding_core::{Failure, Handle, HostText, HostValue, HostValues, OutValue, OutValues, Raised};
+use binding_core::{Failure, Handle, HostText, HostValue, HostValues, Native, NativeObject, OutValue, OutValues, Raised};
 use polyspec_template::{ErrorCode, OrderedMap, RenderError, TemplateError, Value, value_in, value_out};
 use std::collections::HashMap;
+
+/// What a binding keeps for a language object: here its number.
+#[derive(Debug, PartialEq)]
+struct Kept(u64);
+
+impl NativeObject for Kept {}
+
+/// The `Native` of the language object of a number.
+fn kept(number: u64) -> Native {
+    Native::new(Kept(number))
+}
 
 /// A language value as a binding describes it: containers by handle, with their children.
 #[derive(Default)]
@@ -23,7 +34,7 @@ struct Host {
 impl HostValues for Host {
     fn item(&mut self, list: Handle, index: u64) -> Result<HostValue, Raised> {
         if self.raising == Some(list.raw()) {
-            return Err(Raised::from_generated(Handle::new(99)));
+            return Err(Raised::from_generated(kept(99)));
         }
         Ok(self.lists[&list.raw()][usize::try_from(index).unwrap()].clone())
     }
@@ -80,7 +91,7 @@ fn scalars_bind_as_the_tables_of_val_13() {
     for value in [
         HostValue::Bytes(vec![1]),
         HostValue::Date(Handle::new(1)),
-        HostValue::Callable(Handle::new(1)),
+        HostValue::Callable(kept(1)),
     ] {
         assert_eq!(code(value_in(&mut host, value)), ErrorCode::DataUnsupportedType);
     }
@@ -163,7 +174,7 @@ fn an_exception_of_the_walk_reaches_the_caller_unchanged() {
             len: 1,
         },
     ) {
-        Err(Failure::Raised(raised)) => assert_eq!(raised, Raised::from_generated(Handle::new(99))),
+        Err(Failure::Raised(raised)) => assert_eq!(raised.native().downcast::<Kept>(), Some(&Kept(99))),
         other => panic!("expected the raised exception, got {other:?}"),
     }
 }
@@ -207,7 +218,10 @@ fn make(out: OutValue, source: &mut dyn OutValues, made: &mut Vec<u64>) -> Strin
         }
         OutValue::Float(number) => number.value().to_string(),
         OutValue::Text(text) => text,
-        OutValue::Native(handle) => format!("native{}", handle.raw()),
+        OutValue::Native(native) => match native.downcast::<Kept>() {
+            Some(Kept(number)) => format!("native{number}"),
+            None => format!("{native:?}"),
+        },
         other => format!("{other:?}"),
     }
 }
@@ -221,7 +235,7 @@ fn a_value_leaves_with_one_handle_for_one_container() {
     let native = value_in(
         &mut host,
         HostValue::Object {
-            handle: Handle::new(7),
+            native: kept(7),
             type_name: "Order".to_string(),
             json_serializable: false,
         },
@@ -233,14 +247,14 @@ fn a_value_leaves_with_one_handle_for_one_container() {
     assert_eq!(make(root, &mut source, &mut made), "[[1],#2,seq{0:a},native7]");
 }
 
-/// A language object that entered as a handle has no member and no method in the core (VAL-23).
+/// A language object that entered as a `Native` has no member and no method in the core (VAL-23).
 #[test]
 fn a_host_object_is_opaque_to_templates() {
     let mut host = Host::default();
     let native = value_in(
         &mut host,
         HostValue::Object {
-            handle: Handle::new(7),
+            native: kept(7),
             type_name: "Order".to_string(),
             json_serializable: false,
         },

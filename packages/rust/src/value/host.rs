@@ -5,24 +5,27 @@
 use crate::error::{ErrorCode, RenderError, TemplateError};
 use crate::value::bind::{BindError, check_level, check_number};
 use crate::value::{HostError, OrderedMap, TemplateObject, Value};
-use binding_core::{Failure, Handle, HostText, HostValue, HostValues, MapOut, OutValue, OutValues};
+use binding_core::{Failure, Handle, HostText, HostValue, HostValues, MapOut, Native, OutValue, OutValues};
 use std::collections::HashMap;
 use std::sync::Arc;
 
-/// A language object that entered as a handle (VAL-23 `Object`): the core holds it and gives it back unchanged; it reads
-/// no member and calls no method of it.
+/// A language object that entered as a `Native` (VAL-23 `Object`): the core holds it and gives it back unchanged; it
+/// reads no member and calls no method of it.
 #[derive(Debug)]
 pub struct HostObject {
-    handle: Handle,
+    native: Native,
 }
 
 impl HostObject {
-    /// The handle of the language object.
-    pub fn handle(&self) -> Handle {
-        self.handle
+    /// What the binding keeps for the language object.
+    pub fn native(&self) -> &Native {
+        &self.native
     }
 }
 
+// EXP-39: the identity is the default, the address of this object. A binding makes one `Native` each time a language
+// object enters, and two `Native` are equal only when one is a copy of the other, so one entry of an object is one
+// `HostObject`, which every copy of its value shares.
 impl TemplateObject for HostObject {
     fn member(&self, _key: &str) -> Result<Option<Value>, HostError> {
         Ok(None)
@@ -30,16 +33,6 @@ impl TemplateObject for HostObject {
 
     fn call(&self, _method: &str, _args: &[Value]) -> Option<Result<Value, HostError>> {
         None
-    }
-
-    // EXP-39: two such objects are the same host object when their handles are equal.
-    fn identity(&self) -> *const () {
-        // The binding gives handles from 1 upward, which a pointer of the target holds; one beyond it is the last address.
-        let address = match usize::try_from(self.handle.raw()) {
-            Ok(address) => address,
-            Err(_) => usize::MAX,
-        };
-        std::ptr::without_provenance(address)
     }
 }
 
@@ -137,7 +130,7 @@ fn bind(host: &mut dyn HostValues, value: HostValue, level: usize) -> Result<Val
             entries(host, handle, len, level, false)?
         }
         HostValue::PhpReference { target, .. } => bind(host, *target, level)?,
-        HostValue::Object { handle, .. } => Value::object(HostObject { handle }),
+        HostValue::Object { native, .. } => Value::object(HostObject { native }),
         HostValue::Bytes(_) => return Err(unsupported("a byte string")),
         HostValue::Date(_) => return Err(unsupported("a date")),
         HostValue::Callable(_) => return Err(unsupported("a function")),
@@ -191,7 +184,7 @@ impl<'v> ValueOut<'v> {
                 ))
             }
             Value::Object(object) => match (Arc::as_ref(object) as &dyn std::any::Any).downcast_ref::<HostObject>() {
-                Some(host) => OutValue::Native(host.handle()),
+                Some(host) => OutValue::Native(host.native().clone()),
                 // An object that a Rust host built has no language object; no binding gives the core one.
                 None => OutValue::Null,
             },

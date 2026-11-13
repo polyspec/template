@@ -4,6 +4,7 @@ name = "polyspec-template-node"
 version = "0.0.27"
 edition = "2021"
 rust-version = "1.99.0"
+license = "MIT"
 publish = false
 build = "build.rs"
 
@@ -16,6 +17,8 @@ crate-type = ["cdylib"]
 panic-test = []
 fault-test = ["polyspec-template/fault-test"]
 codec-test = []
+thread-test = []
+thrown-count-test = []
 
 [build-dependencies]
 napi-build = "=2.6.0"
