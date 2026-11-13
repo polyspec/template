@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 661c57c16c916b67aeb8c18c9a3fd573edf8d75c98209214192489a2d91af878 -->
+<!-- source-sha256: b4fb4e202219ebb36a6590ca37e947285cc3b64ada27d02650663f744933e535 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- Rust `AstProgram::register`와 `register_class`는 식별자가 아니거나 내장 함수의 이름인 이름에 대해 `String`이 아니라 kind가 `argument_function_name`인 `TemplateError`를 돌려준다(ERR-15). `packages/rust/interface.json`에서 member의 `raises`는 코어가 그 member에서 돌려주는 kind를 적으며, `template_value`의 `in` 함수만 내는 kind는 적지 않는다(VAL-23). `register`와 `register_class`의 함수 parameter는 `host_function`이다. `function`이 PHP와 JavaScript의 예약어이기 때문이다.
 - `examples/showcase/adapters/rust/Cargo.lock`은 `polyspec-binding-core`와 `polyspec-json`을 루트 `Cargo.lock`의 commit에 고정한다. 그보다 오래된 commit에는 `binding_core::OutValues`가 없어서 `make lint-rust`가 예제 adapter를 컴파일하지 못했다.
 - legacy Go module은 그 폴더의 module 경로 `github.com/polyspec/template/legacy/packages/go`를 가지며, compiler의 Go backend, 예제 adapter, 스크립트가 그 경로로 import한다. `github.com/polyspec/template/packages/go`는 바인딩 module만의 경로다.
 - 정수 인자(`slice`의 start와 length, `date`의 초)와 개수(`truncate`의 n, `number`의 decimals, `round`의 d)를 절단하거나 반올림하거나 범위로 맞추지 않는다: 소수는 `E_RUNTIME_TYPE`, 음수 개수는 `E_RUNTIME_TYPE`, 크기가 2^53 − 1을 넘으면 `E_RUNTIME_LIMIT`다(FUN-50). `number`와 `round`는 소수 자리를 최대 100개 쓴다(FUN-20). 날짜 텍스트는 그 달의 날을 적어야 한다: `2025-02-29`와 `2024-04-31`은 다음 달 첫날이 아니라 날짜가 아니다(FUN-37). Rust 구현이 이 규칙을 따르며 다른 구현은 바뀌지 않았다.
