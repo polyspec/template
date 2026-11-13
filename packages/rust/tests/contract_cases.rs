@@ -867,8 +867,10 @@ impl CaseHost {
     }
 
     fn held(&self, handle: Handle) -> Option<&Held> {
-        let index = usize::try_from(handle.raw()).ok()?.checked_sub(1)?;
-        self.held.get(index)
+        match usize::try_from(handle.raw()) {
+            Ok(number) => self.held.get(number.checked_sub(1)?),
+            Err(_) => None,
+        }
     }
 
     fn unread(&mut self, value: &Json) -> HostValue {
@@ -932,10 +934,18 @@ impl CaseHost {
     }
 }
 
+/// The child of a container at an index that the core asks for.
+fn child(children: &[Json], index: u64) -> Option<Json> {
+    match usize::try_from(index) {
+        Ok(index) => children.get(index).cloned(),
+        Err(_) => None,
+    }
+}
+
 impl HostValues for CaseHost {
     fn item(&mut self, list: Handle, index: u64) -> Result<HostValue, Raised> {
         let item = match self.held(list) {
-            Some(Held::Items(items)) => usize::try_from(index).ok().and_then(|index| items.get(index)).cloned(),
+            Some(Held::Items(items)) => child(items, index),
             Some(Held::Nested(0, value)) => Some(value.clone()),
             Some(Held::Nested(left, value)) => {
                 let around = Held::Nested(left - 1, value.clone());
@@ -954,7 +964,7 @@ impl HostValues for CaseHost {
 
     fn entry(&mut self, map: Handle, index: u64) -> Result<(HostValue, HostValue), Raised> {
         let pair = match self.held(map) {
-            Some(Held::Items(pairs)) => usize::try_from(index).ok().and_then(|index| pairs.get(index)).cloned(),
+            Some(Held::Items(pairs)) => child(pairs, index),
             _ => None,
         };
         Ok(match pair.as_ref().and_then(Json::as_array).map(Vec::as_slice) {
@@ -1104,7 +1114,10 @@ fn main() {
         .flat_map(|row| {
             assert_eq!(row["file"], "contracts/core-cases.json", "the file of the cases of {alias}");
             assert_eq!(row["group"], alias, "the group of the cases of an alias has its id");
-            file[alias].as_array().cloned().unwrap_or_default()
+            match file[alias].as_array() {
+                Some(cases) => cases.clone(),
+                None => Vec::new(),
+            }
         })
         .collect();
     {

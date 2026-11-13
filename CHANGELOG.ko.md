@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9740b8a7f72107aa07700c47bb48adb108d52eef195542bbbcf749fcc6b1cb60 -->
+<!-- source-sha256: 804ba661f8e564d285c0dfac3b5637b19146cbdb33adfd6f360b65b5ec16a413 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `packages/rust/interface.json`의 value alias `template_value`는 `value_in`이 돌려주는 kind인 data_number_range, data_number_not_finite, data_invalid_utf8, data_unsupported_type, data_depth를 `in_raises`에 적고, `cases`의 행 하나가 `alias`로 가리키는 `contracts/core-cases.json`의 group `template_value`는 kind마다 케이스 `{id, value, raises}` 하나를 담는다. 계약은 `engine.render`처럼 alias를 받는 member에 대해 이 kind를 어디에도 적지 않았다. 그 member의 `raises`는 자기 경로의 kind만 담는다. `packages/rust/tests/contract_cases.rs`는 각 케이스를 `value_in`으로 실행하고, `in_raises`가 그 다섯 kind를 적고 각 kind에 케이스가 있는지를 `in_raises::template_value`로 확인한다(CNF-19).
 - enum field인 `format_options`의 `template_blocks`와 `engine_options`의 `artifact_refresh`는 `default_core`에 상수 `polyspec_template::DEFAULT_TEMPLATE_BLOCKS`와 `polyspec_template::DEFAULT_ARTIFACT_REFRESH`를 적고, `TemplateBlocks`와 `ArtifactRefresh`의 `Default`는 그 상수를 돌려준다(binding GN-6i, U-2). 계약은 `artifact_refresh`에 `{literal: "dev"}`를 선언했지만 RT-40과 코어는 옵션이 정책을 정하지 않은 엔진에 `true`를 쓴다. 그래서 생성된 바인딩은 load마다 모든 템플릿을 다시 파싱했을 것이다. 이제 기본값은 `{literal: "true"}`다. `tests/scripts/default-core.test.mts`는 enum unit의 모든 `{literal}` 기본값이, 선언이 그 값의 variant인 상수를 적기를 요구한다(T28.31).
 - `tests/scripts/lint-rust-workspaces.test.mts`는 `make lint-rust`의 step이 넘기는 모든 `--exclude`가 그 step의 Cargo workspace의 package를 적기를 요구한다. recipe는 root workspace의 binding crate를 제외하는데, kit의 lint utility는 같은 인자를 `examples/showcase/adapters/rust`의 step에도 넘기고, cargo는 그 package가 없다고 경고한다. kit이 한 workspace의 step에 인자를 주는 방법을 제공할 때까지 이 시험은 실패한다(polyspec/kit#36).
 - language package와 그 case가 `legacy/`로 옮겨진 tree에서 `make template-test-scripts`가 통과한다. `legacy/tests/.editorconfig`는 `tests/.editorconfig`가 `tests/`에 하는 것처럼 `legacy/tests/cases`와 `legacy/tests/fixtures` 아래 파일의 바이트를 지킨다. `scripts/generate-error-codes.mts`의 `parseCatalog`는 첫 칸이 code 식별자인 행만 읽으므로 ERR-16의 point 표는 code 행이 아니다. fixture `public-parser.rs`, `public-formatter.rs`, `public-prefix-analysis.rs`는 `parse`, `analyze`, `analyze_prefix`, `format`이 `TemplateError`를 돌려주는 현재 API를 적는다. `tests/fixtures/public-types/private-api-extractor.json`은 project folder `legacy/packages/ts`에서 경로를 적는다. `make template-test-scripts`로 검증했다.

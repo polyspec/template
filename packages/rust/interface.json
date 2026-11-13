@@ -356,6 +356,13 @@
         "in": "polyspec_template::value_in",
         "out": "polyspec_template::value_out"
       },
+      "in_raises": [
+        "polyspec_template::ErrorCode::DataNumberRange",
+        "polyspec_template::ErrorCode::DataNumberNotFinite",
+        "polyspec_template::ErrorCode::DataInvalidUtf8",
+        "polyspec_template::ErrorCode::DataUnsupportedType",
+        "polyspec_template::ErrorCode::DataDepth"
+      ],
       "out": [
         {
           "kind": "null",
@@ -4617,6 +4624,11 @@
       "member": "merge",
       "file": "contracts/core-cases.json",
       "group": "merge"
+    },
+    {
+      "alias": "template_value",
+      "file": "contracts/core-cases.json",
+      "group": "template_value"
     }
   ]
 }
