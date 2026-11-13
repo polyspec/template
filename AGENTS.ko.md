@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: b2c41d6b2ca8367df359d921f9c5cad31cd129a6a9b7dff3eca776a2603b5b3f -->
+<!-- source-sha256: bd9f9058a3018ff23ae7a7d2483f3ce0833ed90551956fbf2143b59b86d98020 -->
 # 개발
 
 ## 문서
@@ -59,7 +59,7 @@
   Enforced by: none, a local run is not observed by a tool.
 - Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`).
   Enforced by: `make template-test-scripts`
-- Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 hook인 `.githooks`로 설정한다. `make hooks`는 그것을 설정하고 추적된 hook을 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
+- Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 추적되는 hook인 `.githooks`로 설정한다. `make hooks`는 그것을 설정하고 그 hook을 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
   Enforced by: `make hooks-check`
 - Own: 모든 test는 실행 중에 시작, 결과, 경과 시간을 출력하고 자기 timeout을 가진다. 실행 전체, package, 파일에 시간 제한을 두지 않는다. 수십 분 걸리는 test와 시작과 끝만 출력하는 test는 결함이다.
   Enforced by: none, the output of a test is a judgement.

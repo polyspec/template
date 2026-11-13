@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-go-readme -->
-<!-- source-sha256: 6dc7bbeb6389bc9dc762ddbaed0d72d30ef7577542f47fd5a3bd4cf1bbdc6f77 -->
+<!-- source-sha256: 8a90b5fcb07aaae7d57d9d1a4c50ec1a4264ab4bdf36b0dd037cba59b8570b13 -->
 # github.com/polyspec/template/legacy/packages/go
 
 [English](README.md).
