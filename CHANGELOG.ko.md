@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 24dd11b39bb52edf3408cabcab762ebddef8d7830fdcf3319de84563865e8e35 -->
+<!-- source-sha256: cb29a4a6aa6e7d6a7db7d8ae4c5cc5df06f76d2fa201ac6917fda9aa51bba9f2 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `Cargo.lock`은 `polyspec-binding-core`를 binding 931645f에 고정하고(CK-20), 바인딩 패키지는 931645f의 `binding scaffold`가 쓰는 그대로이다(CK-19). 각 `src/lib.rs`는 rustfmt 꼴이고, `packages/go/internal/ffi`의 manifest는 scaffold를 따른다. binding check, `cargo fmt --all --check`, `make layout-check`는 아무것도 보고하지 않는다(T28.22).
 - Rust 코어가 인터페이스 계약 꼴의 host 함수를 받는다. `ContractFunction`은 `Box<dyn Fn(&[Value], &Environment) -> Result<Value, binding_core::Failure<ErrorCode>> + Send + Sync>`(binding GN-6d)이고, `Environment`는 계약의 record `environment`(`timezone`, `now`)이다. `packages/rust/interface.json`에서 `engine.register`와 `engine.register_class`의 코어 경로인 `AstProgram::register_function`과 `AstProgram::register_class_function`은 `contract_host_function`이 만드는 runtime의 `HostFunction`으로 그것을 등록한다. `Failure::Kind`는 그 code의 binding 실패(VAL-19)이고, `Failure::Raised`와 `Failure::Callback`은 호출자에게 그대로 간다(FUN-46). `tests/contract_cases.rs`는 함수 fixture를 그 꼴로 등록한다(T28.21).
 - `--features fault-test` 없는 코어의 cargo test가 실패 주입점을 장전한다. `packages/rust/Cargo.toml`은 `polyspec-template` 자신을 feature `fault-test`와 함께 dev-dependency로 적으므로 코어의 모든 시험 build가 그 feature를 가지고, `make test-rust`는 `__test_support`와 `cli`만 넘긴다. binding 642e70f는 지점을 쓰는 crate의 feature `fault-test`로 지점을 판단하므로, binding의 end-to-end 검사처럼 flag 없이 빌드한 시험에서 `tests/contract_cases.rs`의 case `parse::a_missing_open_block_is_internal`과 `format::a_formatted_text_of_another_ast_is_format_invariant`가 `the faults of template.internal did not fire`와 `the faults of template.format_invariant did not fire`로 실패했다(T28.20).
 - `Cargo.lock`은 `polyspec-binding-core`를 binding 49a4e97에(CK-20), `polyspec-json`을 json 73d2db9에 고정하고, 바인딩 패키지는 49a4e97의 `binding scaffold`가 쓰는 그대로이다(CK-19). 각 manifest는 workspace의 lint를 받는다. 주입 지점 `template.internal`(`packages/rust/src/parser/mod.rs:551`)과 `template.format_invariant`(`packages/rust/src/format/mod.rs:163`)는 macro `binding_core::fault::point!`이다. Cargo는 한 build 안에서 binding_core의 feature를 합치므로, binding 642e70f는 지점을 쓰는 crate의 feature `fault-test`로 지점을 판단한다(GN-5). 코어는 `fault-test = ["polyspec-binding-core/fault-test"]`를 선언하고 `make test-rust`는 그 feature로 코어를 빌드하므로, `tests/contract_cases.rs`가 두 지점을 장전한다(T28.19).
