@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: c727ef922fdd0c4fc15540ad431dc7d32d1fd5910c7fcddc9df843a143d0281e -->
+<!-- source-sha256: a1e062af2f594bb8fd57956301084bbc509b39f1b4522d1ca76288051513d286 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- 계약은 `errors.code`에 코어 오류와 그 code를 주는 함수를 적는다. `{error: polyspec_template::TemplateError, path: polyspec_template::TemplateError::code}`다(T28.38, binding GN-7b). Rust core의 `TemplateError::code`는 field `code`가 담은 code를 돌려준다. member는 struct `TemplateError`를 돌려주고 `errors.kinds`의 행은 `ErrorCode`의 variant를 적으므로, 생성 crate는 행을 코어의 오류에 match하는 pattern을 가질 수 없었다. 계약 검사는 Rust source를 읽지 않아 빠진 항목에 아무것도 보고하지 않았다. `tests/scripts/error-code-projection.test.mts`는 그 항목, 모든 행의 형태, 코어의 함수를 요구하고, `packages/rust/tests/error_code.rs`는 그 함수가 code를 주도록 요구한다. `Cargo.lock`이 고정한 binding의 schema에는 `errors.code`가 없다. 그것이 schema에 있는 binding의 계약 검사는 tree 사본에서 그 항목에 아무것도 보고하지 않는다.
 - 클래스 단위 `bound_map`의 매개변수는 코어가 그것을 빌리는 방식 `core: "&"`를 명시한다(T28.37, binding CK-67, GN-6h). `engine.render_bound`와 `engine.prepare_bound`의 `assign`, `merge`의 `first`와 `second`이며, 코어는 이들을 `&BoundMap`으로 받는다. 계약이 빌림을 명시하지 않아 계약 검사가 네 매개변수에 CK-67을 보고했다. `tests/scripts/class-borrow.test.mts`는 클래스 단위의 모든 매개변수가 `core`를 명시하고, 코어 경로의 이름을 가진 `packages/rust/src`의 각 `pub fn`이 그 매개변수를 그 형태로 받을 것을 요구한다.
 - `packages/rust/interface.json`의 value alias `template_value`는 `value_in`이 돌려주는 kind인 data_number_range, data_number_not_finite, data_invalid_utf8, data_unsupported_type, data_depth를 `in_raises`에 적고, `cases`의 행 하나가 `alias`로 가리키는 `contracts/core-cases.json`의 group `template_value`는 kind마다 케이스 `{id, value, raises}` 하나를 담는다. 계약은 `engine.render`처럼 alias를 받는 member에 대해 이 kind를 어디에도 적지 않았다. 그 member의 `raises`는 자기 경로의 kind만 담는다. `packages/rust/tests/contract_cases.rs`는 각 케이스를 `value_in`으로 실행하고, `in_raises`가 그 다섯 kind를 적고 각 kind에 케이스가 있는지를 `in_raises::template_value`로 확인한다(CNF-19).
 - enum field인 `format_options`의 `template_blocks`와 `engine_options`의 `artifact_refresh`는 `default_core`에 상수 `polyspec_template::DEFAULT_TEMPLATE_BLOCKS`와 `polyspec_template::DEFAULT_ARTIFACT_REFRESH`를 적고, `TemplateBlocks`와 `ArtifactRefresh`의 `Default`는 그 상수를 돌려준다(binding GN-6i, U-2). 계약은 `artifact_refresh`에 `{literal: "dev"}`를 선언했지만 RT-40과 코어는 옵션이 정책을 정하지 않은 엔진에 `true`를 쓴다. 그래서 생성된 바인딩은 load마다 모든 템플릿을 다시 파싱했을 것이다. 이제 기본값은 `{literal: "true"}`다. `tests/scripts/default-core.test.mts`는 enum unit의 모든 `{literal}` 기본값이, 선언이 그 값의 variant인 상수를 적기를 요구한다(T28.31).

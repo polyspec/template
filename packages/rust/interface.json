@@ -311,6 +311,10 @@
         "category": "internal"
       }
     ],
+    "code": {
+      "error": "polyspec_template::TemplateError",
+      "path": "polyspec_template::TemplateError::code"
+    },
     "binding": [],
     "wrapped": []
   },

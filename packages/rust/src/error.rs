@@ -334,6 +334,12 @@ impl binding_core::Kinds for TemplateError {
 }
 
 impl TemplateError {
+    /// The code of the error (ERR-1), whose kind the error has; the interface contract names this function in
+    /// `errors.code`, so a generated binding reads the code of an error through it (binding GN-7b).
+    pub fn code(&self) -> ErrorCode {
+        self.code
+    }
+
     /// An error of an argument of an operation (ERR-15): no position, the name that the operation received.
     pub fn argument(code: ErrorCode, template: &str, message: impl Into<String>) -> TemplateError {
         TemplateError::without_position(code, template, message)
