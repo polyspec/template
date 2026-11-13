@@ -61,15 +61,16 @@ fn public_formatter_preserves_shared_results() {
             // The fixture names a template only where the case depends on the name.
             name: item.options.name,
             delimiters: item.options.delimiters,
-            range: item.options.range.map(|range| range.start..range.end),
+            range: item.options.range.map(|range| [range.start, range.end]),
             indent: match item.options.indent {
                 serde_json::Value::Null => None,
                 serde_json::Value::String(value) => Some(IndentUnit::new(&value).expect("valid indent")),
                 _ => panic!("invalid fixture indent"),
             },
             template_blocks: match item.options.template_blocks.as_deref() {
-                None | Some("indent") => TemplateBlocks::Indent,
-                Some("flat") => TemplateBlocks::Flat,
+                None => None,
+                Some("indent") => Some(TemplateBlocks::Indent),
+                Some("flat") => Some(TemplateBlocks::Flat),
                 _ => panic!("invalid fixture mode"),
             },
         };

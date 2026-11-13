@@ -483,7 +483,7 @@ fn artifact_refresh_policies_are_independent_of_rendering() {
         sources.lock().unwrap().set("a.tpl", "1");
         let program = AstProgram::new(EngineOptions {
             loader: Some(Box::new(SharedLoader(Arc::clone(&sources)))),
-            artifact_refresh: policy,
+            artifact_refresh: Some(policy),
             ..Default::default()
         })
         .expect("valid engine options");

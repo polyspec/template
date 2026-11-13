@@ -4,7 +4,7 @@ pub fn public_formatter() -> Result<Formatted, TemplateError> {
     let _: ErrorCode = ErrorCode::FormatInvariant;
     let options = FormatOptions {
         indent: Some(IndentUnit::new("  ").expect("valid indent")),
-        template_blocks: TemplateBlocks::Indent,
+        template_blocks: Some(TemplateBlocks::Indent),
         ..FormatOptions::default()
     };
     format("text", &options)

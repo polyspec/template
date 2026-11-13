@@ -51,8 +51,8 @@ pub struct EngineOptions {
     pub limits: Option<Limits>,
     /// Delimiters as a two-character string; `{}` when absent.
     pub delimiters: Option<String>,
-    /// Template artifact refresh policy.
-    pub artifact_refresh: ArtifactRefresh,
+    /// Template artifact refresh policy. `None` is [`DEFAULT_ARTIFACT_REFRESH`].
+    pub artifact_refresh: Option<ArtifactRefresh>,
 }
 
 /// A template definition given to `render` (RT-24).
@@ -273,7 +273,11 @@ impl AstProgram {
             },
             runtime: RuntimeEnvironment::new(options.limits, options.functions)?,
             delimiters,
-            artifact_refresh: options.artifact_refresh,
+            // RT-40: a program whose options name no policy has the default policy.
+            artifact_refresh: match options.artifact_refresh {
+                Some(policy) => policy,
+                None => DEFAULT_ARTIFACT_REFRESH,
+            },
             cache: Mutex::new(HashMap::new()),
         })
     }

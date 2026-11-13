@@ -848,7 +848,7 @@ impl Run {
 
     fn engine_options(&self, value: Option<&Json>) -> Result<EngineOptions, Failed> {
         let mut options = EngineOptions {
-            artifact_refresh: ArtifactRefresh::Dev,
+            artifact_refresh: Some(ArtifactRefresh::Dev),
             ..EngineOptions::default()
         };
         let Some(value) = value else {
@@ -870,9 +870,9 @@ impl Run {
         }
         if let Some(refresh) = key(value, "artifact_refresh") {
             options.artifact_refresh = match text(refresh, "artifact_refresh")?.as_str() {
-                "dev" => ArtifactRefresh::Dev,
-                "true" => ArtifactRefresh::True,
-                "false" => ArtifactRefresh::False,
+                "dev" => Some(ArtifactRefresh::Dev),
+                "true" => Some(ArtifactRefresh::True),
+                "false" => Some(ArtifactRefresh::False),
                 other => return fail(format!("{other} is no artifact_refresh")),
             };
         }
@@ -1007,7 +1007,7 @@ fn format_options(case: &Json) -> Result<Result<FormatOptions, TemplateError>, F
         options.delimiters = Some(text(delimiters, "delimiters")?);
     }
     if let Some(range) = key(value, "range").filter(|range| !range.is_null()) {
-        options.range = Some(uint(&range[0], "range")?..uint(&range[1], "range")?);
+        options.range = Some(span_of(range)?);
     }
     if let Some(indent) = key(value, "indent") {
         options.indent = match indent.as_str() {
@@ -1020,8 +1020,8 @@ fn format_options(case: &Json) -> Result<Result<FormatOptions, TemplateError>, F
     }
     if let Some(blocks) = key(value, "template_blocks") {
         options.template_blocks = match text(blocks, "template_blocks")?.as_str() {
-            "indent" => TemplateBlocks::Indent,
-            "flat" => TemplateBlocks::Flat,
+            "indent" => Some(TemplateBlocks::Indent),
+            "flat" => Some(TemplateBlocks::Flat),
             other => return fail(format!("{other} is no template_blocks")),
         };
     }

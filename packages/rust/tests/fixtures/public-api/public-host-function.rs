@@ -16,7 +16,7 @@ pub fn configurations() -> (polyspec_template::EngineOptions, polyspec_template:
         loader: Some(Box::new(polyspec_template::MapLoader::new())),
         functions: std::collections::HashMap::from([("custom".into(), host_function())]),
         limits: Some(Limits { output_bytes: 128, ..Default::default() }),
-        delimiters: Some("[]".into()), artifact_refresh: ArtifactRefresh::False,
+        delimiters: Some("[]".into()), artifact_refresh: Some(ArtifactRefresh::False),
     };
     let request = RenderOptions {
         define: std::collections::HashMap::new(), env: Some(Env { timezone: "+09:00".into(), now: 123.0 }),

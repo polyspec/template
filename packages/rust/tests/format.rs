@@ -136,14 +136,14 @@ fn keeps_a_byte_order_mark_and_crlf_line_terminators() {
 #[test]
 fn formats_only_the_tags_and_lines_inside_a_range() {
     let options = FormatOptions {
-        range: Some(4..8),
+        range: Some([4, 8]),
         ..options()
     };
     assert_eq!(text("{=a}{=b}{=c}", &options), "{=a}{= b}{=c}");
     let source = lines(&["<ul>", "<li>a</li>", "<li>{=b}</li>", "</ul>"]);
     let start = source.find("<li>{=b}").expect("start");
     let options = FormatOptions {
-        range: Some(start..source.len()),
+        range: Some([start, source.len()]),
         ..FormatOptions::default()
     };
     assert_eq!(text(&source, &options), lines(&["<ul>", "<li>a</li>", "  <li>{= b}</li>", "</ul>"]));
@@ -241,7 +241,7 @@ fn indents_html_elements_and_template_blocks() {
         ])
     );
     let flat = FormatOptions {
-        template_blocks: TemplateBlocks::Flat,
+        template_blocks: Some(TemplateBlocks::Flat),
         ..options()
     };
     assert_eq!(

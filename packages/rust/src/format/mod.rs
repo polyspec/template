@@ -6,13 +6,12 @@ mod expression;
 mod indent;
 mod invariant;
 
-use crate::error::{ErrorCode, LineIndex, TemplateError};
+use crate::error::{ErrorCode, LineIndex, Span, TemplateError};
 use crate::parser::{SyntaxTag, TagKind};
 use crate::{ParseOptions, analyze};
 use body::{BodyInput, format_body};
 use indent::indent_edits;
 use invariant::same_tree;
-use std::ops::Range;
 
 /// An indent unit: a run of spaces or one tab.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -54,12 +53,13 @@ pub struct FormatOptions {
     pub name: Option<String>,
     /// Engine delimiter option as two characters (LEX-22). The default is `{}`.
     pub delimiters: Option<String>,
-    /// Byte range of the source; only tags that lie completely inside it and lines that start inside it are formatted.
-    pub range: Option<Range<usize>>,
+    /// Byte range `[start, end)` of the source; only tags that lie completely inside it and lines that start inside it
+    /// are formatted.
+    pub range: Option<Span>,
     /// Indent unit; the default is two spaces. `None` keeps the indentation of every line.
     pub indent: Option<IndentUnit>,
-    /// How template blocks indent their content.
-    pub template_blocks: TemplateBlocks,
+    /// How template blocks indent their content. `None` is [`DEFAULT_TEMPLATE_BLOCKS`].
+    pub template_blocks: Option<TemplateBlocks>,
 }
 
 /// How template blocks indent when the options name no policy (`format_options.template_blocks` of the interface
@@ -83,6 +83,14 @@ impl FormatOptions {
             None => DEFAULT_FORMAT_NAME,
         }
     }
+
+    /// How template blocks indent: the given policy, or [`DEFAULT_TEMPLATE_BLOCKS`].
+    pub fn template_blocks(&self) -> TemplateBlocks {
+        match self.template_blocks {
+            Some(policy) => policy,
+            None => DEFAULT_TEMPLATE_BLOCKS,
+        }
+    }
 }
 
 impl Default for FormatOptions {
@@ -92,7 +100,7 @@ impl Default for FormatOptions {
             delimiters: None,
             range: None,
             indent: Some(IndentUnit("  ".to_string())),
-            template_blocks: DEFAULT_TEMPLATE_BLOCKS,
+            template_blocks: None,
         }
     }
 }
@@ -133,8 +141,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
 
     let range = options
         .range
-        .as_ref()
-        .map(|range| range.start.saturating_sub(bom.len())..range.end.saturating_sub(bom.len()));
+        .map(|[start, end]| start.saturating_sub(bom.len())..end.saturating_sub(bom.len()));
     let mut edits: Vec<Edit> = Vec::new();
     for tag in &analysis.tags {
         if tag.kind == TagKind::Directive {
@@ -148,15 +155,16 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
         }
     }
     if let Some(unit) = &options.indent {
-        let indentation = indent_edits(text, &analysis.tags, unit.as_str(), options.template_blocks, range.as_ref()).map_err(|error| {
-            TemplateError::at(
-                ErrorCode::FormatHtml,
-                name,
-                Some(&LineIndex::of(text.as_bytes())),
-                [error.index, error.index + 1],
-                error.message,
-            )
-        })?;
+        let indentation =
+            indent_edits(text, &analysis.tags, unit.as_str(), options.template_blocks(), range.as_ref()).map_err(|error| {
+                TemplateError::at(
+                    ErrorCode::FormatHtml,
+                    name,
+                    Some(&LineIndex::of(text.as_bytes())),
+                    [error.index, error.index + 1],
+                    error.message,
+                )
+            })?;
         edits.extend(indentation);
         edits.sort_by_key(|edit| edit.start);
     }
