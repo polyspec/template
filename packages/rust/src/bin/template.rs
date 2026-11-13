@@ -239,7 +239,7 @@ fn main() {
             let source = read_source(&file_path, &file);
             let defaults = FormatOptions::default();
             let options = FormatOptions {
-                name,
+                name: Some(name),
                 delimiters,
                 // CNF-4: without --indent the default indent unit.
                 indent: match indent {

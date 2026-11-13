@@ -51,8 +51,8 @@ pub enum TemplateBlocks {
 /// Options of [`format()`].
 #[derive(Debug, Clone)]
 pub struct FormatOptions {
-    /// Template name used in error results. The default is `template.tpl`.
-    pub name: String,
+    /// Template name used in error results. `None` is [`DEFAULT_FORMAT_NAME`].
+    pub name: Option<String>,
     /// Engine delimiter option as two characters (LEX-22). The default is `{}`.
     pub delimiters: Option<String>,
     /// Byte range of the source; only tags that lie completely inside it and lines that start inside it are formatted.
@@ -63,10 +63,23 @@ pub struct FormatOptions {
     pub template_blocks: TemplateBlocks,
 }
 
+/// The template name of a format whose options name none (`format_options.name` of the interface contract).
+pub const DEFAULT_FORMAT_NAME: &str = "template.tpl";
+
+impl FormatOptions {
+    /// The template name of the error results: the given name, or [`DEFAULT_FORMAT_NAME`].
+    pub fn name(&self) -> &str {
+        match &self.name {
+            Some(name) => name,
+            None => DEFAULT_FORMAT_NAME,
+        }
+    }
+}
+
 impl Default for FormatOptions {
     fn default() -> FormatOptions {
         FormatOptions {
-            name: "template.tpl".to_string(),
+            name: None,
             delimiters: None,
             range: None,
             indent: Some(IndentUnit("  ".to_string())),
@@ -101,7 +114,7 @@ const BOM: &str = "\u{feff}";
 /// A source that cannot be formatted keeps its text, and the error says why (ERR-15): the parse error of the source,
 /// `argument_delimiters`, `format_html` at the tag that does not nest or `format_invariant` at the first changed byte.
 pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, TemplateError> {
-    let name = options.name.as_str();
+    let name = options.name();
     let bom = if source.starts_with(BOM) { BOM } else { "" };
     let text = &source[bom.len()..];
     let parse_options = ParseOptions {
@@ -179,10 +192,10 @@ pub fn format_bytes(source: &[u8], options: &FormatOptions) -> Result<Formatted,
             let parse_options = ParseOptions {
                 delimiters: options.delimiters.clone(),
             };
-            analyze(source, &options.name, &parse_options)?;
+            analyze(source, options.name(), &parse_options)?;
             Err(TemplateError::without_position(
                 ErrorCode::Internal,
-                &options.name,
+                options.name(),
                 "internal failure: the parser accepted a source that is not UTF-8 (LEX-1)",
             ))
         }

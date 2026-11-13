@@ -11,7 +11,9 @@ mod common;
 
 use common::{case_delimiters, repo_root, templates};
 use common::{without_line_indentation, without_spans};
-use polyspec_template::{ErrorCode, FormatOptions, Formatted, IndentUnit, ParseOptions, TemplateBlocks, format, format_bytes, parse};
+use polyspec_template::{
+    DEFAULT_FORMAT_NAME, ErrorCode, FormatOptions, Formatted, IndentUnit, ParseOptions, TemplateBlocks, format, format_bytes, parse,
+};
 use std::fs;
 
 fn options() -> FormatOptions {
@@ -61,7 +63,7 @@ fn formats_the_fixtures_and_is_idempotent_on_them() {
         let input = fs::read_to_string(fixtures.join("input").join(&name)).expect("input");
         let expected = fs::read_to_string(fixtures.join("expected").join(&name)).expect("expected");
         let options = FormatOptions {
-            name: name.clone(),
+            name: Some(name.clone()),
             ..options()
         };
         assert_eq!(formatted(&input, &options), expected, "{name}");
@@ -171,6 +173,24 @@ fn returns_the_parser_error_position_for_a_source_that_does_not_parse() {
     let error = format("<p>\n  {? a}\n</p>", &options()).expect_err("parse error");
     assert_eq!(error.code, ErrorCode::ParseUnclosedBlock);
     assert_eq!((error.line, error.col), (2, 3));
+}
+
+/// binding GN-6i: options without a name report the errors of the source under `DEFAULT_FORMAT_NAME`, and a given name
+/// replaces it, for text and for bytes.
+#[test]
+fn names_the_errors_with_the_default_name_unless_the_options_give_one() {
+    assert_eq!(DEFAULT_FORMAT_NAME, "template.tpl");
+    assert_eq!(FormatOptions::default().name, None);
+    let error = format("{? a}", &options()).expect_err("parse error");
+    assert_eq!(error.template, DEFAULT_FORMAT_NAME);
+    let error = format_bytes(b"\xff", &options()).expect_err("parse error");
+    assert_eq!(error.template, DEFAULT_FORMAT_NAME);
+    let named = FormatOptions {
+        name: Some("page.tpl".to_string()),
+        ..options()
+    };
+    assert_eq!(format("{? a}", &named).expect_err("parse error").template, "page.tpl");
+    assert_eq!(format_bytes(b"\xff", &named).expect_err("parse error").template, "page.tpl");
 }
 
 /// A source given as bytes formats as its text; bytes that are not UTF-8 do not parse (LEX-1), and the error says where.
@@ -463,7 +483,7 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
                 let options = FormatOptions {
                     indent,
                     delimiters: delimiters.clone(),
-                    name: "input.tpl".to_string(),
+                    name: Some("input.tpl".to_string()),
                     ..FormatOptions::default()
                 };
                 let failure = format_bytes(&bytes, &options).expect_err("parse error");
@@ -477,7 +497,7 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
             let options = FormatOptions {
                 indent: indent.clone(),
                 delimiters: delimiters.clone(),
-                name: "input.tpl".to_string(),
+                name: Some("input.tpl".to_string()),
                 ..FormatOptions::default()
             };
             let once = match format(&source, &options) {

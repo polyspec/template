@@ -80,7 +80,7 @@ fn formatting(dir: &Path) -> Result<(), Failed> {
             &FormatOptions {
                 indent,
                 delimiters: delimiters.clone(),
-                name: "input.tpl".to_string(),
+                name: Some("input.tpl".to_string()),
                 ..FormatOptions::default()
             },
         ))

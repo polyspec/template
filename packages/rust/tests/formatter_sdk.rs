@@ -59,10 +59,7 @@ fn public_formatter_preserves_shared_results() {
     for item in data.cases {
         let options = FormatOptions {
             // The fixture names a template only where the case depends on the name.
-            name: match item.options.name {
-                Some(name) => name,
-                None => "template.tpl".into(),
-            },
+            name: item.options.name,
             delimiters: item.options.delimiters,
             range: item.options.range.map(|range| range.start..range.end),
             indent: match item.options.indent {

@@ -568,7 +568,7 @@ fn format_options(case: &Json) -> Result<Result<FormatOptions, TemplateError>, F
         return Ok(Ok(options));
     };
     if let Some(name) = key(value, "name") {
-        options.name = text(name, "name")?;
+        options.name = Some(text(name, "name")?);
     }
     if let Some(delimiters) = key(value, "delimiters").filter(|delimiters| !delimiters.is_null()) {
         options.delimiters = Some(text(delimiters, "delimiters")?);
