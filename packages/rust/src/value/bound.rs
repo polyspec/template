@@ -9,16 +9,12 @@ use std::sync::Arc;
 /// A map that passed host binding (VAL-22). `bind` and `merge` create it; its entries are private.
 ///
 /// It is `Send` and `Sync`: template values share their lists and maps through `Arc`, so one bound map
-/// renders in several threads at once (RT-70). A clone holds the same entries.
-#[derive(Clone)]
+/// renders in several threads at once (RT-70). It derives `Clone` and `Debug` and has no other implementation: a clone
+/// holds the same entries, so it is no other way to make or to change a bound map, and a generated binding reads a
+/// bound map in a field of a record by a clone (RT-24).
+#[derive(Debug, Clone)]
 pub struct BoundMap {
     entries: Arc<OrderedMap>,
-}
-
-impl std::fmt::Debug for BoundMap {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        formatter.debug_struct("BoundMap").finish_non_exhaustive()
-    }
 }
 
 mod sealed {

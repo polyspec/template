@@ -401,9 +401,10 @@ fn runtime_declarations_match_manifest() {
     }
 }
 
-/// VAL-22: the bound map type has private fields, no method and no trait implementation, and the
-/// public functions of its module are exactly the operations of the manifest and the operations
-/// that it declares for generated programs.
+/// VAL-22: the bound map type has private fields, no method and no implementation block, it derives `Clone` and
+/// `Debug` and nothing else (a clone holds the same entries, and `DefineInput`, which holds a bound map in `bound`,
+/// derives both, RT-24), and the public functions of its module are exactly the operations of the manifest and the
+/// operations that it declares for generated programs.
 #[test]
 fn bound_map_declarations_match_manifest() {
     let manifest_path = match std::env::var("TEMPLATE_INTERFACE_MANIFEST") {
@@ -422,6 +423,21 @@ fn bound_map_declarations_match_manifest() {
                 assert!(
                     item.fields.iter().all(|field| matches!(field.vis, syn::Visibility::Inherited)),
                     "BoundMap has a public field"
+                );
+                let mut derived = Vec::new();
+                for attribute in item.attrs.iter().filter(|attribute| attribute.path().is_ident("derive")) {
+                    attribute
+                        .parse_nested_meta(|meta| {
+                            derived.push(meta.path.segments.last().expect("a derived trait").ident.to_string());
+                            Ok(())
+                        })
+                        .expect("the derive of BoundMap");
+                }
+                derived.sort();
+                assert_eq!(
+                    derived,
+                    ["Clone", "Debug"],
+                    "BoundMap derives another trait, which adds an operation"
                 );
             }
             Item::Impl(item) if names_type(&item.self_ty) => {
