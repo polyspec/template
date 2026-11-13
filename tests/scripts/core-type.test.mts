@@ -216,7 +216,8 @@ function reader() {
     // GN-6aa: a callback inside a record is a box of the core trait with the lifetime of the struct.
     if (unit['origin'] === 'callback') return [`Box<dyn${coreName(unit)}+'a>`];
     if (unit['kind'] === 'record' && holdsCallback({ unit: unit['id'] }, new Set())) return [`${coreName(unit)}<'a>`];
-    if (['enum', 'record', 'variant', 'alias'].includes(String(unit['kind'])) && typeof unit['core_type'] === 'string') return [coreName(unit)];
+    // GN-6h: a class value in a field is a clone of the core type of the class.
+    if (['enum', 'record', 'variant', 'alias', 'class'].includes(String(unit['kind'])) && typeof unit['core_type'] === 'string') return [coreName(unit)];
     return `the test states no Rust type of ${JSON.stringify(type)}`;
   };
   return { contract, core, units, expanded, coreName, holdsCallback, rust };
