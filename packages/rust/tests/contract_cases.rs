@@ -14,10 +14,10 @@ mod common;
 use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
-    ArtifactRefresh, AstProgram, BoundMap, DefineData, DefineInput, EngineOptions, Env, FormatOptions, FsLoader, FunctionContext,
-    HostError, HostFunction, IndentUnit, Limits, LoadError, Loaded, Loader, MapLoader, OrderedMap, ParseOptions, RenderError,
-    RenderOptions, RenderTarget, SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, Value, analyze,
-    analyze_prefix, bind, decode_template, encode_template, format, merge, parse, resolve_path,
+    ArtifactRefresh, AstProgram, BoundMap, ContractFunction, DefineData, DefineInput, EngineOptions, Env, Environment, FormatOptions,
+    FsLoader, HostError, IndentUnit, Limits, LoadError, Loaded, Loader, MapLoader, OrderedMap, ParseOptions, RenderError, RenderOptions,
+    RenderTarget, SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, Value, analyze, analyze_prefix, bind,
+    decode_template, encode_template, format, merge, parse, resolve_path,
 };
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -340,13 +340,15 @@ impl Loader for FixtureLoader {
     }
 }
 
-fn host_function(rows: &Json, unexpected: &Unexpected) -> Result<HostFunction, Failed> {
+/// The function of a case `{"function": [<row>]}` in the form of the contract (GN-6d): the template values of the call
+/// and the record environment, and a failure of binding_core.
+fn host_function(rows: &Json, unexpected: &Unexpected) -> Result<ContractFunction, Failed> {
     let rows = Rows::new("function", required(rows, "function")?, unexpected)?;
-    Ok(Box::new(move |args: &[Value], context: &FunctionContext<'_>| {
+    Ok(Box::new(move |args: &[Value], environment: &Environment| {
         let list: Vec<Json> = args.iter().map(case_value).collect();
-        let call = serde_json::json!({"0": list, "1": {"timezone": context.env.timezone, "now": context.env.now}});
-        let result = rows.answer(&call).map_err(HostError::Callback)?;
-        template_value(&result).map_err(|error| HostError::Callback(format!("the row of the function: {error:?}").into()))
+        let call = serde_json::json!({"0": list, "1": {"timezone": environment.timezone, "now": environment.now}});
+        let result = rows.answer(&call).map_err(binding_core::Failure::Callback)?;
+        template_value(&result).map_err(|error| binding_core::Failure::Callback(format!("the row of the function: {error:?}").into()))
     }))
 }
 
@@ -456,8 +458,8 @@ impl Run {
             let args = required(step, "args")?;
             let function = host_function(required(args, "host_function")?, &self.unexpected)?;
             match text(required(step, "call")?, "call")?.as_str() {
-                "engine.register" => engine.register(&text(required(args, "name")?, "name")?, function),
-                "engine.register_class" => engine.register_class(
+                "engine.register" => engine.register_function(&text(required(args, "name")?, "name")?, function),
+                "engine.register_class" => engine.register_class_function(
                     &text(required(args, "class_name")?, "class_name")?,
                     &text(required(args, "method")?, "method")?,
                     function,
@@ -636,11 +638,11 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
         "engine.new" => done(kind_of(AstProgram::new(run.engine_options(key(case, "options"))?).map(drop))),
         "engine.register" => {
             let function = host_function(arg("host_function")?, &run.unexpected)?;
-            done(kind_of(run.engine(arg("receiver")?)?.register(&name("name")?, function)))
+            done(kind_of(run.engine(arg("receiver")?)?.register_function(&name("name")?, function)))
         }
         "engine.register_class" => {
             let function = host_function(arg("host_function")?, &run.unexpected)?;
-            done(kind_of(run.engine(arg("receiver")?)?.register_class(
+            done(kind_of(run.engine(arg("receiver")?)?.register_class_function(
                 &name("class_name")?,
                 &name("method")?,
                 function,
