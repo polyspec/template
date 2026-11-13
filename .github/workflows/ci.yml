@@ -347,7 +347,7 @@ jobs:
         if: ${{ !cancelled() }}
       - run: make template-install-rust
         if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-lint-rust-format test-rust conformance-rust"
+      - run: make ci-targets TARGETS="fmt-check test-rust conformance-rust"
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}

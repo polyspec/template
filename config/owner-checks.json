@@ -704,7 +704,7 @@
         "test-rust",
         "lint-rust",
         "bindings-check",
-        "template-lint-rust-format",
+        "fmt-check",
         "conformance",
         "conformance-generated-rust",
         "delimiter-matrix",
@@ -1438,7 +1438,7 @@
       ]
     },
     {
-      "check": "make template-lint-rust-format",
+      "check": "make fmt-check",
       "paths": [
         "packages/rust/**"
       ]
