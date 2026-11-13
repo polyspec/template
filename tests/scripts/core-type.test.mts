@@ -9,7 +9,8 @@
 // in the Rust type that the contract type of the field states, because a generated crate writes a struct literal of
 // those fields and passes `None` for a field with a default that was left out. The second test compares the type of
 // every field, the fields of the struct with those of the record, and the lifetime parameter of a struct that holds a
-// callback.
+// callback. The third test compares the type of every field of every case of a variant unit with the struct variant of
+// the core enum, with `Box<T>` where the unit holds itself (GN-6v).
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
@@ -130,7 +131,8 @@ const plain = (type: string): string => type.replaceAll(/\s+/gu, '').replaceAll(
 /** Every combination of one text of each list. */
 const combinations = (lists: string[][]): string[][] => lists.reduce<string[][]>((found, list) => found.flatMap((head) => list.map((item) => [...head, item])), [[]]);
 
-test('every field of a record has in the core struct the type that the contract states', () => {
+/** The contract, the core and the Rust types that the contract types state (CNF-20). */
+function reader() {
   const contract: unknown = JSON.parse(readFileSync(path.join(ROOT, 'packages/rust/interface.json'), 'utf8'));
   assert.ok(isObject(contract), 'packages/rust/interface.json is no object');
   const core = sources(path.join(ROOT, 'packages/rust/src')).join('\n');
@@ -139,7 +141,7 @@ test('every field of a record has in the core struct the type that the contract 
   // A `pub type <Name> = <Type>;` without parameters stands for its type, on both sides of the comparison.
   const aliases = [...core.matchAll(/^pub type (\w+) = ([^;]+);/gmu)].map((alias) => ({ name: String(alias[1]), type: plain(String(alias[2])) }));
   const expanded = (type: string): string => {
-    let text = plain(type);
+    let text = plain(type).replaceAll('binding_core::Failure', 'Failure');
     for (let round = 0; round < aliases.length; round += 1) {
       const next = aliases.reduce((current, alias) => current.replaceAll(new RegExp(`(?<![\\w:])${alias.name}(?![\\w<])`, 'gu'), alias.type), text);
       if (next === text) break;
@@ -189,6 +191,25 @@ test('every field of a record has in the core struct the type that the contract 
       const one = tuple.every((part) => JSON.stringify(part) === JSON.stringify(tuple[0]));
       return one ? [...tuples, ...(lists[0] ?? []).map((item) => `[${item};${String(lists.length)}]`)] : tuples;
     }
+    // GN-6z: a function is the boxed Fn of its parameters, each borrowed as a parameter of a callback member is, and of
+    // its return or a failure of the core error.
+    const fn = type['function'];
+    if (isObject(fn) && Array.isArray(fn['parameters'])) {
+      const borrowed = (parameter: unknown): string[] | string => {
+        if (parameter === 'text') return ['&str'];
+        if (parameter === 'bytes' || parameter === 'latin1') return ['&[u8]'];
+        if (parameter === 'bool' || parameter === 'float' || (typeof parameter === 'string' && INTEGERS[parameter] !== undefined)) return rust(parameter);
+        if (isObject(parameter) && 'list' in parameter) return wrapped(parameter['list'], (text) => `&[${text}]`);
+        return wrapped(parameter, (text) => `&${text}`);
+      };
+      const parameters: unknown[] = fn['parameters'];
+      const parts = [...parameters.map(borrowed), fn['returns'] === 'none' ? ['()'] : rust(fn['returns'])];
+      const reason = parts.find((part) => typeof part === 'string');
+      if (typeof reason === 'string') return reason;
+      const errors = isObject(contract['errors']) && isObject(contract['errors']['code']) ? String(contract['errors']['code']['error']).split('::').at(-1) : undefined;
+      if (errors === undefined) return 'the contract names no core error in errors.code, which a function type returns';
+      return combinations(parts.filter((part): part is string[] => typeof part !== 'string')).map((found) => `Box<dynFn(${found.slice(0, -1).join(',')})->Result<${String(found.at(-1))},Failure<${errors}>>+Send+Sync>`);
+    }
     const unit = typeof type['unit'] === 'string' && type['library'] === undefined ? units.get(type['unit']) : undefined;
     if (unit === undefined) return `the test states no Rust type of ${JSON.stringify(type)}`;
     // GN-6aa: a callback inside a record is a box of the core trait with the lifetime of the struct.
@@ -197,6 +218,11 @@ test('every field of a record has in the core struct the type that the contract 
     if (['enum', 'record', 'variant', 'alias'].includes(String(unit['kind'])) && typeof unit['core_type'] === 'string') return [coreName(unit)];
     return `the test states no Rust type of ${JSON.stringify(type)}`;
   };
+  return { contract, core, units, expanded, coreName, holdsCallback, rust };
+}
+
+test('every field of a record has in the core struct the type that the contract states', () => {
+  const { core, units, expanded, coreName, holdsCallback, rust } = reader();
   const records = [...units.values()].filter((unit) => unit['kind'] === 'record' && typeof unit['core_type'] === 'string');
   assert.ok(records.length > 0, 'packages/rust/interface.json declares no record with a core type');
   const findings: string[] = [];
@@ -242,6 +268,88 @@ test('every field of a record has in the core struct the type that the contract 
       const optional = isObject(type) && 'optional' in type;
       const expected = (field['default'] !== undefined && !optional ? stated.map((text) => `Option<${text}>`) : stated).map(expanded);
       if (!expected.includes(expanded(actual))) findings.push(`${id}.${name} is ${actual.replaceAll(/\s+/gu, ' ')} in ${struct}, and the contract states ${expected.join(' or ')}`);
+    }
+  }
+  assert.deepEqual(findings, []);
+});
+
+test('every field of a case of a variant has in the core enum the type that the contract states', () => {
+  const { core, units, expanded, coreName, rust } = reader();
+  /** The units that a unit holds in a field directly or in an optional, which is how a variant holds itself (GN-6v). */
+  const held = (unit: Json): string[] => {
+    const fields = unit['kind'] === 'variant' ? list(unit['cases']).flatMap((kase) => list(kase['fields'])) : list(unit['fields']);
+    return fields.flatMap((field) => {
+      const type = isObject(field['type']) && 'optional' in field['type'] ? field['type']['optional'] : field['type'];
+      return isObject(type) && typeof type['unit'] === 'string' && type['library'] === undefined ? [type['unit']] : [];
+    });
+  };
+  const reaches = (from: string, target: string, seen: Set<string>): boolean => {
+    if (from === target) return true;
+    const unit = units.get(from);
+    if (unit === undefined || seen.has(from)) return false;
+    seen.add(from);
+    return held(unit).some((next) => reaches(next, target, seen));
+  };
+  const variants = [...units.values()].filter((unit) => unit['kind'] === 'variant' && typeof unit['core_type'] === 'string');
+  assert.ok(variants.length > 0, 'packages/rust/interface.json declares no variant with a core type');
+  const findings: string[] = [];
+  for (const unit of variants) {
+    const id = String(unit['id']);
+    const name = coreName(unit);
+    const body = bodies(core, 'enum', name)[0];
+    if (body === undefined) {
+      findings.push(`${id} names ${String(unit['core_type'])}, and packages/rust/src declares no pub enum of that name`);
+      continue;
+    }
+    const coreCases = new Map<string, Map<string, string>>();
+    for (const item of items(body)) {
+      const variant = /^(\w+)\s*(?:\{([\s\S]*)\})?$/u.exec(item);
+      if (variant === null) {
+        findings.push(`${id}: the enum ${name} has the item ${item.replaceAll(/\s+/gu, ' ')}, which is no unit and no struct variant`);
+        continue;
+      }
+      const fields = new Map<string, string>();
+      for (const part of items(variant[2] ?? '')) {
+        const field = /^(?:r#)?(\w+)\s*:\s*([\s\S]+)$/u.exec(part);
+        if (field === null) findings.push(`${id}: ${name}::${String(variant[1])} has the item ${part}, which is no field`);
+        else fields.set(String(field[1]), String(field[2]).replaceAll('\u2192', '->'));
+      }
+      coreCases.set(String(variant[1]), fields);
+    }
+    for (const kase of list(unit['cases'])) {
+      const caseName = upperCamel(String(kase['value']).split(/[_\s]+/u));
+      const coreFields = coreCases.get(caseName);
+      if (coreFields === undefined) {
+        findings.push(`${id}: the case ${String(kase['value'])} is no variant ${caseName} of ${name}`);
+        continue;
+      }
+      const fields = list(kase['fields']);
+      const names = fields.map((field) => words(field['name']).join('_'));
+      for (const field of coreFields.keys()) {
+        if (!names.includes(field)) findings.push(`${id}: ${name}::${caseName} has the field ${field}, which the case does not have`);
+      }
+      for (const field of fields) {
+        const fieldName = words(field['name']).join('_');
+        const actual = coreFields.get(fieldName);
+        if (actual === undefined) {
+          findings.push(`${id}: ${name}::${caseName} has no field ${fieldName}`);
+          continue;
+        }
+        const type = field['type'];
+        const optional = isObject(type) && 'optional' in type;
+        const inner = isObject(type) && 'optional' in type ? type['optional'] : type;
+        // GN-6v: a field that holds the variant again, directly or through units and optionals, is in a Box.
+        const boxed = isObject(inner) && typeof inner['unit'] === 'string' && inner['library'] === undefined && reaches(inner['unit'], id, new Set());
+        const stated = rust(inner);
+        if (typeof stated === 'string') {
+          findings.push(`${id}.${String(kase['value'])}.${fieldName}: ${stated}`);
+          continue;
+        }
+        const expected = stated.map((text) => (boxed ? `Box<${text}>` : text)).map((text) => (optional ? `Option<${text}>` : text)).map(expanded);
+        if (!expected.includes(expanded(actual))) {
+          findings.push(`${id}.${String(kase['value'])}.${fieldName} is ${actual.replaceAll(/\s+/gu, ' ')} in ${name}::${caseName}, and the contract states ${expected.join(' or ')}`);
+        }
+      }
     }
   }
   assert.deepEqual(findings, []);

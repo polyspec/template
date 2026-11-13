@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-rust-readme -->
-<!-- source-sha256: aa5d8834f169a789c12838720935f34329a17fc2ab0cbd0edac15b13137db2ba -->
+<!-- source-sha256: eba146b37813db8b664bd80f842caf54059c55ebae266496045c9f0f6981935f -->
 # polyspec-template
 
 [English](README.md).
@@ -41,7 +41,7 @@ assign 데이터는 crate가 다시 내보내는 crate `polyspec-json`의 JSON �
 | `AstProgram::new(EngineOptions<'static>)` | 로더, 호스트 함수, 제한, 구분자를 가진 AST program을 생성한다. 구분자 쌍이 아닌 구분자 옵션에는 kind `argument_delimiters`의 `TemplateError`를 돌려준다. `EngineOptions<'a>`는 로더를 `Box<dyn Loader + 'a>`로 담고, program이 로더를 보관하므로 lifetime `'static`의 옵션을 받는다. `artifact_refresh`는 `Option`이고 `None`은 `DEFAULT_ARTIFACT_REFRESH`다. |
 | `Engine::new(Program)` | AST 또는 generated program 하나에 위임하는 engine을 생성한다. Generated program은 module 파일이 아니라 `include!`로(`build.rs` 뒤의 `OUT_DIR`에서, 또는 commit한 파일에서) crate에 들어오므로 `cargo fmt`는 그 배치를 compiler에 맡기고 clippy가 이를 lint한다. |
 | `Engine::render(target, assign, &RenderOptions)` | 템플릿 이름 또는 파싱된 템플릿을 문자열로 렌더한다. `assign`은 변수를 담고 `define`은 템플릿 또는 HTML 항목을 제공한다. |
-| `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind`는 `&polyspec_json::Value`, `&OrderedMap`, `&Value`, `&BoundMap`을 한 번 검사하고 `BoundMap`을 반환한다. `&Value`는 map이거나 데이터 없음인 null이며(RT-4), 다른 타입의 값은 `data_unsupported_type`이다. `merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `render_bound`와 `prepare_bound`는 bound map을 assign으로 받고, `DefineData::Bound`는 그것을 정의 데이터로 준다. 둘 다 다시 binding하지 않는다(VAL-22). `BoundMap`은 `Send`이고 `Sync`다. 오류에는 template과 위치가 없다(ERR-14). |
+| `bind(input)`, `merge(&first, &second)`, `Engine::render_bound`, `Engine::prepare_bound` | `bind`는 `&polyspec_json::Value`, `&OrderedMap`, `&Value`, `&BoundMap`을 한 번 검사하고 `BoundMap`을 반환한다. `&Value`는 map이거나 데이터 없음인 null이며(RT-4), 다른 타입의 값은 `data_unsupported_type`이다. `merge`는 두 bound map을 합치며, `second`의 항목이 같은 key를 가진 `first`의 항목을 바꾼다. `render_bound`와 `prepare_bound`는 bound map을 assign으로 받고, `DefineInput`의 field `bound`는 그것을 정의 데이터로 준다. 둘 다 다시 binding하지 않는다(VAL-22). field `data`는 값을 주며, 둘 다 준 정의는 `data_unsupported_type`으로 실패한다. `BoundMap`은 `Send`이고 `Sync`다. 오류에는 template과 위치가 없다(ERR-14). |
 | `AstProgram::register(name, function)` | 호스트 함수 `Fn(&[Value], &FunctionContext) -> Result<Value, HostError>`를 등록한다. `Err("message".into())`는 렌더를 끝내고 `render` 호출자는 그 오류를 `RenderError::Callback`으로 바뀌지 않고 받으며(FUN-46), 반환값은 호스트 데이터와 같이 검사한다. safe 문자열 인자는 `Value::Str`로 도착한다(VAL-21). |
 | `AstProgram::render_values(target, OrderedMap, &RenderOptions)` | `Value`로 만든 root map을 렌더한다. Map은 `Value::Object` native object를 담을 수 있다. 숫자, 깊이, safe 문자열은 JSON 데이터와 같이 검사한다. |
 | `TemplateObject` | Native object. `member(key)`는 `Ok(Some(value))`, public field가 없으면 `Ok(None)`, 또는 `HostError`를 반환한다. `call(method, args)`는 public method가 없으면 `None`을 반환한다. |
