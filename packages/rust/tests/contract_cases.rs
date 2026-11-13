@@ -6,19 +6,21 @@
 //! The contract cases of contracts/core-cases.json (binding design K-1, G-5), one trial per case, `<group>::<id>`, run
 //! against the core. A case names its arguments by the parameter names of its member in packages/rust/interface.json; an
 //! instance is `{"new", "receiver", "args", "then"}`, a callback `{"callback": {"<member>": [rows]}}`, a function
-//! `{"function": [rows]}`, and a result is compared in the form of a case value. A form that this runner does not
-//! read fails its case; no case is skipped.
+//! `{"function": [rows]}`, and a result is compared in the form of a case value. A case of the value alias
+//! `template_value` is `{id, value, raises}`: its value enters through `value_in` as a binding describes it, and the kind
+//! is one of the `in_raises` of the alias (binding design U-7). A form that this runner does not read fails its case; no
+//! case is skipped.
 
 mod common;
 
-use binding_core::Io;
+use binding_core::{Handle, HostText, HostValue, HostValues, Io, Raised};
 use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
     ArtifactRefresh, AstProgram, BoundMap, ContractFunction, DefineData, DefineInput, EngineOptions, Env, Environment, FormatOptions,
     FsLoader, HostError, IndentUnit, Limits, LoadError, Loaded, Loader, MapLoader, OrderedMap, ParseOptions, RenderError, RenderOptions,
     RenderTarget, SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, Value, analyze, analyze_prefix, bind,
-    decode_template, encode_template, format, merge, parse, resolve_path,
+    decode_template, encode_template, format, merge, parse, resolve_path, value_in,
 };
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -841,18 +843,206 @@ fn trial(group: &str, case: &Json) -> Result<(), Failed> {
     }
 }
 
+/// The children of a container of a case value, which the core asks for by the handle of the container.
+enum Held {
+    /// The items of a list, or the `[key, value]` pairs of a map.
+    Items(Vec<Json>),
+    /// `{"kind": "list", "repeat": n, "value": v}`: the lists that are still around the value, each the one item of
+    /// the one around it.
+    Nested(u64, Json),
+}
+
+/// A case value as a binding describes it to `value_in` (VAL-23): a scalar by its value and a container by a handle.
+#[derive(Default)]
+struct CaseHost {
+    held: Vec<Held>,
+    /// The first form of the case value that this runner does not read.
+    problem: Option<String>,
+}
+
+impl CaseHost {
+    fn hold(&mut self, held: Held) -> Handle {
+        self.held.push(held);
+        Handle::new(u64::try_from(self.held.len()).expect("a count of containers"))
+    }
+
+    fn held(&self, handle: Handle) -> Option<&Held> {
+        let index = usize::try_from(handle.raw()).ok()?.checked_sub(1)?;
+        self.held.get(index)
+    }
+
+    fn unread(&mut self, value: &Json) -> HostValue {
+        self.problem.get_or_insert(format!("{value} is no case value of the alias"));
+        HostValue::Null
+    }
+
+    fn describe(&mut self, value: &Json) -> HostValue {
+        let kind = key(value, "kind").and_then(Json::as_str);
+        let content = key(value, "value");
+        match (kind, content) {
+            (Some("null"), None) => HostValue::Null,
+            (Some("bool"), Some(Json::Bool(flag))) => HostValue::Bool(*flag),
+            (Some("int"), Some(Json::Number(number))) => match number.as_i64() {
+                Some(number) => HostValue::Int(number),
+                None => self.unread(value),
+            },
+            (Some("float"), Some(Json::Number(number))) => match number.as_f64() {
+                Some(number) => HostValue::Float(number),
+                None => self.unread(value),
+            },
+            (Some("float"), Some(Json::Object(form))) => match (form.len(), form.get("float").and_then(Json::as_str)) {
+                (1, Some("nan")) => HostValue::Float(f64::NAN),
+                (1, Some("inf")) => HostValue::Float(f64::INFINITY),
+                (1, Some("-inf")) => HostValue::Float(f64::NEG_INFINITY),
+                _ => self.unread(value),
+            },
+            (Some("number"), Some(Json::String(literal))) => HostValue::Number(literal.clone()),
+            (Some("text"), Some(Json::String(text))) => HostValue::Text(HostText::Utf16(text.encode_utf16().collect())),
+            // G-5 of binding: the text and then one code unit that no well-formed text holds, an unpaired surrogate.
+            (Some("text"), Some(Json::Object(form))) => match (form.len(), form.get("ill_formed").and_then(Json::as_str)) {
+                (1, Some(text)) => HostValue::Text(HostText::Utf16(text.encode_utf16().chain([0xD800]).collect())),
+                _ => self.unread(value),
+            },
+            (Some("bytes"), Some(Json::Object(form))) => match (form.len(), form.get("hex").and_then(Json::as_str)) {
+                (1, Some(hex)) if hex.len() % 2 == 0 && hex.bytes().all(|digit| digit.is_ascii_hexdigit()) => HostValue::Bytes(
+                    (0..hex.len())
+                        .step_by(2)
+                        .map(|at| u8::from_str_radix(&hex[at..at + 2], 16).expect("two hex digits"))
+                        .collect(),
+                ),
+                _ => self.unread(value),
+            },
+            (Some("list"), Some(inner)) if key(value, "repeat").is_some() => match key(value, "repeat").and_then(Json::as_u64) {
+                Some(count) if count >= 1 => HostValue::List {
+                    handle: self.hold(Held::Nested(count - 1, inner.clone())),
+                    len: 1,
+                },
+                _ => self.unread(value),
+            },
+            (Some("list"), Some(Json::Array(items))) => HostValue::List {
+                len: u64::try_from(items.len()).expect("a count of items"),
+                handle: self.hold(Held::Items(items.clone())),
+            },
+            (Some("map"), Some(Json::Array(pairs))) => HostValue::Map {
+                len: u64::try_from(pairs.len()).expect("a count of entries"),
+                handle: self.hold(Held::Items(pairs.clone())),
+            },
+            _ => self.unread(value),
+        }
+    }
+}
+
+impl HostValues for CaseHost {
+    fn item(&mut self, list: Handle, index: u64) -> Result<HostValue, Raised> {
+        let item = match self.held(list) {
+            Some(Held::Items(items)) => usize::try_from(index).ok().and_then(|index| items.get(index)).cloned(),
+            Some(Held::Nested(0, value)) => Some(value.clone()),
+            Some(Held::Nested(left, value)) => {
+                let around = Held::Nested(left - 1, value.clone());
+                return Ok(HostValue::List {
+                    handle: self.hold(around),
+                    len: 1,
+                });
+            }
+            None => None,
+        };
+        Ok(match item {
+            Some(item) => self.describe(&item),
+            None => self.unread(&Json::Null),
+        })
+    }
+
+    fn entry(&mut self, map: Handle, index: u64) -> Result<(HostValue, HostValue), Raised> {
+        let pair = match self.held(map) {
+            Some(Held::Items(pairs)) => usize::try_from(index).ok().and_then(|index| pairs.get(index)).cloned(),
+            _ => None,
+        };
+        Ok(match pair.as_ref().and_then(Json::as_array).map(Vec::as_slice) {
+            Some([Json::String(name), value]) => (
+                HostValue::Text(HostText::Utf16(name.encode_utf16().collect())),
+                self.describe(value),
+            ),
+            _ => (self.unread(&Json::Null), HostValue::Null),
+        })
+    }
+
+    fn read(&mut self, value: Handle) -> Result<HostValue, Raised> {
+        Ok(self.unread(&Json::String(format!("the handle {}", value.raw()))))
+    }
+}
+
+/// A case of the value alias (U-7): `value_in` refuses its value with the kind of its `raises`.
+fn alias_case(case: &Json) -> Result<(), Failed> {
+    for name in case.as_object().into_iter().flat_map(serde_json::Map::keys) {
+        if !matches!(name.as_str(), "id" | "note" | "rule" | "value" | "raises") {
+            return fail(format!("a case of an alias has no key {name}"));
+        }
+    }
+    let raises = required(case, "raises")?;
+    let mut host = CaseHost::default();
+    let value = host.describe(required(case, "value")?);
+    let outcome = value_in(&mut host, value);
+    if let Some(problem) = host.problem {
+        return fail(problem);
+    }
+    match outcome {
+        Err(RenderError::Kind(error)) => {
+            let kind = error.code.as_str();
+            let actual = serde_json::json!({"kind": kind, "status": null, "category": kind_category(kind)});
+            if &actual == raises {
+                Ok(())
+            } else {
+                fail(format!("raises\n  actual {actual} ({})\nexpected {raises}", error.message))
+            }
+        }
+        Ok(value) => fail(format!("value_in gave {value:?}, expected {raises}")),
+        Err(error) => fail(format!("value_in failed: {error}")),
+    }
+}
+
+/// The variant of a kind is its words in UpperCamelCase (binding E-3).
+fn variant_of(kind: &str) -> String {
+    format!(
+        "polyspec_template::ErrorCode::{}",
+        kind.split('_')
+            .map(|word| word[..1].to_uppercase() + &word[1..])
+            .collect::<String>()
+    )
+}
+
+/// The kinds that `value_in` returns (VAL-23), which the alias `template_value` names in `in_raises` (U-7).
+const VALUE_IN_KINDS: [&str; 5] = [
+    "data_number_range",
+    "data_number_not_finite",
+    "data_invalid_utf8",
+    "data_unsupported_type",
+    "data_depth",
+];
+
+/// `in_raises` of the alias names exactly the kinds of `value_in`, and each of them has a case of the alias.
+fn in_raises_of_alias(in_raises: &[String], cases: &[Json]) -> Result<(), Failed> {
+    let mut expected: Vec<String> = VALUE_IN_KINDS.iter().map(|kind| variant_of(kind)).collect();
+    let mut declared = in_raises.to_vec();
+    expected.sort();
+    declared.sort();
+    if declared != expected {
+        return fail(format!("in_raises\n  actual {declared:?}\nexpected {expected:?}"));
+    }
+    for kind in VALUE_IN_KINDS {
+        let raised = |case: &Json| key(case, "raises").and_then(|raises| key(raises, "kind")).and_then(Json::as_str) == Some(kind);
+        if !cases.iter().any(raised) {
+            return fail(format!("no case of the alias raises {kind}"));
+        }
+    }
+    Ok(())
+}
+
 /// The kinds that the cases of a member raise are kinds of its `raises` in the contract; a case of another kind states
 /// a failure that the contract does not give the member (E-5).
 fn raises_of_member(member: &str, raises: &[String], cases: &[Json]) -> Result<(), Failed> {
     for case in cases {
         if let Some(kind) = key(case, "raises").and_then(|raises| key(raises, "kind")).and_then(Json::as_str) {
-            // The variant of a kind is its words in UpperCamelCase (binding E-3).
-            let variant = format!(
-                "polyspec_template::ErrorCode::{}",
-                kind.split('_')
-                    .map(|word| word[..1].to_uppercase() + &word[1..])
-                    .collect::<String>()
-            );
+            let variant = variant_of(kind);
             if !raises.contains(&variant) {
                 return fail(format!(
                     "a case of {member} raises {kind}, which the raises of the member do not name"
@@ -892,7 +1082,46 @@ fn main() {
     }
     let mut trials = Vec::new();
     let mut groups = Vec::new();
+    // U-7: the value alias, whose cases a row of `cases` names by `alias`; without the row the trial reports it.
+    let alias = "template_value";
+    let alias_unit = contract["units"]
+        .as_array()
+        .expect("units")
+        .iter()
+        .find(|unit| unit["id"] == alias)
+        .expect("the alias template_value");
+    let in_raises: Vec<String> = alias_unit["in_raises"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|kind| kind.as_str().expect("a variant").to_string())
+        .collect();
+    let alias_cases: Vec<Json> = contract["cases"]
+        .as_array()
+        .expect("cases")
+        .iter()
+        .filter(|row| row["alias"] == alias)
+        .flat_map(|row| {
+            assert_eq!(row["file"], "contracts/core-cases.json", "the file of the cases of {alias}");
+            assert_eq!(row["group"], alias, "the group of the cases of an alias has its id");
+            file[alias].as_array().cloned().unwrap_or_default()
+        })
+        .collect();
+    {
+        let cases = alias_cases.clone();
+        trials.push(Trial::test(format!("in_raises::{alias}"), move || {
+            in_raises_of_alias(&in_raises, &cases)
+        }));
+    }
+    for case in alias_cases {
+        let id = case["id"].as_str().expect("a case id").to_string();
+        trials.push(Trial::test(format!("{alias}::{id}"), move || alias_case(&case)));
+    }
+    groups.push(alias.to_string());
     for row in contract["cases"].as_array().expect("cases") {
+        if row.get("alias").is_some() {
+            continue;
+        }
         assert_eq!(
             row["file"], "contracts/core-cases.json",
             "the file of the cases of {}",
