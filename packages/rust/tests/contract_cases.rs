@@ -1176,8 +1176,8 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
     }
 }
 
-/// The members of a prepared render, which borrows its engine: `engine.prepare` and `engine.prepare_bound` with their
-/// `after` on the result, and `prepared_render.render` on a receiver that one of the two makes.
+/// The members of a prepared render, which borrows its engine: `engine.prepare` and `engine.prepare_bound`, and
+/// `prepared_render.render` on a receiver that one of the two makes.
 fn prepared(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
     let (maker, source) = if group == "prepared_render.render" {
         let receiver = required(case, "receiver")?;
@@ -1212,25 +1212,8 @@ fn prepared(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
             Err(error) => fail(format!("the preparation failed: {error}")),
         };
     }
-    let render = match made {
-        Ok(render) => render,
-        Err(error) => return Ok(Err(error)),
-    };
-    for observation in key(case, "after").and_then(Json::as_array).into_iter().flatten() {
-        if key(observation, "on") != Some(&Json::String("result".to_string()))
-            || key(observation, "call") != Some(&Json::String("prepared_render.render".to_string()))
-        {
-            return fail(format!(
-                "the runner observes only prepared_render.render on the result: {observation}"
-            ));
-        }
-        let expected = required(observation, "result")?;
-        match render.render() {
-            Ok(text) if expected == &Json::String(text.clone()) => {}
-            other => return fail(format!("after\n  actual {other:?}\nexpected {expected}")),
-        }
-    }
-    Ok(Ok(None))
+    // CNF-19: the prepared render that the member returns is observed by the cases of `prepared_render.render`.
+    Ok(made.map(|_render| None))
 }
 
 /// The expected result of a case as the runner writes a result: a template is read into the type of the core and
@@ -1258,8 +1241,9 @@ fn run_case(group: &str, case: &Json) -> Result<(), Failed> {
     if !unexpected.is_empty() {
         return fail(format!("calls that no row of a fixture answers: {unexpected:?}"));
     }
-    if key(case, "after").is_some() && !matches!(group, "engine.prepare" | "engine.prepare_bound") {
-        return fail("the runner observes no after of this member");
+    // CNF-19: a case names no `after`; a returned instance is observed by a case of its own member.
+    if key(case, "after").is_some() {
+        return fail("a case names no after: a returned instance is observed by a case of its own member");
     }
     match (outcome, key(case, "raises")) {
         (Ok(actual), None) => match (actual, key(case, "result")) {
