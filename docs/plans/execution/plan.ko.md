@@ -1,5 +1,5 @@
 <!-- doc-id: plan-execution -->
-<!-- source-sha256: 11087686f861bb6c6f7cefb5841776d713f949d5189bdf2b9637a406a5cf798a -->
+<!-- source-sha256: f00fba25a7b87512c2913054537afea05db974778e1a87732287d2ecce7a4057 -->
 # 실행 계획
 
 [English](/plans/execution/plan).
@@ -228,4 +228,4 @@ T27.1-9-1은 Kit 0.0.64의 선택 설치를 적용하고 네이티브 린트·�
 
 ## Wave 28 — Rust 코어와 바인딩
 
-의존: Wave 27. Rust crate가 런타임의 유일한 구현이고, binding이 `packages/rust/interface.json`에서 생성하는 바인딩이 언어 패키지를 대신하며, 언어 패키지는 각 바인딩이 공유 suite를 통과할 때까지 `legacy/`에 남는다(docs/spec/runtime.md#transition). compiler는 backend 하나씩 Rust, TypeScript, Python, PHP, Go 순서로 타입 있는 프로그램(docs/spec/compiler.md#typed-programs)으로 옮긴다. 각 단계는 backend를 옮기고, 그 생성 conformance runner와 생성 제어 흐름 검사를 선언 검사로 바꾸고, 생성 실행 문단에서 그 언어를 빼는 하나의 task다. 바인딩 패키지가 필요한 단계는 바인딩이 생성된 뒤(`make bindings`) 그 runner를 돌린다. T28.1은 고정 도구가 있는 기계에서 legacy PHP 확장의 header를 그 도구로 다시 만든다.
+의존: Wave 27. Rust crate가 런타임의 유일한 구현이고, binding이 `packages/rust/interface.json`에서 생성하는 바인딩이 언어 패키지를 대신하며, 언어 패키지는 각 바인딩이 공유 suite를 통과할 때까지 `legacy/`에 남는다(docs/spec/runtime.md#transition). compiler는 backend 하나씩 Rust, TypeScript, Python, PHP, Go 순서로 타입 있는 프로그램(docs/spec/compiler.md#typed-programs)으로 옮긴다. 각 단계는 backend를 옮기고, 그 생성 conformance runner와 생성 제어 흐름 검사를 선언 검사로 바꾸고, 생성 실행 문단에서 그 언어를 빼는 하나의 task다. 바인딩 패키지가 필요한 단계는 바인딩이 생성된 뒤(`make bindings`) 그 runner를 돌린다. T28.1은 고정 도구가 있는 기계에서 legacy PHP 확장의 header를 그 도구로 다시 만든다. T28.8에서 T28.11까지는 계약과 코어가 binding 8faad21의 check와 end-to-end check를 통과하게 한다. `make bindings`와 T28.4에서 T28.7까지의 backend가 그것을 필요로 한다. T28.4에서 T28.7까지와 T28.10은 binding의 function case 꼴(GN-13a)을 기다린다. 그 꼴이 없으면 binding generate가 계약을 거부한다.
