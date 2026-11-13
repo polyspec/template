@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: ae17d802b15c0fdc25bd8d807022dcecfaac0a2ffd452154a1feff262f75f0cf -->
+<!-- source-sha256: 2ebabdcb5e5e7bca1293b46bf84a09e348e042ef0b101da7974e66ae99b0ed66 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- PHP 8.4.27의 gen_stub.php와 고정 PHP-Parser 5.0.0으로 다시 만든 `legacy/packages/php-ext/src/polyspec_template_arginfo.h`는 PHP-Parser 5.9.0이 쓴 a0e3f22a의 header와 바이트 단위로 같다. 그 header로 `make lint-php-ext`와 `make test-php-ext`(152 tests)가 통과한다(T28.1).
 - `contracts/core-cases.json`은 Rust 코어의 계약 케이스를 담으며, `packages/rust/interface.json`의 공개 member마다 group이 하나 있고 계약의 `cases`가 그 group을 가리킨다. 케이스는 인스턴스를 그것을 만드는 member와 준비 단계로, host 코드의 로더를 행을 가진 callback 값으로, host 함수를 function 값으로 적으며, `packages/rust/tests/contract_cases.rs`가 `make test-rust`에서 각 케이스를 코어에 실행한다(CNF-19). Rust `bind`는 `&Value`를 받는다. map이거나 데이터 없음인 null이며, 다른 타입의 값은 `data_unsupported_type`이다(VAL-22, RT-4).
 - Rust `AstProgram::register`와 `register_class`는 식별자가 아니거나 내장 함수의 이름인 이름에 대해 `String`이 아니라 kind가 `argument_function_name`인 `TemplateError`를 돌려준다(ERR-15). `packages/rust/interface.json`에서 member의 `raises`는 코어가 그 member에서 돌려주는 kind를 적으며, `template_value`의 `in` 함수만 내는 kind는 적지 않는다(VAL-23). `register`와 `register_class`의 함수 parameter는 `host_function`이다. `function`이 PHP와 JavaScript의 예약어이기 때문이다.
 - `examples/showcase/adapters/rust/Cargo.lock`은 `polyspec-binding-core`와 `polyspec-json`을 루트 `Cargo.lock`의 commit에 고정한다. 그보다 오래된 commit에는 `binding_core::OutValues`가 없어서 `make lint-rust`가 예제 adapter를 컴파일하지 못했다.
