@@ -84,7 +84,8 @@ test('every literal default of an enum unit names the constant of the core that 
   assert.ok(items.length > 0, 'packages/rust/interface.json declares no literal default of an enum unit');
   const findings: string[] = [];
   for (const { where, item, unit } of items) {
-    const literal = (item['default'] as Json)['literal'];
+    const given = item['default'];
+    const literal = isObject(given) ? given['literal'] : undefined;
     const variant = list(unit['variants']).find((candidate) => candidate['value'] === literal);
     if (variant === undefined) {
       findings.push(`${where} declares ${JSON.stringify(literal)}, which is no value of the enum ${String(unit['id'])}`);
