@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 2f447dbb2256b992f75bdc7092f2c463f06c17147797af0d2ca0c3c0ce986183 -->
+<!-- source-sha256: 6a7cb6d4c2d9d5394194c021b61cfbfafba20f54f7ad73aedf978ae7107ced97 -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -575,3 +575,4 @@
 | T28.46 | `packages/language`의 TypeScript 포매터는 물린 FMT-9의 `indent: null` 대신 FMT-17과 FMT-18의 옵션, 즉 text인 `indent`와 `keepIndentation`을 받는다. 그 `FormatOptions`는 자기 타입이고, 명령의 `--indent none`은 `keepIndentation`을 설정하며, `docs/operations/editor-tools.md`와 `packages/language/README.md`가 이를 적는다. 원인: `packages/language/src/format.ts`는 `@polyspec/template-legacy`의 `FormatOptions`(`legacy/packages/ts/src/format-types.ts`, FMT-16)를 받는데 그 `indent`는 `string \| null`이고, `packages/language/tests/formatter-sdk.test.ts`는 legacy 패키지도 읽는 공유 fixture `tests/fixtures/formatter-sdk.json`을 그 형태로 준다. 그래서 포매터는 legacy 패키지의 타입과 fixture를 받는 동안 옵션을 바꿀 수 없다 | packages/language/src, packages/language/tests, docs/operations/editor-tools.md(.ko), packages/language/README.md(.ko), CHANGELOG.md CHANGELOG.ko.md | `make template-test-language` | [ ] |
 | T28.47 | `legacy/`의 패키지가 FMT-18의 옵션 `keepIndentation`을 받는다 | legacy/packages | `make text-absent FILE=docs/spec/formatting.md TEXT="implement it as it was"` | [-] cause: `legacy/`의 패키지는 이전 구현이고 그대로 남는다. 물린 FMT-9를 구현하고, `legacy/tests/cases`의 케이스가 그것을 인용하며, `docs/spec/formatting.md`의 FMT-9가 그렇게 적는다 |
 | T28.48 | `tests/scripts/python-toolchain.test.mts`의 시험 `make reads the Python environment without a shared BOOTSTRAP_NODE variable`은 `{ timeout: 5000 }` 없이 make dry run을 종료 상태와 출력만으로 판정한다. 원인: make dry run의 시간은 machine의 부하에 달려 있으므로(다른 실행 옆에서 dry run이 3초 걸렸다) 그 한도는 부하가 걸린 machine에서 올바른 Makefile을 실패시킨다 | tests/scripts/python-toolchain.test.mts, CHANGELOG.md CHANGELOG.ko.md | `make template-test-scripts` | [ ] |
+| T28.49 | `tests/scripts/browser-server.test.mts`의 browser 시험 `the browser test waits for a server that starts slowly`는 Playwright로 `tests/browser/render.spec.ts`를 실행한다. 이 시험은 Playwright의 test timeout 60000 ms가 결정하지 않고 server의 event와 page의 결과로 server의 시작을 판정한다. 원인: machine의 load가 20~36일 때 이 시험이 `render.spec.ts:88`에서 `Test timeout of 60000ms exceeded`로 실패했다. 시간 한도는 부하가 걸린 machine에서 올바른 server를 실패시킨다 | tests/scripts/browser-server.test.mts, tests/browser, CHANGELOG.md CHANGELOG.ko.md | `make template-test-scripts` | [ ] |

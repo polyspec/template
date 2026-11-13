@@ -144,7 +144,7 @@ final class ErrorCode
     /** A byte range of the public `Source` of an implementation is reversed or reaches beyond the source. */
     public const E_ARGUMENT_SOURCE_RANGE = 'E_ARGUMENT_SOURCE_RANGE';
 
-    /** An indent unit of `format` is not a run of spaces or one tab (FMT-9). */
+    /** An indent unit of `format` is not a run of spaces or one tab (FMT-17). */
     public const E_ARGUMENT_INDENT = 'E_ARGUMENT_INDENT';
 
     /** The text that `format` would return does not parse to the AST of the source (FMT-1). */
