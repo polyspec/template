@@ -20,15 +20,24 @@ use std::sync::Arc;
 use std::sync::{Mutex, PoisonError};
 
 /// Controls when compiled template artifacts are refreshed.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArtifactRefresh {
     /// Parse source on every load.
     Dev,
     /// Reuse an artifact until the loader version changes.
-    #[default]
     True,
     /// Keep the first artifact for the lifetime of the engine.
     False,
+}
+
+/// The refresh policy of an engine whose options name none (RT-40, `engine_options.artifact_refresh` of the interface
+/// contract): reuse an artifact until the loader version changes.
+pub const DEFAULT_ARTIFACT_REFRESH: ArtifactRefresh = ArtifactRefresh::True;
+
+impl Default for ArtifactRefresh {
+    fn default() -> ArtifactRefresh {
+        DEFAULT_ARTIFACT_REFRESH
+    }
 }
 
 /// AstProgram options.

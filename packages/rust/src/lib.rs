@@ -49,12 +49,12 @@ pub mod fault {
 pub use ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp};
 pub use ast_json::{decode_template, encode_template};
 pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
-pub use format::{DEFAULT_FORMAT_NAME, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
+pub use format::{DEFAULT_FORMAT_NAME, DEFAULT_TEMPLATE_BLOCKS, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
 pub use functions::{ContractFunction, Env, Environment, FunctionContext, HostFunction, contract_host_function};
 pub use loader::{FsLoader, LoadError, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{DefineEntry, Frame, Limits, LoopMeta, ParsedTemplate, RenderContext, RuntimeServices, Scope};
 pub use render::engine::{
-    ArtifactRefresh, AstProgram, DefineInput, Engine, EngineOptions, PreparedRender, Program, RenderOptions, RenderTarget,
+    ArtifactRefresh, AstProgram, DEFAULT_ARTIFACT_REFRESH, DefineInput, Engine, EngineOptions, PreparedRender, Program, RenderOptions, RenderTarget,
     defines_from_json, env_from_json,
 };
 pub use render::runtime_bindings::{RuntimeBindings, RuntimeEntry};

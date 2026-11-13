@@ -39,10 +39,9 @@ impl IndentUnit {
 }
 
 /// How template blocks indent their content.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TemplateBlocks {
     /// Template blocks add an indentation level like HTML elements.
-    #[default]
     Indent,
     /// Template blocks add no level.
     Flat,
@@ -61,6 +60,16 @@ pub struct FormatOptions {
     pub indent: Option<IndentUnit>,
     /// How template blocks indent their content.
     pub template_blocks: TemplateBlocks,
+}
+
+/// How template blocks indent when the options name no policy (`format_options.template_blocks` of the interface
+/// contract).
+pub const DEFAULT_TEMPLATE_BLOCKS: TemplateBlocks = TemplateBlocks::Indent;
+
+impl Default for TemplateBlocks {
+    fn default() -> TemplateBlocks {
+        DEFAULT_TEMPLATE_BLOCKS
+    }
 }
 
 /// The template name of a format whose options name none (`format_options.name` of the interface contract).
@@ -83,7 +92,7 @@ impl Default for FormatOptions {
             delimiters: None,
             range: None,
             indent: Some(IndentUnit("  ".to_string())),
-            template_blocks: TemplateBlocks::Indent,
+            template_blocks: DEFAULT_TEMPLATE_BLOCKS,
         }
     }
 }

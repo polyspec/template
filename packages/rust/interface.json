@@ -2602,7 +2602,8 @@
           },
           "default": {
             "literal": "indent"
-          }
+          },
+          "default_core": "polyspec_template::DEFAULT_TEMPLATE_BLOCKS"
         }
       ]
     },
@@ -2905,8 +2906,9 @@
             "unit": "artifact_refresh"
           },
           "default": {
-            "literal": "dev"
-          }
+            "literal": "true"
+          },
+          "default_core": "polyspec_template::DEFAULT_ARTIFACT_REFRESH"
         }
       ]
     },
