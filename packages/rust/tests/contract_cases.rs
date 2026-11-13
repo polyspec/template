@@ -841,10 +841,8 @@ impl Run {
     }
 
     fn engine_options(&self, value: Option<&Json>) -> Result<EngineOptions<'static>, Failed> {
-        let mut options = EngineOptions {
-            artifact_refresh: Some(ArtifactRefresh::Dev),
-            ..EngineOptions::default()
-        };
+        // CNF-19: an option that a case leaves out has the default of the contract, as in a generated binding test.
+        let mut options = EngineOptions::default();
         let Some(value) = value else {
             return Ok(options);
         };
