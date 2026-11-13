@@ -132,7 +132,7 @@ func TestDecodeTemplateFailsOnTextThatIsNotJSON(t *testing.T) {
 // TestTheEmbeddedSchemaIsTheContractSchema: the schema that the package embeds, ast/ast.schema.json, is
 // contracts/schema/ast.schema.json byte for byte.
 func TestTheEmbeddedSchemaIsTheContractSchema(t *testing.T) {
-	root := filepath.Join(casetest.Dir(t), "..", "..")
+	root := casetest.Root(t)
 	embedded, err := os.ReadFile(filepath.Join(root, "legacy", "packages", "go", "ast", "ast.schema.json"))
 	if err != nil {
 		t.Fatal(err)
@@ -209,7 +209,7 @@ func assertPublicDecoderRoundTrip(t *testing.T, fixture string) {
 
 // AST-10: the public native data fields have the canonical serialization keys.
 func TestPublicASTFieldsMatchTheSchema(t *testing.T) {
-	data, err := os.ReadFile(filepath.Join(casetest.Dir(t), "..", "..", "contracts", "schema", "ast.schema.json"))
+	data, err := os.ReadFile(filepath.Join(casetest.Root(t), "contracts", "schema", "ast.schema.json"))
 	if err != nil {
 		t.Fatal(err)
 	}

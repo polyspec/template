@@ -39,6 +39,12 @@ func Dir(t testing.TB) string {
 	}
 }
 
+// Root is the root of the repository, which holds legacy/tests/cases three levels up (Dir).
+func Root(t testing.TB) string {
+	t.Helper()
+	return filepath.Join(Dir(t), "..", "..", "..")
+}
+
 // List is every case directory <group>/<name> of tests/cases in the order of their ids; a tests/cases without a case
 // fails the test.
 func List(t testing.TB) []Case {

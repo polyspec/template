@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5ac440362d53dac964abe2f87384bd7be1eb6cd67ab1a40364b2821d58948c48 -->
+<!-- source-sha256: 2cc4f3f302ee8b8b424a3a3f9d8233b3a87c08d6438ec41297deac29b76f70e0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- legacy Go 모듈의 `casetest.Root`는 저장소 root이고, `legacy/packages/go/ast`의 schema 시험 둘은 `contracts/schema/ast.schema.json`과 내장 schema를 거기서 읽는다. 두 시험은 root를 `legacy/tests/cases`의 두 단계 위인 `legacy/`로 잡아 실패했다(T28.15).
 - `make lint-ts`와 `make test-ts`가 통과한다. legacy TypeScript 시험은 compiler를 `packages/compiler/src`에서 import한다. 아무도 읽지 않는 복사본 `legacy/tests/fixtures/public-types`를 지웠다. `examples/showcase/adapters/tsconfig.json`은 타입 있는 TypeScript 프로그램이 import하는 이름 `@polyspec/template`을 legacy 런타임으로 잇는다. TypeScript backend가 옮겨질 때까지(T28.4) 생성 검사의 임시 workspace가 legacy 런타임을 그 이름으로 복사하는 것과 같다. interface 계약의 오류 표는 type assertion 대신 JSON Schema로 읽고, 쓰이지 않는 import 둘을 지웠다(T28.14).
 - legacy PHP와 Python 시험이 phpcs와 ruff format을 통과한다. `legacy/` 경로로 줄 한도보다 길어진 PHP 네 줄과 Python 시험 일곱 파일을 나눴다(T28.13).
 - Cargo.lock은 `polyspec-binding-core`를 binding 8faad21로 고정하고, `packages/ts`, `packages/python`, `packages/php-ext`는 그 commit의 `binding scaffold`가 쓰는 것이다. binding-core의 feature `lock`과 macOS에서 PHP 확장을 link하는 `packages/php-ext/build.rs`다(CK-19, CK-20). kind `format_invariant`의 category는 `packages/rust/interface.json`에서 `internal`이다. 어떤 입력도 닿지 않는 formatter의 불변식(FMT-1)이므로 binding check는 더 이상 그 입력 case를 요구하지 않는다(T28.12).
