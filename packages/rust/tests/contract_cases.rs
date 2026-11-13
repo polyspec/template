@@ -846,7 +846,7 @@ impl Run {
         Ok(loader)
     }
 
-    fn engine_options(&self, value: Option<&Json>) -> Result<EngineOptions, Failed> {
+    fn engine_options(&self, value: Option<&Json>) -> Result<EngineOptions<'static>, Failed> {
         let mut options = EngineOptions {
             artifact_refresh: Some(ArtifactRefresh::Dev),
             ..EngineOptions::default()

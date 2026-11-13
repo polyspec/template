@@ -160,7 +160,7 @@ pub struct GeneratedProgram { program: AstProgram }
 ${API}
 impl GeneratedProgram {
     /// The program over the templates of the artifact; the loader of \`options\` is replaced by the templates.
-    pub fn new(options: EngineOptions) -> Result<GeneratedProgram, GeneratedError> {
+    pub fn new(options: EngineOptions<'static>) -> Result<GeneratedProgram, GeneratedError> {
         let mut loader = MapLoader::new();
         for (name, ast, lines) in TEMPLATES {
             let ast = polyspec_template::decode_template(ast)?;

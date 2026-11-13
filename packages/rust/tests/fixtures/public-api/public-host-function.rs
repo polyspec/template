@@ -9,7 +9,7 @@ pub fn host_function() -> HostFunction {
     Box::new(|_, context| Ok(Value::text(context.env.timezone.clone())))
 }
 
-pub fn configurations() -> (polyspec_template::EngineOptions, polyspec_template::RenderOptions) {
+pub fn configurations() -> (polyspec_template::EngineOptions<'static>, polyspec_template::RenderOptions) {
     use polyspec_template::{ArtifactRefresh, EngineOptions, Limits, RenderOptions};
     let _policies = [ArtifactRefresh::Dev, ArtifactRefresh::True, ArtifactRefresh::False];
     let engine = EngineOptions {

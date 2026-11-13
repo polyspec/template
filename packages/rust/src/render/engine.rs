@@ -40,11 +40,12 @@ impl Default for ArtifactRefresh {
     }
 }
 
-/// AstProgram options.
+/// AstProgram options. `'a` is the lifetime of the loader, the callback that the record `engine_options` of the
+/// interface contract holds (CNF-20).
 #[derive(Default)]
-pub struct EngineOptions {
+pub struct EngineOptions<'a> {
     /// Template loader; an empty map loader when absent.
-    pub loader: Option<Box<dyn Loader>>,
+    pub loader: Option<Box<dyn Loader + 'a>>,
     /// Host functions.
     pub functions: HashMap<String, HostFunction>,
     /// Limits; defaults when absent.
@@ -258,8 +259,9 @@ impl AstProgram {
         Ok((target_name, template))
     }
 
-    /// Creates an engine. A delimiter option that is not a delimiter pair is an argument error (ERR-13).
-    pub fn new(options: EngineOptions) -> Result<AstProgram, TemplateError> {
+    /// Creates an engine. A delimiter option that is not a delimiter pair is an argument error (ERR-13). The program
+    /// keeps the loader of the options, so the options hold a loader of the lifetime `'static`.
+    pub fn new(options: EngineOptions<'static>) -> Result<AstProgram, TemplateError> {
         let delimiters = match options.delimiters {
             Some(value) => parse_delimiters(&value)
                 .ok_or_else(|| TemplateError::argument(ErrorCode::ArgumentDelimiters, "", format!("{value:?} is not a delimiter pair")))?,
