@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `examples/showcase/adapters/rust/Cargo.lock` pins `polyspec-binding-core` and `polyspec-json` at the commits of the root `Cargo.lock`; at its older commits `binding_core::OutValues` did not exist, so `make lint-rust` failed to compile the adapter of the showcase.
 - The legacy Go module has the module path of its folder, `github.com/polyspec/template/legacy/packages/go`, and the Go backend of the compiler, the showcase adapter and the scripts import it by that path; `github.com/polyspec/template/packages/go` is the path of the binding module only.
 - An integer argument (`slice` start and length, `date` seconds) and a count (`truncate` n, `number` decimals, `round` d) is never truncated, rounded or clamped: a fraction is `E_RUNTIME_TYPE`, a negative count is `E_RUNTIME_TYPE` and a magnitude above 2^53 − 1 is `E_RUNTIME_LIMIT` (FUN-50). `number` and `round` write at most 100 decimals (FUN-20). A date text names a day of its month: `2025-02-29` and `2024-04-31` are no dates instead of the first day of the next month (FUN-37). The Rust implementation follows these rules; the other implementations are unchanged.
 - A `\uXXXX` escape of a surrogate that is not part of a surrogate pair is `E_PARSE_INVALID_ESCAPE` at that escape instead of U+FFFD (EXP-3); the Rust implementation follows the rule.
