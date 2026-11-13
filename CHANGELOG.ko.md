@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 5924b54f340ce6e324c2d3acebf9cd35704fdc666aa408f7b5e2797dbd89ed5a -->
+<!-- source-sha256: c0eecd957950aeb6f4fb990e677602d41b39c442a6a1995295eff88b8ce5fd56 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- Rust 식 parser는 이항 연산자를 precedence climbing으로 읽어, 여섯 단계마다 frame을 하나씩 쓰지 않고 모든 단계에 frame 하나를 쓴다. 그래서 중첩 한계(RT-34)의 식이 debug build에서 2 MiB stack의 thread로 parse된다. `parse::runtime_limit`, `analyze::runtime_limit`, `engine.load::runtime_limit`, `engine.prepare::runtime_limit` case는 `cargo test`가 시험마다 주는 그런 thread를 넘쳐 실행을 멈췄다. AST와 그 span, 오류는 바뀌지 않는다(T28.11).
 - Rust `ErrorCode`의 variant는 kind를 UpperCamelCase로 쓴 이름이다. 예: `parse_unterminated_tag`는 `ErrorCode::ParseUnterminatedTag`. 그래서 `packages/rust/interface.json`의 `errors.kinds` variant를 snake_case로 쓰면 그 kind가 된다(binding E-3). 이름이 `E_<KIND>`일 때 binding 8faad21의 binding check는 kind를 `e_<kind>`로 얻었고, `contracts/core-cases.json`의 어떤 case도 그 kind를 내지 않아 CK-22를 282번 보고했다. 이제 6번 보고한다(T28.8).
 - PHP 8.4.27의 gen_stub.php와 고정 PHP-Parser 5.0.0으로 다시 만든 `legacy/packages/php-ext/src/polyspec_template_arginfo.h`는 PHP-Parser 5.9.0이 쓴 a0e3f22a의 header와 바이트 단위로 같다. 그 header로 `make lint-php-ext`와 `make test-php-ext`(152 tests)가 통과한다(T28.1).
 - `contracts/core-cases.json`은 Rust 코어의 계약 케이스를 담으며, `packages/rust/interface.json`의 공개 member마다 group이 하나 있고 계약의 `cases`가 그 group을 가리킨다. 케이스는 인스턴스를 그것을 만드는 member와 준비 단계로, host 코드의 로더를 행을 가진 callback 값으로, host 함수를 function 값으로 적으며, `packages/rust/tests/contract_cases.rs`가 `make test-rust`에서 각 케이스를 코어에 실행한다(CNF-19). Rust `bind`는 `&Value`를 받는다. map이거나 데이터 없음인 null이며, 다른 타입의 값은 `data_unsupported_type`이다(VAL-22, RT-4).

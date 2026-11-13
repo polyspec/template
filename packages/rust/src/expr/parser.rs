@@ -54,6 +54,33 @@ fn multiplicative_op(kind: TokenType) -> Option<BinaryOp> {
     }
 }
 
+/// The operator that a token names at one level of the binary operators, if any.
+type OperatorOf = fn(TokenType) -> Option<BinaryOp>;
+
+/// The levels of the binary operators from the lowest precedence to the highest (EXP-10), each with whether its
+/// operators chain: `||`, `&&`, equality, comparison, additive and multiplicative.
+const BINARY_LEVELS: [(OperatorOf, bool); 6] = [
+    (or_op, true),
+    (and_op, true),
+    (equality_op, false),
+    (comparison_op, false),
+    (additive_op, true),
+    (multiplicative_op, true),
+];
+
+/// The level of a binary operator token and its operator.
+fn binary_operator(kind: TokenType) -> Option<(usize, BinaryOp)> {
+    BINARY_LEVELS
+        .iter()
+        .enumerate()
+        .find_map(|(level, (operator, _))| operator(kind).map(|op| (level, op)))
+}
+
+/// Whether the operators of a level chain; a level outside the table does not.
+fn level_chains(level: usize) -> bool {
+    BINARY_LEVELS.get(level).is_some_and(|(_, chains)| *chains)
+}
+
 fn starts_expression(kind: TokenType) -> bool {
     matches!(
         kind,
@@ -255,7 +282,7 @@ impl<'a> ExpressionParser<'a> {
 
     fn parse_coalesce(&mut self) -> Result<Expr, TemplateError> {
         let start = self.peek()?.start;
-        let left = self.parse_or()?;
+        let left = self.parse_binary(0)?;
         if self.peek()?.kind != TokenType::Coalesce {
             return Ok(left);
         }
@@ -283,44 +310,17 @@ impl<'a> ExpressionParser<'a> {
         })
     }
 
-    fn parse_or(&mut self) -> Result<Expr, TemplateError> {
-        self.parse_binary_level(Self::parse_and, or_op, true)
-    }
-
-    fn parse_and(&mut self) -> Result<Expr, TemplateError> {
-        self.parse_binary_level(Self::parse_equality, and_op, true)
-    }
-
-    fn parse_equality(&mut self) -> Result<Expr, TemplateError> {
-        self.parse_binary_level(Self::parse_comparison, equality_op, false)
-    }
-
-    fn parse_comparison(&mut self) -> Result<Expr, TemplateError> {
-        self.parse_binary_level(Self::parse_additive, comparison_op, false)
-    }
-
-    fn parse_additive(&mut self) -> Result<Expr, TemplateError> {
-        self.parse_binary_level(Self::parse_multiplicative, additive_op, true)
-    }
-
-    fn parse_multiplicative(&mut self) -> Result<Expr, TemplateError> {
-        self.parse_binary_level(Self::parse_unary, multiplicative_op, true)
-    }
-
-    /// One precedence level of the binary operators: operands of the next level joined by the operators that `operator`
-    /// names. The operators of a level that chains join from the left; an operator of a level that does not chain
-    /// (associativity none, EXP-10) is unexpected after the second operand.
-    fn parse_binary_level(
-        &mut self,
-        next: fn(&mut Self) -> Result<Expr, TemplateError>,
-        operator: fn(TokenType) -> Option<BinaryOp>,
-        chains: bool,
-    ) -> Result<Expr, TemplateError> {
+    /// The binary operators of the levels from `min` up, with their operands (EXP-10): precedence climbing over
+    /// [`BINARY_LEVELS`]. Each operand is a unary expression, and the right operand of an operator takes the operators
+    /// of the higher levels, so the operators of a level that chains join from the left, and an operator of a level that
+    /// does not chain (associativity none) is unexpected after the second operand. One frame serves every level, so a
+    /// nested expression at the depth limit (RT-34) needs a few frames for each parenthesis, not one for each level.
+    fn parse_binary(&mut self, min: usize) -> Result<Expr, TemplateError> {
         let start = self.peek()?.start;
-        let mut left = next(self)?;
-        while let Some(op) = operator(self.peek()?.kind) {
+        let mut left = self.parse_unary()?;
+        while let Some((level, op)) = binary_operator(self.peek()?.kind).filter(|(level, _)| *level >= min) {
             self.next_token()?;
-            let right = next(self)?;
+            let right = self.parse_binary(level + 1)?;
             let end = self.end();
             left = Expr::Binary {
                 op,
@@ -328,12 +328,11 @@ impl<'a> ExpressionParser<'a> {
                 right: Box::new(right),
                 span: self.span(start, end),
             };
-            if !chains {
+            if !level_chains(level) {
                 let following = self.peek()?;
-                if operator(following.kind).is_some() {
+                if binary_operator(following.kind).is_some_and(|(next, _)| next == level) {
                     return Err(self.unexpected(&following));
                 }
-                break;
             }
         }
         Ok(left)
