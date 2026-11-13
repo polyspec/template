@@ -296,7 +296,7 @@
       },
       {
         "variant": "polyspec_template::ErrorCode::FormatInvariant",
-        "category": "value"
+        "category": "internal"
       },
       {
         "variant": "polyspec_template::ErrorCode::FormatHtml",
