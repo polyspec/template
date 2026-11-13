@@ -2,3 +2,5 @@ go 1.27.3
 
 use ./legacy/packages/go
 use ./examples/showcase/adapters/go
+
+use ./packages/go

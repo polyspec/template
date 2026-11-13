@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `go.work` uses the binding module `packages/go`, which `make lint-go` lints; until `make bindings` writes its Go files the module has none, so golangci-lint and deadcode of `packages/go` fail (T28.16).
 - `casetest.Root` of the legacy Go module is the root of the repository, and the two schema tests of `legacy/packages/go/ast` read `contracts/schema/ast.schema.json` and the embedded schema from it; they took the root as two levels above `legacy/tests/cases`, which is `legacy/`, and failed (T28.15).
 - `make lint-ts` and `make test-ts` pass: the legacy TypeScript tests import the compiler from `packages/compiler/src`; the unread copy `legacy/tests/fixtures/public-types` is deleted; `examples/showcase/adapters/tsconfig.json` maps `@polyspec/template`, the name that the typed TypeScript programs import, to the legacy runtime, as the temporary workspaces of the generated checks copy it under that name until the TypeScript backend moves (T28.4); the error table of the interface contract is read through a JSON Schema instead of a type assertion, and two unused imports are gone (T28.14).
 - The legacy PHP and Python tests pass phpcs and ruff format: four PHP lines and seven Python test files that the paths of `legacy/` had made longer than the line limit are split (T28.13).

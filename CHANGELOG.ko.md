@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 2cc4f3f302ee8b8b424a3a3f9d8233b3a87c08d6438ec41297deac29b76f70e0 -->
+<!-- source-sha256: 3ec52991041009ad4268ece4290d7425c276640c9c3efbb0ff31392a417cd60d -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `go.work`는 `make lint-go`가 lint하는 바인딩 모듈 `packages/go`를 쓴다. `make bindings`가 Go 파일을 쓰기 전까지 그 모듈에는 Go 파일이 없어서 `packages/go`의 golangci-lint와 deadcode가 실패한다(T28.16).
 - legacy Go 모듈의 `casetest.Root`는 저장소 root이고, `legacy/packages/go/ast`의 schema 시험 둘은 `contracts/schema/ast.schema.json`과 내장 schema를 거기서 읽는다. 두 시험은 root를 `legacy/tests/cases`의 두 단계 위인 `legacy/`로 잡아 실패했다(T28.15).
 - `make lint-ts`와 `make test-ts`가 통과한다. legacy TypeScript 시험은 compiler를 `packages/compiler/src`에서 import한다. 아무도 읽지 않는 복사본 `legacy/tests/fixtures/public-types`를 지웠다. `examples/showcase/adapters/tsconfig.json`은 타입 있는 TypeScript 프로그램이 import하는 이름 `@polyspec/template`을 legacy 런타임으로 잇는다. TypeScript backend가 옮겨질 때까지(T28.4) 생성 검사의 임시 workspace가 legacy 런타임을 그 이름으로 복사하는 것과 같다. interface 계약의 오류 표는 type assertion 대신 JSON Schema로 읽고, 쓰이지 않는 import 둘을 지웠다(T28.14).
 - legacy PHP와 Python 시험이 phpcs와 ruff format을 통과한다. `legacy/` 경로로 줄 한도보다 길어진 PHP 네 줄과 Python 시험 일곱 파일을 나눴다(T28.13).
