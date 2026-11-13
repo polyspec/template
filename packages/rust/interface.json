@@ -3638,7 +3638,8 @@
               "type": {
                 "unit": "bound_map"
               },
-              "required": true
+              "required": true,
+              "core": "&"
             },
             {
               "name": [
@@ -3869,7 +3870,8 @@
               "type": {
                 "unit": "bound_map"
               },
-              "required": true
+              "required": true,
+              "core": "&"
             },
             {
               "name": [
@@ -4309,7 +4311,8 @@
               "type": {
                 "unit": "bound_map"
               },
-              "required": true
+              "required": true,
+              "core": "&"
             },
             {
               "name": [
@@ -4318,7 +4321,8 @@
               "type": {
                 "unit": "bound_map"
               },
-              "required": true
+              "required": true,
+              "core": "&"
             }
           ],
           "returns": {

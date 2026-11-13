@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 804ba661f8e564d285c0dfac3b5637b19146cbdb33adfd6f360b65b5ec16a413 -->
+<!-- source-sha256: c727ef922fdd0c4fc15540ad431dc7d32d1fd5910c7fcddc9df843a143d0281e -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- 클래스 단위 `bound_map`의 매개변수는 코어가 그것을 빌리는 방식 `core: "&"`를 명시한다(T28.37, binding CK-67, GN-6h). `engine.render_bound`와 `engine.prepare_bound`의 `assign`, `merge`의 `first`와 `second`이며, 코어는 이들을 `&BoundMap`으로 받는다. 계약이 빌림을 명시하지 않아 계약 검사가 네 매개변수에 CK-67을 보고했다. `tests/scripts/class-borrow.test.mts`는 클래스 단위의 모든 매개변수가 `core`를 명시하고, 코어 경로의 이름을 가진 `packages/rust/src`의 각 `pub fn`이 그 매개변수를 그 형태로 받을 것을 요구한다.
 - `packages/rust/interface.json`의 value alias `template_value`는 `value_in`이 돌려주는 kind인 data_number_range, data_number_not_finite, data_invalid_utf8, data_unsupported_type, data_depth를 `in_raises`에 적고, `cases`의 행 하나가 `alias`로 가리키는 `contracts/core-cases.json`의 group `template_value`는 kind마다 케이스 `{id, value, raises}` 하나를 담는다. 계약은 `engine.render`처럼 alias를 받는 member에 대해 이 kind를 어디에도 적지 않았다. 그 member의 `raises`는 자기 경로의 kind만 담는다. `packages/rust/tests/contract_cases.rs`는 각 케이스를 `value_in`으로 실행하고, `in_raises`가 그 다섯 kind를 적고 각 kind에 케이스가 있는지를 `in_raises::template_value`로 확인한다(CNF-19).
 - enum field인 `format_options`의 `template_blocks`와 `engine_options`의 `artifact_refresh`는 `default_core`에 상수 `polyspec_template::DEFAULT_TEMPLATE_BLOCKS`와 `polyspec_template::DEFAULT_ARTIFACT_REFRESH`를 적고, `TemplateBlocks`와 `ArtifactRefresh`의 `Default`는 그 상수를 돌려준다(binding GN-6i, U-2). 계약은 `artifact_refresh`에 `{literal: "dev"}`를 선언했지만 RT-40과 코어는 옵션이 정책을 정하지 않은 엔진에 `true`를 쓴다. 그래서 생성된 바인딩은 load마다 모든 템플릿을 다시 파싱했을 것이다. 이제 기본값은 `{literal: "true"}`다. `tests/scripts/default-core.test.mts`는 enum unit의 모든 `{literal}` 기본값이, 선언이 그 값의 variant인 상수를 적기를 요구한다(T28.31).
 - `tests/scripts/lint-rust-workspaces.test.mts`는 `make lint-rust`의 step이 넘기는 모든 `--exclude`가 그 step의 Cargo workspace의 package를 적기를 요구한다. recipe는 root workspace의 binding crate를 제외하는데, kit의 lint utility는 같은 인자를 `examples/showcase/adapters/rust`의 step에도 넘기고, cargo는 그 package가 없다고 경고한다. kit이 한 workspace의 step에 인자를 주는 방법을 제공할 때까지 이 시험은 실패한다(polyspec/kit#36).
