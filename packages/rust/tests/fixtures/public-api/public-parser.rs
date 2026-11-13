@@ -1,16 +1,14 @@
-pub fn public_parser() -> Result<polyspec_template::Template, polyspec_template::RequestError> {
-    let options = polyspec_template::ParseOptions { delimiters: Some("[]".into()) };
-    let analysis: polyspec_template::TemplateAnalysis = polyspec_template::analyze(b"hello", "page.tpl", &options)?;
-    let _: Vec<polyspec_template::SyntaxTag> = analysis.tags;
-    polyspec_template::parse(b"hello", "page.tpl", &options)
+use polyspec_template::{ErrorCode, ParseOptions, SyntaxTag, Template, TemplateAnalysis, TemplateError, analyze, parse};
+
+pub fn public_parser() -> Result<Template, TemplateError> {
+    let options = ParseOptions { delimiters: Some("[]".into()) };
+    let analysis: TemplateAnalysis = analyze(b"hello", "page.tpl", &options)?;
+    let _: Vec<SyntaxTag> = analysis.tags;
+    parse(b"hello", "page.tpl", &options)
 }
 
-pub fn argument_error() -> polyspec_template::RequestError {
-    let error = polyspec_template::ArgumentError { message: "invalid option".into() };
+pub fn argument_error() -> TemplateError {
+    let error = TemplateError::without_position(ErrorCode::ArgumentDelimiters, "page.tpl", "invalid option");
     let _: &str = &error.message;
-    polyspec_template::RequestError::Argument(error)
-}
-
-pub fn template_error(error: polyspec_template::TemplateError) -> polyspec_template::RequestError {
-    polyspec_template::RequestError::Template(error)
+    error
 }

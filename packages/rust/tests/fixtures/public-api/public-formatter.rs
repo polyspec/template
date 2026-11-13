@@ -1,7 +1,7 @@
-use polyspec_template::{FormatError, FormatErrorReason, FormatOptions, Formatted, IndentUnit, TemplateBlocks, format};
+use polyspec_template::{ErrorCode, FormatOptions, Formatted, IndentUnit, TemplateBlocks, TemplateError, format};
 
-pub fn public_formatter() -> Result<Formatted, FormatError> {
-    let _: FormatErrorReason = FormatErrorReason::Parse;
+pub fn public_formatter() -> Result<Formatted, TemplateError> {
+    let _: ErrorCode = ErrorCode::FormatInvariant;
     let options = FormatOptions {
         indent: Some(IndentUnit::new("  ").expect("valid indent")),
         template_blocks: TemplateBlocks::Indent,

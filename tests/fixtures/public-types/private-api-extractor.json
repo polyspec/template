@@ -1,15 +1,15 @@
 {
   "extends": "../../../legacy/packages/ts/api-extractor.json",
-  "mainEntryPointFilePath": "<projectFolder>/../../tests/fixtures/public-types/private-base.d.ts",
+  "mainEntryPointFilePath": "<projectFolder>/../../../tests/fixtures/public-types/private-base.d.ts",
   "compiler": {
     "overrideTsconfig": {
       "files": [
-        "../../tests/fixtures/public-types/private-base.d.ts"
+        "../../../tests/fixtures/public-types/private-base.d.ts"
       ]
     }
   },
   "docModel": {
     "enabled": true,
-    "apiJsonFilePath": "<projectFolder>/../../var/report/public-types-negative.api.json"
+    "apiJsonFilePath": "<projectFolder>/../../../var/report/public-types-negative.api.json"
   }
 }

@@ -31,7 +31,7 @@ const ROW = /^\| `([a-z][a-z0-9_]*)` \| (.+?) \| .+ \|$/;
 export function parseCatalog(text: string): CatalogCode[] {
   const codes: CatalogCode[] = [];
   text.split('\n').forEach((line, index) => {
-    if (!/^\| `[a-z]/.test(line)) return;
+    if (!/^\| `[a-z][a-z0-9_]*` \|/.test(line)) return;
     const match = ROW.exec(line);
     if (!match?.[1] || !match[2]) throw new Error(`${CATALOG}:${index + 1}: the row ${JSON.stringify(line)} is no | code | condition | position | row`);
     codes.push({ code: legacyName(match[1]), kind: match[1], condition: match[2] });

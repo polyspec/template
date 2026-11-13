@@ -36,6 +36,11 @@ test('a malformed code row, a repeated code or a catalog without codes fails the
   assert.throws(() => parseCatalog('| Code | Condition | Position |\n'), /names no code/);
 });
 
+test('a row whose first cell is no code identifier, such as a point of ERR-16, is no code row', { timeout: 10_000 }, () => {
+  assert.deepEqual(parseCatalog('| `a` | b | c |\n| `template.internal` | branch | `internal` (ERR-13) |\n'),
+    [{ code: 'E_A', kind: 'a', condition: 'b' }]);
+});
+
 test('the Go identifier of each code is the constant that the Go package declares for it', { timeout: 10_000 }, () => {
   const declared = new Map([...readFileSync(path.join(ROOT, 'legacy/packages/go/errs/errs.go'), 'utf8').matchAll(/(\w+)\s+Code = "(E_\w+)"/g)]
     .map(match => [match[2], match[1]]));
