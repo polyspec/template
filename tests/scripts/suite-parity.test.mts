@@ -145,3 +145,13 @@ test('a verifying CI job runs every later step after a failing step, and a make 
   }
 });
 
+
+// The Rust sources are in the form of rustfmt, which a review cannot judge by reading: fmt-check checks every crate of the
+// root workspace, the binding packages included, with `cargo fmt --all --check`, as the fmt-check of the other polyspec
+// libraries does, and the full suite runs it; no narrower target checks the crate of the core alone (T28.27).
+test('the full suite checks the form of every crate of the root workspace with cargo fmt', () => {
+  const makefile = read('Makefile');
+  assert.ok(CHECK_TARGETS.includes('fmt-check'), 'CHECK_TARGETS names fmt-check');
+  assert.match(makefile, /^fmt-check:.*\n\t\$\(CARGO\) fmt --all --check\n/mu, 'fmt-check runs $(CARGO) fmt --all --check');
+  assert.doesNotMatch(makefile, /\$\(CARGO\) fmt -p /u, 'no target checks the format of one crate of the root workspace');
+});
