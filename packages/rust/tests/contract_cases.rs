@@ -143,6 +143,7 @@ fn json_text(value: &Json) -> Result<String, Failed> {
         ("bool", Some(Json::Bool(flag))) => Ok(flag.to_string()),
         ("number", Some(Json::String(literal))) => Ok(literal.clone()),
         ("text", Some(text @ Json::String(_))) => Ok(text.to_string()),
+        ("text", Some(Json::Object(form))) => ill_formed_text(form),
         ("list", Some(Json::Array(items))) => Ok(format!(
             "[{}]",
             items.iter().map(json_text).collect::<Result<Vec<_>, _>>()?.join(",")
@@ -155,6 +156,21 @@ fn json_text(value: &Json) -> Result<String, Failed> {
             Ok(format!("{{{}}}", members.join(",")))
         }
         _ => fail(format!("{value} is no json_value of a case")),
+    }
+}
+
+/// The JSON string of a text that is not well formed, `{"ill_formed": "<text>"}` (G-5 of binding): the text and then
+/// the escape of an unpaired surrogate, a code unit that no well-formed text holds (VAL-12).
+fn ill_formed_text(form: &serde_json::Map<String, Json>) -> Result<String, Failed> {
+    match (form.len(), form.get("ill_formed")) {
+        (1, Some(text @ Json::String(_))) => {
+            let quoted = text.to_string();
+            match quoted.strip_suffix('"') {
+                Some(open) => Ok(format!("{open}\\ud800\"")),
+                None => fail(format!("{quoted} is no JSON string")),
+            }
+        }
+        _ => fail(format!("{} is no text of a case", Json::Object(form.clone()))),
     }
 }
 
