@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f3c423caec4f97ddcb930018a018b7f2405895202ac68b6263e9c7c885e6d0d9 -->
+<!-- source-sha256: 6072a4d5903c7617512dfb4664a33093eb5c29f4fd9c1885408305b0b0e896a3 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `examples/showcase/adapters/rust/Cargo.lock`은 `polyspec-binding-core`를 931645f에, `polyspec-json`을 73d2db9에 고정한다. root `Cargo.lock`의 commit이다(binding CK-20). 그래서 `make lint-rust`가 showcase workspace에서 코어를 컴파일한다. 전에는 binding-core 8faad21에 대해 `fault::point!`의 E0433으로 실패했다. `tests/scripts/cargo-lock-pins.test.mts`는 추적되는 모든 `Cargo.lock`이 root lock의 git package를 같은 commit에 고정하기를 요구한다(T28.24).
 - `format_options`의 field `name`은 `default_core`에 값이 `template.tpl`인 상수 `polyspec_template::DEFAULT_FORMAT_NAME`을 적는다(binding GN-6i, U-2). 코어 field `FormatOptions::name`은 `Option<String>`이다. option이 name을 주지 않으면 `format`과 `format_bytes`는 source의 오류를 그 상수 이름으로 보고한다. 그래서 생성된 바인딩은 호출자가 빼 둔 name에 `None`을 넘기고 코어만 그 값을 정한다. `tests/scripts/default-core.test.mts`는 scalar의 모든 `{literal}`·`{const}` 기본값이 그런 상수를 적기를 요구한다(T28.23).
 - `Cargo.lock`은 `polyspec-binding-core`를 binding 931645f에 고정하고(CK-20), 바인딩 패키지는 931645f의 `binding scaffold`가 쓰는 그대로이다(CK-19). 각 `src/lib.rs`는 rustfmt 꼴이고, `packages/go/internal/ffi`의 manifest는 scaffold를 따른다. binding check, `cargo fmt --all --check`, `make layout-check`는 아무것도 보고하지 않는다(T28.22).
 - Rust 코어가 인터페이스 계약 꼴의 host 함수를 받는다. `ContractFunction`은 `Box<dyn Fn(&[Value], &Environment) -> Result<Value, binding_core::Failure<ErrorCode>> + Send + Sync>`(binding GN-6d)이고, `Environment`는 계약의 record `environment`(`timezone`, `now`)이다. `packages/rust/interface.json`에서 `engine.register`와 `engine.register_class`의 코어 경로인 `AstProgram::register_function`과 `AstProgram::register_class_function`은 `contract_host_function`이 만드는 runtime의 `HostFunction`으로 그것을 등록한다. `Failure::Kind`는 그 code의 binding 실패(VAL-19)이고, `Failure::Raised`와 `Failure::Callback`은 호출자에게 그대로 간다(FUN-46). `tests/contract_cases.rs`는 함수 fixture를 그 꼴로 등록한다(T28.21).
