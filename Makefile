@@ -173,8 +173,10 @@ lint-ts: ## Lint the TypeScript: oxlint and knip, the type check of each tsconfi
 	$(NODE) $(KIT)/lint-ts.$(KIT_EXT)
 lint-go: ## Lint the Go: golangci-lint and deadcode -test in each Go module; offline
 	$(NODE) $(KIT)/lint-go.$(KIT_EXT)
+# The binding crates are packages of the root workspace alone, so only the step of that workspace gets their exclusion
+# (--workspace-args, kit K1195): cargo warns of an excluded package that a workspace does not hold (T28.30).
 lint-rust: ## Lint the Rust: cargo clippy in each Cargo workspace, without the binding crates (lint-bindings)
-	$(NODE) $(KIT)/lint-rust.$(KIT_EXT) --locked $(foreach crate,$(BINDING_CRATES),--exclude $(crate))
+	$(NODE) $(KIT)/lint-rust.$(KIT_EXT) --locked --workspace-args . $(foreach crate,$(BINDING_CRATES),--exclude $(crate))
 lint-php: ## Lint the PHP: phpcs, and PHPStan on each Composer package; offline
 	$(NODE) $(KIT)/lint-php.$(KIT_EXT) --memory-limit=-1
 lint-python: ## Lint the Python: ruff check, ruff format --check and vulture on each package; offline

@@ -9,6 +9,8 @@ Use the latest stable release that supports the declared runtime range. "Latest"
 
 A registry dependency is a direct dependency that a registry resolves: an entry of `dependencies` or `devDependencies` of the root `package.json`, or of `require` or `require-dev` of a Composer manifest: the root `composer.json`, `legacy/packages/php-ext/composer.json` and `legacy/packages/cli/php/composer.json`. The root `package.json` is the only npm manifest that declares dependencies: it holds the development tools of every package, and the packages of `packages/` declare only their runtime dependencies. A `file:`, `link:` or `workspace:` dependency is a package of this repository, and `php`, `ext-*`, `lib-*` and `composer-*` are platform requirements. No registry resolves them, so "latest stable" has no meaning for them.
 
+`@polyspec/kit` is no registry dependency: `package.json` pins the address of its release asset and `package-lock.json` its integrity. It is at 0.0.112, the newest release of kit. The pin moves with each release of kit that the repository takes; a release older than 0.0.111 is not taken again, because `make lint-rust` gives the exclusion of the binding crates to the step of the root Cargo workspace alone with `--workspace-args` of that release (kit K1195), which `tests/scripts/lint-rust-workspaces.test.mts` protects.
+
 ## Exceptions
 
 An older stable release is recorded in this section. Each record identifies a registry dependency by its manifest, the root `package.json` or a Composer manifest, and contains the reproduced incompatibility, the condition for removing the pin and the tests that protect that condition.

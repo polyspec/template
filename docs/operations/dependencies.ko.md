@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-dependencies -->
-<!-- source-sha256: 055db7ec6a76a7319156e45d7435ac06e4b357d9fff9bb3333089bf803e78c5c -->
+<!-- source-sha256: eebdbd7295c24e2f6cffb15c97c2767d6a1f8d8e9d6c9bbdebb93120bb5fbfd6 -->
 # 의존성 정책
 
 [English](/operations/dependencies).
@@ -9,6 +9,8 @@
 ## 범위
 
 Registry 의존성은 registry가 해석하는 직접 의존성이다. 루트 `package.json`의 `dependencies`나 `devDependencies` 항목, 또는 Composer manifest(루트 `composer.json`, `legacy/packages/php-ext/composer.json`, `legacy/packages/cli/php/composer.json`)의 `require`나 `require-dev` 항목이다. 의존성을 선언하는 npm manifest는 루트 `package.json` 하나다. 루트는 모든 package의 개발 도구를 가지며, `packages/`의 package는 runtime 의존성만 선언한다. `file:`, `link:`, `workspace:` 의존성은 이 저장소의 package이고, `php`, `ext-*`, `lib-*`, `composer-*`는 platform 요구 사항이다. 어떤 registry도 이들을 해석하지 않으므로 "최신 안정"은 이들에게 의미가 없다.
+
+`@polyspec/kit`은 registry 의존성이 아니다. `package.json`이 그 release asset의 주소를, `package-lock.json`이 그 integrity를 고정한다. 현재 kit의 최신 release인 0.0.112다. 고정은 저장소가 받는 kit release마다 옮겨진다. 0.0.111보다 오래된 release는 다시 받지 않는다. `make lint-rust`가 그 release의 `--workspace-args`(kit K1195)로 binding crate의 제외를 루트 Cargo workspace의 단계에만 주기 때문이며, `tests/scripts/lint-rust-workspaces.test.mts`가 이를 보호한다.
 
 ## 예외
 
