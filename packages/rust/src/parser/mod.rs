@@ -548,7 +548,7 @@ impl<'a> TemplateParser<'a> {
                 self.collect(&parser);
                 // X-1: the fault injection point template.internal imitates an open block that is missing here, which the
                 // checks above exclude, so no input reaches the kind internal.
-                let open = if binding_core::fault::point(crate::fault::INTERNAL).is_some() {
+                let open = if binding_core::fault::point!(crate::fault::INTERNAL).is_some() {
                     None
                 } else {
                     self.frames.last_mut()

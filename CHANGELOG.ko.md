@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 6b7dd61354003fa69b7cf9d459db93d8c8aac9cb677f2449205dcbde233cc8d0 -->
+<!-- source-sha256: aecb215c473213f3d82e88d5cc04c52b04f3b5edb1c2a075c9e3aee7dd83d919 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `Cargo.lock`은 `polyspec-binding-core`를 binding 49a4e97에(CK-20), `polyspec-json`을 json 73d2db9에 고정하고, 바인딩 패키지는 49a4e97의 `binding scaffold`가 쓰는 그대로이다(CK-19). 각 manifest는 workspace의 lint를 받는다. 주입 지점 `template.internal`(`packages/rust/src/parser/mod.rs:551`)과 `template.format_invariant`(`packages/rust/src/format/mod.rs:163`)는 macro `binding_core::fault::point!`이다. Cargo는 한 build 안에서 binding_core의 feature를 합치므로, binding 642e70f는 지점을 쓰는 crate의 feature `fault-test`로 지점을 판단한다(GN-5). 코어는 `fault-test = ["polyspec-binding-core/fault-test"]`를 선언하고 `make test-rust`는 그 feature로 코어를 빌드하므로, `tests/contract_cases.rs`가 두 지점을 장전한다(T28.19).
 - `engine.render_json`과 `engine.prepare`의 case 하나씩이 `data_invalid_utf8`을 낸다(VAL-12). 그 case는 `assign`에 올바른 꼴이 아닌 kind `text`의 text, 곧 binding case 언어의 `{"ill_formed": "a"}`(G-5)를 주므로, binding check는 그 kind에 CK-22를 보고하지 않는다. Rust case runner `packages/rust/tests/contract_cases.rs`는 그 꼴을 짝 없는 surrogate의 escape `\ud800`로 끝나는 JSON 문자열로 읽고, `polyspec-json`은 그것을 지니고 VAL-12의 변환은 거부한다(T28.9-1).
 - `config/owner-checks.json`이 다시 모든 추적 경로를 소유한다(`make owner-validate`, HR-88). `make lint-ts`, `conformance`, `delimiter-matrix`, `package-installs-check`의 inputs는 그 check들이 읽는 `legacy/packages/` 아래 legacy 패키지와 Cargo workspace를 부르고, 한 규칙이 workspace member manifest `packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml`에 그 check들을 고른다. `packages/rust/**`, `Cargo.toml`, `Cargo.lock`의 규칙은 `packages/rust/interface.json`과 `Cargo.lock`을 읽는 `bindings-check`를 고른다. inputs는 `legacy/`로 옮긴 뒤 바인딩 패키지가 든 `packages/{ts,go,php,python}/**`를 불렀고, `owner-validate`는 오류 38개를 보고했다(T28.18).
 - Rust core는 `polyspec-binding-core`의 주입 지점 둘을 둔다(ERR-16, binding X-1). 지점은 feature `fault-test`로 빌드하고 지점을 장전했을 때만 발동한다. `template.internal`은 `packages/rust/src/parser/mod.rs:551`, 열린 block을 찾지 못한 `{:?}` tag의 분기로 `internal`을 내고, `template.format_invariant`는 `packages/rust/src/format/mod.rs:163`, `format_invariant`를 내는 `same_tree` 분기다. `packages/rust/interface.json`은 둘을 `faults` 아래에 나열한다. case `parse::a_missing_open_block_is_internal`과 `format::a_formatted_text_of_another_ast_is_format_invariant`는 둘을 broken으로 장전하고, `tests/contract_cases.rs`는 지점이 발동하지 않은 case를 실패시키며, `engine.render::an_elseif_renders_its_branch_without_faults`는 장전 없이 첫 지점의 분기를 렌더한다. root와 showcase의 `Cargo.lock`은 그 feature의 serde_json 1.0.154를 받는 e8ab5e7에 `polyspec-json`을 고정하고, `packages/ts`, `packages/python`, `packages/php-ext`는 8faad21의 `binding scaffold`가 쓰는 대로 `fault-test`를 넘긴다(T28.17).
