@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: a389973c7f36e3a6abc03a2698c840126861d469148a7aa713983e448a56afe3 -->
+<!-- source-sha256: 0c78b3f9de3cf49a23396907ed32dbbaf1ada64acee9ceb37ae1707e207eea27 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `tests/scripts/lint-rust-workspaces.test.mts`는 `make lint-rust`의 step이 넘기는 모든 `--exclude`가 그 step의 Cargo workspace의 package를 적기를 요구한다. recipe는 root workspace의 binding crate를 제외하는데, kit의 lint utility는 같은 인자를 `examples/showcase/adapters/rust`의 step에도 넘기고, cargo는 그 package가 없다고 경고한다. kit이 한 workspace의 step에 인자를 주는 방법을 제공할 때까지 이 시험은 실패한다(polyspec/kit#36).
 - language package와 그 case가 `legacy/`로 옮겨진 tree에서 `make template-test-scripts`가 통과한다. `legacy/tests/.editorconfig`는 `tests/.editorconfig`가 `tests/`에 하는 것처럼 `legacy/tests/cases`와 `legacy/tests/fixtures` 아래 파일의 바이트를 지킨다. `scripts/generate-error-codes.mts`의 `parseCatalog`는 첫 칸이 code 식별자인 행만 읽으므로 ERR-16의 point 표는 code 행이 아니다. fixture `public-parser.rs`, `public-formatter.rs`, `public-prefix-analysis.rs`는 `parse`, `analyze`, `analyze_prefix`, `format`이 `TemplateError`를 돌려주는 현재 API를 적는다. `tests/fixtures/public-types/private-api-extractor.json`은 project folder `legacy/packages/ts`에서 경로를 적는다. `make template-test-scripts`로 검증했다.
 - RT-9는 생성된 바인딩이 받는 host 코드의 loader가 source text를 `loaded`의 case `source`의 field `bytes`, 즉 bytes로 준다고 적는다. 코어가 그 bytes를 UTF-8로 판정하고 UTF-8이 아닌 byte의 위치를 보고하는데(LEX-1), 언어가 이미 decode한 text는 그 위치를 잃기 때문이다(T28.28).
 - `packages/rust/interface.json`의 AST와 loader의 variant unit과 record는 코어 타입의 꼴을 가진다(binding T-9, GN-6v, GN-6a). `node`, `expr`, `literal_value`, `map_entry`, `loaded`는 `core_type`에 Rust enum을 적는다. 코어 variant `LiteralValue::Bool`, `Number`, `String`은 `value`를, `MapEntry::Spread`는 `expr`을 이름 있는 field로 가지므로, 모든 case는 계약의 field로 된 struct variant다. `scope_item`은 `value`와 `span` 대신 코어와 `docs/spec/ast.md`의 field `name`과 `expr`을 가진다. `loaded`의 case `source`는 binding이 parameter로만 받는 `source` 대신 코어의 `Vec<u8>`인 bytes 타입의 `bytes`를 가진다. `tests/scripts/contract-core-shapes.test.mts`는 variant와 record를 `ast.rs`와 `loader.rs`의 enum과 struct와 비교한다(T28.28).
