@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-formatting -->
-<!-- source-sha256: b816c9aff4eb800bc7535a3c5526b0477ece5aba5794fcf8ebb2e31963e0690f -->
+<!-- source-sha256: 9378e90c472fde3e88cf8f35acd46e19253dfb74a9f41069e103b6920d409735 -->
 # 포맷
 
 [English](/spec/formatting).
@@ -57,7 +57,7 @@
 
 - **FMT-18** 옵션 `keepIndentation`(Rust 코어의 interface 계약에서는 `keep_indentation`)은 기본값이 false이고, true이면 모든 줄의 들여쓰기를 유지하므로 태그 안의 공백만 바뀐다. null인 `indent`는 고유한 뜻이 없다. 그것은 주어지지 않은 옵션이고, 기본 단위다. 명령줄 옵션 `--indent none`은 `keepIndentation`을 설정한다. 이유: 생성된 바인딩은 생략된 옵션과 null에 같은 값을 코어에 넘기고 PHP는 둘을 구별하지 못하므로, null이 뜻을 갖는 옵션은 다섯 target에서 같은 결과를 낼 수 없다.
 
-- **FMT-9** 물렸다. FMT-17과 FMT-18이 이를 대신한다. 이 규칙은 FMT-17처럼 들여쓰기 단위를 적었고, null인 `indent`가 모든 줄의 들여쓰기를 유지한다고 적었다. `legacy/`의 패키지와, 옵션이 legacy TypeScript 패키지의 타입인 `packages/language`의 TypeScript 포매터는 이 규칙을 그대로 구현하고, `legacy/`의 케이스가 이것을 인용한다. 그 패키지들에는 옵션 `keepIndentation`이 없다.
+- **FMT-9** 물렸다. FMT-17과 FMT-18이 이를 대신한다. 이 규칙은 FMT-17처럼 들여쓰기 단위를 적었고, null인 `indent`가 모든 줄의 들여쓰기를 유지한다고 적었다. `legacy/`의 패키지는 이 규칙을 그대로 구현하고 그 케이스가 이것을 인용한다. 그 패키지에는 옵션 `keepIndentation`이 없다.
 
 ```
 <div class="board-list">
@@ -105,6 +105,6 @@
 
 ## SDK 계약
 
-- **FMT-16** 모든 SDK는 formatter의 호출 signature, 옵션과 성공·실패 결과를 공개한다. 이름 있는 callable 계약으로 같은 SDK의 다른 진입점에서 공개한 구현을 기술할 수 있다. 공개 구현은 formatting 동작을 바꾸는 adapter 없이 이 계약을 충족한다.
+- **FMT-16** 모든 SDK는 formatter의 호출 signature, 옵션과 성공·실패 결과를 공개한다. 이름 있는 callable 계약으로 같은 SDK의 다른 진입점에서 공개한 구현을 기술할 수 있다. 공개 구현은 formatting 동작을 바꾸는 adapter 없이 이 계약을 충족한다. 옵션, 결과, callable 계약은 구현을 공개하는 패키지에 속한다. `@polyspec/template-language`의 TypeScript 포매터는 `Formatter`, `FormatOptions`, `FormatResult`, `FormatError`를 FMT-17과 FMT-18의 옵션으로 직접 선언하고, legacy TypeScript 패키지의 타입을 받지 않는다. legacy 패키지의 `Formatter`는 물린 FMT-9의 옵션을 적으며 이 저장소의 어떤 구현도 기술하지 않는다. 이유: 옵션 타입을 다른 패키지에서 받는 패키지는 그 패키지가 옵션을 유지하는 동안 옵션을 바꿀 수 없다.
 
-공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `keepIndentation`, `templateBlocks`를 제공한다. `legacy/`의 패키지와 `packages/language`에는 `keepIndentation`이 없다(FMT-9). TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.
+공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `keepIndentation`, `templateBlocks`를 제공한다. `legacy/`의 패키지에는 `keepIndentation`이 없다(FMT-9). TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.

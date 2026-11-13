@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: cdedef2fcfbb30b261f771530d9846ea763f7896dbbbd05162be358f7cac73c6 -->
+<!-- source-sha256: 514c7056a1d20082a1104c78519de7d67c60405f85bbbc3a7a0923a146d9b931 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -17,7 +17,7 @@
 
 포맷 스타일, 들여쓰기, 포매터가 유지하는 부분, 안전 불변식은 명세의 규칙이다([포맷](/ko/spec/formatting), FMT-3~FMT-15). 모든 구현이 이 규칙으로 포맷하고, 적합성 케이스가 그 결과를 비교한다(CNF-18). 이 절은 `@polyspec/template-language`의 TypeScript 포매터 `format()`을 설명한다.
 
-`format(source, options)`는 옵션 `indent`(FMT-9, 기본값 공백 두 개, `null`은 들여쓰기를 유지한다), `templateBlocks`(`'indent'` 또는 `'flat'`), `delimiters`(엔진 구분자, FMT-8), `name`(오류의 템플릿 이름), `range`(범위 안에 완전히 들어가는 태그와 범위 안에서 시작하는 줄만 포맷한다)를 받는다. `@polyspec/template`의 `analyze()`로 소스를 파싱하고, 파서의 태그 본문과 토큰으로 각 태그를 포맷하며, 다음 결과 중 하나를 돌려준다(FMT-14).
+`format(source, options)`는 옵션 `indent`(FMT-17, 기본값 공백 두 개), `keepIndentation`(FMT-18, `true`는 들여쓰기를 유지한다), `templateBlocks`(`'indent'` 또는 `'flat'`), `delimiters`(엔진 구분자, FMT-8), `name`(오류의 템플릿 이름), `range`(범위 안에 완전히 들어가는 태그와 범위 안에서 시작하는 줄만 포맷한다)를 받는다. `@polyspec/template`의 `analyze()`로 소스를 파싱하고, 파서의 태그 본문과 토큰으로 각 태그를 포맷하며, 다음 결과 중 하나를 돌려준다(FMT-14).
 
 | 결과 | 조건 |
 | --- | --- |
@@ -26,9 +26,9 @@
 | `{ ok: false, error: { reason: 'invariant', code: null, line, col, message } }` | 포맷한 텍스트가 파싱되지 않거나 다른 AST로 파싱된다 |
 | `{ ok: false, error: { reason: 'html', code: null, line, col, message } }` | HTML 구조의 짝이 맞지 않는다(FMT-12) |
 
-출력이 HTML이 아닌 템플릿은 `indent: null`로 포맷한다.
+출력이 HTML이 아닌 템플릿은 `keepIndentation: true`로 포맷한다.
 
-불변식 테스트(`packages/language/tests/invariant.test.ts`)는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 `indent: null`로 한 번, 기본 들여쓰기로 한 번 포맷한다. 파싱되는 파일마다 `indent: null`은 span을 제외한 AST와 태그 밖의 텍스트가 같아야 한다. 기본 들여쓰기는 `html` 오류이거나, 줄 앞 공백과 탭을 제거한 상태에서 AST와 태그 밖의 텍스트가 같아야 한다. 둘 다 두 번째 실행에서 바뀌지 않아야 한다(FMT-13, FMT-15). `packages/language/tests/conformance.test.ts`는 모든 적합성 케이스의 결과를 그 `expected.format.json`과 비교한다.
+불변식 테스트(`packages/language/tests/invariant.test.ts`)는 `tests/cases`(`options.json`의 구분자 적용), `tests/fixtures`, `examples`, 포매터 픽스처 아래의 모든 `.tpl` 파일을 `keepIndentation: true`로 한 번, 기본 들여쓰기로 한 번 포맷한다. 파싱되는 파일마다 `keepIndentation: true`은 span을 제외한 AST와 태그 밖의 텍스트가 같아야 한다. 기본 들여쓰기는 `html` 오류이거나, 줄 앞 공백과 탭을 제거한 상태에서 AST와 태그 밖의 텍스트가 같아야 한다. 둘 다 두 번째 실행에서 바뀌지 않아야 한다(FMT-13, FMT-15). `packages/language/tests/conformance.test.ts`는 모든 적합성 케이스의 결과를 그 `expected.format.json`과 비교한다.
 
 명령 `template-language format [--indent none|tab|N] [--delimiters OC] FILE`(`packages/language/bin/template-language.mjs`)는 적합성 계약에서 TypeScript의 format 명령이다(CNF-4, CNF-5). `template-fmt`처럼 node:util `parseArgs`로 옵션을 파싱한다. 포맷한 텍스트를 출력하거나, 오류를 표준 오류에 JSON으로 쓰고 종료 상태 2로 끝난다.
 
@@ -53,7 +53,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|none]
 - 디렉터리를 주면 그 아래의 모든 `.tpl` 파일을 정렬 순서로 포맷하고, `node_modules`와 이름이 `.`으로 시작하는 디렉터리는 건너뛴다. 경로가 여러 개이거나 디렉터리이면 `--write`나 `--check`가 필요하다.
 - `--write`: 포맷되지 않은 파일을 다시 쓰고 그 경로를 출력한다.
 - `--check`: 아무것도 바꾸지 않고 포맷되지 않은 파일의 경로를 출력한다.
-- `--indent`: 들여쓰기 단위. 공백 `N`개(1~8), `tab`, 또는 `indent: null`(모든 줄이 들여쓰기를 유지)인 `none`이다. 기본값은 `2`다.
+- `--indent`: 들여쓰기 단위. 공백 `N`개(1~8), `tab`, 또는 `keepIndentation: true`(모든 줄이 들여쓰기를 유지)인 `none`이다. 기본값은 `2`다.
 - `--template-blocks`: `templateBlocks` 옵션인 `indent`(기본값) 또는 `flat`.
 - 파싱되지 않거나, 포맷한 AST가 다르거나, HTML 구조의 짝이 맞지 않는 파일(FMT-14)은 표준 오류에 `path:line:col: LABEL: message` 형식으로 출력하고 바꾸지 않는다. `LABEL`은 파서 오류 코드, `formatted AST differs` 또는 `HTML structure`다.
 
@@ -230,7 +230,7 @@ CI job `editor`는 `make editor-boundary-check template-test-language format-che
 
 - `format(options)`는 `indent`, `templateBlocks`, `range` 옵션을 받는 포매터의 `format()`이다.
 
-- `lineIndentation(line, options)`는 타이핑하는 줄이 갖는 들여쓰기를 돌려준다. 포매터의 들여쓰기 규칙(FMT-9, FMT-10)에 `options.indent`와 `options.templateBlocks`를 적용해, 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값이다. 깊이는 그 줄 앞의 텍스트로 정한다. 포매터와 달리 짝이 맞는 구조를 요구하지 않는다. 끝 태그는 같은 이름의 열린 요소까지 닫고, 그런 요소가 열려 있지 않으면 무시한다. Enter가 만드는 빈 줄도 그 깊이의 들여쓰기를 갖는다. 빈 줄을 비우는 것은 포매터뿐이다.
+- `lineIndentation(line, options)`는 타이핑하는 줄이 갖는 들여쓰기를 돌려준다. 포매터의 들여쓰기 규칙(FMT-17, FMT-10)에 `options.indent`와 `options.templateBlocks`를 적용해, 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값이다. 깊이는 그 줄 앞의 텍스트로 정한다. 포매터와 달리 짝이 맞는 구조를 요구하지 않는다. 끝 태그는 같은 이름의 열린 요소까지 닫고, 그런 요소가 열려 있지 않으면 무시한다. Enter가 만드는 빈 줄도 그 깊이의 들여쓰기를 갖는다. 빈 줄을 비우는 것은 포매터뿐이다.
 
 - `@polyspec/template-lsp`는 표준 입력과 출력을 쓰는 Language Server Protocol 서버다(명령 `template-lsp`). `positionEncoding` `utf-16`과 전체 텍스트 동기화를 쓰며 다음을 제공한다.
 

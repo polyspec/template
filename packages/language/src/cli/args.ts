@@ -87,12 +87,14 @@ export function parseArguments(argv: readonly string[]): Arguments | string {
  * The indent unit and delimiters of the values of FORMAT_OPTIONS, or the message of an invalid value. An option that is
  * absent is left out, so the default of format applies.
  */
-export function formatOptions(values: { indent?: string | undefined; delimiters?: string | undefined }): Pick<FormatOptions, 'indent' | 'delimiters'> | string {
-  const options: Pick<FormatOptions, 'indent' | 'delimiters'> = {};
+export function formatOptions(values: { indent?: string | undefined; delimiters?: string | undefined }): Pick<FormatOptions, 'indent' | 'keepIndentation' | 'delimiters'> | string {
+  const options: Pick<FormatOptions, 'indent' | 'keepIndentation' | 'delimiters'> = {};
   if (values.indent !== undefined) {
     const indent = indentUnit(values.indent);
     if (indent === undefined) return '--indent requires a number from 1 to 8, tab or none';
-    options.indent = indent;
+    // FMT-18: `none` keeps the indentation of every line.
+    if (indent === null) options.keepIndentation = true;
+    else options.indent = indent;
   }
   if (values.delimiters !== undefined) {
     if (values.delimiters.length !== 2) return '--delimiters requires two characters';

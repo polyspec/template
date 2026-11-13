@@ -1,10 +1,47 @@
 // Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from the source AST.
-import { analyze, DelimiterOptionError, parse, TemplateError, type FormatError, type FormatOptions, type FormatResult } from '@polyspec/template-legacy';
+import { analyze, DelimiterOptionError, parse, TemplateError } from '@polyspec/template-legacy';
 import { formatBody } from './body.js';
 import { indentEdits } from './indent.js';
 import { sameTree, withoutLineIndentation } from './invariant.js';
 
-export type { FormatError, FormatOptions, FormatResult } from '@polyspec/template-legacy';
+/** The callable formatter of this package (FMT-16): its options and its result are the types of this package. */
+export type Formatter = (source: string, options?: FormatOptions) => FormatResult;
+
+/** Options of {@link format}. */
+export interface FormatOptions {
+  /** Template name used in error results. The default is `template.tpl`. */
+  name?: string;
+  /** Engine delimiter option as two characters (LEX-22). The default is `{}`. */
+  delimiters?: string;
+  /** String index range; only tags that lie completely inside it and lines that start inside it are formatted. */
+  range?: { start: number; end: number };
+  /** Indent unit: a run of spaces or one tab (FMT-17). The default is two spaces. */
+  indent?: string;
+  /** `true` keeps the indentation of every line, so only the whitespace inside tags changes (FMT-18). The default is `false`. */
+  keepIndentation?: boolean;
+  /** `indent` (default): template blocks add an indentation level like HTML elements. `flat`: they add none. */
+  templateBlocks?: 'indent' | 'flat';
+}
+
+/** Why {@link format} returned no text. */
+export interface FormatError {
+  /**
+   * `parse`: the source does not parse. `invariant`: the formatted text does not parse to the same AST. `html`: the
+   * HTML structure is not balanced, so the lines cannot be indented.
+   */
+  reason: 'parse' | 'invariant' | 'html';
+  /** Error code of the parser, or null for an AST difference. */
+  code: string | null;
+  /** 1-based line of the error position. */
+  line: number;
+  /** 1-based byte column of the error position, as in parser errors (ERR-1). */
+  col: number;
+  /** Human-readable formatting failure. */
+  message: string;
+}
+
+/** The result of {@link format}: the formatted text, or the reason why the source is kept. */
+export type FormatResult = { ok: true; text: string; changed: boolean } | { ok: false; error: FormatError };
 
 interface Edit {
   start: number;
@@ -21,8 +58,11 @@ const BOM = '\uFEFF';
  * the start of lines of text.
  */
 export function format(source: string, options: FormatOptions = {}): FormatResult {
-  const indent = options.indent === undefined ? '  ' : options.indent;
-  if (indent !== null && !/^(?: +|\t)$/.test(indent)) throw new RangeError('indent must be a run of spaces or one tab');
+  // FMT-17, FMT-18: the unit is checked whether or not the lines keep their indentation; a caller of JavaScript that
+  // gives null gave no unit, which is the default.
+  const indent = options.indent ?? '  ';
+  if (!/^(?: +|\t)$/.test(indent)) throw new RangeError('indent must be a run of spaces or one tab');
+  const keep = options.keepIndentation ?? false;
   const name = options.name ?? 'template.tpl';
   const bom = source.startsWith(BOM) ? BOM : '';
   const text = source.slice(bom.length);
@@ -48,7 +88,7 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
     if (body === null || body === text.slice(tag.bodyStart, tag.bodyEnd)) continue;
     edits.push({ start: tag.bodyStart, end: tag.bodyEnd, text: body });
   }
-  if (indent !== null) {
+  if (!keep) {
     const indentation = indentEdits(text, analysis.tags, { unit: indent, templateBlocks: options.templateBlocks ?? 'indent', range });
     if ('error' in indentation) {
       return { ok: false, error: { reason: 'html', code: null, ...positionOf(text, indentation.error.index), message: indentation.error.message } };
@@ -67,7 +107,7 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
     const detail = error instanceof Error ? error.message : String(error);
     return { ok: false, error: { reason: 'invariant', code: null, ...positionOf(text, first.start), message: `formatted text does not parse: ${detail}` } };
   }
-  const same = indent === null ? sameTree(analysis.ast, after) : sameTree(withoutLineIndentation(analysis.ast), withoutLineIndentation(after));
+  const same = keep ? sameTree(analysis.ast, after) : sameTree(withoutLineIndentation(analysis.ast), withoutLineIndentation(after));
   if (!same) {
     return { ok: false, error: { reason: 'invariant', code: null, ...positionOf(text, first.start), message: 'formatted text parses to a different AST' } };
   }

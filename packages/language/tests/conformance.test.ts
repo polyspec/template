@@ -25,7 +25,7 @@ it.each(caseIds(casesDir))('%s', id => {
   const expectedPath = join(dir, 'expected.format.json');
   const bytes = readFileSync(join(dir, 'input.tpl'));
   const indent = formatBytes(bytes, 'input.tpl', options);
-  const keep = formatBytes(bytes, 'input.tpl', { ...options, indent: null });
+  const keep = formatBytes(bytes, 'input.tpl', { ...options, keepIndentation: true });
   if (!existsSync(join(dir, 'expected.ast.json'))) {
     expect(existsSync(expectedPath)).toBe(false);
     expect([indent.ok || indent.error.reason, keep.ok || keep.error.reason]).toEqual(['parse', 'parse']);

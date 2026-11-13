@@ -82,6 +82,6 @@ describe('template-language format', () => {
 describe('formatOptions', () => {
   it('leaves out an absent --indent and --delimiters, so the defaults of format apply', () => {
     expect(formatOptions({})).toStrictEqual({});
-    expect(formatOptions({ indent: 'none', delimiters: '<>' })).toStrictEqual({ indent: null, delimiters: '<>' });
+    expect(formatOptions({ indent: 'none', delimiters: '<>' })).toStrictEqual({ keepIndentation: true, delimiters: '<>' });
   });
 });

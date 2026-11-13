@@ -1,10 +1,10 @@
 <!-- doc-id: packages-template-language-readme -->
-<!-- source-sha256: ae62f9510273293ae38f89757605f16cb6bc6adad226f30d64c685d162ae3ab9 -->
+<!-- source-sha256: 65832f1a42b99987c8d50c14e397fd5cc66c15bc600e97e513e783c06e1c8992 -->
 # @polyspec/template-language
 
 [English](README.md).
 
-템플릿 소스 포매터다. 템플릿 태그 안의 공백을 정규화하고 HTML 요소와 템플릿 블록의 중첩에 따라 줄을 들여쓴다. 태그 밖의 다른 텍스트는 바꾸지 않는다. 소스와 결과를 `@polyspec/template`으로 파싱하고, 두 AST가 `span` 필드와 줄 들여쓰기를 제외하고 같을 때만 결과를 돌려준다. `indent: null`은 들여쓰기를 유지한다.
+템플릿 소스 포매터다. 템플릿 태그 안의 공백을 정규화하고 HTML 요소와 템플릿 블록의 중첩에 따라 줄을 들여쓴다. 태그 밖의 다른 텍스트는 바꾸지 않는다. 소스와 결과를 `@polyspec/template`으로 파싱하고, 두 AST가 `span` 필드와 줄 들여쓰기를 제외하고 같을 때만 결과를 돌려준다. `keepIndentation: true`은 들여쓰기를 유지한다.
 
 ## 라이브러리
 

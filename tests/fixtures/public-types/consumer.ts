@@ -8,10 +8,12 @@ import type {
   ParseFunction, RuntimeLimit, RuntimeLoopMeta, SetNode, SourceSpan,
   SyntaxTokenKind, TagRange, Ternary, Text, Unary, Var,
 } from '@polyspec/template-legacy';
-import { format } from '@polyspec/template-language';
+import { format, type Formatter as LanguageFormatter } from '@polyspec/template-language';
 
-// The language service's published callable implements the shared SDK contract.
-export const formatter: Formatter = format;
+// FMT-16: the formatter of the language package has the contract of its own package, with the options of FMT-17 and
+// FMT-18. The legacy package names the contract of the retired FMT-9, which a consumer can still name.
+export const languageFormatter: LanguageFormatter = format;
+export declare const formatter: Formatter;
 export const formatterOptions: FormatOptions = { name: 'sdk.tpl', delimiters: '[]', range: { start: 0, end: 4 }, indent: null, templateBlocks: 'flat' };
 export const formatterResult: FormatResult = formatter('text', formatterOptions);
 

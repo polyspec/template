@@ -1,11 +1,18 @@
 // FMT-16: published formatter data carries native options, results and error fields.
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import type { FormatError, FormatOptions } from '@polyspec/template-legacy';
-import { format } from '@polyspec/template-language';
+import { format, type FormatError, type FormatOptions } from '@polyspec/template-language';
 import { jsonDocument } from '../../../scripts/json-document.mts';
 
-const fixture = jsonDocument<{ cases: { id: string; source: string; options: FormatOptions; expected: unknown }[]; errors: FormatError[] }>('formatter SDK data', {
+// The fixture is shared with the packages of legacy/ and written in their form (FMT-9): its `indent: null` keeps the
+// indentation of every line, which this package takes as `keepIndentation` (FMT-18).
+type FixtureOptions = Omit<FormatOptions, 'indent' | 'keepIndentation'> & { indent?: string | null };
+function formatOptions({ indent, ...rest }: FixtureOptions): FormatOptions {
+  if (indent === undefined) return rest;
+  return indent === null ? { ...rest, keepIndentation: true } : { ...rest, indent };
+}
+
+const fixture = jsonDocument<{ cases: { id: string; source: string; options: FixtureOptions; expected: unknown }[]; errors: FormatError[] }>('formatter SDK data', {
   type: 'object', required: ['cases', 'errors'], properties: {
     cases: { type: 'array', minItems: 1, items: { type: 'object', required: ['id', 'source', 'options', 'expected'], properties: {
       id: { type: 'string' }, source: { type: 'string' }, options: { type: 'object', properties: {
@@ -24,7 +31,7 @@ const fixture = jsonDocument<{ cases: { id: string; source: string; options: For
 
 describe('formatter SDK data', () => {
   it.each(fixture.cases)('preserves $id', item => {
-    const result = format(item.source, item.options);
+    const result = format(item.source, formatOptions(item.options));
     if (result.ok) expect(result).toEqual(item.expected);
     else {
       const { message, ...error } = result.error;

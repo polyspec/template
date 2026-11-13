@@ -34,7 +34,7 @@ const BOARD = lines(
 );
 
 describe('indentation', () => {
-  // FMT-9, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
+  // FMT-17, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
   // with {:}, {/} or an end tag one level less; FMT-15: formatting the result again changes nothing.
   it('indents HTML elements and template blocks by two spaces', () => {
     expect(formatted(BOARD)).toBe(lines(
@@ -78,12 +78,14 @@ describe('indentation', () => {
     expect(formatted(source, { indent: '    ' })).toBe(lines('<ul>', '    <li>a</li>', '    <li>b</li>', '</ul>'));
   });
 
-  it('keeps every line with indent null and formats only the tags', () => {
-    expect(formatted('<ul>\n        <li>{=a}</li>\n</ul>', { indent: null })).toBe('<ul>\n        <li>{= a}</li>\n</ul>');
+  it('keeps every line with keepIndentation and formats only the tags', () => {
+    expect(formatted('<ul>\n        <li>{=a}</li>\n</ul>', { keepIndentation: true })).toBe('<ul>\n        <li>{= a}</li>\n</ul>');
   });
 
   it('rejects an indent unit that is not spaces or one tab', () => {
     expect(() => format('<p></p>', { indent: ' \t' })).toThrow(/indent/);
+    // FMT-17: the unit is checked also when every line keeps its indentation.
+    expect(() => format('<p></p>', { indent: ' \t', keepIndentation: true })).toThrow(/indent/);
     expect(() => format('<p></p>', { indent: '' })).toThrow(/indent/);
   });
 
@@ -211,7 +213,7 @@ describe('html error', () => {
     expect(htmlError('{? a}<div>{:? b}<div>{/}\n</div>')).toMatchObject({ line: 1, col: 22 });
   });
 
-  it('changes nothing for an html error, and indent null formats the same source', () => {
-    expect(text(format('<div>\n<p>{=a}</div>', { indent: null }))).toBe('<div>\n<p>{= a}</div>');
+  it('changes nothing for an html error, and keepIndentation formats the same source', () => {
+    expect(text(format('<div>\n<p>{=a}</div>', { keepIndentation: true }))).toBe('<div>\n<p>{= a}</div>');
   });
 });

@@ -16,7 +16,7 @@ Only the language service reads the template syntax from `@polyspec/template`: t
 
 The formatting style, the indentation, the parts that the formatter keeps and the safety invariant are rules of the specification ([formatting](../spec/formatting.md), FMT-3 to FMT-15); every implementation formats by them, and the conformance cases compare the results (CNF-18). This section describes the TypeScript formatter `format()` of `@polyspec/template-language`.
 
-`format(source, options)` takes the options `indent` (FMT-9, two spaces by default, `null` keeps the indentation), `templateBlocks` (`'indent'` or `'flat'`), `delimiters` (the engine delimiters, FMT-8), `name` (the template name of errors) and `range` (only the tags that lie completely inside the range and the lines that start inside it are formatted). It parses the source with `analyze()` of `@polyspec/template`, formats each tag from the parser's tag body and tokens, and returns one of these results (FMT-14):
+`format(source, options)` takes the options `indent` (FMT-17, two spaces by default), `keepIndentation` (FMT-18, `true` keeps the indentation), `templateBlocks` (`'indent'` or `'flat'`), `delimiters` (the engine delimiters, FMT-8), `name` (the template name of errors) and `range` (only the tags that lie completely inside the range and the lines that start inside it are formatted). It parses the source with `analyze()` of `@polyspec/template`, formats each tag from the parser's tag body and tokens, and returns one of these results (FMT-14):
 
 | Result | Condition |
 | --- | --- |
@@ -25,9 +25,9 @@ The formatting style, the indentation, the parts that the formatter keeps and th
 | `{ ok: false, error: { reason: 'invariant', code: null, line, col, message } }` | the formatted text does not parse or parses to a different AST |
 | `{ ok: false, error: { reason: 'html', code: null, line, col, message } }` | the HTML structure is not balanced (FMT-12) |
 
-A template whose output is not HTML is formatted with `indent: null`.
+A template whose output is not HTML is formatted with `keepIndentation: true`.
 
-The invariant test (`packages/language/tests/invariant.test.ts`) formats every `.tpl` file under `tests/cases` (with the delimiters of `options.json`), `tests/fixtures`, `examples` and the formatter fixtures, once with `indent: null` and once with the default indentation. For each file that parses, `indent: null` must give the same AST without spans and the same text outside tags. The default indentation must give either the `html` error or the same AST and the same text outside tags once the spaces and tabs at the start of lines are removed. Both must not change on a second run (FMT-13, FMT-15). `packages/language/tests/conformance.test.ts` compares the results of every conformance case with its `expected.format.json`.
+The invariant test (`packages/language/tests/invariant.test.ts`) formats every `.tpl` file under `tests/cases` (with the delimiters of `options.json`), `tests/fixtures`, `examples` and the formatter fixtures, once with `keepIndentation: true` and once with the default indentation. For each file that parses, `keepIndentation: true` must give the same AST without spans and the same text outside tags. The default indentation must give either the `html` error or the same AST and the same text outside tags once the spaces and tabs at the start of lines are removed. Both must not change on a second run (FMT-13, FMT-15). `packages/language/tests/conformance.test.ts` compares the results of every conformance case with its `expected.format.json`.
 
 The command `template-language format [--indent none|tab|N] [--delimiters OC] FILE` (`packages/language/bin/template-language.mjs`) is the format command of TypeScript in the conformance contract (CNF-4, CNF-5); like `template-fmt`, it parses its options with node:util `parseArgs`: it prints the formatted text, or the error as JSON on standard error with exit status 2.
 
@@ -52,7 +52,7 @@ usage: template-fmt [--write | --check] [--delimiters OC] [--indent N|tab|none]
 - A directory: the command formats every `.tpl` file below it, in sorted order, and skips `node_modules` and directories whose name starts with `.`. Several paths or a directory require `--write` or `--check`.
 - `--write`: rewrites every file that is not formatted and prints its path.
 - `--check`: changes nothing and prints the path of every file that is not formatted.
-- `--indent`: the indent unit, `N` spaces (1 to 8), `tab`, or `none` for `indent: null` (every line keeps its indentation). The default is `2`.
+- `--indent`: the indent unit, `N` spaces (1 to 8), `tab`, or `none` for `keepIndentation: true` (every line keeps its indentation). The default is `2`.
 - `--template-blocks`: `indent` (default) or `flat`, the `templateBlocks` option.
 - A file that does not parse, whose formatted AST differs or whose HTML structure is not balanced (FMT-14) is printed to standard error as `path:line:col: LABEL: message` and is not changed. `LABEL` is the parser error code, `formatted AST differs` or `HTML structure`.
 
@@ -229,7 +229,7 @@ The CI job `editor` runs `make editor-boundary-check template-test-language form
 
 - `format(options)` is `format()` of the formatter with the options `indent`, `templateBlocks` and `range`.
 
-- `lineIndentation(line, options)` returns the indentation a line gets while it is typed: the indent unit repeated by the line's depth under the indentation rule of the formatter (FMT-9, FMT-10), with `options.indent` and `options.templateBlocks`. The depth comes from the text before the line. Unlike the formatter, it does not require a balanced structure: an end tag closes up to the open element of the same name and is ignored when no such element is open. A blank line, which Enter creates, gets the indentation of its depth; only the formatter empties blank lines.
+- `lineIndentation(line, options)` returns the indentation a line gets while it is typed: the indent unit repeated by the line's depth under the indentation rule of the formatter (FMT-17, FMT-10), with `options.indent` and `options.templateBlocks`. The depth comes from the text before the line. Unlike the formatter, it does not require a balanced structure: an end tag closes up to the open element of the same name and is ignored when no such element is open. A blank line, which Enter creates, gets the indentation of its depth; only the formatter empties blank lines.
 
 - `@polyspec/template-lsp` is a Language Server Protocol server over standard input and output (command `template-lsp`). It uses `positionEncoding` `utf-16` and full text synchronization and provides:
 

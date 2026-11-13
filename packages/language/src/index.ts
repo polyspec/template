@@ -1,5 +1,5 @@
 // Package entry: the language service document and the formatter used by every editor adapter.
-export { format, type FormatError, type FormatOptions, type FormatResult } from './format.js';
+export { format, type FormatError, type FormatOptions, type FormatResult, type Formatter } from './format.js';
 export {
   openDocument,
   TemplateDocument,

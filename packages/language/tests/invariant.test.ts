@@ -66,7 +66,7 @@ describe('safety invariant', () => {
       const source = readFileSync(file, 'utf8');
       const delimiters = delimitersFor(file);
       const options = delimiters === undefined ? { name } : { name, delimiters };
-      const kept = { ...options, indent: null };
+      const kept = { ...options, keepIndentation: true };
       const result = format(source, kept);
       const indented = format(source, options);
       if (!parses(source, delimiters)) {
