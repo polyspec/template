@@ -547,7 +547,7 @@ test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and 
 template-test-rust-clippy:
 	$(CARGO) clippy --locked --release --all-targets --all-features --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
 template-test-rust-unit:
-	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support,cli,fault-test -- --test-threads=1
+	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support,cli -- --test-threads=1
 
 test-php: template-test-php ## PHP unit tests
 

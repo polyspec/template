@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: aecb215c473213f3d82e88d5cc04c52b04f3b5edb1c2a075c9e3aee7dd83d919 -->
+<!-- source-sha256: 47d450ba69a720b12ce8bde3b4d7c9a6c46420b0f13171e2a918ab2d3bdfb669 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `--features fault-test` 없는 코어의 cargo test가 실패 주입점을 장전한다. `packages/rust/Cargo.toml`은 `polyspec-template` 자신을 feature `fault-test`와 함께 dev-dependency로 적으므로 코어의 모든 시험 build가 그 feature를 가지고, `make test-rust`는 `__test_support`와 `cli`만 넘긴다. binding 642e70f는 지점을 쓰는 crate의 feature `fault-test`로 지점을 판단하므로, binding의 end-to-end 검사처럼 flag 없이 빌드한 시험에서 `tests/contract_cases.rs`의 case `parse::a_missing_open_block_is_internal`과 `format::a_formatted_text_of_another_ast_is_format_invariant`가 `the faults of template.internal did not fire`와 `the faults of template.format_invariant did not fire`로 실패했다(T28.20).
 - `Cargo.lock`은 `polyspec-binding-core`를 binding 49a4e97에(CK-20), `polyspec-json`을 json 73d2db9에 고정하고, 바인딩 패키지는 49a4e97의 `binding scaffold`가 쓰는 그대로이다(CK-19). 각 manifest는 workspace의 lint를 받는다. 주입 지점 `template.internal`(`packages/rust/src/parser/mod.rs:551`)과 `template.format_invariant`(`packages/rust/src/format/mod.rs:163`)는 macro `binding_core::fault::point!`이다. Cargo는 한 build 안에서 binding_core의 feature를 합치므로, binding 642e70f는 지점을 쓰는 crate의 feature `fault-test`로 지점을 판단한다(GN-5). 코어는 `fault-test = ["polyspec-binding-core/fault-test"]`를 선언하고 `make test-rust`는 그 feature로 코어를 빌드하므로, `tests/contract_cases.rs`가 두 지점을 장전한다(T28.19).
 - `engine.render_json`과 `engine.prepare`의 case 하나씩이 `data_invalid_utf8`을 낸다(VAL-12). 그 case는 `assign`에 올바른 꼴이 아닌 kind `text`의 text, 곧 binding case 언어의 `{"ill_formed": "a"}`(G-5)를 주므로, binding check는 그 kind에 CK-22를 보고하지 않는다. Rust case runner `packages/rust/tests/contract_cases.rs`는 그 꼴을 짝 없는 surrogate의 escape `\ud800`로 끝나는 JSON 문자열로 읽고, `polyspec-json`은 그것을 지니고 VAL-12의 변환은 거부한다(T28.9-1).
 - `config/owner-checks.json`이 다시 모든 추적 경로를 소유한다(`make owner-validate`, HR-88). `make lint-ts`, `conformance`, `delimiter-matrix`, `package-installs-check`의 inputs는 그 check들이 읽는 `legacy/packages/` 아래 legacy 패키지와 Cargo workspace를 부르고, 한 규칙이 workspace member manifest `packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml`에 그 check들을 고른다. `packages/rust/**`, `Cargo.toml`, `Cargo.lock`의 규칙은 `packages/rust/interface.json`과 `Cargo.lock`을 읽는 `bindings-check`를 고른다. inputs는 `legacy/`로 옮긴 뒤 바인딩 패키지가 든 `packages/{ts,go,php,python}/**`를 불렀고, `owner-validate`는 오류 38개를 보고했다(T28.18).

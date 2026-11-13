@@ -87,8 +87,11 @@ winapi-util = "0.1.11"
 [dev-dependencies]
 # Only generated code makes a Raised; the tests make one through the feature `construct` to check that it reaches the
 # caller unchanged (FUN-46).
+polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", branch = "v1/rust-core", features = ["construct"] }
 # tests/contract_cases.rs arms the fault injection points of the cases that name them, as a generated binding test does.
-polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", branch = "v1/rust-core", features = ["construct", "fault-test"] }
+# The core is its own dev-dependency with fault-test, so every test build of the core, a plain cargo test included, has
+# the points (binding GN-5).
+polyspec-template = { path = ".", features = ["fault-test"] }
 libtest-mimic = "0.8.2"
 # The JSON of the test fixtures and of the expected results that the tests compare.
 serde = { version = "1", features = ["derive"] }
