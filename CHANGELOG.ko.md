@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 8eff615d338228bbb6a239809ce772b657320e07fde0e91f07fe075f68a1e48b -->
+<!-- source-sha256: 373720df53cc1f0a2bb47d45ae04e3eaa3253a930548d593a39d605f883b72a5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- `config/owner-checks.json`이 다시 모든 추적 경로를 소유한다(`make owner-validate`, HR-88). `make lint-ts`, `conformance`, `delimiter-matrix`, `package-installs-check`의 inputs는 그 check들이 읽는 `legacy/packages/` 아래 legacy 패키지와 Cargo workspace를 부르고, 한 규칙이 workspace member manifest `packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml`에 그 check들을 고른다. `packages/rust/**`, `Cargo.toml`, `Cargo.lock`의 규칙은 `packages/rust/interface.json`과 `Cargo.lock`을 읽는 `bindings-check`를 고른다. inputs는 `legacy/`로 옮긴 뒤 바인딩 패키지가 든 `packages/{ts,go,php,python}/**`를 불렀고, `owner-validate`는 오류 38개를 보고했다(T28.18).
 - Rust core는 `polyspec-binding-core`의 주입 지점 둘을 둔다(ERR-16, binding X-1). 지점은 feature `fault-test`로 빌드하고 지점을 장전했을 때만 발동한다. `template.internal`은 `packages/rust/src/parser/mod.rs:551`, 열린 block을 찾지 못한 `{:?}` tag의 분기로 `internal`을 내고, `template.format_invariant`는 `packages/rust/src/format/mod.rs:163`, `format_invariant`를 내는 `same_tree` 분기다. `packages/rust/interface.json`은 둘을 `faults` 아래에 나열한다. case `parse::a_missing_open_block_is_internal`과 `format::a_formatted_text_of_another_ast_is_format_invariant`는 둘을 broken으로 장전하고, `tests/contract_cases.rs`는 지점이 발동하지 않은 case를 실패시키며, `engine.render::an_elseif_renders_its_branch_without_faults`는 장전 없이 첫 지점의 분기를 렌더한다. root와 showcase의 `Cargo.lock`은 그 feature의 serde_json 1.0.154를 받는 e8ab5e7에 `polyspec-json`을 고정하고, `packages/ts`, `packages/python`, `packages/php-ext`는 8faad21의 `binding scaffold`가 쓰는 대로 `fault-test`를 넘긴다(T28.17).
 - `go.work`는 `make lint-go`가 lint하는 바인딩 모듈 `packages/go`를 쓴다. `make bindings`가 Go 파일을 쓰기 전까지 그 모듈에는 Go 파일이 없어서 `packages/go`의 golangci-lint와 deadcode가 실패한다(T28.16).
 - legacy Go 모듈의 `casetest.Root`는 저장소 root이고, `legacy/packages/go/ast`의 schema 시험 둘은 `contracts/schema/ast.schema.json`과 내장 schema를 거기서 읽는다. 두 시험은 root를 `legacy/tests/cases`의 두 단계 위인 `legacy/`로 잡아 실패했다(T28.15).

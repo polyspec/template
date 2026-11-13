@@ -703,6 +703,7 @@
       "targets": [
         "test-rust",
         "lint-rust",
+        "bindings-check",
         "template-lint-rust-format",
         "conformance",
         "conformance-generated-rust",
@@ -1257,6 +1258,16 @@
     },
     {
       "paths": [
+        "packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml"
+      ],
+      "targets": [
+        "conformance",
+        "delimiter-matrix",
+        "template-install-check"
+      ]
+    },
+    {
+      "paths": [
         "legacy/tests/**"
       ],
       "targets": [
@@ -1400,7 +1411,8 @@
     {
       "check": "make lint-ts",
       "paths": [
-        "packages/{ts,language,lsp,codemirror,compiler,vscode}/**"
+        "packages/{language,lsp,codemirror,compiler,vscode}/**",
+        "legacy/packages/ts/**"
       ]
     },
     {
@@ -1634,7 +1646,11 @@
     {
       "check": "make conformance",
       "paths": [
-        "packages/{ts,go,rust,php,python}/**",
+        "legacy/packages/{ts,go,php,python}/**",
+        "packages/rust/**",
+        "Cargo.toml",
+        "Cargo.lock",
+        "packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml",
         "tests/runner/{conformance,cases,drivers}.mts",
         "tests/fixtures/filesystem/**",
         "scripts/publish-build.mts"
@@ -1683,7 +1699,11 @@
     {
       "check": "make delimiter-matrix",
       "paths": [
-        "packages/{ts,go,rust,php}/**",
+        "legacy/packages/{ts,go,php}/**",
+        "packages/rust/**",
+        "Cargo.toml",
+        "Cargo.lock",
+        "packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml",
         "tests/runner/delimiter-matrix.mts"
       ]
     },
@@ -1824,7 +1844,11 @@
         "scripts/check-package-installs.mts",
         "scripts/install-workspace.mts",
         "scripts/language-checks.mts",
-        "packages/{ts,go,rust,php}/**",
+        "legacy/packages/{ts,go,php}/**",
+        "packages/rust/**",
+        "Cargo.toml",
+        "Cargo.lock",
+        "packages/{ts,ts/wasm,python,php-ext,go/internal/ffi}/Cargo.toml",
         "scripts/python-toolchain.mts",
         "legacy/packages/python/**",
         "mise.toml",
