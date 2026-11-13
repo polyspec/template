@@ -188,6 +188,11 @@ impl LineIndex {
         Ok(LineIndex { starts })
     }
 
+    /// The byte offset of the start of each line, from 0.
+    pub fn starts(&self) -> &[usize] {
+        &self.starts
+    }
+
     /// Restores a verified line index stored in a compiled artifact.
     pub fn from_starts(starts: Vec<usize>) -> LineIndex {
         assert!(starts.first() == Some(&0), "a line index must start at byte zero");

@@ -19,7 +19,7 @@ use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
     ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineInput, Definitions, EngineOptions, Env, Environment,
-    Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError, Loaded, Loader,
+    Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, IndentUnit, Limits, LiteralValue, LoadError, Loaded, Loader,
     LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
     SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind,
     decode_template, encode_template, format, merge, parse, resolve_path, value_in,
@@ -749,13 +749,7 @@ impl Loader for FixtureLoader {
                     // `lines` is an optional field without a default, so the value names it (CNF-19).
                     let lines = match required(&result, "lines")? {
                         Json::Null => None,
-                        lines => {
-                            let starts = list_of(lines, "lines", |line| uint(line, "a line start"))?;
-                            Some(
-                                LineIndex::try_from_starts(starts)
-                                    .map_err(|error| Failed::from(format!("the line index of the row: {error}")))?,
-                            )
-                        }
+                        lines => Some(list_of(lines, "lines", |line| uint(line, "a line start"))?),
                     };
                     Ok(Loaded::Ast {
                         ast: template_of(required(&result, "ast")?)?,

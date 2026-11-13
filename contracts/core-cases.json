@@ -942,6 +942,157 @@
       "result": "a c"
     },
     {
+      "id": "a_host_loader_gives_the_line_starts_of_a_parsed_template",
+      "rule": "RT-9",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "callback": {
+                "loader.load": [
+                  {
+                    "args": {
+                      "name": "page.tpl"
+                    },
+                    "result": {
+                      "type": "ast",
+                      "ast": {
+                        "name": "page.tpl",
+                        "body": [
+                          {
+                            "type": "Text",
+                            "value": "a ",
+                            "span": [
+                              0,
+                              2
+                            ]
+                          },
+                          {
+                            "type": "Echo",
+                            "expr": {
+                              "type": "Var",
+                              "name": "b",
+                              "span": [
+                                5,
+                                6
+                              ]
+                            },
+                            "span": [
+                              2,
+                              7
+                            ]
+                          }
+                        ],
+                        "comments": []
+                      },
+                      "version": "1",
+                      "lines": [
+                        0
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": [
+          [
+            "b",
+            {
+              "kind": "text",
+              "value": "c"
+            }
+          ]
+        ]
+      },
+      "options": {},
+      "result": "a c"
+    },
+    {
+      "id": "a_host_loader_gives_line_starts_that_do_not_start_at_zero",
+      "rule": "RT-9",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "callback": {
+                "loader.load": [
+                  {
+                    "args": {
+                      "name": "page.tpl"
+                    },
+                    "result": {
+                      "type": "ast",
+                      "ast": {
+                        "name": "page.tpl",
+                        "body": [
+                          {
+                            "type": "Text",
+                            "value": "a ",
+                            "span": [
+                              0,
+                              2
+                            ]
+                          },
+                          {
+                            "type": "Echo",
+                            "expr": {
+                              "type": "Var",
+                              "name": "b",
+                              "span": [
+                                5,
+                                6
+                              ]
+                            },
+                            "span": [
+                              2,
+                              7
+                            ]
+                          }
+                        ],
+                        "comments": []
+                      },
+                      "version": "1",
+                      "lines": [
+                        1,
+                        2
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": [
+          [
+            "b",
+            {
+              "kind": "text",
+              "value": "c"
+            }
+          ]
+        ]
+      },
+      "options": {},
+      "raises": {
+        "kind": "load_failed",
+        "status": null,
+        "category": "io"
+      }
+    },
+    {
       "id": "a_host_loader_row_answers_once",
       "rule": "RT-9",
       "receiver": {

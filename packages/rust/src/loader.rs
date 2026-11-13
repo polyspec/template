@@ -24,8 +24,9 @@ pub enum Loaded {
         /// Version of the AST.
         version: String,
         /// The line index of the source of the AST, which an AST artifact records, so that an error names its line and
-        /// column (ERR-3); without it the error has line 0 and column 0.
-        lines: Option<crate::LineIndex>,
+        /// column (ERR-3): the byte offset of the start of each line, from 0. Without it the error has line 0 and
+        /// column 0. The program checks the offsets when it loads the template (RT-9).
+        lines: Option<Vec<usize>>,
     },
 }
 
@@ -109,7 +110,7 @@ impl MapLoader {
         let lines = crate::LineIndex::try_from_starts(starts).map_err(|error| format!("the line index of {name}: {error}"))?;
         self.set_ast(name, ast)?;
         if let Some(Loaded::Ast { lines: held, .. }) = self.entries.get_mut(name) {
-            *held = Some(lines);
+            *held = Some(lines.starts().to_vec());
         }
         Ok(())
     }

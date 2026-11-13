@@ -102,7 +102,7 @@ impl Loader for ArtifactLoader {
         Ok(self.templates.get(name).map(|(ast, version, lines)| Loaded::Ast {
             ast: ast.clone(),
             version: version.clone(),
-            lines: lines.clone(),
+            lines: lines.as_ref().map(|index| index.starts().to_vec()),
         }))
     }
 }

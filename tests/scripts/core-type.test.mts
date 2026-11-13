@@ -139,7 +139,8 @@ function reader() {
   const units = new Map(list(contract['units']).map((unit) => [String(unit['id']), unit]));
   const typeNames: Json = isObject(contract['types']) ? contract['types'] : {};
   // A `pub type <Name> = <Type>;` without parameters stands for its type, on both sides of the comparison.
-  const aliases = [...core.matchAll(/^pub type (\w+) = ([^;]+);/gmu)].map((alias) => ({ name: String(alias[1]), type: plain(String(alias[2])) }));
+  // The type runs to the semicolon that ends the line, because an array type, `[usize; 2]`, holds a semicolon.
+  const aliases = [...core.matchAll(/^pub type (\w+) = (.+);$/gmu)].map((alias) => ({ name: String(alias[1]), type: plain(String(alias[2])) }));
   const expanded = (type: string): string => {
     let text = plain(type).replaceAll('binding_core::Failure', 'Failure');
     for (let round = 0; round < aliases.length; round += 1) {

@@ -1,7 +1,7 @@
 //! AstProgram: template loading, caching, function registration and rendering (RT-1 to RT-6, RT-40, RT-41).
 
 use crate::ast::{Node, Template};
-use crate::error::{ErrorCode, RenderError, Span, TemplateError, internal_boundary};
+use crate::error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
 use crate::functions::{ContractFunction, Env, HostFunction, contract_host_function};
 use crate::loader::{LoadError, Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
@@ -370,7 +370,17 @@ impl AstProgram {
         }
         let version = loaded.version().to_string();
         let template = match loaded {
-            Loaded::Ast { ast, lines, .. } => ParsedTemplate { ast, lines },
+            Loaded::Ast { ast, lines, .. } => ParsedTemplate {
+                ast,
+                // RT-9: the line starts that a loader gives with an AST start at 0 and increase.
+                lines: match lines {
+                    Some(starts) => Some(
+                        LineIndex::try_from_starts(starts)
+                            .map_err(|cause| fail(ErrorCode::LoadFailed, format!("template {name} cannot be loaded: {cause}")))?,
+                    ),
+                    None => None,
+                },
+            },
             Loaded::Source { bytes, .. } => {
                 let source = Source::from_bytes(name, &bytes)?;
                 let ast = parse_template(&source, self.delimiters)?;
