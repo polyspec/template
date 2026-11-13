@@ -1,5 +1,5 @@
 {
-  "comment": "The contract cases of the Rust core and of the bindings generated from it (binding design K-1, G-5), one group per member of packages/rust/interface.json; packages/rust/tests/contract_cases.rs runs each case against the core. The keys of a case are the parameter names of its member. An instance is {\"new\": <member that gives it>, \"receiver\", \"args\", \"then\": [steps]}; a callback is {\"callback\": {\"<callback member>\": [rows]}} and a function {\"function\": [rows]}, a row being {\"args\", \"result\"} with \"once\" for a row that answers one call, and a call that no row answers fails the case. A template_value and a json_value are {\"kind\", \"value\"}, a map being its [key, value] pairs in order and a number of a json_value its literal; {\"host\": \"object\"} is a native object; a source is its text or {\"hex\"}; a variant is {\"<tag>\": {fields}}; a path is relative to the directory of the case. A failure is raises: its kind, its status and its category (ERR-1, B-4); a result is the returned value, and after observes the returned instance. The kind internal has no case of a member: no input reaches it.",
+  "comment": "The contract cases of the Rust core and of the bindings generated from it (binding design K-1, G-5), one group per member of packages/rust/interface.json; packages/rust/tests/contract_cases.rs runs each case against the core. The keys of a case are the parameter names of its member. An instance is {\"new\": <member that gives it>, \"receiver\", \"args\", \"then\": [steps]}; a callback is {\"callback\": {\"<callback member>\": [rows]}} and a function {\"function\": [rows]}, a row being {\"args\", \"result\"} with \"once\" for a row that answers one call, and a call that no row answers fails the case. A template_value and a json_value are {\"kind\", \"value\"}, a map being its [key, value] pairs in order and a number of a json_value its literal; {\"host\": \"object\"} is a native object; a source is its text or {\"hex\"}; a variant is {\"<tag>\": {fields}}; a path is relative to the directory of the case. A failure is raises: its kind, its status and its category (ERR-1, B-4); a result is the returned value, and after observes the returned instance. A case that names faults arms those fault injection points before its call (G-5, X-1): a kind of the category internal, which no input reaches, has the case of its point and no input case.",
   "fs_loader.new": [
     {
       "id": "a_root_that_holds_no_file",
@@ -2147,6 +2147,45 @@
         "value": []
       },
       "options": {}
+    },
+    {
+      "id": "an_elseif_renders_its_branch_without_faults",
+      "rule": "GRM-10",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{? a}\nx\n{:? b}\ny\n{/}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": [
+          [
+            "b",
+            {
+              "kind": "bool",
+              "value": true
+            }
+          ]
+        ]
+      },
+      "options": {},
+      "result": "y\n"
     }
   ],
   "engine.render_json": [
@@ -11494,6 +11533,24 @@
         "status": null,
         "category": "value"
       }
+    },
+    {
+      "id": "a_missing_open_block_is_internal",
+      "rule": "ERR-13",
+      "source": "{? a}\nx\n{:? b}\ny\n{/}\n",
+      "name": "page.tpl",
+      "options": {},
+      "faults": [
+        {
+          "point": "template.internal",
+          "kind": "broken"
+        }
+      ],
+      "raises": {
+        "kind": "internal",
+        "status": null,
+        "category": "internal"
+      }
     }
   ],
   "analyze": [
@@ -12198,6 +12255,23 @@
       },
       "source": "<div>\n</span>\n",
       "options": {}
+    },
+    {
+      "id": "a_formatted_text_of_another_ast_is_format_invariant",
+      "rule": "FMT-1",
+      "source": "a {=b}\n",
+      "options": {},
+      "faults": [
+        {
+          "point": "template.format_invariant",
+          "kind": "broken"
+        }
+      ],
+      "raises": {
+        "kind": "format_invariant",
+        "status": null,
+        "category": "internal"
+      }
     }
   ],
   "resolve_path": [

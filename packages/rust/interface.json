@@ -314,6 +314,32 @@
     "binding": [],
     "wrapped": []
   },
+  "faults": [
+    {
+      "id": "internal",
+      "core": "polyspec_template::fault::INTERNAL",
+      "inject": [
+        "broken"
+      ],
+      "fills": [
+        "internal"
+      ],
+      "reason": "ERR-13",
+      "place": "polyspec_template::parse"
+    },
+    {
+      "id": "format_invariant",
+      "core": "polyspec_template::fault::FORMAT_INVARIANT",
+      "inject": [
+        "broken"
+      ],
+      "fills": [
+        "format_invariant"
+      ],
+      "reason": "FMT-1",
+      "place": "polyspec_template::format"
+    }
+  ],
   "units": [
     {
       "id": "template_value",

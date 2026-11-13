@@ -798,6 +798,26 @@ fn run_case(group: &str, case: &Json) -> Result<(), Failed> {
     }
 }
 
+/// A case that arms fault injection points (G-5, X-1): it arms them for the member of its group as a generated binding
+/// test does, runs the case under the arming, and fails a fault that did not fire.
+fn faulted(group: &str, case: &Json, faults: &Json) -> Result<(), Failed> {
+    let id = binding_core::fault::arm(group, &faults.to_string()).map_err(|error| Failed::from(error.to_string()))?;
+    let outcome = binding_core::fault::take(group).run(|| run_case(group, case));
+    let left = binding_core::fault::left(id).map_err(|error| Failed::from(error.to_string()))?;
+    if !left.is_empty() {
+        return fail(format!("the faults of {} did not fire", left.join(", ")));
+    }
+    outcome
+}
+
+/// A case of the file: with its faults armed when it names any.
+fn trial(group: &str, case: &Json) -> Result<(), Failed> {
+    match key(case, "faults") {
+        Some(faults) => faulted(group, case, faults),
+        None => run_case(group, case),
+    }
+}
+
 /// The kinds that the cases of a member raise are kinds of its `raises` in the contract; a case of another kind states
 /// a failure that the contract does not give the member (E-5).
 fn raises_of_member(member: &str, raises: &[String], cases: &[Json]) -> Result<(), Failed> {
@@ -875,7 +895,7 @@ fn main() {
         for case in cases {
             let id = case["id"].as_str().expect("a case id").to_string();
             let group = group.clone();
-            trials.push(Trial::test(format!("{group}::{id}"), move || run_case(&group, &case)));
+            trials.push(Trial::test(format!("{group}::{id}"), move || trial(&group, &case)));
         }
         groups.push(group);
     }

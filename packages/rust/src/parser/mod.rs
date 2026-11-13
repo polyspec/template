@@ -546,7 +546,14 @@ impl<'a> TemplateParser<'a> {
                 let test = parser.parse_expression()?;
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
                 self.collect(&parser);
-                let Some(frame) = self.frames.last_mut() else {
+                // X-1: the fault injection point template.internal imitates an open block that is missing here, which the
+                // checks above exclude, so no input reaches the kind internal.
+                let open = if binding_core::fault::point(crate::fault::INTERNAL).is_some() {
+                    None
+                } else {
+                    self.frames.last_mut()
+                };
+                let Some(frame) = open else {
                     return Err(self.fail(ErrorCode::Internal, context.start, context.start + 1, "the open block is missing"));
                 };
                 if let Node::If { branches, .. } = &mut frame.node {

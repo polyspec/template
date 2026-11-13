@@ -558,6 +558,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "foldhash"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
+
+[[package]]
 name = "foreign-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1127,6 +1133,8 @@ version = "0.0.1"
 source = "git+https://github.com/polyspec/binding.git?branch=v1%2Frust-core#8faad2135d1f163eacf0daeb2f51f8b4db6aeb5d"
 dependencies = [
  "indexmap",
+ "libc",
+ "serde_json",
  "tokio",
  "tokio-util",
 ]
@@ -1134,7 +1142,7 @@ dependencies = [
 [[package]]
 name = "polyspec-json"
 version = "0.0.25"
-source = "git+https://github.com/polyspec/json.git?branch=v1%2Frust-core#d7136288f9bb9de36458bae1682f6b1a258b55e7"
+source = "git+https://github.com/polyspec/json.git?branch=v1%2Frust-core#e8ab5e710e9ac7660e5e52dc7ae3d178ca2ba679"
 dependencies = [
  "polyspec-binding-core",
  "ryu-js",
@@ -1483,10 +1491,11 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.151"
+version = "1.0.154"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14"
+checksum = "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
 dependencies = [
+ "foldhash",
  "indexmap",
  "itoa",
  "memchr",

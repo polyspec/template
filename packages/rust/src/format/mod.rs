@@ -158,7 +158,9 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
     let after = analyze(formatted.as_bytes(), name, &parse_options)
         .map_err(|error| invariant(format!("formatted text does not parse: {error}")))?
         .ast;
-    if !same_tree(&analysis.ast, &after, options.indent.is_some()) {
+    // FMT-1: the fault injection point template.format_invariant imitates a formatted text that parses to another AST,
+    // which no input reaches.
+    if binding_core::fault::point(crate::fault::FORMAT_INVARIANT).is_some() || !same_tree(&analysis.ast, &after, options.indent.is_some()) {
         return Err(invariant("formatted text parses to a different AST".to_string()));
     }
     Ok(Formatted {

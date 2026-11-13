@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 9178bf1528466b2803921e93d8cedbe77e9640946618223806da38a381eca513 -->
+<!-- source-sha256: 88b6c8951e4df128a242bbf5b8e55374613eac4cd21f06f714048a543f34799d -->
 # 오류
 
 [English](/spec/errors).
@@ -111,6 +111,13 @@ ERR-7에서 ERR-12와 ERR-15의 code table이 error code의 catalog입니다. `m
 | `internal` | 이 명세가 정의하지 않은 방식으로 구현이 실패했다. 엔진이 실행하는 Rust 또는 Go 코드의 panic, 또는 TypeScript와 PHP에서 언어 런타임이 프로그래밍 결함에 대해 발생시킨 오류다. | ERR-5. `bind`와 `merge`에서는 ERR-14. `parse`에서는 `parse`에 전달한 템플릿 이름. |
 
 - **ERR-13** 어떤 구현도 호스트 프로세스를 종료시키지 않으며, panic이나 언어 런타임 오류가 구현의 공개 `parse`, `prepare`, `render`, `bind`, `merge` operation 밖으로 나가지 않는다. Generated program과 PHP 확장의 operation도 같다. 이런 실패는 모두 호스트에 `internal`로 보고한다. 언어 런타임 오류는 JavaScript 엔진이 발생시키는 `Error`의 내장 하위 클래스(`TypeError`, `RangeError`, `ReferenceError`, `SyntaxError`, `EvalError`, `URIError`)와 PHP `Error` 계층의 클래스다. 엔진이 호출하는 호스트 코드(등록된 함수, 논리 class 함수, instance method, member accessor, `jsonSerialize()`)가 자기 언어의 오류 방식, 즉 TypeScript와 PHP에서는 던진 예외, Go와 Rust에서는 반환한 오류로 실패를 보고하면 바뀌지 않고 호출자에게 도달하며(FUN-46), 호스트 로더의 오류도 같다(RT-9). Go나 Rust의 그런 호스트 코드가 일으킨 panic은 내부 오류다. 그 밖의 예외는 바뀌지 않고 호스트에 전달된다. 예를 들어 파싱이나 렌더링을 시작하기 전에 API가 발생시키는 인자 오류, 즉 잘못된 delimiter 옵션이나 generated program의 선언 타입과 맞지 않는 요청이다. `assign`이나 정의 `data`가 generated program의 선언 타입과 맞지 않거나 program이 선언하지 않은 정의를 담은 요청은 ERR-1 오류가 아니라 그 언어의 인자 오류로 실패한다. TypeScript에서는 `TemplateError`도 언어 런타임 오류도 아닌 `Error`, Go에서는 `*errs.Error`가 아닌 `error`, Rust에서는 Rust `Program`의 하나뿐인 오류 타입인 `argument_*` kind의 `TemplateError`(ERR-15), PHP에서는 `\InvalidArgumentException`이고, Python에서는 `ValueError`다. 이는 generated program의 `prepare`가 언어 런타임 오류를 `internal`로 보고하는 `render`의 경계 앞에서 발생시킨다. 인자 오류의 message는 모든 target에서 같은 문장이다. 값은 요청 안의 경로로 부른다: `assign.<field>`, 또는 정의 data는 `define.<id>.data.<field>`이고, 뒤에 record의 field는 `.<field>`, map의 항목은 `.<key>`, list의 item은 `[<index>]`가 붙는다. 값이 없거나 null이고 그 type이 optional이 아니면 `<path> is required`, 그 밖에는 `<path> is not <expected>`로 보고하며, `<expected>`는 `a string`, `a number`, `a boolean`, `a list`, `an object` 중 하나다. object가 아닌 `define` 옵션은 그런 값을 요청에 담을 수 있는 모든 target에서 `define is not an object`로, 정의 항목은 `define.<id> is not declared`, `define.<id> has an invalid template`, `define.<id> has an invalid html entry`, `define.<id>.data is not an object`로 보고한다. 구분자 쌍이 아닌 구분자 옵션도 같은 인자 오류다. Go에서 `Parse`와 `NewAstProgram`은 `*errs.Error`가 아닌 `error`를 돌려준다. Rust에서 `AstProgram::new`와 `parse`는 kind `argument_delimiters`의 `TemplateError`를 돌려주고, PHP extension은 PHP package처럼 `\InvalidArgumentException`을 던진다. 잘못된 UTF-8처럼 binding한 값 자체의 데이터 오류는 `data_*` 오류로 남는다.
+
+- **ERR-16** Rust core는 어떤 입력도 닿지 않는 분기마다 주입 지점을 두어, 계약의 case가 그 지점을 장전하고 그 분기가 내는 오류를 검사하게 한다. 지점은 core crate `polyspec-binding-core`의 `binding_core::fault::point`이고, feature `fault-test`로 빌드했을 때만 발동한다. 그 feature 없이 빌드한 것과, 그 feature로 빌드했지만 어떤 지점도 장전하지 않은 실행은 지점을 거쳐 그 분기로 가지 않는다. 계약 `packages/rust/interface.json`은 지점을 `faults` 아래에 나열한다:
+
+| 지점 | 분기 | 내는 code |
+| --- | --- | --- |
+| `template.internal` | `parse`가 `{:?}`의 열린 block을 찾지 못한다(`packages/rust/src/parser/mod.rs`). | `internal`(ERR-13) |
+| `template.format_invariant` | `format`이 자기 text가 원본의 AST로 parse되지 않음을 찾는다(`packages/rust/src/format/mod.rs`). | `format_invariant`(FMT-1) |
 
 ## 예제
 

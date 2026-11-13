@@ -34,6 +34,18 @@ pub mod __test_support {
     pub use crate::expr::vectors::{ExpressionToken, evaluate_expression, parse_expression, tokenize_expression};
 }
 
+/// The fault injection points of the crate (binding design G-5, X-1; docs/spec/errors.md#fault-injection-points), which
+/// the interface contract names in `faults`. A point does nothing unless the feature `fault-test` is on.
+pub mod fault {
+    /// An open block that the parser of a block tag finds missing: the kind `internal`, which no input reaches (X-1).
+    #[doc(hidden)]
+    pub const INTERNAL: &str = "template.internal";
+    /// A formatted text that parses to another AST than its source: the kind `format_invariant`, which no input reaches
+    /// (FMT-1).
+    #[doc(hidden)]
+    pub const FORMAT_INVARIANT: &str = "template.format_invariant";
+}
+
 pub use ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, MapEntry, Node, ScopeItem, Template, UnaryOp};
 pub use ast_json::{decode_template, encode_template};
 pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
