@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-compiler -->
-<!-- source-sha256: 0ddfd4583036466a1eebb6818237d04a3299449d36276b8b14bdbfdc55017c9f -->
+<!-- source-sha256: 56d6d3946f1ba70bc68ed7c13322e8e4d34d715d439649a25658bf757de05945 -->
 # Compiler 계약
 
 [English](/spec/compiler).
@@ -94,7 +94,7 @@ Generated file은 임시 위치에서 완성한 뒤 원자적으로 교체한다
 
 AST compiler와 runtime은 구현됐다. 제품 compiler는 backend 언어마다 구체적인 `GeneratedProgram`을 생성하고 showcase는 모든 구현의 artifact를 직접 실행한다. Generated backend는 native object와 class call operation을 생성한다. 모든 구현에서 모든 canonical case의 generated matrix가 통과하며, 별도의 generated native-call fixture가 모든 구현에서 같은 assign object field, instance method, class function 결과를 출력하며, AST program과 같은 호스트 인자(VAL-21)와 native object 동등성(EXP-39)을 가진다.
 
-Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 entry와 source·type·contract digest를 검증한 뒤 재생성 여부를 결정하며, `false`는 배포된 generated source와 manifest만 읽어 검증한다. 검사는 다시 컴파일해 generated file이나 manifest의 바이트가 하나라도 다르면 실패한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
+Generated artifact는 canonical AST artifact와 같은 갱신 경계를 사용한다. `dev`는 항상 새 source 파일과 manifest를 생성하고, `true`는 entry와 source·type·contract digest, 그리고 호출자가 컴파일이 읽는 compiler 파일을 적으면 그 digest `inputDigest`를 검증한 뒤 재생성 여부를 결정하며, 그래서 결과는 tree에만 의존한다(showcase의 typed generator는 `packages/compiler/src`, `packages/compiler/backends`, `packages/compiler/functions.json`의 파일을 적고, release install처럼 아무것도 적지 않는 호출자는 위의 manifest를 쓴다), `false`는 배포된 generated source와 manifest만 읽어 검증한다. 검사는 다시 컴파일해 generated file이나 manifest의 바이트가 하나라도 다르면 실패한다. Source와 manifest는 원자적으로 교체하며 manifest를 마지막에 반영한다.
 
 `make conformance-generated-ts`는 canonical case 각각에 대해 새로운 generated TypeScript program을 만든다. Compile 진단, 입력 binding 진단, runtime 진단, 성공한 UTF-8 출력을 AST 실행과 같은 expected artifact에 대조한다.
 `make conformance-generated-php`는 각 case마다 별도로 생성하고 문법 검사한 PHP 소스로 같은 내용을 증명한다.

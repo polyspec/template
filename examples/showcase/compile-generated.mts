@@ -7,7 +7,7 @@ import { root } from '../../tests/runner/drivers.mts';
 import { compileFiles, compileSource } from '../../packages/compiler/src/compiler.mts';
 import { compileGeneratedArtifact } from '../../packages/compiler/src/generated-artifact.mts';
 import { showcasePhpNamespace } from './php-namespace.mts';
-import { generatedLanguages, generatedOutput } from './generated-output.mts';
+import { compilerInputs, generatedLanguages, generatedOutput } from './generated-output.mts';
 import { scenarioIds } from '../../scripts/showcase-documents.mts';
 
 const scenariosRoot = join(root, 'examples/site/scenarios');
@@ -19,6 +19,8 @@ if (refreshAt < 0 || refresh === undefined || argv.some((value, index) => index 
   throw new Error('usage: compile-generated.mts --refresh dev|true|false [--check]');
 }
 const scenarios = scenarioIds(scenariosRoot);
+// T28.26: the files of the compiler are inputs of every artifact, so refresh true rebuilds an artifact of a changed compiler.
+const inputs = compilerInputs();
 
 for (const id of scenarios) {
   const scenario = join(scenariosRoot, id);
@@ -33,6 +35,7 @@ for (const id of scenarios) {
       output,
       refresh,
       check,
+      inputs,
       compile: () => language === 'php' ? compileFiles(graph, manifest, language, { phpNamespace: showcasePhpNamespace(id) }) : compileSource(graph, manifest, language),
     });
   }
@@ -44,6 +47,8 @@ for (const id of scenarios) {
     output: generatedOutput(id, 'js'),
     refresh,
     check,
+    // The JavaScript artifact is the TypeScript artifact, transformed.
+    inputs: [typescriptOutput],
     compile: () => transformSync(readFileSync(typescriptOutput, 'utf8'), {
       loader: 'ts',
       target: 'es2022',

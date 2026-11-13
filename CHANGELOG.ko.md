@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 9e3ac3e386487d878420932f830591ba47eeef4ddbe7e8ace5f1d5a62b8b68b9 -->
+<!-- source-sha256: 7c862cd733763a9772a9c2051b1ed97fd838f5330e3a08681514360167e91cbd -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- 생성물의 refresh true는 그 컴파일이 읽는 compiler 파일이 바뀌면 생성물을 다시 만든다. `compileGeneratedArtifact`는 `inputs`를 받아 그 digest를 `inputDigest`로 기록한다. showcase의 typed generator는 `packages/compiler/src`, `packages/compiler/backends`, `packages/compiler/functions.json`의 파일을 넘기고, JavaScript 생성물에는 TypeScript 생성물을 넘긴다. 전에는 Rust backend가 바뀐 checkout이 `examples/showcase/adapters/generated/typed/`에 이전 backend의 생성 Rust program을 그대로 두어, 빈 checkout은 통과하는데 `make lint-rust`가 거기서 E0061로 실패했다. inputs 없는 호출자는 T27.1-78의 manifest를 그대로 쓴다(T28.26).
 - wait가 `blocking_io`인 member `engine.load`, `engine.prepare`, `engine.prepare_bound`의 코어 함수 `AstProgram::load`, `AstProgram::prepare`, `AstProgram::prepare_bound`는 receiver 다음 첫 인자로 `binding_core::Io`를 받는다(binding I-2 (4), B-5 (a), GN-6m). 그래서 생성된 바인딩은 RT-77의 파일 읽기로 호출이 멈출 수 있는 곳에서 token을 넘긴다. `Engine`, map loader 위의 생성된 program(`packages/compiler/src/backends/rust.mts`), showcase가 부르는 trait `Program`은 token을 받지 않는다. `tests/scripts/wait-tokens.test.mts`는 기다리는 member마다 token을 요구한다(T28.25).
 - `examples/showcase/adapters/rust/Cargo.lock`은 `polyspec-binding-core`를 931645f에, `polyspec-json`을 73d2db9에 고정한다. root `Cargo.lock`의 commit이다(binding CK-20). 그래서 `make lint-rust`가 showcase workspace에서 코어를 컴파일한다. 전에는 binding-core 8faad21에 대해 `fault::point!`의 E0433으로 실패했다. `tests/scripts/cargo-lock-pins.test.mts`는 추적되는 모든 `Cargo.lock`이 root lock의 git package를 같은 commit에 고정하기를 요구한다(T28.24).
 - `format_options`의 field `name`은 `default_core`에 값이 `template.tpl`인 상수 `polyspec_template::DEFAULT_FORMAT_NAME`을 적는다(binding GN-6i, U-2). 코어 field `FormatOptions::name`은 `Option<String>`이다. option이 name을 주지 않으면 `format`과 `format_bytes`는 source의 오류를 그 상수 이름으로 보고한다. 그래서 생성된 바인딩은 호출자가 빼 둔 name에 `None`을 넘기고 코어만 그 값을 정한다. `tests/scripts/default-core.test.mts`는 scalar의 모든 `{literal}`·`{const}` 기본값이 그런 상수를 적기를 요구한다(T28.23).

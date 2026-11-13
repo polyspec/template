@@ -107,6 +107,8 @@ export interface GeneratedManifest {
   sourceDigest: string;
   typeDigest: string;
   contractDigest: string;
+  /** The digest of the files of the compiler that the compilation read, when its caller named them (T28.26). */
+  inputDigest?: string;
   files: Record<string, GeneratedFile>;
 }
 
@@ -122,6 +124,7 @@ export const generatedManifestDocument = jsonDocument<GeneratedManifest>('genera
     sourceDigest: digest,
     typeDigest: digest,
     contractDigest: digest,
+    inputDigest: { ...digest, nullable: true },
     files: names<GeneratedFile>({
       type: 'object',
       additionalProperties: false,

@@ -16,7 +16,7 @@ const isDirectory = (path: string): boolean => existsSync(path) && statSync(path
 const artifactBase = (output: string): string => isDirectory(output) ? output : dirname(output);
 
 /** The metadata that a generated artifact must record: the inputs it is built from. */
-type Expected = Pick<GeneratedManifest, 'entry' | 'sourceDigest' | 'typeDigest' | 'contractDigest'>;
+type Expected = Pick<GeneratedManifest, 'entry' | 'sourceDigest' | 'typeDigest' | 'contractDigest' | 'inputDigest'>;
 
 function verifyGeneratedArtifact(output: string, target: string, expected: Expected | null = null): GeneratedManifest {
   const manifestPath = generatedManifestPath(output);
@@ -32,21 +32,32 @@ function verifyGeneratedArtifact(output: string, target: string, expected: Expec
   const intact = files.every(([name, file]) => file.path === name && existsSync(join(artifactBase(output), name)) && hash(readFileSync(join(artifactBase(output), name))) === file.artifactDigest);
   if (!listed || !intact) throw new ArtifactStaleError(`generated artifact files are missing or changed: ${output}`);
   if (expected) {
-    for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest'] as const) {
+    for (const key of ['entry', 'sourceDigest', 'typeDigest', 'contractDigest', 'inputDigest'] as const) {
       if (manifest[key] !== expected[key]) throw new ArtifactStaleError(`generated artifact ${key} differs`);
     }
   }
   return manifest;
 }
 
-function expectedMetadata(graphPath: string, typeManifestPath: string): Expected {
+/**
+ * The digest of the files that a compilation reads besides its AST artifact, type manifest and contract: the digest of
+ * the bytes of each file, in the order of the sorted paths, so the same tree gives the same digest in any checkout.
+ */
+function inputDigest(inputs: readonly string[]): string {
+  return hash([...inputs].map(file => resolve(file)).sort().map(file => hash(readFileSync(file))).join('\n'));
+}
+
+function expectedMetadata(graphPath: string, typeManifestPath: string, inputs: readonly string[] | undefined): Expected {
   const graph = astManifestDocument.read(graphPath);
   const typeBytes = readFileSync(typeManifestPath);
   const contractDigest = hash(readFileSync(contractPath));
   const typeDigest = hash(typeBytes);
   if (graph.typeDigest !== typeDigest) throw new Error('canonical AST and type manifest digests differ');
   if (graph.contractDigest !== contractDigest) throw new Error('canonical AST and compiler contract digests differ');
-  return { entry: graph.entry, sourceDigest: graph.sourceDigest, typeDigest, contractDigest };
+  const expected: Expected = { entry: graph.entry, sourceDigest: graph.sourceDigest, typeDigest, contractDigest };
+  // A caller without inputs, such as a release install, writes the manifest of T27.1-78, which names no compiler file.
+  if (inputs !== undefined) expected.inputDigest = inputDigest(inputs);
+  return expected;
 }
 
 /**
@@ -61,6 +72,11 @@ export interface GeneratedArtifactOptions {
   refresh: string;
   compile: () => string | Record<string, string>;
   check?: boolean;
+  /**
+   * The files besides the AST artifact, the type manifest and the contract whose bytes the compilation reads, such as the
+   * sources of the compiler in a checkout; refresh true rebuilds the artifact when one of them changed (T28.26).
+   */
+  inputs?: readonly string[];
 }
 
 /**
@@ -75,7 +91,7 @@ export function compileGeneratedArtifact(options: GeneratedArtifactOptions): Gen
     return verifyGeneratedArtifact(output, target);
   }
   if (refresh !== 'dev' && refresh !== 'true') throw new Error(`${refresh} is not an artifact refresh policy`);
-  const expected = expectedMetadata(resolve(graphPath), resolve(typeManifestPath));
+  const expected = expectedMetadata(resolve(graphPath), resolve(typeManifestPath), options.inputs);
   if (refresh === 'true' && !check) {
     try {
       return verifyGeneratedArtifact(output, target, expected);
