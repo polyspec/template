@@ -66,7 +66,7 @@ fn bound(input: &serde_json::Value) -> BoundMap {
 }
 
 fn expect_bind_failure(result: Result<BoundMap, TemplateError>, code: ErrorCode) {
-    let error = result.err().expect("bind fails");
+    let error = result.expect_err("bind fails");
     assert_eq!(
         (error.code, error.template.as_str(), error.line, error.col, error.offset, error.end),
         (code, "", 0, 0, 0, 0),
@@ -191,8 +191,7 @@ fn a_definition_with_a_value_and_a_bound_map_fails() {
     );
     let failure = program()
         .render(RenderTarget::Name("define.tpl"), &common::ojson(cases["assign"].clone()), &both)
-        .err()
-        .expect("a definition with data and bound fails");
+        .expect_err("a definition with data and bound fails");
     match failure {
         RenderError::Kind(error) => {
             assert_eq!(error.code, ErrorCode::DataUnsupportedType, "{error:?}");
