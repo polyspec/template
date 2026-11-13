@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e53596ceca4b47d4e3bbe53111ada2f55ea1423dd0112ceaf1d8b9e2240e48c3 -->
+<!-- source-sha256: 31b13405f442505e9007f7e96c95e5a21196597419ee0126a07ccaadd22a5a91 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- RT-9는 생성된 바인딩이 받는 host 코드의 loader가 source text를 `loaded`의 case `source`의 field `bytes`, 즉 bytes로 준다고 적는다. 코어가 그 bytes를 UTF-8로 판정하고 UTF-8이 아닌 byte의 위치를 보고하는데(LEX-1), 언어가 이미 decode한 text는 그 위치를 잃기 때문이다(T28.28).
 - `packages/rust/interface.json`의 AST와 loader의 variant unit과 record는 코어 타입의 꼴을 가진다(binding T-9, GN-6v, GN-6a). `node`, `expr`, `literal_value`, `map_entry`, `loaded`는 `core_type`에 Rust enum을 적는다. 코어 variant `LiteralValue::Bool`, `Number`, `String`은 `value`를, `MapEntry::Spread`는 `expr`을 이름 있는 field로 가지므로, 모든 case는 계약의 field로 된 struct variant다. `scope_item`은 `value`와 `span` 대신 코어와 `docs/spec/ast.md`의 field `name`과 `expr`을 가진다. `loaded`의 case `source`는 binding이 parameter로만 받는 `source` 대신 코어의 `Vec<u8>`인 bytes 타입의 `bytes`를 가진다. `tests/scripts/contract-core-shapes.test.mts`는 variant와 record를 `ast.rs`와 `loader.rs`의 enum과 struct와 비교한다(T28.28).
 - `make fmt-check`는 binding package를 포함한 root workspace의 모든 crate가 rustfmt의 꼴인지 `cargo fmt --all --check`로 검사하고, `polyspec-template`만 검사하던 `template-lint-rust-format`을 대신한다. `CHECK_TARGETS`, `lint`, `.github/workflows/ci.yml`의 Rust job, `packages/rust`의 owner 규칙이 그것을 적고, `tests/scripts/suite-parity.test.mts`가 그것을 요구한다(T28.27).
 - 생성물의 refresh true는 그 컴파일이 읽는 compiler 파일이 바뀌면 생성물을 다시 만든다. `compileGeneratedArtifact`는 `inputs`를 받아 그 digest를 `inputDigest`로 기록한다. showcase의 typed generator는 `packages/compiler/src`, `packages/compiler/backends`, `packages/compiler/functions.json`의 파일을 넘기고, JavaScript 생성물에는 TypeScript 생성물을 넘긴다. 전에는 Rust backend가 바뀐 checkout이 `examples/showcase/adapters/generated/typed/`에 이전 backend의 생성 Rust program을 그대로 두어, 빈 checkout은 통과하는데 `make lint-rust`가 거기서 E0061로 실패했다. inputs 없는 호출자는 T27.1-78의 manifest를 그대로 쓴다(T28.26).
