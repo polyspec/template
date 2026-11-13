@@ -78,8 +78,8 @@ fn json_parsing_preserves_order_and_checks_integer_literals() {
         Value::Map(map) => assert_eq!(map.keys().cloned().collect::<Vec<_>>(), vec!["2", "1", "x"]),
         _ => panic!("not a map"),
     }
-    assert_eq!(parse_json("9007199254740992").unwrap_err().code, ErrorCode::E_DATA_NUMBER_RANGE);
-    assert_eq!(parse_json("1e400").unwrap_err().code, ErrorCode::E_DATA_NUMBER_NOT_FINITE);
+    assert_eq!(parse_json("9007199254740992").unwrap_err().code, ErrorCode::DataNumberRange);
+    assert_eq!(parse_json("1e400").unwrap_err().code, ErrorCode::DataNumberNotFinite);
     assert_eq!(
         parse_json("{\"a\": 1, \"a\": 2}").expect("json"),
         parse_json("{\"a\": 2}").expect("json")
@@ -90,17 +90,17 @@ fn json_parsing_preserves_order_and_checks_integer_literals() {
 fn binding_checks_the_numeric_value_and_not_its_spelling() {
     // VAL-2: an integer literal, a fraction and an exponent of the same magnitude fail alike.
     for text in ["9007199254740992", "9007199254740992.0", "1e19", "-9.007199254740992e15"] {
-        assert_eq!(parse_json(text).unwrap_err().code, ErrorCode::E_DATA_NUMBER_RANGE, "{text}");
+        assert_eq!(parse_json(text).unwrap_err().code, ErrorCode::DataNumberRange, "{text}");
     }
     assert_eq!(parse_json("9007199254740991.0").expect("json"), Value::Number(9007199254740991.0));
     assert_eq!(parse_json("1.5e-300").expect("json"), Value::Number(1.5e-300));
     assert_eq!(
         parse_json(&format!("1{}", "0".repeat(400))).unwrap_err().code,
-        ErrorCode::E_DATA_NUMBER_NOT_FINITE
+        ErrorCode::DataNumberNotFinite
     );
     assert_eq!(
         bind_json(&ojson(serde_json::json!(9007199254740992u64))).unwrap_err().code,
-        ErrorCode::E_DATA_NUMBER_RANGE
+        ErrorCode::DataNumberRange
     );
     assert_eq!(
         bind_json(&ojson(serde_json::json!(-9007199254740991i64))).expect("bind"),
@@ -108,23 +108,23 @@ fn binding_checks_the_numeric_value_and_not_its_spelling() {
     );
     assert_eq!(
         bind_value(&Value::Number(f64::NAN)).unwrap_err().code,
-        ErrorCode::E_DATA_NUMBER_NOT_FINITE
+        ErrorCode::DataNumberNotFinite
     );
-    assert_eq!(bind_value(&Value::Number(1e19)).unwrap_err().code, ErrorCode::E_DATA_NUMBER_RANGE);
+    assert_eq!(bind_value(&Value::Number(1e19)).unwrap_err().code, ErrorCode::DataNumberRange);
 }
 
 #[test]
 fn json_text_fails_at_the_first_violation_in_document_order() {
     assert_eq!(
         parse_json("{\"a\": 1e19, \"b\": \"\\ud800\"}").unwrap_err().code,
-        ErrorCode::E_DATA_NUMBER_RANGE
+        ErrorCode::DataNumberRange
     );
     assert_eq!(
         parse_json("{\"b\": \"\\ud800\", \"a\": 1e19}").unwrap_err().code,
-        ErrorCode::E_DATA_INVALID_UTF8
+        ErrorCode::DataInvalidUtf8
     );
-    assert_eq!(parse_json("[\"\\udc00\"]").unwrap_err().code, ErrorCode::E_DATA_INVALID_UTF8);
-    assert_eq!(parse_json("{\"\\ud800x\": 1}").unwrap_err().code, ErrorCode::E_DATA_INVALID_UTF8);
+    assert_eq!(parse_json("[\"\\udc00\"]").unwrap_err().code, ErrorCode::DataInvalidUtf8);
+    assert_eq!(parse_json("{\"\\ud800x\": 1}").unwrap_err().code, ErrorCode::DataInvalidUtf8);
     assert_eq!(parse_json("\"\\ud83d\\ude00\"").expect("json"), Value::text("\u{1F600}"));
 }
 
@@ -133,18 +133,18 @@ fn binding_limits_the_nesting_depth() {
     // VAL-20: 64 levels bind, 65 fail, and a deep or unterminated text fails at the 65th level.
     let nested = |levels: usize| format!("{}{}", "[".repeat(levels), "]".repeat(levels));
     assert!(parse_json(&nested(64)).is_ok());
-    assert_eq!(parse_json(&nested(65)).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
-    assert_eq!(parse_json(&"[".repeat(200_000)).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
+    assert_eq!(parse_json(&nested(65)).unwrap_err().code, ErrorCode::DataDepth);
+    assert_eq!(parse_json(&"[".repeat(200_000)).unwrap_err().code, ErrorCode::DataDepth);
     let mut deep = polyspec_json::Value::null();
     for _ in 0..200 {
         deep = polyspec_json::Value::array(&[deep]).expect("array");
     }
-    assert_eq!(bind_json(&deep).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
+    assert_eq!(bind_json(&deep).unwrap_err().code, ErrorCode::DataDepth);
     let mut value = Value::Null;
     for _ in 0..65 {
         value = Value::list(vec![value]);
     }
-    assert_eq!(bind_value(&value).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
+    assert_eq!(bind_value(&value).unwrap_err().code, ErrorCode::DataDepth);
     assert!(!value.depth_within(64));
     assert!(value.depth_within(65));
 }
@@ -155,11 +155,7 @@ fn binding_limits_the_nesting_depth() {
 #[test]
 fn json_bytes_that_are_not_utf8_are_invalid_utf8() {
     for bytes in [&b"[\"\xff\"]"[..], &b"{\"\xff\": 1}"[..], &b"\"a\xc3\""[..]] {
-        assert_eq!(
-            parse_json_bytes(bytes).unwrap_err().code,
-            ErrorCode::E_DATA_INVALID_UTF8,
-            "{bytes:?}"
-        );
+        assert_eq!(parse_json_bytes(bytes).unwrap_err().code, ErrorCode::DataInvalidUtf8, "{bytes:?}");
     }
 }
 

@@ -112,8 +112,8 @@ pub fn ast_pointer(error: &polyspec_template::TemplateError) -> Option<&str> {
 /// parser code, which only the reason `parse` has (ERR-15).
 pub fn format_record(error: &polyspec_template::TemplateError) -> (&'static str, Option<String>) {
     match error.code {
-        polyspec_template::ErrorCode::E_FORMAT_INVARIANT => ("invariant", None),
-        polyspec_template::ErrorCode::E_FORMAT_HTML => ("html", None),
+        polyspec_template::ErrorCode::FormatInvariant => ("invariant", None),
+        polyspec_template::ErrorCode::FormatHtml => ("html", None),
         code if code.as_str().starts_with("argument_") => ("parse", None),
         code => ("parse", Some(code.as_str().to_string())),
     }
@@ -123,7 +123,13 @@ pub fn format_record(error: &polyspec_template::TemplateError) -> (&'static str,
 pub fn kind_category(kind: &str) -> String {
     let path = repo_root().join("packages").join("rust").join("interface.json");
     let contract: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(&path).expect("interface.json")).expect("JSON");
-    let variant = format!("polyspec_template::ErrorCode::E_{}", kind.to_uppercase());
+    // The variant of a kind is its words in UpperCamelCase (binding E-3).
+    let variant = format!(
+        "polyspec_template::ErrorCode::{}",
+        kind.split('_')
+            .map(|word| word[..1].to_uppercase() + &word[1..])
+            .collect::<String>()
+    );
     contract["errors"]["kinds"]
         .as_array()
         .expect("errors.kinds")

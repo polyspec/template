@@ -119,8 +119,8 @@ fn text(value: &str) -> String {
 /// parser code for the reason `parse`, the position and the message.
 fn format_record(error: &TemplateError) -> String {
     let (reason, code) = match error.code {
-        polyspec_template::ErrorCode::E_FORMAT_INVARIANT => ("invariant", None),
-        polyspec_template::ErrorCode::E_FORMAT_HTML => ("html", None),
+        polyspec_template::ErrorCode::FormatInvariant => ("invariant", None),
+        polyspec_template::ErrorCode::FormatHtml => ("html", None),
         code => ("parse", Some(code.as_str())),
     };
     format!(
@@ -158,7 +158,7 @@ fn read_json(root: &Path, path: &str, template: &str) -> polyspec_template::poly
     let text = match std::str::from_utf8(&bytes) {
         Ok(text) => text,
         Err(error) => fail(TemplateError::without_position(
-            polyspec_template::ErrorCode::E_DATA_INVALID_UTF8,
+            polyspec_template::ErrorCode::DataInvalidUtf8,
             template,
             format!("invalid UTF-8 at byte {}", error.valid_up_to()),
         )),
@@ -328,7 +328,7 @@ fn render(root: &Path, name: &str, delimiters: Option<String>, data: Option<Stri
         // The command registers no host function and loads with FsLoader, so no host code reports an error; one that
         // does is a broken invariant of the command (ERR-13).
         Err(error @ (RenderError::Raised(_) | RenderError::Callback(_))) => fail(TemplateError::without_position(
-            polyspec_template::ErrorCode::E_INTERNAL,
+            polyspec_template::ErrorCode::Internal,
             name,
             format!("internal failure: host code reported an error in the command: {error}"),
         )),

@@ -140,13 +140,13 @@ impl<'a> RawTagReader<'a> {
             Some(RawToken::Ident { value, start, end }) if !value.is_empty() => {
                 Err(self
                     .source
-                    .error(ErrorCode::E_PARSE_INVALID_PATH, start, end, format!("{value:?} is not a path")))
+                    .error(ErrorCode::ParseInvalidPath, start, end, format!("{value:?} is not a path")))
             }
             _ => {
                 let at = skip_horizontal_space(self.bytes(), index);
                 Err(self
                     .source
-                    .error(ErrorCode::E_PARSE_INVALID_PATH, at, at + 1, "include requires a path"))
+                    .error(ErrorCode::ParseInvalidPath, at, at + 1, "include requires a path"))
             }
         }
     }
@@ -178,7 +178,7 @@ impl<'a> RawTagReader<'a> {
             _ => {
                 let at = skip_horizontal_space(bytes, cursor);
                 return Err(self.source.error(
-                    ErrorCode::E_PARSE_INVALID_BLOCK_TAG,
+                    ErrorCode::ParseInvalidBlockTag,
                     at,
                     at + 1,
                     "block tag requires an identifier or a path",
@@ -191,7 +191,7 @@ impl<'a> RawTagReader<'a> {
                 RawToken::Ident { start, end, .. } | RawToken::Path { start, end, .. } => {
                     let text = self.source.text[start..end.min(self.source.text.len())].to_string();
                     return Err(self.source.error(
-                        ErrorCode::E_PARSE_INVALID_BLOCK_TAG,
+                        ErrorCode::ParseInvalidBlockTag,
                         start,
                         end,
                         format!("unexpected {text:?} in block tag"),
@@ -203,7 +203,7 @@ impl<'a> RawTagReader<'a> {
                 let value_start = cursor + 1;
                 if value_start >= bytes.len() || is_horizontal_space(bytes[value_start]) {
                     return Err(self.source.error(
-                        ErrorCode::E_PARSE_INVALID_BLOCK_TAG,
+                        ErrorCode::ParseInvalidBlockTag,
                         cursor,
                         cursor + 1,
                         "scope item requires a value after \":\"",

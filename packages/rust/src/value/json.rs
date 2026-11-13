@@ -10,7 +10,7 @@ use polyspec_json::{Error as JsonError, ParseOptions, parse};
 /// not one JSON document is `data_invalid_json` (VAL-12).
 pub fn parse_json_bytes(bytes: &[u8]) -> Result<Value, BindError> {
     let text = std::str::from_utf8(bytes).map_err(|error| BindError {
-        code: ErrorCode::E_DATA_INVALID_UTF8,
+        code: ErrorCode::DataInvalidUtf8,
         message: format!("invalid UTF-8 at byte {}", error.valid_up_to()),
     })?;
     parse_json(text)
@@ -31,7 +31,7 @@ pub fn read_json(text: &str) -> Result<polyspec_json::Value, BindError> {
         Ok(depth) => depth,
         Err(error) => {
             return Err(BindError {
-                code: ErrorCode::E_INTERNAL,
+                code: ErrorCode::Internal,
                 message: format!("the depth limit does not fit u64: {error}"),
             });
         }
@@ -60,10 +60,10 @@ pub fn read_json(text: &str) -> Result<polyspec_json::Value, BindError> {
 /// limit is `data_depth`, and an error that is not a rejection of the text is a broken invariant, `internal`.
 fn json_failure(error: &JsonError) -> BindError {
     let code = match error {
-        JsonError::MaximumDepthExceeded { .. } => ErrorCode::E_DATA_DEPTH,
-        JsonError::InvalidUtf8 { .. } => ErrorCode::E_DATA_INVALID_UTF8,
-        _ if error.offset().is_some() => ErrorCode::E_DATA_INVALID_JSON,
-        _ => ErrorCode::E_INTERNAL,
+        JsonError::MaximumDepthExceeded { .. } => ErrorCode::DataDepth,
+        JsonError::InvalidUtf8 { .. } => ErrorCode::DataInvalidUtf8,
+        _ if error.offset().is_some() => ErrorCode::DataInvalidJson,
+        _ => ErrorCode::Internal,
     };
     BindError {
         code,
@@ -175,7 +175,7 @@ fn check_string(bytes: &[u8], start: usize) -> Result<usize, BindError> {
 
 fn unpaired() -> BindError {
     BindError {
-        code: ErrorCode::E_DATA_INVALID_UTF8,
+        code: ErrorCode::DataInvalidUtf8,
         message: "a \\u escape leaves a surrogate unpaired".to_string(),
     }
 }

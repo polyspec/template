@@ -24,7 +24,7 @@ impl TemplateObject for Order {
             "total" => Ok(Some(Value::Number(self.total))),
             "huge" => Ok(Some(Value::Number(1e19))),
             "invalid" => Err(HostError::Data(BindError {
-                code: ErrorCode::E_DATA_INVALID_UTF8,
+                code: ErrorCode::DataInvalidUtf8,
                 message: "not UTF-8".to_string(),
             })),
             "broken" => Err("accessor failed".into()),
@@ -93,10 +93,10 @@ fn member_and_result_binding_failures_point_at_the_expression() {
     // the lookup or the call. FUN-46: the error of an accessor reaches the caller unchanged.
     let order = Arc::new(Order { total: 1.0 });
     let cases = [
-        ("x{= order.huge}", ErrorCode::E_DATA_NUMBER_RANGE, 5),
-        ("x{= order['invalid']}", ErrorCode::E_DATA_INVALID_UTF8, 5),
-        ("x{= order.nan()}", ErrorCode::E_DATA_NUMBER_NOT_FINITE, 5),
-        ("x{= order.absent()}", ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION, 5),
+        ("x{= order.huge}", ErrorCode::DataNumberRange, 5),
+        ("x{= order['invalid']}", ErrorCode::DataInvalidUtf8, 5),
+        ("x{= order.nan()}", ErrorCode::DataNumberNotFinite, 5),
+        ("x{= order.absent()}", ErrorCode::RuntimeUnknownFunction, 5),
     ];
     for (source, code, col) in cases {
         let error = render(&program(&[source]), 0, order_root(&order)).unwrap_err();
@@ -169,7 +169,7 @@ fn host_function_results_are_bound() {
         .unwrap();
     assert_eq!(render(&program, 0, OrderedMap::new()).unwrap(), "5|&lt;b&gt;");
     let error = render(&program, 1, OrderedMap::new()).unwrap_err();
-    assert_eq!((error.code, error.col), (ErrorCode::E_DATA_NUMBER_RANGE, 4));
+    assert_eq!((error.code, error.col), (ErrorCode::DataNumberRange, 4));
 }
 
 #[test]
@@ -179,14 +179,14 @@ fn render_values_binds_the_host_built_root() {
     let mut root = OrderedMap::new();
     root.insert("n".to_string(), Value::Number(f64::INFINITY));
     let error = render(&program, 0, root).unwrap_err();
-    assert_eq!((error.code, error.line), (ErrorCode::E_DATA_NUMBER_NOT_FINITE, 0));
+    assert_eq!((error.code, error.line), (ErrorCode::DataNumberNotFinite, 0));
     let mut deep = Value::Null;
     for _ in 0..64 {
         deep = Value::list(vec![deep]);
     }
     let mut root = OrderedMap::new();
     root.insert("deep".to_string(), deep);
-    assert_eq!(render(&program, 1, root).unwrap_err().code, ErrorCode::E_DATA_DEPTH);
+    assert_eq!(render(&program, 1, root).unwrap_err().code, ErrorCode::DataDepth);
     let mut root = OrderedMap::new();
     root.insert("s".to_string(), Value::safe_text("<i>"));
     assert_eq!(render(&program, 2, root).unwrap(), "&lt;i&gt;");
@@ -207,7 +207,7 @@ fn a_panic_is_reported_as_an_internal_error() {
         .unwrap_err();
     assert_eq!(
         (error.code, error.template.as_str(), error.line),
-        (ErrorCode::E_INTERNAL, "page0.tpl", 0)
+        (ErrorCode::Internal, "page0.tpl", 0)
     );
     assert!(error.message.contains("host defect"));
     let prepared = program
@@ -217,9 +217,9 @@ fn a_panic_is_reported_as_an_internal_error() {
             &RenderOptions::default(),
         )
         .unwrap();
-    assert_eq!(kind(prepared.render().unwrap_err()).code, ErrorCode::E_INTERNAL);
+    assert_eq!(kind(prepared.render().unwrap_err()).code, ErrorCode::Internal);
     let error = render(&program, 0, OrderedMap::new()).unwrap_err();
-    assert_eq!(error.code, ErrorCode::E_INTERNAL);
+    assert_eq!(error.code, ErrorCode::Internal);
     let template = parse(b"{= 1}", "after.tpl", &ParseOptions::default()).unwrap();
     assert_eq!(
         program

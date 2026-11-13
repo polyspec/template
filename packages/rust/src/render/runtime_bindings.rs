@@ -63,7 +63,7 @@ impl RuntimeBindings {
                         context,
                         frame,
                         span,
-                        ErrorCode::E_RUNTIME_STRINGIFY,
+                        ErrorCode::RuntimeStringify,
                         "a list or map cannot be converted to text",
                     ));
                 }
@@ -86,7 +86,7 @@ impl RuntimeBindings {
             BinaryOp::Divide => {
                 let divisor = self.number(context, right, frame, span)?;
                 if divisor == 0.0 {
-                    return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
+                    return Err(self.error(context, frame, span, ErrorCode::RuntimeDivZero, "division by zero"));
                 }
                 let result = self.number(context, left, frame, span)? / divisor;
                 self.finite(context, result, frame, span)
@@ -95,10 +95,10 @@ impl RuntimeBindings {
                 let dividend = self.number(context, left, frame, span)?;
                 let divisor = self.number(context, right, frame, span)?;
                 if dividend.fract() != 0.0 || divisor.fract() != 0.0 {
-                    return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "% requires integer operands"));
+                    return Err(self.error(context, frame, span, ErrorCode::RuntimeType, "% requires integer operands"));
                 }
                 if divisor == 0.0 {
-                    return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_DIV_ZERO, "division by zero"));
+                    return Err(self.error(context, frame, span, ErrorCode::RuntimeDivZero, "division by zero"));
                 }
                 Ok(Value::Number(dividend % divisor))
             }
@@ -129,7 +129,7 @@ impl RuntimeBindings {
                     context,
                     frame,
                     span,
-                    ErrorCode::E_RUNTIME_TYPE,
+                    ErrorCode::RuntimeType,
                     "in requires a list, map or string on the right",
                 )),
             },
@@ -137,7 +137,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_TYPE,
+                ErrorCode::RuntimeType,
                 "short-circuit operator requires control flow",
             )),
         }
@@ -150,12 +150,10 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_STRINGIFY,
+                ErrorCode::RuntimeStringify,
                 "a list or map cannot be converted to text",
             ),
-            StringifyError::NotFinite(error) => {
-                self.error(context, frame, span, ErrorCode::E_INTERNAL, format!("internal failure: {error}"))
-            }
+            StringifyError::NotFinite(error) => self.error(context, frame, span, ErrorCode::Internal, format!("internal failure: {error}")),
         })
     }
 
@@ -178,7 +176,7 @@ impl RuntimeBindings {
         if value.is_finite() {
             Ok(Value::Number(value))
         } else {
-            Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "arithmetic result is not finite"))
+            Err(self.error(context, frame, span, ErrorCode::RuntimeType, "arithmetic result is not finite"))
         }
     }
 
@@ -205,7 +203,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_COMPARE,
+                ErrorCode::RuntimeCompare,
                 format!("{} and {} have no order", left.value_type().name(), right.value_type().name()),
             )
         })
@@ -238,7 +236,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
+                ErrorCode::RuntimeUnknownFunction,
                 format!("{method} is not a function"),
             ));
         };
@@ -247,7 +245,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
+                ErrorCode::RuntimeUnknownFunction,
                 format!("{method} is not a function"),
             )),
             Some(result) => host_result(self, context, result, frame, span),
@@ -269,7 +267,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
+                ErrorCode::RuntimeUnknownFunction,
                 format!("{class_name}::{method} is not a function"),
             ));
         };
@@ -295,7 +293,7 @@ impl RuntimeBindings {
                     && number.fract() == 0.0
                 {
                     let text = crate::value::number::number_to_string(*number)
-                        .map_err(|error| self.error(context, frame, span, ErrorCode::E_INTERNAL, format!("internal failure: {error}")))?;
+                        .map_err(|error| self.error(context, frame, span, ErrorCode::Internal, format!("internal failure: {error}")))?;
                     return Ok(absent_is_null(map.get(&text)));
                 }
                 Err(key_type(self, context, "map", key, frame, span))
@@ -346,7 +344,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_LIMIT,
+                ErrorCode::RuntimeLimit,
                 format!("a list or map literal nests deeper than {MAX_DEPTH} levels"),
             ))
         }
@@ -362,13 +360,7 @@ impl RuntimeBindings {
                 .map(|(index, value)| (Value::Number(index as f64), value.clone()))
                 .collect()),
             Value::Map(map) => Ok(map.iter().map(|(key, value)| (Value::text(key.clone()), value.clone())).collect()),
-            _ => Err(self.error(
-                context,
-                frame,
-                span,
-                ErrorCode::E_RUNTIME_TYPE,
-                "loop requires a list, a map or null",
-            )),
+            _ => Err(self.error(context, frame, span, ErrorCode::RuntimeType, "loop requires a list, a map or null")),
         }
     }
 
@@ -376,7 +368,7 @@ impl RuntimeBindings {
     pub fn list_spread(&self, context: &RenderContext<'_>, value: &Value, frame: &Frame, span: Span) -> Result<Vec<Value>, RenderError> {
         match value {
             Value::List(list) => Ok(list.to_vec()),
-            _ => Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a list requires a list")),
+            _ => Err(self.error(context, frame, span, ErrorCode::RuntimeType, "spread in a list requires a list")),
         }
     }
 
@@ -390,7 +382,7 @@ impl RuntimeBindings {
     ) -> Result<crate::value::OrderedMap, RenderError> {
         match value {
             Value::Map(map) => Ok((**map).clone()),
-            _ => Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, "spread in a map requires a map")),
+            _ => Err(self.error(context, frame, span, ErrorCode::RuntimeType, "spread in a map requires a map")),
         }
     }
 
@@ -408,7 +400,7 @@ impl RuntimeBindings {
                     context,
                     frame,
                     span,
-                    ErrorCode::E_RUNTIME_ARITY,
+                    ErrorCode::RuntimeArity,
                     format!("{name} accepts {range} arguments, got {}", args.len()),
                 ));
             }
@@ -419,7 +411,7 @@ impl RuntimeBindings {
                 context,
                 frame,
                 span,
-                ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION,
+                ErrorCode::RuntimeUnknownFunction,
                 format!("{name} is not a function"),
             ));
         };
@@ -436,7 +428,7 @@ impl RuntimeBindings {
             (limits.iterations, "loop iterations exceed")
         };
         if count > maximum {
-            return Err(self.error(context, frame, span, ErrorCode::E_RUNTIME_LIMIT, format!("{message} {maximum}")));
+            return Err(self.error(context, frame, span, ErrorCode::RuntimeLimit, format!("{message} {maximum}")));
         }
         Ok(())
     }
@@ -519,5 +511,5 @@ fn key_type(
         "list" => "a list index is an integer or an index text",
         _ => "a member name of a native object is a string",
     };
-    runtime.error(context, frame, span, ErrorCode::E_RUNTIME_TYPE, format!("{expected}, not {found}"))
+    runtime.error(context, frame, span, ErrorCode::RuntimeType, format!("{expected}, not {found}"))
 }

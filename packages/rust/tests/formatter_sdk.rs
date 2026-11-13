@@ -95,9 +95,9 @@ fn public_formatter_constructs_shared_error_data() {
     assert_eq!(data.errors.len(), 3);
     for value in data.errors {
         let code = match (value.reason.as_str(), value.code.as_deref()) {
-            ("invariant", None) => ErrorCode::E_FORMAT_INVARIANT,
-            ("html", None) => ErrorCode::E_FORMAT_HTML,
-            ("parse", Some("parse_unclosed_block")) => ErrorCode::E_PARSE_UNCLOSED_BLOCK,
+            ("invariant", None) => ErrorCode::FormatInvariant,
+            ("html", None) => ErrorCode::FormatHtml,
+            ("parse", Some("parse_unclosed_block")) => ErrorCode::ParseUnclosedBlock,
             other => panic!("invalid error record {other:?}"),
         };
         let mut error = TemplateError::without_position(code, "template.tpl", value.message.clone());

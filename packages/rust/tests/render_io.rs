@@ -45,7 +45,7 @@ fn a_render_without_load_reads_no_file() {
     std::fs::remove_dir_all(&root).expect("cleanup");
     assert_eq!(
         (error.code, error.template.as_str(), error.line),
-        (ErrorCode::E_LOAD_NOT_LOADED, "page.tpl", 0)
+        (ErrorCode::LoadNotLoaded, "page.tpl", 0)
     );
 }
 
@@ -95,6 +95,6 @@ fn a_missing_include_fails_the_render_that_reaches_it() {
     std::fs::remove_dir_all(&root).expect("cleanup");
     assert_eq!(
         (error.code, error.template.as_str(), error.line, error.col),
-        (ErrorCode::E_LOAD_NOT_FOUND, "page.tpl", 1, 9)
+        (ErrorCode::LoadNotFound, "page.tpl", 1, 9)
     );
 }

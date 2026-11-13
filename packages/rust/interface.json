@@ -115,199 +115,199 @@
     ],
     "kinds": [
       {
-        "variant": "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
+        "variant": "polyspec_template::ErrorCode::LexInvalidUtf8",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
+        "variant": "polyspec_template::ErrorCode::ParseUnterminatedTag",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
+        "variant": "polyspec_template::ErrorCode::ParseUnterminatedComment",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
+        "variant": "polyspec_template::ErrorCode::ParseUnterminatedString",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
+        "variant": "polyspec_template::ErrorCode::ParseUnexpectedToken",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
+        "variant": "polyspec_template::ErrorCode::ParseInvalidNumber",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
+        "variant": "polyspec_template::ErrorCode::ParseInvalidEscape",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
+        "variant": "polyspec_template::ErrorCode::ParseUnexpectedClose",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
+        "variant": "polyspec_template::ErrorCode::ParseUnclosedBlock",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
+        "variant": "polyspec_template::ErrorCode::ParseElseOutsideBlock",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
+        "variant": "polyspec_template::ErrorCode::ParseDuplicateElse",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
+        "variant": "polyspec_template::ErrorCode::ParseElseifAfterElse",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
+        "variant": "polyspec_template::ErrorCode::ParseElseifNotInIf",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
+        "variant": "polyspec_template::ErrorCode::ParseReservedName",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
+        "variant": "polyspec_template::ErrorCode::ParseInvalidPath",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
+        "variant": "polyspec_template::ErrorCode::ParseInvalidBlockTag",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
+        "variant": "polyspec_template::ErrorCode::ParseInvalidWrapper",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
+        "variant": "polyspec_template::ErrorCode::ParseInvalidDirective",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
+        "variant": "polyspec_template::ErrorCode::LoadNotFound",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_LOAD_CYCLE",
+        "variant": "polyspec_template::ErrorCode::LoadCycle",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
+        "variant": "polyspec_template::ErrorCode::LoadOutsideRoot",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_LOAD_FAILED",
+        "variant": "polyspec_template::ErrorCode::LoadFailed",
         "category": "io"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
+        "variant": "polyspec_template::ErrorCode::LoadNotLoaded",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
+        "variant": "polyspec_template::ErrorCode::DataNumberRange",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
+        "variant": "polyspec_template::ErrorCode::DataNumberNotFinite",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
+        "variant": "polyspec_template::ErrorCode::DataInvalidUtf8",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
+        "variant": "polyspec_template::ErrorCode::DataUnsupportedType",
         "category": "type"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_DATA_DEPTH",
+        "variant": "polyspec_template::ErrorCode::DataDepth",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_DATA_INVALID_JSON",
+        "variant": "polyspec_template::ErrorCode::DataInvalidJson",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_TYPE",
+        "variant": "polyspec_template::ErrorCode::RuntimeType",
         "category": "type"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_COMPARE",
+        "variant": "polyspec_template::ErrorCode::RuntimeCompare",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO",
+        "variant": "polyspec_template::ErrorCode::RuntimeDivZero",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY",
+        "variant": "polyspec_template::ErrorCode::RuntimeStringify",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION",
+        "variant": "polyspec_template::ErrorCode::RuntimeUnknownFunction",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_ARITY",
+        "variant": "polyspec_template::ErrorCode::RuntimeArity",
         "category": "type"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_HOST_FUNCTION",
+        "variant": "polyspec_template::ErrorCode::RuntimeHostFunction",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP",
+        "variant": "polyspec_template::ErrorCode::RuntimeUnknownLoop",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED",
+        "variant": "polyspec_template::ErrorCode::RuntimeBlockUndefined",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED",
+        "variant": "polyspec_template::ErrorCode::RuntimeBlockRedefined",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_DEPTH",
+        "variant": "polyspec_template::ErrorCode::RuntimeDepth",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
+        "variant": "polyspec_template::ErrorCode::RuntimeLimit",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
+        "variant": "polyspec_template::ErrorCode::ArgumentDelimiters",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_FUNCTION_NAME",
+        "variant": "polyspec_template::ErrorCode::ArgumentFunctionName",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_SOURCE_RANGE",
+        "variant": "polyspec_template::ErrorCode::ArgumentSourceRange",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_ARGUMENT_INDENT",
+        "variant": "polyspec_template::ErrorCode::ArgumentIndent",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_FORMAT_INVARIANT",
+        "variant": "polyspec_template::ErrorCode::FormatInvariant",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_FORMAT_HTML",
+        "variant": "polyspec_template::ErrorCode::FormatHtml",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_AST_INVALID",
+        "variant": "polyspec_template::ErrorCode::AstInvalid",
         "category": "value"
       },
       {
-        "variant": "polyspec_template::ErrorCode::E_INTERNAL",
+        "variant": "polyspec_template::ErrorCode::Internal",
         "category": "internal"
       }
     ],
@@ -3150,7 +3150,7 @@
           ],
           "returns": "none",
           "raises": [
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -3186,7 +3186,7 @@
           ],
           "returns": "none",
           "raises": [
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -3235,40 +3235,40 @@
           "parameters": [],
           "returns": "text",
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_CYCLE",
-            "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_RUNTIME_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_COMPARE",
-            "polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO",
-            "polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION",
-            "polyspec_template::ErrorCode::E_RUNTIME_ARITY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_DEPTH",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadCycle",
+            "polyspec_template::ErrorCode::LoadOutsideRoot",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::RuntimeType",
+            "polyspec_template::ErrorCode::RuntimeCompare",
+            "polyspec_template::ErrorCode::RuntimeDivZero",
+            "polyspec_template::ErrorCode::RuntimeStringify",
+            "polyspec_template::ErrorCode::RuntimeUnknownFunction",
+            "polyspec_template::ErrorCode::RuntimeArity",
+            "polyspec_template::ErrorCode::RuntimeUnknownLoop",
+            "polyspec_template::ErrorCode::RuntimeBlockUndefined",
+            "polyspec_template::ErrorCode::RuntimeBlockRedefined",
+            "polyspec_template::ErrorCode::RuntimeDepth",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -3311,7 +3311,7 @@
             }
           ],
           "raises": [
-            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS"
+            "polyspec_template::ErrorCode::ArgumentDelimiters"
           ],
           "wait": "none",
           "core": {
@@ -3357,7 +3357,7 @@
           ],
           "returns": "none",
           "raises": [
-            "polyspec_template::ErrorCode::E_ARGUMENT_FUNCTION_NAME"
+            "polyspec_template::ErrorCode::ArgumentFunctionName"
           ],
           "wait": "none",
           "core": {
@@ -3413,7 +3413,7 @@
           ],
           "returns": "none",
           "raises": [
-            "polyspec_template::ErrorCode::E_ARGUMENT_FUNCTION_NAME"
+            "polyspec_template::ErrorCode::ArgumentFunctionName"
           ],
           "wait": "none",
           "core": {
@@ -3459,42 +3459,42 @@
           ],
           "returns": "text",
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_CYCLE",
-            "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_COMPARE",
-            "polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO",
-            "polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION",
-            "polyspec_template::ErrorCode::E_RUNTIME_ARITY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_DEPTH",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadCycle",
+            "polyspec_template::ErrorCode::LoadOutsideRoot",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LoadNotLoaded",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::RuntimeType",
+            "polyspec_template::ErrorCode::RuntimeCompare",
+            "polyspec_template::ErrorCode::RuntimeDivZero",
+            "polyspec_template::ErrorCode::RuntimeStringify",
+            "polyspec_template::ErrorCode::RuntimeUnknownFunction",
+            "polyspec_template::ErrorCode::RuntimeArity",
+            "polyspec_template::ErrorCode::RuntimeUnknownLoop",
+            "polyspec_template::ErrorCode::RuntimeBlockUndefined",
+            "polyspec_template::ErrorCode::RuntimeBlockRedefined",
+            "polyspec_template::ErrorCode::RuntimeDepth",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -3539,46 +3539,46 @@
           ],
           "returns": "text",
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_CYCLE",
-            "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
-            "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
-            "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_DATA_DEPTH",
-            "polyspec_template::ErrorCode::E_RUNTIME_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_COMPARE",
-            "polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO",
-            "polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION",
-            "polyspec_template::ErrorCode::E_RUNTIME_ARITY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_DEPTH",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadCycle",
+            "polyspec_template::ErrorCode::LoadOutsideRoot",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LoadNotLoaded",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::DataNumberRange",
+            "polyspec_template::ErrorCode::DataNumberNotFinite",
+            "polyspec_template::ErrorCode::DataInvalidUtf8",
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::DataDepth",
+            "polyspec_template::ErrorCode::RuntimeType",
+            "polyspec_template::ErrorCode::RuntimeCompare",
+            "polyspec_template::ErrorCode::RuntimeDivZero",
+            "polyspec_template::ErrorCode::RuntimeStringify",
+            "polyspec_template::ErrorCode::RuntimeUnknownFunction",
+            "polyspec_template::ErrorCode::RuntimeArity",
+            "polyspec_template::ErrorCode::RuntimeUnknownLoop",
+            "polyspec_template::ErrorCode::RuntimeBlockUndefined",
+            "polyspec_template::ErrorCode::RuntimeBlockRedefined",
+            "polyspec_template::ErrorCode::RuntimeDepth",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -3625,42 +3625,42 @@
           ],
           "returns": "text",
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_CYCLE",
-            "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LOAD_NOT_LOADED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_COMPARE",
-            "polyspec_template::ErrorCode::E_RUNTIME_DIV_ZERO",
-            "polyspec_template::ErrorCode::E_RUNTIME_STRINGIFY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION",
-            "polyspec_template::ErrorCode::E_RUNTIME_ARITY",
-            "polyspec_template::ErrorCode::E_RUNTIME_UNKNOWN_LOOP",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_UNDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_BLOCK_REDEFINED",
-            "polyspec_template::ErrorCode::E_RUNTIME_DEPTH",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadCycle",
+            "polyspec_template::ErrorCode::LoadOutsideRoot",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LoadNotLoaded",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::RuntimeType",
+            "polyspec_template::ErrorCode::RuntimeCompare",
+            "polyspec_template::ErrorCode::RuntimeDivZero",
+            "polyspec_template::ErrorCode::RuntimeStringify",
+            "polyspec_template::ErrorCode::RuntimeUnknownFunction",
+            "polyspec_template::ErrorCode::RuntimeArity",
+            "polyspec_template::ErrorCode::RuntimeUnknownLoop",
+            "polyspec_template::ErrorCode::RuntimeBlockUndefined",
+            "polyspec_template::ErrorCode::RuntimeBlockRedefined",
+            "polyspec_template::ErrorCode::RuntimeDepth",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -3697,29 +3697,29 @@
           ],
           "returns": "none",
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "blocking_io",
           "core": {
@@ -3774,33 +3774,33 @@
             "unit": "prepared_render"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_DATA_NUMBER_RANGE",
-            "polyspec_template::ErrorCode::E_DATA_NUMBER_NOT_FINITE",
-            "polyspec_template::ErrorCode::E_DATA_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_DATA_DEPTH",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::DataNumberRange",
+            "polyspec_template::ErrorCode::DataNumberNotFinite",
+            "polyspec_template::ErrorCode::DataInvalidUtf8",
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::DataDepth",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "blocking_io",
           "core": {
@@ -3858,29 +3858,29 @@
             "unit": "prepared_render"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_NOT_FOUND",
-            "polyspec_template::ErrorCode::E_LOAD_FAILED",
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LoadNotFound",
+            "polyspec_template::ErrorCode::LoadFailed",
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "blocking_io",
           "core": {
@@ -3947,27 +3947,27 @@
             "unit": "template"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::ArgumentDelimiters",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4012,27 +4012,27 @@
             "unit": "template_analysis"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::ArgumentDelimiters",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4078,9 +4078,9 @@
             "unit": "prefix_analysis"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_LEX_INVALID_UTF8",
-            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::LexInvalidUtf8",
+            "polyspec_template::ErrorCode::ArgumentDelimiters",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4118,29 +4118,29 @@
             "unit": "formatted"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_COMMENT",
-            "polyspec_template::ErrorCode::E_PARSE_UNTERMINATED_STRING",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_TOKEN",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_NUMBER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_ESCAPE",
-            "polyspec_template::ErrorCode::E_PARSE_UNEXPECTED_CLOSE",
-            "polyspec_template::ErrorCode::E_PARSE_UNCLOSED_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK",
-            "polyspec_template::ErrorCode::E_PARSE_DUPLICATE_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE",
-            "polyspec_template::ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF",
-            "polyspec_template::ErrorCode::E_PARSE_RESERVED_NAME",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_PATH",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_BLOCK_TAG",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_WRAPPER",
-            "polyspec_template::ErrorCode::E_PARSE_INVALID_DIRECTIVE",
-            "polyspec_template::ErrorCode::E_RUNTIME_LIMIT",
-            "polyspec_template::ErrorCode::E_ARGUMENT_DELIMITERS",
-            "polyspec_template::ErrorCode::E_ARGUMENT_INDENT",
-            "polyspec_template::ErrorCode::E_FORMAT_HTML",
-            "polyspec_template::ErrorCode::E_FORMAT_INVARIANT",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::ParseUnterminatedTag",
+            "polyspec_template::ErrorCode::ParseUnterminatedComment",
+            "polyspec_template::ErrorCode::ParseUnterminatedString",
+            "polyspec_template::ErrorCode::ParseUnexpectedToken",
+            "polyspec_template::ErrorCode::ParseInvalidNumber",
+            "polyspec_template::ErrorCode::ParseInvalidEscape",
+            "polyspec_template::ErrorCode::ParseUnexpectedClose",
+            "polyspec_template::ErrorCode::ParseUnclosedBlock",
+            "polyspec_template::ErrorCode::ParseElseOutsideBlock",
+            "polyspec_template::ErrorCode::ParseDuplicateElse",
+            "polyspec_template::ErrorCode::ParseElseifAfterElse",
+            "polyspec_template::ErrorCode::ParseElseifNotInIf",
+            "polyspec_template::ErrorCode::ParseReservedName",
+            "polyspec_template::ErrorCode::ParseInvalidPath",
+            "polyspec_template::ErrorCode::ParseInvalidBlockTag",
+            "polyspec_template::ErrorCode::ParseInvalidWrapper",
+            "polyspec_template::ErrorCode::ParseInvalidDirective",
+            "polyspec_template::ErrorCode::RuntimeLimit",
+            "polyspec_template::ErrorCode::ArgumentDelimiters",
+            "polyspec_template::ErrorCode::ArgumentIndent",
+            "polyspec_template::ErrorCode::FormatHtml",
+            "polyspec_template::ErrorCode::FormatInvariant",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4173,7 +4173,7 @@
           ],
           "returns": "text",
           "raises": [
-            "polyspec_template::ErrorCode::E_LOAD_OUTSIDE_ROOT"
+            "polyspec_template::ErrorCode::LoadOutsideRoot"
           ],
           "wait": "none",
           "core": {
@@ -4201,7 +4201,7 @@
           ],
           "returns": "text",
           "raises": [
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4229,8 +4229,8 @@
             "unit": "template"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_AST_INVALID",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::AstInvalid",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4257,8 +4257,8 @@
             "unit": "bound_map"
           },
           "raises": [
-            "polyspec_template::ErrorCode::E_DATA_UNSUPPORTED_TYPE",
-            "polyspec_template::ErrorCode::E_INTERNAL"
+            "polyspec_template::ErrorCode::DataUnsupportedType",
+            "polyspec_template::ErrorCode::Internal"
           ],
           "wait": "none",
           "core": {
@@ -4312,7 +4312,7 @@
       "from": {
         "node": "code: 'E_DATA_DEPTH' and the other E_ codes",
         "python": "code 'E_DATA_DEPTH' and the other E_ codes",
-        "php": "ErrorCode::E_DATA_DEPTH and the other E_ constants",
+        "php": "ErrorCode::DataDepth and the other E_ constants",
         "go": "errs.Code DataDepth = \"E_DATA_DEPTH\""
       },
       "to": null

@@ -50,7 +50,7 @@ impl Source {
     pub fn byte_at(&self, index: usize) -> Result<usize, TemplateError> {
         if index > self.length() {
             return Err(TemplateError::argument(
-                ErrorCode::E_ARGUMENT_SOURCE_RANGE,
+                ErrorCode::ArgumentSourceRange,
                 "",
                 "index is outside the source",
             ));
@@ -62,7 +62,7 @@ impl Source {
     pub fn span(&self, start: usize, end: usize) -> Result<Span, TemplateError> {
         if start > end {
             return Err(TemplateError::argument(
-                ErrorCode::E_ARGUMENT_SOURCE_RANGE,
+                ErrorCode::ArgumentSourceRange,
                 "",
                 "source range is reversed",
             ));

@@ -8,5 +8,5 @@ pub fn source_context() -> Result<TemplateError, TemplateError> {
     let _: usize = source.length();
     let _: usize = source.byte_at(1).expect("source index");
     let _: Span = source.span(0, 1).expect("source range");
-    Ok(text_source.error(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, 0, 1, "example"))
+    Ok(text_source.error(ErrorCode::ParseUnexpectedToken, 0, 1, "example"))
 }

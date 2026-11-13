@@ -75,7 +75,7 @@ fn public_source_contexts_preserve_the_shared_fixtures() {
             let restored = LineIndex::from_starts(item.lines.clone());
             assert_eq!(source.lines(), &restored);
             let span: Span = [item.probe.offset, item.probe.end];
-            assert_eq!(ErrorCode::E_PARSE_UNEXPECTED_TOKEN.as_str(), "parse_unexpected_token");
+            assert_eq!(ErrorCode::ParseUnexpectedToken.as_str(), "parse_unexpected_token");
             assert_eq!(source.length(), item.offsets.byte.len() - 1);
             for (start, offset) in item.offsets.byte.iter().enumerate() {
                 assert_eq!(source.byte_at(start).expect("native index"), *offset);
@@ -85,7 +85,7 @@ fn public_source_contexts_preserve_the_shared_fixtures() {
             }
             assert_eq!(LineIndex::of(source.bytes()), *source.lines());
             assert_eq!(restored.position(span[0]), (item.probe.line, item.probe.col));
-            let error = source.error(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, span[0], span[1], "message");
+            let error = source.error(ErrorCode::ParseUnexpectedToken, span[0], span[1], "message");
             assert_eq!(
                 (
                     error.code,
@@ -97,7 +97,7 @@ fn public_source_contexts_preserve_the_shared_fixtures() {
                     error.message.as_str()
                 ),
                 (
-                    ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+                    ErrorCode::ParseUnexpectedToken,
                     item.name.as_str(),
                     item.probe.line,
                     item.probe.col,
@@ -120,7 +120,7 @@ fn public_source_rejects_shared_invalid_utf8() {
         let error = Source::from_bytes("invalid.tpl", &bytes(&item.hex)).expect_err(&item.id);
         assert_eq!(
             (error.code, error.offset, error.end, error.line, error.col),
-            (ErrorCode::E_LEX_INVALID_UTF8, item.offset, item.offset + 1, item.line, item.col),
+            (ErrorCode::LexInvalidUtf8, item.offset, item.offset + 1, item.line, item.col),
             "{}",
             item.id
         );

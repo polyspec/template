@@ -42,7 +42,7 @@ pub struct BuiltIn {
 /// Creates an runtime_type error.
 pub fn type_error(message: impl Into<String>) -> FunctionError {
     FunctionError {
-        code: ErrorCode::E_RUNTIME_TYPE,
+        code: ErrorCode::RuntimeType,
         message: message.into(),
     }
 }
@@ -89,7 +89,7 @@ pub fn arg_integer(value: &Value) -> Result<i64, FunctionError> {
     }
     if number.abs() > MAX_SAFE {
         return Err(FunctionError {
-            code: ErrorCode::E_RUNTIME_LIMIT,
+            code: ErrorCode::RuntimeLimit,
             message: format!("{number} is outside the integer range of an argument"),
         });
     }
@@ -108,7 +108,7 @@ pub fn arg_count(value: &Value) -> Result<usize, FunctionError> {
 pub fn stringify_arg(value: &Value) -> Result<String, FunctionError> {
     stringify(value).map_err(|error| match error {
         StringifyError::NoText => FunctionError {
-            code: ErrorCode::E_RUNTIME_STRINGIFY,
+            code: ErrorCode::RuntimeStringify,
             message: "a list or map cannot be converted to text".to_string(),
         },
         StringifyError::NotFinite(error) => internal(&error),
@@ -123,7 +123,7 @@ pub fn optional(args: &[Value], index: usize) -> Option<&Value> {
 /// internal: a broken invariant of a function, such as a count that its own checks bounded and that still does not fit.
 pub fn internal(error: &dyn std::fmt::Display) -> FunctionError {
     FunctionError {
-        code: ErrorCode::E_INTERNAL,
+        code: ErrorCode::Internal,
         message: format!("internal failure: {error}"),
     }
 }

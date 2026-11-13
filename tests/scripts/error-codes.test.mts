@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { ARTIFACTS, CATALOG, goName, parseCatalog, render, replaceBlocks, ROOT, run } from '../../scripts/generate-error-codes.mts';
+import { ARTIFACTS, CATALOG, goName, parseCatalog, render, replaceBlocks, ROOT, run, rustName } from '../../scripts/generate-error-codes.mts';
 
 const catalog = parseCatalog(readFileSync(path.join(ROOT, CATALOG), 'utf8'));
 const codes = new Set(catalog.map(entry => entry.code));
@@ -51,13 +51,19 @@ test('replaceBlocks writes each block between its markers, keeps the markers and
   assert.throws(() => replaceBlocks(source, [block], catalog, 'x'), /x holds 2 blocks of generated error codes; the generator writes 1/);
 });
 
+test('the Rust variant of a kind is its words in UpperCamelCase, whose snake_case is the kind', { timeout: 10_000 }, () => {
+  for (const { kind } of catalog) assert.equal(rustName(kind).replace(/(?<=[a-z0-9])(?=[A-Z])/g, '_').toLowerCase(), kind);
+  assert.equal(rustName('lex_invalid_utf8'), 'LexInvalidUtf8');
+});
+
 test('every list is stable on a second render and holds a code that the catalog adds', { timeout: 10_000 }, () => {
   const grown = [...catalog, { code: 'E_EXTRA_CODE', kind: 'extra_code', condition: 'An added code.' }];
   for (const artifact of ARTIFACTS) {
     const current = readFileSync(path.join(ROOT, artifact.file), 'utf8');
     const own = render(artifact, catalog, current);
     assert.equal(render(artifact, catalog, own), own, `${artifact.file} is stable`);
-    assert.match(render(artifact, grown, own), /E_EXTRA_CODE/, `${artifact.file} writes the added code`);
+    // The Rust core names the variant of a kind in UpperCamelCase (binding E-3); the other lists name its legacy code.
+    assert.match(render(artifact, grown, own), artifact.file === 'packages/rust/src/error.rs' ? /ExtraCode => "extra_code"/ : /E_EXTRA_CODE/, `${artifact.file} writes the added code`);
   }
 });
 

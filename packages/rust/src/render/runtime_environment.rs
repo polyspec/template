@@ -28,7 +28,7 @@ impl RuntimeEnvironment {
         for (name, function) in host_functions {
             runtime
                 .register(&name, function)
-                .map_err(|message| TemplateError::argument(ErrorCode::E_ARGUMENT_FUNCTION_NAME, "", message))?;
+                .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))?;
         }
         Ok(runtime)
     }

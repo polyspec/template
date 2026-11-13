@@ -56,33 +56,33 @@ fn scalars_bind_as_the_tables_of_val_13() {
     assert_eq!(value_in(&mut host, HostValue::Int(-3)).unwrap(), Value::Number(-3.0));
     assert_eq!(value_in(&mut host, HostValue::UntypedNumber(1.5)).unwrap(), Value::Number(1.5));
     assert_eq!(value_in(&mut host, text("a")).unwrap(), Value::text("a"));
-    assert_eq!(code(value_in(&mut host, HostValue::Int(1 << 53))), ErrorCode::E_DATA_NUMBER_RANGE);
+    assert_eq!(code(value_in(&mut host, HostValue::Int(1 << 53))), ErrorCode::DataNumberRange);
     assert_eq!(
         code(value_in(&mut host, HostValue::Number("1".repeat(30)))),
-        ErrorCode::E_DATA_NUMBER_RANGE
+        ErrorCode::DataNumberRange
     );
     assert_eq!(
         code(value_in(&mut host, HostValue::Float(f64::NAN))),
-        ErrorCode::E_DATA_NUMBER_NOT_FINITE
+        ErrorCode::DataNumberNotFinite
     );
     assert_eq!(
         code(value_in(&mut host, HostValue::Text(HostText::Utf16(vec![0xD800])))),
-        ErrorCode::E_DATA_INVALID_UTF8
+        ErrorCode::DataInvalidUtf8
     );
     assert_eq!(
         code(value_in(&mut host, HostValue::Text(HostText::Bytes(vec![0xFF])))),
-        ErrorCode::E_DATA_INVALID_UTF8
+        ErrorCode::DataInvalidUtf8
     );
     assert_eq!(
         code(value_in(&mut host, HostValue::Text(HostText::CodePoints(vec![0xDC00])))),
-        ErrorCode::E_DATA_INVALID_UTF8
+        ErrorCode::DataInvalidUtf8
     );
     for value in [
         HostValue::Bytes(vec![1]),
         HostValue::Date(Handle::new(1)),
         HostValue::Callable(Handle::new(1)),
     ] {
-        assert_eq!(code(value_in(&mut host, value)), ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+        assert_eq!(code(value_in(&mut host, value)), ErrorCode::DataUnsupportedType);
     }
 }
 
@@ -124,7 +124,7 @@ fn containers_bind_their_children_in_order() {
                 len: 1
             }
         )),
-        ErrorCode::E_DATA_UNSUPPORTED_TYPE
+        ErrorCode::DataUnsupportedType
     );
 }
 
@@ -146,7 +146,7 @@ fn a_value_that_holds_itself_is_too_deep() {
                 len: 1
             }
         )),
-        ErrorCode::E_DATA_DEPTH
+        ErrorCode::DataDepth
     );
 }
 
@@ -175,7 +175,7 @@ fn value_in_has_the_form_of_a_value_alias_in() {
     let function: fn(&mut dyn HostValues, HostValue) -> Result<Value, Failure<TemplateError>> = value_in;
     let mut host = Host::default();
     match function(&mut host, HostValue::Bytes(Vec::new())) {
-        Err(Failure::Kind(error)) => assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE),
+        Err(Failure::Kind(error)) => assert_eq!(error.code, ErrorCode::DataUnsupportedType),
         other => panic!("expected the kind data_unsupported_type, got {other:?}"),
     }
 }
@@ -267,7 +267,7 @@ fn a_host_object_is_opaque_to_templates() {
         "[]"
     );
     match program.render_values(polyspec_template::RenderTarget::Name("b.tpl"), assign(), &options) {
-        Err(RenderError::Kind(error)) => assert_eq!(error.code, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION),
+        Err(RenderError::Kind(error)) => assert_eq!(error.code, ErrorCode::RuntimeUnknownFunction),
         other => panic!("expected runtime_unknown_function, got {other:?}"),
     }
 }

@@ -25,7 +25,7 @@ fn decimals(args: &[Value], index: usize, name: &str) -> Result<usize, FunctionE
     let places = arg_count(value)?;
     if places > MAX_DECIMALS {
         return Err(FunctionError {
-            code: ErrorCode::E_RUNTIME_LIMIT,
+            code: ErrorCode::RuntimeLimit,
             message: format!("{name} writes at most {MAX_DECIMALS} decimals, not {places}"),
         });
     }

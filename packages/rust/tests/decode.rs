@@ -71,7 +71,7 @@ fn decode_fails_naming_the_json_pointer_of_the_invalid_node() {
         let pointer = case["path"].as_str().expect("path");
         let json = serde_json::to_string(&case["ast"]).expect("encode");
         let error = decode_template(&json).expect_err(name);
-        assert_eq!(error.code, polyspec_template::ErrorCode::E_AST_INVALID, "{name}: {error}");
+        assert_eq!(error.code, polyspec_template::ErrorCode::AstInvalid, "{name}: {error}");
         assert_eq!(common::ast_pointer(&error), Some(pointer), "{name}: {error}");
         let shown = if pointer.is_empty() { "the root" } else { pointer };
         assert!(error.to_string().contains(shown), "{name}: {error}");
@@ -91,7 +91,7 @@ fn decode_names_the_deepest_invalid_node() {
 #[test]
 fn decode_fails_on_text_that_is_not_json() {
     let error = decode_template("{").expect_err("{");
-    assert_eq!(error.code, polyspec_template::ErrorCode::E_AST_INVALID, "{error}");
+    assert_eq!(error.code, polyspec_template::ErrorCode::AstInvalid, "{error}");
     assert!(common::ast_pointer(&error).is_none(), "{error}");
 }
 

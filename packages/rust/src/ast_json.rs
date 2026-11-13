@@ -228,11 +228,10 @@ fn write_expr(out: &mut String, expr: &Expr) -> Result<(), TemplateError> {
                 LiteralValue::Null => out.push_str("null"),
                 LiteralValue::Bool(value) => out.push_str(if *value { "true" } else { "false" }),
                 // AST-7: the number token of the value, as VAL-9 writes it.
-                LiteralValue::Number(value) => {
-                    out.push_str(&number_text(*value).map_err(|error| {
-                        TemplateError::without_position(ErrorCode::E_INTERNAL, "", format!("internal failure: {error}"))
-                    })?)
-                }
+                LiteralValue::Number(value) => out.push_str(
+                    &number_text(*value)
+                        .map_err(|error| TemplateError::without_position(ErrorCode::Internal, "", format!("internal failure: {error}")))?,
+                ),
                 LiteralValue::String(value) => text(out, value),
             }
             span(out, &mut first, *at);
@@ -1343,7 +1342,7 @@ fn is_identifier(name: &str) -> bool {
 /// (ERR-15), whose message names the JSON Pointer of the first node, in document order, that breaks one.
 pub fn decode_template(json: &str) -> Result<Template, TemplateError> {
     let value = parse(json.as_bytes(), &ParseOptions::default())
-        .map_err(|error| TemplateError::without_position(ErrorCode::E_AST_INVALID, "", format!("the template AST is not JSON: {error}")))?;
+        .map_err(|error| TemplateError::without_position(ErrorCode::AstInvalid, "", format!("the template AST is not JSON: {error}")))?;
     let mut violations = Violations::default();
     violations.template(&value);
     let invalid = match violations.first() {
@@ -1358,6 +1357,6 @@ pub fn decode_template(json: &str) -> Result<Template, TemplateError> {
         } else {
             format!("invalid template AST at {path}: {reason}")
         };
-        TemplateError::without_position(ErrorCode::E_AST_INVALID, "", message)
+        TemplateError::without_position(ErrorCode::AstInvalid, "", message)
     })
 }

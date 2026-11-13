@@ -19,7 +19,7 @@ impl Source {
         if let Err(error) = std::str::from_utf8(input) {
             let invalid = error.valid_up_to();
             return Err(TemplateError::at(
-                ErrorCode::E_LEX_INVALID_UTF8,
+                ErrorCode::LexInvalidUtf8,
                 name,
                 Some(&LineIndex::of(input)),
                 [invalid, invalid + 1],
@@ -36,7 +36,7 @@ impl Source {
             Ok(text) => text.to_string(),
             Err(error) => {
                 return Err(TemplateError::without_position(
-                    ErrorCode::E_INTERNAL,
+                    ErrorCode::Internal,
                     name,
                     format!("internal failure: the text after the BOM is not UTF-8: {error}"),
                 ));

@@ -338,7 +338,7 @@ impl<'a> TemplateParser<'a> {
         self.scan()?;
         if let Some(frame) = self.frames.last() {
             return Err(self.fail(
-                ErrorCode::E_PARSE_UNCLOSED_BLOCK,
+                ErrorCode::ParseUnclosedBlock,
                 frame.open_start,
                 frame.open_start + 1,
                 "block is not closed before the end of the file",
@@ -520,7 +520,7 @@ impl<'a> TemplateParser<'a> {
             Some(":?") => {
                 let Some(frame) = self.frames.last() else {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK,
+                        ErrorCode::ParseElseOutsideBlock,
                         context.start,
                         context.start + 1,
                         "\"{:?}\" outside of a block",
@@ -528,7 +528,7 @@ impl<'a> TemplateParser<'a> {
                 };
                 if !matches!(frame.node, Node::If { .. }) {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF,
+                        ErrorCode::ParseElseifNotInIf,
                         context.start,
                         context.start + 1,
                         "\"{:?}\" inside a loop or if-block",
@@ -536,7 +536,7 @@ impl<'a> TemplateParser<'a> {
                 }
                 if frame.has_else {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE,
+                        ErrorCode::ParseElseifAfterElse,
                         context.start,
                         context.start + 1,
                         "\"{:?}\" after \"{:}\"",
@@ -547,7 +547,7 @@ impl<'a> TemplateParser<'a> {
                 let end = self.finish_tag(&context, parser.expect_close()?)?;
                 self.collect(&parser);
                 let Some(frame) = self.frames.last_mut() else {
-                    return Err(self.fail(ErrorCode::E_INTERNAL, context.start, context.start + 1, "the open block is missing"));
+                    return Err(self.fail(ErrorCode::Internal, context.start, context.start + 1, "the open block is missing"));
                 };
                 if let Node::If { branches, .. } = &mut frame.node {
                     branches.push(IfBranch {
@@ -564,7 +564,7 @@ impl<'a> TemplateParser<'a> {
             Some(":") => {
                 let Some(frame) = self.frames.last() else {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK,
+                        ErrorCode::ParseElseOutsideBlock,
                         context.start,
                         context.start + 1,
                         "\"{:}\" outside of a block",
@@ -572,7 +572,7 @@ impl<'a> TemplateParser<'a> {
                 };
                 if frame.has_else {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_DUPLICATE_ELSE,
+                        ErrorCode::ParseDuplicateElse,
                         context.start,
                         context.start + 1,
                         "second \"{:}\" in the same block",
@@ -580,7 +580,7 @@ impl<'a> TemplateParser<'a> {
                 }
                 let end = self.finish_tag(&context, self.expect_close_raw(&context, body_start)?)?;
                 let Some(frame) = self.frames.last_mut() else {
-                    return Err(self.fail(ErrorCode::E_INTERNAL, context.start, context.start + 1, "the open block is missing"));
+                    return Err(self.fail(ErrorCode::Internal, context.start, context.start + 1, "the open block is missing"));
                 };
                 frame.has_else = true;
                 frame.bodies.push(Vec::new());
@@ -590,15 +590,15 @@ impl<'a> TemplateParser<'a> {
             Some("/") => {
                 let Some(frame) = self.frames.pop() else {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_UNEXPECTED_CLOSE,
+                        ErrorCode::ParseUnexpectedClose,
                         context.start,
                         context.start + 1,
                         "\"{/}\" without an open block",
                     ));
                 };
                 let end = self.finish_tag(&context, self.expect_close_raw(&context, body_start)?)?;
-                let node = close_frame(frame, end)
-                    .map_err(|message| self.fail(ErrorCode::E_INTERNAL, context.start, context.start + 1, message))?;
+                let node =
+                    close_frame(frame, end).map_err(|message| self.fail(ErrorCode::Internal, context.start, context.start + 1, message))?;
                 self.push_item(Item::Node(node));
                 end
             }
@@ -629,12 +629,12 @@ impl<'a> TemplateParser<'a> {
                 end
             }
             Some("%") => self.parse_directive(&context, body_start, first_tag)?,
-            None => return Err(self.fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag")),
-            Some(_) => return Err(self.fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag")),
+            None => return Err(self.fail(ErrorCode::ParseUnexpectedToken, body_start, body_start + 1, "unknown tag")),
+            Some(_) => return Err(self.fail(ErrorCode::ParseUnexpectedToken, body_start, body_start + 1, "unknown tag")),
         };
         if is_directive && !first_tag {
             return Err(self.fail(
-                ErrorCode::E_PARSE_INVALID_DIRECTIVE,
+                ErrorCode::ParseInvalidDirective,
                 context.start,
                 context.start + 1,
                 "delimiter directive is not the first tag",
@@ -642,7 +642,7 @@ impl<'a> TemplateParser<'a> {
         }
         let Some(sigil) = sigil else {
             return Err(self.fail(
-                ErrorCode::E_INTERNAL,
+                ErrorCode::Internal,
                 context.start,
                 context.start + 1,
                 "an accepted tag has no sigil",
@@ -711,14 +711,14 @@ impl<'a> TemplateParser<'a> {
         }
         if !bytes[at.min(bytes.len())..].contains(&self.delimiters.close) {
             return Err(self.fail(
-                ErrorCode::E_PARSE_UNTERMINATED_TAG,
+                ErrorCode::ParseUnterminatedTag,
                 context.open,
                 context.open + 1,
                 "tag is not terminated",
             ));
         }
         Err(self.fail(
-            ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+            ErrorCode::ParseUnexpectedToken,
             at,
             at + 1,
             "unexpected character before the end of the tag",
@@ -731,7 +731,7 @@ impl<'a> TemplateParser<'a> {
         let at = skip_horizontal_space(bytes, after_close);
         if !bytes[at.min(bytes.len())..].starts_with(wrapper.closer.as_bytes()) {
             return Err(self.fail(
-                ErrorCode::E_PARSE_INVALID_WRAPPER,
+                ErrorCode::ParseInvalidWrapper,
                 context.start,
                 context.start + wrapper.opener.len(),
                 format!("wrapped tag is not followed by {:?}", wrapper.closer),
@@ -749,7 +749,7 @@ impl<'a> TemplateParser<'a> {
             .position(|window| window == terminator.as_slice());
         let Some(offset) = found else {
             return Err(self.fail(
-                ErrorCode::E_PARSE_UNTERMINATED_COMMENT,
+                ErrorCode::ParseUnterminatedComment,
                 context.open,
                 context.open + 1,
                 "comment is not terminated",
@@ -773,7 +773,7 @@ impl<'a> TemplateParser<'a> {
         let after_name = skip_horizontal_space(bytes, name_start + name_length);
         if name_length == 0 || bytes.get(after_name) != Some(&b'=') {
             return Err(self.fail(
-                ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+                ErrorCode::ParseUnexpectedToken,
                 name_start,
                 name_start + 1,
                 "loop requires \"name = expression\"",
@@ -782,7 +782,7 @@ impl<'a> TemplateParser<'a> {
         let name = self.source.text[name_start..name_start + name_length].to_string();
         if RESERVED.contains(&name.as_str()) {
             return Err(self.fail(
-                ErrorCode::E_PARSE_RESERVED_NAME,
+                ErrorCode::ParseReservedName,
                 name_start,
                 name_start + name_length,
                 format!("{name} is a reserved word"),
@@ -822,13 +822,13 @@ impl<'a> TemplateParser<'a> {
         let operator_start = skip_horizontal_space(bytes, body_start + name_length);
         let operator_length = assign_operator_length(bytes, operator_start);
         if name_length == 0 || operator_length == 0 {
-            return Err(self.fail(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, body_start, body_start + 1, "unknown tag"));
+            return Err(self.fail(ErrorCode::ParseUnexpectedToken, body_start, body_start + 1, "unknown tag"));
         }
         let name = self.source.text[body_start..body_start + name_length].to_string();
         let operator = self.source.text[operator_start..operator_start + operator_length].to_string();
         if RESERVED.contains(&name.as_str()) {
             return Err(self.fail(
-                ErrorCode::E_PARSE_RESERVED_NAME,
+                ErrorCode::ParseReservedName,
                 body_start,
                 body_start + name_length,
                 format!("{name} is a reserved word"),
@@ -868,7 +868,7 @@ impl<'a> TemplateParser<'a> {
             } else {
                 let Some(op) = BinaryOp::from_text(&operator[..1]) else {
                     return Err(self.fail(
-                        ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+                        ErrorCode::ParseUnexpectedToken,
                         body_start,
                         body_start + 1,
                         "unknown assignment operator",
@@ -895,7 +895,7 @@ impl<'a> TemplateParser<'a> {
 
     fn parse_directive(&mut self, context: &TagContext, body_start: usize, first_tag: bool) -> Result<usize, TemplateError> {
         let invalid =
-            |parser: &Self, message: &str| parser.fail(ErrorCode::E_PARSE_INVALID_DIRECTIVE, context.start, context.start + 1, message);
+            |parser: &Self, message: &str| parser.fail(ErrorCode::ParseInvalidDirective, context.start, context.start + 1, message);
         if !first_tag || !self.text_before_first_tag_is_whitespace {
             return Err(invalid(self, "delimiter directive is not the first tag"));
         }

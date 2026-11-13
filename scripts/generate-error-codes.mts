@@ -46,6 +46,11 @@ export function parseCatalog(text: string): CatalogCode[] {
 // The words of a code that keep their capitals in a Go identifier, as Go writes initialisms: LexInvalidUTF8, DataInvalidJSON.
 const GO_INITIALISMS = new Set(['UTF8', 'JSON']);
 
+/** The Rust variant of a kind: each word with a capital first letter, so its snake_case is the kind (binding E-3). */
+export function rustName(kind: string): string {
+  return kind.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+}
+
 /** The Go identifier of a code: each word after E_ with a capital first letter, initialisms in capitals. */
 export function goName(code: string): string {
   return code.slice(2).split('_').map(word => (GO_INITIALISMS.has(word) ? word : word.charAt(0) + word.slice(1).toLowerCase())).join('');
@@ -79,8 +84,8 @@ export const ARTIFACTS: Artifact[] = [
   {
     file: 'packages/rust/src/error.rs',
     blocks: [
-      { comment: '//', indent: '    ', lines: codes => codes.flatMap(({ code, condition }) => [`    /// ${condition}`, `    ${code},`]) },
-      { comment: '//', indent: '            ', lines: codes => codes.map(({ code, kind }) => `            ErrorCode::${code} => "${kind}",`) },
+      { comment: '//', indent: '    ', lines: codes => codes.flatMap(({ kind, condition }) => [`    /// ${condition}`, `    ${rustName(kind)},`]) },
+      { comment: '//', indent: '            ', lines: codes => codes.map(({ kind }) => `            ErrorCode::${rustName(kind)} => "${kind}",`) },
     ],
   },
   {

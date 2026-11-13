@@ -102,7 +102,7 @@ pub fn analyze_prefix(source: &[u8], name: &str, options: &ParseOptions) -> Resu
 fn option_delimiters(options: &ParseOptions, name: &str) -> Result<Delimiters, TemplateError> {
     match &options.delimiters {
         Some(value) => parse_delimiters(value)
-            .ok_or_else(|| TemplateError::argument(ErrorCode::E_ARGUMENT_DELIMITERS, name, format!("{value:?} is not a delimiter pair"))),
+            .ok_or_else(|| TemplateError::argument(ErrorCode::ArgumentDelimiters, name, format!("{value:?} is not a delimiter pair"))),
         None => Ok(DEFAULT_DELIMITERS),
     }
 }

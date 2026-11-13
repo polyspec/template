@@ -12,7 +12,7 @@ use polyspec_json::{StringifyOptions, stringify};
 /// `runtime_type`.
 pub fn to_json(value: &Value) -> Result<String, FunctionError> {
     let json = to_json_value(value).map_err(|error| match error.code {
-        ErrorCode::E_DATA_UNSUPPORTED_TYPE => type_error("json does not accept a native object"),
+        ErrorCode::DataUnsupportedType => type_error("json does not accept a native object"),
         _ => internal(&error),
     })?;
     Ok(stringify(&json, &StringifyOptions { html_safe: Some(true) }))

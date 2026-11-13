@@ -1,5 +1,5 @@
 <!-- doc-id: checklist-execution -->
-<!-- source-sha256: 54034fd46421de4d18d16d6b74741b1f93d1a4d566790e03752632a336ddc9e8 -->
+<!-- source-sha256: bb45a2584fa77b908f04bd1f924cec2c375b6e1516b04a1c0666336b81f42b7b -->
 # 실행 체크리스트
 
 | ID | Task | Deliverables | Verification | State |
@@ -529,3 +529,4 @@
 | T28.5 | Python backend는 polyspec.template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/python.mts, tests/runner/conformance-generated-python.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-python` | [ ] |
 | T28.6 | PHP backend는 Polyspec\\Template의 AstProgram으로 렌더하는 선언을 낸다 | packages/compiler/src/backends/php.mts, tests/runner/conformance-generated-php.mts, 생성 검사 | `make bindings` 뒤 `make conformance-generated-php` | [ ] |
 | T28.7 | Go backend는 Go 바인딩의 AstProgram으로 렌더하는 선언을 낸다. 생성 실행 문단이 docs/spec/compiler.md에서 빠진다 | packages/compiler/src/backends/go.mts, tests/runner/conformance-generated-go.mts, 생성 검사, docs/spec/compiler.md(.ko) | `make bindings` 뒤 `make conformance-generated-go` | [ ] |
+| T28.8 | P0: Rust ErrorCode의 variant 이름은 그 이름의 snake_case가 kind가 되게 짓는다(binding E-3). 예: parse_unterminated_tag는 ErrorCode::ParseUnterminatedTag. 원인: binding 8faad21의 binding check는 packages/rust/interface.json의 errors.kinds 행의 kind를 variant 이름에서 얻는다. 그래서 variant E_PARSE_UNTERMINATED_TAG는 e_parse_unterminated_tag가 되고, contracts/core-cases.json의 어떤 case도 그 kind를 내지 않아 CK-22가 282번 보고되며 binding generate가 계약을 거부한다 | scripts/generate-error-codes.mts, packages/rust/src/error.rs and every Rust source that names a code, packages/rust/interface.json, scripts/conformance-case-files.mts, scripts/check-generated-native-calls.mts, scripts/check-typed-generator.mts, CHANGELOG.md CHANGELOG.ko.md | `make error-codes-check`, `make test-rust`, `make lint-rust`; binding check of binding 8faad21 reports no CK-22 finding of a kind e_* | [o] |

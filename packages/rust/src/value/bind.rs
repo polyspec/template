@@ -35,11 +35,11 @@ fn bind_error(code: ErrorCode, message: impl Into<String>) -> BindError {
 /// VAL-2, VAL-3: accepts a number that is finite and whose magnitude is at most 2^53 − 1.
 pub fn check_number(value: f64) -> Result<f64, BindError> {
     if !value.is_finite() {
-        return Err(bind_error(ErrorCode::E_DATA_NUMBER_NOT_FINITE, "number is not finite"));
+        return Err(bind_error(ErrorCode::DataNumberNotFinite, "number is not finite"));
     }
     if value.abs() > MAX_SAFE {
         return Err(bind_error(
-            ErrorCode::E_DATA_NUMBER_RANGE,
+            ErrorCode::DataNumberRange,
             format!("number {value} is outside the safe range"),
         ));
     }
@@ -51,7 +51,7 @@ pub fn check_number(value: f64) -> Result<f64, BindError> {
 pub fn check_level(level: usize) -> Result<(), BindError> {
     if level > MAX_DEPTH {
         return Err(bind_error(
-            ErrorCode::E_DATA_DEPTH,
+            ErrorCode::DataDepth,
             format!("lists and maps nest deeper than {MAX_DEPTH} levels"),
         ));
     }
@@ -68,7 +68,7 @@ pub fn bind_json(input: &JsonValue) -> Result<Value, BindError> {
 /// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, internal.
 fn json_internal(error: &polyspec_json::Error) -> BindError {
     BindError {
-        code: ErrorCode::E_INTERNAL,
+        code: ErrorCode::Internal,
         message: format!("internal failure: {error}"),
     }
 }
@@ -77,7 +77,7 @@ fn json_internal(error: &polyspec_json::Error) -> BindError {
 fn json_text(input: &JsonValue) -> Result<String, BindError> {
     input.string_value().map_err(|error| match error {
         polyspec_json::Error::UnpairedSurrogate => BindError {
-            code: ErrorCode::E_DATA_INVALID_UTF8,
+            code: ErrorCode::DataInvalidUtf8,
             message: "a \\u escape leaves a surrogate unpaired".to_string(),
         },
         other => json_internal(&other),
@@ -119,7 +119,7 @@ fn bind_json_at(input: &JsonValue, level: usize) -> Result<Value, BindError> {
 /// literal that f64 does not read is a broken invariant of the JSON reader, internal.
 fn json_number(literal: &str) -> Result<f64, BindError> {
     literal.parse::<f64>().map_err(|error| BindError {
-        code: ErrorCode::E_INTERNAL,
+        code: ErrorCode::Internal,
         message: format!("the JSON number {literal} is not a number literal: {error}"),
     })
 }
@@ -134,7 +134,7 @@ pub fn bind_map(input: &JsonValue) -> Result<OrderedMap, BindError> {
             Ok(map) => map,
             Err(shared) => (*shared).clone(),
         }),
-        _ => Err(bind_error(ErrorCode::E_DATA_UNSUPPORTED_TYPE, "assign is not a map")),
+        _ => Err(bind_error(ErrorCode::DataUnsupportedType, "assign is not a map")),
     }
 }
 
@@ -230,7 +230,7 @@ pub fn to_json_value(value: &Value) -> Result<JsonValue, BindError> {
         }
         Value::Object(_) => {
             return Err(BindError {
-                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                code: ErrorCode::DataUnsupportedType,
                 message: "a native object has no JSON form".to_string(),
             });
         }

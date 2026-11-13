@@ -25,7 +25,7 @@ impl IndentUnit {
             Ok(IndentUnit(unit.to_string()))
         } else {
             Err(TemplateError::argument(
-                ErrorCode::E_ARGUMENT_INDENT,
+                ErrorCode::ArgumentIndent,
                 "",
                 "indent must be a run of spaces or one tab",
             ))
@@ -128,7 +128,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
     if let Some(unit) = &options.indent {
         let indentation = indent_edits(text, &analysis.tags, unit.as_str(), options.template_blocks, range.as_ref()).map_err(|error| {
             TemplateError::at(
-                ErrorCode::E_FORMAT_HTML,
+                ErrorCode::FormatHtml,
                 name,
                 Some(&LineIndex::of(text.as_bytes())),
                 [error.index, error.index + 1],
@@ -148,7 +148,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
     let formatted = apply(text, &edits);
     let invariant = |message: String| {
         TemplateError::at(
-            ErrorCode::E_FORMAT_INVARIANT,
+            ErrorCode::FormatInvariant,
             name,
             Some(&LineIndex::of(text.as_bytes())),
             [first, first],
@@ -178,7 +178,7 @@ pub fn format_bytes(source: &[u8], options: &FormatOptions) -> Result<Formatted,
             };
             analyze(source, &options.name, &parse_options)?;
             Err(TemplateError::without_position(
-                ErrorCode::E_INTERNAL,
+                ErrorCode::Internal,
                 &options.name,
                 "internal failure: the parser accepted a source that is not UTF-8 (LEX-1)",
             ))

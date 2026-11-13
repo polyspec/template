@@ -53,7 +53,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                     return Err(self.fail(
                         frame,
                         *span,
-                        ErrorCode::E_RUNTIME_UNKNOWN_LOOP,
+                        ErrorCode::RuntimeUnknownLoop,
                         format!("{loop} is not an active loop variable", loop = r#loop),
                     ));
                 };
@@ -168,7 +168,7 @@ impl<'c, 'e> Evaluator<'c, 'e> {
                 }
                 self.runtime.depth(self.context, Value::map(map), frame, *span)
             }
-            Expr::Spread { span, .. } => Err(self.fail(frame, *span, ErrorCode::E_RUNTIME_TYPE, "spread outside of a literal")),
+            Expr::Spread { span, .. } => Err(self.fail(frame, *span, ErrorCode::RuntimeType, "spread outside of a literal")),
         }
     }
 

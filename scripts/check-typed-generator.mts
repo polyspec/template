@@ -170,7 +170,7 @@ fn generated_${index}_matches() {
     ${fixtureExists(id, 'env.json') ? `options.env = Some(polyspec_template::env_from_json(&polyspec_template::read_json(${JSON.stringify(fixture(id, 'env.json'))}).unwrap()).unwrap());` : ''}
     assert_eq!(generated_${index}::execute(${JSON.stringify(target(id))}, &assign, &options), ${JSON.stringify(expected(id))});
     ${index === 0 ? `let generated_0::GeneratedError::Render(polyspec_template::RenderError::Kind(error)) = generated_0::execute_limited(${JSON.stringify(target(id))}, &assign, &options).unwrap_err() else { panic!("expected a template error") };
-    assert_eq!(error.code, polyspec_template::ErrorCode::E_RUNTIME_LIMIT);
+    assert_eq!(error.code, polyspec_template::ErrorCode::RuntimeLimit);
     assert!(error.line > 0 && error.col > 0);` : ''}
 }`).join('\n');
   writeFileSync(test, `${modules}\n${cases}\n`);

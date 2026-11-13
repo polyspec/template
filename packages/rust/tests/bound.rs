@@ -190,18 +190,18 @@ fn null_and_an_empty_map_give_an_empty_bound_map() {
 #[test]
 fn bind_reports_the_code_of_the_failed_check_without_a_position() {
     for input in [serde_json::json!(5), serde_json::json!([1]), serde_json::json!("{\"a\":1}")] {
-        expect_bind_failure(bind(&common::ojson(input)), ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+        expect_bind_failure(bind(&common::ojson(input)), ErrorCode::DataUnsupportedType);
     }
     expect_bind_failure(
         bind(&common::ojson(serde_json::json!({ "n": 9007199254740992u64 }))),
-        ErrorCode::E_DATA_NUMBER_RANGE,
+        ErrorCode::DataNumberRange,
     );
     let mut deep = serde_json::json!(1);
     for _ in 0..65 {
         deep = serde_json::json!([deep]);
     }
-    expect_bind_failure(bind(&common::ojson(serde_json::json!({ "deep": deep }))), ErrorCode::E_DATA_DEPTH);
+    expect_bind_failure(bind(&common::ojson(serde_json::json!({ "deep": deep }))), ErrorCode::DataDepth);
     let mut host = OrderedMap::new();
     host.insert("n".to_string(), Value::Number(f64::NAN));
-    expect_bind_failure(bind(&host), ErrorCode::E_DATA_NUMBER_NOT_FINITE);
+    expect_bind_failure(bind(&host), ErrorCode::DataNumberNotFinite);
 }

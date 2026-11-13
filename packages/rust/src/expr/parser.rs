@@ -115,7 +115,7 @@ impl<'a> ExpressionParser<'a> {
 
     /// internal at a token: a broken invariant of the lexer or the parser.
     fn internal(&self, token: &Token, message: &str) -> TemplateError {
-        self.lexer.error(ErrorCode::E_INTERNAL, token.start, token.end, message)
+        self.lexer.error(ErrorCode::Internal, token.start, token.end, message)
     }
 
     /// The error for a token the grammar does not accept.
@@ -125,18 +125,15 @@ impl<'a> ExpressionParser<'a> {
         {
             return self
                 .lexer
-                .error(ErrorCode::E_PARSE_UNTERMINATED_TAG, open, open + 1, "tag is not terminated");
+                .error(ErrorCode::ParseUnterminatedTag, open, open + 1, "tag is not terminated");
         }
         if token.kind == TokenType::Eof {
-            return self.lexer.error(
-                ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
-                token.start,
-                token.start,
-                "unexpected end of input",
-            );
+            return self
+                .lexer
+                .error(ErrorCode::ParseUnexpectedToken, token.start, token.start, "unexpected end of input");
         }
         self.lexer.error(
-            ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+            ErrorCode::ParseUnexpectedToken,
             token.start,
             token.end,
             format!("unexpected token {:?}", token.value),
@@ -183,7 +180,7 @@ impl<'a> ExpressionParser<'a> {
         if self.depth > EXPRESSION_DEPTH_LIMIT {
             let token = self.peek()?;
             return Err(self.lexer.error(
-                ErrorCode::E_RUNTIME_LIMIT,
+                ErrorCode::RuntimeLimit,
                 token.start,
                 token.end,
                 format!("expression nesting exceeds {EXPRESSION_DEPTH_LIMIT}"),
@@ -486,7 +483,7 @@ impl<'a> ExpressionParser<'a> {
                     Ok(value) => value,
                     Err(error) => {
                         return Err(self.lexer.error(
-                            ErrorCode::E_PARSE_INVALID_NUMBER,
+                            ErrorCode::ParseInvalidNumber,
                             token.start,
                             token.end,
                             format!("invalid number {}: {error}", token.value),
@@ -575,7 +572,7 @@ impl<'a> ExpressionParser<'a> {
                 BracketEntry::Plain(key) => {
                     let start = key.span()[0];
                     return Err(self.lexer.error(
-                        ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+                        ErrorCode::ParseUnexpectedToken,
                         start,
                         start + 1,
                         "map literal entry without \"=>\"",

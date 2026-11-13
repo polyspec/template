@@ -91,7 +91,7 @@ fn a_path_resolves_against_the_current_directory_and_fails_outside_the_root() {
         )
         .map_err(kind)
         .unwrap_err();
-    assert_eq!(error.code, ErrorCode::E_LOAD_OUTSIDE_ROOT);
+    assert_eq!(error.code, ErrorCode::LoadOutsideRoot);
 }
 
 /// RT-10, RT-40: native result variants retain payloads and version content changes.

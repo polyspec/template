@@ -72,7 +72,7 @@ fn current_time() -> Result<f64, BindError> {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs() as f64)
         .map_err(|error| BindError {
-            code: ErrorCode::E_INTERNAL,
+            code: ErrorCode::Internal,
             message: format!("system clock is before the Unix epoch: {error}"),
         })
 }
@@ -251,9 +251,8 @@ impl AstProgram {
     /// Creates an engine. A delimiter option that is not a delimiter pair is an argument error (ERR-13).
     pub fn new(options: EngineOptions) -> Result<AstProgram, TemplateError> {
         let delimiters = match options.delimiters {
-            Some(value) => parse_delimiters(&value).ok_or_else(|| {
-                TemplateError::argument(ErrorCode::E_ARGUMENT_DELIMITERS, "", format!("{value:?} is not a delimiter pair"))
-            })?,
+            Some(value) => parse_delimiters(&value)
+                .ok_or_else(|| TemplateError::argument(ErrorCode::ArgumentDelimiters, "", format!("{value:?} is not a delimiter pair")))?,
             None => DEFAULT_DELIMITERS,
         };
         Ok(AstProgram {
@@ -274,7 +273,7 @@ impl AstProgram {
     pub fn register(&mut self, name: &str, function: HostFunction) -> Result<(), TemplateError> {
         self.runtime
             .register(name, function)
-            .map_err(|message| TemplateError::argument(ErrorCode::E_ARGUMENT_FUNCTION_NAME, "", message))
+            .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))
     }
 
     /// Registers one logical class function used by `Class::method(...)`. A class or method name that is not an
@@ -282,7 +281,7 @@ impl AstProgram {
     pub fn register_class(&mut self, class_name: &str, method: &str, function: HostFunction) -> Result<(), TemplateError> {
         self.runtime
             .register_class(class_name, method, function)
-            .map_err(|message| TemplateError::argument(ErrorCode::E_ARGUMENT_FUNCTION_NAME, "", message))
+            .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
@@ -295,11 +294,11 @@ impl AstProgram {
         };
         let loaded = match self.loader.load(name) {
             Ok(Some(loaded)) => loaded,
-            Ok(None) => return Err(fail(ErrorCode::E_LOAD_NOT_FOUND, format!("template {name} does not exist"))),
+            Ok(None) => return Err(fail(ErrorCode::LoadNotFound, format!("template {name} does not exist"))),
             // RT-9: a load that the loader judges failed is load_failed with its cause, at the tag that names the template.
-            Err(LoadError::Kind(error)) if error.code == ErrorCode::E_LOAD_FAILED => {
+            Err(LoadError::Kind(error)) if error.code == ErrorCode::LoadFailed => {
                 return Err(fail(
-                    ErrorCode::E_LOAD_FAILED,
+                    ErrorCode::LoadFailed,
                     format!("template {name} cannot be loaded: {}", error.message),
                 ));
             }
@@ -311,12 +310,12 @@ impl AstProgram {
         // RT-9: a loaded template holds a non-empty version; the type holds a source or an AST.
         if loaded.version().is_empty() {
             return Err(fail(
-                ErrorCode::E_LOAD_FAILED,
+                ErrorCode::LoadFailed,
                 format!("template {name} cannot be loaded: the loader returned no version"),
             ));
         }
         // A cache that a panic of another render poisoned fails the load as internal instead of serving what it holds.
-        let poisoned = |error: PoisonError<_>| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be read: {error}"));
+        let poisoned = |error: PoisonError<_>| fail(ErrorCode::Internal, format!("the template cache cannot be read: {error}"));
         if let Some(Cached::Template(version, template)) = self.cache.lock().map_err(poisoned)?.get(name)
             && (self.artifact_refresh == ArtifactRefresh::False
                 || (self.artifact_refresh == ArtifactRefresh::True && version == loaded.version()))
@@ -338,7 +337,7 @@ impl AstProgram {
         let template = Arc::new(template);
         self.cache
             .lock()
-            .map_err(|error| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be written: {error}")))?
+            .map_err(|error| fail(ErrorCode::Internal, format!("the template cache cannot be written: {error}")))?
             .insert(name.to_string(), Cached::Template(version, Arc::clone(&template)));
         Ok(template)
     }
@@ -359,15 +358,15 @@ impl AstProgram {
         let cache = self
             .cache
             .lock()
-            .map_err(|error| fail(ErrorCode::E_INTERNAL, format!("the template cache cannot be read: {error}")))?;
+            .map_err(|error| fail(ErrorCode::Internal, format!("the template cache cannot be read: {error}")))?;
         match cache.get(name) {
             Some(Cached::Template(_, template)) => Ok(Arc::clone(template)),
-            Some(Cached::Failed(error)) if matches!(error.code, ErrorCode::E_LOAD_NOT_FOUND | ErrorCode::E_LOAD_FAILED) => {
+            Some(Cached::Failed(error)) if matches!(error.code, ErrorCode::LoadNotFound | ErrorCode::LoadFailed) => {
                 Err(fail(error.code, error.message.clone()))
             }
             Some(Cached::Failed(error)) => Err(RenderError::Kind(error.clone())),
             None => Err(fail(
-                ErrorCode::E_LOAD_NOT_LOADED,
+                ErrorCode::LoadNotLoaded,
                 format!("template {name} is not loaded: a loader that reads files is called by prepare and load only (RT-77)"),
             )),
         }
@@ -413,7 +412,7 @@ impl AstProgram {
                         .lock()
                         .map_err(|lock| {
                             TemplateError::without_position(
-                                ErrorCode::E_INTERNAL,
+                                ErrorCode::Internal,
                                 &next,
                                 format!("the template cache cannot be written: {lock}"),
                             )
@@ -605,7 +604,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
             registry.insert(id.clone(), DefineEntry::Html(html.clone()));
         } else if let Some(template) = &input.template {
             let name = resolve_path("", template).map_err(|error| BindError {
-                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                code: ErrorCode::DataUnsupportedType,
                 message: format!("define {id}: {}", error.message),
             })?;
             let data = match &input.data {
@@ -614,7 +613,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
                     Value::Map(map) => Some(map),
                     _ => {
                         return Err(BindError {
-                            code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                            code: ErrorCode::DataUnsupportedType,
                             message: format!("define {id}: data is not a map"),
                         });
                     }
@@ -623,7 +622,7 @@ fn bind_defines(defines: &HashMap<String, DefineInput>) -> Result<HashMap<String
             registry.insert(id.clone(), DefineEntry::Template { template: name, data });
         } else {
             return Err(BindError {
-                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                code: ErrorCode::DataUnsupportedType,
                 message: format!("define {id}: entry needs \"template\" or \"html\""),
             });
         }
@@ -656,7 +655,7 @@ pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInpu
                 None => Ok(None),
                 Some(field) if field.kind() == JsonKind::String => Ok(Some(json_text(field)?)),
                 Some(_) => Err(BindError {
-                    code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                    code: ErrorCode::DataUnsupportedType,
                     message: format!("define {id}: {name} is not a string"),
                 }),
             }
@@ -681,7 +680,7 @@ pub fn defines_from_json(value: &JsonValue) -> Result<HashMap<String, DefineInpu
 fn json_object<'v>(value: &'v JsonValue, message: &str) -> Result<&'v polyspec_json::OrderedMap, BindError> {
     if value.kind() != JsonKind::Object {
         return Err(BindError {
-            code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+            code: ErrorCode::DataUnsupportedType,
             message: message.to_string(),
         });
     }
@@ -693,7 +692,7 @@ fn json_text(value: &JsonValue) -> Result<String, BindError> {
     match value_from_json(value)? {
         Value::Str(text) => Ok(text),
         _ => Err(BindError {
-            code: ErrorCode::E_INTERNAL,
+            code: ErrorCode::Internal,
             message: "internal failure: a JSON string is not a string value".to_string(),
         }),
     }
@@ -702,7 +701,7 @@ fn json_text(value: &JsonValue) -> Result<String, BindError> {
 /// A failure of an accessor of a JSON value whose kind was matched first: a broken invariant, internal.
 fn json_internal(error: &polyspec_json::Error) -> BindError {
     BindError {
-        code: ErrorCode::E_INTERNAL,
+        code: ErrorCode::Internal,
         message: format!("internal failure: {error}"),
     }
 }
@@ -716,7 +715,7 @@ pub fn env_from_json(value: &JsonValue) -> Result<Env, BindError> {
         Some(text) if text.kind() == JsonKind::String => json_text(text)?,
         Some(_) => {
             return Err(BindError {
-                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                code: ErrorCode::DataUnsupportedType,
                 message: "env.timezone is not a string".to_string(),
             });
         }
@@ -727,14 +726,14 @@ pub fn env_from_json(value: &JsonValue) -> Result<Env, BindError> {
             Value::Number(now) => now,
             _ => {
                 return Err(BindError {
-                    code: ErrorCode::E_INTERNAL,
+                    code: ErrorCode::Internal,
                     message: "internal failure: a JSON number is not a number value".to_string(),
                 });
             }
         },
         Some(_) => {
             return Err(BindError {
-                code: ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                code: ErrorCode::DataUnsupportedType,
                 message: "env.now is not a number".to_string(),
             });
         }

@@ -119,12 +119,12 @@ fn isolated_state_positioned_errors_and_bounded_output() {
         lines: Some(LineIndex::from_starts(vec![0, 2])),
         context: root,
     };
-    let error = kind(context.fail(ErrorCode::E_RUNTIME_TYPE, None, None, "unpositioned"));
+    let error = kind(context.fail(ErrorCode::RuntimeType, None, None, "unpositioned"));
     assert_eq!(
         (error.template.as_str(), error.line, error.col, error.offset, error.end),
         ("entry.tpl", 0, 0, 0, 0)
     );
-    let error = kind(context.fail(ErrorCode::E_RUNTIME_TYPE, Some(&frame), Some([2, 3]), "positioned"));
+    let error = kind(context.fail(ErrorCode::RuntimeType, Some(&frame), Some([2, 3]), "positioned"));
     assert_eq!(
         (error.template.as_str(), error.line, error.col, error.offset, error.end),
         ("part.tpl", 2, 1, 2, 3)
@@ -133,7 +133,7 @@ fn isolated_state_positioned_errors_and_bounded_output() {
     assert_eq!(context.chain, vec!["entry.tpl"]);
     assert_eq!(
         kind(context.enter("entry.tpl", Some(&frame), Some([2, 3])).unwrap_err()).code,
-        ErrorCode::E_LOAD_CYCLE
+        ErrorCode::LoadCycle
     );
     assert_eq!(context.chain, vec!["entry.tpl"]);
     context.leave();
@@ -144,7 +144,7 @@ fn isolated_state_positioned_errors_and_bounded_output() {
     let error = kind(context.write("x", &frame, [2, 3]).unwrap_err());
     assert_eq!(
         (error.code, error.template.as_str(), error.line, error.col, error.offset, error.end),
-        (ErrorCode::E_RUNTIME_LIMIT, "part.tpl", 2, 1, 2, 3)
+        (ErrorCode::RuntimeLimit, "part.tpl", 2, 1, 2, 3)
     );
 }
 

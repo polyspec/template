@@ -188,7 +188,7 @@ fn range(args: &[Value], _context: &FunctionContext<'_>) -> Result<Value, Functi
     let count = ((end - start) / increment).floor() + 1.0;
     if count > RANGE_LIMIT as f64 {
         return Err(FunctionError {
-            code: ErrorCode::E_RUNTIME_LIMIT,
+            code: ErrorCode::RuntimeLimit,
             message: format!("range would produce more than {RANGE_LIMIT} elements"),
         });
     }

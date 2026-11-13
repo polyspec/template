@@ -50,15 +50,15 @@ fn integer_arguments_are_never_truncated_or_clamped() {
     use crate::functions::helpers::{arg_count, arg_integer};
     assert_eq!(arg_integer(&Value::Number(-3.0)).expect("integer"), -3);
     assert_eq!(arg_integer(&Value::text("7")).expect("integer"), 7);
-    assert_eq!(arg_integer(&Value::Number(1.5)).unwrap_err().code, ErrorCode::E_RUNTIME_TYPE);
+    assert_eq!(arg_integer(&Value::Number(1.5)).unwrap_err().code, ErrorCode::RuntimeType);
     assert_eq!(
         arg_integer(&Value::Number(9007199254740992.0)).unwrap_err().code,
-        ErrorCode::E_RUNTIME_LIMIT
+        ErrorCode::RuntimeLimit
     );
-    assert_eq!(arg_integer(&Value::Number(-1e300)).unwrap_err().code, ErrorCode::E_RUNTIME_LIMIT);
-    assert_eq!(arg_count(&Value::Number(-1.0)).unwrap_err().code, ErrorCode::E_RUNTIME_TYPE);
+    assert_eq!(arg_integer(&Value::Number(-1e300)).unwrap_err().code, ErrorCode::RuntimeLimit);
+    assert_eq!(arg_count(&Value::Number(-1.0)).unwrap_err().code, ErrorCode::RuntimeType);
     assert_eq!(arg_count(&Value::Number(2.0)).expect("count"), 2);
-    assert_eq!(to_unix_seconds(&Value::Number(1.5), 0).unwrap_err().code, ErrorCode::E_RUNTIME_TYPE);
+    assert_eq!(to_unix_seconds(&Value::Number(1.5), 0).unwrap_err().code, ErrorCode::RuntimeType);
 }
 
 #[test]
@@ -109,7 +109,7 @@ fn builtins_declare_arity() {
             )
             .map_err(kind)
             .expect_err(source);
-        assert_eq!(error.code, ErrorCode::E_RUNTIME_ARITY, "{source}");
+        assert_eq!(error.code, ErrorCode::RuntimeArity, "{source}");
     }
 }
 
@@ -185,7 +185,7 @@ fn engine_reports_host_failures_and_limits() {
         )
         .map_err(kind)
         .unwrap_err();
-    assert_eq!(error.code, ErrorCode::E_RUNTIME_LIMIT);
+    assert_eq!(error.code, ErrorCode::RuntimeLimit);
 }
 
 // RT-33: the default limits; RT-35: the output size is checked as the output is written, and exceeding it fails;
@@ -242,7 +242,7 @@ fn render_limits_default_output_and_abort() {
         )
         .map_err(kind)
         .unwrap_err();
-    assert_eq!((error.code, error.line, error.col), (ErrorCode::E_RUNTIME_LIMIT, 1, 3));
+    assert_eq!((error.code, error.line, error.col), (ErrorCode::RuntimeLimit, 1, 3));
 }
 
 fn templates(sources: &[(&str, &str)]) -> MapLoader {
@@ -299,7 +299,7 @@ fn host_function_rules() {
         )
         .map_err(kind)
         .unwrap_err();
-    assert_eq!(error.code, ErrorCode::E_DATA_NUMBER_RANGE);
+    assert_eq!(error.code, ErrorCode::DataNumberRange);
     let other = AstProgram::new(EngineOptions {
         loader: Some(Box::new(templates(&sources))),
         ..Default::default()
@@ -313,7 +313,7 @@ fn host_function_rules() {
         )
         .map_err(kind)
         .unwrap_err();
-    assert_eq!(error.code, ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION);
+    assert_eq!(error.code, ErrorCode::RuntimeUnknownFunction);
 }
 
 /// RT-5, FUN-43, FUN-44: the functions of the options are registered as `register` registers them, so a name that is no
@@ -375,12 +375,12 @@ fn the_request_options_that_are_no_object_fail() {
     let Err(error) = crate::defines_from_json(&ojson(serde_json::json!("b.tpl"))) else {
         panic!("a define that is no object");
     };
-    assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+    assert_eq!(error.code, ErrorCode::DataUnsupportedType);
     assert_eq!(error.message, "define is not an object");
     let Err(error) = crate::env_from_json(&ojson(serde_json::json!(0))) else {
         panic!("an env that is no object");
     };
-    assert_eq!(error.code, ErrorCode::E_DATA_UNSUPPORTED_TYPE);
+    assert_eq!(error.code, ErrorCode::DataUnsupportedType);
     assert_eq!(error.message, "env is not an object");
 }
 

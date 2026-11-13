@@ -178,7 +178,7 @@ pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usiz
     let mut index = start + 1;
     let lone = |at: usize| {
         source.error(
-            ErrorCode::E_PARSE_INVALID_ESCAPE,
+            ErrorCode::ParseInvalidEscape,
             at,
             at + 6,
             "a \\u escape leaves a surrogate unpaired",
@@ -187,7 +187,7 @@ pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usiz
     loop {
         if index >= bytes.len() {
             return Err(source.error(
-                ErrorCode::E_PARSE_UNTERMINATED_STRING,
+                ErrorCode::ParseUnterminatedString,
                 start,
                 start + 1,
                 "string literal is not terminated",
@@ -203,7 +203,7 @@ pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usiz
         }
         if byte != b'\\' {
             let Some(char) = source.text.get(index..).and_then(|rest| rest.chars().next()) else {
-                return Err(source.error(ErrorCode::E_INTERNAL, index, index + 1, "a string literal splits a character"));
+                return Err(source.error(ErrorCode::Internal, index, index + 1, "a string literal splits a character"));
             };
             decoded.push(char);
             index += char.len_utf8();
@@ -218,7 +218,7 @@ pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usiz
             Some(b't') => decoded.push('\t'),
             Some(b'u') => {
                 let Some(unit) = source.text.get(index + 2..index + 6).and_then(hex_unit) else {
-                    return Err(source.error(ErrorCode::E_PARSE_INVALID_ESCAPE, index, index + 2, "invalid escape sequence"));
+                    return Err(source.error(ErrorCode::ParseInvalidEscape, index, index + 2, "invalid escape sequence"));
                 };
                 match (pending_high.take(), unit) {
                     (Some((high, _)), 0xdc00..=0xdfff) => {
@@ -238,7 +238,7 @@ pub fn lex_string_literal(source: &Source, start: usize) -> Result<(String, usiz
                 index += 6;
                 continue;
             }
-            _ => return Err(source.error(ErrorCode::E_PARSE_INVALID_ESCAPE, index, index + 2, "invalid escape sequence")),
+            _ => return Err(source.error(ErrorCode::ParseInvalidEscape, index, index + 2, "invalid escape sequence")),
         }
         index += 2;
     }
@@ -308,7 +308,7 @@ impl<'a> ExpressionLexer<'a> {
         }
         match &self.lookahead {
             Some(token) => Ok(token),
-            None => Err(self.error(ErrorCode::E_INTERNAL, self.index, self.index, "the lookahead token is missing")),
+            None => Err(self.error(ErrorCode::Internal, self.index, self.index, "the lookahead token is missing")),
         }
     }
 
@@ -316,7 +316,7 @@ impl<'a> ExpressionLexer<'a> {
     pub fn next_token(&mut self) -> Result<Token, TemplateError> {
         self.peek()?;
         let Some(token) = self.lookahead.take() else {
-            return Err(self.error(ErrorCode::E_INTERNAL, self.index, self.index, "the lookahead token is missing"));
+            return Err(self.error(ErrorCode::Internal, self.index, self.index, "the lookahead token is missing"));
         };
         self.previous = Some(token.clone());
         if matches!(token.kind, TokenType::LParen | TokenType::LBracket) {
@@ -427,10 +427,10 @@ impl<'a> ExpressionLexer<'a> {
             }
         }
         let Some(char) = self.source.text.get(start..).and_then(|rest| rest.chars().next()) else {
-            return Err(self.error(ErrorCode::E_INTERNAL, start, start, "no character at the offset of a token"));
+            return Err(self.error(ErrorCode::Internal, start, start, "no character at the offset of a token"));
         };
         Err(self.error(
-            ErrorCode::E_PARSE_UNEXPECTED_TOKEN,
+            ErrorCode::ParseUnexpectedToken,
             start,
             start + char.len_utf8(),
             format!("unexpected character {char:?}"),
@@ -461,7 +461,7 @@ impl<'a> ExpressionLexer<'a> {
                 end = cursor;
             } else {
                 return Err(self.error(
-                    ErrorCode::E_PARSE_INVALID_NUMBER,
+                    ErrorCode::ParseInvalidNumber,
                     start,
                     cursor,
                     format!("invalid number {:?}", &self.source.text[start..cursor]),
@@ -478,7 +478,7 @@ impl<'a> ExpressionLexer<'a> {
                 cursor += 1;
             }
             return Err(self.error(
-                ErrorCode::E_PARSE_INVALID_NUMBER,
+                ErrorCode::ParseInvalidNumber,
                 start,
                 cursor,
                 format!("invalid number {:?}", &self.source.text[start..cursor]),
@@ -525,12 +525,12 @@ impl<'a> ExpressionLexer<'a> {
                 end += 1;
             }
             return Err(self.error(
-                ErrorCode::E_PARSE_INVALID_NUMBER,
+                ErrorCode::ParseInvalidNumber,
                 start,
                 end,
                 format!("invalid number {:?}", &self.source.text[start..end]),
             ));
         }
-        Err(self.error(ErrorCode::E_PARSE_UNEXPECTED_TOKEN, start, start + 1, "unexpected \".\""))
+        Err(self.error(ErrorCode::ParseUnexpectedToken, start, start + 1, "unexpected \".\""))
     }
 }

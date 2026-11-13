@@ -28,7 +28,7 @@ fn a_parse_with_an_invalid_delimiter_option_returns_an_argument_error() {
         delimiters: Some("x".to_string()),
     };
     match parse(b"text", "t.tpl", &options) {
-        Err(error) if error.code == ErrorCode::E_ARGUMENT_DELIMITERS => assert_eq!(error.message, "\"x\" is not a delimiter pair"),
+        Err(error) if error.code == ErrorCode::ArgumentDelimiters => assert_eq!(error.message, "\"x\" is not a delimiter pair"),
         other => panic!("expected an argument error, got {other:?}"),
     }
 }

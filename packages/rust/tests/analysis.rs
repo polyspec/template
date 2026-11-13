@@ -59,5 +59,5 @@ fn public_analysis_preserves_shared_contexts() {
 #[test]
 fn public_analysis_rejects_incomplete_source() {
     let error = analyze(b"{? x}", "invalid.tpl", &ParseOptions::default()).expect_err("incomplete source");
-    assert!(error.code == ErrorCode::E_PARSE_UNCLOSED_BLOCK);
+    assert!(error.code == ErrorCode::ParseUnclosedBlock);
 }

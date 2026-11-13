@@ -66,13 +66,13 @@ export function expectedErrorOf(raises: ExpectedRaises['raises']): ExpectedError
 
 /**
  * The category of each kind, from the error table of the interface contract (packages/rust/interface.json, design E-1):
- * a variant `polyspec_template::ErrorCode::E_<KIND>` has the kind `<kind>`.
+ * a variant `polyspec_template::ErrorCode::<Kind>` has the kind of its name in snake_case (binding E-3).
  */
 export function kindCategories(root: string): Map<string, string> {
   const contract = readJson(join(root, 'packages/rust/interface.json'));
   const rows = (contract as { errors?: { kinds?: { variant: string; category: string }[] } }).errors?.kinds;
   if (rows === undefined) throw new Error('packages/rust/interface.json has no errors.kinds');
-  return new Map(rows.map(row => [row.variant.replace(/^.*::E_/, '').toLowerCase(), row.category]));
+  return new Map(rows.map(row => [row.variant.replace(/^.*::/, '').replace(/(?<=[a-z0-9])(?=[A-Z])/g, '_').toLowerCase(), row.category]));
 }
 
 /** The expected.error.json of an error that an implementation wrote, with the category of its kind. */

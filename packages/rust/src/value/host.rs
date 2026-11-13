@@ -49,7 +49,7 @@ fn kind(error: BindError) -> RenderError {
 
 fn unsupported(what: &str) -> RenderError {
     RenderError::Kind(TemplateError::without_position(
-        ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+        ErrorCode::DataUnsupportedType,
         "",
         format!("{what} is not a template value"),
     ))
@@ -57,7 +57,7 @@ fn unsupported(what: &str) -> RenderError {
 
 fn invalid_text(cause: impl std::fmt::Display) -> RenderError {
     RenderError::Kind(TemplateError::without_position(
-        ErrorCode::E_DATA_INVALID_UTF8,
+        ErrorCode::DataInvalidUtf8,
         "",
         format!("a string is not valid Unicode text: {cause}"),
     ))
@@ -94,7 +94,7 @@ fn bind(host: &mut dyn HostValues, value: HostValue, level: usize) -> Result<Val
             // VAL-2: an integer within ±(2^53 − 1) is exact as a double; one outside it is data_number_range.
             if value.unsigned_abs() > 9_007_199_254_740_991 {
                 return Err(kind(BindError {
-                    code: ErrorCode::E_DATA_NUMBER_RANGE,
+                    code: ErrorCode::DataNumberRange,
                     message: format!("number {value} is outside the safe range"),
                 }));
             }
@@ -108,7 +108,7 @@ fn bind(host: &mut dyn HostValues, value: HostValue, level: usize) -> Result<Val
         }
         HostValue::Number(token) => {
             return Err(kind(BindError {
-                code: ErrorCode::E_DATA_NUMBER_RANGE,
+                code: ErrorCode::DataNumberRange,
                 message: format!("number {token} is outside the safe range"),
             }));
         }

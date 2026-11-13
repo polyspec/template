@@ -46,7 +46,7 @@ pub type LoadError = crate::RenderError;
 
 /// The `load_failed` of a loader of the implementation, with the cause as its message (RT-9).
 pub fn load_failed(name: &str, cause: impl Into<String>) -> LoadError {
-    LoadError::Kind(crate::TemplateError::without_position(crate::ErrorCode::E_LOAD_FAILED, name, cause))
+    LoadError::Kind(crate::TemplateError::without_position(crate::ErrorCode::LoadFailed, name, cause))
 }
 
 /// Loads templates by name (RT-9).
@@ -266,7 +266,7 @@ pub fn resolve_path(current: &str, path: &str) -> Result<String, crate::Template
             ".." => {
                 if segments.pop().is_none() {
                     return Err(crate::TemplateError::without_position(
-                        crate::ErrorCode::E_LOAD_OUTSIDE_ROOT,
+                        crate::ErrorCode::LoadOutsideRoot,
                         current,
                         format!("{path:?} leaves the loader root"),
                     ));

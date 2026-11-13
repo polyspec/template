@@ -2,110 +2,109 @@
 
 use std::fmt;
 
-/// Error codes of the specification. A variant is named `E_` and its kind in capitals; the kind, which `as_str` returns and
-/// the serialization writes, is lowercase snake_case (ERR-1).
+/// Error codes of the specification. A variant is named after its kind in UpperCamelCase, so the snake_case of the name is
+/// the kind (binding E-3); the kind, which `as_str` returns and the serialization writes, is lowercase snake_case (ERR-1).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[expect(non_camel_case_types, reason = "ERR-1: a variant is the kind of its code in capitals")]
 pub enum ErrorCode {
     // BEGIN GENERATED ERROR CODES
     /// The source is not valid UTF-8.
-    E_LEX_INVALID_UTF8,
+    LexInvalidUtf8,
     /// A tag has no closing `}` before the end of the file.
-    E_PARSE_UNTERMINATED_TAG,
+    ParseUnterminatedTag,
     /// A comment has no `*}` before the end of the file.
-    E_PARSE_UNTERMINATED_COMMENT,
+    ParseUnterminatedComment,
     /// A string literal has no closing quote before the end of the tag.
-    E_PARSE_UNTERMINATED_STRING,
+    ParseUnterminatedString,
     /// A token is not allowed by the grammar at its position, including an empty expression.
-    E_PARSE_UNEXPECTED_TOKEN,
+    ParseUnexpectedToken,
     /// A number literal does not match the number token.
-    E_PARSE_INVALID_NUMBER,
+    ParseInvalidNumber,
     /// A backslash in a string literal is followed by a character outside the escape set.
-    E_PARSE_INVALID_ESCAPE,
+    ParseInvalidEscape,
     /// `{/}` appears with no open block.
-    E_PARSE_UNEXPECTED_CLOSE,
+    ParseUnexpectedClose,
     /// The file ends while a block is open.
-    E_PARSE_UNCLOSED_BLOCK,
+    ParseUnclosedBlock,
     /// `{:}` or `{:? ...}` appears with no open block.
-    E_PARSE_ELSE_OUTSIDE_BLOCK,
+    ParseElseOutsideBlock,
     /// A second `{:}` appears in the same block.
-    E_PARSE_DUPLICATE_ELSE,
+    ParseDuplicateElse,
     /// `{:? ...}` appears after `{:}` in the same block.
-    E_PARSE_ELSEIF_AFTER_ELSE,
+    ParseElseifAfterElse,
     /// `{:? ...}` appears directly inside a loop block or an if-block.
-    E_PARSE_ELSEIF_NOT_IN_IF,
+    ParseElseifNotInIf,
     /// An assignment target or loop variable is a reserved word.
-    E_PARSE_RESERVED_NAME,
+    ParseReservedName,
     /// An include or block path is not a path token.
-    E_PARSE_INVALID_PATH,
+    ParseInvalidPath,
     /// The tokens of a block tag do not match the block tag grammar.
-    E_PARSE_INVALID_BLOCK_TAG,
+    ParseInvalidBlockTag,
     /// The `}}` of a wrapped tag is not followed by the wrapper closer that matches the wrapper opener.
-    E_PARSE_INVALID_WRAPPER,
+    ParseInvalidWrapper,
     /// A delimiter directive is not the first tag of the file, names a character that is not a delimiter, or has another form.
-    E_PARSE_INVALID_DIRECTIVE,
+    ParseInvalidDirective,
     /// The loader has no template for the resolved name.
-    E_LOAD_NOT_FOUND,
+    LoadNotFound,
     /// An include or block renders a template that is already being rendered in the same chain.
-    E_LOAD_CYCLE,
+    LoadCycle,
     /// A resolved path leaves the loader root.
-    E_LOAD_OUTSIDE_ROOT,
+    LoadOutsideRoot,
     /// The loader reports a failure for the resolved name (RT-9): a TypeScript or PHP loader throws an exception, a Go or Rust loader returns an error, or a filesystem loader cannot read an existing regular file (RT-10), or a loader result lacks a source text and an AST, or a version (RT-9).
-    E_LOAD_FAILED,
+    LoadFailed,
     /// A render needs a template of a loader that reads files (RT-77) that `prepare` or `load` did not load.
-    E_LOAD_NOT_LOADED,
+    LoadNotLoaded,
     /// A finite number has a magnitude greater than 2^53 − 1 (VAL-2).
-    E_DATA_NUMBER_RANGE,
+    DataNumberRange,
     /// A number is NaN or infinite.
-    E_DATA_NUMBER_NOT_FINITE,
+    DataNumberNotFinite,
     /// A string or a map key is not valid Unicode text (VAL-12 to VAL-17).
-    E_DATA_INVALID_UTF8,
+    DataInvalidUtf8,
     /// A value has a type that has no binding.
-    E_DATA_UNSUPPORTED_TYPE,
+    DataUnsupportedType,
     /// Lists and maps are nested deeper than the binding depth limit, including a cyclic host structure (VAL-20).
-    E_DATA_DEPTH,
+    DataDepth,
     /// JSON text of assign data, template definitions or the environment is not one JSON document (VAL-12).
-    E_DATA_INVALID_JSON,
+    DataInvalidJson,
     /// An operand or argument has a type the operation does not accept.
-    E_RUNTIME_TYPE,
+    RuntimeType,
     /// An ordering comparison has operands without an order.
-    E_RUNTIME_COMPARE,
+    RuntimeCompare,
     /// The right operand of `/` or `%` is zero.
-    E_RUNTIME_DIV_ZERO,
+    RuntimeDivZero,
     /// A list, a map or a native object (VAL-19) is converted to a string.
-    E_RUNTIME_STRINGIFY,
+    RuntimeStringify,
     /// A call names a function that is neither built in nor registered.
-    E_RUNTIME_UNKNOWN_FUNCTION,
+    RuntimeUnknownFunction,
     /// A call has an argument count outside the function's range.
-    E_RUNTIME_ARITY,
+    RuntimeArity,
     /// A legacy implementation reports an error of host code that the engine called (FUN-46, VAL-19); the Rust core passes such an error to the caller unchanged and never reports this code.
-    E_RUNTIME_HOST_FUNCTION,
+    RuntimeHostFunction,
     /// A loop meta names a loop that is not enclosing the expression.
-    E_RUNTIME_UNKNOWN_LOOP,
+    RuntimeUnknownLoop,
     /// `{# id}` names an id that the template definition registry does not contain.
-    E_RUNTIME_BLOCK_UNDEFINED,
+    RuntimeBlockUndefined,
     /// `{# id path}` names an id that is registered with a different path.
-    E_RUNTIME_BLOCK_REDEFINED,
+    RuntimeBlockRedefined,
     /// The nesting depth of includes and blocks exceeds the limit.
-    E_RUNTIME_DEPTH,
+    RuntimeDepth,
     /// The iteration count, the output size, the expression depth, a range size or the depth of a value that a list or map literal builds (VAL-20) exceeds its limit.
-    E_RUNTIME_LIMIT,
+    RuntimeLimit,
     /// A delimiter option of `parse`, `analyze`, `format` or an engine is not a delimiter pair (LEX-21).
-    E_ARGUMENT_DELIMITERS,
+    ArgumentDelimiters,
     /// A host function name of `register` or of the engine options is not an identifier or names a built-in function (RT-5, FUN-44).
-    E_ARGUMENT_FUNCTION_NAME,
+    ArgumentFunctionName,
     /// A byte range of the public `Source` of an implementation is reversed or reaches beyond the source.
-    E_ARGUMENT_SOURCE_RANGE,
+    ArgumentSourceRange,
     /// An indent unit of `format` is not a run of spaces or one tab (FMT-9).
-    E_ARGUMENT_INDENT,
+    ArgumentIndent,
     /// The text that `format` would return does not parse to the AST of the source (FMT-1).
-    E_FORMAT_INVARIANT,
+    FormatInvariant,
     /// The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12).
-    E_FORMAT_HTML,
+    FormatHtml,
     /// The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the invalid node (AST-10).
-    E_AST_INVALID,
+    AstInvalid,
     /// The implementation failed in a way this specification does not define: a panic in Rust or Go code that the engine runs, or, in TypeScript and PHP, an error that the language runtime raises for a programming defect.
-    E_INTERNAL,
+    Internal,
     // END GENERATED ERROR CODES
 }
 
@@ -114,55 +113,55 @@ impl ErrorCode {
     pub fn as_str(self) -> &'static str {
         match self {
             // BEGIN GENERATED ERROR CODES
-            ErrorCode::E_LEX_INVALID_UTF8 => "lex_invalid_utf8",
-            ErrorCode::E_PARSE_UNTERMINATED_TAG => "parse_unterminated_tag",
-            ErrorCode::E_PARSE_UNTERMINATED_COMMENT => "parse_unterminated_comment",
-            ErrorCode::E_PARSE_UNTERMINATED_STRING => "parse_unterminated_string",
-            ErrorCode::E_PARSE_UNEXPECTED_TOKEN => "parse_unexpected_token",
-            ErrorCode::E_PARSE_INVALID_NUMBER => "parse_invalid_number",
-            ErrorCode::E_PARSE_INVALID_ESCAPE => "parse_invalid_escape",
-            ErrorCode::E_PARSE_UNEXPECTED_CLOSE => "parse_unexpected_close",
-            ErrorCode::E_PARSE_UNCLOSED_BLOCK => "parse_unclosed_block",
-            ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK => "parse_else_outside_block",
-            ErrorCode::E_PARSE_DUPLICATE_ELSE => "parse_duplicate_else",
-            ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE => "parse_elseif_after_else",
-            ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF => "parse_elseif_not_in_if",
-            ErrorCode::E_PARSE_RESERVED_NAME => "parse_reserved_name",
-            ErrorCode::E_PARSE_INVALID_PATH => "parse_invalid_path",
-            ErrorCode::E_PARSE_INVALID_BLOCK_TAG => "parse_invalid_block_tag",
-            ErrorCode::E_PARSE_INVALID_WRAPPER => "parse_invalid_wrapper",
-            ErrorCode::E_PARSE_INVALID_DIRECTIVE => "parse_invalid_directive",
-            ErrorCode::E_LOAD_NOT_FOUND => "load_not_found",
-            ErrorCode::E_LOAD_CYCLE => "load_cycle",
-            ErrorCode::E_LOAD_OUTSIDE_ROOT => "load_outside_root",
-            ErrorCode::E_LOAD_FAILED => "load_failed",
-            ErrorCode::E_LOAD_NOT_LOADED => "load_not_loaded",
-            ErrorCode::E_DATA_NUMBER_RANGE => "data_number_range",
-            ErrorCode::E_DATA_NUMBER_NOT_FINITE => "data_number_not_finite",
-            ErrorCode::E_DATA_INVALID_UTF8 => "data_invalid_utf8",
-            ErrorCode::E_DATA_UNSUPPORTED_TYPE => "data_unsupported_type",
-            ErrorCode::E_DATA_DEPTH => "data_depth",
-            ErrorCode::E_DATA_INVALID_JSON => "data_invalid_json",
-            ErrorCode::E_RUNTIME_TYPE => "runtime_type",
-            ErrorCode::E_RUNTIME_COMPARE => "runtime_compare",
-            ErrorCode::E_RUNTIME_DIV_ZERO => "runtime_div_zero",
-            ErrorCode::E_RUNTIME_STRINGIFY => "runtime_stringify",
-            ErrorCode::E_RUNTIME_UNKNOWN_FUNCTION => "runtime_unknown_function",
-            ErrorCode::E_RUNTIME_ARITY => "runtime_arity",
-            ErrorCode::E_RUNTIME_HOST_FUNCTION => "runtime_host_function",
-            ErrorCode::E_RUNTIME_UNKNOWN_LOOP => "runtime_unknown_loop",
-            ErrorCode::E_RUNTIME_BLOCK_UNDEFINED => "runtime_block_undefined",
-            ErrorCode::E_RUNTIME_BLOCK_REDEFINED => "runtime_block_redefined",
-            ErrorCode::E_RUNTIME_DEPTH => "runtime_depth",
-            ErrorCode::E_RUNTIME_LIMIT => "runtime_limit",
-            ErrorCode::E_ARGUMENT_DELIMITERS => "argument_delimiters",
-            ErrorCode::E_ARGUMENT_FUNCTION_NAME => "argument_function_name",
-            ErrorCode::E_ARGUMENT_SOURCE_RANGE => "argument_source_range",
-            ErrorCode::E_ARGUMENT_INDENT => "argument_indent",
-            ErrorCode::E_FORMAT_INVARIANT => "format_invariant",
-            ErrorCode::E_FORMAT_HTML => "format_html",
-            ErrorCode::E_AST_INVALID => "ast_invalid",
-            ErrorCode::E_INTERNAL => "internal",
+            ErrorCode::LexInvalidUtf8 => "lex_invalid_utf8",
+            ErrorCode::ParseUnterminatedTag => "parse_unterminated_tag",
+            ErrorCode::ParseUnterminatedComment => "parse_unterminated_comment",
+            ErrorCode::ParseUnterminatedString => "parse_unterminated_string",
+            ErrorCode::ParseUnexpectedToken => "parse_unexpected_token",
+            ErrorCode::ParseInvalidNumber => "parse_invalid_number",
+            ErrorCode::ParseInvalidEscape => "parse_invalid_escape",
+            ErrorCode::ParseUnexpectedClose => "parse_unexpected_close",
+            ErrorCode::ParseUnclosedBlock => "parse_unclosed_block",
+            ErrorCode::ParseElseOutsideBlock => "parse_else_outside_block",
+            ErrorCode::ParseDuplicateElse => "parse_duplicate_else",
+            ErrorCode::ParseElseifAfterElse => "parse_elseif_after_else",
+            ErrorCode::ParseElseifNotInIf => "parse_elseif_not_in_if",
+            ErrorCode::ParseReservedName => "parse_reserved_name",
+            ErrorCode::ParseInvalidPath => "parse_invalid_path",
+            ErrorCode::ParseInvalidBlockTag => "parse_invalid_block_tag",
+            ErrorCode::ParseInvalidWrapper => "parse_invalid_wrapper",
+            ErrorCode::ParseInvalidDirective => "parse_invalid_directive",
+            ErrorCode::LoadNotFound => "load_not_found",
+            ErrorCode::LoadCycle => "load_cycle",
+            ErrorCode::LoadOutsideRoot => "load_outside_root",
+            ErrorCode::LoadFailed => "load_failed",
+            ErrorCode::LoadNotLoaded => "load_not_loaded",
+            ErrorCode::DataNumberRange => "data_number_range",
+            ErrorCode::DataNumberNotFinite => "data_number_not_finite",
+            ErrorCode::DataInvalidUtf8 => "data_invalid_utf8",
+            ErrorCode::DataUnsupportedType => "data_unsupported_type",
+            ErrorCode::DataDepth => "data_depth",
+            ErrorCode::DataInvalidJson => "data_invalid_json",
+            ErrorCode::RuntimeType => "runtime_type",
+            ErrorCode::RuntimeCompare => "runtime_compare",
+            ErrorCode::RuntimeDivZero => "runtime_div_zero",
+            ErrorCode::RuntimeStringify => "runtime_stringify",
+            ErrorCode::RuntimeUnknownFunction => "runtime_unknown_function",
+            ErrorCode::RuntimeArity => "runtime_arity",
+            ErrorCode::RuntimeHostFunction => "runtime_host_function",
+            ErrorCode::RuntimeUnknownLoop => "runtime_unknown_loop",
+            ErrorCode::RuntimeBlockUndefined => "runtime_block_undefined",
+            ErrorCode::RuntimeBlockRedefined => "runtime_block_redefined",
+            ErrorCode::RuntimeDepth => "runtime_depth",
+            ErrorCode::RuntimeLimit => "runtime_limit",
+            ErrorCode::ArgumentDelimiters => "argument_delimiters",
+            ErrorCode::ArgumentFunctionName => "argument_function_name",
+            ErrorCode::ArgumentSourceRange => "argument_source_range",
+            ErrorCode::ArgumentIndent => "argument_indent",
+            ErrorCode::FormatInvariant => "format_invariant",
+            ErrorCode::FormatHtml => "format_html",
+            ErrorCode::AstInvalid => "ast_invalid",
+            ErrorCode::Internal => "internal",
             // END GENERATED ERROR CODES
         }
     }
@@ -356,7 +355,7 @@ pub fn internal_boundary<T, E: From<TemplateError>>(template: &str, operation: i
                 (None, Some(text)) => text.clone(),
                 (None, None) => "a panic without a message".to_string(),
             };
-            Err(TemplateError::without_position(ErrorCode::E_INTERNAL, template, format!("internal failure: {reason}")).into())
+            Err(TemplateError::without_position(ErrorCode::Internal, template, format!("internal failure: {reason}")).into())
         }
     }
 }

@@ -803,7 +803,13 @@ fn run_case(group: &str, case: &Json) -> Result<(), Failed> {
 fn raises_of_member(member: &str, raises: &[String], cases: &[Json]) -> Result<(), Failed> {
     for case in cases {
         if let Some(kind) = key(case, "raises").and_then(|raises| key(raises, "kind")).and_then(Json::as_str) {
-            let variant = format!("polyspec_template::ErrorCode::E_{}", kind.to_uppercase());
+            // The variant of a kind is its words in UpperCamelCase (binding E-3).
+            let variant = format!(
+                "polyspec_template::ErrorCode::{}",
+                kind.split('_')
+                    .map(|word| word[..1].to_uppercase() + &word[1..])
+                    .collect::<String>()
+            );
             if !raises.contains(&variant) {
                 return fail(format!(
                     "a case of {member} raises {kind}, which the raises of the member do not name"

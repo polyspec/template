@@ -49,23 +49,23 @@ fn delimiters_come_from_the_option_and_the_directive() {
     assert_eq!(kinds("{% delimiter [] }\n[= a[0]]\n"), vec!["Echo", "Text"]);
     assert_eq!(
         code_of("{= a}{% delimiter ;;}", &ParseOptions::default()),
-        Some(ErrorCode::E_PARSE_INVALID_DIRECTIVE)
+        Some(ErrorCode::ParseInvalidDirective)
     );
     assert_eq!(
         code_of("{% delimiter ab}", &ParseOptions::default()),
-        Some(ErrorCode::E_PARSE_INVALID_DIRECTIVE)
+        Some(ErrorCode::ParseInvalidDirective)
     );
 }
 
 #[test]
 fn block_structure_errors() {
     let options = ParseOptions::default();
-    assert_eq!(code_of("{/}", &options), Some(ErrorCode::E_PARSE_UNEXPECTED_CLOSE));
-    assert_eq!(code_of("{? a}", &options), Some(ErrorCode::E_PARSE_UNCLOSED_BLOCK));
-    assert_eq!(code_of("{:}", &options), Some(ErrorCode::E_PARSE_ELSE_OUTSIDE_BLOCK));
-    assert_eq!(code_of("{? a}{:}{:}{/}", &options), Some(ErrorCode::E_PARSE_DUPLICATE_ELSE));
-    assert_eq!(code_of("{? a}{:}{:? b}{/}", &options), Some(ErrorCode::E_PARSE_ELSEIF_AFTER_ELSE));
-    assert_eq!(code_of("{?# a}{:? b}{/}", &options), Some(ErrorCode::E_PARSE_ELSEIF_NOT_IN_IF));
+    assert_eq!(code_of("{/}", &options), Some(ErrorCode::ParseUnexpectedClose));
+    assert_eq!(code_of("{? a}", &options), Some(ErrorCode::ParseUnclosedBlock));
+    assert_eq!(code_of("{:}", &options), Some(ErrorCode::ParseElseOutsideBlock));
+    assert_eq!(code_of("{? a}{:}{:}{/}", &options), Some(ErrorCode::ParseDuplicateElse));
+    assert_eq!(code_of("{? a}{:}{:? b}{/}", &options), Some(ErrorCode::ParseElseifAfterElse));
+    assert_eq!(code_of("{?# a}{:? b}{/}", &options), Some(ErrorCode::ParseElseifNotInIf));
 }
 
 /// AST-2, LEX-16: a span counts UTF-8 bytes.
@@ -93,10 +93,10 @@ fn a_parse_error_is_the_error_object() {
     };
     assert_eq!(
         (error.code, error.template.as_str(), error.line, error.col, error.offset, error.end),
-        (ErrorCode::E_PARSE_UNCLOSED_BLOCK, "x.tpl", 2, 1, 2, 3)
+        (ErrorCode::ParseUnclosedBlock, "x.tpl", 2, 1, 2, 3)
     );
     assert!(!error.message.is_empty());
-    let unpositioned = TemplateError::without_position(ErrorCode::E_LOAD_NOT_FOUND, "missing.tpl", "missing");
+    let unpositioned = TemplateError::without_position(ErrorCode::LoadNotFound, "missing.tpl", "missing");
     assert_eq!(
         serde_json::from_str::<serde_json::Value>(&unpositioned.to_json()).expect("the error JSON is JSON"),
         serde_json::json!({"code": "load_not_found", "template": "missing.tpl", "line": 0,

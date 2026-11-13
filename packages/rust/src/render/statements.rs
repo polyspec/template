@@ -160,7 +160,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
     fn resolve(&self, path: &str, frame: &Frame, span: Span) -> Result<String, RenderError> {
         resolve_path(&frame.name, path).map_err(|error| {
             self.context
-                .fail(ErrorCode::E_LOAD_OUTSIDE_ROOT, Some(frame), Some(span), error.message)
+                .fail(ErrorCode::LoadOutsideRoot, Some(frame), Some(span), error.message)
         })
     }
 
@@ -192,7 +192,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
                 Some(entry) => entry.clone(),
                 None => {
                     return Err(self.context.fail(
-                        ErrorCode::E_RUNTIME_BLOCK_UNDEFINED,
+                        ErrorCode::RuntimeBlockUndefined,
                         Some(frame),
                         Some(span),
                         format!("define {id} is not registered"),
@@ -207,7 +207,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
                             let same = matches!(registered, DefineEntry::Template { template, .. } if *template == name);
                             if !same {
                                 return Err(self.context.fail(
-                                    ErrorCode::E_RUNTIME_BLOCK_REDEFINED,
+                                    ErrorCode::RuntimeBlockRedefined,
                                     Some(frame),
                                     Some(span),
                                     format!("define {id} is registered with a different template"),
@@ -232,7 +232,7 @@ impl<'c, 'e> Renderer<'c, 'e> {
             }
             (None, None) => {
                 return Err(self.context.fail(
-                    ErrorCode::E_RUNTIME_BLOCK_UNDEFINED,
+                    ErrorCode::RuntimeBlockUndefined,
                     Some(frame),
                     Some(span),
                     "block tag without id or path",

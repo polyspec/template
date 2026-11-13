@@ -33,7 +33,7 @@ fn read_json(path: &Path) -> Result<Option<Result<polyspec_template::polyspec_js
         return Ok(None);
     };
     let Ok(text) = std::str::from_utf8(&bytes) else {
-        return Ok(Some(Err(ErrorCode::E_DATA_INVALID_UTF8)));
+        return Ok(Some(Err(ErrorCode::DataInvalidUtf8)));
     };
     Ok(Some(polyspec_template::read_json(text).map_err(|error| error.code)))
 }

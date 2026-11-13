@@ -169,7 +169,7 @@ fn formats_with_the_delimiter_option() {
 #[test]
 fn returns_the_parser_error_position_for_a_source_that_does_not_parse() {
     let error = format("<p>\n  {? a}\n</p>", &options()).expect_err("parse error");
-    assert_eq!(error.code, ErrorCode::E_PARSE_UNCLOSED_BLOCK);
+    assert_eq!(error.code, ErrorCode::ParseUnclosedBlock);
     assert_eq!((error.line, error.col), (2, 3));
 }
 
@@ -178,7 +178,7 @@ fn returns_the_parser_error_position_for_a_source_that_does_not_parse() {
 fn formats_bytes_and_reports_bytes_that_are_not_utf8_as_a_parse_error() {
     assert_eq!(format_bytes(b"{=a}", &options()).expect("format").text, "{= a}");
     let error = format_bytes(b"<p>\n\xff</p>", &options()).expect_err("parse error");
-    assert_eq!(error.code, ErrorCode::E_LEX_INVALID_UTF8);
+    assert_eq!(error.code, ErrorCode::LexInvalidUtf8);
     assert_eq!((error.line, error.col), (2, 1));
 }
 
@@ -426,7 +426,7 @@ fn reports_an_html_structure_that_cannot_be_indented() {
     ];
     for (source, line, col) in cases {
         let error = format(source, &options()).expect_err("html error");
-        assert_eq!(error.code, ErrorCode::E_FORMAT_HTML, "{source}");
+        assert_eq!(error.code, ErrorCode::FormatHtml, "{source}");
         assert_eq!((error.line, error.col), (*line, *col), "{source}");
     }
 }
@@ -484,7 +484,7 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
                 Ok(formatted) => formatted.text,
                 Err(error) => {
                     assert!(
-                        error.code == ErrorCode::E_FORMAT_HTML && indent.is_some(),
+                        error.code == ErrorCode::FormatHtml && indent.is_some(),
                         "{}: {error:?}",
                         file.display()
                     );

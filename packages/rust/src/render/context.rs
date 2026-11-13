@@ -165,7 +165,7 @@ impl<'e> RenderContext<'e> {
         let limits = self.services.limits();
         if self.output.len() + text.len() > limits.output_bytes {
             return Err(self.fail(
-                ErrorCode::E_RUNTIME_LIMIT,
+                ErrorCode::RuntimeLimit,
                 Some(frame),
                 Some(span),
                 format!("output exceeds {} bytes", limits.output_bytes),
@@ -178,12 +178,12 @@ impl<'e> RenderContext<'e> {
     /// Enters a template (RT-22, RT-23).
     pub fn enter(&mut self, name: &str, frame: Option<&Frame>, span: Option<Span>) -> Result<(), RenderError> {
         if self.chain.iter().any(|entry| entry == name) {
-            return Err(self.fail(ErrorCode::E_LOAD_CYCLE, frame, span, format!("{name} is already being rendered")));
+            return Err(self.fail(ErrorCode::LoadCycle, frame, span, format!("{name} is already being rendered")));
         }
         let limits = self.services.limits();
         if self.chain.len() > limits.depth {
             return Err(self.fail(
-                ErrorCode::E_RUNTIME_DEPTH,
+                ErrorCode::RuntimeDepth,
                 frame,
                 span,
                 format!("nesting depth exceeds {}", limits.depth),

@@ -83,7 +83,7 @@ pub fn bind<'a>(input: impl BindInput<'a>) -> Result<BoundMap, TemplateError> {
             Source::Value(Value::Map(map)) => Arc::new(bind_values(map).map_err(failure)?),
             Source::Value(_) => {
                 return Err(TemplateError::without_position(
-                    crate::ErrorCode::E_DATA_UNSUPPORTED_TYPE,
+                    crate::ErrorCode::DataUnsupportedType,
                     "",
                     "the value is not a map",
                 ));

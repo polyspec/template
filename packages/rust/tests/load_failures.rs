@@ -81,7 +81,7 @@ fn a_loader_error_reaches_the_caller_and_a_judged_failure_is_load_failed() {
     );
     assert_eq!(
         (entry.code, entry.template.as_str(), entry.line, entry.col),
-        (ErrorCode::E_LOAD_FAILED, "page.tpl", 0, 0)
+        (ErrorCode::LoadFailed, "page.tpl", 0, 0)
     );
     assert!(entry.message.contains("page.tpl cannot be read"), "{}", entry.message);
     let include = kind(
@@ -96,7 +96,7 @@ fn a_loader_error_reaches_the_caller_and_a_judged_failure_is_load_failed() {
     );
     assert_eq!(
         (include.code, include.template.as_str(), include.line, include.col),
-        (ErrorCode::E_LOAD_FAILED, "page.tpl", 2, 1)
+        (ErrorCode::LoadFailed, "page.tpl", 2, 1)
     );
 }
 
@@ -115,7 +115,7 @@ fn a_loader_result_without_a_version_is_a_load_failure() {
     assert_eq!(
         (error.code, error.message.as_str()),
         (
-            ErrorCode::E_LOAD_FAILED,
+            ErrorCode::LoadFailed,
             "template page.tpl cannot be loaded: the loader returned no version"
         )
     );
@@ -155,15 +155,15 @@ fn the_filesystem_loader_separates_missing_and_unreadable_files() {
     if readable {
         assert_eq!(locked_result, Ok("x".to_string()));
     } else {
-        assert_eq!(locked_result, Err(ErrorCode::E_LOAD_FAILED));
+        assert_eq!(locked_result, Err(ErrorCode::LoadFailed));
     }
     assert_eq!(
         codes,
         vec![
-            ErrorCode::E_LOAD_FAILED,
-            ErrorCode::E_LOAD_NOT_FOUND,
-            ErrorCode::E_LOAD_NOT_FOUND,
-            ErrorCode::E_LOAD_NOT_FOUND
+            ErrorCode::LoadFailed,
+            ErrorCode::LoadNotFound,
+            ErrorCode::LoadNotFound,
+            ErrorCode::LoadNotFound
         ]
     );
 }
@@ -173,19 +173,19 @@ fn text_that_is_not_one_json_document_is_invalid_json() {
     let deep = format!("[{}x", "[".repeat(64));
     let syntax_first = format!("[x, {}", "[".repeat(65));
     let cases: Vec<(&str, ErrorCode)> = vec![
-        ("", ErrorCode::E_DATA_INVALID_JSON),
-        (" ", ErrorCode::E_DATA_INVALID_JSON),
-        ("{", ErrorCode::E_DATA_INVALID_JSON),
-        ("{\"a\": }", ErrorCode::E_DATA_INVALID_JSON),
-        ("[1,]", ErrorCode::E_DATA_INVALID_JSON),
-        ("{\"a\": 1} x", ErrorCode::E_DATA_INVALID_JSON),
-        ("nul", ErrorCode::E_DATA_INVALID_JSON),
-        ("\"a", ErrorCode::E_DATA_INVALID_JSON),
-        ("01", ErrorCode::E_DATA_INVALID_JSON),
-        ("{\"a\": , \"b\": 1e19}", ErrorCode::E_DATA_INVALID_JSON),
-        ("{\"a\": 1e19, \"b\": }", ErrorCode::E_DATA_NUMBER_RANGE),
-        (deep.as_str(), ErrorCode::E_DATA_DEPTH),
-        (syntax_first.as_str(), ErrorCode::E_DATA_INVALID_JSON),
+        ("", ErrorCode::DataInvalidJson),
+        (" ", ErrorCode::DataInvalidJson),
+        ("{", ErrorCode::DataInvalidJson),
+        ("{\"a\": }", ErrorCode::DataInvalidJson),
+        ("[1,]", ErrorCode::DataInvalidJson),
+        ("{\"a\": 1} x", ErrorCode::DataInvalidJson),
+        ("nul", ErrorCode::DataInvalidJson),
+        ("\"a", ErrorCode::DataInvalidJson),
+        ("01", ErrorCode::DataInvalidJson),
+        ("{\"a\": , \"b\": 1e19}", ErrorCode::DataInvalidJson),
+        ("{\"a\": 1e19, \"b\": }", ErrorCode::DataNumberRange),
+        (deep.as_str(), ErrorCode::DataDepth),
+        (syntax_first.as_str(), ErrorCode::DataInvalidJson),
     ];
     for (text, code) in cases {
         assert_eq!(read_json(text).unwrap_err().code, code, "{text:.30}");
