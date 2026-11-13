@@ -1,12 +1,12 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 7be8bf72625b0086ee3fdeed2ccf8f07ee451c9132e74c342f3a03e62a7f4b3f -->
+<!-- source-sha256: eeb60284f8fdaeaefd4c89786994fd7eed3c1a294ef2dc5938fe72a27965cd67 -->
 # 오류
 
 [English](/spec/errors).
 
 ## 오류 객체
 
-- **ERR-1** 오류는 `code`, `template`, `line`, `col`, `offset`, `end`, `message` 필드를 가진 객체다. `code`는 이 문서에 나열된 코드 중 하나이며 오류의 kind로, 소문자 snake_case로 쓴다: 모든 polyspec 라이브러리의 kind가 같은 형식이므로 여러 라이브러리의 오류를 다루는 host는 한 kind 형식으로 오류를 구별한다. TypeScript, Go, PHP, PHP extension, Python의 legacy 구현은 없어질 때까지 코드를 `E_`와 대문자 kind로 적는다(`data_depth`는 `E_DATA_DEPTH`). `template`은 오류가 위치한 템플릿의 이름이다. `message`는 영어 자유 텍스트다.
+- **ERR-1** 오류는 `code`, `template`, `line`, `col`, `offset`, `end`, `message` 필드를 가진 객체다. `code`는 이 문서에 나열된 코드 중 하나이며 오류의 kind로, 소문자 snake_case로 쓴다: 모든 polyspec 라이브러리의 kind가 같은 형식이므로 여러 라이브러리의 오류를 다루는 host는 한 kind 형식으로 오류를 구별한다. TypeScript, Go, PHP, PHP extension, Python의 legacy 구현은 없어질 때까지 코드를 `E_`와 대문자 kind로 적는다(`data_depth`는 `E_DATA_DEPTH`). language service `packages/language`와 그 위의 편집기 패키지(`packages/lsp`, `packages/vscode`, `packages/codemirror`)는 자기가 공개하는 모든 code, 즉 format 오류의 code, diagnostic의 code, 명령 출력 줄의 code에 kind를 준다. 이 패키지들은 legacy TypeScript parser의 오류를 읽고, 오류가 language service를 떠나는 자리에서 그 code의 kind를 쓴다. 그래서 편집기와 Rust 코어는 하나의 오류를 하나의 text로 부른다. `template`은 오류가 위치한 템플릿의 이름이다. `message`는 영어 자유 텍스트다.
 
 SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 필드를 제공한다. TypeScript는 `ErrorObject`와 `TemplateError.toObject`, Go는 `errs.Error`의 공개 필드와 `JSON`, Rust는 `TemplateError` 필드와 직렬화 구현을 사용한다. PHP와 PHP 확장은 `TemplateError.toArray`를 사용하며 속성 이름은 `errorCode`, `errorLine`, `errorCol`이고 메시지는 네이티브 예외에서 읽는다. Python은 `TemplateError` 속성과 `to_object`를 사용한다. 네이티브 생성자나 구조체 리터럴은 같은 값을 만든다. 위치 factory는 바이트 span과 줄 인덱스를 받고, 위치 없는 factory 또는 위치에 0을 넣는 TypeScript 생성자는 위치 필드 네 개에 모두 0을 유지한다.
 

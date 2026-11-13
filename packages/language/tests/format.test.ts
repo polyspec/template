@@ -65,7 +65,7 @@ describe('format', () => {
     if (result.ok) return;
     // The message is the parser's own; the test fixes only the error position.
     const { message, ...error } = result.error;
-    expect(error).toEqual({ reason: 'parse', code: 'E_PARSE_UNCLOSED_BLOCK', line: 2, col: 3 });
+    expect(error).toEqual({ reason: 'parse', code: 'parse_unclosed_block', line: 2, col: 3 });
     expect(message).toBeTypeOf('string');
   });
 

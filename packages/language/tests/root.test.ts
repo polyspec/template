@@ -53,7 +53,7 @@ describe('root marker vectors', () => {
       }
       expect(diagnostics).toHaveLength(1);
       const [diagnostic] = diagnostics;
-      expect(diagnostic?.code).toBe('E_ROOT_INVALID');
+      expect(diagnostic?.code).toBe('root_invalid');
       expect(diagnostic?.message.startsWith(vector.message)).toBe(true);
       expect([diagnostic?.start, diagnostic?.end]).toEqual([0, vector.text.length]);
     });
@@ -75,9 +75,9 @@ describe('template root', () => {
     expect(openDocument(text, { location: { path: '/w/page.tpl', host } }).root).toBeNull();
     const message = 'no template root declared (template-root.json)';
     const expected = [
-      { start: 0, end: 12, code: 'E_ROOT_UNDECLARED', message },
-      { start: 12, end: 31, code: 'E_ROOT_UNDECLARED', message },
-      { start: 39, end: 51, code: 'E_ROOT_UNDECLARED', message },
+      { start: 0, end: 12, code: 'root_undeclared', message },
+      { start: 12, end: 31, code: 'root_undeclared', message },
+      { start: 39, end: 51, code: 'root_undeclared', message },
     ];
     expect(diagnosticsOf(text, '/w/page.tpl', host)).toEqual(expected);
     expect(openDocument(text).diagnostics.map(({ start, end, code, message }) => ({ start, end, code, message }))).toEqual(expected);
@@ -87,8 +87,8 @@ describe('template root', () => {
     const host = memoryHost({ '/w/template-root.json': '{"schema": 2}', '/w/page.tpl': '', '/w/part.tpl': 'x' });
     const document = openDocument('{+ part.tpl}', { location: { path: '/w/page.tpl', host } });
     expect(document.root?.path).toBeNull();
-    expect(document.root?.diagnostics.map(item => item.code)).toEqual(['E_ROOT_INVALID']);
-    expect(document.diagnostics.map(item => item.code)).toEqual(['E_ROOT_UNDECLARED']);
+    expect(document.root?.diagnostics.map(item => item.code)).toEqual(['root_invalid']);
+    expect(document.diagnostics.map(item => item.code)).toEqual(['root_undeclared']);
   });
 
   it('reports an include and a block path that name no regular file under the root', () => {
@@ -114,25 +114,25 @@ describe('template root', () => {
       '{+ part.tpl/x.tpl}',
     ].join('\n');
     expect(diagnosticsOf(text, '/w/pages/page.tpl', host).map(({ code, message }) => [code, message])).toEqual([
-      ['E_LOAD_NOT_FOUND', 'template pages/missing.tpl does not exist'],
-      ['E_LOAD_NOT_FOUND', 'template parts/none.tpl does not exist'],
-      ['E_LOAD_NOT_FOUND', 'template parts/dir does not exist'],
-      ['E_LOAD_FAILED', 'template linked.tpl cannot be loaded: linked.tpl is a symbolic link'],
-      ['E_LOAD_FAILED', 'template linkdir/head.tpl cannot be loaded: linkdir is a symbolic link'],
-      ['E_LOAD_OUTSIDE_ROOT', '"../../x.tpl" leaves the template root'],
-      ['E_LOAD_NOT_FOUND', 'template pages/part.tpl/x.tpl does not exist'],
+      ['load_not_found', 'template pages/missing.tpl does not exist'],
+      ['load_not_found', 'template parts/none.tpl does not exist'],
+      ['load_not_found', 'template parts/dir does not exist'],
+      ['load_failed', 'template linked.tpl cannot be loaded: linked.tpl is a symbolic link'],
+      ['load_failed', 'template linkdir/head.tpl cannot be loaded: linkdir is a symbolic link'],
+      ['load_outside_root', '"../../x.tpl" leaves the template root'],
+      ['load_not_found', 'template pages/part.tpl/x.tpl does not exist'],
     ]);
   });
 
   it('reports a missing include at its tag', () => {
     const host = memoryHost({ '/w/template-root.json': MARKER, '/w/page.tpl': '' });
     expect(diagnosticsOf('<p>{+ missing.tpl}</p>', '/w/page.tpl', host)).toEqual([
-      { start: 3, end: 18, code: 'E_LOAD_NOT_FOUND', message: 'template missing.tpl does not exist' },
+      { start: 3, end: 18, code: 'load_not_found', message: 'template missing.tpl does not exist' },
     ]);
   });
 
   it('reports only the parser error of a text that does not parse', () => {
     const host = memoryHost({ '/w/page.tpl': '' });
-    expect(diagnosticsOf('{+ part.tpl}{/}', '/w/page.tpl', host).map(item => item.code)).toEqual(['E_PARSE_UNEXPECTED_CLOSE']);
+    expect(diagnosticsOf('{+ part.tpl}{/}', '/w/page.tpl', host).map(item => item.code)).toEqual(['parse_unexpected_close']);
   });
 });

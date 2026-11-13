@@ -61,7 +61,7 @@ describe('options', () => {
   it('passes the template name to the language service', () => {
     const state = createState('{? a}', { name: 'page.tpl' });
     expect(state.field(templateDocument).diagnostics.length).toBe(1);
-    expect(templateDiagnostics(state)[0]?.message).toMatch(/^E_PARSE_UNCLOSED_BLOCK: /);
+    expect(templateDiagnostics(state)[0]?.message).toMatch(/^parse_unclosed_block: /);
   });
 
   it('formats with the editor indent unit and templateBlocks', () => {
@@ -105,10 +105,10 @@ describe('template root', () => {
 
   it('resolves include paths against the marker of the location option', () => {
     const diagnostics = templateDiagnostics(createState('{+ part.tpl}{+ missing.tpl}', { location }));
-    expect(diagnostics.map(item => [item.from, item.to, item.message])).toEqual([[12, 27, 'E_LOAD_NOT_FOUND: template missing.tpl does not exist']]);
+    expect(diagnostics.map(item => [item.from, item.to, item.message])).toEqual([[12, 27, 'load_not_found: template missing.tpl does not exist']]);
   });
 
   it('reports every include path without the location option', () => {
-    expect(templateDiagnostics(createState('{+ part.tpl}')).map(item => item.message)).toEqual(['E_ROOT_UNDECLARED: no template root declared (template-root.json)']);
+    expect(templateDiagnostics(createState('{+ part.tpl}')).map(item => item.message)).toEqual(['root_undeclared: no template root declared (template-root.json)']);
   });
 });

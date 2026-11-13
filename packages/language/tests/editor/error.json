@@ -3,7 +3,7 @@
     {
       "start": 18,
       "end": 19,
-      "code": "E_PARSE_UNEXPECTED_TOKEN"
+      "code": "parse_unexpected_token"
     }
   ],
   "tokens": [

@@ -85,7 +85,7 @@ describe('template-fmt', () => {
     writeFileSync(changed, '{=a}');
     const result = run(['--write', broken, changed]);
     expect(result.status).toBe(2);
-    expect(result.stderr).toMatch(new RegExp(`^${broken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:2:3: E_PARSE_UNCLOSED_BLOCK: `));
+    expect(result.stderr).toMatch(new RegExp(`^${broken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:2:3: parse_unclosed_block: `));
     expect(readFileSync(broken, 'utf8')).toBe('<p>\n  {? a}\n');
     expect(readFileSync(changed, 'utf8')).toBe('{= a}');
     expect(run([broken]).status).toBe(2);
@@ -97,14 +97,14 @@ describe('template-fmt', () => {
     writeFileSync(file, Buffer.from([0x61, 0x0a, 0x62, 0xff]));
     const result = run(['--check', file]);
     expect(result.status).toBe(2);
-    expect(result.stderr).toContain(':2:2: E_LEX_INVALID_UTF8: ');
+    expect(result.stderr).toContain(':2:2: lex_invalid_utf8: ');
   });
 
   it('reports a standard input that does not parse', () => {
     const result = run([], '{= }');
     expect(result.status).toBe(2);
     expect(result.stdout).toBe('');
-    expect(result.stderr).toMatch(/^<stdin>:1:4: E_PARSE_UNEXPECTED_TOKEN: /);
+    expect(result.stderr).toMatch(/^<stdin>:1:4: parse_unexpected_token: /);
   });
 
   it('formats with the delimiter option', () => {

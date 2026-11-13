@@ -30,7 +30,7 @@ export interface FormatError {
    * HTML structure is not balanced, so the lines cannot be indented.
    */
   reason: 'parse' | 'invariant' | 'html';
-  /** Error code of the parser, or null for an AST difference. */
+  /** The kind of the parser error in lowercase snake_case (ERR-1), or null for an AST difference. */
   code: string | null;
   /** 1-based line of the error position. */
   line: number;
@@ -124,9 +124,17 @@ function apply(text: string, edits: readonly Edit[]): string {
   return output + text.slice(cursor);
 }
 
+/**
+ * The kind of a code of the legacy parser (ERR-1): the legacy TypeScript package names a code `E_` followed by its kind
+ * in capitals, and every code that this package gives is the kind in lowercase snake_case.
+ */
+export function kindOf(code: string): string {
+  return (code.startsWith('E_') ? code.slice(2) : code).toLowerCase();
+}
+
 function parseError(error: TemplateError | DelimiterOptionError): FormatError {
   if (error instanceof TemplateError) {
-    return { reason: 'parse', code: error.code, line: error.line, col: error.col, message: error.message };
+    return { reason: 'parse', code: kindOf(error.code), line: error.line, col: error.col, message: error.message };
   }
   return { reason: 'parse', code: null, line: 0, col: 0, message: error.message };
 }

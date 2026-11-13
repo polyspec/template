@@ -39,7 +39,7 @@ test('marks tokens and paints the tag background', async ({ page }) => {
 test('reports an unclosed block', async ({ page }) => {
   await mount(page, '<ul>\n{@ x = xs}\n</ul>\n', false);
   await expect(page.locator('.cm-lintRange-error')).toHaveCount(1);
-  expect(await page.evaluate(() => window.diagnostics())).toEqual(['E_PARSE_UNCLOSED_BLOCK: block is not closed before the end of the file']);
+  expect(await page.evaluate(() => window.diagnostics())).toEqual(['parse_unclosed_block: block is not closed before the end of the file']);
 });
 
 test('formats with Shift-Alt-f', async ({ page }) => {

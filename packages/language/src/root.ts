@@ -39,7 +39,7 @@ export interface TemplateRoot {
 /** The diagnostics of a marker text: empty for `{"schema": 1}`, otherwise one error over the whole text. */
 export function checkRootMarker(text: string): Diagnostic[] {
   const invalid = (message: string): Diagnostic[] => [
-    { start: 0, end: text.length, code: 'E_ROOT_INVALID', message, severity: 'error', source: 'polyspec-template' },
+    { start: 0, end: text.length, code: 'root_invalid', message, severity: 'error', source: 'polyspec-template' },
   ];
   let value: unknown;
   try {
@@ -83,7 +83,7 @@ interface PathTag {
  */
 export function pathDiagnostics(ast: Template, location: DocumentLocation | undefined, root: TemplateRoot | null): { span: [number, number]; code: string; message: string }[] {
   const tags = pathTags(ast);
-  if (location === undefined || root === null || root.path === null) return tags.map(tag => ({ span: tag.span, code: 'E_ROOT_UNDECLARED', message: UNDECLARED }));
+  if (location === undefined || root === null || root.path === null) return tags.map(tag => ({ span: tag.span, code: 'root_undeclared', message: UNDECLARED }));
   const base = root.path === '/' ? '' : root.path;
   const name = location.path.slice(base.length + 1);
   const result: { span: [number, number]; code: string; message: string }[] = [];
@@ -101,15 +101,15 @@ function resolveTag(path: string, name: string, base: string, host: RootHost): {
     target = resolvePath(name, path);
   } catch (error) {
     if (!(error instanceof PathError)) throw error;
-    return { code: 'E_LOAD_OUTSIDE_ROOT', message: `${JSON.stringify(path)} leaves the template root` };
+    return { code: 'load_outside_root', message: `${JSON.stringify(path)} leaves the template root` };
   }
-  const missing = { code: 'E_LOAD_NOT_FOUND', message: `template ${target} does not exist` };
+  const missing = { code: 'load_not_found', message: `template ${target} does not exist` };
   const segments = target === '' ? [] : target.split('/');
   if (segments.length === 0) return missing;
   for (let index = 0; index < segments.length; index++) {
     const component = segments.slice(0, index + 1).join('/');
     const type = host.entryType(`${base}/${component}`);
-    if (type === 'symlink') return { code: 'E_LOAD_FAILED', message: `template ${target} cannot be loaded: ${component} is a symbolic link` };
+    if (type === 'symlink') return { code: 'load_failed', message: `template ${target} cannot be loaded: ${component} is a symbolic link` };
     if (type === null || (index < segments.length - 1 ? type !== 'directory' : type !== 'file')) return missing;
   }
   return null;

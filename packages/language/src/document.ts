@@ -1,6 +1,6 @@
 // Language service document: one analysis of a template text and every editor result of the document.
 import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template-legacy';
-import { format, type FormatOptions, type FormatResult } from './format.js';
+import { format, kindOf, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
 import { indexOfByte } from './positions.js';
 import { findRoot, pathDiagnostics, type DocumentLocation, type TemplateRoot } from './root.js';
@@ -167,7 +167,7 @@ export function openDocument(text: string, options: DocumentOptions = {}): Templ
 }
 
 function diagnosticOf(source: string, error: TemplateError, shift: number): Diagnostic {
-  return rangeOf(source, error.offset, error.end, error.code, error.message, shift);
+  return rangeOf(source, error.offset, error.end, kindOf(error.code), error.message, shift);
 }
 
 // A diagnostic over the string range of a byte range, at least one character long when the text has one.

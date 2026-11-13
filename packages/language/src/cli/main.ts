@@ -2,7 +2,7 @@
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { buffer } from 'node:stream/consumers';
 import { parse, TemplateError } from '@polyspec/template-legacy';
-import { format, type FormatOptions, type FormatResult } from '../format.js';
+import { format, kindOf, type FormatOptions, type FormatResult } from '../format.js';
 import { parseArguments, USAGE } from './args.js';
 import { collectFiles } from './files.js';
 
@@ -72,7 +72,7 @@ function usageError(message: string): number {
   return 2;
 }
 
-// Decodes UTF-8 and formats. Invalid UTF-8 is reported with the parser's E_LEX_INVALID_UTF8 position.
+// Decodes UTF-8 and formats. Invalid UTF-8 is reported with the position of the parser's lex_invalid_utf8.
 export function formatBytes(bytes: Uint8Array, name: string, options: FormatOptions): FormatResult {
   let source: string;
   try {
@@ -83,7 +83,7 @@ export function formatBytes(bytes: Uint8Array, name: string, options: FormatOpti
       parse(bytes, name, options.delimiters === undefined ? {} : { delimiters: options.delimiters });
     } catch (error) {
       if (!(error instanceof TemplateError)) throw error;
-      return { ok: false, error: { reason: 'parse', code: error.code, line: error.line, col: error.col, message: error.message } };
+      return { ok: false, error: { reason: 'parse', code: kindOf(error.code), line: error.line, col: error.col, message: error.message } };
     }
     throw new Error(`${name}: the parser accepted bytes that are not UTF-8`, { cause: decodeError });
   }

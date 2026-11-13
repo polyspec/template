@@ -48,7 +48,7 @@ describe('constructs', () => {
 describe('tags and diagnostics', () => {
   it('lists every tag except comments, after a byte order mark', () => {
     const document = openDocument('﻿{* note *}{:n = 1}{= n}{? n}{+ "p.tpl"}{/}{# box}');
-    expect(document.diagnostics).toEqual([expect.objectContaining({ code: 'E_ROOT_UNDECLARED', start: 29, end: 40 })]);
+    expect(document.diagnostics).toEqual([expect.objectContaining({ code: 'root_undeclared', start: 29, end: 40 })]);
     expect(document.tags.map(tag => [tag.kind, document.text.slice(tag.start, tag.end)])).toEqual([
       ['assignment', '{:n = 1}'], ['echo', '{= n}'], ['if', '{? n}'], ['include', '{+ "p.tpl"}'], ['close', '{/}'], ['block', '{# box}'],
     ]);
@@ -57,21 +57,21 @@ describe('tags and diagnostics', () => {
   it('reports the parse error at string positions after multi-byte text and a byte order mark', () => {
     const document = openDocument('﻿<p>제목</p>\n<b>{/}</b>');
     const [diagnostic] = document.diagnostics;
-    expect(diagnostic).toMatchObject({ code: 'E_PARSE_UNEXPECTED_CLOSE', severity: 'error', source: 'polyspec-template' });
+    expect(diagnostic).toMatchObject({ code: 'parse_unexpected_close', severity: 'error', source: 'polyspec-template' });
     expect(document.text.slice(diagnostic?.start, (diagnostic?.start ?? 0) + 3)).toBe('{/}');
     expect(diagnostic?.end).toBeGreaterThan(diagnostic?.start ?? 0);
   });
 
   it('reports an unclosed block at its opening tag and keeps every tag of the text', () => {
     const document = openDocument('<p>\n  {? a}\n  {= b}\n</p>');
-    expect(document.diagnostics).toEqual([expect.objectContaining({ code: 'E_PARSE_UNCLOSED_BLOCK', start: 6, end: 7 })]);
+    expect(document.diagnostics).toEqual([expect.objectContaining({ code: 'parse_unclosed_block', start: 6, end: 7 })]);
     expect(slices(document, document.tags)).toEqual(['{? a}', '{= b}']);
     expect(document.constructs).toEqual([]);
   });
 
   it('keeps the tags before a tag that fails', () => {
     const document = openDocument('{= a}{= b +}{= c}');
-    expect(document.diagnostics[0]?.code).toBe('E_PARSE_UNEXPECTED_TOKEN');
+    expect(document.diagnostics[0]?.code).toBe('parse_unexpected_token');
     expect(slices(document, document.tags)).toEqual(['{= a}']);
   });
 
@@ -230,7 +230,7 @@ describe('agreement with the AST', () => {
         return;
       }
       // A text that parses has only path diagnostics, here without a declared root.
-      expect(document.diagnostics.filter(item => item.code !== 'E_ROOT_UNDECLARED')).toEqual([]);
+      expect(document.diagnostics.filter(item => item.code !== 'root_undeclared')).toEqual([]);
       const text = source.startsWith('﻿') ? source.slice(1) : source;
       const shift = source.length - text.length;
       const bytes = (index: number): number => Buffer.byteLength(text.slice(0, index - shift));

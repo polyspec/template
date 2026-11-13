@@ -3,7 +3,7 @@
     {
       "start": 34,
       "end": 35,
-      "code": "E_PARSE_UNCLOSED_BLOCK"
+      "code": "parse_unclosed_block"
     }
   ],
   "tokens": [

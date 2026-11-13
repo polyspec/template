@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: 514c7056a1d20082a1104c78519de7d67c60405f85bbbc3a7a0923a146d9b931 -->
+<!-- source-sha256: b0e6460af91dfc1fec1f58ef60340e0b113a1dee4ac1138b2ca3c11d81e37f05 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -99,7 +99,7 @@ code --list-extensions --show-versions | grep polyspec
 
 서버는 진단, 토큰, 태그 범위, 구성, 접기 범위, 짝 태그를 언어 서비스의 `openDocument()`에서 얻는다([에디터 지원](/ko/spec/editor)). 언어 서비스의 테스트는 모든 적합성 사례에서 구성을 AST의 `If`, `For`, `IfBlock` span과 분기 span과 비교한다.
 
-- 진단: 서버는 문서의 모든 버전에 대해 `E_PARSE_UNCLOSED_BLOCK`, `E_PARSE_UNEXPECTED_CLOSE`, `E_PARSE_ELSE_OUTSIDE_BLOCK` 같은 파싱 오류를 오류 코드와 함께 파서 위치에 게시한다. 문서가 파싱되거나 닫히면 진단을 지운다.
+- 진단: 서버는 문서의 모든 버전에 대해 `parse_unclosed_block`, `parse_unexpected_close`, `parse_else_outside_block` 같은 파싱 오류를 오류 코드와 함께 파서 위치에 게시한다. 문서가 파싱되거나 닫히면 진단을 지운다.
 - 시맨틱 토큰: 서버는 텍스트의 템플릿 부분을 EDT-8의 토큰 종류로 분류한다. 태그 밖의 텍스트는 문법의 HTML 색을 유지한다. 확장은 VS Code가 정의하지 않은 종류를 `semanticTokenTypes`로 제공한다. 상위 종류가 `keyword`인 `delimiter`와 상위 종류가 `string`인 `path`다. `semanticTokenScopes`는 `delimiter`를 `keyword.control.tag.begin.polyspec-template`에, `keyword`를 `keyword.control.polyspec-template`에, `path`를 `string.unquoted.path.polyspec-template`에 대응시키므로, 시맨틱 토큰 규칙이 없는 테마도 구분자와 기호를 `keyword.control`로 칠한다. 기본값 `configuredByTheme`는 시맨틱 강조를 켜지 않는 테마에서 태그를 칠하지 않으므로, 확장은 `"[polyspec-template]": { "editor.semanticHighlighting.enabled": true }`를 설정 기본값으로 제공한다. 이 언어에 대한 사용자나 작업 공간 설정이 이를 덮어쓴다.
 - 태그 배경: 주석을 뺀 모든 태그에 어두운 테마에서는 `#16351c`, 밝은 테마에서는 `#e3f6dd`인 진한 초록 배경을 칠한다. 이 배경은 편집기 배경과 밝기가 다르고(Dark 2026에서 ΔL* +13.4, Light 2026에서 5.1), Dark 2026의 모든 문법 색을 4.5:1 이상으로 유지한다. 가장 낮은 것은 키워드 기호의 4.8:1이다. `#044700`처럼 채도가 더 높은 초록은 더 눈에 띄지만 기호를 4.0:1로 낮추고, 어두운 테마의 검정처럼 편집기와 밝기가 같은 색은 구별되지 않는다. 확장은 템플릿 편집기가 보일 때와 마지막 변경 250 ms 뒤에 `polyspec-template/tagRanges`를 요청하고, 요청하는 동안 문서가 바뀌지 않았을 때만 결과를 칠한다. 문서가 파싱되지 않는 동안에는 파서가 오류 전까지 받아들인 태그에 배경을 칠한다. 확장은 API로 `tagRanges(document)`를 돌려주며(`vscode.extensions.getExtension('polyspec.polyspec-template').exports`), 이 함수는 확장이 칠하는 범위를 준다. VS Code에는 편집기의 장식을 읽는 API가 없으므로 통합 테스트는 이 범위를 여기서 읽는다.
 - 강조: 커서가 여는 태그, 분기 태그, 닫는 태그에 있으면 같은 구성의 모든 태그를 강조한다.
@@ -149,7 +149,7 @@ new EditorView({
 - EDT-8의 모든 토큰에 붙는 클래스 `cm-template-<type>`의 마크. 토큰 마크는 문법 강조보다 우선순위가 높으므로 그 요소가 HTML 강조의 요소 안에 놓이고, HTML 속성 값 안의 템플릿 토큰도 템플릿 색을 유지한다.
 - 모든 태그 범위에 붙는 클래스 `cm-template-tag`의 마크. 우선순위가 가장 낮으므로 그 요소가 태그의 토큰 마크를 감싼다.
 - 주 커서 아래 구성의 모든 태그에 붙는 클래스 `cm-template-highlight`의 마크(`highlights`)
-- `@codemirror/lint`의 `linter`를 통한 진단. 심각도는 `error`, 출처는 `polyspec-template`, 메시지는 `CODE: message`이다. 예를 들면 `E_PARSE_UNCLOSED_BLOCK: block is not closed before the end of the file`이다. `templateDiagnostics(state)`는 상태에 대해 같은 진단을 돌려준다.
+- `@codemirror/lint`의 `linter`를 통한 진단. 심각도는 `error`, 출처는 `polyspec-template`, 메시지는 `CODE: message`이다. 예를 들면 `parse_unclosed_block: block is not closed before the end of the file`이다. `templateDiagnostics(state)`는 상태에 대해 같은 진단을 돌려준다.
 - `foldingRanges`로 만든 `foldService` 접기. 한 줄을 접으면 여는 태그 다음 줄부터 닫는 태그 앞 줄까지 숨긴다. CodeMirror는 한 줄에 범위 하나를 접는다. 한 줄에서 여러 구성이 시작하면 가장 늦게 끝나는 구성을 접는다.
 - 편집기의 `indentUnit`과 `templateBlocks`로 구한 그 줄의 `lineIndentation` 열 너비를 돌려주는 `indentService`. Enter가 줄을 나누면 서비스는 줄을 나눈 텍스트를 분석하므로, 새 줄과 그 줄로 옮겨진 텍스트는 타이핑하는 줄의 들여쓰기를 얻는다. 언어 서비스가 요구하는 대로 들여쓰기 단위는 공백의 연속이거나 탭 하나여야 한다.
 - `formatTemplate`을 실행하는 Shift+Alt+F
@@ -267,18 +267,18 @@ CI job `editor`는 `make editor-boundary-check template-test-language format-che
 
 - 파일 `template-root.json`은 템플릿 root, 곧 그 디렉터리를 선언한다. 문서의 root는 문서의 가장 가까운 상위 디렉터리에 있는 marker가 선언하며, 문서의 디렉터리부터 파일시스템 root까지 찾는다. 일반 파일만 marker다. marker는 호출자가 root를 주지 않는 도구, 곧 언어 서비스, LSP 서버, `options.location`을 통한 CodeMirror 어댑터를 위한 것이다. 컴파일러는 `root` 인자를, 파일시스템 로더는 그 root를 유지하고, map 로더와 artifact 로더는 바뀌지 않으며, 적합성 명령은 `--root`(CNF-4)를 유지한다. 에디터는 marker를 기준으로 경로를 해석하고 host의 loader root를 검사하지 않는다. host의 loader root는 host 자신의 선언이며, 둘의 차이는 host의 선택이다.
 
-- marker의 내용은 `{"schema": 1}`이다. 곧 유일한 키가 숫자 1인 `schema`인 객체 하나의 JSON 문서다. JSON 문서 하나가 아닌 텍스트, 객체가 아닌 값, `schema`가 없는 것, 다른 `schema` 값, 알 수 없는 키는 각각 marker 텍스트 전체에 걸친 오류 `E_ROOT_INVALID`이며 marker에 보고된다(`TemplateDocument.root.diagnostics`, marker의 URI에 게시). 유효하지 않은 marker는 root를 선언하지 않는다. `packages/language/tests/root-marker/vectors.json`의 vector가 marker 텍스트를 받아들이고 거부한다.
+- marker의 내용은 `{"schema": 1}`이다. 곧 유일한 키가 숫자 1인 `schema`인 객체 하나의 JSON 문서다. JSON 문서 하나가 아닌 텍스트, 객체가 아닌 값, `schema`가 없는 것, 다른 `schema` 값, 알 수 없는 키는 각각 marker 텍스트 전체에 걸친 오류 `root_invalid`이며 marker에 보고된다(`TemplateDocument.root.diagnostics`, marker의 URI에 게시). 유효하지 않은 marker는 root를 선언하지 않는다. `packages/language/tests/root-marker/vectors.json`의 vector가 marker 텍스트를 받아들이고 거부한다.
 
 - 파싱되는 텍스트에서 모든 include 경로와 경로 토큰을 가진 block 태그의 모든 block 경로는 해석되지 않으면 그 태그에 걸친 진단 하나를 받는다:
 
 | 조건 | 코드 | 메시지 |
 | --- | --- | --- |
-| marker가 없거나, 유효하지 않거나, `options.location`이 없음 | `E_ROOT_UNDECLARED` | `no template root declared (template-root.json)` |
-| RT-8의 정규화 뒤 경로가 root를 벗어남 | `E_LOAD_OUTSIDE_ROOT` | `"<path>" leaves the template root` |
-| root 아래 component가 symbolic link임(RT-10) | `E_LOAD_FAILED` | `template <name> cannot be loaded: <component> is a symbolic link` |
-| 해석된 이름이 root 아래의 일반 파일이 아님 | `E_LOAD_NOT_FOUND` | `template <name> does not exist` |
+| marker가 없거나, 유효하지 않거나, `options.location`이 없음 | `root_undeclared` | `no template root declared (template-root.json)` |
+| RT-8의 정규화 뒤 경로가 root를 벗어남 | `load_outside_root` | `"<path>" leaves the template root` |
+| root 아래 component가 symbolic link임(RT-10) | `load_failed` | `template <name> cannot be loaded: <component> is a symbolic link` |
+| 해석된 이름이 root 아래의 일반 파일이 아님 | `load_not_found` | `template <name> does not exist` |
 
-경로는 root에 대한 문서의 템플릿 이름을 기준으로 RT-8의 정규화로 해석한다. 앞의 `/`는 root를 기준으로 하고 `.`와 `..`는 정규화한다. 식별자만 있는 block 태그와 `define`이 주는 대상은 렌더링 때 해석되며(RT-24, RT-25) 진단을 받지 않는다. 그것은 렌더링 때 `E_LOAD_NOT_FOUND`나 `E_RUNTIME_BLOCK_UNDEFINED`로 실패한다. 분석 뒤에 바뀐 파일은 문서의 다음 분석에서 보인다.
+경로는 root에 대한 문서의 템플릿 이름을 기준으로 RT-8의 정규화로 해석한다. 앞의 `/`는 root를 기준으로 하고 `.`와 `..`는 정규화한다. 식별자만 있는 block 태그와 `define`이 주는 대상은 렌더링 때 해석되며(RT-24, RT-25) 진단을 받지 않는다. 그것은 렌더링 때 `load_not_found`나 `E_RUNTIME_BLOCK_UNDEFINED`로 실패한다. 분석 뒤에 바뀐 파일은 문서의 다음 분석에서 보인다.
 
 - 언어 서비스는 `options.location`(`{ path, host }`, `path`는 `/`로 구분한 절대 경로)으로 받은 host를 통해서만 파일에 닿는다. `host.entryType(path)`는 경로의 항목에 대해 symbolic link를 따라가지 않고 `file`, `directory`, `symlink`, `other`를 돌려주거나, 경로가 아무것도 가리키지 않으면 null을 돌려주고, `host.readText(path)`는 일반 파일의 텍스트를 돌려준다. 언어 서비스는 Node.js 없이 유지된다. LSP 서버는 `node:fs` 위의 host를 넘기고, CodeMirror host는 자기 host를 넘긴다.
 

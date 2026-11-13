@@ -139,7 +139,7 @@ const enabled = [
     }
     assert.equal(diagnostics.length, 1);
     const [diagnostic] = diagnostics;
-    assert.equal(diagnostic.code, 'E_PARSE_UNCLOSED_BLOCK');
+    assert.equal(diagnostic.code, 'parse_unclosed_block');
     assert.equal(diagnostic.source, 'polyspec-template');
     assert.equal(diagnostic.severity, vscode.DiagnosticSeverity.Error);
     assert.deepEqual([diagnostic.range.start.line, diagnostic.range.start.character], [1, 2]);

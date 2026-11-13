@@ -54,12 +54,12 @@ describe('template-language format', () => {
   it('reports each error reason as JSON with exit status 2', () => {
     const parse = run(['format', file('<p>\n  {? a}\n')]);
     expect(parse.status).toBe(2);
-    expect(JSON.parse(parse.stderr)).toMatchObject({ reason: 'parse', code: 'E_PARSE_UNCLOSED_BLOCK', line: 2, col: 3 });
+    expect(JSON.parse(parse.stderr)).toMatchObject({ reason: 'parse', code: 'parse_unclosed_block', line: 2, col: 3 });
     const html = run(['format', file('<div>\n<p>{=a}</div>\n')]);
     expect([html.status, html.stdout]).toEqual([2, '']);
     expect(JSON.parse(html.stderr)).toEqual({ reason: 'html', code: null, line: 2, col: 8, message: 'the end tag </div> does not match the open element <p>' });
     const bytes = run(['format', file(Buffer.from([0x61, 0x0a, 0x62, 0xff]))]);
-    expect(JSON.parse(bytes.stderr)).toMatchObject({ reason: 'parse', code: 'E_LEX_INVALID_UTF8', line: 2, col: 2 });
+    expect(JSON.parse(bytes.stderr)).toMatchObject({ reason: 'parse', code: 'lex_invalid_utf8', line: 2, col: 2 });
   });
 
   it('exits with status 1 on a usage error', () => {

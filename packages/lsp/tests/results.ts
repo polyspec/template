@@ -9,6 +9,8 @@ export const SPACES = { tabSize: 2, insertSpaces: true };
 
 // The labels of format errors in the server log, by the reason of the fixtures; a parse error is logged with its code.
 const REASONS: Record<string, string> = { 'HTML structure': 'html', 'formatted AST differs': 'invariant' };
+// ERR-1: the label of a parse error is its kind in lowercase snake_case, such as parse_unexpected_token.
+const KIND = /^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/;
 
 /** The string index where every line of the language service starts. */
 function lineStarts(text: string): number[] {
@@ -77,7 +79,7 @@ export async function serverResults(client: Client, uri: string, source: string,
   const edits = await client.request<TextEdit[]>('textDocument/formatting', { textDocument, options: SPACES });
   const warning = client.messages.slice(messages).find(message => message.endsWith('; no edits returned'));
   const label = warning === undefined ? null : (/^.*?:\d+:\d+: ([^:]+): /.exec(warning)?.[1] ?? warning);
-  const formatted = label === null ? TextDocument.applyEdits(text, edits) : edits.length > 0 ? { error: label, edits } : { error: REASONS[label] ?? (label.startsWith('E_') ? 'parse' : label) };
+  const formatted = label === null ? TextDocument.applyEdits(text, edits) : edits.length > 0 ? { error: label, edits } : { error: REASONS[label] ?? (KIND.test(label) ? 'parse' : label) };
 
   return {
     diagnostics: published.diagnostics.map(item => ({ start: indexOf(item.range.start), end: indexOf(item.range.end), code: item.code })),

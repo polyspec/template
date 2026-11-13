@@ -98,12 +98,12 @@ describe('diagnostics', () => {
     await client.open(uri, '<p>\n  {? a}\n</p>');
     const opened = await client.diagnosticsOf(uri, params => params.version === 1);
     expect(opened.diagnostics).toEqual([
-      { range: { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } }, severity: 1, code: 'E_PARSE_UNCLOSED_BLOCK', source: 'polyspec-template', message: openDocument('<p>\n  {? a}\n</p>').diagnostics[0]?.message },
+      { range: { start: { line: 1, character: 2 }, end: { line: 1, character: 3 } }, severity: 1, code: 'parse_unclosed_block', source: 'polyspec-template', message: openDocument('<p>\n  {? a}\n</p>').diagnostics[0]?.message },
     ]);
     await client.change(uri, '<p>{? a}x{/}</p>', 2);
     expect((await client.diagnosticsOf(uri, params => params.version === 2)).diagnostics).toEqual([]);
     await client.change(uri, '{/}', 3);
-    expect((await client.diagnosticsOf(uri, params => params.version === 3)).diagnostics.map(item => item.code)).toEqual(['E_PARSE_UNEXPECTED_CLOSE']);
+    expect((await client.diagnosticsOf(uri, params => params.version === 3)).diagnostics.map(item => item.code)).toEqual(['parse_unexpected_close']);
     await client.close(uri);
     expect((await client.diagnosticsOf(uri, params => params.version === undefined)).diagnostics).toEqual([]);
   });
@@ -206,7 +206,7 @@ describe('template root', () => {
     const uri = pathToFileURL(join(directory, 'page.tpl')).href;
     await client.open(uri, '{+ part.tpl}\n{+ missing.tpl}');
     const published = await client.diagnosticsOf(uri, params => params.version === 1);
-    expect(published.diagnostics.map(item => [item.range.start.line, item.code, item.message])).toEqual([[1, 'E_LOAD_NOT_FOUND', 'template missing.tpl does not exist']]);
+    expect(published.diagnostics.map(item => [item.range.start.line, item.code, item.message])).toEqual([[1, 'load_not_found', 'template missing.tpl does not exist']]);
     const marker = await client.diagnosticsOf(pathToFileURL(join(directory, 'template-root.json')).href, () => true);
     expect(marker.diagnostics).toEqual([]);
     await client.close(uri);
@@ -217,10 +217,10 @@ describe('template root', () => {
     const uri = pathToFileURL(join(directory, 'other.tpl')).href;
     await client.open(uri, '{+ part.tpl}');
     const published = await client.diagnosticsOf(uri, params => params.version === 1);
-    expect(published.diagnostics.map(item => [item.code, item.message])).toEqual([['E_ROOT_UNDECLARED', 'no template root declared (template-root.json)']]);
+    expect(published.diagnostics.map(item => [item.code, item.message])).toEqual([['root_undeclared', 'no template root declared (template-root.json)']]);
     const marker = await client.diagnosticsOf(pathToFileURL(join(directory, 'template-root.json')).href, params => params.diagnostics.length > 0);
     expect(marker.diagnostics.map(item => [item.range, item.code, item.message])).toEqual([
-      [{ start: { line: 0, character: 0 }, end: { line: 0, character: 28 } }, 'E_ROOT_INVALID', 'template-root.json has the unknown key "root"'],
+      [{ start: { line: 0, character: 0 }, end: { line: 0, character: 28 } }, 'root_invalid', 'template-root.json has the unknown key "root"'],
     ]);
     await client.close(uri);
   });

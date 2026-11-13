@@ -3,17 +3,17 @@
     {
       "start": 7,
       "end": 28,
-      "code": "E_LOAD_NOT_FOUND"
+      "code": "load_not_found"
     },
     {
       "start": 29,
       "end": 54,
-      "code": "E_LOAD_NOT_FOUND"
+      "code": "load_not_found"
     },
     {
       "start": 64,
       "end": 82,
-      "code": "E_LOAD_OUTSIDE_ROOT"
+      "code": "load_outside_root"
     }
   ],
   "tokens": [

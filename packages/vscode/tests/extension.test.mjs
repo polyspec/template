@@ -116,6 +116,6 @@ test('the bundled server publishes diagnostics and answers the requests of the e
   assert.deepEqual(edits, [{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, newText: '  ' }]);
   for (let attempt = 0; attempt < 50 && !published.some(params => params.uri === uri); attempt++) await new Promise(resolvePromise => setTimeout(resolvePromise, 20));
   const [diagnostic] = published.find(params => params.uri === uri).diagnostics;
-  assert.equal(diagnostic.code, 'E_PARSE_UNCLOSED_BLOCK');
+  assert.equal(diagnostic.code, 'parse_unclosed_block');
   assert.deepEqual(diagnostic.range.start, { line: 5, character: 0 });
 });
