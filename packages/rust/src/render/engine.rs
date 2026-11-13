@@ -2,7 +2,7 @@
 
 use crate::ast::{Node, Template};
 use crate::error::{ErrorCode, RenderError, Span, TemplateError, internal_boundary};
-use crate::functions::{Env, HostFunction};
+use crate::functions::{ContractFunction, Env, HostFunction, contract_host_function};
 use crate::loader::{LoadError, Loaded, Loader, MapLoader, resolve_path};
 use crate::parser::parse_template;
 use crate::parser::scanner::{DEFAULT_DELIMITERS, Delimiters, parse_delimiters};
@@ -282,6 +282,18 @@ impl AstProgram {
         self.runtime
             .register_class(class_name, method, function)
             .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))
+    }
+
+    /// FUN-43, FUN-44: registers a host function in the form of the interface contract (binding GN-6d), the core path
+    /// of `engine.register`; it is registered as `register` registers a host function.
+    pub fn register_function(&mut self, name: &str, function: ContractFunction) -> Result<(), TemplateError> {
+        self.register(name, contract_host_function(function))
+    }
+
+    /// Registers one logical class function in the form of the interface contract (binding GN-6d), the core path of
+    /// `engine.register_class`; it is registered as `register_class` registers a host function.
+    pub fn register_class_function(&mut self, class_name: &str, method: &str, function: ContractFunction) -> Result<(), TemplateError> {
+        self.register_class(class_name, method, contract_host_function(function))
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.

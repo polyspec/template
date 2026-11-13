@@ -3387,7 +3387,7 @@
           ],
           "wait": "none",
           "core": {
-            "path": "polyspec_template::AstProgram::register",
+            "path": "polyspec_template::AstProgram::register_function",
             "receiver": "&mut self"
           }
         },
@@ -3443,7 +3443,7 @@
           ],
           "wait": "none",
           "core": {
-            "path": "polyspec_template::AstProgram::register_class",
+            "path": "polyspec_template::AstProgram::register_class_function",
             "receiver": "&mut self"
           }
         },

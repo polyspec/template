@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-functions -->
-<!-- source-sha256: 00f6e3a188a213d40a0df6e19815ec474fccc5ff8f1c71cd3ffbc94ab889595b -->
+<!-- source-sha256: a317ee9d623c76224e00e6901574a9db1928599a33bab910161f623630e53e86 -->
 # 함수
 
 [English](/spec/functions).
@@ -180,7 +180,7 @@
 
 - **FUN-43** 호스트는 `register(name, fn)`으로 함수를 등록한다. `name`은 식별자다. `fn`은 인자 목록을 VAL-21 형태의 호스트 값으로 받고 값을 반환한다.
 
-Host callback은 렌더 환경도 받는다. TypeScript·Go·Rust·Python은 `HostFunction`과 `env`가 `timezone`·`now`를 담는 `FunctionContext`를 명명하며 PHP·PHP 확장은 callable의 두 번째 인자로 환경 배열을 직접 전달한다. 이 네이티브 시그니처는 구현 모듈을 import하지 않고 같은 고정 offset과 렌더 시각을 공개한다.
+Host callback은 렌더 환경도 받는다. TypeScript·Go·Rust·Python은 `HostFunction`과 `env`가 `timezone`·`now`를 담는 `FunctionContext`를 명명하며 PHP·PHP 확장은 callable의 두 번째 인자로 환경 배열을 직접 전달한다. 이 네이티브 시그니처는 구현 모듈을 import하지 않고 같은 고정 offset과 렌더 시각을 공개한다. Rust 코어는 생성 바인딩이 주는 인터페이스 계약 꼴의 host 함수도 받는다. 그것은 `ContractFunction`, 곧 `Box<dyn Fn(&[Value], &Environment) -> Result<Value, binding_core::Failure<ErrorCode>> + Send + Sync>`이고, `Environment`는 `timezone`과 `now`를 담는다. `AstProgram::register_function`과 `register_class_function`은 `register`와 `register_class`가 `HostFunction`을 등록하듯 그것을 등록한다. 함수의 `Failure::Kind`는 그 code의 binding 실패(VAL-19)이고, `Failure::Raised`와 `Failure::Callback`은 호출자에게 그대로 간다(FUN-46).
 
 - **FUN-44** 내장 함수 이름의 등록은 등록 시점에 실패한다. 같은 이름을 두 번 등록하면 앞의 함수를 교체한다.
 - **FUN-45** 반환값은 데이터 모델의 호스트 바인딩 규칙으로 변환한다. 변환할 수 없는 값은 해당 `data_*` 코드로 실패한다.

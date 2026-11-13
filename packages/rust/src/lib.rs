@@ -50,7 +50,7 @@ pub use ast::{BinaryOp, Comment, Expr, IfBranch, LiteralValue, LoopMetaField, Ma
 pub use ast_json::{decode_template, encode_template};
 pub use error::{ErrorCode, LineIndex, RenderError, Span, TemplateError, internal_boundary};
 pub use format::{FormatOptions, Formatted, IndentUnit, TemplateBlocks, format, format_bytes};
-pub use functions::{Env, FunctionContext, HostFunction};
+pub use functions::{ContractFunction, Env, Environment, FunctionContext, HostFunction, contract_host_function};
 pub use loader::{FsLoader, LoadError, Loaded, Loader, MapLoader, resolve_path};
 pub use render::context::{DefineEntry, Frame, Limits, LoopMeta, ParsedTemplate, RenderContext, RuntimeServices, Scope};
 pub use render::engine::{
