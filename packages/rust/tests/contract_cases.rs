@@ -6,7 +6,8 @@
 //! The contract cases of contracts/core-cases.json (binding design K-1, G-5), one trial per case, `<group>::<id>`, run
 //! against the core. A case names its arguments by the parameter names of its member in packages/rust/interface.json; an
 //! instance is `{"new", "receiver", "args", "then"}`, a callback `{"callback": {"<member>": [rows]}}`, a function
-//! `{"function": [rows]}`, and a result is compared in the form of a case value. A case of the value alias
+//! `{"function": [rows]}`, a variant `{"type": "<case value>", fields}` (CNF-19), and a result is compared in the form
+//! of a case value. A case of the value alias
 //! `template_value` is `{id, value, raises}`: its value enters through `value_in` as a binding describes it, and the kind
 //! is one of the `in_raises` of the alias (binding design U-7). A form that this runner does not read fails its case; no
 //! case is skipped.
@@ -17,9 +18,10 @@ use binding_core::{Handle, HostText, HostValue, HostValues, Io, Raised};
 use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
-    ArtifactRefresh, AstProgram, BoundMap, ContractFunction, DefineData, DefineInput, EngineOptions, Env, Environment, FormatOptions,
-    FsLoader, HostError, IndentUnit, Limits, LoadError, Loaded, Loader, MapLoader, OrderedMap, ParseOptions, RenderError, RenderOptions,
-    RenderTarget, SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, Value, analyze, analyze_prefix, bind,
+    ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineData, DefineInput, EngineOptions, Env, Environment,
+    Expr, FormatOptions, FsLoader, HostError, IfBranch, IndentUnit, Limits, LineIndex, LiteralValue, LoadError, Loaded, Loader,
+    LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
+    SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind,
     decode_template, encode_template, format, merge, parse, resolve_path, value_in,
 };
 use std::collections::HashMap;
@@ -64,9 +66,14 @@ fn required<'a>(object: &'a Json, name: &str) -> Result<&'a Json, Failed> {
 
 /// The bytes of a `source` value: its text, or `{"hex": ...}` for bytes that are no text (GN-13).
 fn source_bytes(value: &Json) -> Result<Vec<u8>, Failed> {
-    if let Some(text) = value.as_str() {
-        return Ok(text.as_bytes().to_vec());
+    match value.as_str() {
+        Some(text) => Ok(text.as_bytes().to_vec()),
+        None => bytes_of(value),
     }
+}
+
+/// The bytes of a `bytes` value, `{"hex": ...}` (CNF-19).
+fn bytes_of(value: &Json) -> Result<Vec<u8>, Failed> {
     let hex = text(required(value, "hex")?, "hex")?;
     (0..hex.len())
         .step_by(2)
@@ -183,61 +190,466 @@ fn json_value(value: &Json) -> Result<polyspec_template::polyspec_json::Value, F
     parse(text.as_bytes(), &ParseOptions::default()).map_err(|error| Failed::from(format!("the json_value {text}: {error}")))
 }
 
-/// The canonical AST JSON (AST-7) of a case value: a variant `{"<tag>": {fields}}` is `{"type": "<tag>", fields}`.
-fn canonical(value: &Json) -> Json {
-    match value {
-        Json::Array(items) => Json::Array(items.iter().map(canonical).collect()),
-        Json::Object(members) => {
-            let variant = members
-                .iter()
-                .next()
-                .filter(|(tag, fields)| members.len() == 1 && tag.starts_with(char::is_uppercase) && fields.is_object());
-            let (tag, fields) = match variant {
-                Some((tag, Json::Object(fields))) => (tag.as_str(), fields),
-                _ => ("Template", members),
-            };
-            let mut object = serde_json::Map::new();
-            object.insert("type".to_string(), Json::String(tag.to_string()));
-            for (name, field) in fields {
-                object.insert(name.clone(), canonical(field));
-            }
-            Json::Object(object)
+/// Fails a key of a record value or of a variant value that is no field of it (CNF-19).
+fn only(value: &Json, names: &[&str]) -> Result<(), Failed> {
+    for name in value.as_object().into_iter().flat_map(serde_json::Map::keys) {
+        if !names.contains(&name.as_str()) {
+            return fail(format!("{value} has no field {name}"));
         }
-        other => other.clone(),
+    }
+    Ok(())
+}
+
+/// The case of a variant value: its tag key `type` holds the value of the case as the contract states it (CNF-19).
+fn case_of<'a>(value: &'a Json, variant: &str) -> Result<&'a str, Failed> {
+    match key(value, "type").and_then(Json::as_str) {
+        Some(case) => Ok(case),
+        None => fail(format!(
+            "a value of the variant {variant} is an object whose type is the value of one of its cases, not {value}"
+        )),
     }
 }
 
-/// The case value of a canonical AST JSON value, the reverse of [`canonical`]. A literal holds a variant of the
-/// contract that the runner does not write, so a result with a literal fails its case.
-fn case_ast(value: &Json) -> Result<Json, Failed> {
-    match value {
-        Json::Array(items) => Ok(Json::Array(items.iter().map(case_ast).collect::<Result<_, _>>()?)),
-        Json::Object(members) => {
-            let tag = text(required(value, "type")?, "type")?;
-            if tag == "Literal" {
-                return fail("the runner writes no literal of an AST result");
-            }
-            let mut fields = serde_json::Map::new();
-            for (name, field) in members {
-                if name != "type" {
-                    fields.insert(name.clone(), case_ast(field)?);
-                }
-            }
-            if tag == "Template" {
-                return Ok(Json::Object(fields));
-            }
-            Ok(serde_json::json!({ tag: fields }))
-        }
-        other => Ok(other.clone()),
+/// A field of an `optional` type whose default is null: left out or null, it is no value (CNF-19).
+fn optional<'a>(value: &'a Json, name: &str) -> Option<&'a Json> {
+    key(value, name).filter(|field| !field.is_null())
+}
+
+fn optional_text(value: &Json, name: &str) -> Result<Option<String>, Failed> {
+    match optional(value, name) {
+        Some(field) => text(field, name).map(Some),
+        None => Ok(None),
     }
 }
 
+fn list_of<T>(value: &Json, what: &str, item: impl Fn(&Json) -> Result<T, Failed>) -> Result<Vec<T>, Failed> {
+    match value.as_array() {
+        Some(items) => items.iter().map(item).collect(),
+        None => fail(format!("{what} is no list: {value}")),
+    }
+}
+
+/// A `tuple<uint, uint>` of a case, the span of a node: an array of its two parts.
+fn span_of(value: &Json) -> Result<Span, Failed> {
+    match value.as_array().map(Vec::as_slice) {
+        Some([start, end]) => Ok([uint(start, "the start of a span")?, uint(end, "the end of a span")?]),
+        _ => fail(format!("a span is an array of two unsigned integers, not {value}")),
+    }
+}
+
+/// The record `template` of a case value.
 fn template_of(value: &Json) -> Result<Template, Failed> {
-    decode_template(&canonical(value).to_string()).map_err(|error| Failed::from(format!("the template of the case: {error}")))
+    only(value, &["name", "body", "comments"])?;
+    Ok(Template {
+        name: text(required(value, "name")?, "name")?,
+        body: list_of(required(value, "body")?, "body", node_of)?,
+        comments: list_of(required(value, "comments")?, "comments", |comment| {
+            only(comment, &["value", "span"])?;
+            Ok(Comment {
+                value: text(required(comment, "value")?, "value")?,
+                span: span_of(required(comment, "span")?)?,
+            })
+        })?,
+    })
 }
 
-fn case_template(template: &Template) -> Result<Json, Failed> {
-    case_ast(&common::ast_value(template))
+fn optional_nodes(value: &Json, name: &str) -> Result<Option<Vec<Node>>, Failed> {
+    match optional(value, name) {
+        Some(nodes) => list_of(nodes, name, node_of).map(Some),
+        None => Ok(None),
+    }
+}
+
+/// The variant `node` of a case value.
+fn node_of(value: &Json) -> Result<Node, Failed> {
+    let case = case_of(value, "node")?;
+    let span = span_of(required(value, "span")?)?;
+    let name = |name: &str| text(required(value, name)?, name);
+    let expr = |name: &str| expr_of(required(value, name)?);
+    let nodes = |name: &str| list_of(required(value, name)?, name, node_of);
+    let fields = |names: &[&str]| only(value, &[&["type", "span"][..], names].concat());
+    match case {
+        "Text" => {
+            fields(&["value"])?;
+            Ok(Node::Text {
+                value: name("value")?,
+                span,
+            })
+        }
+        "Echo" => {
+            fields(&["expr"])?;
+            Ok(Node::Echo { expr: expr("expr")?, span })
+        }
+        "If" => {
+            fields(&["branches", "else"])?;
+            Ok(Node::If {
+                branches: list_of(required(value, "branches")?, "branches", |branch| {
+                    only(branch, &["test", "body", "span"])?;
+                    Ok(IfBranch {
+                        test: expr_of(required(branch, "test")?)?,
+                        body: list_of(required(branch, "body")?, "body", node_of)?,
+                        span: span_of(required(branch, "span")?)?,
+                    })
+                })?,
+                r#else: optional_nodes(value, "else")?,
+                span,
+            })
+        }
+        "For" => {
+            fields(&["name", "iter", "body", "empty"])?;
+            Ok(Node::For {
+                name: name("name")?,
+                iter: expr("iter")?,
+                body: nodes("body")?,
+                empty: optional_nodes(value, "empty")?,
+                span,
+            })
+        }
+        "Set" => {
+            fields(&["name", "expr"])?;
+            Ok(Node::Set {
+                name: name("name")?,
+                expr: expr("expr")?,
+                span,
+            })
+        }
+        "Include" => {
+            fields(&["path"])?;
+            Ok(Node::Include { path: name("path")?, span })
+        }
+        "Block" => {
+            fields(&["id", "path", "scope"])?;
+            Ok(Node::Block {
+                id: optional_text(value, "id")?,
+                path: optional_text(value, "path")?,
+                scope: list_of(required(value, "scope")?, "scope", |item| {
+                    only(item, &["name", "expr"])?;
+                    Ok(ScopeItem {
+                        name: text(required(item, "name")?, "name")?,
+                        expr: expr_of(required(item, "expr")?)?,
+                    })
+                })?,
+                span,
+            })
+        }
+        "IfBlock" => {
+            fields(&["id", "body", "else"])?;
+            Ok(Node::IfBlock {
+                id: name("id")?,
+                body: nodes("body")?,
+                r#else: optional_nodes(value, "else")?,
+                span,
+            })
+        }
+        other => fail(format!("{other} is no case of the variant node")),
+    }
+}
+
+/// The variant `literal_value` of a case value.
+fn literal_of(value: &Json) -> Result<LiteralValue, Failed> {
+    match case_of(value, "literal_value")? {
+        "null" => {
+            only(value, &["type"])?;
+            Ok(LiteralValue::Null)
+        }
+        case @ ("bool" | "number" | "string") => {
+            only(value, &["type", "value"])?;
+            match (case, required(value, "value")?) {
+                ("bool", Json::Bool(flag)) => Ok(LiteralValue::Bool { value: *flag }),
+                ("number", Json::Number(number)) => match number.as_f64() {
+                    Some(number) => Ok(LiteralValue::Number { value: number }),
+                    None => fail(format!("{number} is no number")),
+                },
+                ("string", Json::String(text)) => Ok(LiteralValue::String { value: text.clone() }),
+                (_, other) => fail(format!("{other} is no value of the case {case} of the variant literal_value")),
+            }
+        }
+        other => fail(format!("{other} is no case of the variant literal_value")),
+    }
+}
+
+/// The variant `map_entry` of a case value.
+fn map_entry_of(value: &Json) -> Result<MapEntry, Failed> {
+    match case_of(value, "map_entry")? {
+        "entry" => {
+            only(value, &["type", "key", "value"])?;
+            Ok(MapEntry::Entry {
+                key: expr_of(required(value, "key")?)?,
+                value: expr_of(required(value, "value")?)?,
+            })
+        }
+        "spread" => {
+            only(value, &["type", "expr"])?;
+            Ok(MapEntry::Spread {
+                expr: expr_of(required(value, "expr")?)?,
+            })
+        }
+        other => fail(format!("{other} is no case of the variant map_entry")),
+    }
+}
+
+/// The variant `expr` of a case value; an enum is the value of its variant (CNF-19).
+fn expr_of(value: &Json) -> Result<Expr, Failed> {
+    let case = case_of(value, "expr")?;
+    let span = span_of(required(value, "span")?)?;
+    let name = |name: &str| text(required(value, name)?, name);
+    let expr = |name: &str| -> Result<Box<Expr>, Failed> { Ok(Box::new(expr_of(required(value, name)?)?)) };
+    let exprs = |name: &str| list_of(required(value, name)?, name, expr_of);
+    let fields = |names: &[&str]| only(value, &[&["type", "span"][..], names].concat());
+    match case {
+        "Literal" => {
+            fields(&["kind", "value"])?;
+            Ok(Expr::Literal {
+                kind: name("kind")?,
+                value: literal_of(required(value, "value")?)?,
+                span,
+            })
+        }
+        "Var" => {
+            fields(&["name"])?;
+            Ok(Expr::Var { name: name("name")?, span })
+        }
+        "LoopMeta" => {
+            fields(&["loop", "field"])?;
+            let field = name("field")?;
+            match LoopMetaField::from_name(&field) {
+                Some(field) => Ok(Expr::LoopMeta {
+                    r#loop: name("loop")?,
+                    field,
+                    span,
+                }),
+                None => fail(format!("{field} is no value of the enum loop_meta_field")),
+            }
+        }
+        "Member" => {
+            fields(&["object", "key"])?;
+            Ok(Expr::Member {
+                object: expr("object")?,
+                key: name("key")?,
+                span,
+            })
+        }
+        "MemberCall" => {
+            fields(&["object", "method", "args"])?;
+            Ok(Expr::MemberCall {
+                object: expr("object")?,
+                method: name("method")?,
+                args: exprs("args")?,
+                span,
+            })
+        }
+        "ClassCall" => {
+            fields(&["class_name", "method", "args"])?;
+            Ok(Expr::ClassCall {
+                class_name: name("class_name")?,
+                method: name("method")?,
+                args: exprs("args")?,
+                span,
+            })
+        }
+        "Index" => {
+            fields(&["object", "index"])?;
+            Ok(Expr::Index {
+                object: expr("object")?,
+                index: expr("index")?,
+                span,
+            })
+        }
+        "Call" => {
+            fields(&["name", "args"])?;
+            Ok(Expr::Call {
+                name: name("name")?,
+                args: exprs("args")?,
+                span,
+            })
+        }
+        "Unary" => {
+            fields(&["op", "operand"])?;
+            let op = match name("op")?.as_str() {
+                "!" => UnaryOp::Not,
+                "-" => UnaryOp::Negate,
+                other => return fail(format!("{other} is no value of the enum unary_op")),
+            };
+            Ok(Expr::Unary {
+                op,
+                operand: expr("operand")?,
+                span,
+            })
+        }
+        "Binary" => {
+            fields(&["op", "left", "right"])?;
+            let op = name("op")?;
+            match BinaryOp::from_text(&op) {
+                Some(op) => Ok(Expr::Binary {
+                    op,
+                    left: expr("left")?,
+                    right: expr("right")?,
+                    span,
+                }),
+                None => fail(format!("{op} is no value of the enum binary_op")),
+            }
+        }
+        "Ternary" => {
+            fields(&["test", "then", "else"])?;
+            Ok(Expr::Ternary {
+                test: expr("test")?,
+                then: match optional(value, "then") {
+                    Some(then) => Some(Box::new(expr_of(then)?)),
+                    None => None,
+                },
+                r#else: expr("else")?,
+                span,
+            })
+        }
+        "List" => {
+            fields(&["items"])?;
+            Ok(Expr::List {
+                items: exprs("items")?,
+                span,
+            })
+        }
+        "Map" => {
+            fields(&["entries"])?;
+            Ok(Expr::Map {
+                entries: list_of(required(value, "entries")?, "entries", map_entry_of)?,
+                span,
+            })
+        }
+        "Spread" => {
+            fields(&["expr"])?;
+            Ok(Expr::Spread { expr: expr("expr")?, span })
+        }
+        other => fail(format!("{other} is no case of the variant expr")),
+    }
+}
+
+/// The case value of the record `template`, every field written (CNF-19).
+fn case_template(template: &Template) -> Json {
+    let comments: Vec<Json> = template
+        .comments
+        .iter()
+        .map(|comment| serde_json::json!({"value": comment.value, "span": comment.span}))
+        .collect();
+    serde_json::json!({"name": template.name, "body": case_nodes(&template.body), "comments": comments})
+}
+
+fn case_nodes(nodes: &[Node]) -> Json {
+    nodes.iter().map(case_node).collect()
+}
+
+fn case_optional_nodes(nodes: Option<&[Node]>) -> Json {
+    match nodes {
+        Some(nodes) => case_nodes(nodes),
+        None => Json::Null,
+    }
+}
+
+fn case_exprs(exprs: &[Expr]) -> Json {
+    exprs.iter().map(case_expr).collect()
+}
+
+/// The case value of the variant `node`.
+fn case_node(node: &Node) -> Json {
+    match node {
+        Node::Text { value, span } => serde_json::json!({"type": "Text", "value": value, "span": span}),
+        Node::Echo { expr, span } => serde_json::json!({"type": "Echo", "expr": case_expr(expr), "span": span}),
+        Node::If { branches, r#else, span } => {
+            let branches: Vec<Json> = branches
+                .iter()
+                .map(|branch| serde_json::json!({"test": case_expr(&branch.test), "body": case_nodes(&branch.body), "span": branch.span}))
+                .collect();
+            serde_json::json!({"type": "If", "branches": branches, "else": case_optional_nodes(r#else.as_deref()), "span": span})
+        }
+        Node::For {
+            name,
+            iter,
+            body,
+            empty,
+            span,
+        } => serde_json::json!({"type": "For", "name": name, "iter": case_expr(iter), "body": case_nodes(body),
+            "empty": case_optional_nodes(empty.as_deref()), "span": span}),
+        Node::Set { name, expr, span } => serde_json::json!({"type": "Set", "name": name, "expr": case_expr(expr), "span": span}),
+        Node::Include { path, span } => serde_json::json!({"type": "Include", "path": path, "span": span}),
+        Node::Block { id, path, scope, span } => {
+            let scope: Vec<Json> = scope
+                .iter()
+                .map(|item| serde_json::json!({"name": item.name, "expr": case_expr(&item.expr)}))
+                .collect();
+            serde_json::json!({"type": "Block", "id": id, "path": path, "scope": scope, "span": span})
+        }
+        Node::IfBlock { id, body, r#else, span } => serde_json::json!({"type": "IfBlock", "id": id, "body": case_nodes(body),
+            "else": case_optional_nodes(r#else.as_deref()), "span": span}),
+    }
+}
+
+/// The case value of the variant `literal_value`.
+fn case_literal(value: &LiteralValue) -> Json {
+    match value {
+        LiteralValue::Null => serde_json::json!({"type": "null"}),
+        LiteralValue::Bool { value } => serde_json::json!({"type": "bool", "value": value}),
+        LiteralValue::Number { value } => serde_json::json!({"type": "number", "value": value}),
+        LiteralValue::String { value } => serde_json::json!({"type": "string", "value": value}),
+    }
+}
+
+/// The case value of the variant `expr`; an enum is the value of its variant.
+fn case_expr(expr: &Expr) -> Json {
+    match expr {
+        Expr::Literal { kind, value, span } => {
+            serde_json::json!({"type": "Literal", "kind": kind, "value": case_literal(value), "span": span})
+        }
+        Expr::Var { name, span } => serde_json::json!({"type": "Var", "name": name, "span": span}),
+        Expr::LoopMeta { r#loop, field, span } => {
+            serde_json::json!({"type": "LoopMeta", "loop": r#loop, "field": field.name(), "span": span})
+        }
+        Expr::Member { object, key, span } => {
+            serde_json::json!({"type": "Member", "object": case_expr(object), "key": key, "span": span})
+        }
+        Expr::MemberCall {
+            object,
+            method,
+            args,
+            span,
+        } => serde_json::json!({"type": "MemberCall", "object": case_expr(object), "method": method, "args": case_exprs(args),
+            "span": span}),
+        Expr::ClassCall {
+            class_name,
+            method,
+            args,
+            span,
+        } => serde_json::json!({"type": "ClassCall", "class_name": class_name, "method": method, "args": case_exprs(args),
+            "span": span}),
+        Expr::Index { object, index, span } => {
+            serde_json::json!({"type": "Index", "object": case_expr(object), "index": case_expr(index), "span": span})
+        }
+        Expr::Call { name, args, span } => serde_json::json!({"type": "Call", "name": name, "args": case_exprs(args), "span": span}),
+        Expr::Unary { op, operand, span } => {
+            serde_json::json!({"type": "Unary", "op": op.as_str(), "operand": case_expr(operand), "span": span})
+        }
+        Expr::Binary { op, left, right, span } => serde_json::json!({"type": "Binary", "op": op.as_str(), "left": case_expr(left),
+            "right": case_expr(right), "span": span}),
+        Expr::Ternary { test, then, r#else, span } => {
+            let then = match then {
+                Some(then) => case_expr(then),
+                None => Json::Null,
+            };
+            serde_json::json!({"type": "Ternary", "test": case_expr(test), "then": then, "else": case_expr(r#else), "span": span})
+        }
+        Expr::List { items, span } => serde_json::json!({"type": "List", "items": case_exprs(items), "span": span}),
+        Expr::Map { entries, span } => {
+            let entries: Vec<Json> = entries
+                .iter()
+                .map(|entry| match entry {
+                    MapEntry::Entry { key, value } => {
+                        serde_json::json!({"type": "entry", "key": case_expr(key), "value": case_expr(value)})
+                    }
+                    MapEntry::Spread { expr } => serde_json::json!({"type": "spread", "expr": case_expr(expr)}),
+                })
+                .collect();
+            serde_json::json!({"type": "Map", "entries": entries, "span": span})
+        }
+        Expr::Spread { expr, span } => serde_json::json!({"type": "Spread", "expr": case_expr(expr), "span": span}),
+    }
 }
 
 fn case_tags(tags: &[SyntaxTag]) -> Json {
@@ -323,18 +735,36 @@ impl Loader for FixtureLoader {
             return Ok(None);
         }
         let loaded = (|| -> Result<Loaded, Failed> {
-            if let Some(source) = key(&result, "source") {
-                return Ok(Loaded::Source {
-                    bytes: source_bytes(required(source, "source")?)?,
-                    version: text(required(source, "version")?, "version")?,
-                });
+            let version = text(required(&result, "version")?, "version")?;
+            match case_of(&result, "loaded")? {
+                "source" => {
+                    only(&result, &["type", "bytes", "version"])?;
+                    Ok(Loaded::Source {
+                        bytes: bytes_of(required(&result, "bytes")?)?,
+                        version,
+                    })
+                }
+                "ast" => {
+                    only(&result, &["type", "ast", "version", "lines"])?;
+                    // `lines` is an optional field without a default, so the value names it (CNF-19).
+                    let lines = match required(&result, "lines")? {
+                        Json::Null => None,
+                        lines => {
+                            let starts = list_of(lines, "lines", |line| uint(line, "a line start"))?;
+                            Some(
+                                LineIndex::try_from_starts(starts)
+                                    .map_err(|error| Failed::from(format!("the line index of the row: {error}")))?,
+                            )
+                        }
+                    };
+                    Ok(Loaded::Ast {
+                        ast: template_of(required(&result, "ast")?)?,
+                        version,
+                        lines,
+                    })
+                }
+                other => fail(format!("{other} is no case of the variant loaded")),
             }
-            let ast = required(&result, "ast")?;
-            Ok(Loaded::Ast {
-                ast: template_of(required(ast, "ast")?)?,
-                version: text(required(ast, "version")?, "version")?,
-                lines: None,
-            })
         })();
         match loaded {
             Ok(loaded) => Ok(Some(loaded)),
@@ -687,19 +1117,19 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
         "parse" => {
             let parsed = parse(&source_bytes(arg("source")?)?, &name("name")?, &parse_options(case)?);
             match parsed {
-                Ok(template) => Ok(Ok(Some(case_template(&template)?))),
+                Ok(template) => Ok(Ok(Some(case_template(&template)))),
                 Err(error) => Ok(Err(RenderError::Kind(error))),
             }
         }
         "analyze" => match analyze(&source_bytes(arg("source")?)?, &name("name")?, &parse_options(case)?) {
-            Ok(analysis) => Ok(Ok(Some(serde_json::json!({"ast": case_template(&analysis.ast)?,
+            Ok(analysis) => Ok(Ok(Some(serde_json::json!({"ast": case_template(&analysis.ast),
                 "tags": case_tags(&analysis.tags), "tokens": case_tokens(&analysis.tokens)})))),
             Err(error) => Ok(Err(RenderError::Kind(error))),
         },
         "analyze_prefix" => match analyze_prefix(&source_bytes(arg("source")?)?, &name("name")?, &parse_options(case)?) {
             Ok(analysis) => {
                 let ast = match &analysis.ast {
-                    Some(ast) => case_template(ast)?,
+                    Some(ast) => case_template(ast),
                     None => Json::Null,
                 };
                 let error = match &analysis.error {
@@ -722,7 +1152,7 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
         "resolve_path" => value(kind_of(resolve_path(&name("current")?, &name("path")?))),
         "encode_template" => value(kind_of(encode_template(&template_of(arg("template")?)?))),
         "decode_template" => match decode_template(&name("json")?) {
-            Ok(template) => Ok(Ok(Some(case_template(&template)?))),
+            Ok(template) => Ok(Ok(Some(case_template(&template)))),
             Err(error) => Ok(Err(RenderError::Kind(error))),
         },
         "bind" => done(kind_of(bind(&template_value(arg("value")?)?).map(drop))),
@@ -791,6 +1221,22 @@ fn prepared(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
     Ok(Ok(None))
 }
 
+/// The expected result of a case as the runner writes a result: a template is read into the type of the core and
+/// written from it, so a field that the case leaves out is null (CNF-19).
+fn expected_result(group: &str, expected: &Json) -> Result<Json, Failed> {
+    match group {
+        "parse" | "decode_template" => Ok(case_template(&template_of(expected)?)),
+        "analyze" | "analyze_prefix" => {
+            let mut written = expected.clone();
+            if let Some(ast) = optional(expected, "ast") {
+                written["ast"] = case_template(&template_of(ast)?);
+            }
+            Ok(written)
+        }
+        _ => Ok(expected.clone()),
+    }
+}
+
 /// Runs one case: its result equals `result`, or its failure has the kind and the category of `raises` (B-4), and no
 /// fixture was called without a row.
 fn run_case(group: &str, case: &Json) -> Result<(), Failed> {
@@ -806,7 +1252,14 @@ fn run_case(group: &str, case: &Json) -> Result<(), Failed> {
     match (outcome, key(case, "raises")) {
         (Ok(actual), None) => match (actual, key(case, "result")) {
             (None, None) => Ok(()),
-            (Some(actual), Some(expected)) if json_equal(&actual, expected) => Ok(()),
+            (Some(actual), Some(expected)) => {
+                let expected = expected_result(group, expected)?;
+                if json_equal(&actual, &expected) {
+                    Ok(())
+                } else {
+                    fail(format!("result\n  actual {actual}\nexpected {expected}"))
+                }
+            }
             (actual, expected) => fail(format!("result\n  actual {actual:?}\nexpected {expected:?}")),
         },
         (Err(RenderError::Kind(error)), Some(raises)) => {
