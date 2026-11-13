@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: bd9f9058a3018ff23ae7a7d2483f3ce0833ed90551956fbf2143b59b86d98020 -->
+<!-- source-sha256: ccfa18c287c37f6da5a3684a283cb1126429fb064257f6b60d79be88946e76da -->
 # 개발
 
 ## 문서
@@ -35,7 +35,7 @@
 
 - Refines S4: Toolchain: 모든 recipe는 checkout의 파일이 선언한 도구 version을 실행한다. Node.js는 `mise.toml`(mise가 `var/tools`에 설치하고 `$(NODE)`로 실행, kit K171), npm은 `package.json`의 `devEngines`가 이름하는 `mise.toml`의 `npm:npm`(kit K938), Go, Python, Composer와 lint·audit 도구는 `mise.toml`이 선언하고 그 digest는 `mise.lock`에 둔다. Go와 Python은 kit pin이며 `legacy/packages/go/go.mod`의 `go` 줄이 같아야 한다. Rust는 `rust-toolchain.toml`, PHP minor version과 mise는 `config/toolchain.json`이 선언한다. C PHP extension은 `PATH`에 있는 PHP의 phpize와 php-config로 build하며, 이 PHP는 test를 실행하는 PHP여야 한다(그렇지 않으면 kit의 `make build-php-ext`가 실패한다). `make install-tools`(`$(KIT)/install-tools.$(KIT_EXT)`)가 `make install-tools TOOLS=npm`이 npm과 mise를 설치한 뒤 `mise.toml`의 도구를 mise로 `var/tools`에 설치하며, machine의 도구는 아무것도 바꾸지 않는다. CI는 모든 action을 commit으로, runner image를 version으로 고정한다. `tests/scripts/toolchain-files.test.mts`가 모든 변경에서 version을 검사한다.
   Enforced by: `make template-test-scripts`
-- Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`의 download를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). template-install-rust가 cargo fetch --locked로 추적되는 모든 Cargo.lock의 crate를 받고, offline cargo는 없는 crate를 밝힌다.
+- Refines P17: Network: 최신 릴리스, 버전 range의 resolve, outdated 패키지나 새 릴리스의 조회처럼 결과가 시간에 따라 달라지는 registry 조회는 검사에서 실행하지 않는다. lock이 정확한 버전과 integrity로 고정한 패키지의 download는 설치이며 검사에서 실행할 수 있다. `make install`이 `npm ci`와 `composer install`로 그렇게 한다. 검사가 `cargo --offline`으로 resolve하는 모든 Cargo.lock의 crate처럼 다른 검사가 읽는 것은 `make install`이 받아 두므로, 어떤 검사도 먼저 실행된 명령에 기대지 않는다. Makefile은 `$(ONLINE)`을 쓰는 `install`, `install-tools`의 download를 빼고 모든 recipe에서 cargo, go, npm, Composer를 offline으로 실행한다(`CARGO_NET_OFFLINE`, `GOPROXY=off`, `npm_config_offline`, `COMPOSER_DISABLE_NETWORK`). template-install-rust가 cargo fetch --locked로 추적되는 모든 Cargo.lock의 crate를 받고, offline cargo는 없는 crate를 밝힌다. install target은 실행될 때마다 자기가 설치하는 것을 만들며, 이전 실행의 stamp로 그것을 판정하지 않는다. `make template-install-python`은 Python package의 environment를 다시 만들고(`template-python-environment`), 그래서 그 뒤에는 lock의 wheel이 checkout의 uv cache에 있다. stamp는 environment가 설치되었음을 뜻하고 cache가 download를 담고 있음을 뜻하지 않기 때문이다.
   Enforced by: `make template-test-scripts`
 - Refines P17: 공유 상태: 실행은 자기 directory에만 쓴다. 임시 파일은 checkout 밖에 실행의 이름으로, cache는 checkout 안(`var/`)에 둔다. 여러 실행이 읽고 쓰는 record는 읽을 때부터 마지막으로 쓸 때까지 lock을 쥔다. 실행은 자기가 시작한 group의 process를 남기지 않는다.
   Enforced by: none, the sharing of runs is a judgement.
