@@ -44,9 +44,10 @@ test('make reads the Python environment without a shared BOOTSTRAP_NODE variable
 
 // T28.44: an install makes what it installs each time it runs. The stamp of python-package states that the environment
 // is installed, not that the wheels of the lock are in the uv cache, so make template-install-python runs the recipe of
-// the environment itself and not the target of the stamp, which does nothing while the stamp is current. The two dry
-// runs of make took 3 seconds on a loaded machine, so the test has 30 seconds.
-test('make template-install-python makes the environment of the lock whatever the stamp of python-package says', { timeout: 30000 }, () => {
+// the environment itself and not the target of the stamp, which does nothing while the stamp is current. The test
+// has no time limit: it judges each dry run by its exit status and its output, and the time of a dry run depends on
+// the load of the machine.
+test('make template-install-python makes the environment of the lock whatever the stamp of python-package says', () => {
   const install = spawnSync('make', ['--no-print-directory', '-n', 'template-install-python'], { encoding: 'utf8' });
   assert.equal(install.status, 0, install.stderr);
   assert.match(install.stdout, /\btemplate-python-environment\b/, install.stdout);
