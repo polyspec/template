@@ -19,10 +19,10 @@ use common::{json_equal, kind_category, repo_root};
 use libtest_mimic::{Arguments, Failed, Trial};
 use polyspec_template::{
     ArtifactRefresh, AstProgram, BinaryOp, BoundMap, Comment, ContractFunction, DefineInput, Definitions, EngineOptions, Env, Environment,
-    Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, IndentUnit, Limits, LiteralValue, LoadError, Loaded, Loader,
-    LoopMetaField, MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span,
-    SyntaxTag, SyntaxToken, Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind,
-    decode_template, encode_template, format, merge, parse, resolve_path, value_in,
+    Expr, FormatOptions, FsLoader, Functions, HostError, IfBranch, Limits, LiteralValue, LoadError, Loaded, Loader, LoopMetaField,
+    MapEntry, MapLoader, Node, OrderedMap, ParseOptions, RenderError, RenderOptions, RenderTarget, ScopeItem, Span, SyntaxTag, SyntaxToken,
+    Template, TemplateBlocks, TemplateError, TemplateObject, UnaryOp, Value, analyze, analyze_prefix, bind, decode_template,
+    encode_template, format, merge, parse, resolve_path, value_in,
 };
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -1004,12 +1004,12 @@ fn parse_options(case: &Json) -> Result<ParseOptions, Failed> {
     Ok(ParseOptions { delimiters })
 }
 
-/// The format options of a case; `indent` given as null keeps every line, and its text is an indent unit, which the
-/// core validates (FMT-9).
-fn format_options(case: &Json) -> Result<Result<FormatOptions, TemplateError>, Failed> {
+/// The format options of a case; the text of `indent` is an indent unit, which the core checks (FMT-17), and
+/// `keep_indentation` keeps every line (FMT-18).
+fn format_options(case: &Json) -> Result<FormatOptions, Failed> {
     let mut options = FormatOptions::default();
     let Some(value) = key(case, "options") else {
-        return Ok(Ok(options));
+        return Ok(options);
     };
     if let Some(name) = key(value, "name") {
         options.name = Some(text(name, "name")?);
@@ -1020,13 +1020,17 @@ fn format_options(case: &Json) -> Result<Result<FormatOptions, TemplateError>, F
     if let Some(range) = key(value, "range").filter(|range| !range.is_null()) {
         options.range = Some(span_of(range)?);
     }
+    only(
+        value,
+        &["name", "delimiters", "range", "indent", "keep_indentation", "template_blocks"],
+    )?;
     if let Some(indent) = key(value, "indent") {
-        options.indent = match indent.as_str() {
-            Some(unit) => match IndentUnit::new(unit) {
-                Ok(unit) => Some(unit),
-                Err(error) => return Ok(Err(error)),
-            },
-            None => None,
+        options.indent = Some(text(indent, "indent")?);
+    }
+    if let Some(keep) = key(value, "keep_indentation") {
+        options.keep_indentation = match keep {
+            Json::Bool(keep) => Some(*keep),
+            other => return fail(format!("keep_indentation is no bool: {other}")),
         };
     }
     if let Some(blocks) = key(value, "template_blocks") {
@@ -1036,7 +1040,7 @@ fn format_options(case: &Json) -> Result<Result<FormatOptions, TemplateError>, F
             other => return fail(format!("{other} is no template_blocks")),
         };
     }
-    Ok(Ok(options))
+    Ok(options)
 }
 
 /// What the member of a case gave: nothing, a value in the form of a case value, or a failure.
@@ -1154,10 +1158,7 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
             Err(error) => Ok(Err(RenderError::Kind(error))),
         },
         "format" => {
-            let formatted = match format_options(case)? {
-                Ok(options) => format(&name("source")?, &options),
-                Err(error) => Err(error),
-            };
+            let formatted = format(&name("source")?, &format_options(case)?);
             Ok(kind_of(formatted).map(|formatted| Some(serde_json::json!({"text": formatted.text, "changed": formatted.changed}))))
         }
         "resolve_path" => value(kind_of(resolve_path(&name("current")?, &name("path")?))),

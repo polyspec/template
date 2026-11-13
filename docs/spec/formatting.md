@@ -13,7 +13,7 @@ This document defines the tokens of a template and the formatter: the formatting
 
 ## Formatting style
 
-- **FMT-3** The formatter changes only the whitespace inside tags (FMT-4 to FMT-6) and the spaces and tabs at the start of lines (FMT-9 to FMT-12). It changes no other text outside tags.
+- **FMT-3** The formatter changes only the whitespace inside tags (FMT-4 to FMT-6) and the spaces and tabs at the start of lines (FMT-10 to FMT-12, FMT-17 and FMT-18). It changes no other text outside tags.
 
 - **FMT-4** Each tag kind has one formatted form:
 
@@ -52,7 +52,11 @@ No whitespace stands between the open delimiter and the sigil or before the clos
 
 ## Indentation
 
-- **FMT-9** The option `indent` is the indent unit: a run of spaces or one tab, two spaces by default. The formatter sets the indentation of each line to the indent unit repeated by the line's depth. `indent: null` keeps the indentation of every line, so only the whitespace inside tags changes. The option `templateBlocks` is `indent` (default) or `flat`.
+- **FMT-17** The option `indent` is the indent unit: a run of spaces or one tab, two spaces by default. The formatter sets the indentation of each line to the indent unit repeated by the line's depth. An indent unit of another form fails with `argument_indent`, also when the lines keep their indentation (FMT-18). The option `templateBlocks` is `indent` (default) or `flat`.
+
+- **FMT-18** The option `keepIndentation` (`keep_indentation` in the interface contract of the Rust core), false by default, keeps the indentation of every line when it is true, so only the whitespace inside tags changes. A null `indent` has no meaning of its own: it is an option that was not given, which is the default unit. The command line option `--indent none` sets `keepIndentation`. Reason: a generated binding gives the core one value for an option that was left out and for a null, and PHP cannot tell the two apart, so an option whose null has a meaning cannot give the same result in the five targets.
+
+- **FMT-9** Retired; FMT-17 and FMT-18 replace it. It stated the indent unit as FMT-17 does and that a null `indent` keeps the indentation of every line. The packages of `legacy/` and the TypeScript formatter of `packages/language`, whose options are the type of the legacy TypeScript package, implement it as it was, and the cases of `legacy/` cite it; they have no option `keepIndentation`.
 
 ```
 <div class="board-list">
@@ -78,7 +82,7 @@ No whitespace stands between the open delimiter and the sigil or before the clos
 
 - **FMT-11** The formatter keeps the indentation of lines that start inside `<pre>`, `<textarea>`, `<script>`, `<style>`, an HTML comment or a tag, including the line of the end tag. It does not read HTML tags inside `<script>`, `<style>` and `<textarea>`. A blank line becomes empty. The text of a line after its indentation does not change; the formatter never moves an element to another line.
 
-- **FMT-12** Indentation needs a balanced HTML structure. When an end tag does not match the open element, an element is not closed at the end of the template, or the HTML elements that are open differ between the branches of a template block or between its start and its close tag, the formatter returns the error `html` at the tag where the structure fails and changes nothing. With `indent: null` the structure is not read.
+- **FMT-12** Indentation needs a balanced HTML structure. When an end tag does not match the open element, an element is not closed at the end of the template, or the HTML elements that are open differ between the branches of a template block or between its start and its close tag, the formatter returns the error `html` at the tag where the structure fails and changes nothing. With `keepIndentation: true` the structure is not read.
 
 Spaces and tabs at the start of a line are part of the rendered output, except on a line that holds only a block tag, which the renderer removes with its whitespace. Indentation therefore changes the whitespace at the start of rendered lines; browsers do not display it, except inside `<pre>` and `<textarea>`, which the formatter keeps, and inside elements whose CSS `white-space` keeps spaces.
 
@@ -102,4 +106,4 @@ Spaces and tabs at the start of a line are part of the rendered output, except o
 
 - **FMT-16** Every SDK publishes the formatter callable signature, its options and its success/failure result. A named callable contract may describe an implementation published by another entry point of the same SDK. The published implementation satisfies that contract without an adapter that changes formatting behaviour.
 
-The public option data carries `name`, `delimiters`, `range`, `indent` and `templateBlocks`, using native field spelling. TypeScript uses interfaces and a discriminated result union; Go uses the root aliases and native `format` records plus its error return; Rust uses structs, `Result`, `TemplateError` and `TemplateBlocks`; PHP and the PHP extension use an options array and `FormatResult`/`FormatError` values; Python uses its public dataclasses. Go `KeepIndentation` represents a null indent, and its range record exposes `Start`/`End`. A success carries `text` and `changed`; a failure carries `reason`, `code`, `line`, `col` and free English `message`. The three error reasons and two block modes have the same canonical literals in every SDK. Public facade/native names denote the same data and formatter: Go alias assignability and calls through both entries, and Python re-export identity, are verified alongside the shared SDK results. The PHP static `Formatter` class is its native formatter provider.
+The public option data carries `name`, `delimiters`, `range`, `indent`, `keepIndentation` and `templateBlocks`, using native field spelling; the packages of `legacy/` and `packages/language` carry no `keepIndentation` (FMT-9). TypeScript uses interfaces and a discriminated result union; Go uses the root aliases and native `format` records plus its error return; Rust uses structs, `Result`, `TemplateError` and `TemplateBlocks`; PHP and the PHP extension use an options array and `FormatResult`/`FormatError` values; Python uses its public dataclasses. Go `KeepIndentation` represents a null indent, and its range record exposes `Start`/`End`. A success carries `text` and `changed`; a failure carries `reason`, `code`, `line`, `col` and free English `message`. The three error reasons and two block modes have the same canonical literals in every SDK. Public facade/native names denote the same data and formatter: Go alias assignability and calls through both entries, and Python re-export identity, are verified alongside the shared SDK results. The PHP static `Formatter` class is its native formatter provider.

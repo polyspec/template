@@ -12,7 +12,7 @@ mod common;
 use common::{case_delimiters, repo_root, templates};
 use common::{without_line_indentation, without_spans};
 use polyspec_template::{
-    DEFAULT_FORMAT_NAME, ErrorCode, FormatOptions, Formatted, IndentUnit, ParseOptions, TemplateBlocks, format, format_bytes, parse,
+    DEFAULT_FORMAT_NAME, ErrorCode, FormatOptions, Formatted, ParseOptions, TemplateBlocks, format, format_bytes, parse,
 };
 use std::fs;
 
@@ -45,8 +45,8 @@ fn lines(items: &[&str]) -> String {
     items.join("\n")
 }
 
-fn unit(value: &str) -> Option<IndentUnit> {
-    Some(IndentUnit::new(value).expect("indent unit"))
+fn unit(value: &str) -> Option<String> {
+    Some(value.to_string())
 }
 
 #[test]
@@ -218,7 +218,7 @@ const BOARD: &[&str] = &[
     "",
 ];
 
-/// FMT-9, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
+/// FMT-17, FMT-10: each line is indented by two spaces for each open element and template block, and a line that starts
 /// with {:}, {/} or an end tag one level less; FMT-15: formatting the result again changes nothing.
 #[test]
 fn indents_html_elements_and_template_blocks() {
@@ -280,7 +280,10 @@ fn uses_the_indent_unit_or_keeps_every_line() {
         formatted(&source, &four),
         lines(&["<ul>", "    <li>a</li>", "    <li>b</li>", "</ul>"])
     );
-    let keep = FormatOptions { indent: None, ..options() };
+    let keep = FormatOptions {
+        keep_indentation: Some(true),
+        ..options()
+    };
     assert_eq!(
         formatted("<ul>\n        <li>{=a}</li>\n</ul>", &keep),
         "<ul>\n        <li>{= a}</li>\n</ul>"
@@ -290,9 +293,18 @@ fn uses_the_indent_unit_or_keeps_every_line() {
 
 #[test]
 fn rejects_an_indent_unit_that_is_not_spaces_or_one_tab() {
-    assert!(IndentUnit::new(" \t").is_err());
-    assert!(IndentUnit::new("").is_err());
-    assert!(IndentUnit::new("\t\t").is_err());
+    for invalid in [" \t", "", "\t\t"] {
+        // FMT-17, FMT-18: the unit is checked also when every line keeps its indentation.
+        for keep in [false, true] {
+            let options = FormatOptions {
+                indent: unit(invalid),
+                keep_indentation: Some(keep),
+                ..options()
+            };
+            let error = format("text", &options).expect_err("an invalid indent unit");
+            assert_eq!(error.code, ErrorCode::ArgumentIndent, "{invalid:?}");
+        }
+    }
 }
 
 #[test]
@@ -462,7 +474,7 @@ fn ast(source: &str, delimiters: &Option<String>) -> serde_json::Value {
 /// the same AST without spans (and, when lines are indented, without line indentation), and formatting it again
 /// changes nothing. A source whose HTML structure cannot be indented is kept with an html error.
 /// FMT-13: the result is returned only when the ASTs without their spans are equal; FMT-3, FMT-7: the text outside the
-/// tags is kept; FMT-12: with indent null the structure is not read; FMT-14: a source that does not parse fails with
+/// tags is kept; FMT-12, FMT-18: when every line keeps its indentation the structure is not read; FMT-14: a source that does not parse fails with
 /// the reason parse; FMT-15: formatting the result again changes nothing.
 #[test]
 fn holds_the_invariant_and_idempotence_over_every_case() {
@@ -479,9 +491,9 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
         // A source that does not parse, bytes that are not UTF-8 among them, is kept with the parse error in both modes.
         if let Err(error) = parse(&bytes, "input.tpl", &parse_options) {
             assert!(!error.code.as_str().starts_with("argument_"), "{}: {error:?}", file.display());
-            for indent in [unit("  "), None] {
+            for keep in [false, true] {
                 let options = FormatOptions {
-                    indent,
+                    keep_indentation: Some(keep),
                     delimiters: delimiters.clone(),
                     name: Some("input.tpl".to_string()),
                     ..FormatOptions::default()
@@ -493,9 +505,9 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
             continue;
         }
         let source = String::from_utf8(bytes).expect("a source that parses is UTF-8");
-        for indent in [unit("  "), None] {
+        for keep in [false, true] {
             let options = FormatOptions {
-                indent: indent.clone(),
+                keep_indentation: Some(keep),
                 delimiters: delimiters.clone(),
                 name: Some("input.tpl".to_string()),
                 ..FormatOptions::default()
@@ -503,16 +515,12 @@ fn holds_the_invariant_and_idempotence_over_every_case() {
             let once = match format(&source, &options) {
                 Ok(formatted) => formatted.text,
                 Err(error) => {
-                    assert!(
-                        error.code == ErrorCode::FormatHtml && indent.is_some(),
-                        "{}: {error:?}",
-                        file.display()
-                    );
+                    assert!(error.code == ErrorCode::FormatHtml && !keep, "{}: {error:?}", file.display());
                     continue;
                 }
             };
             let (before, after) = (ast(&source, &delimiters), ast(&once, &delimiters));
-            if indent.is_some() {
+            if !keep {
                 assert_eq!(
                     without_line_indentation(&before),
                     without_line_indentation(&after),

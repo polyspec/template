@@ -13,13 +13,12 @@ use body::{BodyInput, format_body};
 use indent::indent_edits;
 use invariant::same_tree;
 
-/// An indent unit: a run of spaces or one tab.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct IndentUnit(String);
+/// An indent unit: a run of spaces or one tab (FMT-17).
+struct IndentUnit(String);
 
 impl IndentUnit {
     /// Validates an indent unit.
-    pub fn new(unit: &str) -> Result<IndentUnit, TemplateError> {
+    fn new(unit: &str) -> Result<IndentUnit, TemplateError> {
         if unit == "\t" || (!unit.is_empty() && unit.bytes().all(|byte| byte == b' ')) {
             Ok(IndentUnit(unit.to_string()))
         } else {
@@ -32,7 +31,7 @@ impl IndentUnit {
     }
 
     /// The text of one level.
-    pub fn as_str(&self) -> &str {
+    fn as_str(&self) -> &str {
         &self.0
     }
 }
@@ -47,7 +46,7 @@ pub enum TemplateBlocks {
 }
 
 /// Options of [`format()`].
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FormatOptions {
     /// Template name used in error results. `None` is [`DEFAULT_FORMAT_NAME`].
     pub name: Option<String>,
@@ -56,8 +55,11 @@ pub struct FormatOptions {
     /// Byte range `[start, end)` of the source; only tags that lie completely inside it and lines that start inside it
     /// are formatted.
     pub range: Option<Span>,
-    /// Indent unit; the default is two spaces. `None` keeps the indentation of every line.
-    pub indent: Option<IndentUnit>,
+    /// Indent unit, a run of spaces or one tab, which `format` checks (FMT-17). `None` is [`DEFAULT_INDENT`].
+    pub indent: Option<String>,
+    /// Whether every line keeps its indentation, so that only the whitespace inside tags changes (FMT-18). `None` is
+    /// [`DEFAULT_KEEP_INDENTATION`].
+    pub keep_indentation: Option<bool>,
     /// How template blocks indent their content. `None` is [`DEFAULT_TEMPLATE_BLOCKS`].
     pub template_blocks: Option<TemplateBlocks>,
 }
@@ -71,6 +73,13 @@ impl Default for TemplateBlocks {
         DEFAULT_TEMPLATE_BLOCKS
     }
 }
+
+/// The indent unit of a format whose options name none (`format_options.indent` of the interface contract, FMT-17).
+pub const DEFAULT_INDENT: &str = "  ";
+
+/// Whether a format whose options do not say so keeps the indentation of every line
+/// (`format_options.keep_indentation` of the interface contract, FMT-18).
+pub const DEFAULT_KEEP_INDENTATION: bool = false;
 
 /// The template name of a format whose options name none (`format_options.name` of the interface contract).
 pub const DEFAULT_FORMAT_NAME: &str = "template.tpl";
@@ -89,18 +98,6 @@ impl FormatOptions {
         match self.template_blocks {
             Some(policy) => policy,
             None => DEFAULT_TEMPLATE_BLOCKS,
-        }
-    }
-}
-
-impl Default for FormatOptions {
-    fn default() -> FormatOptions {
-        FormatOptions {
-            name: None,
-            delimiters: None,
-            range: None,
-            indent: Some(IndentUnit("  ".to_string())),
-            template_blocks: None,
         }
     }
 }
@@ -132,6 +129,15 @@ const BOM: &str = "\u{feff}";
 /// `argument_delimiters`, `format_html` at the tag that does not nest or `format_invariant` at the first changed byte.
 pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, TemplateError> {
     let name = options.name();
+    // FMT-17: the indent unit of the options is checked whether or not the lines are indented.
+    let unit = match &options.indent {
+        Some(unit) => IndentUnit::new(unit)?,
+        None => IndentUnit(DEFAULT_INDENT.to_string()),
+    };
+    let keep = match options.keep_indentation {
+        Some(keep) => keep,
+        None => DEFAULT_KEEP_INDENTATION,
+    };
     let bom = if source.starts_with(BOM) { BOM } else { "" };
     let text = &source[bom.len()..];
     let parse_options = ParseOptions {
@@ -154,7 +160,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
             edits.push(edit);
         }
     }
-    if let Some(unit) = &options.indent {
+    if !keep {
         let indentation =
             indent_edits(text, &analysis.tags, unit.as_str(), options.template_blocks(), range.as_ref()).map_err(|error| {
                 TemplateError::at(
@@ -190,8 +196,7 @@ pub fn format(source: &str, options: &FormatOptions) -> Result<Formatted, Templa
         .ast;
     // FMT-1: the fault injection point template.format_invariant imitates a formatted text that parses to another AST,
     // which no input reaches.
-    if binding_core::fault::point!(crate::fault::FORMAT_INVARIANT).is_some() || !same_tree(&analysis.ast, &after, options.indent.is_some())
-    {
+    if binding_core::fault::point!(crate::fault::FORMAT_INVARIANT).is_some() || !same_tree(&analysis.ast, &after, !keep) {
         return Err(invariant("formatted text parses to a different AST".to_string()));
     }
     Ok(Formatted {

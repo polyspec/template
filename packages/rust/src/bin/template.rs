@@ -6,8 +6,8 @@
 
 use clap::{Args, Parser, Subcommand};
 use polyspec_template::{
-    AstProgram, BindError, Engine, EngineOptions, FormatOptions, IndentUnit, ParseOptions, RenderError, RenderOptions, RenderTarget,
-    TemplateError, analyze, defines_from_json, encode_template, env_from_json, format_bytes, parse, read_json as parse_json_text,
+    AstProgram, BindError, Engine, EngineOptions, FormatOptions, ParseOptions, RenderError, RenderOptions, RenderTarget, TemplateError,
+    analyze, defines_from_json, encode_template, env_from_json, format_bytes, parse, read_json as parse_json_text,
 };
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -74,20 +74,19 @@ struct Input {
     file: String,
 }
 
-/// The --indent value: `None` keeps the indentation of every line.
+/// The --indent value: an indent unit, or `None` for `none`, which keeps the indentation of every line (FMT-18).
 #[derive(Clone)]
-struct Indent(Option<IndentUnit>);
+struct Indent(Option<String>);
 
 fn indent(value: &str) -> Result<Indent, String> {
-    let unit = match value {
-        "none" => return Ok(Indent(None)),
-        "tab" => "\t".to_string(),
+    match value {
+        "none" => Ok(Indent(None)),
+        "tab" => Ok(Indent(Some("\t".to_string()))),
         count => match count.parse::<usize>() {
-            Ok(count @ 1..=8) => " ".repeat(count),
-            _ => return Err("--indent is none, tab or a number of spaces from 1 to 8".to_string()),
+            Ok(count @ 1..=8) => Ok(Indent(Some(" ".repeat(count)))),
+            _ => Err("--indent is none, tab or a number of spaces from 1 to 8".to_string()),
         },
-    };
-    IndentUnit::new(&unit).map(|unit| Indent(Some(unit))).map_err(|error| error.message)
+    }
 }
 
 /// A usage error of CNF-4 ends with status 1; help is printed to stdout with status 0.
@@ -237,16 +236,18 @@ fn main() {
         Command::Format { indent, delimiters, file } => {
             let (_, file_path, name) = locate(&file, None);
             let source = read_source(&file_path, &file);
-            let defaults = FormatOptions::default();
+            // CNF-4: without --indent the default indent unit; `--indent none` keeps the indentation of every line.
+            let (indent, keep_indentation) = match indent {
+                Some(Indent(Some(unit))) => (Some(unit), None),
+                Some(Indent(None)) => (None, Some(true)),
+                None => (None, None),
+            };
             let options = FormatOptions {
                 name: Some(name),
                 delimiters,
-                // CNF-4: without --indent the default indent unit.
-                indent: match indent {
-                    Some(Indent(unit)) => unit,
-                    None => defaults.indent.clone(),
-                },
-                ..defaults
+                indent,
+                keep_indentation,
+                ..FormatOptions::default()
             };
             match format_bytes(&source, &options) {
                 Ok(formatted) => write_stdout(&formatted.text),

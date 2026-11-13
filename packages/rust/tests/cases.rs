@@ -12,7 +12,7 @@ mod common;
 
 use common::{case_delimiters, cases};
 use libtest_mimic::{Arguments, Failed, Trial};
-use polyspec_template::{FormatOptions, Formatted, IndentUnit, ParseOptions, analyze, format};
+use polyspec_template::{FormatOptions, Formatted, ParseOptions, analyze, format};
 use std::fs;
 use std::path::Path;
 
@@ -74,18 +74,18 @@ fn formatting(dir: &Path) -> Result<(), Failed> {
     };
     let source = fs::read_to_string(dir.join("input.tpl")).map_err(|error| format!("input.tpl: {error}"))?;
     let delimiters = case_delimiters(dir);
-    let run = |indent: Option<IndentUnit>| {
+    let run = |keep: bool| {
         result_json(format(
             &source,
             &FormatOptions {
-                indent,
+                keep_indentation: Some(keep),
                 delimiters: delimiters.clone(),
                 name: Some("input.tpl".to_string()),
                 ..FormatOptions::default()
             },
         ))
     };
-    let actual = serde_json::json!({ "indent": run(Some(IndentUnit::new("  ").expect("indent unit"))), "keep": run(None) });
+    let actual = serde_json::json!({ "indent": run(false), "keep": run(true) });
     if actual != expected {
         return Err(format!("format\n  actual {actual}\nexpected {expected}").into());
     }

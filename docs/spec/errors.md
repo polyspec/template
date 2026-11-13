@@ -98,7 +98,7 @@ The code tables of ERR-7 to ERR-12 and ERR-15 are the catalog of the error codes
 | `argument_delimiters` | A delimiter option of `parse`, `analyze`, `format` or an engine is not a delimiter pair (LEX-21). | None. |
 | `argument_function_name` | A host function name of `register` or of the engine options is not an identifier or names a built-in function (RT-5, FUN-44). | None. |
 | `argument_source_range` | A byte range of the public `Source` of an implementation is reversed or reaches beyond the source. | None. |
-| `argument_indent` | An indent unit of `format` is not a run of spaces or one tab (FMT-9). | None. |
+| `argument_indent` | An indent unit of `format` is not a run of spaces or one tab (FMT-17). | None. |
 | `format_invariant` | The text that `format` would return does not parse to the AST of the source (FMT-1). | The first changed byte. |
 | `format_html` | The HTML elements of the source do not nest, so `format` cannot indent the lines by them (FMT-12). | The tag that does not nest. |
 | `ast_invalid` | The text that `decode_template` reads is not JSON, or its value is not an AST of the canonical schema; the message names the JSON Pointer of the invalid node (AST-10). | None. |

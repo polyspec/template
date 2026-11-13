@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-formatting -->
-<!-- source-sha256: e27b462cd3ca9c503a31cd9500c378800de76bd4eecb68270afb7df78eab79b4 -->
+<!-- source-sha256: b816c9aff4eb800bc7535a3c5526b0477ece5aba5794fcf8ebb2e31963e0690f -->
 # 포맷
 
 [English](/spec/formatting).
@@ -14,7 +14,7 @@
 
 ## 포맷 스타일
 
-- **FMT-3** 포매터는 태그 안의 공백(FMT-4~FMT-6)과 줄 앞의 공백과 탭(FMT-9~FMT-12)만 바꾼다. 태그 밖의 다른 텍스트는 바꾸지 않는다.
+- **FMT-3** 포매터는 태그 안의 공백(FMT-4~FMT-6)과 줄 앞의 공백과 탭(FMT-10~FMT-12, FMT-17, FMT-18)만 바꾼다. 태그 밖의 다른 텍스트는 바꾸지 않는다.
 
 - **FMT-4** 각 태그 종류는 하나의 포맷 결과를 갖는다.
 
@@ -53,7 +53,11 @@
 
 ## 들여쓰기
 
-- **FMT-9** 옵션 `indent`는 들여쓰기 단위이며 공백 여러 개 또는 탭 하나다. 기본값은 공백 두 개다. 포매터는 각 줄의 들여쓰기를 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값으로 정한다. `indent: null`은 모든 줄의 들여쓰기를 유지하므로 태그 안의 공백만 바뀐다. 옵션 `templateBlocks`는 `indent`(기본값) 또는 `flat`이다.
+- **FMT-17** 옵션 `indent`는 들여쓰기 단위이며 공백 여러 개 또는 탭 하나다. 기본값은 공백 두 개다. 포매터는 각 줄의 들여쓰기를 들여쓰기 단위를 그 줄의 깊이만큼 반복한 값으로 정한다. 다른 형태의 들여쓰기 단위는 `argument_indent`로 실패하며, 줄이 들여쓰기를 유지할 때도(FMT-18) 그렇다. 옵션 `templateBlocks`는 `indent`(기본값) 또는 `flat`이다.
+
+- **FMT-18** 옵션 `keepIndentation`(Rust 코어의 interface 계약에서는 `keep_indentation`)은 기본값이 false이고, true이면 모든 줄의 들여쓰기를 유지하므로 태그 안의 공백만 바뀐다. null인 `indent`는 고유한 뜻이 없다. 그것은 주어지지 않은 옵션이고, 기본 단위다. 명령줄 옵션 `--indent none`은 `keepIndentation`을 설정한다. 이유: 생성된 바인딩은 생략된 옵션과 null에 같은 값을 코어에 넘기고 PHP는 둘을 구별하지 못하므로, null이 뜻을 갖는 옵션은 다섯 target에서 같은 결과를 낼 수 없다.
+
+- **FMT-9** 물렸다. FMT-17과 FMT-18이 이를 대신한다. 이 규칙은 FMT-17처럼 들여쓰기 단위를 적었고, null인 `indent`가 모든 줄의 들여쓰기를 유지한다고 적었다. `legacy/`의 패키지와, 옵션이 legacy TypeScript 패키지의 타입인 `packages/language`의 TypeScript 포매터는 이 규칙을 그대로 구현하고, `legacy/`의 케이스가 이것을 인용한다. 그 패키지들에는 옵션 `keepIndentation`이 없다.
 
 ```
 <div class="board-list">
@@ -79,7 +83,7 @@
 
 - **FMT-11** 포매터는 `<pre>`, `<textarea>`, `<script>`, `<style>`, HTML 주석, 태그 안에서 시작하는 줄의 들여쓰기를 유지하며, 끝 태그가 있는 줄도 포함한다. `<script>`, `<style>`, `<textarea>` 안의 HTML 태그는 읽지 않는다. 빈 줄은 비운다. 들여쓰기 뒤의 줄 텍스트는 바뀌지 않으며, 포매터는 요소를 다른 줄로 옮기지 않는다.
 
-- **FMT-12** 들여쓰기에는 짝이 맞는 HTML 구조가 필요하다. 끝 태그가 열린 요소와 맞지 않거나, 템플릿 끝까지 닫히지 않은 요소가 있거나, 템플릿 블록의 분기 사이 또는 시작 태그와 닫는 태그 사이에서 열린 HTML 요소가 다르면, 포매터는 구조가 어긋난 태그의 위치와 함께 오류 `html`을 돌려주고 아무것도 바꾸지 않는다. `indent: null`이면 구조를 읽지 않는다.
+- **FMT-12** 들여쓰기에는 짝이 맞는 HTML 구조가 필요하다. 끝 태그가 열린 요소와 맞지 않거나, 템플릿 끝까지 닫히지 않은 요소가 있거나, 템플릿 블록의 분기 사이 또는 시작 태그와 닫는 태그 사이에서 열린 HTML 요소가 다르면, 포매터는 구조가 어긋난 태그의 위치와 함께 오류 `html`을 돌려주고 아무것도 바꾸지 않는다. `keepIndentation: true`이면 구조를 읽지 않는다.
 
 줄 앞의 공백과 탭은 렌더 출력의 일부다. 다만 블록 태그만 있는 줄은 렌더러가 그 공백과 함께 제거한다. 따라서 들여쓰기는 렌더된 줄 앞의 공백을 바꾼다. 브라우저는 그 공백을 표시하지 않는다. 예외는 포매터가 유지하는 `<pre>`와 `<textarea>` 안, 그리고 CSS `white-space`가 공백을 유지하는 요소 안이다.
 
@@ -103,4 +107,4 @@
 
 - **FMT-16** 모든 SDK는 formatter의 호출 signature, 옵션과 성공·실패 결과를 공개한다. 이름 있는 callable 계약으로 같은 SDK의 다른 진입점에서 공개한 구현을 기술할 수 있다. 공개 구현은 formatting 동작을 바꾸는 adapter 없이 이 계약을 충족한다.
 
-공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `templateBlocks`를 제공한다. TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.
+공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `keepIndentation`, `templateBlocks`를 제공한다. `legacy/`의 패키지와 `packages/language`에는 `keepIndentation`이 없다(FMT-9). TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.

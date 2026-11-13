@@ -95,7 +95,7 @@ pub enum ErrorCode {
     ArgumentFunctionName,
     /// A byte range of the public `Source` of an implementation is reversed or reaches beyond the source.
     ArgumentSourceRange,
-    /// An indent unit of `format` is not a run of spaces or one tab (FMT-9).
+    /// An indent unit of `format` is not a run of spaces or one tab (FMT-17).
     ArgumentIndent,
     /// The text that `format` would return does not parse to the AST of the source (FMT-1).
     FormatInvariant,

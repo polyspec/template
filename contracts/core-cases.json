@@ -12438,11 +12438,11 @@
       }
     },
     {
-      "id": "no_indent_keeps_every_line",
-      "rule": "FMT-9",
+      "id": "keep_indentation_keeps_every_line",
+      "rule": "FMT-18",
       "source": "<div>\n<p>{=b}</p>\n</div>\n",
       "options": {
-        "indent": null
+        "keep_indentation": true
       },
       "result": {
         "text": "<div>\n<p>{= b}</p>\n</div>\n",
@@ -12451,7 +12451,7 @@
     },
     {
       "id": "a_tab_indents_the_lines",
-      "rule": "FMT-9",
+      "rule": "FMT-17",
       "source": "<div>\n<p>a</p>\n</div>\n",
       "options": {
         "indent": "\t"
@@ -12683,6 +12683,20 @@
       "source": "x",
       "options": {
         "indent": "x"
+      }
+    },
+    {
+      "id": "argument_indent_with_kept_indentation",
+      "rule": "FMT-17",
+      "raises": {
+        "kind": "argument_indent",
+        "status": null,
+        "category": "value"
+      },
+      "source": "x",
+      "options": {
+        "indent": "x",
+        "keep_indentation": true
       }
     },
     {

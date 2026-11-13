@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: 88b6c8951e4df128a242bbf5b8e55374613eac4cd21f06f714048a543f34799d -->
+<!-- source-sha256: 7be8bf72625b0086ee3fdeed2ccf8f07ee451c9132e74c342f3a03e62a7f4b3f -->
 # 오류
 
 [English](/spec/errors).
@@ -99,7 +99,7 @@ ERR-7에서 ERR-12와 ERR-15의 code table이 error code의 catalog입니다. `m
 | `argument_delimiters` | `parse`, `analyze`, `format`이나 engine의 구분자 옵션이 구분자 쌍이 아니다(LEX-21). | 없음. |
 | `argument_function_name` | `register`나 engine 옵션의 host 함수 이름이 식별자가 아니거나 내장 함수 이름이다(RT-5, FUN-44). | 없음. |
 | `argument_source_range` | 구현의 공개 `Source`의 바이트 범위가 뒤집혔거나 소스 밖에 닿는다. | 없음. |
-| `argument_indent` | `format`의 들여쓰기 단위가 공백의 연속이나 탭 하나가 아니다(FMT-9). | 없음. |
+| `argument_indent` | `format`의 들여쓰기 단위가 공백의 연속이나 탭 하나가 아니다(FMT-17). | 없음. |
 | `format_invariant` | `format`이 돌려줄 텍스트가 소스의 AST로 파싱되지 않는다(FMT-1). | 처음 바뀐 바이트. |
 | `format_html` | 소스의 HTML 요소가 짝이 맞지 않아 `format`이 그에 따라 줄을 들여쓸 수 없다(FMT-12). | 짝이 맞지 않는 태그. |
 | `ast_invalid` | `decode_template`이 읽는 텍스트가 JSON이 아니거나 그 값이 canonical schema의 AST가 아니다. 메시지가 잘못된 노드의 JSON Pointer를 적는다(AST-10). | 없음. |
