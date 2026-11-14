@@ -61,18 +61,28 @@ test('the packages of the release are the names that their manifests declare', (
   }
 });
 
-test('the legacy language packages and the binding packages are no release target', () => {
-  // docs/spec/runtime.md#transition: the legacy packages leave the release until they are removed, and the binding
-  // packages that binding scaffolds are released once the generated bindings pass the shared suite (V-6 (2)).
+test('the legacy language packages are no release target, and the release carries the binding packages', () => {
+  // docs/spec/runtime.md#transition: the legacy packages leave the release until they are removed.
   const unreleased = [
     'legacy/packages/ts/package.json', 'legacy/packages/php/composer.json', 'legacy/packages/php-ext/composer.json',
     'legacy/packages/cli/php/composer.json', 'legacy/packages/python/pyproject.toml', 'legacy/packages/go/go.mod',
-    'packages/ts/package.json', 'packages/ts/Cargo.toml', 'packages/python/pyproject.toml', 'packages/python/Cargo.toml',
-    'packages/php-ext/composer.json', 'packages/php-ext/Cargo.toml', 'packages/ts/wasm/Cargo.toml', 'packages/go/go.mod', 'packages/go/internal/ffi/Cargo.toml',
+    // The Go module of the bindings, which make release-go-module tags at a commit of its own (binding GN-19f).
+    'packages/go/go.mod',
   ];
   for (const file of unreleased) {
     assert.equal(CONFIG.manifests[file], undefined, `${file} is a manifest of the release`);
     assert.equal(typeof CONFIG.notReleased[file], 'string', `${file} names no reason in notReleased`);
+  }
+  // The binding packages that binding scaffolds are released with the assets of each platform (binding GN-19a, GN-19g): the
+  // version of each manifest is the version of the release, and the Composer package of the PHP extension takes it from the tag.
+  const released: Record<string, string> = {
+    'packages/ts/package.json': 'version', 'packages/ts/Cargo.toml': 'version', 'packages/ts/wasm/Cargo.toml': 'version',
+    'packages/python/pyproject.toml': 'version', 'packages/python/Cargo.toml': 'version', 'packages/php-ext/Cargo.toml': 'version',
+    'packages/go/internal/ffi/Cargo.toml': 'version', 'packages/php-ext/composer.json': 'git-tag',
+  };
+  for (const [file, mode] of Object.entries(released)) {
+    assert.equal(CONFIG.manifests[file], mode, `${file} is no manifest of the release with the mode ${mode}`);
+    assert.equal(CONFIG.notReleased[file], undefined, `${file} is a manifest of the release and names a reason in notReleased`);
   }
   assert.deepEqual(CONFIG.packages.filter(item => item.directory.startsWith('legacy/') || ['packages/ts', 'packages/python', 'packages/php-ext'].includes(item.directory)), []);
   assert.deepEqual(CONFIG.goModules, {});

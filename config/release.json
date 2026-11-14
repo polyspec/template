@@ -34,7 +34,15 @@
     "packages/lsp/package.json": "archive",
     "packages/codemirror/package.json": "archive",
     "packages/vscode/package.json": "version",
-    "packages/rust/Cargo.toml": "git-tag"
+    "packages/rust/Cargo.toml": "git-tag",
+    "packages/ts/package.json": "version",
+    "packages/ts/Cargo.toml": "version",
+    "packages/ts/wasm/Cargo.toml": "version",
+    "packages/python/pyproject.toml": "version",
+    "packages/python/Cargo.toml": "version",
+    "packages/php-ext/Cargo.toml": "version",
+    "packages/go/internal/ffi/Cargo.toml": "version",
+    "packages/php-ext/composer.json": "git-tag"
   },
   "notReleased": {
     "composer.json": "the development root of the Composer packages of packages/, never published",
@@ -47,17 +55,9 @@
     "legacy/packages/python/pyproject.toml": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
     "legacy/packages/ts/package.json": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
     "Cargo.toml": "the root Cargo workspace; the crate is released by packages/rust/Cargo.toml",
-    "packages/php-ext/Cargo.toml": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/php-ext/composer.json": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/python/Cargo.toml": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/python/pyproject.toml": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/ts/Cargo.toml": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/ts/package.json": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
     "legacy/packages/go/go.mod": "the legacy language package of the transition, which is no release target until it is removed (docs/spec/runtime.md#transition)",
     "packages/compiler/package.json": "the build compiler, which takes the TypeScript runtime as the legacy package @polyspec/template-legacy during the transition and is released again once it uses a binding (docs/spec/runtime.md#transition)",
-    "packages/go/go.mod": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/go/internal/ffi/Cargo.toml": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))",
-    "packages/ts/wasm/Cargo.toml": "a binding package of binding, released after the generated bindings pass the shared suite and the package tests (V-6 (2))"
+    "packages/go/go.mod": "the Go module of the bindings, which make release-go-module of packages/release.mk releases with binding release-go-module: it tags a commit of its own that carries the generated files and the static libraries (binding GN-19f), so the tag of the release names no Go module"
   },
   "goModules": {},
   "annotatedTags": true,

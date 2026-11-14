@@ -269,7 +269,7 @@ ci-passed: ## Fail unless every job of RESULTS, the JSON of toJSON(needs), has t
 # ---- Release (.github/workflows/release.yml, config/release.json) -----------------------------------------------------------
 # release-tag tags the commit of the successful CI run RUN with vX.Y.Z, X.Y.Z the newest section of the change log of that
 # commit, and the Go module tags, and appends TAG and VERSION to GITHUB_ENV (kit K911, K924, K987).
-.PHONY: release-prepare release-tools release-tools-path release-tag release-assets release-candidate-assets release-publish release-undraft release-coverage
+.PHONY: release-prepare release-tools release-tools-path release-tag release-tag-output release-assets release-candidate-assets release-publish release-undraft release-coverage
 release-prepare: ## Prepare what the release needs before release-tools; template needs nothing
 	@:
 release-tools: ## Install the tools that config/release.json needs for the release; ONLINE
@@ -283,6 +283,9 @@ release-tools-path: ## Append var/tools/bin and the shims of mise to GITHUB_PATH
 release-tag: ## Tag the commit of the successful CI run RUN of ci.yml on main with vX.Y.Z and the tags of the Go modules; AUTO releases only the version commit; reads the run with gh
 	@test -n "$$RUN" || { echo "release-tag: RUN is required, for example make release-tag RUN=123"; exit 1; }
 	RELEASE_MAIN=origin/main $(NODE) $(KIT)/release-run.$(KIT_EXT) tag "$$RUN"$(if $(AUTO), --auto)
+release-tag-output: ## Give the later jobs of the release workflow TAG and VERSION, which release-tag wrote into the environment of its job, through GITHUB_OUTPUT; both are empty when the run releases nothing
+	@test -n "$$GITHUB_OUTPUT" || { echo 'release-tag-output: GITHUB_OUTPUT is not set; run it in the release workflow'; exit 2; }
+	printf 'tag=%s\nversion=%s\n' "$$TAG" "$$VERSION" >> "$$GITHUB_OUTPUT"
 release-assets: ## Build the archive of every package of TAG and packages.json of its Composer packages into var/release/assets; ONLINE
 	@test -n "$$TAG" || { echo "release-assets: TAG is required, for example make release-assets TAG=v0.0.1"; exit 1; }
 	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) assets "$$TAG"
@@ -557,7 +560,7 @@ test-php: template-test-php ## PHP unit tests
 template-test-php: build-php
 	COMPOSER_VENDOR_DIR=$(CURDIR)/vendor $(NODE) $(KIT)/run-tests.$(KIT_EXT) phpunit --cwd $(PHP_DIR)
 
-template-test-scripts: build-rust typed-generator compiler-interface-generate build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package ## Tests of the test runner and the conformance runners
+template-test-scripts: build-rust typed-generator compiler-interface-generate build-ts template-build-language template-build-lsp template-build-codemirror build-php python-package release-recipes ## Tests of the test runner and the conformance runners
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) node -- --test-concurrency=1 tests/scripts/
 
 # The script tests that FILES names, with the environment of the Makefile: a test that starts a tool of var/tools through
@@ -934,22 +937,34 @@ clean: ## Remove build outputs
 	rm -rf $(TS_DIR)/dist $(LANGUAGE_DIR)/dist packages/*/dist.inputs.json packages/*/dist.next-* legacy/packages/*/dist.inputs.json legacy/packages/*/dist.next-* $(LSP_DIR)/dist $(CODEMIRROR_DIR)/dist $(VSCODE_DIR)/dist $(GO_DIR)/template $(RUST_DIR)/target examples/showcase/adapters/rust/target docs/.vitepress/dist var/build var/go
 
 # ---- Bindings: generated from packages/rust/interface.json by binding ------------------------------------------------
-# The root Cargo workspace holds the core crate and the binding crates that binding scaffold writes (binding L-2). binding
-# is not yet a package that package-lock.json pins; until it is, BINDING names the cli (packages/ts/src/cli.ts) of a
-# binding checkout, and the targets refuse to run without it. bindings writes the generated folders of packages/ts,
-# packages/ts/wasm, packages/python, packages/php-ext and packages/go, which Git ignores; bindings-check runs the contract check, which also compares the
-# tracked binding packages with what binding scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
+# The root Cargo workspace holds the core crate and the binding crates that binding scaffold writes (binding L-2). binding is
+# the npm package @polyspec/binding of package.json, the asset of the GitHub Release of the tag that every dependency line on
+# polyspec-binding-core names, so that the tool and the crate are one release (binding CK-20, CK-70); package-lock.json pins
+# it by its integrity. binding reads the crates of Cargo.lock offline, which make template-install-rust fetches. bindings
+# writes the generated folders of packages/ts, packages/ts/wasm, packages/python, packages/php-ext and packages/go, which Git
+# ignores; bindings-check runs the contract check, which also compares the tracked binding packages with what binding
+# scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
 BINDING_CRATES := polyspec-template-node polyspec-template-wasm polyspec-template-python polyspec-template-php-ext polyspec-template-go
-BINDING ?=
+BINDING := $(CURDIR)/node_modules/.bin/binding
 .PHONY: bindings bindings-check lint-bindings test-bindings
 bindings:
-	@test -n "$(BINDING)" || { echo "bindings: set BINDING to the cli of binding"; exit 1; }
 	$(NODE) $(BINDING) generate --root $(CURDIR)
 bindings-check:
-	@test -n "$(BINDING)" || { echo "bindings-check: set BINDING to the cli of binding"; exit 1; }
 	$(NODE) $(BINDING) check $(CURDIR)/packages/rust/interface.json
 # The lint and the tests of the binding crates, after make bindings writes their generated folders.
 lint-bindings: bindings
 	$(CARGO) clippy --locked $(foreach crate,$(BINDING_CRATES),-p $(crate)) --all-targets -- -D warnings
 test-bindings: bindings
 	$(CARGO) test --locked $(foreach crate,$(BINDING_CRATES),-p $(crate))
+
+# ---- Release recipes of the bindings: packages/release.mk, which binding release-recipes writes (binding GN-19h) -----------
+# The recipes of the platform assets (release-go-static, release-wheel, release-php-ext, release-npm-platform, release-npm,
+# release-go-module, release-binding-check, release-platform-assets, install-llvm and install-wasm-bindgen) are the file that
+# binding release-recipes writes for the contract; Git ignores it, and make release-recipes writes it again before a release
+# runs a recipe, because no recipe of these targets is written by hand (CK-94). The file reads BINDING_RUN, NODE, NPM and UV,
+# which this Makefile defines before the include; a checkout that has not written the file yet reads none of its targets.
+BINDING_RUN := $(NODE) $(BINDING)
+.PHONY: release-recipes
+release-recipes:
+	$(BINDING_RUN) release-recipes --root $(CURDIR)
+-include packages/release.mk

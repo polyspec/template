@@ -14,7 +14,9 @@
 // - PHP is one of the minor versions of config/toolchain.json: setup-php cannot pin a patch, so the minor is the pin and
 //   the CI report records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
 //   no tools;
-// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04;
+// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04, but the job platform of assets.yml,
+//   which runs on the runner of each platform of the bindings (binding GN-19i), and a job that calls a workflow of the
+//   repository, whose jobs follow these rules themselves;
 // - the last job of ci.yml is ci-passed, which fails the run that a release takes by its id unless every job passed: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
@@ -113,7 +115,8 @@ export function ciPassedViolations(text: string) {
   if (JSON.stringify([...needs].sort(compareText)) !== JSON.stringify(others.map(entry => entry.name).sort(compareText))) {
     found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
   }
-  const runners = [...new Set(others.map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
+  // A job that calls a workflow of the repository has no runner of its own; the jobs of that workflow have theirs.
+  const runners = [...new Set(others.filter(entry => entry.value.uses === undefined).map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
   const runsOn = shown(jobField(job, 'runs-on'));
   if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = runsOf(job);
@@ -144,9 +147,10 @@ function recipe(command: string, env: NodeJS.ProcessEnv = {}, make = 'make') {
 }
 
 // T27.1-64: the recipes are template's own; the Makefile includes no makefile of kit and runs the utilities of the installed
-// package, never of a sibling checkout.
+// package, never of a sibling checkout. The one other file that it reads is packages/release.mk, the release recipes that
+// binding release-recipes writes for the contract (binding GN-19h), when make release-recipes has written it.
 test('make reads the Makefile alone and runs the utilities of the installed kit', () => {
-  const files = recipe('printf "%s\\n" "$(MAKEFILE_LIST)"').split(/\s+/).filter(file => !file.endsWith('probe.mk'));
+  const files = recipe('printf "%s\\n" "$(MAKEFILE_LIST)"').split(/\s+/).filter(file => !file.endsWith('probe.mk') && file !== 'packages/release.mk');
   assert.deepEqual(files, ['Makefile']);
   const kit = recipe('printf "%s\\n" "$(KIT)"');
   assert.equal(kit, path.join(realpathSync(path.join(ROOT, 'node_modules/@polyspec/kit')), existsSync(path.join(ROOT, 'node_modules/@polyspec/kit/scripts/kit/land.mts')) ? 'scripts/kit' : 'dist'));
@@ -356,7 +360,8 @@ test('every CI job runs its targets past failures and uploads their report, also
   const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
-  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED)) {
+  // The job assets calls assets.yml, which builds the binding assets and runs no check of the suite.
+  for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED && entry.value.uses === undefined)) {
     const lines = runLines(job);
     const runners = new Set<string>();
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
@@ -412,15 +417,30 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
   }
 });
 
+// The runners of the job platform of assets.yml, one of each platform of the binding assets (binding GN-19i): an asset is
+// linked and loaded only on its platform, because no tool of the release compiles for another platform.
+const PLATFORM_RUNNERS = ['macos-15', 'ubuntu-26.04', 'ubuntu-26.04-arm'];
+
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
-    // The bootstrap action is a file of the checkout, which runs at the commit of the run, so it needs no pin.
-    for (const pin of pinsOf(file).filter(entry => entry.uses !== KIT_BOOTSTRAP)) {
+    // The bootstrap action and the workflows of the repository are files of the checkout, which run at the commit of the run,
+    // so they need no pin.
+    for (const pin of pinsOf(file).filter(entry => !entry.uses.startsWith('./'))) {
       assert.match(pin.uses, /^[\w.-]+\/[\w.-]+@[0-9a-f]{40}$/, `${file}: ${pin.uses} is not pinned by a commit`);
       assert.match(pin.comment ?? 'no comment', /^v?\d+\.\d+\.\d+$/, `${file}: ${pin.uses} does not name its release in a comment`);
     }
     for (const job of jobs(file)) {
+      // A job that calls a workflow of the repository runs on the runners of the jobs of that workflow.
+      if (job.value.uses !== undefined) continue;
       const runsOn = jobField(job, 'runs-on');
+      if (file.endsWith('/assets.yml') && job.name === 'platform') {
+        assert.equal(runsOn, '${{ matrix.runner }}', `${file}: the job platform runs on ${shown(runsOn)}, not on the runner of its platform`);
+        const strategy = job.value.strategy;
+        const include = isJsonObject(strategy) && isJsonObject(strategy.matrix) ? strategy.matrix.include : undefined;
+        const runners = Array.isArray(include) ? include.map(entry => (isJsonObject(entry) ? String(entry.runner) : '')).sort(compareText) : [];
+        assert.deepEqual(runners, PLATFORM_RUNNERS, `${file}: the job platform runs on ${runners.join(', ')}, not on one runner of each platform`);
+        continue;
+      }
       assert.equal(runsOn, 'ubuntu-24.04', `${file}: runs-on ${shown(runsOn)}, expected ubuntu-24.04`);
     }
   }

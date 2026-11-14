@@ -16,6 +16,10 @@
       "examples/site/scenarios/react-boundary/react-host.tsx"
     ]
   },
+  "ignoreDependencies": [
+    "@polyspec/binding",
+    "@napi-rs/cli"
+  ],
   "ignoreBinaries": [
     "go",
     "gmake",

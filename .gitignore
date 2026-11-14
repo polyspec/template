@@ -79,3 +79,11 @@ legacy/packages/go/go.work.sum
 # them again.
 /packages/*/generated/
 /packages/ts/wasm/generated/
+# The generated folder of the C ABI crate of Go and the Go files zz_generated_*.go of packages/go, which make bindings and
+# make release-go-module write and a release adds in the commit of its Go tag (binding GN-15g).
+/packages/go/internal/ffi/generated/
+/packages/go/**/zz_generated_*.go
+# The release recipes that binding release-recipes writes (binding GN-19h), and the folders of make release-npm-platform, in
+# which napi writes and packs the npm package of a platform; a release writes both again.
+/packages/release.mk
+/packages/ts/npm/

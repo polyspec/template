@@ -129,7 +129,9 @@ test('a verifying CI job runs every later step after a failing step, and a make 
       for (const step of job.steps) {
         const command = step.run;
         if (command === undefined) continue;
-        if (!publishes) assert.equal(step.if, '${{ !cancelled() }}', `${file} job ${job.name} stops after a failing step before: ${command}`);
+        // A step that runs only for some calls of its workflow, such as the release check of assets.yml, adds its own
+        // condition to !cancelled().
+        if (!publishes) assert.match(step.if ?? '', /^\$\{\{ !cancelled\(\)(?: && [^}]+)? \}\}$/, `${file} job ${job.name} stops after a failing step before: ${command}`);
         for (const make of command.matchAll(/\bmake((?: [^|&;]+)?)/g)) {
           // The arguments of make are optional in the pattern: a bare make names no goal.
           const args = make[1];
