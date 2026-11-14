@@ -3328,6 +3328,15 @@
       "final": true,
       "constructible": false,
       "core_type": "polyspec_template::PreparedRender",
+      "only": {
+        "targets": [
+          "php",
+          "python",
+          "node",
+          "go"
+        ],
+        "reason": "RT-10"
+      },
       "members": [
         {
           "id": "prepared_render.render",
