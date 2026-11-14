@@ -26,6 +26,13 @@
       "name": "@polyspec/template-codemirror",
       "product": "template-codemirror",
       "runtime": "ts"
+    },
+    {
+      "kind": "composer",
+      "directory": "packages/php-ext",
+      "name": "polyspec/template",
+      "product": "template",
+      "runtime": "php-ext"
     }
   ],
   "manifests": {
@@ -42,7 +49,7 @@
     "packages/python/Cargo.toml": "version",
     "packages/php-ext/Cargo.toml": "version",
     "packages/go/internal/ffi/Cargo.toml": "version",
-    "packages/php-ext/composer.json": "git-tag"
+    "packages/php-ext/composer.json": "archive"
   },
   "notReleased": {
     "composer.json": "the development root of the Composer packages of packages/, never published",

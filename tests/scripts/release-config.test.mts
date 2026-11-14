@@ -74,17 +74,25 @@ test('the legacy language packages are no release target, and the release carrie
     assert.equal(typeof CONFIG.notReleased[file], 'string', `${file} names no reason in notReleased`);
   }
   // The binding packages that binding scaffolds are released with the assets of each platform (binding GN-19a, GN-19g): the
-  // version of each manifest is the version of the release, and the Composer package of the PHP extension takes it from the tag.
+  // version of each manifest is the version of the release, and the Composer package of the PHP extension is an archive of the
+  // release, which packages.json of the release names, so that `pie install` finds the package and its pre-packaged binary.
   const released: Record<string, string> = {
     'packages/ts/package.json': 'version', 'packages/ts/Cargo.toml': 'version', 'packages/ts/wasm/Cargo.toml': 'version',
     'packages/python/pyproject.toml': 'version', 'packages/python/Cargo.toml': 'version', 'packages/php-ext/Cargo.toml': 'version',
-    'packages/go/internal/ffi/Cargo.toml': 'version', 'packages/php-ext/composer.json': 'git-tag',
+    'packages/go/internal/ffi/Cargo.toml': 'version', 'packages/php-ext/composer.json': 'archive',
   };
   for (const [file, mode] of Object.entries(released)) {
     assert.equal(CONFIG.manifests[file], mode, `${file} is no manifest of the release with the mode ${mode}`);
     assert.equal(CONFIG.notReleased[file], undefined, `${file} is a manifest of the release and names a reason in notReleased`);
   }
-  assert.deepEqual(CONFIG.packages.filter(item => item.directory.startsWith('legacy/') || ['packages/ts', 'packages/python', 'packages/php-ext'].includes(item.directory)), []);
+  assert.deepEqual(CONFIG.packages.filter(item => item.directory.startsWith('legacy/') || ['packages/ts', 'packages/python'].includes(item.directory)), []);
+  // The Composer package of the PHP extension under the PHP package name of the interface contract (packages.php.package).
+  const contract = parsedJsonObject(read('packages/rust/interface.json'), 'packages/rust/interface.json');
+  const php = isJsonObject(contract.packages) && isJsonObject(contract.packages.php) ? contract.packages.php.package : undefined;
+  assert.equal(typeof php, 'string', 'packages/rust/interface.json names no packages.php.package');
+  assert.deepEqual(CONFIG.packages.filter(item => item.directory === 'packages/php-ext'), [
+    { kind: 'composer', directory: 'packages/php-ext', name: php, product: 'template', runtime: 'php-ext' },
+  ], 'config/release.json releases the Composer package of the PHP extension');
   assert.deepEqual(CONFIG.goModules, {});
 });
 

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 24b57ecfe30ae12a4f26488050df59df503fd284e38415ab134257648493f7ef -->
+<!-- source-sha256: a9a52b1c8f983cc145e31c8bb926c5ee394fd0d789d0be008cb5245f6012ea1e -->
 # 발행
 
 [English](/operations/publication).
@@ -68,6 +68,8 @@ make release-undraft
 release workflow는 `make release-assets` 전에 `make release-tools`를 실행하며, 이것은 `mise.toml`의 Python을 설치한다. wheel은 그 Python으로 build하기 때문이다.
 
 릴리스는 binding 패키지도 각 platform의 asset으로 담는다(binding GN-19a, GN-19g, GN-19i). 그 recipe는 `packages/release.mk`이며, `package.json`이 고정하는 binding 릴리스의 `binding release-recipes`가 쓰고 Git은 무시한다. `make release-recipes`가 그것을 쓰고 Makefile이 include하며, 그 recipe는 손으로 쓰지 않는다(binding GN-19h, CK-94). `.github/workflows/assets.yml`은 각 platform의 runner(`ubuntu-26.04`, `ubuntu-26.04-arm`, `macos-15`)에서 Go module의 static library, abi3 wheel, `config/toolchain.json`의 `phpExtension.minors`에 있는 PHP minor(8.4와 8.5)마다 그 파일의 LLVM으로 PHP 확장(확장은 자기를 build한 header의 PHP minor에만 load되기 때문이다), npm platform 패키지를 build하고, `ubuntu-24.04`에서 `mise.toml`의 wasm-bindgen CLI로 npm 패키지 자체를 만든다. `ci.yml`은 자기 실행의 commit에 대해 그것을 호출하므로, asset이 build되지 않는 commit은 실행이 실패한다. `release.yml`은 job 세 개를 가진다. `tag`는 `make release-tag`를 실행하고 tag를 뒤의 job에 넘기며(`make release-tag-output`), `assets`는 `make release-binding-check` 뒤에 tag에 대해 `assets.yml`을 호출하고, `release`는 위의 step을 실행하고 각 platform의 asset을 `var/release/assets`로 받으며, 자기 commit에 tag를 붙이는 `make release-go-module`로 `packages/go`의 Go module을 옮기고(binding GN-19f), `make release-undraft` 전에 `make release-platform-assets`로 asset을 label과 함께 올린다. `make release-binding-check`는 polyspec crate의 의존 줄이 branch나 commit을 적는 동안 실패한다(CK-70).
+
+binding의 PHP 확장은 `packages/php-ext`의 Composer 패키지 `polyspec/template`이다. 이 이름은 `packages/rust/interface.json`의 `packages.php.package`가 적는 PHP 패키지이며, type은 `php-ext`, `download-url-method`는 `pre-packaged-binary`다. `config/release.json`은 그것을 kind `composer`의 패키지(product `template`, runtime `php-ext`)로, 그 `composer.json`을 `archive` manifest로 선언한다. 그래서 `make release-assets`가 그 zip `polyspec-template-php-ext-X.Y.Z.zip`과 릴리스의 `packages.json`을 쓰고, 그 `packages.json`의 `composer` repository로 `pie install polyspec/template`이 패키지를 찾고 자기 platform의 binary를 릴리스의 asset에서 받는다. 이 패키지가 없으면 `pie install`은 확장의 패키지를 찾지 못한다.
 
 release workflow는 dispatch마다 한 번 실행된다. `make release-tag`가 Go tag를 tag `vX.Y.Z`와 함께 만들어 push하므로 메인테이너는 tag를 push하지 않는다. 실행의 token으로 push한 tag는 workflow를 시작하지 않는다. push한 tag는 옮기지 않으므로, 메인테이너는 버전 올림 commit을 담은 실행만 dispatch하며, 그 `CHANGELOG.md`의 첫 section `## X.Y.Z`가 버전을 이름한다.
 

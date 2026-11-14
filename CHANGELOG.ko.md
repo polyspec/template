@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 920885181c27c785d09cab03aab33e84a14321da4f190a8f7c8f1b41087aff6d -->
+<!-- source-sha256: efd89934175593d4701d2f3b12974cde2b14af0d9b89d5b01d8d6635b36ecec5 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- 릴리스는 binding의 PHP 확장의 Composer 패키지 `polyspec/template`을 담는다(T28.59). `config/release.json`이 `packages/php-ext`의 패키지를 kind `composer`로, 그 `composer.json`을 `archive` manifest로 선언하므로, `make release-assets`가 그 zip과 `packages.json`을 쓴다. 이전 릴리스에는 확장의 Composer 패키지가 없어서 `pie install polyspec/template`이 설치할 패키지를 찾지 못했다.
 - 전체 suite는 다섯 binding 대상의 생성된 시험을 실행한다(T28.58, binding G-5, GN-13e). `make test-binding-php`, `test-binding-python`, `test-binding-node`, `test-binding-wasm`, `test-binding-go`는 각 binding crate를 시험 feature로 build하고, `contracts/core-cases.json`의 case를 담은 생성된 시험을 PHPUnit, unittest, `node --test`, `go test`로 실행한다. `lint-bindings`, `check-declarations`, `test-binding-crates`와 함께 이것들은 `CHECK_TARGETS`의 target이며, `ci.yml`의 새 job `bindings`가 ubuntu-26.04-arm에서 실행하고 `ci-passed`가 요구한다. 이전에는 어떤 CI job도 binding의 생성된 시험을 실행하지 않아서, release가 어떤 실행도 시험하지 않은 binding package를 게시했다. `mise.toml`이 maturin 1.16.0을 고정하고, legacy package는 자기 시험을 유지한다.
 - 릴리스는 각 platform의 PHP 확장을 `config/toolchain.json`의 `phpExtension.minors`에 있는 minor인 PHP 8.4와 PHP 8.5용으로 build한다(T28.57, binding GN-19d). 확장은 자기를 build한 header의 PHP minor에만 load되므로, `.github/workflows/assets.yml`의 job `platform`이 minor마다 그것을 준비하고 그 뒤에 `make release-php-ext PHP=php`를 실행한다. 이전에는 `.php-version`의 PHP인 8.4용으로만 build해서, 요구 `php >=8.4`가 허용하는 PHP 8.5에는 load할 확장이 없었다. `tests/scripts/php-version.test.mts`가 job의 step을 목록과 비교한다.
 - 릴리스는 binding 0.0.4와 json 0.0.27로 build한다(T28.56, binding CK-19, CK-20, CK-70). `package.json`이 binding 0.0.4의 release asset을 적는다. 그 생성된 Go binding은 쓰이지 않는 writer method를 정의하지 않고(B2.264), 그 Python build는 out folder에 쓰며(B2.265), npm package의 release recipe는 npm 12로 build한다(B2.266). `package-lock.json`이 그 integrity를 고정한다. `polyspec-binding-core`에 대한 모든 의존 줄이 tag v0.0.4를, `polyspec-json`에 대한 모든 줄이 json의 branch `v1/rust-core` 대신 tag v0.0.27을 적고 두 lock이 그것을 고정한다. 0.0.4의 `binding scaffold`가 json 0.0.27의 요구를 Python, npm, PHP, Go package의 manifest에 쓰고, `go.work.sum`이 json v0.0.27의 Go module의 sum을 가진다. 이전에는 `make template-install-go`가 `github.com/polyspec/json/packages/go@v0.0.0: invalid version: unknown revision packages/go/v0.0.0`로 실패했다. 확인: 0.0.4의 `binding check --release`가 아무것도 보고하지 않고 `make template-install-go`가 통과한다.
