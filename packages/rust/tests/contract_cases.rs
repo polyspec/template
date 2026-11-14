@@ -1591,7 +1591,15 @@ fn main() {
         );
         let member = row["member"].as_str().expect("a member").to_string();
         let group = row["group"].as_str().expect("a group").to_string();
-        assert_eq!(member, group, "a group of the case file has the id of its member");
+        // CNF-19: a group has the id of its member; a second group of the member, whose row names an only (binding
+        // GN-13h), has the id, `/` and a word.
+        assert!(
+            group == member
+                || group
+                    .strip_prefix(member.as_str())
+                    .is_some_and(|rest| rest.starts_with('/') && rest.len() > 1),
+            "the group {group} of the case file has the id of its member {member}"
+        );
         let Some(cases) = file[&group].as_array().cloned() else {
             panic!("the group {group} is not in the case file");
         };
@@ -1602,14 +1610,14 @@ fn main() {
         };
         {
             let (member, cases) = (member.clone(), cases.clone());
-            trials.push(Trial::test(format!("raises::{member}"), move || {
+            trials.push(Trial::test(format!("raises::{group}"), move || {
                 raises_of_member(&member, &kinds, &cases)
             }));
         }
         for case in cases {
             let id = case["id"].as_str().expect("a case id").to_string();
-            let group = group.clone();
-            trials.push(Trial::test(format!("{group}::{id}"), move || trial(&group, &case)));
+            let member = member.clone();
+            trials.push(Trial::test(format!("{group}::{id}"), move || trial(&member, &case)));
         }
         groups.push(group);
     }

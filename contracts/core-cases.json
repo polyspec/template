@@ -1326,34 +1326,6 @@
       "options": {}
     },
     {
-      "id": "load_not_loaded",
-      "rule": "ERR-9",
-      "raises": {
-        "kind": "load_not_loaded",
-        "status": null,
-        "category": "value"
-      },
-      "receiver": {
-        "new": "engine.new",
-        "args": {
-          "options": {
-            "loader": {
-              "new": "fs_loader.new",
-              "args": {
-                "root": "templates"
-              }
-            }
-          }
-        }
-      },
-      "name": "page.tpl",
-      "assign": {
-        "kind": "map",
-        "value": []
-      },
-      "options": {}
-    },
-    {
       "id": "lex_invalid_utf8",
       "rule": "ERR-7",
       "raises": {
@@ -2552,6 +2524,36 @@
       "result": "hi a\n"
     }
   ],
+  "engine.render/files": [
+    {
+      "id": "load_not_loaded",
+      "rule": "ERR-9",
+      "raises": {
+        "kind": "load_not_loaded",
+        "status": null,
+        "category": "value"
+      },
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "fs_loader.new",
+              "args": {
+                "root": "templates"
+              }
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": []
+      },
+      "options": {}
+    }
+  ],
   "engine.render_json": [
     {
       "id": "an_echo_of_assign",
@@ -2826,34 +2828,6 @@
                     }
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "name": "page.tpl",
-      "assign": {
-        "kind": "map",
-        "value": []
-      },
-      "options": {}
-    },
-    {
-      "id": "load_not_loaded",
-      "rule": "ERR-9",
-      "raises": {
-        "kind": "load_not_loaded",
-        "status": null,
-        "category": "value"
-      },
-      "receiver": {
-        "new": "engine.new",
-        "args": {
-          "options": {
-            "loader": {
-              "new": "fs_loader.new",
-              "args": {
-                "root": "templates"
               }
             }
           }
@@ -4465,6 +4439,36 @@
       "options": {}
     }
   ],
+  "engine.render_json/files": [
+    {
+      "id": "load_not_loaded",
+      "rule": "ERR-9",
+      "raises": {
+        "kind": "load_not_loaded",
+        "status": null,
+        "category": "value"
+      },
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "fs_loader.new",
+              "args": {
+                "root": "templates"
+              }
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": []
+      },
+      "options": {}
+    }
+  ],
   "engine.render_bound": [
     {
       "id": "an_echo_of_a_bound_map",
@@ -4821,47 +4825,6 @@
                     }
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "name": "page.tpl",
-      "assign": {
-        "new": "bind",
-        "args": {
-          "value": {
-            "kind": "map",
-            "value": [
-              [
-                "name",
-                {
-                  "kind": "text",
-                  "value": "World"
-                }
-              ]
-            ]
-          }
-        }
-      },
-      "options": {}
-    },
-    {
-      "id": "load_not_loaded",
-      "rule": "ERR-9",
-      "raises": {
-        "kind": "load_not_loaded",
-        "status": null,
-        "category": "value"
-      },
-      "receiver": {
-        "new": "engine.new",
-        "args": {
-          "options": {
-            "loader": {
-              "new": "fs_loader.new",
-              "args": {
-                "root": "templates"
               }
             }
           }
@@ -6352,6 +6315,49 @@
               "depth": 32,
               "output_bytes": 16777216,
               "expression_depth": 64
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "new": "bind",
+        "args": {
+          "value": {
+            "kind": "map",
+            "value": [
+              [
+                "name",
+                {
+                  "kind": "text",
+                  "value": "World"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "options": {}
+    }
+  ],
+  "engine.render_bound/files": [
+    {
+      "id": "load_not_loaded",
+      "rule": "ERR-9",
+      "raises": {
+        "kind": "load_not_loaded",
+        "status": null,
+        "category": "value"
+      },
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "fs_loader.new",
+              "args": {
+                "root": "templates"
+              }
             }
           }
         }

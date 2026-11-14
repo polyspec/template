@@ -4640,14 +4640,56 @@
       "group": "engine.render"
     },
     {
+      "member": "engine.render",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render/files",
+      "only": {
+        "targets": [
+          "php",
+          "python",
+          "node",
+          "go"
+        ],
+        "reason": "RT-77"
+      }
+    },
+    {
       "member": "engine.render_json",
       "file": "contracts/core-cases.json",
       "group": "engine.render_json"
     },
     {
+      "member": "engine.render_json",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render_json/files",
+      "only": {
+        "targets": [
+          "php",
+          "python",
+          "node",
+          "go"
+        ],
+        "reason": "RT-77"
+      }
+    },
+    {
       "member": "engine.render_bound",
       "file": "contracts/core-cases.json",
       "group": "engine.render_bound"
+    },
+    {
+      "member": "engine.render_bound",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render_bound/files",
+      "only": {
+        "targets": [
+          "php",
+          "python",
+          "node",
+          "go"
+        ],
+        "reason": "RT-77"
+      }
     },
     {
       "member": "engine.load",
