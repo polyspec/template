@@ -15,8 +15,9 @@
 //   the CI report records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
 //   no tools;
 // - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04, but the job platform of assets.yml,
-//   which runs on the runner of each platform of the bindings (binding GN-19i), and a job that calls a workflow of the
-//   repository, whose jobs follow these rules themselves;
+//   which runs on the runner of each platform of the bindings (binding GN-19i), the job bindings of ci.yml, which runs on
+//   ubuntu-26.04-arm for the LLVM of config/toolchain.json, and a job that calls a workflow of the repository, whose jobs
+//   follow these rules themselves;
 // - the last job of ci.yml is ci-passed, which fails the run that a release takes by its id unless every job passed: it runs after every other
 //   job (`if: ${{ always() }}`), needs every other job, runs on their runner and runs make ci-passed with the JSON of
 //   needs, so it passes only when every other job passed (T22.1-3);
@@ -115,8 +116,9 @@ export function ciPassedViolations(text: string) {
   if (JSON.stringify([...needs].sort(compareText)) !== JSON.stringify(others.map(entry => entry.name).sort(compareText))) {
     found.push(`ci.yml: the job ${CI_PASSED} needs [${needs.join(', ')}], not every other job [${others.map(entry => entry.name).join(', ')}]`);
   }
-  // A job that calls a workflow of the repository has no runner of its own; the jobs of that workflow have theirs.
-  const runners = [...new Set(others.filter(entry => entry.value.uses === undefined).map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
+  // A job that calls a workflow of the repository has no runner of its own; the jobs of that workflow have theirs. The job
+  // bindings runs on BINDINGS_RUNNER for the LLVM of config/toolchain.json, the one exception to the runner of the jobs.
+  const runners = [...new Set(others.filter(entry => entry.value.uses === undefined && entry.name !== 'bindings').map(entry => shown(jobField(entry, 'runs-on'))))].sort(compareText);
   const runsOn = shown(jobField(job, 'runs-on'));
   if (JSON.stringify([runsOn]) !== JSON.stringify(runners)) found.push(`ci.yml: the job ${CI_PASSED} runs on '${runsOn}', not on the runner of the other jobs ${runners.join(', ')}`);
   const runs = runsOf(job);
@@ -323,7 +325,9 @@ test('no CI job installs without make or sets up a Go or a Python of its own', (
 
 // The targets that a step of make names, also those of `make ci-targets TARGETS="..."`.
 function makeTargets(step: string) {
-  return step.replace(/^.*\bmake\b/, '').replace(/TARGETS="([^"]*)"/, '$1').split(/\s+/).filter(word => /^[a-z][\w-]*$/.test(word));
+  // TARGETS="..." names targets; any other quoted variable, such as TOOLS="rust go", names values that are no targets.
+  return step.replace(/^.*\bmake\b/, '').replace(/TARGETS="([^"]*)"/, '$1').replace(/\b[A-Z_]+="[^"]*"/g, '')
+    .split(/\s+/).filter(word => /^[a-z][\w-]*$/.test(word));
 }
 
 test('every make target that a step of a workflow runs is a target of the Makefile', () => {
@@ -357,7 +361,9 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'install-symbols', ...['node', 'go', 'rust', 'php', 'python', 'parity'].map(language => `template-install-${language}`)]);
+  // release-recipes writes packages/release.mk and install-llvm installs the LLVM of config/toolchain.json, the setup of the
+  // job bindings.
+  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'install-symbols', 'release-recipes', 'install-llvm', ...['node', 'go', 'rust', 'php', 'python', 'parity', 'bindings'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   // The job assets calls assets.yml, which builds the binding assets and runs no check of the suite.
@@ -420,6 +426,8 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
 // The runners of the job platform of assets.yml, one of each platform of the binding assets (binding GN-19i): an asset is
 // linked and loaded only on its platform, because no tool of the release compiles for another platform.
 const PLATFORM_RUNNERS = ['macos-15', 'ubuntu-26.04', 'ubuntu-26.04-arm'];
+// The runner of the job bindings of ci.yml, whose packages hold the LLVM of config/toolchain.json.
+const BINDINGS_RUNNER = 'ubuntu-26.04-arm';
 
 test('every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04', () => {
   for (const file of WORKFLOWS) {
@@ -433,6 +441,12 @@ test('every action of a workflow is pinned by its commit and every job runs on u
       // A job that calls a workflow of the repository runs on the runners of the jobs of that workflow.
       if (job.value.uses !== undefined) continue;
       const runsOn = jobField(job, 'runs-on');
+      // The job bindings of ci.yml builds the PHP extension of the binding, whose bindgen reads the libclang of the LLVM of
+      // config/toolchain.json, which the packages of ubuntu-26.04-arm hold and those of ubuntu-24.04 do not.
+      if (file.endsWith('/ci.yml') && job.name === 'bindings') {
+        assert.equal(runsOn, BINDINGS_RUNNER, `${file}: the job bindings runs on ${shown(runsOn)}, not on ${BINDINGS_RUNNER}`);
+        continue;
+      }
       if (file.endsWith('/assets.yml') && job.name === 'platform') {
         assert.equal(runsOn, '${{ matrix.runner }}', `${file}: the job platform runs on ${shown(runsOn)}, not on the runner of its platform`);
         const strategy = job.value.strategy;

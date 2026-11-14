@@ -416,6 +416,42 @@ jobs:
           path: var/report/ci-targets/
           if-no-files-found: error
 
+  # The generated bindings of the five targets of the contract, which a release publishes (docs/spec/runtime.md#transition):
+  # the lint of the binding crates, the declarations of the Node binding and the generated tests of each target, which hold
+  # the cases of contracts/core-cases.json, on the standard runner of its language. It runs on ubuntu-26.04-arm, whose
+  # packages hold the LLVM of config/toolchain.json that the build of the PHP extension reads (make install-llvm of
+  # packages/release.mk, which make release-recipes writes); the legacy packages keep their tests in the other jobs.
+  bindings:
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
+        uses: ./.github/actions/kit-bootstrap
+        if: ${{ !cancelled() }}
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version-file: .php-version
+          tools: none
+          coverage: none
+      - run: make install-tools TOOLS="rust go php composer python uv"
+        if: ${{ !cancelled() }}
+      - run: make template-install-bindings
+        if: ${{ !cancelled() }}
+      - run: make release-recipes
+        if: ${{ !cancelled() }}
+      - run: make install-llvm
+        if: ${{ !cancelled() }}
+      - run: make ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go"
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: report-bindings
+          path: var/report/ci-targets/
+          if-no-files-found: error
+
   # The assets of each platform of the bindings, built from the commit of the run with the matrix of the release (binding
   # GN-19a, GN-19i), without the release check of binding, so that an asset that does not build stops the release before a
   # tag exists. The job calls assets.yml, whose jobs run on the runner of each platform.
@@ -430,7 +466,7 @@ jobs:
   # node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [gates, lint, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext, assets]
+    needs: [gates, lint, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext, bindings, assets]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

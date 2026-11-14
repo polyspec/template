@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-testing -->
-<!-- source-sha256: 0b37aa0689102bcb8866834d8aec5ce1938681fc15de65778c3e21d84675dfca -->
+<!-- source-sha256: 8a2d29eb596868445cd6c56d0c54706515c1e439335eae1e67901dac1df1d212 -->
 # 릴리스 테스트
 
 [English](/operations/testing).
@@ -12,6 +12,7 @@
 | 적합성 | `tests/cases`의 모든 canonical case를 모든 구현의 AST program과 generated program으로 실행 | 정확한 언어, 모드, case와 출력 또는 구조화 진단 차이 |
 | 회귀 | 위치 오류, 실패 복구, request 불변성과 interface·artifact·benchmark hash mutation | 알려진 잘못된 mutation을 받거나 복구 후 출력이 달라진다. |
 | Package 설치 | 변경 불가능한 npm, Go module, Cargo, Composer, Python wheel package와 browser DOM 출력 | Package 설치, 공개 import 또는 설치 프로젝트 출력 실패 |
+| 생성된 binding | binding crate의 lint, Node binding의 선언, binding crate의 시험, 그리고 `packages/rust/interface.json`의 `cases`가 적는 `contracts/core-cases.json`의 case를 담은 다섯 대상의 생성된 시험을 unittest, `node --test`(Node와 `./wasm`), PHPUnit, `go test`로 실행(`make test-bindings`, `ci.yml`의 job `bindings`) | 실패한 대상, 언어, case |
 | 표시와 성능 | 정적 예제 HTML, parser 기반 하이라이트, 크기가 제한된 source 보기, 문서 멱등성과 출력이 같은 새 benchmark smoke | 잘못된 HTML, 오래된 site, 두 번째 build 차이 또는 잘못된 측정 행 |
 
 전체 mode matrix는 모든 canonical case를 compiler mode 두 개, 모든 구현과 곱한다. 성공 case는 정확한 UTF-8 바이트를 비교한다. 실패 case는 오류 code, message, template 이름, source 위치를 비교한다. Generated 실행은 host source를 승인하기 전에 parser, AST interpreter, fallback 참조가 없는지도 검사한다.

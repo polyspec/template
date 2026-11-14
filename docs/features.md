@@ -28,6 +28,7 @@ The table records the status of each feature.
 | dependency-policy | Dependency policy | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](operations/dependencies) |
 | template-function-contract | Canonical template function contract | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/functions) |
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/ast) |
+| generated-bindings | Bindings generated from the interface contract, tested on five targets | partial | go: planned<br>php: planned<br>rust: pass<br>typescript: planned<br>python: planned | [Evidence](operations/testing) |
 | bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/data-model) |
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.

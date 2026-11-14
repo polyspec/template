@@ -67,6 +67,20 @@ export function suiteViolations(text: string, suite: string[]) {
   return found;
 }
 
+// The binding packages of packages/ are the packages that a release publishes (docs/spec/runtime.md#transition), so the full
+// suite runs the generated tests of every target of the contract, which hold the cases of contracts/core-cases.json that
+// `cases` of packages/rust/interface.json names (binding G-5, GN-13e), on the standard runner of its language. Each target of
+// BINDING_TARGETS has its target test-binding-<target>, and CHECK_TARGETS holds it with the lint of the binding crates, the
+// check of the declarations of the Node binding and the tests of the binding crates, so one job of ci.yml runs each and the
+// job ci-passed requires that job.
+test('CHECK_TARGETS holds the generated tests of every binding target', () => {
+  const targets = captured(read('Makefile').match(/^BINDING_TARGETS := (.*)$/m), 1, 'BINDING_TARGETS of the Makefile').split(/\s+/).filter(Boolean);
+  assert.deepEqual([...targets].sort(), ['go', 'node', 'php', 'python', 'wasm'], 'BINDING_TARGETS names the five targets of the contract');
+  const missing = ['lint-bindings', 'check-declarations', 'test-binding-crates', ...targets.map(target => `test-binding-${target}`)]
+    .filter(target => !CHECK_TARGETS.includes(target));
+  assert.deepEqual(missing, [], 'CHECK_TARGETS names the lint, the declarations and the generated tests of every binding target');
+});
+
 test('the jobs of the CI workflow run each target of CHECK_TARGETS in exactly one job and no other target (T17.1-10)', () => {
   assert.deepEqual(suiteViolations(read('.github/workflows/ci.yml'), CHECK_TARGETS), []);
 });

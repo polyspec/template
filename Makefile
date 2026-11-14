@@ -404,7 +404,7 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as the checks of the job gates, lint-ts
 # and conformance-ts. The list stays on one line: the owner-check utility of @polyspec/kit reads it.
-CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent
+CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go
 
 .PHONY: lint build test
 lint: lint-ts lint-go lint-rust lint-php lint-python lint-php-ext template-lint-go-format template-lint-go-modules fmt-check template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets and the format checks
@@ -946,16 +946,109 @@ clean: ## Remove build outputs
 # scaffold writes (CK-19) and the pin of the root Cargo.lock (CK-20).
 BINDING_CRATES := polyspec-template-node polyspec-template-wasm polyspec-template-python polyspec-template-php-ext polyspec-template-go
 BINDING := $(CURDIR)/node_modules/.bin/binding
-.PHONY: bindings bindings-check lint-bindings test-bindings
+# The five targets of the contract, each of which has its target test-binding-<target>.
+BINDING_TARGETS := php python node wasm go
+.PHONY: bindings bindings-check lint-bindings test-bindings check-declarations binding-node-package test-binding-crates \
+	$(foreach target,$(BINDING_TARGETS),test-binding-$(target)) template-install-bindings
 bindings:
 	$(NODE) $(BINDING) generate --root $(CURDIR)
 bindings-check:
 	$(NODE) $(BINDING) check $(CURDIR)/packages/rust/interface.json
+# The binding packages are the packages that a release publishes (docs/spec/runtime.md#transition), so the full suite runs
+# the generated tests of each target of the contract, which hold the cases of contracts/core-cases.json that `cases` of
+# packages/rust/interface.json names (binding G-5, GN-13e), on the standard runner of its language, each in its own target
+# test-binding-<target>, against a build with the test features of its crate (binding GN-5): unittest against the installed
+# wheel, node --test against the installed npm package and through its subpath ./wasm, PHPUnit with the extension loaded and
+# go test with the static library. The job bindings of .github/workflows/ci.yml runs them; the legacy packages keep their
+# own tests in the other jobs until each is removed (V-6 (5)).
+test-bindings: lint-bindings check-declarations test-binding-crates $(foreach target,$(BINDING_TARGETS),test-binding-$(target))
+# The build script of ext-php-rs runs bindgen, which reads the libclang and the clang of the LLVM of config/toolchain.json:
+# LLVM_ROOT of packages/release.mk, which make install-llvm installs; without that file bindgen finds them itself.
+BINDING_LLVM = $(if $(LLVM_ROOT),LIBCLANG_PATH=$(LLVM_ROOT)/lib CLANG_PATH=$(LLVM_ROOT)/bin/clang)
 # The lint and the tests of the binding crates, after make bindings writes their generated folders.
 lint-bindings: bindings
-	$(CARGO) clippy --locked $(foreach crate,$(BINDING_CRATES),-p $(crate)) --all-targets -- -D warnings
-test-bindings: bindings
-	$(CARGO) test --locked $(foreach crate,$(BINDING_CRATES),-p $(crate))
+	$(BINDING_LLVM) $(CARGO) clippy --locked $(foreach crate,$(BINDING_CRATES),-p $(crate)) --all-targets -- -D warnings
+test-binding-crates: bindings
+	$(BINDING_LLVM) $(CARGO) test --locked $(foreach crate,$(BINDING_CRATES),-p $(crate))
+# The TypeScript compiler of package-lock.json checks the generated declarations of the Node binding and of its WASM binding.
+check-declarations: bindings
+	$(NODE) node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict packages/ts/generated/index.d.ts
+	$(NODE) node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict packages/ts/wasm/generated/index.d.ts
+
+# The tools of the job bindings beyond those of make install-tools: maturin and the wasm-bindgen CLI of mise.toml at the
+# digests of mise.lock, the crates of every Cargo.lock, the Go modules of go.work and PHPUnit of composer.lock, which runs
+# the generated tests of the PHP extension.
+template-install-bindings: template-install-rust template-install-go template-install-php
+	$(ONLINE) $(KIT_TOOLS)/bin/mise install --locked github:PyO3/maturin github:wasm-bindgen/wasm-bindgen
+MATURIN := $(KIT_TOOLS)/mise/shims/maturin
+BINDING_WASM_BINDGEN := $(KIT_TOOLS)/mise/shims/wasm-bindgen
+BINDING_GOFMT := $(KIT_TOOLS)/mise/shims/gofmt
+# The PHP of PATH, whose php-config the build script of ext-php-rs reads: the PHP of .php-version that setup-php provides.
+BINDING_PHP ?= php
+BINDING_PHPUNIT := $(CURDIR)/vendor/bin/phpunit
+BINDING_VAR := $(CURDIR)/var/bindings
+BINDING_DYLIB := $(if $(filter Darwin,$(shell uname -s)),dylib,so)
+# The test features of a binding crate: every feature of its manifest (binding GN-5), joined by commas.
+binding_features = $(shell sed -n '/^\[features\]/,/^\[/s/^\([a-z][a-z0-9-]*\) = .*/\1/p' $(1) | paste -sd, -)
+
+# The wheel that maturin builds for the Python of mise.toml, installed into a virtual environment without an index, and the
+# generated tests on unittest, which fails a run that ran no test.
+test-binding-python: bindings
+	$(KIT_TOOLS)/mise/shims/python3 -m venv --clear $(BINDING_VAR)/venv
+	rm -rf $(BINDING_VAR)/wheels
+	cd packages/python && $(MATURIN) build --locked --interpreter $(BINDING_VAR)/venv/bin/python --features $(call binding_features,packages/python/Cargo.toml) --out $(BINDING_VAR)/wheels
+	$(BINDING_VAR)/venv/bin/python -m pip install -q --no-index --force-reinstall $(BINDING_VAR)/wheels/*.whl
+	cd $(BINDING_VAR) && venv/bin/python -m unittest discover -s $(CURDIR)/packages/python/generated/tests -t $(CURDIR)/packages/python/generated/tests
+
+# The npm package with the addon of this platform and the WASM module, packed and installed into var/bindings/node as a
+# release packs them (binding GN-3c, GN-18, P-5): the addon is the platform package that a release names in
+# optionalDependencies, and the module and its glue are what the wasm-bindgen of mise.toml writes into
+# packages/ts/wasm/generated.
+BINDING_PLATFORM := $(shell $(NODE) -p 'process.platform + "-" + process.arch + (process.platform === "linux" ? "-gnu" : "")' 2>/dev/null)
+BINDING_ADDON := template.$(BINDING_PLATFORM).node
+BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
+binding-node-package: bindings
+	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
+	$(CARGO) build --locked -p polyspec-template-wasm --target wasm32-unknown-unknown --features $(call binding_features,packages/ts/wasm/Cargo.toml)
+	$(BINDING_WASM_BINDGEN) --target web --out-dir packages/ts/wasm/generated --out-name template_wasm target/wasm32-unknown-unknown/debug/polyspec_template_wasm.wasm
+	$(CARGO) build --locked -p polyspec-template-node --features $(call binding_features,packages/ts/Cargo.toml)
+	rm -rf $(BINDING_VAR)/node $(BINDING_VAR)/node-platform
+	mkdir -p $(BINDING_VAR)/node $(BINDING_VAR)/node-platform
+	cp target/debug/libpolyspec_template_node.$(BINDING_DYLIB) $(BINDING_VAR)/node-platform/$(BINDING_ADDON)
+	$(NODE) -e 'const p = require("./packages/ts/package.json"); require("fs").writeFileSync("$(BINDING_VAR)/node-platform/package.json", JSON.stringify({ name: p.name + "-$(BINDING_PLATFORM)", version: p.version, os: [process.platform], cpu: [process.arch], main: "$(BINDING_ADDON)", files: ["$(BINDING_ADDON)"] }, null, 2) + "\n")'
+	cd $(BINDING_VAR)/node-platform && $(NPM) pack --pack-destination $(BINDING_VAR)/node
+	cd packages/ts && $(NPM) pack --pack-destination $(BINDING_VAR)/node
+	echo '{ "private": true }' > $(BINDING_VAR)/node/package.json
+	cd $(BINDING_VAR)/node && $(NPM) install --offline --no-audit --no-fund --omit=optional ./*.tgz
+
+# The generated tests of the Node binding on node --test, against the installed package.
+test-binding-node: binding-node-package
+	cp packages/ts/generated/tests/generated.test.mjs $(BINDING_VAR)/node/generated.test.mjs
+	cd $(BINDING_VAR)/node && $(NODE) --test generated.test.mjs
+
+# The generated tests of the WASM binding through the subpath ./wasm of the installed package (binding P-5); --expose-gc
+# serves the generated tests that collect instances (binding GN-18a).
+test-binding-wasm: binding-node-package
+	cp packages/ts/wasm/generated/tests/generated.test.mjs $(BINDING_VAR)/node/generated.wasm.test.mjs
+	cd $(BINDING_VAR)/node && $(NODE) --expose-gc --test generated.wasm.test.mjs
+
+# The extension built with the test features against the PHP of PATH, its stub linted, and the generated tests on PHPUnit
+# with the extension loaded; a run without a test or with a skipped test fails.
+test-binding-php: bindings
+	$(BINDING_LLVM) $(CARGO) build --locked -p polyspec-template-php-ext --features $(call binding_features,packages/php-ext/Cargo.toml)
+	$(BINDING_PHP) -l packages/php-ext/generated/polyspec_template.stub.php
+	$(BINDING_PHP) -d extension=$(CURDIR)/target/debug/libpolyspec_template.$(BINDING_DYLIB) $(BINDING_PHPUNIT) --fail-on-empty-test-suite --fail-on-skipped packages/php-ext/generated/tests
+
+# The static library with the test features, which Go links through CGO_LDFLAGS, then gofmt, go vet and the generated tests
+# on go test with the build tags of those features, polyspec_<feature> with _ for - (binding GN-5). The module is a module of
+# go.work, whose go.work.sum holds the sums of the Go module of json, and GOTOOLCHAIN=local is exported above.
+BINDING_GO_FEATURES = $(call binding_features,packages/go/internal/ffi/Cargo.toml)
+BINDING_GO_ENV = CGO_LDFLAGS=-L$(CURDIR)/target/debug GOFLAGS=-tags=$(subst -,_,$(shell echo '$(BINDING_GO_FEATURES)' | sed 's/\([^,]*\)/polyspec_\1/g'))
+test-binding-go: bindings
+	$(CARGO) build --locked -p polyspec-template-go --features $(BINDING_GO_FEATURES)
+	test -z "$$(cd packages/go && $(BINDING_GOFMT) -l .)"
+	cd packages/go && $(BINDING_GO_ENV) $(GO) vet ./...
+	cd packages/go && $(BINDING_GO_ENV) $(GO) test -count=1 ./...
 
 # ---- Release recipes of the bindings: packages/release.mk, which binding release-recipes writes (binding GN-19h) -----------
 # The recipes of the platform assets (release-go-static, release-wheel, release-php-ext, release-npm-platform, release-npm,
