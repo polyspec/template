@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: af5dd96df9a5de5a187ea268d0e20d9f430bd2bba6129b4e31124f380659b436 -->
+<!-- source-sha256: e691ad69da8b0a73612edb3d037470f56a011f9699867ba644bee4365bca65cc -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- T28.60 검증: Node 26.12.0에서 commit된 source 구현의 선언된 세 owner 명령이 실패와 skip 없이 시험 60개를 통과한다. Infrastructure typecheck, lint-ts의 14개 step, stage한 owner 검증과 docs-check가 통과한다. 이는 source workflow 근거이며 generated expected-minor recipe 강제와 native CI는 아직 남아 있다.
 
 - T28.60: Assets workflow는 native platform/PHP minor build 여섯 개와 PHP가 아닌 platform build 세 개를 분리한다. 각 PHP job은 자기 setup, expected-minor build 입력, LLVM, 잠긴 입력, 고유한 artifact를 소유하고 진단 guard를 유지한다. 같은 job의 순차 setup은 setup 실패 뒤 다른 minor로 다음 build를 실행하게 할 수 있었다. 엄격한 matrix와 소유권 mutation 시험이 이 source 결함을 재현하고 검사한다. Generated recipe 강제와 native CI 증명은 아직 남아 있다.
 

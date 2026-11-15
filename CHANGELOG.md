@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- T28.60 verification: the exact declared three-owner command passes 60 tests with Node 26.12.0 on the committed source implementation, with no failures or skips. Infrastructure typecheck, all 14 lint-ts steps, staged owner validation and docs-check pass. This is source workflow evidence; generated expected-minor recipe enforcement and native CI remain pending.
+
 - T28.60: The assets workflow separates six native platform/PHP minor builds from three non-PHP platform builds. Each PHP job owns its setup, expected-minor build input, LLVM, locked inputs and unique artifact; diagnostic guards remain. Sequential setups in one job could leave a later build using another minor after setup failure. Strict matrix and ownership mutation tests reproduce and guard this source defect. Generated recipe enforcement and native CI proof remain pending.
 
 - The release carries the Composer package `polyspec/template` of the PHP extension of the binding (T28.59): `config/release.json` declares the package of `packages/php-ext` of the kind `composer` and its `composer.json` as an `archive` manifest, so `make release-assets` writes its zip and `packages.json`. The release had no Composer package of the extension, so `pie install polyspec/template` found no package to install.
