@@ -1129,16 +1129,6 @@ checksum = "f6b464fbc74e149a392436b17d523f769e057cb6877f6a5c4618bc6f11800548"
 
 [[package]]
 name = "polyspec-binding-core"
-version = "0.0.8"
-source = "git+https://github.com/polyspec/binding.git?tag=v0.0.8#7b71949ede916c00c17c0ab35ddc735ab33fa8f6"
-dependencies = [
- "indexmap",
- "libc",
- "tokio-util",
-]
-
-[[package]]
-name = "polyspec-binding-core"
 version = "0.0.10"
 source = "git+https://github.com/polyspec/binding.git?tag=v0.0.10#e38c4a2b3c7ceb322e6d573c278920f27e7f0ba2"
 dependencies = [
@@ -1151,10 +1141,10 @@ dependencies = [
 
 [[package]]
 name = "polyspec-json"
-version = "0.0.29"
-source = "git+https://github.com/polyspec/json.git?tag=v0.0.29#84b6f1459b21f5c9fd66d47d614c0c30f8cdd5be"
+version = "0.0.30"
+source = "git+https://github.com/polyspec/json.git?tag=v0.0.30#a34218e3dd131a5d74d0979ed1be045dda94982e"
 dependencies = [
- "polyspec-binding-core 0.0.8",
+ "polyspec-binding-core",
  "ryu-js",
  "serde",
  "serde_json",
@@ -1166,7 +1156,7 @@ version = "0.0.28"
 dependencies = [
  "clap",
  "libtest-mimic",
- "polyspec-binding-core 0.0.10",
+ "polyspec-binding-core",
  "polyspec-json",
  "polyspec-template",
  "serde",
@@ -1179,7 +1169,7 @@ dependencies = [
 name = "polyspec-template-go"
 version = "0.0.28"
 dependencies = [
- "polyspec-binding-core 0.0.10",
+ "polyspec-binding-core",
  "polyspec-json",
  "polyspec-template",
 ]
@@ -1191,7 +1181,7 @@ dependencies = [
  "napi",
  "napi-build",
  "napi-derive",
- "polyspec-binding-core 0.0.10",
+ "polyspec-binding-core",
  "polyspec-json",
  "polyspec-template",
 ]
@@ -1201,7 +1191,7 @@ name = "polyspec-template-php-ext"
 version = "0.0.28"
 dependencies = [
  "ext-php-rs",
- "polyspec-binding-core 0.0.10",
+ "polyspec-binding-core",
  "polyspec-json",
  "polyspec-template",
 ]
@@ -1210,7 +1200,7 @@ dependencies = [
 name = "polyspec-template-python"
 version = "0.0.28"
 dependencies = [
- "polyspec-binding-core 0.0.10",
+ "polyspec-binding-core",
  "polyspec-json",
  "polyspec-template",
  "pyo3",
@@ -1221,7 +1211,7 @@ name = "polyspec-template-wasm"
 version = "0.0.28"
 dependencies = [
  "js-sys",
- "polyspec-binding-core 0.0.10",
+ "polyspec-binding-core",
  "polyspec-json",
  "polyspec-template",
  "wasm-bindgen",
