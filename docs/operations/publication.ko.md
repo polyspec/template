@@ -1,6 +1,9 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: a9a52b1c8f983cc145e31c8bb926c5ee394fd0d789d0be008cb5245f6012ea1e -->
+<!-- source-sha256: d74e9c32360e3e2b80ff4402e0c08cc8650c7da1441ae38d53916409a85ddaee -->
 # 발행
+
+Native asset job의 분리와 소유권 계약은 [Release asset workflow](../spec/release-assets.md)에 있다. 독립 PHP minor job은 T28.60에서 계획했으며 expected minor를 강제하는 generated recipe 채택과 native CI 증명은 아직 남아 있다.
+
 
 [English](/operations/publication).
 

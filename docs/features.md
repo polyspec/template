@@ -30,6 +30,7 @@ The table records the status of each feature.
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/ast) |
 | generated-bindings | Bindings generated from the interface contract, tested on five targets | partial | go: planned<br>php: planned<br>rust: pass<br>typescript: planned<br>python: planned | [Evidence](operations/testing) |
 | bound-data | Bound data for several renders | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [Evidence](spec/data-model) |
+| platform-asset-isolation | Native platform assets and independent PHP minor jobs | planned | go: planned<br>php: planned<br>rust: unsupported<br>typescript: planned<br>python: planned | [Contract](spec/release-assets) |
 
 An implemented feature requires executable verification and paired documentation; partial and planned are incomplete.
 

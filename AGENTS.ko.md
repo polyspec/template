@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: ccfa18c287c37f6da5a3684a283cb1126429fb064257f6b60d79be88946e76da -->
+<!-- source-sha256: cc44e969aa2172effb30d93ce9d21e71111fb382c4615e9660c421bb2539be94 -->
 # 개발
 
 ## 문서
@@ -30,6 +30,9 @@
   Enforced by: none, no check reads the target.
 
 ## 멱등성
+
+- Own: Workflow job은 native platform asset job과 bindings CI job을 제외하면 ubuntu-24.04에서 실행한다. `assets.yml`의 `platform`과 `php` job은 [docs/spec/release-assets.md](docs/spec/release-assets.md)의 native runner와 분리된 asset 소유권 계약을 따른다. Asset은 자기 platform에서 link하고 load하기 때문이다. `ci.yml`의 `bindings` job은 선언한 LLVM package를 위해 ubuntu-26.04-arm에서 실행한다. 실패한 setup이 다른 minor로 다음 build를 실행하게 하지 않도록 PHP minor 변경은 별도 job으로 나눈다.
+  Enforced by: `tests/scripts/assets-php-matrix.test.mts`, `tests/scripts/php-version.test.mts`, `tests/scripts/toolchain-files.test.mts`
 
 검사는 같은 tree에 대해 언제, 어느 machine에서나 같은 결과를 낸다. 아래 규칙은 각각 한 종류의 결함을 다룬다. 한 종류의 결함은 그 종류가 나타나는 모든 곳에서 고치고, 규칙에는 test를 둔다.
 

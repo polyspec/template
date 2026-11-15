@@ -1,6 +1,9 @@
 <!-- doc-id: docs-operations-publication -->
 # Publication
 
+The isolation and ownership contract for native asset jobs is [Release asset workflow](../spec/release-assets.md). Its independent PHP minor jobs are planned by T28.60; adoption of generated recipes that enforce the expected minor and native CI proof remain pending.
+
+
 [한국어](/ko/operations/publication).
 
 Release archives are distributed as GitHub Release assets. The following commands install packages from local source checkouts. Registry publication is recorded in `docs/features.md` when it happens.
