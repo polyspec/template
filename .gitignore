@@ -87,3 +87,6 @@ legacy/packages/go/go.work.sum
 # which napi writes and packs the npm package of a platform; a release writes both again.
 /packages/release.mk
 /packages/ts/npm/
+/packages/ts/render/
+/packages/ts/render.inputs.json
+/packages/ts/render.next-*

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
@@ -62,4 +63,19 @@ test('star re-exports expose runtime and type names through cycles without a def
 
 test('namespace re-exports expose the namespace name', { timeout: 1000 }, () => {
   assert.deepEqual([...typescriptExports(resolve('entry.ts'), () => 'export * as runtime from "./render.js";')], ['runtime']);
+});
+
+// RT-80: @polyspec/template exports the TypeScript renderer under ./render, apart from the generated binding (.), with the
+// names that release 0.0.27 exported there.
+test('RT-80: @polyspec/template exports the TypeScript renderer under ./render with the names of release 0.0.27', () => {
+  const manifest = JSON.parse(readFileSync('packages/ts/package.json', 'utf8')) as { exports: Record<string, Record<string, string>>; files: string[] };
+  assert.deepEqual(manifest.exports['./render'], { types: './render/render.d.ts', import: './render/render.mjs', require: './render/render.cjs' });
+  assert.ok(manifest.files.includes('render'), 'files of packages/ts/package.json names render');
+  assert.ok(!JSON.stringify(manifest.exports['.']).includes('render'), 'the generated binding (.) does not export the renderer');
+  const declarations = 'packages/ts/render/render.d.ts';
+  assert.ok(existsSync(declarations), `${declarations} is missing; run make build-ts`);
+  const text = readFileSync(declarations, 'utf8');
+  const names = ['AstProgram', 'bind', 'BindError', 'BindErrorCode', 'bindValue', 'BoundMap', 'decodeTemplate', 'Engine', 'HostFunction', 'Loader', 'LoadResult', 'MapLoader', 'MapValue', 'merge', 'NativeObject', 'parseJson', 'resolvePath', 'SafeString', 'Template', 'Value', 'Expr', 'Node'];
+  const missing = names.filter(name => !new RegExp(`\\b${name}\\b`).test(text));
+  assert.deepEqual(missing, [], `${declarations} exports every name of release 0.0.27`);
 });

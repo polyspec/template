@@ -19,6 +19,11 @@
     "./wasm": {
       "types": "./wasm/generated/index.d.ts",
       "default": "./wasm/generated/index.mjs"
+    },
+    "./render": {
+      "types": "./render/render.d.ts",
+      "import": "./render/render.mjs",
+      "require": "./render/render.cjs"
     }
   },
   "files": [
@@ -28,7 +33,8 @@
     "wasm/generated/*.mjs",
     "wasm/generated/*.js",
     "wasm/generated/*.d.ts",
-    "wasm/generated/*.wasm"
+    "wasm/generated/*.wasm",
+    "render"
   ],
   "napi": {
     "binaryName": "template",

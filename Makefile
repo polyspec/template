@@ -639,8 +639,11 @@ template-install-browsers: ## Install the Chromium of Playwright and its system 
 # dependency on ajv and compiles no schema at run time.
 build-ts: template-build-ts ## Build the TypeScript package
 
+# The TypeScript renderer of legacy/packages/ts is also built into packages/ts/render, which @polyspec/template exports as
+# ./render beside the generated binding (runtime.md RT-80).
 template-build-ts: ast-validator
 	$(NODE) scripts/build-package.mts --package ts
+	$(NODE) scripts/build-package.mts --package ts --dist packages/ts/render
 
 .PHONY: ast-validator
 ast-validator: legacy/packages/ts/src/ast-validator.mjs ## Generate the AST validator of legacy/packages/ts from contracts/schema/ast.schema.json
@@ -1151,7 +1154,7 @@ test-binding-python: bindings
 BINDING_PLATFORM := $(shell $(NODE) -p 'process.platform + "-" + process.arch + (process.platform === "linux" ? "-gnu" : "")' 2>/dev/null)
 BINDING_ADDON := template.$(BINDING_PLATFORM).node
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
-binding-node-package: bindings
+binding-node-package: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
 	$(CARGO) build --locked -p polyspec-template-wasm --target wasm32-unknown-unknown --features $(call binding_features,packages/ts/wasm/Cargo.toml)
 	$(BINDING_WASM_BINDGEN) --target web --out-dir packages/ts/wasm/generated --out-name template_wasm target/wasm32-unknown-unknown/debug/polyspec_template_wasm.wasm
