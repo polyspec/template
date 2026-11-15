@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 4731df5cc2f32dca3cdcecfee93463ba8be6700b38c8881a303a1df0d4ea52d0 -->
+<!-- source-sha256: 04aecc26fe54a746473a02853d442ad81b369a74217e90e415480b8f7de0104b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- 전체 suite의 모든 binding target은 명령 하나를 실행한다(T28.66, T19.8). `check-declarations`, `binding-node-package`, `test-binding-node`, `-wasm`, `-php`, `-python`, `-go` target은 각각 명령 두 개에서 열두 개를 실행해서 `tests/scripts/failure-accumulation.test.mts`가 실패했다. 이제 앞선 명령은 각각 `test-binding-go-vet`, `binding-node-package-wasm-build` 같은 자기 선행 target이다. 없는 Python 인터프리터의 메시지는 checkout 밖의 경로를 전체 경로로 보인다. `pythonCommand`가 그 경로를 checkout 기준 상대 경로로 보여서, 임시 디렉터리의 인터프리터에 대해 `tests/scripts/python-toolchain.test.mts`가 실패했다.
 
 - `@polyspec/template`은 TypeScript 렌더러를 다시 `./render`로 내보낸다(T28.65, RT-80). 새 패키지는 생성 binding(`.`)과 WebAssembly 모듈(`./wasm`)만 내보내서 `@polyspec/template/render` import가 실패했다. 이제 그 경로는 `make build-ts`가 `packages/ts/render`로 빌드하는 `legacy/packages/ts`의 렌더러를 release 0.0.27의 이름 그대로 가리킨다. 이 빌드는 선행 target `template-build-ts-render`가 맡아서 각 target이 명령 하나를 실행한다. `tests/scripts/no-silent-skips.test.mts`는 `packages/`의 폴더만 읽는다. 파일 `packages/release.mk`에서 실패했기 때문이다. `tests/scripts/action-pins.test.mts`는 `KyleMayes/install-llvm-action` v2.0.9의 commit을 검증된 pin에 넣는다.
 

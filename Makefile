@@ -1097,6 +1097,7 @@ BINDING_CRATES := polyspec-template-node polyspec-template-wasm polyspec-templat
 BINDING := $(CURDIR)/node_modules/.bin/binding
 # The five targets of the contract, each of which has its target test-binding-<target>.
 BINDING_TARGETS := php python node wasm go
+.PHONY: check-declarations-node test-binding-python-venv test-binding-python-clean test-binding-python-wheel test-binding-python-install binding-node-package-wasm-bindgen-check binding-node-package-wasm-build binding-node-package-wasm-glue binding-node-package-node-build binding-node-package-clean binding-node-package-dirs binding-node-package-addon binding-node-package-platform-manifest binding-node-package-platform-pack binding-node-package-pack binding-node-package-manifest test-binding-node-copy test-binding-wasm-copy test-binding-php-build test-binding-php-lint test-binding-go-build test-binding-go-format test-binding-go-vet
 .PHONY: bindings bindings-check lint-bindings test-bindings check-declarations binding-node-package test-binding-crates \
 	$(foreach target,$(BINDING_TARGETS),test-binding-$(target)) template-install-bindings
 bindings:
@@ -1121,8 +1122,9 @@ lint-bindings: bindings
 test-binding-crates: bindings
 	$(BINDING_LLVM) $(CARGO) test --locked $(foreach crate,$(BINDING_CRATES),-p $(crate))
 # The TypeScript compiler of package-lock.json checks the generated declarations of the Node binding and of its WASM binding.
-check-declarations: bindings
+check-declarations-node: bindings
 	$(NODE) node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict packages/ts/generated/index.d.ts
+check-declarations: check-declarations-node
 	$(NODE) node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict packages/ts/wasm/generated/index.d.ts
 
 # The tools of the job bindings beyond those of make install-tools: maturin and the wasm-bindgen CLI of mise.toml at the
@@ -1143,11 +1145,15 @@ binding_features = $(shell sed -n '/^\[features\]/,/^\[/s/^\([a-z][a-z0-9-]*\) =
 
 # The wheel that maturin builds for the Python of mise.toml, installed into a virtual environment without an index, and the
 # generated tests on unittest, which fails a run that ran no test.
-test-binding-python: bindings
+test-binding-python-venv: bindings
 	$(KIT_TOOLS)/mise/shims/python3 -m venv --clear $(BINDING_VAR)/venv
+test-binding-python-clean: test-binding-python-venv
 	rm -rf $(BINDING_VAR)/wheels
+test-binding-python-wheel: test-binding-python-clean
 	cd packages/python && $(MATURIN) build --locked --interpreter $(BINDING_VAR)/venv/bin/python --features $(call binding_features,packages/python/Cargo.toml) --out $(BINDING_VAR)/wheels
+test-binding-python-install: test-binding-python-wheel
 	$(BINDING_VAR)/venv/bin/python -m pip install -q --no-index --force-reinstall $(BINDING_VAR)/wheels/*.whl
+test-binding-python: test-binding-python-install
 	cd $(BINDING_VAR) && venv/bin/python -m unittest discover -s $(CURDIR)/packages/python/generated/tests -t $(CURDIR)/packages/python/generated/tests
 
 # The npm package with the addon of this platform and the WASM module, packed and installed into var/bindings/node as a
@@ -1157,36 +1163,51 @@ test-binding-python: bindings
 BINDING_PLATFORM := $(shell $(NODE) -p 'process.platform + "-" + process.arch + (process.platform === "linux" ? "-gnu" : "")' 2>/dev/null)
 BINDING_ADDON := template.$(BINDING_PLATFORM).node
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
-binding-node-package: bindings template-build-ts
+binding-node-package-wasm-bindgen-check: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
+binding-node-package-wasm-build: binding-node-package-wasm-bindgen-check
 	$(CARGO) build --locked -p polyspec-template-wasm --target wasm32-unknown-unknown --features $(call binding_features,packages/ts/wasm/Cargo.toml)
+binding-node-package-wasm-glue: binding-node-package-wasm-build
 	$(BINDING_WASM_BINDGEN) --target web --out-dir packages/ts/wasm/generated --out-name template_wasm target/wasm32-unknown-unknown/debug/polyspec_template_wasm.wasm
+binding-node-package-node-build: binding-node-package-wasm-glue
 	$(CARGO) build --locked -p polyspec-template-node --features $(call binding_features,packages/ts/Cargo.toml)
+binding-node-package-clean: binding-node-package-node-build
 	rm -rf $(BINDING_VAR)/node $(BINDING_VAR)/node-platform
+binding-node-package-dirs: binding-node-package-clean
 	mkdir -p $(BINDING_VAR)/node $(BINDING_VAR)/node-platform
+binding-node-package-addon: binding-node-package-dirs
 	cp target/debug/libpolyspec_template_node.$(BINDING_DYLIB) $(BINDING_VAR)/node-platform/$(BINDING_ADDON)
+binding-node-package-platform-manifest: binding-node-package-addon
 	$(NODE) -e 'const p = require("./packages/ts/package.json"); require("fs").writeFileSync("$(BINDING_VAR)/node-platform/package.json", JSON.stringify({ name: p.name + "-$(BINDING_PLATFORM)", version: p.version, os: [process.platform], cpu: [process.arch], main: "$(BINDING_ADDON)", files: ["$(BINDING_ADDON)"] }, null, 2) + "\n")'
+binding-node-package-platform-pack: binding-node-package-platform-manifest
 	cd $(BINDING_VAR)/node-platform && $(NPM) pack --pack-destination $(BINDING_VAR)/node
+binding-node-package-pack: binding-node-package-platform-pack
 	cd packages/ts && $(NPM) pack --pack-destination $(BINDING_VAR)/node
+binding-node-package-manifest: binding-node-package-pack
 	echo '{ "private": true }' > $(BINDING_VAR)/node/package.json
+binding-node-package: binding-node-package-manifest
 	cd $(BINDING_VAR)/node && $(NPM) install --offline --no-audit --no-fund --omit=optional ./*.tgz
 
 # The generated tests of the Node binding on node --test, against the installed package.
-test-binding-node: binding-node-package
+test-binding-node-copy: binding-node-package
 	cp packages/ts/generated/tests/generated.test.mjs $(BINDING_VAR)/node/generated.test.mjs
+test-binding-node: test-binding-node-copy
 	cd $(BINDING_VAR)/node && $(NODE) --test generated.test.mjs
 
 # The generated tests of the WASM binding through the subpath ./wasm of the installed package (binding P-5); --expose-gc
 # serves the generated tests that collect instances (binding GN-18a).
-test-binding-wasm: binding-node-package
+test-binding-wasm-copy: binding-node-package
 	cp packages/ts/wasm/generated/tests/generated.test.mjs $(BINDING_VAR)/node/generated.wasm.test.mjs
+test-binding-wasm: test-binding-wasm-copy
 	cd $(BINDING_VAR)/node && $(NODE) --expose-gc --test generated.wasm.test.mjs
 
 # The extension built with the test features against the PHP of PATH, its stub linted, and the generated tests on PHPUnit
 # with the extension loaded; a run without a test or with a skipped test fails.
-test-binding-php: bindings
+test-binding-php-build: bindings
 	$(BINDING_LLVM) $(CARGO) build --locked -p polyspec-template-php-ext --features $(call binding_features,packages/php-ext/Cargo.toml)
+test-binding-php-lint: test-binding-php-build
 	$(BINDING_PHP) -l packages/php-ext/generated/polyspec_template.stub.php
+test-binding-php: test-binding-php-lint
 	$(BINDING_PHP) -d extension=$(CURDIR)/target/debug/libpolyspec_template.$(BINDING_DYLIB) $(BINDING_PHPUNIT) --fail-on-empty-test-suite --fail-on-skipped packages/php-ext/generated/tests
 
 # The static library with the test features, which Go links through CGO_LDFLAGS, then gofmt, go vet and the generated tests
@@ -1194,10 +1215,13 @@ test-binding-php: bindings
 # go.work, whose go.work.sum holds the sums of the Go module of json, and GOTOOLCHAIN=local is exported above.
 BINDING_GO_FEATURES = $(call binding_features,packages/go/internal/ffi/Cargo.toml)
 BINDING_GO_ENV = CGO_LDFLAGS=-L$(CURDIR)/target/debug GOFLAGS=-tags=$(subst -,_,$(shell echo '$(BINDING_GO_FEATURES)' | sed 's/\([^,]*\)/polyspec_\1/g'))
-test-binding-go: bindings
+test-binding-go-build: bindings
 	$(CARGO) build --locked -p polyspec-template-go --features $(BINDING_GO_FEATURES)
+test-binding-go-format: test-binding-go-build
 	test -z "$$(cd packages/go && $(BINDING_GOFMT) -l .)"
+test-binding-go-vet: test-binding-go-format
 	cd packages/go && $(BINDING_GO_ENV) $(GO) vet ./...
+test-binding-go: test-binding-go-vet
 	cd packages/go && $(BINDING_GO_ENV) $(GO) test -count=1 ./...
 
 # ---- Release recipes of the bindings: packages/release.mk, which binding release-recipes writes (binding GN-19h) -----------

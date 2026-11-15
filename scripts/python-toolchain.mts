@@ -6,7 +6,7 @@
 // imports the package from those sources through its environment, with no changed import path (PRINCIPLES S3).
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readToml, tomlTable } from './toml.mts';
 import { pythonPackageCommandPath } from './python-venv.mts';
@@ -36,7 +36,9 @@ export function pythonMinor(): string {
  */
 export function pythonCommand(interpreter: string = pythonInterpreter, fix: string = 'make install-tools'): string {
   const minor = pythonMinor();
-  const shown = relative(root, interpreter) || interpreter;
+  // A path in the checkout is shown from its root; a path outside it, such as a temporary directory, is shown whole.
+  const inside = relative(root, interpreter);
+  const shown = inside === '' || inside.startsWith('..') || isAbsolute(inside) ? interpreter : inside;
   if (!existsSync(interpreter)) throw new Error(`${shown} is missing; run ${fix}, which installs the python ${minor} of mise.toml`);
   const result = spawnSync(interpreter, ['--version'], { encoding: 'utf8' });
   if (result.error) throw new Error(`${shown} did not start (${result.error.message}); run ${fix}`);
