@@ -2554,6 +2554,106 @@
       "options": {}
     }
   ],
+  "engine.render/bound-data": [
+    {
+      "id": "bound_data_page_unbound",
+      "rule": "VAL-22",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= a}|{= b}|{@ x = list}{= x}{/}|{= m.k}|{= c}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "define.tpl",
+                    "source": "[{# part}]\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "part.tpl",
+                    "source": "{= label}:{= a}:{= b}"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "empty.tpl",
+                    "source": "{= a ?? 'none'}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "kind": "map",
+        "value": [
+          [
+            "a",
+            {
+              "kind": "text",
+              "value": "1"
+            }
+          ],
+          [
+            "b",
+            {
+              "kind": "text",
+              "value": "x"
+            }
+          ],
+          [
+            "list",
+            {
+              "kind": "list",
+              "value": [
+                {
+                  "kind": "float",
+                  "value": 1
+                },
+                {
+                  "kind": "float",
+                  "value": 2
+                }
+              ]
+            }
+          ],
+          [
+            "m",
+            {
+              "kind": "map",
+              "value": [
+                [
+                  "k",
+                  {
+                    "kind": "text",
+                    "value": "v"
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      },
+      "options": {},
+      "result": "1|x|12|v|\n"
+    }
+  ],
   "engine.render_json": [
     {
       "id": "an_echo_of_assign",
@@ -6381,6 +6481,427 @@
         }
       },
       "options": {}
+    }
+  ],
+  "engine.render_bound/bound-data": [
+    {
+      "id": "bound_data_page",
+      "rule": "VAL-22",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= a}|{= b}|{@ x = list}{= x}{/}|{= m.k}|{= c}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "define.tpl",
+                    "source": "[{# part}]\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "part.tpl",
+                    "source": "{= label}:{= a}:{= b}"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "empty.tpl",
+                    "source": "{= a ?? 'none'}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "new": "bind",
+        "args": {
+          "value": {
+            "kind": "map",
+            "value": [
+              [
+                "a",
+                {
+                  "kind": "text",
+                  "value": "1"
+                }
+              ],
+              [
+                "b",
+                {
+                  "kind": "text",
+                  "value": "x"
+                }
+              ],
+              [
+                "list",
+                {
+                  "kind": "list",
+                  "value": [
+                    {
+                      "kind": "float",
+                      "value": 1
+                    },
+                    {
+                      "kind": "float",
+                      "value": 2
+                    }
+                  ]
+                }
+              ],
+              [
+                "m",
+                {
+                  "kind": "map",
+                  "value": [
+                    [
+                      "k",
+                      {
+                        "kind": "text",
+                        "value": "v"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "options": {},
+      "result": "1|x|12|v|\n"
+    },
+    {
+      "id": "bound_data_merged",
+      "rule": "RT-26",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= a}|{= b}|{@ x = list}{= x}{/}|{= m.k}|{= c}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "define.tpl",
+                    "source": "[{# part}]\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "part.tpl",
+                    "source": "{= label}:{= a}:{= b}"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "empty.tpl",
+                    "source": "{= a ?? 'none'}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "page.tpl",
+      "assign": {
+        "new": "merge",
+        "args": {
+          "first": {
+            "new": "bind",
+            "args": {
+              "value": {
+                "kind": "map",
+                "value": [
+                  [
+                    "a",
+                    {
+                      "kind": "text",
+                      "value": "1"
+                    }
+                  ],
+                  [
+                    "b",
+                    {
+                      "kind": "text",
+                      "value": "x"
+                    }
+                  ],
+                  [
+                    "list",
+                    {
+                      "kind": "list",
+                      "value": [
+                        {
+                          "kind": "float",
+                          "value": 1
+                        },
+                        {
+                          "kind": "float",
+                          "value": 2
+                        }
+                      ]
+                    }
+                  ],
+                  [
+                    "m",
+                    {
+                      "kind": "map",
+                      "value": [
+                        [
+                          "k",
+                          {
+                            "kind": "text",
+                            "value": "v"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              }
+            }
+          },
+          "second": {
+            "new": "bind",
+            "args": {
+              "value": {
+                "kind": "map",
+                "value": [
+                  [
+                    "b",
+                    {
+                      "kind": "text",
+                      "value": "y"
+                    }
+                  ],
+                  [
+                    "c",
+                    {
+                      "kind": "text",
+                      "value": "z"
+                    }
+                  ]
+                ]
+              }
+            }
+          }
+        }
+      },
+      "options": {},
+      "result": "1|y|12|v|z\n"
+    },
+    {
+      "id": "bound_data_define",
+      "rule": "RT-24",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= a}|{= b}|{@ x = list}{= x}{/}|{= m.k}|{= c}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "define.tpl",
+                    "source": "[{# part}]\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "part.tpl",
+                    "source": "{= label}:{= a}:{= b}"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "empty.tpl",
+                    "source": "{= a ?? 'none'}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "define.tpl",
+      "assign": {
+        "new": "bind",
+        "args": {
+          "value": {
+            "kind": "map",
+            "value": [
+              [
+                "a",
+                {
+                  "kind": "text",
+                  "value": "1"
+                }
+              ],
+              [
+                "b",
+                {
+                  "kind": "text",
+                  "value": "x"
+                }
+              ],
+              [
+                "list",
+                {
+                  "kind": "list",
+                  "value": [
+                    {
+                      "kind": "float",
+                      "value": 1
+                    },
+                    {
+                      "kind": "float",
+                      "value": 2
+                    }
+                  ]
+                }
+              ],
+              [
+                "m",
+                {
+                  "kind": "map",
+                  "value": [
+                    [
+                      "k",
+                      {
+                        "kind": "text",
+                        "value": "v"
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "options": {
+        "define": {
+          "part": {
+            "template": "part.tpl",
+            "data": {
+              "kind": "map",
+              "value": [
+                [
+                  "label",
+                  {
+                    "kind": "text",
+                    "value": "L"
+                  }
+                ],
+                [
+                  "a",
+                  {
+                    "kind": "text",
+                    "value": "2"
+                  }
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "result": "[L:2:x]\n"
+    },
+    {
+      "id": "bound_data_empty",
+      "rule": "RT-4",
+      "receiver": {
+        "new": "engine.new",
+        "args": {
+          "options": {
+            "loader": {
+              "new": "map_loader.new",
+              "args": {},
+              "then": [
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "page.tpl",
+                    "source": "{= a}|{= b}|{@ x = list}{= x}{/}|{= m.k}|{= c}\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "define.tpl",
+                    "source": "[{# part}]\n"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "part.tpl",
+                    "source": "{= label}:{= a}:{= b}"
+                  }
+                },
+                {
+                  "call": "map_loader.set",
+                  "args": {
+                    "name": "empty.tpl",
+                    "source": "{= a ?? 'none'}\n"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "name": "empty.tpl",
+      "assign": {
+        "new": "bind",
+        "args": {
+          "value": {
+            "kind": "null"
+          }
+        }
+      },
+      "options": {},
+      "result": "none\n"
     }
   ],
   "engine.load": [

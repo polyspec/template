@@ -4661,6 +4661,11 @@
       }
     },
     {
+      "member": "engine.render",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render/bound-data"
+    },
+    {
       "member": "engine.render_json",
       "file": "contracts/core-cases.json",
       "group": "engine.render_json"
@@ -4697,6 +4702,11 @@
         ],
         "reason": "RT-77"
       }
+    },
+    {
+      "member": "engine.render_bound",
+      "file": "contracts/core-cases.json",
+      "group": "engine.render_bound/bound-data"
     },
     {
       "member": "engine.load",
