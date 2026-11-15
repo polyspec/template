@@ -14,6 +14,7 @@ const VERIFIED = [
   { action: 'actions/setup-node', version: 'v7.1.0', commit: '949feb2413d6458794dcd2491c4babbbce0c15c1' },
   { action: 'actions/upload-artifact', version: 'v7.0.1', commit: '043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' },
   { action: 'actions/upload-pages-artifact', version: 'v5.0.0', commit: 'fc324d3547104276b827a68afc52ff2a11cc49c9' },
+  { action: 'KyleMayes/install-llvm-action', version: 'v2.0.9', commit: 'ebc0426251bc40c7cd31162802432c68818ab8f0' },
   { action: 'shivammathur/setup-php', version: '2.40.0', commit: 'eb7c497e18156a6bbabfef1d3a82760b9eda3962' },
 ];
 

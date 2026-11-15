@@ -641,8 +641,11 @@ build-ts: template-build-ts ## Build the TypeScript package
 
 # The TypeScript renderer of legacy/packages/ts is also built into packages/ts/render, which @polyspec/template exports as
 # ./render beside the generated binding (runtime.md RT-80).
-template-build-ts: ast-validator
+template-build-ts: ast-validator template-build-ts-render
 	$(NODE) scripts/build-package.mts --package ts
+
+.PHONY: template-build-ts-render
+template-build-ts-render: ast-validator
 	$(NODE) scripts/build-package.mts --package ts --dist packages/ts/render
 
 .PHONY: ast-validator

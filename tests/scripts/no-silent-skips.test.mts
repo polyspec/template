@@ -43,7 +43,7 @@ test('no test of the packages skips itself', () => {
       else if (/\.(test\.(ts|mjs)|spec\.ts)$/.test(entry.name)) files.push(file);
     }
   };
-  const packageDirectories = ['packages', 'legacy/packages'].flatMap(parent => readdirSync(path.join(ROOT, parent)).map(name => path.join(ROOT, parent, name)));
+  const packageDirectories = ['packages', 'legacy/packages'].flatMap(parent => readdirSync(path.join(ROOT, parent), { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => path.join(ROOT, parent, entry.name)));
   for (const directory of packageDirectories) {
     const tests = path.join(directory, 'tests');
     try { walk(tests); } catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error; }

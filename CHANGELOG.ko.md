@@ -1,12 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: f9c536a94fcf0af867ea7aa4bce506223809a5e7faab6290b12a870cc2d54ce0 -->
+<!-- source-sha256: 4731df5cc2f32dca3cdcecfee93463ba8be6700b38c8881a303a1df0d4ea52d0 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
-- `@polyspec/template`은 TypeScript 렌더러를 다시 `./render`로 내보낸다(T28.65, RT-80). 새 패키지는 생성 binding(`.`)과 WebAssembly 모듈(`./wasm`)만 내보내서 `@polyspec/template/render` import가 실패했다. 이제 그 경로는 `make build-ts`가 `packages/ts/render`로 빌드하는 `legacy/packages/ts`의 렌더러를 release 0.0.27의 이름 그대로 가리킨다.
+- `@polyspec/template`은 TypeScript 렌더러를 다시 `./render`로 내보낸다(T28.65, RT-80). 새 패키지는 생성 binding(`.`)과 WebAssembly 모듈(`./wasm`)만 내보내서 `@polyspec/template/render` import가 실패했다. 이제 그 경로는 `make build-ts`가 `packages/ts/render`로 빌드하는 `legacy/packages/ts`의 렌더러를 release 0.0.27의 이름 그대로 가리킨다. 이 빌드는 선행 target `template-build-ts-render`가 맡아서 각 target이 명령 하나를 실행한다. `tests/scripts/no-silent-skips.test.mts`는 `packages/`의 폴더만 읽는다. 파일 `packages/release.mk`에서 실패했기 때문이다. `tests/scripts/action-pins.test.mts`는 `KyleMayes/install-llvm-action` v2.0.9의 commit을 검증된 pin에 넣는다.
 
 - 릴리스 0.0.28은 kit 0.0.114와 binding 0.0.10으로 빌드한다(T28.62). `package.json`이 그 release asset을 가리키고 `package-lock.json`이 integrity를 고정한다. `binding scaffold`가 쓰는 생성 manifest를 포함한 `polyspec-binding-core`의 모든 의존성 줄은 tag v0.0.10을 가리키며 `Cargo.lock`이 이를 고정한다. `polyspec-json`의 모든 줄과 `binding scaffold`가 쓰는 json 패키지 요구는 `polyspec-binding-core` 0.0.10에 의존하는 json release 0.0.30을 가리키므로, `Cargo.lock`은 core crate와 json을 각각 한 release씩 담고 `binding check --release`는 아무것도 보고하지 않는다. 0.0.4에 의존하는 json 0.0.27에서는 생성 crate가 json의 오류 kind와 호스트 값을 쓸 수 없었다(`polyspec_json::Error: Kinds`). `make ci-bindings`와 `make ci-assets-php`는 binding 0.0.8이 더 이상 `packages/release.mk`에 쓰지 않는 `install-llvm`을 부르지 않는다. ubuntu-26.04 이미지는 LLVM 21을 `/usr/lib/llvm-21`에 가지며, `assets.yml`의 macOS job `php`는 run step 앞에서 commit으로 고정한 `KyleMayes/install-llvm-action`으로 이를 설치하고, recipe는 그 `LLVM_PATH`를 `LLVM_ROOT`로 `release-php-ext`에 넘긴다. binding 0.0.8에서 이전 recipe는 "No rule to make target 'install-llvm'"으로 멈췄다. `ci-assets-php`는 `DYLD_LIBRARY_PATH`와 `LD_LIBRARY_PATH`를 target 변수로 비운다. action이 두 변수에 /usr/lib를 붙이면 job의 PHP가 시스템 libsqlite3를 읽고 중단하기 때문이다. `ci-release-release`는 내려받은 플랫폼 asset을 `cp -R var/release/downloaded/. var/release/assets/`로 복사한다. `cp var/release/downloaded/*`는 artifact의 디렉터리에서 실패하기 때문이다. `tests/scripts/workflows.mts`의 `recipeOf`는 target 변수 줄을 건너뛴다. 그 줄을 `ci-assets-php`의 규칙으로 읽어 recipe를 찾지 못했기 때문이다. `tests/scripts/assets-workflow.mts`는 run step의 조건을 `runStep?.if`로 읽는다. run step이 없는 job에 대해 `make typecheck`가 TS18048을 보고했기 때문이다. checklist의 T28.61 행은 다섯 칸을 담는다. `make docs-check`가 빈 여섯째 칸을 보고했기 때문이다.
 
