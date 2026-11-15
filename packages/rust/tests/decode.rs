@@ -41,7 +41,7 @@ fn a_decoded_template_renders_without_its_source() {
         polyspec_template::parse(b"{= a + 1}", "x.tpl", &Default::default()).expect("parse")
     );
     let mut loader = MapLoader::new();
-    loader.set_ast("x.tpl", ast).expect("set_ast");
+    loader.set_ast("x.tpl", &ast).expect("set_ast");
     let engine = AstProgram::new(EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()

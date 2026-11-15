@@ -15,7 +15,7 @@ fn send_and_sync<T: Send + Sync>() {}
 fn programs_prepared_renders_bound_maps_and_values_are_send_and_sync() {
     send_and_sync::<Engine>();
     send_and_sync::<AstProgram>();
-    send_and_sync::<PreparedRender<'static>>();
+    send_and_sync::<PreparedRender>();
     send_and_sync::<BoundMap>();
     send_and_sync::<Value>();
 }

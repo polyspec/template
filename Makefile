@@ -334,11 +334,10 @@ ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency
 	$(MAKE) --no-print-directory install-symbols EXTRACTORS=php
 	$(MAKE) --no-print-directory template-install-php
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-ext"
-ci-bindings: ## The job bindings: the tools, the graphs, the release recipes and LLVM, then the binding checks; ONLINE
+ci-bindings: ## The job bindings: the tools, the graphs and the release recipes, then the binding checks; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
 	$(MAKE) --no-print-directory template-install-bindings
 	$(MAKE) --no-print-directory release-recipes
-	$(MAKE) --no-print-directory install-llvm
 	$(MAKE) --no-print-directory ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go"
 
 # The jobs of assets.yml. Each writes the release recipes, and with RELEASE=true, the input release of assets.yml that the
@@ -350,14 +349,19 @@ ci-assets-platform: ## The job platform of assets.yml: the Go static library, th
 	$(MAKE) --no-print-directory release-recipes
 	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
 	$(MAKE) --no-print-directory ci-targets TARGETS="release-go-static release-wheel release-npm-platform"
+# The job provisions the LLVM of config/toolchain.json before this recipe (binding GN-19i): the ubuntu-26.04 images hold it at
+# /usr/lib/llvm-<major>, the default LLVM_ROOT of packages/release.mk, and on macOS install-llvm-action installs it and sets
+# LLVM_PATH, which the build takes as LLVM_ROOT. The action also appends DYLD_LIBRARY_PATH and LD_LIBRARY_PATH with /usr/lib
+# first, which make the PHP of the job load the system libsqlite3 and abort, so the recipe empties both.
+ci-assets-php: DYLD_LIBRARY_PATH :=
+ci-assets-php: LD_LIBRARY_PATH :=
 ci-assets-php: ## The job php of assets.yml: the PHP extension for the PHP on PATH, whose minor is EXPECTED_PHP_MINOR; RELEASE=true; ONLINE
 	@test -n "$(EXPECTED_PHP_MINOR)" || { echo 'ci-assets-php needs EXPECTED_PHP_MINOR, the PHP minor of the job, for example make ci-assets-php EXPECTED_PHP_MINOR=8.4' >&2; exit 2; }
 	$(MAKE) --no-print-directory install-tools TOOLS="rust"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory release-recipes
 	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
-	$(MAKE) --no-print-directory install-llvm
-	$(MAKE) --no-print-directory release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR)
+	$(MAKE) --no-print-directory release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR) $(if $(LLVM_PATH),LLVM_ROOT=$(LLVM_PATH))
 ci-assets-npm: ## The job npm of assets.yml: the npm package with the wasm-bindgen of mise.toml; RELEASE=true; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust"
 	$(MAKE) --no-print-directory template-install-rust
@@ -406,7 +410,7 @@ ci-release-release: ## The job release of release.yml: build, carry and publish 
 	$(MAKE) --no-print-directory release-prepare
 	$(MAKE) --no-print-directory release-tools
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-assets
-	mkdir -p var/release/assets && cp var/release/downloaded/* var/release/assets/
+	mkdir -p var/release/assets && cp -R var/release/downloaded/. var/release/assets/
 	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS="rust"
 	$(RELEASE_PATH) $(MAKE) --no-print-directory template-install-rust
 	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS=go
@@ -1102,7 +1106,8 @@ bindings-check:
 # own tests in the other jobs until each is removed (V-6 (5)).
 test-bindings: lint-bindings check-declarations test-binding-crates $(foreach target,$(BINDING_TARGETS),test-binding-$(target))
 # The build script of ext-php-rs runs bindgen, which reads the libclang and the clang of the LLVM of config/toolchain.json:
-# LLVM_ROOT of packages/release.mk, which make install-llvm installs; without that file bindgen finds them itself.
+# LLVM_ROOT of packages/release.mk, an LLVM that the machine provides (binding GN-19i); without that file bindgen finds them
+# itself.
 BINDING_LLVM = $(if $(LLVM_ROOT),LIBCLANG_PATH=$(LLVM_ROOT)/lib CLANG_PATH=$(LLVM_ROOT)/bin/clang)
 # The lint and the tests of the binding crates, after make bindings writes their generated folders.
 lint-bindings: bindings
@@ -1191,7 +1196,7 @@ test-binding-go: bindings
 
 # ---- Release recipes of the bindings: packages/release.mk, which binding release-recipes writes (binding GN-19h) -----------
 # The recipes of the platform assets (release-go-static, release-wheel, release-php-ext, release-npm-platform, release-npm,
-# release-go-module, release-binding-check, release-platform-assets, install-llvm and install-wasm-bindgen) are the file that
+# release-go-module, release-binding-check, release-platform-assets and install-wasm-bindgen) are the file that
 # binding release-recipes writes for the contract; Git ignores it, and make release-recipes writes it again before a release
 # runs a recipe, because no recipe of these targets is written by hand (CK-94). The file reads BINDING_RUN, NODE, NPM and UV,
 # which this Makefile defines before the include; a checkout that has not written the file yet reads none of its targets.

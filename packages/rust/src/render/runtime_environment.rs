@@ -4,15 +4,18 @@ use super::context::{Limits, RuntimeServices};
 use crate::error::{ErrorCode, TemplateError};
 use crate::functions::HostFunction;
 use std::collections::HashMap;
+use std::sync::Arc;
 
-/// Concrete runtime services owned by AST and generated programs.
+/// Concrete runtime services owned by AST and generated programs. A clone shares the host functions, so a prepared
+/// render keeps the functions of its engine at the time of its preparation (RT-78).
+#[derive(Clone)]
 pub struct RuntimeEnvironment {
     /// Active resource limits.
     pub limits: Limits,
     /// Registered host functions.
-    pub host_functions: HashMap<String, HostFunction>,
+    pub host_functions: HashMap<String, Arc<HostFunction>>,
     /// Registered logical class functions.
-    pub class_functions: HashMap<String, HostFunction>,
+    pub class_functions: HashMap<String, Arc<HostFunction>>,
 }
 
 impl RuntimeEnvironment {
@@ -42,7 +45,7 @@ impl RuntimeEnvironment {
         if !valid(class_name) || !valid(method) {
             return Err("class function names must be identifiers".to_string());
         }
-        self.class_functions.insert(format!("{class_name}::{method}"), function);
+        self.class_functions.insert(format!("{class_name}::{method}"), Arc::new(function));
         Ok(())
     }
 
@@ -56,7 +59,7 @@ impl RuntimeEnvironment {
         if crate::functions::builtins().contains_key(name) {
             return Err(format!("{name} is a built-in function"));
         }
-        self.host_functions.insert(name.to_string(), function);
+        self.host_functions.insert(name.to_string(), Arc::new(function));
         Ok(())
     }
 }
@@ -67,10 +70,12 @@ impl RuntimeServices for RuntimeEnvironment {
     }
 
     fn host_function(&self, name: &str) -> Option<&HostFunction> {
-        self.host_functions.get(name)
+        self.host_functions.get(name).map(|function| &**function)
     }
 
     fn class_function(&self, class_name: &str, method: &str) -> Option<&HostFunction> {
-        self.class_functions.get(&format!("{class_name}::{method}"))
+        self.class_functions
+            .get(&format!("{class_name}::{method}"))
+            .map(|function| &**function)
     }
 }

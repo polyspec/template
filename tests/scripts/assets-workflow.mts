@@ -16,7 +16,7 @@ export const RUNS: Record<string, string> = {
   php: 'make ci-assets-php EXPECTED_PHP_MINOR=${{ matrix.php }} RELEASE=${{ inputs.release }}',
   npm: 'make ci-assets-npm RELEASE=${{ inputs.release }}',
 };
-export const PHP_BUILD = 'make release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR)';
+export const PHP_BUILD = 'make release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR) $(if $(LLVM_PATH),LLVM_ROOT=$(LLVM_PATH))';
 export const PLATFORM_BUILD = 'make ci-targets TARGETS="release-go-static release-wheel release-npm-platform"';
 export const NPM_BUILD = 'make release-npm';
 // The release check runs only when the workflow release calls assets.yml with release true.
@@ -82,7 +82,7 @@ export function assetWorkflowFindings(text: string, minors: readonly string[], m
     const runs = job.steps.flatMap((step, index) => step.run === undefined ? [] : [index]);
     const runAt = runs[0] ?? -1;
     const runStep = job.steps[runAt];
-    if (runs.length !== 1 || runStep?.run !== RUNS[name] || runStep.if !== undefined) failures.push(`${name}: the one run step must be ${RUNS[name] ?? ''} without a condition`);
+    if (runs.length !== 1 || runStep?.run !== RUNS[name] || runStep?.if !== undefined) failures.push(`${name}: the one run step must be ${RUNS[name] ?? ''} without a condition`);
     const checkouts = job.steps.flatMap((step, index) => step.uses?.startsWith('actions/checkout@') ? [index] : []);
     const bootstraps = job.steps.flatMap((step, index) => step.uses === './.github/actions/kit-bootstrap' ? [index] : []);
     const checkout = job.steps[checkouts[0] ?? -1];
@@ -92,7 +92,7 @@ export function assetWorkflowFindings(text: string, minors: readonly string[], m
     const build = commands.indexOf(BUILDS[name] ?? '');
     const required = ['make install-tools TOOLS="rust"', 'make template-install-rust', 'make release-recipes', RELEASE_CHECK,
       ...(name === 'platform' ? ['make install-tools TOOLS="uv python"'] : []),
-      ...(name === 'php' ? ['make install-llvm'] : []), ...(name === 'npm' ? ['make install-wasm-bindgen'] : [])];
+      ...(name === 'npm' ? ['make install-wasm-bindgen'] : [])];
     for (const command of required) {
       const found = commands.flatMap((line, index) => line === command ? [index] : []);
       if (found.length !== 1 || (found[0] ?? Infinity) >= build) failures.push(`${name}: ${command} must run once in the recipe before its builds`);

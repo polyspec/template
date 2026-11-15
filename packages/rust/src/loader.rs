@@ -96,18 +96,34 @@ impl MapLoader {
     }
 
     /// Adds a parsed template. Its version is the hash of its AST JSON (RT-10); an AST without a JSON form, which no
-    /// parsed or decoded template is, is an error.
-    pub fn set_ast(&mut self, name: &str, ast: Template) -> Result<(), String> {
-        let json = crate::encode_template(&ast).map_err(|error| format!("the AST of {name} has no JSON form: {}", error.message))?;
+    /// parsed or decoded template is, is `internal`. The loader keeps a copy of the template, which the caller keeps
+    /// (binding GN-6: a record parameter is borrowed).
+    pub fn set_ast(&mut self, name: &str, ast: &Template) -> Result<(), crate::TemplateError> {
+        let json = crate::encode_template(ast).map_err(|error| {
+            crate::TemplateError::without_position(
+                crate::ErrorCode::Internal,
+                name,
+                format!("the AST of {name} has no JSON form: {}", error.message),
+            )
+        })?;
         let version = content_hash(json.as_bytes());
-        self.entries.insert(name.to_string(), Loaded::Ast { ast, version, lines: None });
+        self.entries.insert(
+            name.to_string(),
+            Loaded::Ast {
+                ast: ast.clone(),
+                version,
+                lines: None,
+            },
+        );
         Ok(())
     }
 
     /// Adds a parsed template with the line index of its source: the byte offset of the start of each line, from 0, as
-    /// an AST artifact records it. Offsets that do not start at 0 or do not increase are an error.
-    pub fn set_ast_lines(&mut self, name: &str, starts: Vec<usize>, ast: Template) -> Result<(), String> {
-        let lines = crate::LineIndex::try_from_starts(starts).map_err(|error| format!("the line index of {name}: {error}"))?;
+    /// an AST artifact records it. Offsets that do not start at 0 or do not increase are `internal`.
+    pub fn set_ast_lines(&mut self, name: &str, starts: &[usize], ast: &Template) -> Result<(), crate::TemplateError> {
+        let lines = crate::LineIndex::try_from_starts(starts.to_vec()).map_err(|error| {
+            crate::TemplateError::without_position(crate::ErrorCode::Internal, name, format!("the line index of {name}: {error}"))
+        })?;
         self.set_ast(name, ast)?;
         if let Some(Loaded::Ast { lines: held, .. }) = self.entries.get_mut(name) {
             *held = Some(lines.starts().to_vec());

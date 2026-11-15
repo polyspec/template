@@ -22,7 +22,7 @@ fn public_parsed_template_data_and_cache_identity() {
     for from_ast in [false, true] {
         let mut loader = MapLoader::new();
         if from_ast {
-            loader.set_ast("a.tpl", tree.clone()).expect("set_ast");
+            loader.set_ast("a.tpl", &tree).expect("set_ast");
         } else {
             loader.set("a.tpl", source);
         }
@@ -104,7 +104,7 @@ fn map_loader_versions_source_and_ast_replacements_by_content() {
         for text in ["first", "second", "second"] {
             let tree = parse(text.as_bytes(), "a.tpl", &ParseOptions::default()).unwrap();
             if ast {
-                loader.set_ast("a.tpl", tree.clone()).expect("set_ast");
+                loader.set_ast("a.tpl", &tree).expect("set_ast");
             } else {
                 loader.set("a.tpl", text);
             }
@@ -142,8 +142,8 @@ fn kind(error: polyspec_template::RenderError) -> polyspec_template::TemplateErr
 fn an_ast_with_its_line_index_names_the_position_of_an_error() {
     let ast = polyspec_template::parse(b"a\n{= 1 / 0}", "x.tpl", &polyspec_template::ParseOptions::default()).unwrap();
     let mut loader = polyspec_template::MapLoader::new();
-    assert!(loader.set_ast_lines("x.tpl", vec![1, 2], ast.clone()).is_err());
-    loader.set_ast_lines("x.tpl", vec![0, 2], ast).unwrap();
+    assert!(loader.set_ast_lines("x.tpl", &[1, 2], &ast).is_err());
+    loader.set_ast_lines("x.tpl", &[0, 2], &ast).unwrap();
     let program = polyspec_template::AstProgram::new(polyspec_template::EngineOptions {
         loader: Some(Box::new(loader)),
         ..Default::default()

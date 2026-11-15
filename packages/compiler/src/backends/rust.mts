@@ -168,7 +168,7 @@ impl GeneratedProgram {
         let mut loader = MapLoader::new();
         for (name, ast, lines) in TEMPLATES {
             let ast = polyspec_template::decode_template(ast)?;
-            loader.set_ast_lines(name, lines.to_vec(), ast).map_err(GeneratedError::Argument)?;
+            loader.set_ast_lines(name, lines, &ast)?;
         }
         Ok(GeneratedProgram { program: AstProgram::new(EngineOptions { loader: Some(Box::new(loader)), ..options })? })
     }
@@ -182,7 +182,7 @@ impl GeneratedProgram {
         Ok(self.program.render(RenderTarget::Name(target), assign, options)?)
     }
     /// Prepares a request whose assign is JSON data for repeated renders, after checking it against the declarations.
-    pub fn prepare(&self, target: &str, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, GeneratedError> {
+    pub fn prepare(&self, target: &str, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender, GeneratedError> {
         let root = polyspec_template::bind_json(assign).map_err(|error| TemplateError::without_position(error.code, target, error.message))?;
         generated_check_assign(&root).map_err(GeneratedError::Argument)?;
         generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
@@ -195,7 +195,7 @@ impl GeneratedProgram {
         Ok(self.program.render_bound(RenderTarget::Name(target), assign, options)?)
     }
     /// Prepares a request whose assign is a bound map (VAL-22), after checking it against the declarations.
-    pub fn prepare_bound(&self, target: &str, assign: &BoundMap, options: &RenderOptions) -> Result<PreparedRender<'_>, GeneratedError> {
+    pub fn prepare_bound(&self, target: &str, assign: &BoundMap, options: &RenderOptions) -> Result<PreparedRender, GeneratedError> {
         generated_check_assign(&Value::Map(polyspec_template::bound_root(assign))).map_err(GeneratedError::Argument)?;
         generated_check_definitions(options.define.as_ref()).map_err(GeneratedError::Argument)?;
         Ok(Program::prepare_bound(&self.program, RenderTarget::Name(target), assign, options)?)

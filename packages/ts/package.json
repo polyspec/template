@@ -1,6 +1,6 @@
 {
   "name": "@polyspec/template",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "The template library of polyspec for Node and the browser",
   "license": "MIT",
   "type": "module",
@@ -39,6 +39,6 @@
     ]
   },
   "dependencies": {
-    "@polyspec/json": "0.0.27"
+    "@polyspec/json": "0.0.29"
   }
 }

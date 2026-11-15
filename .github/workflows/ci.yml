@@ -347,8 +347,8 @@ jobs:
   # The generated bindings of the five targets of the contract, which a release publishes (docs/spec/runtime.md#transition):
   # the lint of the binding crates, the declarations of the Node binding and the generated tests of each target, which hold
   # the cases of contracts/core-cases.json, on the standard runner of its language. It runs on ubuntu-26.04-arm, whose
-  # packages hold the LLVM of config/toolchain.json that the build of the PHP extension reads (make install-llvm of
-  # packages/release.mk, which make release-recipes writes); the legacy packages keep their tests in the other jobs.
+  # image holds the LLVM of config/toolchain.json at /usr/lib/llvm-<major>, the LLVM_ROOT that packages/release.mk, which
+  # make release-recipes writes, reads for the build of the PHP extension (binding GN-19i); the legacy packages keep their tests in the other jobs.
   bindings:
     runs-on: ubuntu-26.04-arm
     steps:

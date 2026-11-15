@@ -35,7 +35,7 @@ const recipe = (target: string, lines: string[]) => `${target}: ## the job\n${li
 const prepared = ['make install-tools TOOLS="rust"', 'make template-install-rust'];
 const recipes = {
   platform: [...prepared, 'make install-tools TOOLS="uv python"', 'make release-recipes', RELEASE_CHECK, PLATFORM_BUILD],
-  php: ['@test -n "$(EXPECTED_PHP_MINOR)" || exit 2', ...prepared, 'make release-recipes', RELEASE_CHECK, 'make install-llvm', PHP_BUILD],
+  php: ['@test -n "$(EXPECTED_PHP_MINOR)" || exit 2', ...prepared, 'make release-recipes', RELEASE_CHECK, PHP_BUILD],
   npm: [...prepared, 'make release-recipes', 'make install-wasm-bindgen', RELEASE_CHECK, NPM_BUILD],
 };
 type Recipes = typeof recipes & { extra?: string[] };
@@ -75,7 +75,7 @@ const mutations: [string, (workflow: Fixture) => void][] = [
   ['wrong expected minor', value => { step(value, item => item.run === RUNS.php).run = 'make ci-assets-php EXPECTED_PHP_MINOR=8.4 RELEASE=${{ inputs.release }}'; }],
   ['release input dropped', value => { step(value, item => item.run === RUNS.php).run = 'make ci-assets-php EXPECTED_PHP_MINOR=${{ matrix.php }}'; }],
   ['condition on the run step', value => { step(value, item => item.run === RUNS.php).if = CONTINUE; }],
-  ['second run step', value => { php(value).steps.splice(2, 0, { run: 'make install-llvm' }); }],
+  ['second run step', value => { php(value).steps.splice(2, 0, { run: 'make release-recipes' }); }],
   ['missing run step', value => { php(value).steps = php(value).steps.filter(item => item.run === undefined); }],
   ['missing bootstrap', value => { php(value).steps = php(value).steps.filter(item => item.uses !== './.github/actions/kit-bootstrap'); }],
   ['wrong selected ref', value => { const found = step(value, item => item.uses?.startsWith('actions/checkout@') === true); assert.ok(found.with); found.with.ref = 'main'; }],
@@ -97,7 +97,6 @@ for (const [name, mutate] of mutations) test(`T28.60: refuses ${name}`, () => {
 const without = (lines: string[], line: string) => lines.filter(each => each !== line);
 const recipeMutations: [string, (value: Recipes) => void][] = [
   ['missing build', value => { value.php = without(value.php, PHP_BUILD); }],
-  ['missing LLVM', value => { value.php = without(value.php, 'make install-llvm'); }],
   ['missing crate inputs', value => { value.php = without(value.php, 'make template-install-rust'); }],
   ['missing release recipes', value => { value.npm = without(value.npm, 'make release-recipes'); }],
   ['release check ignores release input', value => { value.php = value.php.map(line => line === RELEASE_CHECK ? 'make release-binding-check' : line); }],

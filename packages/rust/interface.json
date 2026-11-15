@@ -3386,7 +3386,8 @@
           "wait": "none",
           "core": {
             "path": "polyspec_template::PreparedRender::render",
-            "receiver": "&self"
+            "receiver": "&self",
+            "failure": true
           }
         }
       ]
@@ -3429,7 +3430,7 @@
           ],
           "wait": "none",
           "core": {
-            "path": "polyspec_template::AstProgram::new"
+            "path": "polyspec_template::AstProgram::from_options"
           }
         },
         {
@@ -3612,8 +3613,9 @@
           ],
           "wait": "none",
           "core": {
-            "path": "polyspec_template::AstProgram::render_values",
-            "receiver": "&self"
+            "path": "polyspec_template::AstProgram::render_values_named",
+            "receiver": "&self",
+            "failure": true
           }
         },
         {
@@ -3696,8 +3698,9 @@
           ],
           "wait": "none",
           "core": {
-            "path": "polyspec_template::AstProgram::render",
-            "receiver": "&self"
+            "path": "polyspec_template::AstProgram::render_named",
+            "receiver": "&self",
+            "failure": true
           }
         },
         {
@@ -3779,8 +3782,9 @@
           ],
           "wait": "none",
           "core": {
-            "path": "polyspec_template::AstProgram::render_bound",
-            "receiver": "&self"
+            "path": "polyspec_template::AstProgram::render_bound_named",
+            "receiver": "&self",
+            "failure": true
           }
         },
         {
@@ -3838,8 +3842,9 @@
           ],
           "wait": "blocking_io",
           "core": {
-            "path": "polyspec_template::AstProgram::load",
-            "receiver": "&self"
+            "path": "polyspec_template::AstProgram::load_named",
+            "receiver": "&self",
+            "failure": true
           },
           "only": {
             "targets": [
@@ -3919,8 +3924,9 @@
           ],
           "wait": "blocking_io",
           "core": {
-            "path": "polyspec_template::AstProgram::prepare",
-            "receiver": "&self"
+            "path": "polyspec_template::AstProgram::prepare_named",
+            "receiver": "&self",
+            "failure": true
           },
           "only": {
             "targets": [
@@ -4000,8 +4006,9 @@
           ],
           "wait": "blocking_io",
           "core": {
-            "path": "polyspec_template::AstProgram::prepare_bound",
-            "receiver": "&self"
+            "path": "polyspec_template::AstProgram::prepare_bound_named",
+            "receiver": "&self",
+            "failure": true
           },
           "only": {
             "targets": [
@@ -4717,9 +4724,19 @@
       "group": "parse"
     },
     {
+      "member": "parse",
+      "file": "contracts/core-cases.json",
+      "group": "parse/expr"
+    },
+    {
       "member": "analyze",
       "file": "contracts/core-cases.json",
       "group": "analyze"
+    },
+    {
+      "member": "analyze",
+      "file": "contracts/core-cases.json",
+      "group": "analyze/context"
     },
     {
       "member": "analyze_prefix",
@@ -4727,9 +4744,19 @@
       "group": "analyze_prefix"
     },
     {
+      "member": "analyze_prefix",
+      "file": "contracts/core-cases.json",
+      "group": "analyze_prefix/context"
+    },
+    {
       "member": "format",
       "file": "contracts/core-cases.json",
       "group": "format"
+    },
+    {
+      "member": "format",
+      "file": "contracts/core-cases.json",
+      "group": "format/sdk"
     },
     {
       "member": "resolve_path",
@@ -4745,6 +4772,11 @@
       "member": "decode_template",
       "file": "contracts/core-cases.json",
       "group": "decode_template"
+    },
+    {
+      "member": "decode_template",
+      "file": "contracts/core-cases.json",
+      "group": "decode_template/fixtures"
     },
     {
       "member": "bind",

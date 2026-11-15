@@ -137,18 +137,13 @@ impl RenderTarget<'_> {
 /// A complete AST or generated template program.
 pub trait Program: Send + Sync {
     /// Prepares a reusable render request.
-    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RenderError>;
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender, RenderError>;
 
     /// Renders one request.
     fn render(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError>;
 
     /// Prepares a reusable render request whose assign is a bound map, which is not bound again (VAL-22).
-    fn prepare_bound(
-        &self,
-        target: RenderTarget<'_>,
-        assign: &BoundMap,
-        options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RenderError>;
+    fn prepare_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<PreparedRender, RenderError>;
 
     /// Renders one request whose assign is a bound map, which is not bound again (VAL-22).
     fn render_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError>;
@@ -175,12 +170,7 @@ impl Engine {
     }
 
     /// Prepares a request through the selected program.
-    pub fn prepare(
-        &self,
-        target: RenderTarget<'_>,
-        assign: &JsonValue,
-        options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RenderError> {
+    pub fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender, RenderError> {
         self.program.prepare(target, assign, options)
     }
 
@@ -195,7 +185,7 @@ impl Engine {
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RenderError> {
+    ) -> Result<PreparedRender, RenderError> {
         self.program.prepare_bound(target, assign, options)
     }
 
@@ -205,17 +195,19 @@ impl Engine {
     }
 }
 
-/// AST program with a loader and canonical AST evaluator.
+/// AST program with a loader and canonical AST evaluator. Its loader, its host functions and its template cache are
+/// shared, so a prepared render owns a share of its engine and borrows nothing (RT-78).
 pub struct AstProgram {
     /// The loader.
-    pub loader: Box<dyn Loader>,
-    /// Host functions and limits shared with generated programs.
-    pub runtime: RuntimeEnvironment,
+    pub loader: Arc<dyn Loader>,
+    /// Host functions and limits shared with generated programs. A registration after a preparation writes a copy, so the
+    /// prepared render keeps the functions of its preparation (RT-78).
+    pub runtime: Arc<RuntimeEnvironment>,
     /// Delimiters.
     pub(crate) delimiters: Delimiters,
     /// Controls when loaded template artifacts are refreshed.
     pub artifact_refresh: ArtifactRefresh,
-    cache: Mutex<HashMap<String, Cached>>,
+    cache: Arc<Mutex<HashMap<String, Cached>>>,
 }
 
 /// A template in the cache of a program: loaded with its version, or the failure of its load in `prepare` or `load`,
@@ -227,14 +219,15 @@ enum Cached {
 }
 
 /// A render request with data, definitions and the target template prepared once.
-/// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render.
-pub struct PreparedRender<'e> {
+/// Reusing it avoids rebinding JSON and rebuilding the definition registry for every render. It owns what it renders
+/// with, a share of its engine included, so it outlives the borrow of the engine that made it (RT-78).
+pub struct PreparedRender {
     name: String,
-    render: Box<dyn Fn() -> Result<String, RenderError> + Send + Sync + 'e>,
+    render: Box<dyn Fn() -> Result<String, RenderError> + Send + Sync>,
 }
 
-struct AstPreparedExecution<'e> {
-    engine: &'e AstProgram,
+struct AstPreparedExecution {
+    engine: AstProgram,
     root: Arc<OrderedMap>,
     registry: HashMap<String, DefineEntry>,
     env: Env,
@@ -288,24 +281,35 @@ impl AstProgram {
         Ok(AstProgram {
             // RT-5: a program without a loader has an empty map loader.
             loader: match options.loader {
-                Some(loader) => loader,
-                None => Box::new(MapLoader::new()),
+                Some(loader) => Arc::from(loader),
+                None => Arc::new(MapLoader::new()),
             },
-            runtime,
+            runtime: Arc::new(runtime),
             delimiters,
             // RT-40: a program whose options name no policy has the default policy.
             artifact_refresh: match options.artifact_refresh {
                 Some(policy) => policy,
                 None => DEFAULT_ARTIFACT_REFRESH,
             },
-            cache: Mutex::new(HashMap::new()),
+            cache: Arc::new(Mutex::new(HashMap::new())),
         })
+    }
+
+    /// A share of the program: the same loader, host functions, limits and template cache (RT-78).
+    fn share(&self) -> AstProgram {
+        AstProgram {
+            loader: Arc::clone(&self.loader),
+            runtime: Arc::clone(&self.runtime),
+            delimiters: self.delimiters,
+            artifact_refresh: self.artifact_refresh,
+            cache: Arc::clone(&self.cache),
+        }
     }
 
     /// FUN-43, FUN-44: registers a host function. A name that is not an identifier or names a built-in function is
     /// `argument_function_name` (ERR-15).
     pub fn register(&mut self, name: &str, function: HostFunction) -> Result<(), TemplateError> {
-        self.runtime
+        Arc::make_mut(&mut self.runtime)
             .register(name, function)
             .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))
     }
@@ -313,21 +317,24 @@ impl AstProgram {
     /// Registers one logical class function used by `Class::method(...)`. A class or method name that is not an
     /// identifier is `argument_function_name` (ERR-15).
     pub fn register_class(&mut self, class_name: &str, method: &str, function: HostFunction) -> Result<(), TemplateError> {
-        self.runtime
+        Arc::make_mut(&mut self.runtime)
             .register_class(class_name, method, function)
             .map_err(|message| TemplateError::argument(ErrorCode::ArgumentFunctionName, "", message))
     }
 
     /// FUN-43, FUN-44: registers a host function in the form of the interface contract (binding GN-6d), the core path
     /// of `engine.register`; it is registered as `register` registers a host function.
-    pub fn register_function(&mut self, name: &str, function: ContractFunction) -> Result<(), TemplateError> {
-        self.register(name, contract_host_function(function))
+    /// Its error is a `RenderError`, as that of every member of the contract that takes a function (binding GN-7).
+    pub fn register_function(&mut self, name: &str, function: ContractFunction) -> Result<(), RenderError> {
+        self.register(name, contract_host_function(function)).map_err(RenderError::Kind)
     }
 
     /// Registers one logical class function in the form of the interface contract (binding GN-6d), the core path of
     /// `engine.register_class`; it is registered as `register_class` registers a host function.
-    pub fn register_class_function(&mut self, class_name: &str, method: &str, function: ContractFunction) -> Result<(), TemplateError> {
+    /// Its error is a `RenderError`, as for `register_function`.
+    pub fn register_class_function(&mut self, class_name: &str, method: &str, function: ContractFunction) -> Result<(), RenderError> {
         self.register_class(class_name, method, contract_host_function(function))
+            .map_err(RenderError::Kind)
     }
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
@@ -484,48 +491,43 @@ impl AstProgram {
 
     /// Prepares a render request for repeated use. It loads the templates with the loader (RT-77), so it takes the token
     /// `Io`, which proves that the call runs where blocking I/O is allowed (binding I-2 (4), B-5 (a)).
-    pub fn prepare<'e>(
-        &'e self,
+    pub fn prepare(
+        &self,
         _io: Io,
         target: RenderTarget<'_>,
         assign: &JsonValue,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'e>, RenderError> {
+    ) -> Result<PreparedRender, RenderError> {
         self.prepare_root(target, Root::Json(assign), options)
     }
 
     /// Prepares a render request whose assign is a bound map, which is not bound again (VAL-22). It takes the token `Io`
     /// as `prepare` does.
-    pub fn prepare_bound<'e>(
-        &'e self,
+    pub fn prepare_bound(
+        &self,
         _io: Io,
         target: RenderTarget<'_>,
         assign: &BoundMap,
         options: &RenderOptions,
-    ) -> Result<PreparedRender<'e>, RenderError> {
+    ) -> Result<PreparedRender, RenderError> {
         self.prepare_root(target, Root::Bound(assign), options)
     }
 
     /// The preparation of `prepare` and `prepare_bound`, which the trait `Program` calls for a caller that holds no
     /// token, such as `Engine` and a generated program over a map loader.
-    fn prepare_root<'e>(
-        &'e self,
-        target: RenderTarget<'_>,
-        assign: Root<'_>,
-        options: &RenderOptions,
-    ) -> Result<PreparedRender<'e>, RenderError> {
+    fn prepare_root(&self, target: RenderTarget<'_>, assign: Root<'_>, options: &RenderOptions) -> Result<PreparedRender, RenderError> {
         let name = target.name();
         internal_boundary(&name, || self.prepare_request(&name, target, assign, options, true))
     }
 
-    fn prepare_request<'e>(
-        &'e self,
+    fn prepare_request(
+        &self,
         name: &str,
         target: RenderTarget<'_>,
         assign: Root<'_>,
         options: &RenderOptions,
         io: bool,
-    ) -> Result<PreparedRender<'e>, RenderError> {
+    ) -> Result<PreparedRender, RenderError> {
         let bound = (|| -> Result<BoundRequest, BindError> {
             let root = match assign {
                 Root::Json(json) => Arc::new(bind_map(json)?),
@@ -542,7 +544,7 @@ impl AstProgram {
             self.preload(&target_name, &template, &registry)?;
         }
         let execution = AstPreparedExecution {
-            engine: self,
+            engine: self.share(),
             root,
             registry,
             env,
@@ -589,7 +591,7 @@ impl AstProgram {
         let env = options.environment().map_err(bind_failure)?;
         let (target_name, template) = self.resolve_target(target, &registry, false)?;
         AstPreparedExecution {
-            engine: self,
+            engine: self.share(),
             root: Arc::new(assign),
             registry,
             env,
@@ -600,8 +602,66 @@ impl AstProgram {
     }
 }
 
+/// The members of the interface contract on a program (binding GN-6, RT-79): each takes the name of its template, as a
+/// language binding gives it, and calls the method of the same request with `RenderTarget::Name`.
+impl AstProgram {
+    /// `engine.new`: creates an engine as `new` does. Its error is a `RenderError`, as that of every member of the
+    /// contract whose options hold a loader or functions of the host (binding GN-7).
+    pub fn from_options(options: EngineOptions<'static>) -> Result<AstProgram, RenderError> {
+        AstProgram::new(options).map_err(RenderError::Kind)
+    }
+
+    /// `engine.render`: renders a map of values that the host built, native objects included; a null `assign` is an empty
+    /// map (RT-4) and any other value that is no map is `data_unsupported_type`.
+    pub fn render_values_named(&self, name: &str, assign: Option<&Value>, options: &RenderOptions) -> Result<String, RenderError> {
+        let assign = match assign {
+            None | Some(Value::Null) => OrderedMap::new(),
+            Some(Value::Map(map)) => (**map).clone(),
+            Some(_) => {
+                return Err(RenderError::Kind(TemplateError::without_position(
+                    ErrorCode::DataUnsupportedType,
+                    name,
+                    "assign is not an object",
+                )));
+            }
+        };
+        self.render_values(RenderTarget::Name(name), assign, options)
+    }
+
+    /// `engine.render_json`: renders a template with data given as JSON.
+    pub fn render_named(&self, name: &str, assign: &JsonValue, options: &RenderOptions) -> Result<String, RenderError> {
+        self.render(RenderTarget::Name(name), assign, options)
+    }
+
+    /// `engine.render_bound`: renders a template whose assign is a bound map (VAL-22).
+    pub fn render_bound_named(&self, name: &str, assign: &BoundMap, options: &RenderOptions) -> Result<String, RenderError> {
+        self.render_bound(RenderTarget::Name(name), assign, options)
+    }
+
+    /// `engine.load`: loads a template and the templates that it names (RT-77).
+    pub fn load_named(&self, io: Io, name: &str, options: &RenderOptions) -> Result<(), RenderError> {
+        self.load(io, RenderTarget::Name(name), options)
+    }
+
+    /// `engine.prepare`: prepares a render request with data given as JSON (RT-62, RT-78).
+    pub fn prepare_named(&self, io: Io, name: &str, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender, RenderError> {
+        self.prepare(io, RenderTarget::Name(name), assign, options)
+    }
+
+    /// `engine.prepare_bound`: prepares a render request whose assign is a bound map (VAL-22, RT-78).
+    pub fn prepare_bound_named(
+        &self,
+        io: Io,
+        name: &str,
+        assign: &BoundMap,
+        options: &RenderOptions,
+    ) -> Result<PreparedRender, RenderError> {
+        self.prepare_bound(io, RenderTarget::Name(name), assign, options)
+    }
+}
+
 impl Program for AstProgram {
-    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender<'_>, RenderError> {
+    fn prepare(&self, target: RenderTarget<'_>, assign: &JsonValue, options: &RenderOptions) -> Result<PreparedRender, RenderError> {
         self.prepare_root(target, Root::Json(assign), options)
     }
 
@@ -609,12 +669,7 @@ impl Program for AstProgram {
         AstProgram::render(self, target, assign, options)
     }
 
-    fn prepare_bound(
-        &self,
-        target: RenderTarget<'_>,
-        assign: &BoundMap,
-        options: &RenderOptions,
-    ) -> Result<PreparedRender<'_>, RenderError> {
+    fn prepare_bound(&self, target: RenderTarget<'_>, assign: &BoundMap, options: &RenderOptions) -> Result<PreparedRender, RenderError> {
         self.prepare_root(target, Root::Bound(assign), options)
     }
 
@@ -637,9 +692,9 @@ impl RuntimeServices for AstProgram {
     }
 }
 
-impl<'e> PreparedRender<'e> {
+impl PreparedRender {
     /// Creates a prepared operation for the entry template `name` from compiled program state.
-    pub fn new(name: &str, render: impl Fn() -> Result<String, RenderError> + Send + Sync + 'e) -> PreparedRender<'e> {
+    pub fn new(name: &str, render: impl Fn() -> Result<String, RenderError> + Send + Sync + 'static) -> PreparedRender {
         PreparedRender {
             name: name.to_string(),
             render: Box::new(render),
@@ -652,9 +707,9 @@ impl<'e> PreparedRender<'e> {
     }
 }
 
-impl AstPreparedExecution<'_> {
+impl AstPreparedExecution {
     fn render(&self) -> Result<String, RenderError> {
-        let mut context = RenderContext::new(self.engine, Arc::clone(&self.root), self.env.clone(), &self.target_name);
+        let mut context = RenderContext::new(&self.engine, Arc::clone(&self.root), self.env.clone(), &self.target_name);
         context.registry = self.registry.clone();
         context.enter(&self.target_name, None, None)?;
         let frame = Frame {
@@ -663,7 +718,7 @@ impl AstPreparedExecution<'_> {
             context: Arc::clone(&self.root),
         };
         let mut scope = Scope::default();
-        Renderer::new(&mut context, self.engine).render_nodes(&self.template.ast.body, &frame, &mut scope)?;
+        Renderer::new(&mut context, &self.engine).render_nodes(&self.template.ast.body, &frame, &mut scope)?;
         Ok(context.output)
     }
 }

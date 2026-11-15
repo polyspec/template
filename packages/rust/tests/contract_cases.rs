@@ -832,7 +832,7 @@ impl Run {
             match text(required(step, "call")?, "call")?.as_str() {
                 "map_loader.set" => loader.set(&text(required(args, "name")?, "name")?, &text(required(args, "source")?, "source")?),
                 "map_loader.set_ast" => loader
-                    .set_ast(&text(required(args, "path")?, "path")?, template_of(required(args, "ast")?)?)
+                    .set_ast(&text(required(args, "path")?, "path")?, &template_of(required(args, "ast")?)?)
                     .map_err(|error| Failed::from(format!("the preparation failed: {error}")))?,
                 other => return fail(format!("the runner prepares a map loader with no step {other}")),
             }
@@ -1070,8 +1070,10 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
             Ok(Ok(None))
         }
         "map_loader.set_ast" => {
-            let result = run.map_loader(arg("receiver")?)?.set_ast(&name("path")?, template_of(arg("ast")?)?);
-            done(result.map_err(|message| RenderError::Callback(message.into())))
+            let result = run
+                .map_loader(arg("receiver")?)?
+                .set_ast(&name("path")?, &template_of(arg("ast")?)?);
+            done(kind_of(result))
         }
         "map_loader.set_ast_lines" => {
             let lines = match arg("lines")?.as_array() {
@@ -1080,21 +1082,20 @@ fn call(run: &Run, group: &str, case: &Json) -> Result<Outcome, Failed> {
             };
             let result = run
                 .map_loader(arg("receiver")?)?
-                .set_ast_lines(&name("path")?, lines, template_of(arg("ast")?)?);
-            done(result.map_err(|message| RenderError::Callback(message.into())))
+                .set_ast_lines(&name("path")?, &lines, &template_of(arg("ast")?)?);
+            done(kind_of(result))
         }
-        "engine.new" => done(kind_of(AstProgram::new(run.engine_options(key(case, "options"))?).map(drop))),
+        "engine.new" => done(AstProgram::from_options(run.engine_options(key(case, "options"))?).map(drop)),
         "engine.register" => {
             let function = host_function(arg("host_function")?, &run.unexpected)?;
-            done(kind_of(run.engine(arg("receiver")?)?.register_function(&name("name")?, function)))
+            done(run.engine(arg("receiver")?)?.register_function(&name("name")?, function))
         }
         "engine.register_class" => {
             let function = host_function(arg("host_function")?, &run.unexpected)?;
-            done(kind_of(run.engine(arg("receiver")?)?.register_class_function(
-                &name("class_name")?,
-                &name("method")?,
-                function,
-            )))
+            done(
+                run.engine(arg("receiver")?)?
+                    .register_class_function(&name("class_name")?, &name("method")?, function),
+            )
         }
         "engine.render" => {
             let engine = run.engine(arg("receiver")?)?;

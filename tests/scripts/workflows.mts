@@ -103,7 +103,9 @@ export function recipeName(file: string, job: string): string {
  */
 export function recipeOf(target: string, makefile = readFileSync(path.join(ROOT, 'Makefile'), 'utf8')): string[] {
   const lines = makefile.split('\n');
-  const at = lines.findIndex(line => line.startsWith(`${target}:`) && !line.startsWith(`${target}:=`));
+  // A target-specific variable (`target: NAME :=`) is no rule of the target; its rule is the line with the recipe.
+  const variable = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*(?::=|\?=|\+=|=)/;
+  const at = lines.findIndex(line => line.startsWith(`${target}:`) && !line.startsWith(`${target}:=`) && !variable.test(line.slice(target.length + 1)));
   if (at < 0) return [];
   const recipe: string[] = [];
   for (const line of lines.slice(at + 1)) {

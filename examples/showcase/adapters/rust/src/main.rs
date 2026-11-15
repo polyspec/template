@@ -236,7 +236,9 @@ fn artifact_loader(root: &Path) -> Result<MapLoader, String> {
             .map_err(|error| format!("compiled AST/{name}: {error}"))?;
         let ast = polyspec_template::decode_template(&text)
             .map_err(|error| format!("compiled AST/{name}: {error}"))?;
-        loader.set_ast(&name, ast)?;
+        loader
+            .set_ast(&name, &ast)
+            .map_err(|error| error.to_string())?;
     }
     Ok(loader)
 }
@@ -324,7 +326,7 @@ impl RenderAdapter for Adapter {
 }
 
 impl Adapter {
-    fn prepare<'a>(&'a self, request: &RenderRequest) -> Result<PreparedRender<'a>, String> {
+    fn prepare(&self, request: &RenderRequest) -> Result<PreparedRender, String> {
         let options = render_options(request)?;
         let assign = library_json(&Value::Object(request.assign.clone()))?;
         each_runner!(&self.engine, prepare, &request.target, &assign, &options)
