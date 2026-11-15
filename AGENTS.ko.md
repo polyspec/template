@@ -1,5 +1,5 @@
 <!-- doc-id: agents -->
-<!-- source-sha256: cc44e969aa2172effb30d93ce9d21e71111fb382c4615e9660c421bb2539be94 -->
+<!-- source-sha256: c6ef5cea7784cbcc706e2a5833fc7cc6c4556061797ea21758f0d9d4671e4a7c -->
 # 개발
 
 ## 문서
@@ -60,7 +60,9 @@
 
 - Refines P20: 개발에서는 unit test만 실행한다. 작업이 진행 중일 때는 변경을 소유한 Red와 Green unit test를 실행한다. 개발 중에도, commit이나 push 전에도 전체 검사나 end-to-end 검사를 로컬에서 실행하지 않는다. `make owner-check`, conformance runner, browser test, VS Code integration test가 그렇다. CI가 `main`에 대한 모든 push와 모든 수동 실행에서 이것을 실행하며(`.github/workflows/ci.yml`), job마다의 report(`var/report`)가 모든 실패를 log와 함께 밝힌다. 새 경로는 같은 변경에서 `config/owner-checks.json`에 owner를 얻고, owner check는 CI에서 실행된다.
   Enforced by: none, a local run is not observed by a tool.
-- Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 target을 `make ci-targets TARGETS="..."`로 실행하고, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`).
+- Own: `.github/workflows/ci.yml`의 job들은 `main`에 대한 모든 push와 모든 수동 실행(`workflow_dispatch`)에서 전체 suite, 곧 `CHECK_TARGETS`의 target을 실행한다. 각 job은 자기 recipe `make ci-<job>`을 실행하고, 그 recipe가 자기 target을 `make ci-targets TARGETS="..."`로 실행하며, `CHECK_TARGETS`의 모든 target은 정확히 한 job에서 실행된다(`tests/scripts/suite-parity.test.mts`).
+  Enforced by: `make template-test-scripts`
+- Own: workflow `ci.yml`, `ci.yml`과 `release.yml`이 호출하는 `assets.yml`, `release.yml`, `pages.yml`의 모든 job은 `run` step 하나를 둔다. `ci.yml`의 job은 `make ci-<job>`, GitHub가 `assets / <job>`로 부르는 `assets.yml`의 job은 `make ci-assets-<job>`, `release.yml`의 job은 `make ci-release-<job>`, `pages.yml`의 job은 `make ci-pages-<job>`이고, 그 인자는 make 변수뿐이다: 값, `NAME=${{ matrix.<key> }}`로 쓰는 matrix 값, `NAME=${{ inputs.<key> }}`로 쓰는 `assets.yml`의 input, `NAME=${{ needs.<job>.outputs.<key> }}`로 쓰는 job이 기다리는 job의 output, job `tag`의 run id와 job `pages`의 저장소 이름처럼 `NAME="${{ ... }}"`로 따옴표에 넣은 이벤트의 식이다. CI에만 있는 판정 job `ci-passed`는 `make ci-passed RESULTS='${{ toJSON(needs) }}' FAIL_SKIPPED=1`을 실행한다. 다른 모든 step은 runner를 준비하거나 결과를 옮기는 `uses` step이고(checkout, setup-php, bootstrap action, configure-pages, upload-artifact, download-artifact, upload-pages-artifact, deploy-pages), `if` 조건은 `uses` step에만 두며, 어떤 step도 `env`를 두지 않고, job은 릴리스 target이 gh로 읽는 run의 token `GH_TOKEN` 외의 `env`를 두지 않는다. job `pages`의 `VITEPRESS_BASE`처럼 step의 `env`가 주던 값은 recipe가 make 변수로 정한다. `Makefile`의 recipe가 job의 순서와 조건을 가진다: 설치와 setup을 먼저 하고 실패하면 멈추며, 그다음 검사나 빌드를 `make ci-targets`로 각각 끝까지 실행하고, 그 상태가 recipe의 상태다. 화면이 필요한 job은 자기 target을 `VIRTUAL_DISPLAY=1`로 실행하며, Linux에서는 가상 X 서버에서 실행된다. 그래서 job의 내용이 YAML이 아니라 recipe에 있으므로, 로컬 실행은 CI가 하는 호출 `make ci-<job> NAME=value`와 같고 GitHub runner를 흉내 낼 필요가 없다(`tests/scripts/toolchain-files.test.mts`, `tests/scripts/assets-workflow.mts`).
   Enforced by: `make template-test-scripts`
 - Own: 모든 make 실행은 `core.hooksPath`를 `config/checklist.json`의 추적되는 hook인 `.githooks`로 설정한다. `make hooks`는 그것을 설정하고 그 hook을 검사하며, `make hooks-check`는 hook이 설치되지 않았을 때 실패한다. push는 검사하지 않는다. message 규칙은 commit에서 실행되고, CI는 release에서 읽는다(`docs/operations/development.md`).
   Enforced by: `make hooks-check`

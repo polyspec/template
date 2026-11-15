@@ -8,8 +8,10 @@
 # loaded only on that platform, because no tool of the release compiles for another platform. Each platform job builds the static
 # library of the Go module (with the musl library of its arch on Linux), the abi3 wheel and the
 # npm platform package of its platform. The php job builds one extension per platform and declared PHP minor; the job npm the
-# npm package itself with the wasm-bindgen of mise.toml. Each uploads var/release/assets as an artifact, which the workflow release downloads. Each run step is one make
-# target and runs also after a failed one, so one run names every asset that does not build.
+# npm package itself with the wasm-bindgen of mise.toml. Each uploads var/release/assets as an artifact, which the workflow release downloads. Each job runs one
+# recipe of the Makefile, make ci-assets-<job> (T28.61), with the values of its matrix and the input release as make variables:
+# the recipe installs and writes what the job needs, which stops at a failure, then builds every asset of the job also after
+# a failed one, so one run names every asset that does not build.
 name: assets
 
 on:
@@ -56,31 +58,10 @@ jobs:
           ref: ${{ inputs.ref }}
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
-      - name: Install Rust
-        if: ${{ !cancelled() }}
-        run: make install-tools TOOLS="rust"
-      - name: Fetch the crates
-        if: ${{ !cancelled() }}
-        run: make template-install-rust
-      # The uv and the Python of mise.toml, with which uv builds the wheel.
-      - name: Install uv and Python
-        if: ${{ !cancelled() }}
-        run: make install-tools TOOLS="uv python"
-      - name: Write the release recipes
-        if: ${{ !cancelled() }}
-        run: make release-recipes
-      - name: Run the release check of binding
-        if: ${{ !cancelled() && inputs.release }}
-        run: make release-binding-check
-      - name: Build the static library of the Go module
-        if: ${{ !cancelled() }}
-        run: make release-go-static
-      - name: Build the wheel
-        if: ${{ !cancelled() }}
-        run: make release-wheel
-      - name: Build the npm platform package
-        if: ${{ !cancelled() }}
-        run: make release-npm-platform
+      # Rust and the crates, the uv and the Python of mise.toml, with which uv builds the wheel, the release recipes, then the
+      # static library of the Go module, the wheel and the npm platform package.
+      - name: Build the assets of the platform
+        run: make ci-assets-platform RELEASE=${{ inputs.release }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -120,30 +101,15 @@ jobs:
           ref: ${{ inputs.ref }}
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
-      - name: Install Rust
-        if: ${{ !cancelled() }}
-        run: make install-tools TOOLS="rust"
-      - name: Fetch the crates
-        if: ${{ !cancelled() }}
-        run: make template-install-rust
-      - name: Write the release recipes
-        if: ${{ !cancelled() }}
-        run: make release-recipes
-      - name: Run the release check
-        if: ${{ !cancelled() && inputs.release }}
-        run: make release-binding-check
-      - name: Install the LLVM of config/toolchain.json
-        if: ${{ !cancelled() }}
-        run: make install-llvm
       - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
-        if: ${{ !cancelled() }}
         with:
           php-version: ${{ matrix.php }}
           tools: none
           coverage: none
+      # Rust and the crates, the release recipes and the LLVM of config/toolchain.json, then the extension for the PHP of the
+      # setup, whose minor the build checks against EXPECTED_PHP_MINOR.
       - name: Build the PHP extension for its declared minor
-        if: ${{ !cancelled() }}
-        run: make release-php-ext PHP=php EXPECTED_PHP_MINOR=${{ matrix.php }}
+        run: make ci-assets-php EXPECTED_PHP_MINOR=${{ matrix.php }} RELEASE=${{ inputs.release }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -160,24 +126,9 @@ jobs:
           ref: ${{ inputs.ref }}
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
-      - name: Install Rust
-        if: ${{ !cancelled() }}
-        run: make install-tools TOOLS="rust"
-      - name: Fetch the crates
-        if: ${{ !cancelled() }}
-        run: make template-install-rust
-      - name: Write the release recipes
-        if: ${{ !cancelled() }}
-        run: make release-recipes
-      - name: Install the wasm-bindgen of mise.toml
-        if: ${{ !cancelled() }}
-        run: make install-wasm-bindgen
-      - name: Run the release check of binding
-        if: ${{ !cancelled() && inputs.release }}
-        run: make release-binding-check
+      # Rust and the crates, the release recipes and the wasm-bindgen of mise.toml, then the npm package.
       - name: Pack the npm package
-        if: ${{ !cancelled() }}
-        run: make release-npm
+        run: make ci-assets-npm RELEASE=${{ inputs.release }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:

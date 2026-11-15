@@ -1,8 +1,8 @@
 # The documentation site of main (T17.1-7). It publishes the site of every CI run of main that succeeded (workflow_run), and
 # also on a manual run (workflow_dispatch, T17.1-9) of the CI run named by `run-id`. The example site is generated output: it is
-# the artifact `example-site` that the job showcase of that CI run built for the same commit. The workflow publishes, so it
-# stops at its first failure; it pins its actions by commit and runs on ubuntu-24.04. A newer commit of main does not cancel
-# the deployment of the previous one.
+# the artifact `example-site` that the job showcase of that CI run built for the same commit. Its job runs its recipe
+# ci-pages-pages in one run step (T28.61). The workflow publishes, so it stops at its first failure; it pins its actions by
+# commit and runs on ubuntu-24.04. A newer commit of main does not cancel the deployment of the previous one.
 name: Pages
 
 on:
@@ -47,26 +47,22 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-      - run: make install-tools TOOLS="node"
-      - run: make ci-targets TARGETS="docs-static-check build-ts"
-        env:
-          VITEPRESS_BASE: /${{ github.event.repository.name }}/
+      # The example site that the job showcase of the CI run built for the same commit, which ci-pages-pages adds to the site.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: example-site
+          path: var/pages/example-site
+          run-id: ${{ github.event.workflow_run.id || inputs.run-id }}
+          github-token: ${{ github.token }}
+      # The recipe ci-pages-pages (T28.61): the Node tools, the static site under /<repository>/ and the TypeScript package,
+      # each to its end, then the example site as docs/.vitepress/dist/examples/site.
+      - run: make ci-pages-pages REPOSITORY="${{ github.event.repository.name }}"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
           name: report-pages
           path: var/report/ci-targets/
           if-no-files-found: error
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: example-site
-          path: examples/site
-          run-id: ${{ github.event.workflow_run.id || inputs.run-id }}
-          github-token: ${{ github.token }}
-      - run: |
-          mkdir -p docs/.vitepress/dist/examples
-          cp -R examples/site docs/.vitepress/dist/examples/site
-          test -s docs/.vitepress/dist/examples/site/index.html
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: docs/.vitepress/dist

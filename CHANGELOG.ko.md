@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: e691ad69da8b0a73612edb3d037470f56a011f9699867ba644bee4365bca65cc -->
+<!-- source-sha256: 3a93f32bc4e43562af4d5f70d62f740da21f27b11bee589bd3d1bfad417de855 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+- workflow의 모든 job은 `run` step 하나, 곧 `Makefile`에 있는 job의 recipe를 둔다(T28.61): `ci.yml`의 job은 `make ci-<job>`, `assets.yml`의 job은 `make ci-assets-<job>`, `release.yml`의 job은 `make ci-release-<job>`, `pages.yml`의 job은 `make ci-pages-<job>`이며, 인자는 make 변수뿐이다. matrix 값은 `NAME=${{ matrix.<key> }}`, input `release`는 `RELEASE=${{ inputs.release }}`로 넘긴다. `ci-passed`는 하나뿐인 run step을 유지한다. `release.yml`의 job `tag`는 `RUN`과 `AUTO`를 명령줄에서 넘기고, 그 recipe는 `release-tag`가 `GITHUB_ENV`에 덧붙인 `TAG`와 `VERSION`을 뒤 job에 넘긴다. job `release`는 `tag`의 output에서 `TAG`와 `VERSION`을 넘기고, 플랫폼 자산을 `run` step 앞에서 `var/release/downloaded`에 내려받으며, recipe는 그것을 `release-assets` 뒤에 `var/release/assets`에 더하고, zip 검사를 shell step 대신 recipe에서 하며, 뒤 줄을 `release-tools-path` 대신 `release-tools`의 도구를 PATH에 두고 실행하고, Go 모듈 commit의 Git 신원을 step의 `env` 대신 recipe에서 `GITHUB_ACTOR`로 정한다. `pages.yml`의 job `pages`는 예제 사이트를 `run` step 앞에서 `var/pages/example-site`에 내려받고 `REPOSITORY="${{ github.event.repository.name }}"`를 넘기며, recipe는 step의 `env` 대신 `VITEPRESS_BASE=/$(REPOSITORY)/`를 정하고 여러 줄 shell step 대신 예제 사이트를 복사한다. recipe는 job의 설치와 setup을 먼저 실행하고 실패하면 멈추며, 그다음 검사나 빌드를 `make ci-targets`로 각각 끝까지 실행한다. 그래서 로컬 실행은 CI가 하는 호출과 같다. job `editor`는 자기 target을 `make ci-targets VIRTUAL_DISPLAY=1`로 실행하며, 이것은 Linux에서 target을 `xvfb-run -a`로 시작한다. 이전에는 job마다 `run` step이 둘에서 여섯 개였고 각각에 step 조건 `${{ !cancelled() }}`가 있었으며, release check에는 `${{ !cancelled() && inputs.release }}`가 있었고 job `editor`는 run 줄에서 `xvfb-run`을 시작했다. 그래서 로컬 실행은 YAML의 순서와 조건을 되풀이해야 했다. `assets.yml`의 job `php`에서 PHP 설치는 이제 하나뿐인 `run` step 앞에 오고, LLVM 설치는 recipe로 옮겨진다. `tests/scripts/toolchain-files.test.mts`는 job마다 recipe 이름과 인자를 가진 `run` step 하나를 요구하고 그 조건, step의 `env`, `GH_TOKEN` 외의 job `env`를 거부한다. `tests/scripts/suite-parity.test.mts`는 job의 target과 setup을 그 recipe에서 읽고, `tests/scripts/assets-workflow.mts`는 자산 job의 설치, release check, 빌드를 그 recipe에서 읽으며, `tests/scripts/assets-php-matrix.test.mts`는 recipe의 mutation을 더한다.
 
 - T28.60 검증: Node 26.12.0에서 commit된 source 구현의 선언된 세 owner 명령이 실패와 skip 없이 시험 60개를 통과한다. Infrastructure typecheck, lint-ts의 14개 step, stage한 owner 검증과 docs-check가 통과한다. 이는 source workflow 근거이며 generated expected-minor recipe 강제와 native CI는 아직 남아 있다.
 

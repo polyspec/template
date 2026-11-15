@@ -259,12 +259,112 @@ land: ## Land the branch BRANCH on main fast-forward from its worktree, then rem
 	$(NODE) $(KIT)/land.$(KIT_EXT) $(BRANCH) main
 
 # ---- CI (.github/workflows/ci.yml) --------------------------------------------------------------------------------------------
-.PHONY: ci-targets ci-passed
+# Each job of .github/workflows/ci.yml runs one recipe ci-<job>, and each job of assets.yml, which GitHub names assets / <job>,
+# one recipe ci-assets-<job>, with the values of its matrix and the input release of assets.yml as make variables, so that a
+# local run is the call that CI makes: make ci-<job> NAME=value. A recipe runs the installs and the setups of its job
+# first, which stop at a failure, then the checks or the builds of the job with make ci-targets, each to its end, and its
+# status is theirs. The other steps of a job only provision the runner (checkout, setup-php, the bootstrap action) or carry
+# a result (upload-artifact).
+.PHONY: ci-targets ci-passed ci-gates ci-lint ci-scripts ci-generated ci-delimiters ci-showcase ci-docs ci-typescript ci-browser \
+	ci-python ci-editor ci-go ci-rust ci-php ci-php-ext ci-bindings ci-assets-platform ci-assets-php ci-assets-npm ci-release-tag ci-release-release ci-pages-pages
 CI_REPORT ?= var/report/ci-targets
-ci-targets: ## Run TARGETS past failures and write CI_REPORT: the log of each target, record.json and summary.md
-	$(NODE) $(KIT)/ci-targets.$(KIT_EXT) -k $(CI_REPORT) $(TARGETS)
+# VIRTUAL_DISPLAY=1 runs the targets on a virtual X server on Linux, where VS Code has no display; macOS needs none.
+XVFB_RUN := $(if $(filter Linux,$(shell uname -s)),xvfb-run -a)
+ci-targets: ## Run TARGETS past failures and write CI_REPORT: the log of each target, record.json and summary.md; VIRTUAL_DISPLAY=1 on a virtual X server
+	$(if $(VIRTUAL_DISPLAY),$(XVFB_RUN)) $(NODE) $(KIT)/ci-targets.$(KIT_EXT) -k $(CI_REPORT) $(TARGETS)
 ci-passed: ## Fail unless every job of RESULTS, the JSON of toJSON(needs), has the result success
 	$(NODE) $(KIT)/ci-passed.$(KIT_EXT)
+
+ci-gates: ## The job gates: make install, then the checks of the repository; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory ci-targets TARGETS="layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check"
+ci-lint: ## The job lint: make install, then the lint of every language and the checks of the PHP extension; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory ci-targets TARGETS="lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext"
+ci-scripts: ## The job scripts: make install and the browsers, then the tests of the scripts; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory template-install-browsers
+	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-scripts template-install-check function-contract-check function-inventory-check benchmark-check"
+ci-generated: ## The job generated: make install, then the checks of the generated code; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory ci-targets TARGETS="conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php generated-native-check typed-generator-compile-check generated-lint-check"
+ci-delimiters: ## The job delimiters: make install, then the delimiter matrix; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory ci-targets TARGETS="delimiter-matrix"
+ci-showcase: ## The job showcase: make install, then the checks of the showcase and the documentation site; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory ci-targets TARGETS="showcase-check contract-check benchmark-smoke template-lint-showcase-format template-lint-showcase-warnings compiler-interface-check docs-static-check docs-verify-idempotent"
+ci-docs: ## The job docs: make install and make hooks, then the hooks check and the type checks; ONLINE
+	$(MAKE) --no-print-directory install
+	$(MAKE) --no-print-directory hooks
+	$(MAKE) --no-print-directory ci-targets TARGETS="hooks-check typecheck template-test-compiler-types"
+ci-typescript: ## The job typescript: the Node.js packages, then their tests; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	$(MAKE) --no-print-directory template-install-node
+	$(MAKE) --no-print-directory ci-targets TARGETS="test-ts conformance-ts"
+ci-browser: ## The job browser: the Node.js packages and the browsers, then the browser tests; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	$(MAKE) --no-print-directory template-install-node
+	$(MAKE) --no-print-directory template-install-browsers
+	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-browser"
+ci-python: ## The job python: Python, uv and the Python environment, then the Python tests; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="python uv"
+	$(MAKE) --no-print-directory template-install-python
+	$(MAKE) --no-print-directory ci-targets TARGETS="test-python conformance-python conformance-generated-python"
+ci-editor: ## The job editor: the Node.js packages, the browsers and VS Code, then the editor tests on a virtual display; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	$(MAKE) --no-print-directory template-install-node
+	$(MAKE) --no-print-directory template-install-browsers
+	$(MAKE) --no-print-directory template-install-vscode
+	$(MAKE) --no-print-directory ci-targets VIRTUAL_DISPLAY=1 TARGETS="editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode template-test-vscode-integration"
+ci-go: ## The job go: Go and the modules of go.work, then the Go checks; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="go"
+	$(MAKE) --no-print-directory template-install-go
+	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-go-format template-lint-go-modules test-go conformance-go"
+ci-rust: ## The job rust: the Rust toolchain and the crates, then the Rust checks; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="rust"
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory ci-targets TARGETS="fmt-check test-rust conformance-rust"
+ci-php: ## The job php: Composer and the PHP dependency graph for the PHP on PATH, then the PHP checks; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="php composer"
+	$(MAKE) --no-print-directory template-install-php
+	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-php-format test-php conformance-php"
+ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency graph, then the tests of the extension; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="php composer"
+	$(MAKE) --no-print-directory install-symbols EXTRACTORS=php
+	$(MAKE) --no-print-directory template-install-php
+	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-ext"
+ci-bindings: ## The job bindings: the tools, the graphs, the release recipes and LLVM, then the binding checks; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
+	$(MAKE) --no-print-directory template-install-bindings
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-llvm
+	$(MAKE) --no-print-directory ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go"
+
+# The jobs of assets.yml. Each writes the release recipes, and with RELEASE=true, the input release of assets.yml that the
+# workflow release passes, runs the release check of binding before it builds; the builds run each to its end.
+ci-assets-platform: ## The job platform of assets.yml: the Go static library, the wheel and the npm platform package of this host; RELEASE=true; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="rust"
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory install-tools TOOLS="uv python"
+	$(MAKE) --no-print-directory release-recipes
+	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
+	$(MAKE) --no-print-directory ci-targets TARGETS="release-go-static release-wheel release-npm-platform"
+ci-assets-php: ## The job php of assets.yml: the PHP extension for the PHP on PATH, whose minor is EXPECTED_PHP_MINOR; RELEASE=true; ONLINE
+	@test -n "$(EXPECTED_PHP_MINOR)" || { echo 'ci-assets-php needs EXPECTED_PHP_MINOR, the PHP minor of the job, for example make ci-assets-php EXPECTED_PHP_MINOR=8.4' >&2; exit 2; }
+	$(MAKE) --no-print-directory install-tools TOOLS="rust"
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
+	$(MAKE) --no-print-directory install-llvm
+	$(MAKE) --no-print-directory release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR)
+ci-assets-npm: ## The job npm of assets.yml: the npm package with the wasm-bindgen of mise.toml; RELEASE=true; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="rust"
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
+	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
+	$(MAKE) --no-print-directory release-npm
 
 # ---- Release (.github/workflows/release.yml, config/release.json) -----------------------------------------------------------
 # release-tag tags the commit of the successful CI run RUN with vX.Y.Z, X.Y.Z the newest section of the change log of that
@@ -286,6 +386,45 @@ release-tag: ## Tag the commit of the successful CI run RUN of ci.yml on main wi
 release-tag-output: ## Give the later jobs of the release workflow TAG and VERSION, which release-tag wrote into the environment of its job, through GITHUB_OUTPUT; both are empty when the run releases nothing
 	@test -n "$$GITHUB_OUTPUT" || { echo 'release-tag-output: GITHUB_OUTPUT is not set; run it in the release workflow'; exit 2; }
 	printf 'tag=%s\nversion=%s\n' "$$TAG" "$$VERSION" >> "$$GITHUB_OUTPUT"
+# The jobs of release.yml, each one recipe that its one run step runs (T28.61). ci-release-tag tags the commit of the CI run
+# RUN and gives the later jobs the TAG and VERSION that release-tag appended to GITHUB_ENV, which a later line of the same
+# step does not receive in its environment. ci-release-release builds and publishes the release of TAG: the tools of
+# release-tools are on PATH for its later lines (RELEASE_PATH, in the order that release-tools-path gives them), the
+# artifacts of the job assets, which the workflow downloads into var/release/downloaded before this step, join
+# var/release/assets after release-assets, and the commit of the Go module carries the identity of GITHUB_ACTOR, the
+# actor of the run.
+RELEASE_PATH = PATH="$(KIT_TOOLS)/bin:$(KIT_TOOLS)/mise/shims:$$PATH"
+RELEASE_IDENTITY = GIT_AUTHOR_NAME="$${GITHUB_ACTOR:?}" GIT_AUTHOR_EMAIL="$${GITHUB_ACTOR:?}@users.noreply.github.com" \
+	GIT_COMMITTER_NAME="$${GITHUB_ACTOR:?}" GIT_COMMITTER_EMAIL="$${GITHUB_ACTOR:?}@users.noreply.github.com"
+ci-release-tag: ## The job tag of release.yml: tag the commit of the CI run RUN, then write TAG and VERSION into GITHUB_OUTPUT; AUTO for workflow_run
+	@test -n "$$GITHUB_ENV" || { echo 'ci-release-tag: GITHUB_ENV is not set; run it in the release workflow' >&2; exit 2; }
+	$(MAKE) --no-print-directory release-tag
+	$(MAKE) --no-print-directory release-tag-output TAG="$$(sed -n 's/^TAG=//p' "$$GITHUB_ENV" | tail -n 1)" VERSION="$$(sed -n 's/^VERSION=//p' "$$GITHUB_ENV" | tail -n 1)"
+ci-release-release: ## The job release of release.yml: build, carry and publish the release of TAG with the downloaded platform assets; ONLINE
+	@test -n "$(TAG)" || { echo 'ci-release-release: TAG is required, for example make ci-release-release TAG=v0.0.1' >&2; exit 2; }
+	@command -v zip >/dev/null || { echo 'ci-release-release: Info-ZIP is required for Composer release archives; install the zip package on the Ubuntu runner' >&2; exit 1; }
+	$(MAKE) --no-print-directory release-prepare
+	$(MAKE) --no-print-directory release-tools
+	$(RELEASE_PATH) $(MAKE) --no-print-directory release-assets
+	mkdir -p var/release/assets && cp var/release/downloaded/* var/release/assets/
+	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS="rust"
+	$(RELEASE_PATH) $(MAKE) --no-print-directory template-install-rust
+	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS=go
+	$(RELEASE_PATH) $(MAKE) --no-print-directory release-recipes
+	$(RELEASE_IDENTITY) $(RELEASE_PATH) $(MAKE) --no-print-directory release-go-module
+	$(RELEASE_PATH) $(MAKE) --no-print-directory release-publish
+	$(RELEASE_PATH) $(MAKE) --no-print-directory release-platform-assets
+	$(RELEASE_PATH) $(MAKE) --no-print-directory release-undraft
+# The job pages of pages.yml (T28.61): the Node tools, then the static site with VITEPRESS_BASE, the path /REPOSITORY/ of
+# the site of the repository, and the TypeScript package, each to its end, then the example site of the CI run, which the
+# workflow downloads into var/pages/example-site before this step, as docs/.vitepress/dist/examples/site.
+ci-pages-pages: ## The job pages of pages.yml: build the documentation site under /REPOSITORY/ and add the downloaded example site; ONLINE
+	@test -n "$(REPOSITORY)" || { echo 'ci-pages-pages: REPOSITORY is required, for example make ci-pages-pages REPOSITORY=template' >&2; exit 2; }
+	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	VITEPRESS_BASE=/$(REPOSITORY)/ $(MAKE) --no-print-directory ci-targets TARGETS="docs-static-check build-ts"
+	mkdir -p docs/.vitepress/dist/examples
+	cp -R var/pages/example-site docs/.vitepress/dist/examples/site
+	test -s docs/.vitepress/dist/examples/site/index.html
 release-assets: ## Build the archive of every package of TAG and packages.json of its Composer packages into var/release/assets; ONLINE
 	@test -n "$$TAG" || { echo "release-assets: TAG is required, for example make release-assets TAG=v0.0.1"; exit 1; }
 	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) assets "$$TAG"

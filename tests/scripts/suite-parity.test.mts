@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { captured } from '../../scripts/required.mts';
-import { jobs, jobsOf, ROOT, runsOf, WORKFLOWS } from './workflows.mts';
+import { CI_WORKFLOWS, commandsOf, jobs, jobsOf, ROOT, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 
@@ -46,14 +46,15 @@ test('the tool of a source kit is its script and the tool of a packed kit is its
 });
 
 // Each target of CHECK_TARGETS that no job of the workflow text runs, that more than one job runs, or that a job runs
-// although it is not in CHECK_TARGETS; a job of a matrix is one job.
-export function suiteViolations(text: string, suite: string[]) {
+// although it is not in CHECK_TARGETS; a job of a matrix is one job. A job runs the commands of its recipe ci-<job> of
+// `makefile` (T28.61).
+export function suiteViolations(text: string, suite: string[], makefile?: string) {
   const found: string[] = [];
   const owners = new Map<string, string[]>();
   for (const job of jobsOf(text)) {
-    const runs = runsOf(job);
+    const runs = commandsOf(job, makefile);
     for (const run of runs) {
-      for (const match of run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
+      for (const match of run.matchAll(/\bmake ci-targets(?: [A-Z][A-Z0-9_]*=[^ "]*)* TARGETS="([^"]*)"/g)) {
         for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/).filter(Boolean)) owners.set(target, [...(owners.get(target) ?? []), job.name]);
       }
     }
@@ -94,24 +95,31 @@ test('the rule of the CI suite names a missing, a repeated and an extra target',
     'c of CHECK_TARGETS runs in no job',
     'd runs in two and is not in CHECK_TARGETS',
   ]);
+  // A job runs the targets of its recipe (T28.61).
+  const makefile = 'ci-one: ## one\n\t$(MAKE) --no-print-directory install\n\t$(MAKE) --no-print-directory ci-targets TARGETS="a b"\nci-two:\n\t$(MAKE) --no-print-directory ci-targets VIRTUAL_DISPLAY=1 TARGETS="c"\n';
+  assert.deepEqual(suiteViolations(workflow([['one', 'make ci-one'], ['two', 'make ci-two']]), suite, makefile), []);
+  assert.deepEqual(suiteViolations(workflow([['one', 'make ci-one'], ['two', 'make ci-two']]), suite, makefile.replace('TARGETS="c"', 'TARGETS="b"')), [
+    'b runs in 2 jobs: one, two',
+    'c of CHECK_TARGETS runs in no job',
+  ]);
 });
 
-// The setups that a target needs: its job runs the setup in a step before the step that runs the target. A browser target
+// The setups that a target needs: its job runs the setup before the target, in its recipe ci-<job> (T28.61). A browser target
 // needs the browsers; hooks-check needs core.hooksPath and the merge drivers, which a fresh checkout of CI does not have (T27.1-23).
 export const SETUPS = [
   { targets: ['template-test-browser', 'template-test-scripts', 'template-test-codemirror'], setup: /\bmake (?:-\S+ )*(?:template-)?install-browsers\b/, name: 'make template-install-browsers' },
   { targets: ['hooks-check'], setup: /\bmake (?:-\S+ )*hooks(?![\w-])/, name: 'make hooks' },
 ];
 
-// Each job of the workflow text that runs a target of SETUPS without the step of its setup before it.
-export function setupViolations(text: string) {
+// Each job of the workflow text that runs a target of SETUPS without its setup before it, in the commands of its run
+// steps and of its recipe of `makefile`.
+export function setupViolations(text: string, makefile?: string) {
   const found: string[] = [];
   for (const job of jobsOf(text)) {
     const installed = new Set<string>();
-    for (const step of job.steps) {
-      if (step.run === undefined) continue;
-      for (const { setup, name } of SETUPS) if (setup.test(step.run)) installed.add(name);
-      for (const match of step.run.matchAll(/\bmake ci-targets TARGETS="([^"]*)"/g)) {
+    for (const command of commandsOf(job, makefile)) {
+      for (const { setup, name } of SETUPS) if (setup.test(command)) installed.add(name);
+      for (const match of command.matchAll(/\bmake ci-targets(?: [A-Z][A-Z0-9_]*=[^ "]*)* TARGETS="([^"]*)"/g)) {
         for (const target of captured(match, 1, `the targets of ${match[0]}`).split(/\s+/)) {
           for (const { targets, name } of SETUPS) {
             if (targets.includes(target) && !installed.has(name)) found.push(`job ${job.name} runs ${target} without ${name} before it`);
@@ -131,8 +139,13 @@ test('a job that runs a target installs its setup before it', () => {
     'job one runs template-test-scripts without make template-install-browsers before it',
     'job one runs hooks-check without make hooks before it',
   ]);
+  const makefile = 'ci-one:\n\t$(MAKE) --no-print-directory ci-targets TARGETS="template-test-scripts"\n\t$(MAKE) --no-print-directory template-install-browsers\n';
+  assert.deepEqual(setupViolations(workflow(['make ci-one']), makefile), ['job one runs template-test-scripts without make template-install-browsers before it']);
+  assert.deepEqual(setupViolations(workflow(['make ci-one']), makefile.replace(/\t(.*ci-targets.*)\n(\t.*\n)/, '$2\t$1\n')), []);
 });
 
+// A job of the workflows that CI runs has one run step, its recipe, which decides the order and the conditions (T28.61), so
+// that step has no condition; a job of another workflow runs every step after a failing step unless it publishes.
 test('a verifying CI job runs every later step after a failing step, and a make with several targets keeps going', () => {
   for (const file of WORKFLOWS) {
     for (const job of jobs(file)) {
@@ -145,7 +158,8 @@ test('a verifying CI job runs every later step after a failing step, and a make 
         if (command === undefined) continue;
         // A step that runs only for some calls of its workflow, such as the release check of assets.yml, adds its own
         // condition to !cancelled().
-        if (!publishes) assert.match(step.if ?? '', /^\$\{\{ !cancelled\(\)(?: && [^}]+)? \}\}$/, `${file} job ${job.name} stops after a failing step before: ${command}`);
+        if (CI_WORKFLOWS.includes(file)) assert.equal(step.if, undefined, `${file} job ${job.name}: the run step ${command} has a condition; its recipe decides what runs`);
+        else if (!publishes) assert.match(step.if ?? '', /^\$\{\{ !cancelled\(\)(?: && [^}]+)? \}\}$/, `${file} job ${job.name} stops after a failing step before: ${command}`);
         for (const make of command.matchAll(/\bmake((?: [^|&;]+)?)/g)) {
           // The arguments of make are optional in the pattern: a bare make names no goal.
           const args = make[1];

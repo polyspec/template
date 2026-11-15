@@ -1,10 +1,11 @@
-# Continuous integration. Every job runs its tools through Makefile targets (T20.1-8) with
-# `make ci-targets TARGETS="..."`, which runs every target to its end also after a failure and writes a report: the log
-# of each target, a summary with the first failure lines of each failed target, which is also the job summary, and the
-# versions of the toolchains of the job. Every job uploads its report under `!cancelled()` (T20.1-9). Every target of
-# CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run no other target (T17.1-10); the checks that
-# utilities of kit run are targets of this Makefile like any other (T27.1-64): the job gates runs the checks of the
-# repository, and the job lint the lint of every language. A verifying job runs every step after a failing step (`!cancelled()`). Every
+# Continuous integration. Every job runs one recipe of the Makefile, `make ci-<job>` (T28.61), which installs what the job
+# needs, stops at a failure of an install, and then runs the checks of the job with `make ci-targets TARGETS="..."` (T20.1-8),
+# which runs every target to its end also after a failure and writes a report: the log of each target, a summary with the
+# first failure lines of each failed target, which is also the job summary, and the versions of the toolchains of the job.
+# A local run is the same call. The other steps of a job provision the runner or upload its report, which every job does
+# under `!cancelled()` (T20.1-9). Every target of CHECK_TARGETS, the full suite, runs in exactly one job, and the jobs run
+# no other target (T17.1-10); the checks that utilities of kit run are targets of this Makefile like any other (T27.1-64):
+# the job gates runs the checks of the repository, and the job lint the lint of every language. Every
 # job runs on ubuntu-24.04, pins its actions by commit and installs with the bootstrap action of template,
 # `./.github/actions/kit-bootstrap`: it sets up the Node.js of mise.toml, installs the locked kit package, then runs
 # `make install-tools TOOLS=npm`, which installs the npm of the checkout and mise into var/tools, and
@@ -52,10 +53,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check"
-        if: ${{ !cancelled() }}
+      - run: make ci-gates
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -77,10 +75,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext"
-        if: ${{ !cancelled() }}
+      - run: make ci-lint
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -101,12 +96,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make template-install-browsers
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-test-scripts template-install-check function-contract-check function-inventory-check benchmark-check"
-        if: ${{ !cancelled() }}
+      - run: make ci-scripts
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -127,10 +117,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php generated-native-check typed-generator-compile-check generated-lint-check"
-        if: ${{ !cancelled() }}
+      - run: make ci-generated
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -151,10 +138,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="delimiter-matrix"
-        if: ${{ !cancelled() }}
+      - run: make ci-delimiters
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -175,10 +159,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="showcase-check contract-check benchmark-smoke template-lint-showcase-format template-lint-showcase-warnings compiler-interface-check docs-static-check docs-verify-idempotent"
-        if: ${{ !cancelled() }}
+      - run: make ci-showcase
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -205,12 +186,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install
-        if: ${{ !cancelled() }}
-      - run: make hooks
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="hooks-check typecheck template-test-compiler-types"
-        if: ${{ !cancelled() }}
+      - run: make ci-docs
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -227,12 +203,7 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="node"
-        if: ${{ !cancelled() }}
-      - run: make template-install-node
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="test-ts conformance-ts"
-        if: ${{ !cancelled() }}
+      - run: make ci-typescript
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -249,14 +220,7 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="node"
-        if: ${{ !cancelled() }}
-      - run: make template-install-node
-        if: ${{ !cancelled() }}
-      - run: make template-install-browsers
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-test-browser"
-        if: ${{ !cancelled() }}
+      - run: make ci-browser
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -273,12 +237,7 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="python uv"
-        if: ${{ !cancelled() }}
-      - run: make template-install-python
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="test-python conformance-python conformance-generated-python"
-        if: ${{ !cancelled() }}
+      - run: make ci-python
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -295,17 +254,8 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="node"
-        if: ${{ !cancelled() }}
-      - run: make template-install-node
-        if: ${{ !cancelled() }}
-      - run: make template-install-browsers
-        if: ${{ !cancelled() }}
-      - run: make template-install-vscode
-        if: ${{ !cancelled() }}
-      # VS Code needs a display; the integration test runs it on a virtual X server.
-      - run: xvfb-run -a make ci-targets TARGETS="editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode template-test-vscode-integration"
-        if: ${{ !cancelled() }}
+      # The recipe runs the editor tests on a virtual X server, because VS Code needs a display.
+      - run: make ci-editor
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -322,12 +272,7 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="go"
-        if: ${{ !cancelled() }}
-      - run: make template-install-go
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-lint-go-format template-lint-go-modules test-go conformance-go"
-        if: ${{ !cancelled() }}
+      - run: make ci-go
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -344,12 +289,7 @@ jobs:
       - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
         uses: ./.github/actions/kit-bootstrap
         if: ${{ !cancelled() }}
-      - run: make install-tools TOOLS="rust"
-        if: ${{ !cancelled() }}
-      - run: make template-install-rust
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="fmt-check test-rust conformance-rust"
-        if: ${{ !cancelled() }}
+      - run: make ci-rust
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -375,12 +315,7 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           tools: none
-      - run: make install-tools TOOLS="php composer"
-        if: ${{ !cancelled() }}
-      - run: make template-install-php
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-lint-php-format test-php conformance-php"
-        if: ${{ !cancelled() }}
+      - run: make ci-php
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -401,14 +336,7 @@ jobs:
         with:
           php-version-file: .php-version
           tools: none
-      - run: make install-tools TOOLS="php composer"
-        if: ${{ !cancelled() }}
-      - run: make install-symbols EXTRACTORS=php
-        if: ${{ !cancelled() }}
-      - run: make template-install-php
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="template-test-ext"
-        if: ${{ !cancelled() }}
+      - run: make ci-php-ext
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:
@@ -435,16 +363,7 @@ jobs:
           php-version-file: .php-version
           tools: none
           coverage: none
-      - run: make install-tools TOOLS="rust go php composer python uv"
-        if: ${{ !cancelled() }}
-      - run: make template-install-bindings
-        if: ${{ !cancelled() }}
-      - run: make release-recipes
-        if: ${{ !cancelled() }}
-      - run: make install-llvm
-        if: ${{ !cancelled() }}
-      - run: make ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go"
-        if: ${{ !cancelled() }}
+      - run: make ci-bindings
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: ${{ !cancelled() }}
         with:

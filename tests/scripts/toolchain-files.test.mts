@@ -39,7 +39,7 @@ import { captured, required } from '../../scripts/required.mts';
 import { isJsonObject, parsedJsonObject } from '../runner/checked.mts';
 import { toolsDirectory } from '../../scripts/tools-directory.mts';
 import { assetMatrixFindings } from './assets-workflow.mts';
-import { type Job, jobField, jobs, jobsOf, pinsOf, ROOT, runLines, runsOf, WORKFLOWS } from './workflows.mts';
+import { CI_WORKFLOWS, commandsOf, type Job, jobField, jobs, jobsOf, pinsOf, recipeName, recipeOf, ROOT, runLines, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 const TOOLCHAIN_SCHEMA: JSONSchemaType<{ php: string[]; phpExtension: { minors: string[] } }> = {
@@ -368,8 +368,9 @@ test('every CI job runs its targets past failures and uploads their report, also
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   // The job assets calls assets.yml, which builds the binding assets and runs no check of the suite.
+  // The commands of a job are the lines of its recipe ci-<job> (T28.61).
   for (const job of jobs('.github/workflows/ci.yml').filter(entry => entry.name !== CI_PASSED && entry.value.uses === undefined)) {
-    const lines = runLines(job);
+    const lines = commandsOf(job);
     const runners = new Set<string>();
     for (const line of lines.filter(line => /\bmake\b/.test(line))) {
       const [target] = makeTargets(line);
@@ -420,6 +421,79 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
   for (const [name, [brokenText, message]] of Object.entries(broken)) {
     assert.notEqual(brokenText, text, name);
     const found = ciPassedViolations(brokenText);
+    assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
+  }
+});
+
+// An argument of the run step of a job (T28.61): NAME=value, NAME="words", a matrix value or an input of the called workflow,
+// NAME=${{ matrix.<key> }} or NAME=${{ inputs.<key> }}, an output of a job that the job needs, NAME=${{ needs.<job>.outputs.<key> }},
+// or a quoted expression of the event, NAME="${{ ... }}", such as the run id of the job tag of release.yml.
+const JOB_ARGUMENT = /^[A-Z][A-Z0-9_]*=(?:[A-Za-z0-9_.-]+|"[A-Za-z0-9_. -]+"|\$\{\{ (?:matrix|inputs)\.[a-z][a-z0-9_-]* \}\}|\$\{\{ needs\.[a-z][a-z0-9_-]*\.outputs\.[a-z][a-z0-9_-]* \}\}|"\$\{\{ [^"}]* \}\}")$/;
+// The one environment that a job may set: the token of the run, which the release targets read with gh.
+const JOB_ENV = JSON.stringify({ GH_TOKEN: '${{ github.token }}' });
+
+/**
+ * Each broken rule of the steps of the jobs of the workflow `file` with the text `text`, which CI runs (T28.61): a job that
+ * has steps runs one make target, its recipe recipeName with arguments of JOB_ARGUMENT alone, or for ci-passed of ci.yml
+ * CI_PASSED_RUN, the one other expression; its other steps are uses steps, only a uses step has a condition, no step sets
+ * env, and a job sets GH_TOKEN alone (JOB_ENV). So the recipe of `makefile` holds the content of the job, and a local run is the call that CI makes.
+ */
+export function jobStepViolations(file: string, text: string, makefile?: string) {
+  const found: string[] = [];
+  for (const job of jobsOf(text, file)) {
+    if (job.value.uses !== undefined) continue;
+    const at = `${file} job ${job.name}`;
+    if (job.value.env !== undefined && JSON.stringify(job.value.env) !== JOB_ENV) found.push(`${at} sets env other than GH_TOKEN`);
+    if (job.steps.some(step => step.env !== undefined)) found.push(`${at} sets env`);
+    const runs = runsOf(job);
+    if (runs.length !== 1) found.push(`${at} has ${String(runs.length)} run steps, not one`);
+    for (const step of job.steps) if (step.run !== undefined && step.if !== undefined) found.push(`${at} has the condition ${step.if} on its run step`);
+    const [run] = runs;
+    if (run === undefined) continue;
+    if (file.endsWith('/ci.yml') && job.name === CI_PASSED) {
+      if (run !== CI_PASSED_RUN) found.push(`${at} runs ${run}, not ${CI_PASSED_RUN}`);
+      continue;
+    }
+    const [make, target, ...rest] = run.match(/(?:"[^"]*"|\$\{\{[^}]*\}\}|[^\s"])+/g) ?? [];
+    const recipe = recipeName(file, job.name);
+    if (make !== 'make' || target !== recipe) found.push(`${at} runs ${run}, not make ${recipe}`);
+    else if (recipeOf(recipe, makefile).length === 0) found.push(`${at}: the Makefile has no recipe ${recipe}`);
+    for (const argument of rest) if (!JOB_ARGUMENT.test(argument)) found.push(`${at} passes ${argument}, which is no make variable of a value, a matrix value or an input`);
+  }
+  return found;
+}
+
+test('every job of the workflows that CI runs has one run step, its recipe, and its other steps are uses steps (T28.61)', () => {
+  for (const file of CI_WORKFLOWS) assert.deepEqual(jobStepViolations(file, read(file)), [], file);
+  const makefile = 'ci-one: ## one\n\t$(MAKE) --no-print-directory install\nci-assets-one:\n\t$(MAKE) --no-print-directory install\nci-passed:\n\t@:\n';
+  const steps = (run: string) => `      - uses: ./.github/actions/kit-bootstrap\n        if: \${{ !cancelled() }}\n      - run: ${run}\n      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a\n        if: \${{ !cancelled() }}\n`;
+  const workflow = (run: string) => `name: ci\njobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n${steps(run)}  assets:\n    uses: ./.github/workflows/assets.yml\n  ${CI_PASSED}:\n    runs-on: ubuntu-24.04\n    steps:\n      - run: ${CI_PASSED_RUN}\n`;
+  const CI = '.github/workflows/ci.yml';
+  assert.deepEqual(jobStepViolations(CI, workflow('make ci-one'), makefile), []);
+  assert.deepEqual(jobStepViolations(CI, workflow('make ci-one A=1 TOOLS="a b" PHP=${{ matrix.php }} RELEASE=${{ inputs.release }}'), makefile), []);
+  // The jobs of release.yml and pages.yml run ci-release-<job> and ci-pages-<job>, with outputs of the job tag and quoted
+  // expressions of the event, and set the token of the run alone.
+  const release = `name: release\njobs:\n  tag:\n    runs-on: ubuntu-24.04\n    env:\n      GH_TOKEN: \${{ github.token }}\n    steps:\n      - id: tag\n        run: make ci-release-tag RUN="\${{ inputs.run || github.event.workflow_run.id }}" AUTO="\${{ github.event_name == 'workflow_run' && '1' || '' }}"\n  release:\n    runs-on: ubuntu-24.04\n    steps:\n      - run: make ci-release-release TAG=\${{ needs.tag.outputs.tag }}\n`;
+  const releaseMakefile = 'ci-release-tag:\n\t@:\nci-release-release:\n\t@:\nci-pages-pages:\n\t@:\n';
+  assert.deepEqual(jobStepViolations('.github/workflows/release.yml', release, releaseMakefile), []);
+  assert.deepEqual(jobStepViolations('.github/workflows/pages.yml', `name: Pages\njobs:\n  pages:\n    runs-on: ubuntu-24.04\n    steps:\n      - run: make ci-pages-pages REPOSITORY="\${{ github.event.repository.name }}"\n`, releaseMakefile), []);
+  assert.deepEqual(jobStepViolations('.github/workflows/release.yml', release.replace('make ci-release-release', 'make release-tools'), releaseMakefile), ['.github/workflows/release.yml job release runs make release-tools TAG=${{ needs.tag.outputs.tag }}, not make ci-release-release']);
+  assert.deepEqual(jobStepViolations('.github/workflows/assets.yml', `name: assets\njobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n${steps('make ci-assets-one')}`, makefile), []);
+  const broken: Record<string, [string, string]> = {
+    'another target': [workflow('make install'), `${CI} job one runs make install, not make ci-one`],
+    'no recipe': [workflow('make ci-two').replace('  one:', '  two:'), `${CI} job two: the Makefile has no recipe ci-two`],
+    'two run steps': [workflow('make ci-one').replace('      - run: make ci-one\n', '      - run: make install\n      - run: make ci-one\n'), `${CI} job one has 2 run steps, not one`],
+    'no run step': [workflow('make ci-one').replace('      - run: make ci-one\n', ''), `${CI} job one has 0 run steps, not one`],
+    'condition': [workflow('make ci-one').replace('      - run: make ci-one\n', '      - run: make ci-one\n        if: ${{ !cancelled() }}\n'), `${CI} job one has the condition \${{ !cancelled() }} on its run step`],
+    'env': [workflow('make ci-one').replace('      - run: make ci-one\n', '      - run: make ci-one\n        env:\n          A: b\n'), `${CI} job one sets env`],
+    'job env': [workflow('make ci-one').replace('    steps:\n', '    env:\n      TAG: v1\n    steps:\n'), `${CI} job one sets env other than GH_TOKEN`],
+    'unquoted event expression': [workflow('make ci-one RUN=${{ inputs.run || github.event.workflow_run.id }}'), `${CI} job one passes RUN=\${{ inputs.run || github.event.workflow_run.id }}, which is no make variable`],
+    'expression': [workflow('make ci-one BASE=/${{ github.event.repository.name }}/'), `${CI} job one passes BASE=/\${{ github.event.repository.name }}/, which is no make variable`],
+    'shell': [workflow('xvfb-run -a make ci-one'), `${CI} job one runs xvfb-run -a make ci-one, not make ci-one`],
+    'judgement': [workflow('make ci-one').replace(`      - run: ${CI_PASSED_RUN}\n`, '      - run: make ci-passed\n'), `${CI} job ${CI_PASSED} runs make ci-passed, not ${CI_PASSED_RUN}`],
+  };
+  for (const [name, [text, message]] of Object.entries(broken)) {
+    const found = jobStepViolations(CI, text, makefile);
     assert.ok(found.some(issue => issue.includes(message)), `${name}: ${found.join('; ')}`);
   }
 });

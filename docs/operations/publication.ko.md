@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 591b94b7a028a53a7becd09b03122d78d2ea7830de06c3d0a4540c4728ee594e -->
+<!-- source-sha256: 03c8ebf742c4a1f5cdc0b7671644f49eb48554624f2a402b2bdddcdfee045006 -->
 # 발행
 
 Native asset job의 분리와 소유권 계약은 [Release asset workflow](../spec/release-assets.md)에 있다. 독립 PHP minor job source는 T28.60에서 검사하며 expected minor를 강제하는 generated recipe 채택과 native CI 증명은 아직 남아 있다.
@@ -131,7 +131,7 @@ Composer: release가 archive 옆에 게시하는 `packages.json`의 `composer` r
 
 ## 문서 사이트
 
-온라인 문서는 정적 VitePress 사이트다. `main`의 CI run이 성공하면 `pages` workflow의 job이 `make docs-static-check`로 `docs/.vitepress/dist`를 build하고, 같은 commit의 CI run에서 `showcase` job이 build한 artifact `example-site`를 내려받아 `examples/site/`로 복사하며, 그 directory를 Pages artifact로 배포한다. `ci.yml`의 job `docs`와 job `showcase`가 같은 push에서 문서와 showcase를 검증했으므로 게시는 그 gate를 반복하지 않는다. showcase는 parser나 renderer를 browser에 보내지 않는다. build는 저장소 경로에 맞춰 `VITEPRESS_BASE`를 넘기므로 server 쪽 program 없이 `/<repository>/` 아래에서 링크와 asset이 동작한다.
+온라인 문서는 정적 VitePress 사이트다. `main`의 CI run이 성공하면 `pages` workflow의 job이 `make docs-static-check`로 `docs/.vitepress/dist`를 build하고, 같은 commit의 CI run에서 `showcase` job이 build한 artifact `example-site`를 `var/pages/example-site`에 내려받는다. 그 recipe `make ci-pages-pages REPOSITORY=<repository>`가 그것을 `docs/.vitepress/dist/examples/site/`로 복사하고, job은 `docs/.vitepress/dist`를 Pages artifact로 배포한다. `ci.yml`의 job `docs`와 job `showcase`가 같은 push에서 문서와 showcase를 검증했으므로 게시는 그 gate를 반복하지 않는다. showcase는 parser나 renderer를 browser에 보내지 않는다. build는 저장소 경로에 맞춰 `VITEPRESS_BASE`를 넘기므로 server 쪽 program 없이 `/<repository>/` 아래에서 링크와 asset이 동작한다.
 
 문서 빌드는 모든 `*.ko.md` 번역 쌍을 찾아 `/ko/` 아래에 발행한다. VitePress locale 설정이 이 경로 트리 전체에 한국어 탐색 메뉴와 `ko-KR` HTML 메타데이터를 제공한다. 정적 사이트 게이트는 suffix 형태의 출력 경로, 현재 locale을 벗어나는 탐색 링크, 잘못된 HTML 언어 메타데이터, 해석되지 않은 테마 보간을 거부한다.
 

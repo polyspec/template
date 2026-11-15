@@ -19,6 +19,7 @@ interface Step {
   run?: string;
   uses?: string;
   if?: string;
+  env?: unknown;
   with: Record<string, unknown>;
 }
 
@@ -38,6 +39,7 @@ function stepOf(value: unknown, where: string): Step {
     if (typeof field !== 'string') throw new Error(`${where}: ${key} is no string`);
     step[key] = field;
   }
+  if (value.env !== undefined) step.env = value.env;
   if (value.with !== undefined) {
     if (!isJsonObject(value.with)) throw new Error(`${where}: with is no mapping`);
     step.with = value.with;
@@ -78,6 +80,48 @@ export function jobField(job: Job, key: string): string | undefined {
 /** The commands of the run steps of a job, in their order. */
 export function runsOf(job: Job): string[] {
   return job.steps.flatMap(step => (step.run === undefined ? [] : [step.run]));
+}
+
+/**
+ * The workflows whose every job runs one recipe of the Makefile (T28.61): ci.yml, assets.yml, which ci.yml and release.yml call,
+ * release.yml and pages.yml, which start after a successful run of ci.yml.
+ */
+export const CI_WORKFLOWS = ['.github/workflows/ci.yml', '.github/workflows/assets.yml', '.github/workflows/release.yml', '.github/workflows/pages.yml'];
+
+/**
+ * The recipe of the job `job` of the workflow `file` (T28.61): ci-<job> for a job of ci.yml, and ci-<workflow>-<job> for a
+ * job of another workflow: ci-assets-<job> for assets.yml, whose job GitHub names assets / <job>, ci-release-<job> for
+ * release.yml and ci-pages-<job> for pages.yml.
+ */
+export function recipeName(file: string, job: string): string {
+  return file.endsWith('/ci.yml') ? `ci-${job}` : `ci-${path.basename(file, '.yml')}-${job}`;
+}
+
+/**
+ * The recipe lines of the target `target` of the Makefile text `makefile`, trimmed, with `$(MAKE) --no-print-directory`
+ * written as `make`, so that a test reads them as it reads a run step; empty when no rule names the target.
+ */
+export function recipeOf(target: string, makefile = readFileSync(path.join(ROOT, 'Makefile'), 'utf8')): string[] {
+  const lines = makefile.split('\n');
+  const at = lines.findIndex(line => line.startsWith(`${target}:`) && !line.startsWith(`${target}:=`));
+  if (at < 0) return [];
+  const recipe: string[] = [];
+  for (const line of lines.slice(at + 1)) {
+    if (!line.startsWith('\t')) break;
+    recipe.push(line.trim().replaceAll('$(MAKE) --no-print-directory ', 'make '));
+  }
+  return recipe;
+}
+
+/**
+ * The commands of a job in their order: each run step, and for a run step `make ci-...` the lines of that recipe of
+ * `makefile`, which hold the content of the job (T28.61).
+ */
+export function commandsOf(job: Job, makefile?: string): string[] {
+  return runsOf(job).flatMap(run => {
+    const target = /^make (ci-[a-z0-9-]+)(?: |$)/.exec(run)?.[1];
+    return target === undefined || target === 'ci-targets' || target === 'ci-passed' ? [run] : recipeOf(target, makefile);
+  });
 }
 
 /** The lines of the run steps of a job, each trimmed, without the empty ones. */

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-editor-tools -->
-<!-- source-sha256: b0e6460af91dfc1fec1f58ef60340e0b113a1dee4ac1138b2ca3c11d81e37f05 -->
+<!-- source-sha256: 41f5da5adaa2737bfedd41a37a9a260a3f9355255ebbf597ffc9c925132807d9 -->
 # 포매터, 언어 서버, 에디터
 
 [English](/operations/editor-tools).
@@ -198,7 +198,7 @@ integration 실행은 VS Code를 내려받지 않는다. 설치된 사본이 없
 
 `make template-test-codemirror`는 어댑터를 빌드하고 두 종류의 테스트를 실행한다. Vitest 테스트는 `packages/language/tests/editor`의 모든 에디터 픽스처마다 DOM 없이 `EditorState`를 만들고, `templateDiagnostics`의 진단, 상태의 decoration 집합에 있는 토큰 마크와 태그 마크, fold service의 접기 범위, 모든 조회 위치의 강조 마크와 `goToMatchingTag` 목적지, `templateBlocks` `indent`와 `flat` 및 공백 두 개의 들여쓰기 단위로 구한 모든 줄의 들여쓰기 서비스 결과, `formatTemplate`의 결과를 픽스처의 기대 결과와 비교한다. 다른 테스트는 한 줄을 입력하고 `insertNewlineAndIndent`로 Enter를 누르며, 옵션, `formatTemplate`의 들여쓰기 단위, 텍스트마다 분석 하나를 재사용하는지 검사한다. Playwright 테스트는 `tests/browser/page.ts`를 esbuild로 `packages/codemirror/dist/browser/page.js`에 번들하고 빈 Chromium 페이지에 불러온 뒤, `<ul>`, Enter, `{@ x = xs}`, Enter를 입력한 뒤의 들여쓰기, 토큰 클래스, HTML 속성 값 안의 템플릿 색, 밝은 테마와 어두운 테마의 태그 배경, 닫히지 않은 블록의 lint 진단, 포맷되는 텍스트와 파싱되지 않는 텍스트에서의 Shift+Alt+F를 검사한다.
 
-CI job `editor`는 `make editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode`를 실행하고, VS Code가 화면을 요구하므로 `make template-test-vscode-integration`을 `xvfb-run`의 가상 X 서버에서 실행한다.
+CI job `editor`는 `make ci-editor`를 실행한다. 그 recipe는 Node.js package, browser, VS Code를 설치한 뒤 `make editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode template-test-vscode-integration`을 `make ci-targets VIRTUAL_DISPLAY=1`로 실행하며, VS Code가 화면을 요구하므로 Linux에서는 `xvfb-run`의 가상 X 서버에서 실행한다.
 
 `make format-external-check`는 명시한 외부 템플릿 트리에도 불변식 테스트를 실행한다.
 
