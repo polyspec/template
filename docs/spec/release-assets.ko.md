@@ -1,8 +1,8 @@
 <!-- doc-id: spec-release-assets -->
-<!-- source-sha256: 05f3fb3c9dc2dece356f64a587eff7290744eb43f2b16a1a913c636c483c4f5f -->
+<!-- source-sha256: df8b92231bb8151b84ba9dd85dcd399e52a138cff05dbd5937660b22b94bebe1 -->
 # Release asset workflow
 
-[English](release-assets.md).
+[English](/spec/release-assets).
 
 `.github/workflows/assets.yml`의 `platform` job은 native platform마다 Go static library, Python wheel, npm platform
 package를 한 번 만든다. Matrix는 명시적인 include 행 세 개만 갖는다. `linux-x64-gnu`는 `ubuntu-26.04`,
@@ -25,6 +25,6 @@ release recipe를 쓰고 선언한 LLVM을 설치한다. Build 전에 조건부 
 unit owner에서 실패한다. Setup, 준비, build, upload는 `!cancelled()` guard를 유지하며 release check는
 `inputs.release`도 요구한다. 각 job은 실행하는 모든 tool과 잠긴 입력을 소유한다.
 
-이 계약은 T28.60에서 계획했다. 현재 workflow는 아직 `platform`에서 PHP minor를 차례로 바꾼다. 설치된 generated
+Source workflow는 이 분리 계약을 구현하며 T28.60 unit owner와 mutation 시험이 검사한다. 설치된 generated
 release recipe는 아직 `EXPECTED_PHP_MINOR`를 강제하지 않는다. 이 guard가 있는 recipe 채택과 native CI 실행은
 별도의 검증 gate로 남아 있다. Source workflow 시험은 native release build를 증명하지 않는다.

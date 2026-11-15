@@ -1,7 +1,7 @@
 <!-- doc-id: spec-release-assets -->
 # Release asset workflow
 
-[한국어](release-assets.ko.md).
+[한국어](/ko/spec/release-assets).
 
 The `platform` job of `.github/workflows/assets.yml` builds the Go static library, Python wheel and npm platform package
 once for each native platform. Its matrix contains only three explicit include rows: `linux-x64-gnu` on `ubuntu-26.04`,
@@ -25,6 +25,6 @@ an extra, missing or duplicate owner, wrong runner, wrong minor, setup after a b
 workflow's unit owner. Setup, preparation, builds and upload retain `!cancelled()` guards; the release check also requires
 `inputs.release`. Each job owns all tools and locked inputs it executes.
 
-This contract is planned by T28.60. The current workflow still changes PHP minors sequentially in `platform`.
+The source workflow implements this isolation contract, checked by the T28.60 unit owners and mutation tests.
 The installed generated release recipes do not yet enforce `EXPECTED_PHP_MINOR`; adoption of recipes with that guard and
 native CI execution remain separate verification gates. Source workflow tests do not establish a native release build.

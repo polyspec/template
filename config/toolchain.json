@@ -9,7 +9,7 @@
       "8.4",
       "8.5"
     ],
-    "reason": "the PHP minors for which the release builds the PHP extension on each platform (binding GN-19d): an extension loads only into the PHP minor whose headers built it, so each supported minor that the requirement php >=8.4 of packages/php-ext/composer.json admits has an asset of its own. The job platform of .github/workflows/assets.yml sets up each with setup-php and runs make release-php-ext PHP=php after it, which tests/scripts/php-version.test.mts compares with this list"
+    "reason": "the PHP minors for which the release builds the PHP extension on each native platform: an extension loads only into the PHP minor whose headers built it. The php job of .github/workflows/assets.yml declares each platform and minor once, sets up matrix.php, and runs make release-php-ext PHP=php with EXPECTED_PHP_MINOR from that row; tests/scripts/php-version.test.mts and assets-php-matrix.test.mts verify the scoped setup and ownership"
   },
   "symbolExtractors": [
     "php"

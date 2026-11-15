@@ -14,7 +14,7 @@
 // - PHP is one of the minor versions of config/toolchain.json: setup-php cannot pin a patch, so the minor is the pin and
 //   the CI report records the patch of each run; Composer is the exact release of mise.toml, and setup-php installs
 //   no tools;
-// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04, but the job platform of assets.yml,
+// - every action of a workflow is pinned by its commit and every job runs on ubuntu-24.04, but the jobs platform and php of assets.yml,
 //   which runs on the runner of each platform of the bindings (binding GN-19i), the job bindings of ci.yml, which runs on
 //   ubuntu-26.04-arm for the LLVM of config/toolchain.json, and a job that calls a workflow of the repository, whose jobs
 //   follow these rules themselves;
@@ -38,13 +38,14 @@ import { jsonDocument } from '../../scripts/json-document.mts';
 import { captured, required } from '../../scripts/required.mts';
 import { isJsonObject, parsedJsonObject } from '../runner/checked.mts';
 import { toolsDirectory } from '../../scripts/tools-directory.mts';
+import { assetMatrixFindings } from './assets-workflow.mts';
 import { type Job, jobField, jobs, jobsOf, pinsOf, ROOT, runLines, runsOf, WORKFLOWS } from './workflows.mts';
 
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
-const TOOLCHAIN_SCHEMA: JSONSchemaType<{ php: string[] }> = {
-  type: 'object', properties: { php: { type: 'array', items: { type: 'string' } } }, required: ['php'],
+const TOOLCHAIN_SCHEMA: JSONSchemaType<{ php: string[]; phpExtension: { minors: string[] } }> = {
+  type: 'object', properties: { php: { type: 'array', items: { type: 'string' } }, phpExtension: { type: 'object', properties: { minors: { type: 'array', items: { type: 'string' } } }, required: ['minors'] } }, required: ['php', 'phpExtension'],
 };
-const TOOLCHAIN = jsonDocument<{ php: string[] }>('toolchain configuration', TOOLCHAIN_SCHEMA).read(path.join(ROOT, 'config/toolchain.json'));
+const TOOLCHAIN = jsonDocument<{ php: string[]; phpExtension: { minors: string[] } }>('toolchain configuration', TOOLCHAIN_SCHEMA).read(path.join(ROOT, 'config/toolchain.json'));
 // The npm version of devEngines in package.json, which must equal the npm:npm of mise.toml that kit installs with the digest of
 // mise.lock (kit K938); package.json declares no packageManager.
 const declaredNpm = () => {
@@ -423,9 +424,6 @@ test('ci-passed is the last job of ci.yml, runs always, needs every other job an
   }
 });
 
-// The runners of the job platform of assets.yml, one of each platform of the binding assets (binding GN-19i): an asset is
-// linked and loaded only on its platform, because no tool of the release compiles for another platform.
-const PLATFORM_RUNNERS = ['macos-15', 'ubuntu-26.04', 'ubuntu-26.04-arm'];
 // The runner of the job bindings of ci.yml, whose packages hold the LLVM of config/toolchain.json.
 const BINDINGS_RUNNER = 'ubuntu-26.04-arm';
 
@@ -447,12 +445,8 @@ test('every action of a workflow is pinned by its commit and every job runs on u
         assert.equal(runsOn, BINDINGS_RUNNER, `${file}: the job bindings runs on ${shown(runsOn)}, not on ${BINDINGS_RUNNER}`);
         continue;
       }
-      if (file.endsWith('/assets.yml') && job.name === 'platform') {
-        assert.equal(runsOn, '${{ matrix.runner }}', `${file}: the job platform runs on ${shown(runsOn)}, not on the runner of its platform`);
-        const strategy = job.value.strategy;
-        const include = isJsonObject(strategy) && isJsonObject(strategy.matrix) ? strategy.matrix.include : undefined;
-        const runners = Array.isArray(include) ? include.map(entry => (isJsonObject(entry) ? String(entry.runner) : '')).sort(compareText) : [];
-        assert.deepEqual(runners, PLATFORM_RUNNERS, `${file}: the job platform runs on ${runners.join(', ')}, not on one runner of each platform`);
+      if (file.endsWith('/assets.yml') && ['platform', 'php'].includes(job.name)) {
+        assert.deepEqual(assetMatrixFindings(job, TOOLCHAIN.phpExtension.minors), [], `${file}: native asset matrix of ${job.name}`);
         continue;
       }
       assert.equal(runsOn, 'ubuntu-24.04', `${file}: runs-on ${shown(runsOn)}, expected ubuntu-24.04`);

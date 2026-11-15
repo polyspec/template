@@ -1,12 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 71f4143a587e3f1574b75621d12138ef2a839faed2b1d12d1754d120c4c398cb -->
+<!-- source-sha256: af5dd96df9a5de5a187ea268d0e20d9f430bd2bba6129b4e31124f380659b436 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
-- T28.60은 독립적인 native PHP minor job과 각 platform asset의 단일 소유권을 명세한다. 현재 assets workflow는 같은 job에서 PHP 8.4와 8.5를 차례로 setup한다. Source workflow 수정, expected-minor recipe 강제와 native CI 증명은 아직 남아 있다.
+- T28.60: Assets workflow는 native platform/PHP minor build 여섯 개와 PHP가 아닌 platform build 세 개를 분리한다. 각 PHP job은 자기 setup, expected-minor build 입력, LLVM, 잠긴 입력, 고유한 artifact를 소유하고 진단 guard를 유지한다. 같은 job의 순차 setup은 setup 실패 뒤 다른 minor로 다음 build를 실행하게 할 수 있었다. 엄격한 matrix와 소유권 mutation 시험이 이 source 결함을 재현하고 검사한다. Generated recipe 강제와 native CI 증명은 아직 남아 있다.
 
 - 릴리스는 binding의 PHP 확장의 Composer 패키지 `polyspec/template`을 담는다(T28.59). `config/release.json`이 `packages/php-ext`의 패키지를 kind `composer`로, 그 `composer.json`을 `archive` manifest로 선언하므로, `make release-assets`가 그 zip과 `packages.json`을 쓴다. 이전 릴리스에는 확장의 Composer 패키지가 없어서 `pie install polyspec/template`이 설치할 패키지를 찾지 못했다.
 - 전체 suite는 다섯 binding 대상의 생성된 시험을 실행한다(T28.58, binding G-5, GN-13e). `make test-binding-php`, `test-binding-python`, `test-binding-node`, `test-binding-wasm`, `test-binding-go`는 각 binding crate를 시험 feature로 build하고, `contracts/core-cases.json`의 case를 담은 생성된 시험을 PHPUnit, unittest, `node --test`, `go test`로 실행한다. `lint-bindings`, `check-declarations`, `test-binding-crates`와 함께 이것들은 `CHECK_TARGETS`의 target이며, `ci.yml`의 새 job `bindings`가 ubuntu-26.04-arm에서 실행하고 `ci-passed`가 요구한다. 이전에는 어떤 CI job도 binding의 생성된 시험을 실행하지 않아서, release가 어떤 실행도 시험하지 않은 binding package를 게시했다. `mise.toml`이 maturin 1.16.0을 고정하고, legacy package는 자기 시험을 유지한다.

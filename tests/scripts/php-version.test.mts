@@ -3,9 +3,8 @@
 // proof of v0.0.7 ran the composer consumer with the PHP 8.3.6 of Ubuntu, which the platform check of Composer refused
 // (">= 8.4.0"). .php-version holds the minimum PHP release of config/toolchain.json, and each setup-php step of the
 // workflows of the repository reads it, or the PHP of a matrix that lists the releases of config/toolchain.json. The job
-// platform of assets.yml is the exception: it builds the PHP extension of its platform for each PHP minor that
-// phpExtension.minors of config/toolchain.json names, one setup-php step and one `make release-php-ext PHP=php` per minor in
-// that order, because a PHP extension loads only into the PHP minor whose headers built it (binding GN-19d).
+// php of assets.yml is the exception: one native platform/minor row sets up matrix.php and builds with the expected
+// minor guard. A minor setup in another job cannot establish the headers of this build (T28.60).
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -13,11 +12,11 @@ import test from 'node:test';
 import type { JSONSchemaType } from 'ajv';
 import { jsonDocument } from '../../scripts/json-document.mts';
 import { isJsonObject } from '../runner/checked.mts';
-import { jobs, jobsOf, ROOT, WORKFLOWS, type Job } from './workflows.mts';
+import { jobs, ROOT, WORKFLOWS, type Job } from './workflows.mts';
+import { assetWorkflowFindings } from './assets-workflow.mts';
 
 const SETUP_PHP = 'shivammathur/setup-php@';
 const ASSETS = '.github/workflows/assets.yml';
-const BUILD_EXTENSION = 'make release-php-ext PHP=php';
 interface Toolchain {
   php: string[];
   phpExtension: { minors: string[] };
@@ -56,7 +55,7 @@ test('.php-version holds the minimum PHP release of config/toolchain.json', () =
 
 test('every setup-php step of the workflows of the repository reads .php-version or the releases of config/toolchain.json', () => {
   const found = WORKFLOWS.flatMap(file => setupPhp(file).map(step => ({ file, ...step })))
-    .filter(({ file, job }) => !(file === ASSETS && job.name === 'platform'));
+    .filter(({ file, job }) => !(file === ASSETS && job.name === 'php'));
   assert.ok(found.length > 0, 'no setup-php step was found in .github/workflows; the check verified nothing');
   const failures = found.flatMap(({ file, job, inputs }) => {
     if (inputs['php-version-file'] === '.php-version' && inputs['php-version'] === undefined) return [];
@@ -66,52 +65,8 @@ test('every setup-php step of the workflows of the repository reads .php-version
   assert.deepEqual(failures, []);
 });
 
-/**
- * The findings of the job platform of the assets workflow `text`: it sets up each PHP minor of `minors` with setup-php and
- * php-version and builds the extension after each with `make release-php-ext PHP=php`, in the order of `minors`, and sets
- * up no other PHP.
- */
-function extensionMinorFindings(text: string, minors: string[]): string[] {
-  const platform = jobsOf(text, ASSETS).find(job => job.name === 'platform');
-  if (platform === undefined) return [`${ASSETS} has no job platform`];
-  const set: string[] = [];
-  const built: string[] = [];
-  let current: string | undefined;
-  for (const step of platform.steps) {
-    if (step.uses?.startsWith(SETUP_PHP) === true) {
-      const version = step.with['php-version'];
-      current = typeof version === 'string' ? version : JSON.stringify(version ?? step.with['php-version-file']);
-      set.push(current);
-    }
-    if (step.run === BUILD_EXTENSION && current !== undefined) built.push(current);
-  }
-  const found: string[] = [];
-  if (set.join(' ') !== minors.join(' ')) found.push(`${ASSETS}: the job platform sets up PHP ${set.join(', ') || 'none'}, not the minors ${minors.join(', ')} of phpExtension.minors of config/toolchain.json`);
-  if (built.join(' ') !== minors.join(' ')) found.push(`${ASSETS}: the job platform builds the PHP extension for PHP ${built.join(', ') || 'none'}, not for the minors ${minors.join(', ')} of phpExtension.minors of config/toolchain.json`);
-  return found;
-}
-
-test('the job platform of assets.yml builds the PHP extension for each minor of phpExtension.minors and for no other', () => {
-  const sample = `jobs:
-  platform:
-    runs-on: \${{ matrix.runner }}
-    steps:
-      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
-        with:
-          php-version: '8.4'
-      - run: ${BUILD_EXTENSION}
-      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
-        with:
-          php-version: '8.5'
-      - run: ${BUILD_EXTENSION}
-`;
-  assert.deepEqual(extensionMinorFindings(sample, ['8.4', '8.5']), []);
-  assert.deepEqual(extensionMinorFindings(sample, ['8.4', '8.5', '8.6']), [
-    `${ASSETS}: the job platform sets up PHP 8.4, 8.5, not the minors 8.4, 8.5, 8.6 of phpExtension.minors of config/toolchain.json`,
-    `${ASSETS}: the job platform builds the PHP extension for PHP 8.4, 8.5, not for the minors 8.4, 8.5, 8.6 of phpExtension.minors of config/toolchain.json`,
-  ]);
-  assert.deepEqual(extensionMinorFindings(sample.replace(/ {6}- run: make release-php-ext PHP=php\n$/, ''), ['8.4', '8.5']), [
-    `${ASSETS}: the job platform builds the PHP extension for PHP 8.4, not for the minors 8.4, 8.5 of phpExtension.minors of config/toolchain.json`,
-  ]);
-  assert.deepEqual(extensionMinorFindings(readFileSync(path.join(ROOT, ASSETS), 'utf8'), extensionMinors), []);
+test('the php asset job builds every declared minor independently with matching setup and expected-minor guard (T28.60)', () => {
+  const text = readFileSync(path.join(ROOT, ASSETS), 'utf8');
+  assert.deepEqual(assetWorkflowFindings(text, extensionMinors), []);
+  assert.ok(assetWorkflowFindings(text, [...extensionMinors, '8.6']).some(finding => finding.includes('every native platform and PHP minor')));
 });

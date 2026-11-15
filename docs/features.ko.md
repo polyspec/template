@@ -1,5 +1,5 @@
 <!-- doc-id: docs-features -->
-<!-- source-sha256: 181422b3dea9221358ff15adccaed53e6f137052303a23cafd3c7ec78ccedd2e -->
+<!-- source-sha256: c37eb08ae62b55096f50299bb91c10fb314c84a086c49b16666aea1e72363102 -->
 # 기능 상태
 
 표는 각 기능의 상태를 기록한다.
@@ -31,7 +31,7 @@
 | object-and-class-calls | Assigned object and class function calls | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [근거](spec/ast) |
 | generated-bindings | Bindings generated from the interface contract, tested on five targets | partial | go: planned<br>php: planned<br>rust: pass<br>typescript: planned<br>python: planned | [근거](operations/testing) |
 | bound-data | 여러 render를 위한 bound data | implemented | go: pass<br>php: pass<br>rust: pass<br>typescript: pass<br>python: pass | [근거](spec/data-model) |
-| platform-asset-isolation | Native platform asset과 독립 PHP minor job | planned | go: planned<br>php: planned<br>rust: unsupported<br>typescript: planned<br>python: planned | [계약](spec/release-assets) |
+| platform-asset-isolation | Native platform asset과 독립 PHP minor job | partial | go: planned<br>php: planned<br>rust: unsupported<br>typescript: planned<br>python: planned | [계약](spec/release-assets) |
 
 implemented 항목은 실행 가능한 검증과 언어별 문서 쌍이 필요하며 partial과 planned는 미완료 상태다.
 

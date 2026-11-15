@@ -1290,6 +1290,19 @@
       "tests": [
         "tests/scripts/known-failures.test.mts"
       ]
+    },
+    {
+      "paths": [
+        ".github/workflows/assets.yml",
+        "tests/scripts/assets-workflow.mts",
+        "config/toolchain.json"
+      ],
+      "tests": [
+        "tests/scripts/assets-php-matrix.test.mts",
+        "tests/scripts/php-version.test.mts",
+        "tests/scripts/toolchain-files.test.mts"
+      ],
+      "targets": []
     }
   ],
   "inputs": [
