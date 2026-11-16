@@ -29,9 +29,12 @@ const TEMPORARY = join(root, 'var/tmp');
 /**
  * The command and arguments that run cargo with `args` in `directory` through link cargo of kit, the utility of KIT_LINK
  * that the Makefile exports: with the .links of the checkout the polyspec crates of the linked checkouts are built, without
- * it cargo runs as given (kit docs/operations/local-links.md).
+ * it cargo runs as given (kit docs/operations/local-links.md). A cargo that CARGO names runs as given, as `make CARGO=<cargo>`
+ * replaces the cargo of the Makefile, so a test gives its own cargo whatever the links of the checkout are.
  */
 export function cargo(directory: string, args: readonly string[]): [string, string[]] {
+  const given = process.env.CARGO;
+  if (given !== undefined && given !== '') return [given, [...args]];
   const link = process.env.KIT_LINK;
   if (link === undefined || link === '') throw new Error('KIT_LINK is not set; the checks run cargo through link cargo of kit, which the Makefile names');
   return [process.execPath, [link, 'cargo', directory, ...args]];

@@ -3,7 +3,8 @@
 // database of the network and uses the installed Go toolchain; the Rust install project builds with the toolchain of
 // rust-toolchain.toml and with a lock derived from Cargo.lock; the PHP install project reads no
 // repository other than the package of the run. The commands npm, node, go, composer, php and cargo are stubs that
-// record their arguments, their environment and the files of their working directory; nothing is built or downloaded.
+// record their arguments, their environment and the files of their working directory; nothing is built or downloaded. The
+// cargo stub is the one that CARGO names, so the test does not depend on the .links of the checkout; the others are on PATH.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -106,14 +107,15 @@ if (name === 'cargo' && args[0] === 'package') {
 
 function stubs(directory: string) {
   const bin = path.join(directory, 'bin');
-  const cargoBin = path.join(directory, 'home', '.cargo', 'bin');
+  const cargoBin = path.join(directory, 'cargo');
   mkdirSync(bin, { recursive: true });
   mkdirSync(cargoBin, { recursive: true });
-  const commands: [string, string][] = [[bin, 'npm'], [bin, 'node'], [bin, 'go'], [bin, 'composer'], [bin, 'php'], [bin, 'cargo'], [cargoBin, 'cargo']];
+  const commands: [string, string][] = [[bin, 'npm'], [bin, 'node'], [bin, 'go'], [bin, 'composer'], [bin, 'php'], [cargoBin, 'cargo']];
   for (const [where, name] of commands) {
     writeFileSync(path.join(where, name), `#!${process.execPath}\n${STUB}`, { mode: 0o755 });
   }
-  return { bin, home: path.join(directory, 'home'), log: path.join(directory, 'calls.jsonl') };
+  mkdirSync(path.join(directory, 'home'));
+  return { bin, cargo: path.join(cargoBin, 'cargo'), home: path.join(directory, 'home'), log: path.join(directory, 'calls.jsonl') };
 }
 
 test('the install projects read no network source and use the pinned toolchains and locks', { timeout: 4_980_000 }, (t) => {
@@ -122,7 +124,7 @@ test('the install projects read no network source and use the pinned toolchains 
   const stub = stubs(directory);
   const run = spawnSync(process.execPath, [path.join(ROOT, 'scripts/check-package-installs.mts')], {
     cwd: ROOT, encoding: 'utf8',
-    env: { ...process.env, HOME: stub.home, PATH: `${stub.bin}${path.delimiter}${process.env.PATH}`, STUB_LOG: stub.log },
+    env: { ...process.env, CARGO: stub.cargo, HOME: stub.home, PATH: `${stub.bin}${path.delimiter}${process.env.PATH}`, STUB_LOG: stub.log },
   });
   assert.equal(run.status, 0, run.stdout + run.stderr);
   const calls = readFileSync(stub.log, 'utf8').trim().split('\n').map(line => callDocument.parse(line, `the stub call ${line}`));
