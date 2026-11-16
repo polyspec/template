@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `make generated-native-calls-check` compares the error kinds of the native object fixture with the capital names `E_<KIND>` of the legacy runtimes for the backends that run on them (T28.80): the fixture names kinds, and the check failed with `generated compare.tpl = E_RUNTIME_COMPARE` in TypeScript, Go, PHP and Python.
 - Prepare loads the templates that a template names in the order of a render (T28.79, RT-10): of two names of one file, the second fails at its own tag; the Rust core loaded the names from the end of the list, so the conformance case `filesystem/hard-link-second-name` failed at line 1 instead of line 2.
 - The generated TypeScript imports the legacy runtime `@polyspec/template-legacy` until the TypeScript backend moves to typed programs (T28.78, compiler Transition): it imported `@polyspec/template`, which the checkout no longer installs, so the showcase, `make contract-check` and `make benchmark-smoke` failed with `Cannot find package '@polyspec/template'`.
 - `make contract-check` checks the Rust showcase as a typed program (T28.77, U-4): its generated program renders through an `AstProgram` over the AST of its artifact after the check of the declarations, and the adapter builds that program; the check required the trait `Program` and an `Engine` of the generated execution that the typed programs replaced, and failed with `rust: generated execution is not connected through a Program`.
