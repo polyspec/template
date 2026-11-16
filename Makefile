@@ -1228,8 +1228,14 @@ checkout-wasm: checkout-wasm-build
 # run: each artifact lies in a folder that make bindings writes again, so separate runs of the targets one after the other
 # leave only the last artifact, and one make run makes bindings once, before all (T28.108); the renderer of ./render and
 # ./decode is built into packages/ts/render (T28.110).
-.PHONY: checkout checkout-packages
-checkout: checkout-node-addon checkout-wasm template-build-ts-render checkout-python-native checkout-packages
+.PHONY: checkout checkout-packages checkout-php-ext
+checkout: checkout-node-addon checkout-wasm template-build-ts-render checkout-python-native checkout-packages checkout-php-ext
+# The PHP extension of the binding, target/release/libpolyspec_template.$(BINDING_DYLIB), for a consumer that links this
+# checkout (T28.114): make link of the consumer links vendor/polyspec/template to packages/php-ext, the Composer side of the
+# PIE package polyspec/template, and the consumer loads this library with php -d extension= after the extension of json, in
+# place of the binary of the PIE package. Built through link cargo of kit, in the release profile without test features.
+checkout-php-ext: bindings
+	$(BINDING_LLVM) $(CARGO) build --locked --release -p polyspec-template-php-ext
 # The built output of the other npm packages that link providers of kit lists for this checkout (T28.111): build-ts builds
 # legacy/packages/ts, the compiler, codemirror and vscode targets build their packages and, through their prerequisites,
 # language and lsp.
