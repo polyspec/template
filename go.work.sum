@@ -1,7 +1,3 @@
-github.com/polyspec/json/packages/go v0.0.27 h1:qR17RIOHEHrrcynzE2LmJLaTzz4lrCTheN9Mn4dpwbk=
-github.com/polyspec/json/packages/go v0.0.27/go.mod h1:LKpskKEB7fS5dyNZyExoC6Js1KpFH4uYg1zcyIzZtbQ=
-github.com/polyspec/json/packages/go v0.0.31 h1:AJeTIg16kCtqvxeI+P9vlbIrmGZo+Y7iI5N1t47O1Ec=
-github.com/polyspec/json/packages/go v0.0.31/go.mod h1:LKpskKEB7fS5dyNZyExoC6Js1KpFH4uYg1zcyIzZtbQ=
 golang.org/x/mod v0.41.0 h1:qJmnOUb4YB+FsEuM3HcWucdZASCPGhsX6uljO6pog0c=
 golang.org/x/mod v0.41.0/go.mod h1:Ek9pY8RKWXwsWvd3rQiHYtMqkjSUV+s1Rj7j4H5Ur6o=
 golang.org/x/sync v0.24.0 h1:iqiDrGoDgyuvAKrhLQthUEzU/R378N78gXbBjxed7oA=
