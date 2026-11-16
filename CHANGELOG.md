@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The README of the legacy Python package installs it from a checkout and names jsonschema (T28.96): it named a release wheel that no release holds.
 - `make template-install-check` installs the Rust crate as its release does, from the tracked files at a path with `cargo run --locked` (T28.95): its `cargo package`, the archive of crates.io, failed since binding-core is a git dependency.
 - The legacy Python package is the distribution `polyspec-template-legacy` (T28.93), import name `polyspec.template` unchanged: it shared the distribution name `polyspec-template` with the Python binding, so `make link` found two providers of one package.
 - `.gitignore` ignores the `go.work` and `go.work.sum` of every Go module below the root (T28.94): the module `packages/go` had no line, so `make link` failed on its `go.work`.

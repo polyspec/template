@@ -8,13 +8,13 @@ template 언어의 Python 구현: lexer, parser, renderer, 내장 함수, 명령
 
 ## 설치
 
-이 package는 GitHub release의 asset인 wheel에서 설치합니다. `vX.Y.Z`를 release tag로 바꾸고 `https://github.com/polyspec/template/releases/download/vX.Y.Z/`에서 `polyspec_template_legacy-X.Y.Z-py3-none-any.whl`을 내려받습니다:
+이 package는 전환기의 legacy 언어 package이고 release 대상이 아닙니다(docs/spec/runtime.md#transition). 그래서 그 wheel을 가진 release는 없습니다. 이 저장소의 체크아웃에서 설치합니다:
 
 ```sh
-pip install ./polyspec_template_legacy-X.Y.Z-py3-none-any.whl
+pip install ./legacy/packages/python
 ```
 
-wheel은 Python 3.14를 요구하며 다른 package가 필요하지 않습니다. 이 저장소의 체크아웃에서는 `pip install ./legacy/packages/python`으로 설치합니다.
+Python 3.14와, `pyproject.toml`이 고정한 버전의 jsonschema가 필요합니다.
 
 ## 렌더링
 
