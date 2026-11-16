@@ -193,10 +193,7 @@ struct FileIdentity;
 
 #[cfg(not(any(unix, windows)))]
 fn file_identity(_file: &File) -> std::io::Result<FileIdentity> {
-    Err(std::io::Error::new(
-        ErrorKind::Unsupported,
-        "this target reports no file identity",
-    ))
+    Err(std::io::Error::new(ErrorKind::Unsupported, "this target reports no file identity"))
 }
 
 impl FsLoader {
