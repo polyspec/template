@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `make test-binding-go-vet` also vets the Go module outside the workspace with its own `go.sum` (T28.101): in the workspace a `go.sum` that missed a sum passed.
 - `make bindings-check` writes the release recipes before binding check (T28.100): it compared the `packages/release.mk` of an earlier run and failed with CK-94 after a change of binding.
 - `make template-install-bindings` installs the PHP extension of json with PIE, and `make test-binding-php` loads it (T28.97): no recipe installed it, so the generated PHP tests failed with `Class "Polyspec\Json\OrderedMap" not found`.
 - The README of the legacy Python package installs it from a checkout and names jsonschema (T28.96): it named a release wheel that no release holds.

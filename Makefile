@@ -1249,8 +1249,12 @@ test-binding-go-build: bindings
 	$(CARGO) build --locked -p polyspec-template-go --features $(BINDING_GO_FEATURES)
 test-binding-go-format: test-binding-go-build
 	test -z "$$(cd packages/go && $(BINDING_GOFMT) -l .)"
+# The module packages/go is released on its own, so it is also vetted outside the workspace of go.work, with the requirements and
+# sums of its own go.mod and go.sum only (GOWORK=off, -mod=readonly): in the workspace go.work.sum and the other modules
+# answer for them, and a go.sum that misses a sum passes.
 test-binding-go-vet: test-binding-go-format
 	cd packages/go && $(BINDING_GO_ENV) $(GO) vet ./...
+	cd packages/go && GOWORK=off $(BINDING_GO_ENV) $(GO) vet -mod=readonly ./...
 test-binding-go: test-binding-go-vet
 	cd packages/go && $(BINDING_GO_ENV) $(GO) test -count=1 ./...
 
