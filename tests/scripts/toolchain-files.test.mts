@@ -163,7 +163,10 @@ test('npm allows the URL dependencies of the root package.json through .npmrc, a
   assert.match(read('.npmrc'), /^allow-remote=root$/m, '.npmrc does not allow the URL of @polyspec/kit that package.json names; npm 12 refuses npm ci with EALLOWREMOTE');
   const urls = [...read('package-lock.json').matchAll(/"resolved": "(https:\/\/github\.com\/[^"]+)"/g)].map(match => match[1]);
   const manifest = parsedJsonObject(read('package.json'), 'package.json');
-  const declared = Object.values(isJsonObject(manifest.devDependencies) ? manifest.devDependencies : {});
+  const declared = ['devDependencies', 'optionalDependencies'].flatMap(field => {
+    const dependencies = manifest[field];
+    return Object.values(isJsonObject(dependencies) ? dependencies : {});
+  });
   assert.deepEqual(urls.filter(url => !declared.includes(url)), [], 'package-lock.json resolves a URL that the root package.json does not name, which allow-remote=root refuses');
 });
 
