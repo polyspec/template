@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The section `## Idempotency` of `AGENTS.md` opens with its paragraph, and the rule on the runners of the workflow jobs follows it (T28.74): the rule stood before the paragraph, which `make rules-check` reported as a paragraph that introduces no section.
 - The cases `data_invalid_utf8` of `engine.render_json` and `engine.prepare` reach the core in every target (T28.73, VAL-12, binding GN-6k, GN-6x): their `assign` gave a `text` with an unpaired surrogate, which a binding converts only with the `in` function of json, so Node failed with `JsonValueError: text holds an unpaired surrogate` and PHP with `JsonValueError: text is not UTF-8` instead of `data_invalid_utf8`. The text is the value `{"kind": "text16", "value": [97, 55296]}`, which json makes from its UTF-16 code units in the five targets, and the Rust contract runner writes such a value as a JSON string of `\u` escapes.
 
 - The case file holds no case that needs a host object (T28.72, VAL-19): `a_native_object_is_kept` of `bind` and `a_native_object_echoes_no_member` of `engine.render` gave the value `{"host": "object"}`, which the generated tests of no binding make, so they failed in Node and PHP with `a case value of the alias template_value is {"kind": <value kind>, "value": ...}`. They are the tests `a_native_object_is_kept_by_bind` and `a_native_object_echoes_no_member` of `packages/rust/tests/host_values.rs`.

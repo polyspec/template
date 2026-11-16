@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `AGENTS.md`의 `## 멱등성` 절은 그 문단으로 시작하고, workflow job의 runner 규칙이 그 뒤에 온다(T28.74). 그 규칙이 문단 앞에 있어 `make rules-check`가 어느 절도 소개하지 않는 문단으로 보고했다.
 - `engine.render_json`과 `engine.prepare`의 case `data_invalid_utf8`은 모든 대상에서 core에 도달한다(T28.73, VAL-12, binding GN-6k, GN-6x). 그 `assign`은 짝 없는 surrogate를 가진 `text`를 주었는데, 바인딩은 그것을 json의 `in` 함수로만 변환한다. 그래서 Node는 `data_invalid_utf8` 대신 `JsonValueError: text holds an unpaired surrogate`로, PHP는 `JsonValueError: text is not UTF-8`로 실패했다. 이제 그 text는 json이 다섯 대상에서 UTF-16 code unit으로 만드는 값 `{"kind": "text16", "value": [97, 55296]}`이며, Rust contract runner는 그런 값을 `\u` escape의 JSON 문자열로 쓴다.
 
 - case 파일은 host 객체가 필요한 case를 담지 않는다(T28.72, VAL-19). `bind`의 `a_native_object_is_kept`와 `engine.render`의 `a_native_object_echoes_no_member`는 어떤 바인딩의 생성된 시험도 만들지 않는 값 `{"host": "object"}`를 주어서, Node와 PHP에서 `a case value of the alias template_value is {"kind": <value kind>, "value": ...}`로 실패했다. 이제 그것은 `packages/rust/tests/host_values.rs`의 시험 `a_native_object_is_kept_by_bind`와 `a_native_object_echoes_no_member`다.
