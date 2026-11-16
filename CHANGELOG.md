@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `.gitignore` ignores the `go.work` and `go.work.sum` of every Go module below the root (T28.94): the module `packages/go` had no line, so `make link` failed on its `go.work`.
 - Pin kit 0.0.115 (T28.92).
 - Pin json 0.0.32 on binding-core 0.0.13 (T28.91): the crates, the Go module with its sums in `packages/go/go.sum`, composer, Python and npm requirements, `package-lock.json` and the wheel hashes of `packages/python/requirements-bindings.txt`.
 - The generated Go module `packages/go` tracks its `go.sum` (T28.90): it resolved the Go module of json only through `go.work.sum` of the checkout, so outside the workspace `go vet` failed with `missing go.sum entry`.

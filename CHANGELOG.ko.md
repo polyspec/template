@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `.gitignore`는 root 아래 모든 Go module의 `go.work`와 `go.work.sum`을 무시한다(T28.94). module `packages/go`의 줄이 없어서 `make link`가 그 `go.work`에서 실패했다.
 - kit 0.0.115를 pin한다(T28.92).
 - binding-core 0.0.13 위의 json 0.0.32를 pin한다(T28.91). crate, `packages/go/go.sum`에 sum을 둔 Go module, composer·Python·npm 요구, `package-lock.json`, `packages/python/requirements-bindings.txt`의 wheel hash가 대상이다.
 - 생성 Go module `packages/go`는 자기 `go.sum`을 추적한다(T28.90). checkout의 `go.work.sum`으로만 json Go module을 풀어서, workspace 밖에서 `go vet`이 `missing go.sum entry`로 실패했다.

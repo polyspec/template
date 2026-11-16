@@ -68,10 +68,8 @@ examples/site/data/scenarios.json
 examples/site/data/results.json
 
 # The go.work and go.work.sum that the link of kit writes beside each Go module of the consumer, never tracked (K205, T26.7-47)
-examples/showcase/adapters/go/go.work
-examples/showcase/adapters/go/go.work.sum
-legacy/packages/go/go.work
-legacy/packages/go/go.work.sum
+*/**/go.work
+*/**/go.work.sum
 # The local Claude Code settings of each developer, which the repository never tracks (T27.1-47)
 /.claude/settings.local.json
 
