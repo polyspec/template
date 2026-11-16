@@ -22,6 +22,7 @@
 - legacy PHP library의 Composer package 이름은 `polyspec/template-legacy`다(T28.112). namespace `Polyspec\Template`은 그대로다. PHP binding `packages/php-ext`와 이름 `polyspec/template`을 함께 써서, kit의 `link providers`가 한 Composer package에 provider 둘을 찾았다.
 - `.gitignore`는 root 아래 모든 Go module의 `go.work`와 `go.work.sum`을 무시한다(T28.94). module `packages/go`의 줄이 없어서 `make link`가 그 `go.work`에서 실패했다.
 - kit 0.0.115를 pin한다(T28.92).
+- 릴리스 0.0.28은 binding 0.0.17과, 같은 binding으로 빌드된 json 0.0.34로 빌드한다(T28.33). `polyspec-binding-core`의 줄은 모두 tag v0.0.17을, `polyspec-json`의 줄은 모두 tag v0.0.34를 적는다. 그래서 `Cargo.lock`과 Rust showcase adapter의 lock은 각각 한 벌씩 갖는다. `package.json`은 그 release asset을 가리키고 `package-lock.json`은 그 integrity를 고정한다. sum을 둔 Go module, composer, Python requirement와 `packages/python/requirements-bindings.txt`의 wheel hash는 json 0.0.34를 적는다. json 0.0.34는 parse의 깊이 한도를 `i64`로 받는다.
 - binding-core 0.0.13 위의 json 0.0.32를 pin한다(T28.91). crate, `packages/go/go.sum`에 sum을 둔 Go module, composer·Python·npm 요구, `package-lock.json`, `packages/python/requirements-bindings.txt`의 wheel hash가 대상이다.
 - 생성 Go module `packages/go`는 자기 `go.sum`을 추적한다(T28.90). checkout의 `go.work.sum`으로만 json Go module을 풀어서, workspace 밖에서 `go vet`이 `missing go.sum entry`로 실패했다.
 - `make test-binding-go`는 build tag `polyspec_template_<feature>`로 template의 생성 Go 시험을 켠다(T28.88, binding GN-15). tag를 `polyspec_<feature>`로 이름해서, 대신 json Go module의 시험을 켰고 그 link가 실패했다.

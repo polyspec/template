@@ -27,12 +27,12 @@ pub fn parse_json(text: &str) -> Result<Value, BindError> {
 /// at the 65th level of nesting (VAL-20), so a deep document is never read further.
 pub fn read_json(text: &str) -> Result<polyspec_json::Value, BindError> {
     let checked = check_values(text);
-    let depth = match u64::try_from(crate::value::MAX_DEPTH) {
+    let depth = match i64::try_from(crate::value::MAX_DEPTH) {
         Ok(depth) => depth,
         Err(error) => {
             return Err(BindError {
                 code: ErrorCode::Internal,
-                message: format!("the depth limit does not fit u64: {error}"),
+                message: format!("the depth limit does not fit i64: {error}"),
             });
         }
     };
