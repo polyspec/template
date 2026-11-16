@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- 생성 Go module `packages/go`는 자기 `go.sum`을 추적한다(T28.90). checkout의 `go.work.sum`으로만 json Go module을 풀어서, workspace 밖에서 `go vet`이 `missing go.sum entry`로 실패했다.
 - `make test-binding-go`는 build tag `polyspec_template_<feature>`로 template의 생성 Go 시험을 켠다(T28.88, binding GN-15). tag를 `polyspec_<feature>`로 이름해서, 대신 json Go module의 시험을 켰고 그 link가 실패했다.
 - `make conformance-generated-go`는 생성 Go program이 실행 중에 낸 오류를 legacy Go runtime의 대문자 이름 `E_<KIND>`로 비교한다(T28.86, ERR-1). case의 kind를 그 이름과 그대로 비교해서, 위치가 같은데도 오류 case 47개가 실패했다.
 - `make lint-go`는 같은 run이 생성한 Go binding을 lint한다(T28.85). `typed-generator`에만 의존해서, 앞선 생성이 남긴 `packages/go`의 무시된 `zz_generated_*.go`를 lint했다. 이제 `bindings`에 의존한다.

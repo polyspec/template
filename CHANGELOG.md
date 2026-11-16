@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The generated Go module `packages/go` tracks its `go.sum` (T28.90): it resolved the Go module of json only through `go.work.sum` of the checkout, so outside the workspace `go vet` failed with `missing go.sum entry`.
 - `make test-binding-go` turns on the generated Go tests of template with the build tags `polyspec_template_<feature>` (T28.88, binding GN-15): it named them `polyspec_<feature>`, which turned on the tests of the Go module of json instead, whose link failed.
 - `make conformance-generated-go` compares the error that a generated Go program raises at run time with the capital name `E_<KIND>` of the legacy Go runtime (T28.86, ERR-1): it compared the kind of the case with that name, so 47 error cases failed with their position equal.
 - `make lint-go` lints the Go binding that the same run generates (T28.85): it depended on `typed-generator` alone, so it linted the ignored `zz_generated_*.go` of `packages/go` that an earlier generation left; it now depends on `bindings`.
