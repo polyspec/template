@@ -1227,8 +1227,17 @@ checkout-wasm: checkout-wasm-build
 # run: each artifact lies in a folder that make bindings writes again, so separate runs of the targets one after the other
 # leave only the last artifact, and one make run makes bindings once, before all (T28.108); the renderer of ./render and
 # ./decode is built into packages/ts/render (T28.110).
-.PHONY: checkout
-checkout: checkout-node-addon checkout-wasm template-build-ts-render checkout-python-native
+.PHONY: checkout checkout-packages
+checkout: checkout-node-addon checkout-wasm template-build-ts-render checkout-python-native checkout-packages
+# The built output of the other npm packages that link providers of kit lists for this checkout (T28.111): build-ts builds
+# legacy/packages/ts, the compiler, codemirror and vscode targets build their packages and, through their prerequisites,
+# language and lsp.
+checkout-packages: template-build-compiler template-build-codemirror template-build-vscode
+# Every file that an npm provider of this checkout names in its exports, main or bin exists after make checkout, and each
+# JavaScript entry of its exports loads (T28.111).
+.PHONY: checkout-check
+checkout-check: checkout
+	$(NODE) scripts/check-checkout-exports.mts $(KIT)/link.$(KIT_EXT)
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
 binding-node-package-wasm-bindgen-check: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
