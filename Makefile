@@ -319,9 +319,10 @@ ci-editor: ## The job editor: the Node.js packages, the browsers and VS Code, th
 	$(MAKE) --no-print-directory template-install-browsers
 	$(MAKE) --no-print-directory template-install-vscode
 	$(MAKE) --no-print-directory ci-targets VIRTUAL_DISPLAY=1 TARGETS="editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode template-test-vscode-integration"
-ci-go: ## The job go: Go and the modules of go.work, then the Go checks; ONLINE
-	$(MAKE) --no-print-directory install-tools TOOLS="go"
+ci-go: ## The job go: Go, the modules of go.work, the Rust toolchain and the crates that binding generate reads, then the Go checks; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="go rust"
 	$(MAKE) --no-print-directory template-install-go
+	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-go-format template-lint-go-modules test-go conformance-go"
 ci-rust: ## The job rust: the Rust toolchain and the crates, then the Rust checks; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust"
