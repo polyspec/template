@@ -14,7 +14,7 @@
 import assert from 'node:assert/strict';
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-import { installCargoLock, createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mts';
+import { createWorkspace, goModuleEnvironment, removeWorkspace } from './install-workspace.mts';
 import { pythonCommand, pythonEnvironment } from './python-toolchain.mts';
 import { captured } from './required.mts';
 import { CARGO } from './temporary-workspace.mts';
@@ -111,31 +111,33 @@ func main(){ data,_:=os.ReadFile("data.json"); assign,err:=template.ParseJSON(da
   run('go', ['run', '-mod=readonly', '.'], { cwd: directory, env: environment });
 }
 
+// The crate is released as a git tag (config/release.json), so the check installs it in the form of its release: a consumer
+// that names the tag gets the tracked files of the repository, the root Cargo workspace whose lints the crate inherits and
+// the root Cargo.lock included. The release form and the checked form must be the same: `cargo package` makes the archive
+// of crates.io, which requires every dependency on crates.io, and the git dependencies binding-core and json are none.
 function checkRust() {
-  const target = join(temporary, 'cargo-target');
-  run(CARGO, ['package', '--locked', '--allow-dirty', '--manifest-path', join(root, 'packages/rust/Cargo.toml')], { env: { CARGO_TARGET_DIR: target } });
-  const cargoManifest = readToml(join(root, 'packages/rust/Cargo.toml'));
-  const crate = `polyspec-template-${tomlString(tomlTable(cargoManifest.package, 'the [package] of packages/rust/Cargo.toml').version, 'the version of packages/rust/Cargo.toml')}`;
-  const archive = join(target, `package/${crate}.crate`);
-  const packages = join(temporary, 'cargo-packages');
-  mkdirSync(packages);
-  run('tar', ['-xzf', archive, '-C', packages]);
+  const source = join(temporary, 'cargo-source');
+  for (const path of run('git', ['ls-files']).split('\n').filter(Boolean)) {
+    const destination = join(source, path);
+    mkdirSync(resolve(destination, '..'), { recursive: true });
+    cpSync(join(root, path), destination);
+  }
   const directory = join(temporary, 'rust');
   mkdirSync(join(directory, 'src'), { recursive: true });
   stageScenario(directory);
   cpSync(join(root, 'examples/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
-  writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(packages, crate))}}\n`);
-  // The install project builds with the locked versions of the package and the toolchain of the checkout. Cargo does not
-  // resolve the development dependencies of a path dependency for an install project.
-  const development = Object.keys(tomlTable(cargoManifest['dev-dependencies'], 'the [dev-dependencies] of packages/rust/Cargo.toml'));
-  writeFileSync(join(directory, 'Cargo.lock'), installCargoLock(readFileSync(join(root, 'Cargo.lock'), 'utf8'), {
-    name: 'install-check', version: '0.0.1', dependencies: ['polyspec-template'], removed: { 'polyspec-template': development }, lockPath: 'Cargo.lock',
-  }));
+  writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(source, 'packages/rust'))}}\n`);
+  // The install project builds with the locked versions of the package and the toolchain of the checkout. Its lock starts as
+  // the root Cargo.lock, and an offline cargo metadata leaves in it the packages that the install project resolves, its features
+  // and the development dependencies of a path dependency included as cargo judges them, at their locked versions; cargo run
+  // --locked then refuses any other change.
+  cpSync(join(root, 'Cargo.lock'), join(directory, 'Cargo.lock'));
   cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   writeFileSync(join(directory, 'src/main.rs'), `mod generated { include!(concat!(env!("CARGO_MANIFEST_DIR"), "/generated.rs")); }
 use polyspec_template::{AstProgram, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
 fn main(){ let assign=polyspec_template::read_json(include_str!("../data.json")).unwrap(); let raw=polyspec_template::read_json(include_str!("../define.json")).unwrap(); let mut options=RenderOptions::default(); options.define=Some(polyspec_template::defines_from_json(&raw).unwrap()); let expected=include_str!("../expected.html"); let ast=Engine::new(AstProgram::new(EngineOptions{loader:Some(Box::new(FsLoader::new("templates"))),..Default::default()}).unwrap()).prepare(RenderTarget::Name("layout"),&assign,&options).unwrap().render().unwrap(); let program=generated::GeneratedProgram::new(EngineOptions::default()).unwrap(); let direct=program.render("layout",&assign,&options).unwrap(); assert_eq!(ast,expected);assert_eq!(direct,expected);assert_eq!(ast,direct); }
 `);
+  run(CARGO, ['metadata', '--offline', '--format-version', '1'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
   run(CARGO, ['run', '--quiet', '--locked'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
 }
 
