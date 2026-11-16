@@ -20467,21 +20467,6 @@
       }
     },
     {
-      "id": "data_unsupported_type",
-      "rule": "VAL-23",
-      "value": {
-        "kind": "bytes",
-        "value": {
-          "hex": "ff"
-        }
-      },
-      "raises": {
-        "kind": "data_unsupported_type",
-        "status": null,
-        "category": "type"
-      }
-    },
-    {
       "id": "data_depth",
       "rule": "VAL-20",
       "value": {
@@ -20495,6 +20480,23 @@
         "kind": "data_depth",
         "status": null,
         "category": "value"
+      }
+    }
+  ],
+  "template_value/bytes": [
+    {
+      "id": "data_unsupported_type",
+      "rule": "VAL-23",
+      "value": {
+        "kind": "bytes",
+        "value": {
+          "hex": "ff"
+        }
+      },
+      "raises": {
+        "kind": "data_unsupported_type",
+        "status": null,
+        "category": "type"
       }
     }
   ]

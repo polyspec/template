@@ -4814,6 +4814,20 @@
       "alias": "template_value",
       "file": "contracts/core-cases.json",
       "group": "template_value"
+    },
+    {
+      "alias": "template_value",
+      "file": "contracts/core-cases.json",
+      "group": "template_value/bytes",
+      "only": {
+        "targets": [
+          "python",
+          "node",
+          "wasm",
+          "go"
+        ],
+        "reason": "VAL-23"
+      }
     }
   ]
 }

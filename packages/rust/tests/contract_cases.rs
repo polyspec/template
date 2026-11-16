@@ -1574,18 +1574,26 @@ fn main() {
         .flatten()
         .map(|kind| kind.as_str().expect("a variant").to_string())
         .collect();
-    let alias_cases: Vec<Json> = contract["cases"]
+    let alias_groups: Vec<String> = contract["cases"]
         .as_array()
         .expect("cases")
         .iter()
         .filter(|row| row["alias"] == alias)
-        .flat_map(|row| {
+        .map(|row| {
             assert_eq!(row["file"], "contracts/core-cases.json", "the file of the cases of {alias}");
-            assert_eq!(row["group"], alias, "the group of the cases of an alias has its id");
-            match file[alias].as_array() {
-                Some(cases) => cases.clone(),
-                None => Vec::new(),
-            }
+            let group = row["group"].as_str().expect("a group");
+            assert!(
+                group == alias || group.starts_with(&format!("{alias}/")),
+                "the group {group} of the cases of an alias has its id"
+            );
+            group.to_string()
+        })
+        .collect();
+    let alias_cases: Vec<Json> = alias_groups
+        .iter()
+        .flat_map(|group| match file[group.as_str()].as_array() {
+            Some(cases) => cases.clone(),
+            None => Vec::new(),
         })
         .collect();
     {
@@ -1598,7 +1606,7 @@ fn main() {
         let id = case["id"].as_str().expect("a case id").to_string();
         trials.push(Trial::test(format!("{alias}::{id}"), move || alias_case(&case)));
     }
-    groups.push(alias.to_string());
+    groups.extend(alias_groups);
     for row in contract["cases"].as_array().expect("cases") {
         if row.get("alias").is_some() {
             continue;
