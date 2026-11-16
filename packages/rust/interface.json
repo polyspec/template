@@ -32,6 +32,18 @@
           "formats": [
             "import"
           ]
+        },
+        "./render": {
+          "types": "./render/render.d.ts",
+          "import": "./render/render.mjs",
+          "require": "./render/render.cjs",
+          "files": [
+            "render"
+          ],
+          "formats": [
+            "import",
+            "require"
+          ]
         }
       }
     },

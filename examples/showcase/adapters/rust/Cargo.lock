@@ -139,11 +139,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "polyspec-binding-core"
+version = "0.0.13"
+source = "git+https://github.com/polyspec/binding.git?tag=v0.0.13#4c3653bef093f696efb6c0c679887548f0f57103"
+dependencies = [
+ "indexmap",
+ "libc",
+ "tokio-util",
+]
+
+[[package]]
 name = "polyspec-json"
 version = "0.0.30"
 source = "git+https://github.com/polyspec/json.git?tag=v0.0.30#a34218e3dd131a5d74d0979ed1be045dda94982e"
 dependencies = [
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.10",
  "ryu-js",
  "serde",
  "serde_json",
@@ -153,7 +163,7 @@ dependencies = [
 name = "polyspec-template"
 version = "0.0.28"
 dependencies = [
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "winapi-util",
 ]

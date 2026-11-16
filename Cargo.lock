@@ -1134,6 +1134,16 @@ source = "git+https://github.com/polyspec/binding.git?tag=v0.0.10#e38c4a2b3c7ceb
 dependencies = [
  "indexmap",
  "libc",
+ "tokio-util",
+]
+
+[[package]]
+name = "polyspec-binding-core"
+version = "0.0.13"
+source = "git+https://github.com/polyspec/binding.git?tag=v0.0.13#4c3653bef093f696efb6c0c679887548f0f57103"
+dependencies = [
+ "indexmap",
+ "libc",
  "serde_json",
  "tokio",
  "tokio-util",
@@ -1144,7 +1154,7 @@ name = "polyspec-json"
 version = "0.0.30"
 source = "git+https://github.com/polyspec/json.git?tag=v0.0.30#a34218e3dd131a5d74d0979ed1be045dda94982e"
 dependencies = [
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.10",
  "ryu-js",
  "serde",
  "serde_json",
@@ -1156,7 +1166,7 @@ version = "0.0.28"
 dependencies = [
  "clap",
  "libtest-mimic",
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "polyspec-template",
  "serde",
@@ -1169,7 +1179,7 @@ dependencies = [
 name = "polyspec-template-go"
 version = "0.0.28"
 dependencies = [
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "polyspec-template",
 ]
@@ -1181,7 +1191,7 @@ dependencies = [
  "napi",
  "napi-build",
  "napi-derive",
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "polyspec-template",
 ]
@@ -1191,7 +1201,7 @@ name = "polyspec-template-php-ext"
 version = "0.0.28"
 dependencies = [
  "ext-php-rs",
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "polyspec-template",
 ]
@@ -1200,7 +1210,7 @@ dependencies = [
 name = "polyspec-template-python"
 version = "0.0.28"
 dependencies = [
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "polyspec-template",
  "pyo3",
@@ -1211,7 +1221,7 @@ name = "polyspec-template-wasm"
 version = "0.0.28"
 dependencies = [
  "js-sys",
- "polyspec-binding-core",
+ "polyspec-binding-core 0.0.13",
  "polyspec-json",
  "polyspec-template",
  "wasm-bindgen",

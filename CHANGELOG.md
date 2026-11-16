@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The release 0.0.28 builds with binding 0.0.13 (T28.68): `package.json` names its release asset, `package-lock.json` pins its integrity, and every line on `polyspec-binding-core` names the tag v0.0.13, which `Cargo.lock` and the lock of the Rust showcase adapter pin. `packages.node.entries` of `packages/rust/interface.json` declares `./render` (RT-80), because the package that binding generates exported only the entries that the contract names.
+
 - The Rust crate compiles for `wasm32-unknown-unknown` (T28.67, RT-10): `FsLoader` used `FileIdentity` and `file_identity`, which only Unix and Windows defined, so `cargo check --target wasm32-unknown-unknown` failed with E0425. On a target whose standard library reports no file identity, a filesystem load of a file fails with `Unsupported`, because the loader cannot give the file one name. `test-rust` runs `template-test-rust-wasm`, which checks the crate for that target.
 
 - Every binding target of the full suite runs one command (T28.66, T19.8): `check-declarations`, `binding-node-package` and the targets `test-binding-node`, `-wasm`, `-php`, `-python` and `-go` ran two to twelve commands each, so `tests/scripts/failure-accumulation.test.mts` failed; each earlier command is a prerequisite target of its own, such as `test-binding-go-vet` or `binding-node-package-wasm-build`. The message of a missing Python interpreter names a path outside the checkout whole: `pythonCommand` showed it relative to the checkout, so `tests/scripts/python-toolchain.test.mts` failed for an interpreter in a temporary directory.
