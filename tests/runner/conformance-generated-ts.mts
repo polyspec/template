@@ -61,10 +61,11 @@ try {
     progress.start(step);
     // The compiler runs as `node <tsc>`, started by name, by the path of its package (no bin links, T18.4).
     const result = await runStep('node', [
-      tsc, '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
+      // The files of the command line are compiled with the options of the command line alone: --ignoreConfig, since tsc
+      // refuses files on its command line below a tsconfig.json (TS5112), and the workspace lies in var/tmp of the checkout,
+      // below its tsconfig.json (T28.113).
+      tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', output,
       ...pending.map(item => item.sourcePath),
-      // tsc refuses files on its command line in a directory with a tsconfig.json, such as the root of the checkout
-      // (TS5112), so it runs in the workspace, which has none.
     ], { cwd: temporary });
     if (result.status !== 0) {
       const reason = `tsc exited with ${result.status}\n${result.stdout}${result.stderr}`;
