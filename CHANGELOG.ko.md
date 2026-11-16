@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- `engine.render_json`과 `engine.prepare`의 case `data_invalid_utf8`은 모든 대상에서 core에 도달한다(T28.73, VAL-12, binding GN-6k, GN-6x). 그 `assign`은 짝 없는 surrogate를 가진 `text`를 주었는데, 바인딩은 그것을 json의 `in` 함수로만 변환한다. 그래서 Node는 `data_invalid_utf8` 대신 `JsonValueError: text holds an unpaired surrogate`로, PHP는 `JsonValueError: text is not UTF-8`로 실패했다. 이제 그 text는 json이 다섯 대상에서 UTF-16 code unit으로 만드는 값 `{"kind": "text16", "value": [97, 55296]}`이며, Rust contract runner는 그런 값을 `\u` escape의 JSON 문자열로 쓴다.
+
 - case 파일은 host 객체가 필요한 case를 담지 않는다(T28.72, VAL-19). `bind`의 `a_native_object_is_kept`와 `engine.render`의 `a_native_object_echoes_no_member`는 어떤 바인딩의 생성된 시험도 만들지 않는 값 `{"host": "object"}`를 주어서, Node와 PHP에서 `a case value of the alias template_value is {"kind": <value kind>, "value": ...}`로 실패했다. 이제 그것은 `packages/rust/tests/host_values.rs`의 시험 `a_native_object_is_kept_by_bind`와 `a_native_object_echoes_no_member`다.
 
 - 릴리스 0.0.28은 json 0.0.31로 빌드한다(T28.70, binding CK-20). `polyspec-json`에 대한 모든 줄은 `polyspec-binding-core` 0.0.13에 의존하는 json 릴리스의 tag v0.0.31을 가리킨다. 그래서 `Cargo.lock`은 core crate의 릴리스 하나만 담고 `binding check --release`는 아무것도 보고하지 않는다. 0.0.10에 의존하는 json 0.0.30에서는 `Cargo.lock`이 둘을 담아 바인딩의 crate가 컴파일되지 않았다(`polyspec_json::Error: Kinds`). `binding scaffold`가 쓰는 manifest, `packages/go/go.mod`와 `go.work.sum`, `package.json`의 npm asset과 `package-lock.json`의 그 integrity, `packages/python/requirements-bindings.txt`의 wheel과 sha256은 json 0.0.31을 가리킨다. `tests/scripts/toolchain-files.test.mts`는 `allow-remote=root`처럼 root `package.json`의 `optionalDependencies` URL도 명명된 것으로 읽는다. 이 시험은 `devDependencies`만 읽어서, T28.69가 거기에 명명한 json의 platform package에 대해 실패했다.

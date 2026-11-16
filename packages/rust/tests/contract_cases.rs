@@ -154,6 +154,7 @@ fn json_text(value: &Json) -> Result<String, Failed> {
         ("number", Some(Json::String(literal))) => Ok(literal.clone()),
         ("text", Some(text @ Json::String(_))) => Ok(text.to_string()),
         ("text", Some(Json::Object(form))) => ill_formed_text(form),
+        ("text16", Some(Json::Array(units))) => text16_text(units),
         ("list", Some(Json::Array(items))) => Ok(format!(
             "[{}]",
             items.iter().map(json_text).collect::<Result<Vec<_>, _>>()?.join(",")
@@ -182,6 +183,23 @@ fn ill_formed_text(form: &serde_json::Map<String, Json>) -> Result<String, Faile
         }
         _ => fail(format!("{} is no text of a case", Json::Object(form.clone()))),
     }
+}
+
+/// The JSON string of a text of the kind `text16` (binding GN-6x): its UTF-16 code units, each as an escape `\uXXXX`, so
+/// that an unpaired surrogate stays one code unit of the string (VAL-12).
+fn text16_text(units: &[Json]) -> Result<String, Failed> {
+    let mut text = String::from("\"");
+    for unit in units {
+        let Some(number) = unit.as_u64() else {
+            return fail(format!("{unit} is no UTF-16 code unit"));
+        };
+        match u16::try_from(number) {
+            Ok(code) => text.push_str(&format!("\\u{code:04x}")),
+            Err(error) => return fail(format!("{unit} is no UTF-16 code unit: {error}")),
+        }
+    }
+    text.push('"');
+    Ok(text)
 }
 
 fn json_value(value: &Json) -> Result<polyspec_template::polyspec_json::Value, Failed> {

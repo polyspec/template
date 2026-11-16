@@ -3658,10 +3658,11 @@
           [
             "s",
             {
-              "kind": "text",
-              "value": {
-                "ill_formed": "a"
-              }
+              "kind": "text16",
+              "value": [
+                97,
+                55296
+              ]
             }
           ]
         ]
@@ -8552,10 +8553,11 @@
           [
             "s",
             {
-              "kind": "text",
-              "value": {
-                "ill_formed": "a"
-              }
+              "kind": "text16",
+              "value": [
+                97,
+                55296
+              ]
             }
           ]
         ]
