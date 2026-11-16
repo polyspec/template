@@ -559,7 +559,9 @@ lint-php: build-php typed-generator
 lint-ts: typed-generator
 lint-python: typed-generator
 lint-rust: typed-generator
-lint-go: typed-generator
+# The module packages/go holds the Go binding, whose files make bindings writes, so the lint reads the generation of
+# this run and not one that an earlier run left.
+lint-go: typed-generator bindings
 
 .PHONY: template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format
 template-lint-go-format:
