@@ -94,7 +94,8 @@ function checkGeneratedEngineRoute() {
     typescript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/],
     javascript: [/new Engine\(generated[\s\S]*?generatedProgram\(root\)/],
     go: [/program, err = generatedProgram/, /engine := template\.NewEngine\(program\)/],
-    rust: [/generated_engine\([\s\S]*?Engine::new\(generated::/],
+    // The Rust adapter builds the typed program of each scenario and calls its own checked render.
+    rust: [/fn generated_engine\([\s\S]*?generated::\w+::GeneratedProgram::new\(/],
     php: [/generatedProgram\(\$root\)/, /new Engine\(\$program\)/],
     python: [/generated_program\(root\)/, /Engine\(program\)/],
   };
@@ -112,7 +113,9 @@ function checkGeneratedEngineRoute() {
     typescript: id => [`generated/typed/${id}.ts`, /export class GeneratedProgram implements Program/],
     javascript: id => [`generated/javascript/${id}.js`, /export class GeneratedProgram/],
     go: id => [`go/generated/${id}/generated.go`, /type GeneratedProgram struct[\s\S]*?func \(p \*GeneratedProgram\) Prepare/],
-    rust: id => [`generated/typed/${id}.rust`, /pub struct GeneratedProgram[\s\S]*?impl Program for GeneratedProgram/],
+    // Rust has moved to typed programs (compiler.md, Transition): its program checks a request against the declarations
+    // and renders it with the AstProgram of the runtime over a MapLoader of the AST of the artifact (RT-41).
+    rust: id => [`generated/typed/${id}.rust`, /pub struct GeneratedProgram \{ program: AstProgram \}[\s\S]*?MapLoader::new\(\)[\s\S]*?generated_check_assign\(&root\)[\s\S]*?self\.program\.render\(/],
     php: id => [`generated/php/${id}/GeneratedProgram.php`, /final class GeneratedProgram implements Program/],
     python: id => [`generated/typed/${showcasePythonModule(id)}.py`, /class GeneratedProgram\(Program\):/],
   };

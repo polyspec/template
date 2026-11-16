@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `make contract-check` checks the Rust showcase as a typed program (T28.77, U-4): its generated program renders through an `AstProgram` over the AST of its artifact after the check of the declarations, and the adapter builds that program; the check required the trait `Program` and an `Engine` of the generated execution that the typed programs replaced, and failed with `rust: generated execution is not connected through a Program`.
 - `make lint-ts` passes (T28.76): the test RT-80 reads `packages/ts/package.json` through its JSON Schema instead of an assertion from `any`, which oxlint refused, and knip takes `@polyspec/json`, which the Makefile installs for the generated binding tests and no module imports, as used.
 - The Rust core writes the fields of a call, checks the span of a node and of an expression and gives the failure of a load each in one place (T28.75, P34): `make duplication-check` found each of them twice in `ast_json.rs` and `render/engine.rs`.
 - The section `## Idempotency` of `AGENTS.md` opens with its paragraph, and the rule on the runners of the workflow jobs follows it (T28.74): the rule stood before the paragraph, which `make rules-check` reported as a paragraph that introduces no section.
