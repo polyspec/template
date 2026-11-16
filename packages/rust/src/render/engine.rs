@@ -446,21 +446,28 @@ impl AstProgram {
         if !self.loader.blocking_io() {
             return Ok(());
         }
-        let mut pending: Vec<String> = registry
+        // Depth first in the order of their tags, the order of a render (RT-10): of two names of one file, the name that
+        // a render reaches first keeps the file. `pending` is a stack, so each list of names goes on it reversed.
+        let mut named: Vec<String> = registry
             .values()
             .filter_map(|entry| match entry {
                 DefineEntry::Template { template, .. } => Some(template.clone()),
                 DefineEntry::Html(_) => None,
             })
             .collect();
-        named_templates(name, &template.ast.body, &mut pending);
+        named_templates(name, &template.ast.body, &mut named);
+        let mut pending: Vec<String> = named.into_iter().rev().collect();
         let mut seen = std::collections::HashSet::from([name.to_string()]);
         while let Some(next) = pending.pop() {
             if !seen.insert(next.clone()) {
                 continue;
             }
             match self.load_template(&next, None, None) {
-                Ok(loaded) => named_templates(&next, &loaded.ast.body, &mut pending),
+                Ok(loaded) => {
+                    let mut more = Vec::new();
+                    named_templates(&next, &loaded.ast.body, &mut more);
+                    pending.extend(more.into_iter().rev());
+                }
                 Err(RenderError::Kind(error)) => {
                     self.cache
                         .lock()

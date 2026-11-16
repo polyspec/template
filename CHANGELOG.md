@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- Prepare loads the templates that a template names in the order of a render (T28.79, RT-10): of two names of one file, the second fails at its own tag; the Rust core loaded the names from the end of the list, so the conformance case `filesystem/hard-link-second-name` failed at line 1 instead of line 2.
 - The generated TypeScript imports the legacy runtime `@polyspec/template-legacy` until the TypeScript backend moves to typed programs (T28.78, compiler Transition): it imported `@polyspec/template`, which the checkout no longer installs, so the showcase, `make contract-check` and `make benchmark-smoke` failed with `Cannot find package '@polyspec/template'`.
 - `make contract-check` checks the Rust showcase as a typed program (T28.77, U-4): its generated program renders through an `AstProgram` over the AST of its artifact after the check of the declarations, and the adapter builds that program; the check required the trait `Program` and an `Engine` of the generated execution that the typed programs replaced, and failed with `rust: generated execution is not connected through a Program`.
 - `make lint-ts` passes (T28.76): the test RT-80 reads `packages/ts/package.json` through its JSON Schema instead of an assertion from `any`, which oxlint refused, and knip takes `@polyspec/json`, which the Makefile installs for the generated binding tests and no module imports, as used.

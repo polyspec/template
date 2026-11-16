@@ -200,3 +200,37 @@ fn kind(error: RenderError) -> polyspec_template::TemplateError {
         other => panic!("expected a template error, got the error of host code: {other}"),
     }
 }
+
+/// RT-10, RT-77: prepare loads the templates that a template names in the order of their tags, so of two names of one
+/// file the first keeps the file and the second fails at its own tag.
+#[test]
+fn the_second_name_of_a_hard_link_fails_at_its_own_tag() {
+    use polyspec_template::Engine;
+    let root = std::env::temp_dir().join(format!("template-hard-link-{}", std::process::id()));
+    std::fs::create_dir_all(&root).expect("directory");
+    std::fs::write(root.join("input.tpl"), "{+ part.tpl}\n{+ copy.tpl}").expect("input");
+    std::fs::write(root.join("part.tpl"), "x").expect("part");
+    std::fs::hard_link(root.join("part.tpl"), root.join("copy.tpl")).expect("hard link");
+    let engine = Engine::new(
+        AstProgram::new(EngineOptions {
+            loader: Some(Box::new(FsLoader::new(&root))),
+            ..EngineOptions::default()
+        })
+        .expect("program"),
+    );
+    let result = engine
+        .prepare(
+            RenderTarget::Name("input.tpl"),
+            &polyspec_template::polyspec_json::Value::null(),
+            &RenderOptions::default(),
+        )
+        .and_then(|prepared| prepared.render());
+    std::fs::remove_dir_all(&root).expect("cleanup");
+    let Err(RenderError::Kind(error)) = result else {
+        panic!("the render of a second name of one file succeeded")
+    };
+    assert_eq!(
+        (error.code, error.template.as_str(), error.line),
+        (ErrorCode::LoadFailed, "input.tpl", 2)
+    );
+}
