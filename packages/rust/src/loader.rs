@@ -184,6 +184,21 @@ fn file_identity(file: &File) -> std::io::Result<FileIdentity> {
     })
 }
 
+/// The identity of an open file on a target whose standard library reports none (RT-10), such as
+/// `wasm32-unknown-unknown`: the target has no file identity, so the loader cannot give a file one name
+/// and every load that reaches an open file fails.
+#[cfg(not(any(unix, windows)))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct FileIdentity;
+
+#[cfg(not(any(unix, windows)))]
+fn file_identity(_file: &File) -> std::io::Result<FileIdentity> {
+    Err(std::io::Error::new(
+        ErrorKind::Unsupported,
+        "this target reports no file identity",
+    ))
+}
+
 impl FsLoader {
     /// Creates a loader for a root directory.
     pub fn new(root: impl AsRef<Path>) -> FsLoader {

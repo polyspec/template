@@ -1627,6 +1627,13 @@
         "Cargo.toml",
         "Cargo.lock"
       ]
+    },    {
+      "check": "make template-test-rust-wasm",
+      "paths": [
+        "packages/rust/**",
+        "Cargo.toml",
+        "Cargo.lock"
+      ]
     },
     {
       "check": "make template-test-rust-unit",

@@ -696,13 +696,15 @@ template-test-go-backend-vet:
 template-test-go-unit: typed-generator
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) go -- -count=1 -timeout=0 -race ./$(GO_DIR)/... ./examples/showcase/adapters/go/...
 
-test-rust: template-test-rust-clippy template-test-rust-unit ## Rust clippy and tests
+test-rust: template-test-rust-clippy template-test-rust-unit template-test-rust-wasm ## Rust clippy and tests
 
-.PHONY: template-test-rust-clippy template-test-rust-unit
+.PHONY: template-test-rust-clippy template-test-rust-unit template-test-rust-wasm
 template-test-rust-clippy:
 	$(CARGO) clippy --locked --release --all-targets --all-features --manifest-path $(RUST_DIR)/Cargo.toml -- -D warnings
 template-test-rust-unit:
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) cargo --cwd $(RUST_DIR) -- --locked --features __test_support,cli -- --test-threads=1
+template-test-rust-wasm:
+	$(CARGO) check --locked --target wasm32-unknown-unknown --manifest-path $(RUST_DIR)/Cargo.toml
 
 test-php: template-test-php ## PHP unit tests
 

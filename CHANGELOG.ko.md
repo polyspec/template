@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- Rust crate는 `wasm32-unknown-unknown`용으로 컴파일된다(T28.67, RT-10). `FsLoader`가 Unix와 Windows에서만 정의된 `FileIdentity`와 `file_identity`를 사용해서 `cargo check --target wasm32-unknown-unknown`가 E0425로 실패했다. 표준 라이브러리가 파일 identity를 보고하지 않는 target에서 파일의 filesystem load는 `Unsupported`로 실패한다. 로더가 그 파일에 이름 하나를 줄 수 없기 때문이다. `test-rust`는 그 target용으로 crate를 검사하는 `template-test-rust-wasm`을 실행한다.
+
 - 전체 suite의 모든 binding target은 명령 하나를 실행한다(T28.66, T19.8). `check-declarations`, `binding-node-package`, `test-binding-node`, `-wasm`, `-php`, `-python`, `-go` target은 각각 명령 두 개에서 열두 개를 실행해서 `tests/scripts/failure-accumulation.test.mts`가 실패했다. 이제 앞선 명령은 각각 `test-binding-go-vet`, `binding-node-package-wasm-build` 같은 자기 선행 target이다. 없는 Python 인터프리터의 메시지는 checkout 밖의 경로를 전체 경로로 보인다. `pythonCommand`가 그 경로를 checkout 기준 상대 경로로 보여서, 임시 디렉터리의 인터프리터에 대해 `tests/scripts/python-toolchain.test.mts`가 실패했다.
 
 - `@polyspec/template`은 TypeScript 렌더러를 다시 `./render`로 내보낸다(T28.65, RT-80). 새 패키지는 생성 binding(`.`)과 WebAssembly 모듈(`./wasm`)만 내보내서 `@polyspec/template/render` import가 실패했다. 이제 그 경로는 `make build-ts`가 `packages/ts/render`로 빌드하는 `legacy/packages/ts`의 렌더러를 release 0.0.27의 이름 그대로 가리킨다. 이 빌드는 선행 target `template-build-ts-render`가 맡아서 각 target이 명령 하나를 실행한다. `tests/scripts/no-silent-skips.test.mts`는 `packages/`의 폴더만 읽는다. 파일 `packages/release.mk`에서 실패했기 때문이다. `tests/scripts/action-pins.test.mts`는 `KyleMayes/install-llvm-action` v2.0.9의 commit을 검증된 pin에 넣는다.
