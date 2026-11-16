@@ -583,44 +583,6 @@
       "result": "hi a\n"
     },
     {
-      "id": "a_native_object_echoes_no_member",
-      "rule": "VAL-19",
-      "receiver": {
-        "new": "engine.new",
-        "args": {
-          "options": {
-            "loader": {
-              "new": "map_loader.new",
-              "args": {},
-              "then": [
-                {
-                  "call": "map_loader.set",
-                  "args": {
-                    "name": "page.tpl",
-                    "source": "[{= o.name}]\n"
-                  }
-                }
-              ]
-            }
-          }
-        }
-      },
-      "name": "page.tpl",
-      "assign": {
-        "kind": "map",
-        "value": [
-          [
-            "o",
-            {
-              "host": "object"
-            }
-          ]
-        ]
-      },
-      "options": {},
-      "result": "[]\n"
-    },
-    {
       "id": "a_template_definition_with_data",
       "rule": "RT-24",
       "receiver": {
@@ -20397,21 +20359,6 @@
       "rule": "RT-4",
       "value": {
         "kind": "null"
-      }
-    },
-    {
-      "id": "a_native_object_is_kept",
-      "rule": "VAL-19",
-      "value": {
-        "kind": "map",
-        "value": [
-          [
-            "o",
-            {
-              "host": "object"
-            }
-          ]
-        ]
       }
     },
     {

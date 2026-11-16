@@ -145,3 +145,29 @@ fn host_arguments_and_native_equality_match_the_shared_fixture() {
         assert_eq!(error.code.as_str(), code.as_str().expect("code"), "{target}");
     }
 }
+
+// VAL-19 for a native object that no binding can give yet (binding GN-13e reads no host value of a case): binding a map
+// keeps the object, and echoing a member of an object without members renders nothing.
+#[test]
+fn a_native_object_is_kept_by_bind() {
+    let mut map = OrderedMap::new();
+    map.insert("o".to_string(), Value::object(Order));
+    polyspec_template::bind(&Value::map(map)).expect("bind keeps a native object");
+}
+
+#[test]
+fn a_native_object_echoes_no_member() {
+    let mut loader = MapLoader::new();
+    loader.set("page.tpl", "[{= o.name}]\n");
+    let program = AstProgram::new(EngineOptions {
+        loader: Some(Box::new(loader)),
+        ..Default::default()
+    })
+    .expect("valid engine options");
+    let mut root = OrderedMap::new();
+    root.insert("o".to_string(), Value::object(Order));
+    let output = program
+        .render_values(RenderTarget::Name("page.tpl"), root, &RenderOptions::default())
+        .expect("render");
+    assert_eq!(output, "[]\n");
+}
