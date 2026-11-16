@@ -1101,7 +1101,7 @@ BINDING_CRATES := polyspec-template-node polyspec-template-wasm polyspec-templat
 BINDING := $(CURDIR)/node_modules/.bin/binding
 # The five targets of the contract, each of which has its target test-binding-<target>.
 BINDING_TARGETS := php python node wasm go
-.PHONY: check-declarations-node test-binding-python-venv test-binding-python-clean test-binding-python-wheel test-binding-python-install binding-node-package-wasm-bindgen-check binding-node-package-wasm-build binding-node-package-wasm-glue binding-node-package-node-build binding-node-package-clean binding-node-package-dirs binding-node-package-addon binding-node-package-platform-manifest binding-node-package-platform-pack binding-node-package-pack binding-node-package-manifest binding-node-package-deps test-binding-node-copy test-binding-wasm-copy test-binding-php-build test-binding-php-lint test-binding-go-build test-binding-go-format test-binding-go-vet
+.PHONY: check-declarations-node test-binding-python-venv test-binding-python-clean test-binding-python-wheel test-binding-python-install binding-node-package-wasm-bindgen-check binding-node-package-wasm-build binding-node-package-wasm-glue binding-node-package-node-build binding-node-package-clean binding-node-package-dirs binding-node-package-addon binding-node-package-platform-manifest binding-node-package-platform-pack binding-node-package-pack binding-node-package-manifest binding-node-package-deps test-binding-node-copy test-binding-wasm-copy test-binding-php-build test-binding-php-lint test-binding-go-build test-binding-go-format test-binding-go-vet-module test-binding-go-vet
 .PHONY: bindings bindings-check lint-bindings test-bindings check-declarations binding-node-package test-binding-crates \
 	$(foreach target,$(BINDING_TARGETS),test-binding-$(target)) template-install-bindings
 bindings:
@@ -1249,12 +1249,13 @@ test-binding-go-build: bindings
 	$(CARGO) build --locked -p polyspec-template-go --features $(BINDING_GO_FEATURES)
 test-binding-go-format: test-binding-go-build
 	test -z "$$(cd packages/go && $(BINDING_GOFMT) -l .)"
-# The module packages/go is released on its own, so it is also vetted outside the workspace of go.work, with the requirements and
-# sums of its own go.mod and go.sum only (GOWORK=off, -mod=readonly): in the workspace go.work.sum and the other modules
-# answer for them, and a go.sum that misses a sum passes.
-test-binding-go-vet: test-binding-go-format
-	cd packages/go && $(BINDING_GO_ENV) $(GO) vet ./...
+# The module packages/go is released on its own, so test-binding-go-vet-module vets it outside the workspace of go.work, with the
+# requirements and sums of its own go.mod and go.sum only (GOWORK=off, -mod=readonly): in the workspace go.work.sum and the
+# other modules answer for them, and a go.sum that misses a sum passes. Each target runs one command.
+test-binding-go-vet-module: test-binding-go-format
 	cd packages/go && GOWORK=off $(BINDING_GO_ENV) $(GO) vet -mod=readonly ./...
+test-binding-go-vet: test-binding-go-vet-module
+	cd packages/go && $(BINDING_GO_ENV) $(GO) vet ./...
 test-binding-go: test-binding-go-vet
 	cd packages/go && $(BINDING_GO_ENV) $(GO) test -count=1 ./...
 
