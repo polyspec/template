@@ -3114,6 +3114,26 @@
           },
           "optional_reason": "RT-9",
           "async_allowed": false
+        },
+        {
+          "id": "loader.blocking_io",
+          "name": [
+            "blocking",
+            "io"
+          ],
+          "kind": "method",
+          "visibility": "public",
+          "parameters": [],
+          "returns": "bool",
+          "default": {
+            "literal": false
+          },
+          "wait": "none",
+          "core": {
+            "path": "polyspec_template::Loader::blocking_io",
+            "receiver": "&self"
+          },
+          "async_allowed": false
         }
       ]
     },

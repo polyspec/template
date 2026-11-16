@@ -412,7 +412,7 @@ impl AstProgram {
     /// cache that `prepare` or `load` filled, a failure of its load there is reported at the tag, and a name that they
     /// did not load is `load_not_loaded`. A loader of host code is called (RT-9).
     pub(crate) fn render_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Arc<ParsedTemplate>, RenderError> {
-        if !self.loader.blocking_io() {
+        if !self.loader.blocking_io()? {
             return self.load_template(name, from, span);
         }
         let fail = |code: ErrorCode, message: String| load_failure(name, from, span, code, message);
@@ -451,7 +451,7 @@ impl AstProgram {
     /// Loads the templates that a loaded template names, transitively (RT-77); does nothing for a loader of host code,
     /// which a render calls.
     fn preload(&self, name: &str, template: &ParsedTemplate, registry: &HashMap<String, DefineEntry>) -> Result<(), RenderError> {
-        if !self.loader.blocking_io() {
+        if !self.loader.blocking_io()? {
             return Ok(());
         }
         // Depth first in the order of their tags, the order of a render (RT-10): of two names of one file, the name that

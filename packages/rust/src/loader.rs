@@ -56,9 +56,10 @@ pub trait Loader: Send + Sync {
     fn load(&self, name: &str) -> Result<Option<Loaded>, LoadError>;
 
     /// RT-77: whether the loader reads files. A program calls such a loader only in `prepare` and `load`, never during a
-    /// render; a loader of host code is called during a render, synchronously.
-    fn blocking_io(&self) -> bool {
-        false
+    /// render; a loader of host code is called during a render, synchronously. A failure of the answer, such as an
+    /// exception of host code, is the failure of the call that asked.
+    fn blocking_io(&self) -> Result<bool, LoadError> {
+        Ok(false)
     }
 }
 
@@ -223,8 +224,8 @@ impl Loader for FsLoader {
         self.load_file(name).map_err(|cause| load_failed(name, cause))
     }
 
-    fn blocking_io(&self) -> bool {
-        true
+    fn blocking_io(&self) -> Result<bool, LoadError> {
+        Ok(true)
     }
 }
 
