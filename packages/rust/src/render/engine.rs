@@ -339,12 +339,7 @@ impl AstProgram {
 
     /// RT-9, RT-40: loads a template by name through the loader and caches it by version.
     pub fn load_template(&self, name: &str, from: Option<&Frame>, span: Option<Span>) -> Result<Arc<ParsedTemplate>, RenderError> {
-        let fail = |code: ErrorCode, message: String| {
-            RenderError::Kind(match (from, span) {
-                (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
-                _ => TemplateError::without_position(code, name, message),
-            })
-        };
+        let fail = |code: ErrorCode, message: String| load_failure(name, from, span, code, message);
         let loaded = match self.loader.load(name) {
             Ok(Some(loaded)) => loaded,
             Ok(None) => return Err(fail(ErrorCode::LoadNotFound, format!("template {name} does not exist"))),
@@ -412,12 +407,7 @@ impl AstProgram {
         if !self.loader.blocking_io() {
             return self.load_template(name, from, span);
         }
-        let fail = |code: ErrorCode, message: String| {
-            RenderError::Kind(match (from, span) {
-                (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
-                _ => TemplateError::without_position(code, name, message),
-            })
-        };
+        let fail = |code: ErrorCode, message: String| load_failure(name, from, span, code, message);
         let cache = self
             .cache
             .lock()
@@ -908,4 +898,12 @@ fn named_templates(name: &str, nodes: &[Node], names: &mut Vec<String>) {
             Node::Text { .. } | Node::Echo { .. } | Node::Set { .. } | Node::Block { path: None, .. } => {}
         }
     }
+}
+
+/// A failure of the load of `name`: at the tag of `from` when the load comes from a tag, else without a position (RT-9).
+fn load_failure(name: &str, from: Option<&Frame>, span: Option<Span>, code: ErrorCode, message: String) -> RenderError {
+    RenderError::Kind(match (from, span) {
+        (Some(frame), Some(span)) => TemplateError::at(code, &frame.name, frame.lines.as_ref(), span, message),
+        _ => TemplateError::without_position(code, name, message),
+    })
 }

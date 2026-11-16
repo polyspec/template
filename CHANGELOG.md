@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The Rust core writes the fields of a call, checks the span of a node and of an expression and gives the failure of a load each in one place (T28.75, P34): `make duplication-check` found each of them twice in `ast_json.rs` and `render/engine.rs`.
 - The section `## Idempotency` of `AGENTS.md` opens with its paragraph, and the rule on the runners of the workflow jobs follows it (T28.74): the rule stood before the paragraph, which `make rules-check` reported as a paragraph that introduces no section.
 - The cases `data_invalid_utf8` of `engine.render_json` and `engine.prepare` reach the core in every target (T28.73, VAL-12, binding GN-6k, GN-6x): their `assign` gave a `text` with an unpaired surrogate, which a binding converts only with the `in` function of json, so Node failed with `JsonValueError: text holds an unpaired surrogate` and PHP with `JsonValueError: text is not UTF-8` instead of `data_invalid_utf8`. The text is the value `{"kind": "text16", "value": [97, 55296]}`, which json makes from its UTF-16 code units in the five targets, and the Rust contract runner writes such a value as a JSON string of `\u` escapes.
 

@@ -210,6 +210,16 @@ fn write_node(out: &mut String, node: &Node) -> Result<(), TemplateError> {
     Ok(())
 }
 
+/// The fields `method`, `args` and `span` of a call on an object or a class.
+fn call(out: &mut String, first: &mut bool, method: &str, args: &[Expr], at: Span) -> Result<(), TemplateError> {
+    key(out, first, "method");
+    text(out, method);
+    key(out, first, "args");
+    exprs(out, args)?;
+    span(out, first, at);
+    Ok(())
+}
+
 fn exprs(out: &mut String, items: &[Expr]) -> Result<(), TemplateError> {
     list(out, items, write_expr)
 }
@@ -271,11 +281,7 @@ fn write_expr(out: &mut String, expr: &Expr) -> Result<(), TemplateError> {
             text(out, "MemberCall");
             key(out, &mut first, "object");
             write_expr(out, object)?;
-            key(out, &mut first, "method");
-            text(out, method);
-            key(out, &mut first, "args");
-            exprs(out, args)?;
-            span(out, &mut first, *at);
+            call(out, &mut first, method, args, *at)?;
         }
         Expr::ClassCall {
             class_name,
@@ -286,11 +292,7 @@ fn write_expr(out: &mut String, expr: &Expr) -> Result<(), TemplateError> {
             text(out, "ClassCall");
             key(out, &mut first, "className");
             text(out, class_name);
-            key(out, &mut first, "method");
-            text(out, method);
-            key(out, &mut first, "args");
-            exprs(out, args)?;
-            span(out, &mut first, *at);
+            call(out, &mut first, method, args, *at)?;
         }
         Expr::Index { object, index, span: at } => {
             text(out, "Index");
@@ -994,6 +996,13 @@ impl Violations {
     }
 
     /// Calls `check` with the value and the pointer of a field that is present.
+    /// The members of a node or an expression whose fields are `fields`, with its field `span` checked.
+    fn spanned<'v>(&mut self, value: &'v Json, path: &str, fields: &[&str]) -> Option<&'v OrderedMap> {
+        let members = self.object(value, path, fields)?;
+        self.field(members, path, "span", Self::span);
+        Some(members)
+    }
+
     fn field(&mut self, members: &OrderedMap, path: &str, name: &str, check: impl FnOnce(&mut Self, &Json, &str)) {
         if let Ok(Some(value)) = members.get(name) {
             check(self, value, &child(path, name));
@@ -1128,10 +1137,9 @@ impl Violations {
             "Block" => &["type", "id", "path", "scope", "span"],
             _ => &["type", "id", "body", "else", "span"],
         };
-        let Some(members) = self.object(value, path, fields) else {
+        let Some(members) = self.spanned(value, path, fields) else {
             return;
         };
-        self.field(members, path, "span", Self::span);
         match kind.as_str() {
             "Text" => self.field(members, path, "value", |this, value, path| this.string(value, path, 0)),
             "Echo" => self.field(members, path, "expr", Self::expr),
@@ -1217,10 +1225,9 @@ impl Violations {
             "List" => &["type", "items", "span"],
             _ => &["type", "entries", "span"],
         };
-        let Some(members) = self.object(value, path, fields) else {
+        let Some(members) = self.spanned(value, path, fields) else {
             return;
         };
-        self.field(members, path, "span", Self::span);
         match kind.as_str() {
             "Literal" => {
                 let mut literal_kind = None;
