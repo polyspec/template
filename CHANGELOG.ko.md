@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `make conformance-generated-go`는 생성 Go program이 실행 중에 낸 오류를 legacy Go runtime의 대문자 이름 `E_<KIND>`로 비교한다(T28.86, ERR-1). case의 kind를 그 이름과 그대로 비교해서, 위치가 같은데도 오류 case 47개가 실패했다.
 - `make lint-go`는 같은 run이 생성한 Go binding을 lint한다(T28.85). `typed-generator`에만 의존해서, 앞선 생성이 남긴 `packages/go`의 무시된 `zz_generated_*.go`를 lint했다. 이제 `bindings`에 의존한다.
 - 생성 PHP 시험은 `template_value`의 `Bytes` 값 case를 빼고 만든다(T28.84, VAL-23, binding GN-13h). PHP에는 text와 구별되는 bytes가 없어서, 시험이 그 값을 UTF-8이 아닌 문자열로 만들었고 `data_unsupported_type` 대신 `data_invalid_utf8`로 실패했다. 그 case는 group `template_value/bytes`이고, 그 행은 그것을 Python, Node, WebAssembly, Go에 둔다.
 - `make conformance-type-manifest-check`는 case의 kind를 legacy parser의 대문자 이름과 비교해, 그 parse 오류를 기대하는 case의 partial을 받는다(T28.81). 이전에는 kind를 대문자 이름과 그대로 비교해 `close.tpl`에서 `"{/}" without an open block`으로 실패했다.

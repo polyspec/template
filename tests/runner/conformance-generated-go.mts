@@ -11,6 +11,7 @@ import { legacyCasesDir } from './case-list.mts';
 import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
+import { legacyName } from '../../scripts/generate-error-codes.mts';
 import { goWorkspace } from '../../scripts/temporary-workspace.mts';
 
 // A module of the system temporary directory that uses the module of legacy/packages/go from that directory.
@@ -38,7 +39,7 @@ try {
       const envText = testCase.hasEnv ? readFileSync(join(testCase.dir, 'env.json'), 'utf8') : '';
       const expectation = testCase.expectedError === null
         ? `if runErr != nil { t.Fatal(runErr) }; if actual != ${q(expectedHtml(testCase))} { t.Fatalf("generated output differs: %q", actual) }`
-        : `_ = actual; assertGeneratedError(t, runErr, ${q(testCase.expectedError.code)}, ${q(testCase.expectedError.template)}, ${testCase.expectedError.line}, ${testCase.expectedError.col})`;
+        : `_ = actual; assertGeneratedError(t, runErr, ${q(legacyName(testCase.expectedError.code))}, ${q(testCase.expectedError.template)}, ${testCase.expectedError.line}, ${testCase.expectedError.col})`;
       writeFileSync(join(directory, 'generated_test.go'), `package generated
 import ("encoding/base64"; "encoding/json"; "errors"; "testing"; template "github.com/polyspec/template/legacy/packages/go"; "github.com/polyspec/template/legacy/packages/go/errs"; "github.com/polyspec/template/legacy/packages/go/value")
 func assertGeneratedError(t *testing.T, err error, code, name string, line, col int) { t.Helper(); if err == nil { t.Fatalf("expected %s", code) }; var te *errs.Error; if errors.As(err, &te) { if string(te.Code) != code || te.Template != name || te.Line != line || te.Col != col { t.Fatalf("expected %s %s:%d:%d, got %#v", code,name,line,col,te) }; return }; var be *value.BindError; if errors.As(err, &be) && string(be.Code) == code && name == "input.tpl" && line == 0 && col == 0 { return }; t.Fatalf("unexpected error: %T %v",err,err) }
