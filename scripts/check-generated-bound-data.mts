@@ -9,7 +9,7 @@ import { compileFiles, compileSource } from '../packages/compiler/src/compiler.m
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { cargo, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
+import { goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
 import { compileFixtureGraph } from './fixture-graph.mts';
 import { checkLanguages } from './language-checks.mts';
 import { boundDataCasesDocument } from './fixture-documents.mts';
@@ -102,7 +102,7 @@ fn fixture(text: &str) -> polyspec_template::polyspec_json::Value { polyspec_tem
 }
 `);
       try {
-        runChecked(...cargo(root, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_bound_data_check']), root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        runChecked(...rust.cargoTest('generated_bound_data_check'), root, rust.checkEnv);
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }

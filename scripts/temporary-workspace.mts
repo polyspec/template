@@ -76,6 +76,10 @@ export interface RustWorkspace {
   env: NodeJS.ProcessEnv;
   targetDirectory: string;
   test: (file: string) => string;
+  /** The cargo command and arguments that build and run the test `file` of the workspace offline, with `after` after it. */
+  cargoTest: (file: string, ...after: string[]) => [string, string[]];
+  /** The environment of a check run of a test: the target of packages/rust, and every warning but dead code an error. */
+  checkEnv: NodeJS.ProcessEnv;
 }
 
 export function rustWorkspace(name: string): RustWorkspace {
@@ -124,7 +128,12 @@ polyspec-template = { path = ${JSON.stringify(RUST)} }
     rmSync(directory, { recursive: true, force: true });
     throw new Error(`the lock of ${directory} holds packages that Cargo.lock does not: ${other.join(', ')}`);
   }
-  return { directory, manifest, env, targetDirectory, test: file => join(directory, 'tests', `${file}.rs`) };
+  return {
+    directory, manifest, env, targetDirectory,
+    test: file => join(directory, 'tests', `${file}.rs`),
+    cargoTest: (file, ...after) => cargo(root, ['test', '--locked', '--offline', '--manifest-path', manifest, '--test', file, ...after]),
+    checkEnv: { CARGO_TARGET_DIR: targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' },
+  };
 }
 
 /**

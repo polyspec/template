@@ -9,7 +9,7 @@ import { compileFiles, compileSource } from '../packages/compiler/src/compiler.m
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { cargo, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
+import { goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
 import { compileFixtureGraph } from './fixture-graph.mts';
 import { checkLanguages } from './language-checks.mts';
 import { tsc } from './tools.mts';
@@ -86,7 +86,7 @@ fn describe_value(value: &Value) -> String { match value { Value::Null => "null"
 #[test] fn generated_typed_values_match() { let mut program = generated::GeneratedProgram::new(EngineOptions::default()).unwrap(); program.program_mut().register("describe", Box::new(|args, _| Ok(Value::text(args.iter().map(describe_value).collect::<Vec<_>>().join(","))))).unwrap(); let assign = polyspec_template::read_json(r#"{ "page": { "title": "T", "count": 2 }, "rows": [{ "name": "a" }, { "name": "b" }], "tags": { "x": 1 } }"#).unwrap(); assert_eq!(program.render("input.tpl", &assign, &RenderOptions::default()).unwrap(), ${rustString(expected)}); }
 `);
       try {
-        runChecked(...cargo(root, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_typed_values_check']), root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        runChecked(...rust.cargoTest('generated_typed_values_check'), root, rust.checkEnv);
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }
