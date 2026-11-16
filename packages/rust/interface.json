@@ -44,6 +44,15 @@
             "import",
             "require"
           ]
+        },
+        "./decode": {
+          "types": "./render/decode.d.ts",
+          "import": "./render/decode.mjs",
+          "require": "./render/decode.cjs",
+          "formats": [
+            "import",
+            "require"
+          ]
         }
       }
     },
