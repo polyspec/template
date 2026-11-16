@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- 바인딩의 생성된 시험은 json의 package를 받는다(T28.69, binding GN-15f). 생성된 npm package, wheel, PHP 확장은 계약이 값 class를 명명하는 json의 package를 요구하는데, recipe는 template의 package만 주었다. 그래서 `test-binding-node`와 `test-binding-wasm`은 `ENOTCACHED @polyspec/json`으로, `test-binding-python`은 `No matching distribution found for polyspec-json==0.0.30`으로, `test-binding-php`는 `Class "Polyspec\Json\OrderedMap" not found`로 실패했다. `package.json`은 `@polyspec/json`과 그 platform package를 release asset으로 명명하고 `package-lock.json`이 그 integrity를 고정하며, `binding-node-package`는 그것을 template의 package 옆에 pack한다. `template-install-bindings`는 `packages/python/requirements-bindings.txt`의 wheel을 URL과 sha256으로 `pip download --require-hashes`로 받고, `test-binding-python-install`은 `--find-links`로 그것을 찾는다. `test-binding-php`는 `BINDING_PHP_EXTENSIONS`의 각 확장을 먼저 load한다. 변수 `BINDING_PYTHON_FIND_LINKS`, `BINDING_NODE_DEPS`, `BINDING_PHP_EXTENSIONS`는 링크된 json checkout의 빌드를 받는다. json의 PHP 확장은 아직 받지 않는다(kit#50).
+
 - 릴리스 0.0.28은 binding 0.0.13으로 빌드한다(T28.68). `package.json`은 그 release asset을 가리키고 `package-lock.json`은 그 integrity를 고정하며, `polyspec-binding-core`에 대한 모든 줄은 tag v0.0.13을 가리키고 `Cargo.lock`과 Rust showcase adapter의 lock이 그것을 고정한다. `packages/rust/interface.json`의 `packages.node.entries`는 `./render`를 선언한다(RT-80). binding이 생성하는 package는 계약이 명명하는 entry만 공개했기 때문이다.
 
 - Rust crate는 `wasm32-unknown-unknown`용으로 컴파일된다(T28.67, RT-10). `FsLoader`가 Unix와 Windows에서만 정의된 `FileIdentity`와 `file_identity`를 사용해서 `cargo check --target wasm32-unknown-unknown`가 E0425로 실패했다. 표준 라이브러리가 파일 identity를 보고하지 않는 target에서 파일의 filesystem load는 `Unsupported`로 실패한다. 로더가 그 파일에 이름 하나를 줄 수 없기 때문이다. `test-rust`는 그 target용으로 crate를 검사하는 `template-test-rust-wasm`을 실행한다.

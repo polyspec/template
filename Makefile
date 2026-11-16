@@ -1099,7 +1099,7 @@ BINDING_CRATES := polyspec-template-node polyspec-template-wasm polyspec-templat
 BINDING := $(CURDIR)/node_modules/.bin/binding
 # The five targets of the contract, each of which has its target test-binding-<target>.
 BINDING_TARGETS := php python node wasm go
-.PHONY: check-declarations-node test-binding-python-venv test-binding-python-clean test-binding-python-wheel test-binding-python-install binding-node-package-wasm-bindgen-check binding-node-package-wasm-build binding-node-package-wasm-glue binding-node-package-node-build binding-node-package-clean binding-node-package-dirs binding-node-package-addon binding-node-package-platform-manifest binding-node-package-platform-pack binding-node-package-pack binding-node-package-manifest test-binding-node-copy test-binding-wasm-copy test-binding-php-build test-binding-php-lint test-binding-go-build test-binding-go-format test-binding-go-vet
+.PHONY: check-declarations-node test-binding-python-venv test-binding-python-clean test-binding-python-wheel test-binding-python-install binding-node-package-wasm-bindgen-check binding-node-package-wasm-build binding-node-package-wasm-glue binding-node-package-node-build binding-node-package-clean binding-node-package-dirs binding-node-package-addon binding-node-package-platform-manifest binding-node-package-platform-pack binding-node-package-pack binding-node-package-manifest binding-node-package-deps test-binding-node-copy test-binding-wasm-copy test-binding-php-build test-binding-php-lint test-binding-go-build test-binding-go-format test-binding-go-vet
 .PHONY: bindings bindings-check lint-bindings test-bindings check-declarations binding-node-package test-binding-crates \
 	$(foreach target,$(BINDING_TARGETS),test-binding-$(target)) template-install-bindings
 bindings:
@@ -1132,8 +1132,13 @@ check-declarations: check-declarations-node
 # The tools of the job bindings beyond those of make install-tools: maturin and the wasm-bindgen CLI of mise.toml at the
 # digests of mise.lock, the crates of every Cargo.lock, the Go modules of go.work and PHPUnit of composer.lock, which runs
 # the generated tests of the PHP extension.
-template-install-bindings: template-install-rust template-install-go template-install-php
+template-install-bindings: template-install-bindings-python-deps
+.PHONY: template-install-bindings-tools template-install-bindings-python-deps
+template-install-bindings-tools: template-install-rust template-install-go template-install-php
 	$(ONLINE) $(KIT_TOOLS)/bin/mise install --locked github:PyO3/maturin github:wasm-bindgen/wasm-bindgen
+# The wheels of json of packages/python/requirements-bindings.txt, which pip downloads and checks by their sha256.
+template-install-bindings-python-deps: template-install-bindings-tools
+	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download -q --require-hashes --no-deps -r packages/python/requirements-bindings.txt -d $(BINDING_VAR)/deps/python
 MATURIN := $(KIT_TOOLS)/mise/shims/maturin
 BINDING_WASM_BINDGEN := $(KIT_TOOLS)/mise/shims/wasm-bindgen
 BINDING_GOFMT := $(KIT_TOOLS)/mise/shims/gofmt
@@ -1142,6 +1147,13 @@ BINDING_PHP ?= php
 BINDING_PHPUNIT := $(CURDIR)/vendor/bin/phpunit
 BINDING_VAR := $(CURDIR)/var/bindings
 BINDING_DYLIB := $(if $(filter Darwin,$(shell uname -s)),dylib,so)
+# The packages of the libraries that own the value classes of the contract (json), which the generated packages require
+# (binding GN-15f, GN-6x): the wheels that template-install-bindings downloads, the npm packages of json that npm ci installs
+# from the release assets of package.json, and the PHP extension of json, which PHP loads before the extension of template.
+# A linked checkout gives those that its provider built (docs/operations/development.md).
+BINDING_PYTHON_FIND_LINKS ?= $(BINDING_VAR)/deps/python
+BINDING_NODE_DEPS ?= $(CURDIR)/node_modules/@polyspec/json $(CURDIR)/node_modules/@polyspec/json-$(BINDING_PLATFORM)
+BINDING_PHP_EXTENSIONS ?=
 # The test features of a binding crate: every feature of its manifest (binding GN-5), joined by commas.
 binding_features = $(shell sed -n '/^\[features\]/,/^\[/s/^\([a-z][a-z0-9-]*\) = .*/\1/p' $(1) | paste -sd, -)
 
@@ -1154,7 +1166,7 @@ test-binding-python-clean: test-binding-python-venv
 test-binding-python-wheel: test-binding-python-clean
 	cd packages/python && $(MATURIN) build --locked --interpreter $(BINDING_VAR)/venv/bin/python --features $(call binding_features,packages/python/Cargo.toml) --out $(BINDING_VAR)/wheels
 test-binding-python-install: test-binding-python-wheel
-	$(BINDING_VAR)/venv/bin/python -m pip install -q --no-index --force-reinstall $(BINDING_VAR)/wheels/*.whl
+	$(BINDING_VAR)/venv/bin/python -m pip install -q --no-index --find-links $(BINDING_PYTHON_FIND_LINKS) --force-reinstall $(BINDING_VAR)/wheels/*.whl
 test-binding-python: test-binding-python-install
 	cd $(BINDING_VAR) && venv/bin/python -m unittest discover -s $(CURDIR)/packages/python/generated/tests -t $(CURDIR)/packages/python/generated/tests
 
@@ -1187,7 +1199,9 @@ binding-node-package-pack: binding-node-package-platform-pack
 	cd packages/ts && $(NPM) pack --pack-destination $(BINDING_VAR)/node
 binding-node-package-manifest: binding-node-package-pack
 	echo '{ "private": true }' > $(BINDING_VAR)/node/package.json
-binding-node-package: binding-node-package-manifest
+binding-node-package-deps: binding-node-package-manifest
+	cd $(BINDING_VAR)/node && $(NPM) pack $(BINDING_NODE_DEPS)
+binding-node-package: binding-node-package-deps
 	cd $(BINDING_VAR)/node && $(NPM) install --offline --no-audit --no-fund --omit=optional ./*.tgz
 
 # The generated tests of the Node binding on node --test, against the installed package.
@@ -1210,7 +1224,7 @@ test-binding-php-build: bindings
 test-binding-php-lint: test-binding-php-build
 	$(BINDING_PHP) -l packages/php-ext/generated/polyspec_template.stub.php
 test-binding-php: test-binding-php-lint
-	$(BINDING_PHP) -d extension=$(CURDIR)/target/debug/libpolyspec_template.$(BINDING_DYLIB) $(BINDING_PHPUNIT) --fail-on-empty-test-suite --fail-on-skipped packages/php-ext/generated/tests
+	$(BINDING_PHP) $(foreach extension,$(BINDING_PHP_EXTENSIONS),-d extension=$(extension)) -d extension=$(CURDIR)/target/debug/libpolyspec_template.$(BINDING_DYLIB) $(BINDING_PHPUNIT) --fail-on-empty-test-suite --fail-on-skipped packages/php-ext/generated/tests
 
 # The static library with the test features, which Go links through CGO_LDFLAGS, then gofmt, go vet and the generated tests
 # on go test with the build tags of those features, polyspec_<feature> with _ for - (binding GN-5). The module is a module of

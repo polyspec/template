@@ -1,0 +1,9 @@
+# The wheels of the Python package of json that the generated package of packages/python requires (binding GN-15f),
+# the assets of the json release by URL and sha256; make template-install-bindings downloads them with pip --require-hashes.
+
+polyspec-json @ https://github.com/polyspec/json/releases/download/v0.0.30/polyspec_json-0.0.30-cp314-abi3-macosx_11_0_arm64.whl ; sys_platform == "darwin" and platform_machine == "arm64" \
+    --hash=sha256:3b2e2e94f9cc2ff7e4932131b6f77783ace0bd9dbf4002da228dcc326feb7eea
+polyspec-json @ https://github.com/polyspec/json/releases/download/v0.0.30/polyspec_json-0.0.30-cp314-abi3-manylinux_2_34_aarch64.whl ; sys_platform == "linux" and platform_machine == "aarch64" \
+    --hash=sha256:2ad418fc725de35b4d05ac51e4803e2807c5c17f3b850a9b836b28dfbd3d364d
+polyspec-json @ https://github.com/polyspec/json/releases/download/v0.0.30/polyspec_json-0.0.30-cp314-abi3-manylinux_2_34_x86_64.whl ; sys_platform == "linux" and platform_machine == "x86_64" \
+    --hash=sha256:b0465113b5f42ab36b64a1dcffef4debc58c00a2406358bc1176b5c256a1fb4c
