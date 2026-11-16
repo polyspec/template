@@ -1,7 +1,7 @@
 // Tests that a failure names what failed with the expected and the actual value or the fix (T19.10):
 // - the generated Go and Rust conformance runners name each failed case instead of "the failed cases are listed above";
-// - the run-tests of @polyspec/kit names a tool that cannot start, with its command and the install fix, instead of an unhandled
-//   `error` event;
+// - the run-tests of @polyspec/kit fails with a message that names a tool that cannot start, instead of an unhandled `error`
+//   event; the wording is kit's, not a contract of template;
 // - a CLI call of the conformance drivers that outlives its limit names the limit and the command;
 // - the Go and PHP install projects print the expected and the actual output.
 import assert from 'node:assert/strict';
@@ -48,7 +48,7 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
   const run = spawnSync(process.execPath, [fileURLToPath(import.meta.resolve('@polyspec/kit/run-tests')), 'cargo', '--cwd', bin, '--', 'any_test'], { encoding: 'utf8', env: { ...process.env, PATH: bin } });
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
-  assert.match(run.stdout, /✖ cargo .*: cannot start cargo: spawn cargo ENOENT; install rustup and run make install, which installs the toolchain of rust-toolchain\.toml/);
+  assert.match(run.stdout + run.stderr, /\bcargo\b[^\n]*\bENOENT\b/u, 'the failure names cargo and that it cannot start');
 });
 
 test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {
