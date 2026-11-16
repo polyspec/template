@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `make conformance-type-manifest-check`는 case의 kind를 legacy parser의 대문자 이름과 비교해, 그 parse 오류를 기대하는 case의 partial을 받는다(T28.81). 이전에는 kind를 대문자 이름과 그대로 비교해 `close.tpl`에서 `"{/}" without an open block`으로 실패했다.
 - `make generated-native-calls-check`는 native object fixture의 오류 kind를, legacy 런타임 위에서 도는 backend에 대해서는 그 런타임의 대문자 이름 `E_<KIND>`와 비교한다(T28.80). fixture는 kind를 적는데, 검사가 TypeScript, Go, PHP, Python에서 `generated compare.tpl = E_RUNTIME_COMPARE`로 실패했다.
 - Prepare는 template이 이름하는 template을 render의 순서로 load한다(T28.79, RT-10). 한 파일의 두 이름 중 둘째가 자기 tag에서 실패한다. Rust core는 이름을 목록의 끝에서부터 load해서 conformance case `filesystem/hard-link-second-name`이 line 2 대신 line 1에서 실패했다.
 - 생성된 TypeScript는 TypeScript backend가 typed program으로 옮겨지기 전까지 legacy 런타임 `@polyspec/template-legacy`를 import한다(T28.78, compiler Transition). 이전에는 checkout이 더는 설치하지 않는 `@polyspec/template`을 import해서 showcase, `make contract-check`, `make benchmark-smoke`가 `Cannot find package '@polyspec/template'`으로 실패했다.
