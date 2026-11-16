@@ -1193,6 +1193,15 @@ test-binding-python: test-binding-python-install
 # packages/ts/wasm/generated.
 BINDING_PLATFORM := $(shell $(NODE) -p 'process.platform + "-" + process.arch + (process.platform === "linux" ? "-gnu" : "")' 2>/dev/null)
 BINDING_ADDON := template.$(BINDING_PLATFORM).node
+# The addon of the Node binding beside the entry of packages/ts/generated, which the entry loads when no platform package is
+# installed (`./template.<platform>.node`), so a consumer that links this checkout with .links runs the Node binding of its
+# source (T28.106): the release build of the crate, as release-npm-platform builds it, without test features. binding 0.0.16
+# gives this recipe as checkout-node-addon (B2.407).
+.PHONY: checkout-node-addon-build checkout-node-addon
+checkout-node-addon-build: bindings
+	$(CARGO) build --locked --release -p polyspec-template-node
+checkout-node-addon: checkout-node-addon-build
+	cp target/release/libpolyspec_template_node.$(BINDING_DYLIB) packages/ts/generated/$(BINDING_ADDON)
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
 binding-node-package-wasm-bindgen-check: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
