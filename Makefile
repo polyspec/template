@@ -1202,6 +1202,16 @@ checkout-node-addon-build: bindings
 	$(CARGO) build --locked --release -p polyspec-template-node
 checkout-node-addon: checkout-node-addon-build
 	cp target/release/libpolyspec_template_node.$(BINDING_DYLIB) packages/ts/generated/$(BINDING_ADDON)
+# The native module of the Python binding in python-source of packages/python (polyspec/template/_native), which the package
+# imports, so a consumer that links this checkout with .links imports the Python binding of its source (T28.108), on the
+# principle of checkout-node-addon: maturin develop builds it in place with --skip-install, which installs nothing into the
+# interpreter, through link maturin of kit (K1266), so the crates of the checkouts that .links names are built, in the
+# release profile without test features, with the Python of mise.toml in a venv of its own, which maturin develop needs.
+.PHONY: checkout-python-native-venv checkout-python-native
+checkout-python-native-venv: bindings
+	$(KIT_TOOLS)/mise/shims/python3 -m venv --clear $(BINDING_VAR)/checkout-venv
+checkout-python-native: checkout-python-native-venv
+	cd packages/python && VIRTUAL_ENV=$(BINDING_VAR)/checkout-venv MATURIN=$(MATURIN) $(NODE) $(KIT_LINK) maturin $(CURDIR)/packages/python develop --skip-install --release --locked
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
 binding-node-package-wasm-bindgen-check: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
