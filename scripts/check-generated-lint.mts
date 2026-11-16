@@ -23,7 +23,7 @@ import { join, resolve } from 'node:path';
 import { checkLanguages } from './language-checks.mts';
 import { showcasePhpDirectory } from '../examples/showcase/php-namespace.mts';
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
-import { CARGO, root, rustWorkspace, temporaryDirectory } from './temporary-workspace.mts';
+import { cargo, root, rustWorkspace, temporaryDirectory } from './temporary-workspace.mts';
 import { compileAst } from '../packages/compiler/src/ast-artifact.mts';
 import { compileSource } from '../packages/compiler/src/compiler.mts';
 
@@ -92,7 +92,7 @@ function checkRust() {
     }
 `).join('');
     writeFileSync(join(crate.directory, 'src/main.rs'), `use polyspec_template::{EngineOptions, RenderOptions};\n${modules}fn main() {\n${renders}}\n`);
-    run(CARGO, ['clippy', '--locked', '--offline', '--manifest-path', crate.manifest, '--bin', 'template-generated-check', '--', '-D', 'warnings'], { env: { CARGO_TARGET_DIR: crate.targetDirectory, CLIPPY_CONF_DIR: root } });
+    run(...cargo(root, ['clippy', '--locked', '--offline', '--manifest-path', crate.manifest, '--bin', 'template-generated-check', '--', '-D', 'warnings']), { env: { CARGO_TARGET_DIR: crate.targetDirectory, CLIPPY_CONF_DIR: root } });
   } finally {
     rmSync(crate.directory, { recursive: true, force: true });
   }

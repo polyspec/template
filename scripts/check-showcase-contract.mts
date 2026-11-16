@@ -9,7 +9,7 @@ import { pythonCommand, pythonEnvironment, pythonPackageCommand } from './python
 import { compilerManifestDocument, manifestPath, type AdapterLanguage } from './compiler-manifest.mts';
 import { readJson } from './json-document.mts';
 import { runtimePayloadDocument, scenarioIds, scenarioMetadataDocument, type RuntimePayload } from './showcase-documents.mts';
-import { CARGO } from './temporary-workspace.mts';
+import { cargo } from './temporary-workspace.mts';
 import { tsc } from './tools.mts';
 import { showcasePythonModule } from '../examples/showcase/python-module.mts';
 import { rejects } from './expected-rejection.mts';
@@ -178,7 +178,7 @@ function runtimeCommand(language: string, scenarioPath: string, mode = 'ast'): [
   if (language === 'javascript') return [process.execPath, [source, scenarioPath], root, env];
   if (language === 'go') return ['go', ['run', '.', scenarioPath], join(adapterRoot, 'go'), env];
   if (language === 'rust') {
-    return [CARGO, ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath], root, env];
+    return [...cargo(root, ['run', '--quiet', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml'), '--', scenarioPath]), root, env];
   }
   if (language === 'python') return [pythonPackageCommand(), [source, scenarioPath], root, { ...env, ...pythonEnvironment() }];
   // The adapter class is PSR-4 code that php.php loads and runs.
@@ -294,7 +294,7 @@ async function main() {
   const gofmt = run('Go formatting', 'gofmt', ['-d', join(adapterRoot, 'go', 'main.go'), join(adapterRoot, 'go', 'render_adapter.go')]);
   assert(gofmt.trim() === '', `Go sources are not formatted:\n${gofmt}`);
   run('Go contract compilation', 'go', ['test', './...'], join(adapterRoot, 'go'));
-  run('Rust contract compilation', CARGO, ['check', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml')]);
+  run('Rust contract compilation', ...cargo(root, ['check', '--locked', '--manifest-path', join(adapterRoot, 'rust', 'Cargo.toml')]));
   run('PHP generated declaration syntax', 'php', ['-l', join(adapterRoot, languageDefinition('php').generated)]);
   run('PHP adapter syntax', 'php', ['-l', join(adapterRoot, languageDefinition('php').file)]);
   checkPhpReflection();

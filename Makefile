@@ -23,7 +23,7 @@ GO = $(KIT_TOOLS)/mise/shims/go
 # first cargo, which several processes start at once in one run and whose installs then break each other (T18.7-1). A
 # missing toolchain fails with rustup's message, which names rustup toolchain install.
 export RUSTUP_AUTO_INSTALL := 0
-CARGO = $(NODE) $(KIT)/link.$(KIT_EXT) cargo $(CURDIR)
+CARGO = $(NODE) $(KIT_LINK) cargo $(CURDIR)
 # Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
 # the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
 unexport CARGO_TARGET_DIR
@@ -54,6 +54,8 @@ KIT_PACKAGE := $(CURDIR)/node_modules/@polyspec/kit
 KIT_SOURCE := $(wildcard $(KIT_PACKAGE)/scripts/kit/land.mts)
 KIT := $(realpath $(KIT_PACKAGE)/$(if $(KIT_SOURCE),scripts/kit,dist))
 KIT_EXT := $(if $(KIT_SOURCE),mts,mjs)
+# The link utility of kit, through which the Makefile and the TypeScript scripts run cargo (T28.98, T28.99).
+export KIT_LINK := $(KIT)/link.$(KIT_EXT)
 
 # The tools of mise.toml (kit K127) run from the shims of mise, var/tools/mise/shims, which find the mise of the checkout through
 # its environment: every recipe runs with it, and with var/tools/bin (node, npm, mise and the wrappers of the Composer projects)

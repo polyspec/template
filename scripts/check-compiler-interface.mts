@@ -7,7 +7,7 @@ import { parseSync, type Class, type ClassElement, type Directive, type MethodDe
 import { compilerManifestDocument, languageMapping, manifestPath, typeFields, typeOperations } from './compiler-manifest.mts';
 import { pythonPackageCommand } from './python-toolchain.mts';
 import { required } from './required.mts';
-import { CARGO } from './temporary-workspace.mts';
+import { cargo } from './temporary-workspace.mts';
 import { typescriptExports } from './typescript-exports.mts';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -287,7 +287,7 @@ function run(label: string, command: string, args: string[], cwd: string): void 
   if (result.error || result.status !== 0) throw new Error(`${label} failed:\n${result.error ? `${result.error.message}\n` : ''}${result.stdout}${result.stderr}`);
 }
 run('go interface AST check', 'go', ['test', '-run', '^(TestCompilerRuntimeInterface|TestBoundMapInterface)$', '.'], resolve(root, 'legacy/packages/go'));
-run('rust interface AST check', CARGO, ['test', '--locked', '--test', 'compiler_interface'], resolve(root, 'packages/rust'));
+run('rust interface AST check', ...cargo(resolve(root, 'packages/rust'), ['test', '--locked', '--test', 'compiler_interface']), resolve(root, 'packages/rust'));
 run('php interface reflection check', 'php', [resolve(root, 'vendor/bin/phpunit'), '--filter', 'CompilerInterfaceTest'], resolve(root, 'legacy/packages/php'));
 run('python interface check', pythonPackageCommand(), ['tests/test_compiler_interface.py'], resolve(root, 'legacy/packages/python'));
 

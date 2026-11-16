@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The scripts run cargo through `link cargo` of kit in temporary workspaces under `var/tmp` of the checkout (T28.99): they ran plain cargo in the system temporary directory, so with `.links` a check still built the pinned tag of binding.
 - The Makefile runs cargo through `link cargo` of kit (T28.98): with binding linked by `.links`, the crates built the tag of `polyspec-binding-core`, not the linked checkout.
 - `engine.register` and `engine.register_class` keep the host function in the contract (T28.87, binding GN-6aa, GN-7): their parameter has `keeps: true` and their core `failure: true`, so the generated tests check the error of a kept function at the render; the generated Go tests required `Register` to return it.
 - A generated binding renders the RT-77 cases `load_not_loaded` with a filesystem loader (T28.82, RT-77, binding B2.379): the interface `loader` names `blocking_io` with the default false, and `Loader::blocking_io` returns `Result<bool, LoadError>`; the interface named only `load`, so an `FsLoader` passed as `options.loader` answered false and a render failed with `load_not_found`.

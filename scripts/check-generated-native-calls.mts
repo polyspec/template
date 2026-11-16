@@ -7,7 +7,7 @@ import { compileFiles, compileSource } from '../packages/compiler/src/compiler.m
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { CARGO, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
+import { cargo, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
 import { compileFixtureGraph } from './fixture-graph.mts';
 import { checkLanguages } from './language-checks.mts';
 import { hostValuesDocument } from './fixture-documents.mts';
@@ -142,7 +142,7 @@ fn render_host_value(target: &str) -> Result<String, generated::GeneratedError> 
 #[test] fn generated_host_values_match() { for (target, output) in [${Object.entries(hostValues.outputs).map(([name, output]) => `(${rustString(name)}, ${rustString(output)})`).join(', ')}] { assert_eq!(render_host_value(target).unwrap(), output, "Rust generated {target}"); } for (target, code) in [${Object.entries(hostValues.errors).map(([name, code]) => `(${rustString(name)}, ErrorCode::${rustName(code.replace(/^E_/, '').toLowerCase())})`).join(', ')}] { assert_eq!(error_code(render_host_value(target).unwrap_err()), code, "Rust generated {target}"); } }
 `);
       try {
-        runChecked(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
+        runChecked(...cargo(root, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_native_object_check']), root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' });
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }

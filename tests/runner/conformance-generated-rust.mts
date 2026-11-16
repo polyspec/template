@@ -3,7 +3,7 @@
 // tests are named after the cases, and runs it with scripts/kit/run-tests.mjs, which prints each case
 // test with its elapsed time.
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { join, resolve } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { rustString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
@@ -13,7 +13,7 @@ import { knownFailureVerdict } from './known-failures.mts';
 import { runStep, stepProgress } from './bounded.mts';
 import { rustBuildArgs, rustRunArgs } from './rust-steps.mts';
 import { root } from './drivers.mts';
-import { CARGO, rustWorkspace } from '../../scripts/temporary-workspace.mts';
+import { cargo, rustWorkspace } from '../../scripts/temporary-workspace.mts';
 
 // A crate of the system temporary directory that depends on packages/rust; it holds the generated cases and
 // their integration test.
@@ -113,9 +113,9 @@ ${modules}
 ${tests}
 `);
   if (runnable.length > 0) {
-    const env = { ...workspace.env, PATH: `${dirname(CARGO)}:${process.env.PATH}`, RUSTFLAGS: '-Awarnings' };
+    const env = { ...workspace.env, RUSTFLAGS: '-Awarnings' };
     // The crate is built before its tests run, so a compile failure is reported as the build of the crate, not as a test.
-    const build = await runStep(CARGO, rustBuildArgs('generated_conformance_check'), { cwd: temporary, env });
+    const build = await runStep(...cargo(temporary, rustBuildArgs('generated_conformance_check')), { cwd: temporary, env });
     if (build.status !== 0) {
       failures.push(`the generated Rust test crate does not build (exit ${String(build.status)}):\n${build.stderr.trim()}`);
     } else {

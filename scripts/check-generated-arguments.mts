@@ -16,7 +16,7 @@ import { compileFiles, compileSource } from '../packages/compiler/src/compiler.m
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
-import { CARGO, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
+import { cargo, goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
 import { jsonDocument } from './json-document.mts';
 import { checkLanguages } from './language-checks.mts';
 import { tsc } from './tools.mts';
@@ -124,7 +124,7 @@ fn results(path: &str, render: impl Fn(&Json, &RenderOptions) -> String) -> Stri
 #[test] fn generated_arguments() { ${fixtures.map(fixture => `let program = ${fixture.id}::GeneratedProgram::new(EngineOptions::default()).unwrap(); println!("${fixture.name} {}", results(${rustString(vectorsFor(fixture, 'Rust'))}, |assign, options| match program.render("input.tpl", assign, options) { Ok(output) => format!("rendered: {output}"), Err(${fixture.id}::GeneratedError::Argument(message)) => format!("argument: {message}"), Err(${fixture.id}::GeneratedError::Render(RenderError::Kind(error))) => format!("template: {}", error.code.as_str()), Err(other) => format!("host: {other}") }));`).join(' ')} }
 `);
       try {
-        compare('Rust', runChecked(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture'], root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));
+        compare('Rust', runChecked(...cargo(root, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_arguments_check', '--', '--nocapture']), root, { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' }));
       } finally {
         rmSync(rust.directory, { recursive: true, force: true });
       }

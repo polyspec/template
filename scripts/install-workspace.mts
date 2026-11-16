@@ -1,22 +1,23 @@
 // Creates and removes the temporary directory of the package install check.
-import { mkdtempSync, rmSync } from 'node:fs';
+import { rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { parse } from 'smol-toml';
 import { tomlArray, tomlString, tomlTable } from './toml.mts';
+import { temporaryDirectory } from './temporary-workspace.mts';
 
 /** Creates a new temporary directory for one install project run. */
 export function createWorkspace(): string {
-  return mkdtempSync(join(tmpdir(), 'template-installs-'));
+  return temporaryDirectory('installs');
 }
 
 /**
  * Returns the Go environment that keeps the module cache inside the workspace. Go creates module
  * cache files read-only; `-modcacherw` creates them writable so that the workspace removal can
- * remove them.
+ * remove them. GOWORK=off: an install project is a module of its own, as a consumer's is, and its workspace lies in var/tmp of
+ * the checkout (T28.99), below the go.work of the checkout, which does not list it.
  */
-export function goModuleEnvironment(workspace: string): { GOMODCACHE: string; GOFLAGS: string } {
-  return { GOMODCACHE: join(workspace, 'go-module-cache'), GOFLAGS: '-modcacherw' };
+export function goModuleEnvironment(workspace: string): { GOMODCACHE: string; GOFLAGS: string; GOWORK: string } {
+  return { GOMODCACHE: join(workspace, 'go-module-cache'), GOFLAGS: '-modcacherw', GOWORK: 'off' };
 }
 
 /** Removes the workspace of one install project run and fails with its path when the removal fails. */

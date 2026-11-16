@@ -1,21 +1,21 @@
 // The temporary workspaces of the checks and runners that compile and run generated code (T20.1). Every workspace is a
-// new directory of the system temporary directory, never a directory of the checkout: the test files of one
-// `node --test` run start these checks at once, and files that a check writes into the checkout are seen by the other
-// checks, such as the owner check of every tracked path, and compiled by a concurrent `cargo test` of the crate.
+// new directory of var/tmp of the checkout, which Git ignores, so no check of tracked paths sees it, and which no crate of
+// the root workspace contains, so a concurrent `cargo test` does not compile it; the run that makes it removes it. It is
+// in the checkout so that cargo runs through link cargo of kit with the .links of the checkout (T28.99): a directory
+// outside every checkout has no .links, and link cargo runs plain cargo there.
 //
 // - nodeWorkspace: an ES module directory whose node_modules holds copies of installed packages of this repository, so
 //   that tsc and Node.js resolve the runtime that generated code imports from it as from the checkout. No symbolic link
 //   (AGENTS). Until the TypeScript backend moves to typed programs (docs/spec/compiler.md, Transition), that runtime is
 //   the legacy package `@polyspec/template-legacy`.
-// - rustWorkspace: a crate that depends on packages/rust by path, with the versions of its Cargo.lock and the
-//   rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
+// - rustWorkspace: a crate of its own workspace that depends on packages/rust by path, with the versions of its Cargo.lock
+//   and the rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
 //   checkout (T18.7).
 // - goWorkspace: a module that is a member of a Go workspace (go.work) together with legacy/packages/go, as the Go adapter of
 //   the showcase is, so Go resolves the module of legacy/packages/go from that directory and checks its dependencies by its
 //   go.sum (T25.6-1).
 import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseCargoLock, type LockPackage } from './install-workspace.mts';
@@ -24,16 +24,23 @@ import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts'
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const RUST = join(root, 'packages/rust');
 const GO = join(root, 'legacy/packages/go');
-function home(): string {
-  const value = process.env.HOME;
-  if (value === undefined) throw new Error('HOME is not set; the cargo of the checks is $HOME/.cargo/bin/cargo');
-  return value;
-}
-export const CARGO = resolve(home(), '.cargo/bin/cargo');
+const TEMPORARY = join(root, 'var/tmp');
 
-/** A new directory `template-<name>-*` of the system temporary directory. */
+/**
+ * The command and arguments that run cargo with `args` in `directory` through link cargo of kit, the utility of KIT_LINK
+ * that the Makefile exports: with the .links of the checkout the polyspec crates of the linked checkouts are built, without
+ * it cargo runs as given (kit docs/operations/local-links.md).
+ */
+export function cargo(directory: string, args: readonly string[]): [string, string[]] {
+  const link = process.env.KIT_LINK;
+  if (link === undefined || link === '') throw new Error('KIT_LINK is not set; the checks run cargo through link cargo of kit, which the Makefile names');
+  return [process.execPath, [link, 'cargo', directory, ...args]];
+}
+
+/** A new directory `template-<name>-*` of var/tmp of the checkout. */
 export function temporaryDirectory(name: string): string {
-  return mkdtempSync(join(tmpdir(), `template-${name}-`));
+  mkdirSync(TEMPORARY, { recursive: true });
+  return mkdtempSync(join(TEMPORARY, `template-${name}-`));
 }
 
 /** A temporary ES module directory with copies of the installed `packages`. */
@@ -77,11 +84,14 @@ version = "0.0.0"
 edition = "2024"
 publish = false
 
+# Its own workspace, not a member of the workspace of the checkout that holds it.
+[workspace]
+
 [dependencies]
 polyspec-template = { path = ${JSON.stringify(RUST)} }
 `);
-  // rustup selects the toolchain of the nearest rust-toolchain.toml above the working directory; the workspace is outside
-  // the checkout, so it carries the toolchain file of the repository and builds with the pinned Rust.
+  // rustup selects the toolchain of the nearest rust-toolchain.toml above the working directory; the workspace carries the
+  // toolchain file of the repository, so it builds with the pinned Rust wherever it lies.
   cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   mkdirSync(join(directory, 'src'));
   writeFileSync(join(directory, 'src/lib.rs'), '');
@@ -90,7 +100,7 @@ polyspec-template = { path = ${JSON.stringify(RUST)} }
   writeFileSync(join(directory, 'Cargo.lock'), original);
   const targetDirectory = join(RUST, 'target');
   const env = { ...process.env, CARGO_TARGET_DIR: targetDirectory };
-  const metadata = spawnSync(CARGO, ['metadata', '--offline', '--format-version', '1', '--manifest-path', manifest], { cwd: directory, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const metadata = spawnSync(...cargo(directory, ['metadata', '--offline', '--format-version', '1', '--manifest-path', manifest]), { cwd: directory, env, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   // --offline: the crates come from the registry of CARGO_HOME, into which make install downloads every Cargo.lock.
   if (metadata.error || metadata.status !== 0) {
     rmSync(directory, { recursive: true, force: true });

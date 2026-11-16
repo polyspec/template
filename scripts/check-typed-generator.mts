@@ -12,7 +12,7 @@ import { phpString } from '../packages/compiler/src/backend-support.mts';
 import { phpProgramAutoload } from './php-program.mts';
 import { pythonEnvironment, pythonPackageCommand } from './python-toolchain.mts';
 import { tsc } from './tools.mts';
-import { CARGO, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
+import { cargo, goWorkspace, nodeWorkspace, rustWorkspace } from './temporary-workspace.mts';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const generated = resolve(root, 'examples/showcase/adapters/generated/typed');
@@ -175,7 +175,7 @@ fn generated_${index}_matches() {
 }`).join('\n');
   writeFileSync(test, `${modules}\n${cases}\n`);
   try {
-    run(CARGO, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_program_check'], { env: { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' } });
+    run(...cargo(root, ['test', '--locked', '--offline', '--manifest-path', rust.manifest, '--test', 'generated_program_check']), { env: { CARGO_TARGET_DIR: rust.targetDirectory, RUSTFLAGS: '-Dwarnings -Adead-code' } });
   } finally {
     rmSync(rust.directory, { recursive: true, force: true });
   }
