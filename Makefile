@@ -1106,7 +1106,9 @@ BINDING_TARGETS := php python node wasm go
 	$(foreach target,$(BINDING_TARGETS),test-binding-$(target)) template-install-bindings
 bindings:
 	$(NODE) $(BINDING) generate --root $(CURDIR)
-bindings-check:
+# The check compares packages/release.mk, which Git ignores, with what binding release-recipes writes (binding CK-94), so it
+# writes that file first: a file that an earlier binding wrote would fail the check of the current one.
+bindings-check: release-recipes
 	$(NODE) $(BINDING) check $(CURDIR)/packages/rust/interface.json
 # The binding packages are the packages that a release publishes (docs/spec/runtime.md#transition), so the full suite runs
 # the generated tests of each target of the contract, which hold the cases of contracts/core-cases.json that `cases` of

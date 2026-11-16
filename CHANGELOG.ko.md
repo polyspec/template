@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `make bindings-check`는 binding check 전에 release recipe를 쓴다(T28.100). 앞선 run의 `packages/release.mk`를 비교해서, binding이 바뀐 뒤 CK-94로 실패했다.
 - `make template-install-bindings`는 json PHP 확장을 PIE로 설치하고, `make test-binding-php`가 그것을 load한다(T28.97). 그것을 설치하는 recipe가 없어서 생성 PHP 시험이 `Class "Polyspec\Json\OrderedMap" not found`로 실패했다.
 - legacy Python package의 README는 체크아웃에서 설치하라고 안내하고 jsonschema를 이름한다(T28.96). 어느 release에도 없는 wheel을 이름했다.
 - `make template-install-check`는 Rust crate를 release와 같은 형태로, 추적 파일의 경로에서 `cargo run --locked`로 설치한다(T28.95). crates.io archive인 `cargo package`가 binding-core가 git 의존이 된 뒤로 실패했다.
