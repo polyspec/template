@@ -1,6 +1,6 @@
 <!-- doc-id: packages-template-python-readme -->
 <!-- source-sha256: 96aae95ae02009f8cf0e9b152c6042e5c01b5552cbf9cb2779630a06ddc861a6 -->
-# polyspec-template
+# polyspec-template-legacy
 
 [English](README.md)
 
@@ -8,10 +8,10 @@ template 언어의 Python 구현: lexer, parser, renderer, 내장 함수, 명령
 
 ## 설치
 
-이 package는 GitHub release의 asset인 wheel에서 설치합니다. `vX.Y.Z`를 release tag로 바꾸고 `https://github.com/polyspec/template/releases/download/vX.Y.Z/`에서 `polyspec_template-X.Y.Z-py3-none-any.whl`을 내려받습니다:
+이 package는 GitHub release의 asset인 wheel에서 설치합니다. `vX.Y.Z`를 release tag로 바꾸고 `https://github.com/polyspec/template/releases/download/vX.Y.Z/`에서 `polyspec_template_legacy-X.Y.Z-py3-none-any.whl`을 내려받습니다:
 
 ```sh
-pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
+pip install ./polyspec_template_legacy-X.Y.Z-py3-none-any.whl
 ```
 
 wheel은 Python 3.14를 요구하며 다른 package가 필요하지 않습니다. 이 저장소의 체크아웃에서는 `pip install ./legacy/packages/python`으로 설치합니다.

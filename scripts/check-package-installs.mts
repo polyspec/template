@@ -181,7 +181,7 @@ function checkPython() {
   const python = pythonCommand();
   const pip = { ...pythonEnvironment(), PIP_NO_INDEX: '1', PIP_DISABLE_PIP_VERSION_CHECK: '1' };
   const version = tomlString(tomlTable(readToml(join(source, 'pyproject.toml')).project, 'the [project] of legacy/packages/python/pyproject.toml').version, 'the version of legacy/packages/python/pyproject.toml');
-  const archive = join(artifacts, `polyspec_template-${version}-py3-none-any.whl`);
+  const archive = join(artifacts, `polyspec_template_legacy-${version}-py3-none-any.whl`);
   run(python, ['-m', 'pip', 'wheel', '--no-deps', '--no-index', '--find-links', wheelhouseDirectory(root), '--wheel-dir', artifacts, source], { env: pip });
   assert.ok(existsSync(archive), `pip wheel wrote no ${archive} into ${artifacts}`);
   const directory = join(temporary, 'python');

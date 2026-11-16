@@ -3,7 +3,7 @@ requires = ["setuptools==84.2.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "polyspec-template"
+name = "polyspec-template-legacy"
 version = "0.0.27"
 description = "Templates with document order, typed data and HTML rendering"
 readme = "README.md"

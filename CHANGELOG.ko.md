@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- legacy Python package의 배포명은 `polyspec-template-legacy`다(T28.93). import 이름 `polyspec.template`은 그대로다. Python binding과 배포명 `polyspec-template`을 함께 써서, `make link`가 한 package에 provider 둘을 찾았다.
 - `.gitignore`는 root 아래 모든 Go module의 `go.work`와 `go.work.sum`을 무시한다(T28.94). module `packages/go`의 줄이 없어서 `make link`가 그 `go.work`에서 실패했다.
 - kit 0.0.115를 pin한다(T28.92).
 - binding-core 0.0.13 위의 json 0.0.32를 pin한다(T28.91). crate, `packages/go/go.sum`에 sum을 둔 Go module, composer·Python·npm 요구, `package-lock.json`, `packages/python/requirements-bindings.txt`의 wheel hash가 대상이다.

@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-python-readme -->
-# polyspec-template
+# polyspec-template-legacy
 
 [한국어](README.ko.md)
 
@@ -7,10 +7,10 @@ Python implementation of the template language: lexer, parser, renderer, built-i
 
 ## Install
 
-The package installs from its wheel in the assets of a GitHub release. Replace `vX.Y.Z` with the release tag, and download `polyspec_template-X.Y.Z-py3-none-any.whl` from `https://github.com/polyspec/template/releases/download/vX.Y.Z/`:
+The package installs from its wheel in the assets of a GitHub release. Replace `vX.Y.Z` with the release tag, and download `polyspec_template_legacy-X.Y.Z-py3-none-any.whl` from `https://github.com/polyspec/template/releases/download/vX.Y.Z/`:
 
 ```sh
-pip install ./polyspec_template-X.Y.Z-py3-none-any.whl
+pip install ./polyspec_template_legacy-X.Y.Z-py3-none-any.whl
 ```
 
 The wheel requires Python 3.14 and no other package. From a checkout of this repository, install the package with `pip install ./legacy/packages/python`.

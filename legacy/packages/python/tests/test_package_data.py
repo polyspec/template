@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Package data tests of the polyspec-template distribution.
+"""Package data tests of the polyspec-template-legacy distribution.
 
 The package data keys of pyproject.toml name importable packages, so the py.typed marker of polyspec.template and the
 AST schema that decode_template reads ship in the wheel under that package (RT-73).
