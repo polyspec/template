@@ -23,7 +23,7 @@ GO = $(KIT_TOOLS)/mise/shims/go
 # first cargo, which several processes start at once in one run and whose installs then break each other (T18.7-1). A
 # missing toolchain fails with rustup's message, which names rustup toolchain install.
 export RUSTUP_AUTO_INSTALL := 0
-CARGO ?= $(HOME)/.cargo/bin/cargo
+CARGO = $(NODE) $(KIT)/link.$(KIT_EXT) cargo $(CURDIR)
 # Each checkout builds its Rust crates into their own target. A CARGO_TARGET_DIR inherited from the environment, such as
 # the target of another checkout, would let cargo judge binaries built from other sources fresh for this one (T18.7).
 unexport CARGO_TARGET_DIR

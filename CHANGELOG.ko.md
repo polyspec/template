@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- Makefile은 cargo를 kit의 `link cargo`로 돌린다(T28.98). 전에는 `.links`로 binding을 연결해도 crate가 연결한 checkout이 아니라 `polyspec-binding-core`의 tag로 빌드됐다.
 - 계약에서 `engine.register`와 `engine.register_class`는 host 함수를 보관한다(T28.87, binding GN-6aa, GN-7). 그 parameter는 `keeps: true`, core는 `failure: true`를 갖는다. 그래서 생성 시험은 보관한 함수의 오류를 render에서 검사한다. 생성 Go 시험은 `Register`가 그 오류를 돌려주기를 요구했다.
 - 생성 binding은 파일시스템 로더로 RT-77 case `load_not_loaded`를 render한다(T28.82, RT-77, binding B2.379). interface `loader`는 `blocking_io`를 기본값 false와 함께 이름하고, `Loader::blocking_io`는 `Result<bool, LoadError>`를 돌려준다. interface가 `load`만 이름해서, `options.loader`로 넘긴 `FsLoader`가 false로 답했고 render가 `load_not_found`로 실패했다.
 - `wasm32-unknown-unknown`에서 `env.now` 없는 render는 JavaScript host의 시각을 쓴다(T28.89, FUN-42). 그 target에서 `SystemTime::now`가 panic해서, WebAssembly binding의 그런 render가 모두 panic했다.
