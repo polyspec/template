@@ -1212,6 +1212,11 @@ checkout-python-native-venv: bindings
 	$(KIT_TOOLS)/mise/shims/python3 -m venv --clear $(BINDING_VAR)/checkout-venv
 checkout-python-native: checkout-python-native-venv
 	cd packages/python && VIRTUAL_ENV=$(BINDING_VAR)/checkout-venv MATURIN=$(MATURIN) $(NODE) $(KIT_LINK) maturin $(CURDIR)/packages/python develop --skip-install --release --locked
+# Both native artifacts of a linked checkout in one run: each target writes its artifact into a generated folder that make
+# bindings writes again, so two runs of the targets one after the other leave only the second artifact, and one make run
+# makes bindings once, before both (T28.108).
+.PHONY: checkout
+checkout: checkout-node-addon checkout-python-native
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
 binding-node-package-wasm-bindgen-check: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
