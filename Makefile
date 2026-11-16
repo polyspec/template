@@ -1232,7 +1232,7 @@ test-binding-php: test-binding-php-lint
 # on go test with the build tags of those features, polyspec_<feature> with _ for - (binding GN-5). The module is a module of
 # go.work, whose go.work.sum holds the sums of the Go module of json, and GOTOOLCHAIN=local is exported above.
 BINDING_GO_FEATURES = $(call binding_features,packages/go/internal/ffi/Cargo.toml)
-BINDING_GO_ENV = CGO_LDFLAGS=-L$(CURDIR)/target/debug GOFLAGS=-tags=$(subst -,_,$(shell echo '$(BINDING_GO_FEATURES)' | sed 's/\([^,]*\)/polyspec_\1/g'))
+BINDING_GO_ENV = CGO_LDFLAGS=-L$(CURDIR)/target/debug GOFLAGS=-tags=$(subst -,_,$(shell echo '$(BINDING_GO_FEATURES)' | sed 's/\([^,]*\)/polyspec_template_\1/g'))
 test-binding-go-build: bindings
 	$(CARGO) build --locked -p polyspec-template-go --features $(BINDING_GO_FEATURES)
 test-binding-go-format: test-binding-go-build

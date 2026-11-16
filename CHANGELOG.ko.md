@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `make test-binding-go`는 build tag `polyspec_template_<feature>`로 template의 생성 Go 시험을 켠다(T28.88, binding GN-15). tag를 `polyspec_<feature>`로 이름해서, 대신 json Go module의 시험을 켰고 그 link가 실패했다.
 - `make conformance-generated-go`는 생성 Go program이 실행 중에 낸 오류를 legacy Go runtime의 대문자 이름 `E_<KIND>`로 비교한다(T28.86, ERR-1). case의 kind를 그 이름과 그대로 비교해서, 위치가 같은데도 오류 case 47개가 실패했다.
 - `make lint-go`는 같은 run이 생성한 Go binding을 lint한다(T28.85). `typed-generator`에만 의존해서, 앞선 생성이 남긴 `packages/go`의 무시된 `zz_generated_*.go`를 lint했다. 이제 `bindings`에 의존한다.
 - 생성 PHP 시험은 `template_value`의 `Bytes` 값 case를 빼고 만든다(T28.84, VAL-23, binding GN-13h). PHP에는 text와 구별되는 bytes가 없어서, 시험이 그 값을 UTF-8이 아닌 문자열로 만들었고 `data_unsupported_type` 대신 `data_invalid_utf8`로 실패했다. 그 case는 group `template_value/bytes`이고, 그 행은 그것을 Python, Node, WebAssembly, Go에 둔다.

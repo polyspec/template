@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `make test-binding-go` turns on the generated Go tests of template with the build tags `polyspec_template_<feature>` (T28.88, binding GN-15): it named them `polyspec_<feature>`, which turned on the tests of the Go module of json instead, whose link failed.
 - `make conformance-generated-go` compares the error that a generated Go program raises at run time with the capital name `E_<KIND>` of the legacy Go runtime (T28.86, ERR-1): it compared the kind of the case with that name, so 47 error cases failed with their position equal.
 - `make lint-go` lints the Go binding that the same run generates (T28.85): it depended on `typed-generator` alone, so it linted the ignored `zz_generated_*.go` of `packages/go` that an earlier generation left; it now depends on `bindings`.
 - The generated PHP test leaves out the case of a `Bytes` value of `template_value` (T28.84, VAL-23, binding GN-13h): PHP has no bytes apart from text, so the test made the value as a string that is not UTF-8 and failed with `data_invalid_utf8` instead of `data_unsupported_type`; the case is the group `template_value/bytes`, whose row keeps it for Python, Node, WebAssembly and Go.
