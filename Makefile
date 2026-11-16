@@ -570,8 +570,9 @@ template-lint-go-format:
 	@out=$$(gofmt -l $(GO_DIR) $(GO_BACKEND_DIR)) || exit 1; test -z "$$out" || { echo "gofmt -l $(GO_DIR) $(GO_BACKEND_DIR) lists files that are not formatted:"; echo "$$out"; exit 1; }
 # go mod tidy ignores go.work, so each tracked go.mod requires the modules that its packages import, a module of this
 # repository by its path inside the repository, and go.sum holds their sums; go mod tidy -diff names each module that differs
-# (T27.1-60).
-template-lint-go-modules:
+# (T27.1-60). The module packages/go is the Go binding, whose Go files make bindings writes and Git ignores, so the check
+# tidies the generation of this run: without it no file of packages/go imports json, and tidy drops its requirement.
+template-lint-go-modules: bindings
 	@failed=; for module in $$(git ls-files ':(glob)**/go.mod'); do dir=$$(dirname $$module); echo "[go-modules] go mod tidy -diff in $$dir"; (cd $$dir && $(GO) mod tidy -diff) || failed="$$failed $$dir"; done; test -z "$$failed" || { echo "go mod tidy -diff fails in:$$failed"; exit 1; }
 # fmt-check checks that every crate of the root workspace, the binding packages included, is in the form of rustfmt.
 fmt-check:
