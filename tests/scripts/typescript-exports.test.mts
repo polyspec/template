@@ -68,7 +68,11 @@ test('namespace re-exports expose the namespace name', { timeout: 1000 }, () => 
 // RT-80: @polyspec/template exports the TypeScript renderer under ./render, apart from the generated binding (.), with the
 // names that release 0.0.27 exported there.
 test('RT-80: @polyspec/template exports the TypeScript renderer under ./render with the names of release 0.0.27', () => {
-  const manifest = JSON.parse(readFileSync('packages/ts/package.json', 'utf8')) as { exports: Record<string, Record<string, string>>; files: string[] };
+  const manifest = jsonDocument<{ exports: Record<string, unknown>; files: string[] }>('package manifest', {
+    type: 'object', required: ['exports', 'files'],
+    properties: { exports: { type: 'object', additionalProperties: { type: 'object' } },
+      files: { type: 'array', items: { type: 'string' } } },
+  }).read('packages/ts/package.json');
   assert.deepEqual(manifest.exports['./render'], { types: './render/render.d.ts', import: './render/render.mjs', require: './render/render.cjs' });
   assert.ok(manifest.files.includes('render'), 'files of packages/ts/package.json names render');
   assert.ok(!JSON.stringify(manifest.exports['.']).includes('render'), 'the generated binding (.) does not export the renderer');

@@ -18,6 +18,7 @@
   },
   "ignoreDependencies": [
     "@polyspec/binding",
+    "@polyspec/json",
     "@napi-rs/cli"
   ],
   "ignoreBinaries": [

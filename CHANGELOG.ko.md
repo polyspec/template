@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- `make lint-ts`가 통과한다(T28.76). 시험 RT-80은 oxlint가 거부한 `any`에서의 단언 대신 JSON Schema로 `packages/ts/package.json`을 읽는다. knip은 Makefile이 생성 binding 시험을 위해 설치하고 어떤 module도 import하지 않는 `@polyspec/json`을 쓰이는 것으로 본다.
 - Rust core는 call의 field 쓰기, node와 expression의 span 검사, load 실패 생성을 각각 한 곳에서 한다(T28.75, P34). `make duplication-check`가 `ast_json.rs`와 `render/engine.rs`에서 각각 두 번 있는 것을 찾았다.
 - `AGENTS.md`의 `## 멱등성` 절은 그 문단으로 시작하고, workflow job의 runner 규칙이 그 뒤에 온다(T28.74). 그 규칙이 문단 앞에 있어 `make rules-check`가 어느 절도 소개하지 않는 문단으로 보고했다.
 - `engine.render_json`과 `engine.prepare`의 case `data_invalid_utf8`은 모든 대상에서 core에 도달한다(T28.73, VAL-12, binding GN-6k, GN-6x). 그 `assign`은 짝 없는 surrogate를 가진 `text`를 주었는데, 바인딩은 그것을 json의 `in` 함수로만 변환한다. 그래서 Node는 `data_invalid_utf8` 대신 `JsonValueError: text holds an unpaired surrogate`로, PHP는 `JsonValueError: text is not UTF-8`로 실패했다. 이제 그 text는 json이 다섯 대상에서 UTF-16 code unit으로 만드는 값 `{"kind": "text16", "value": [97, 55296]}`이며, Rust contract runner는 그런 값을 `\u` escape의 JSON 문자열로 쓴다.
