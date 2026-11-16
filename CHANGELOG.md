@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `engine.register` and `engine.register_class` keep the host function in the contract (T28.87, binding GN-6aa, GN-7): their parameter has `keeps: true` and their core `failure: true`, so the generated tests check the error of a kept function at the render; the generated Go tests required `Register` to return it.
 - A generated binding renders the RT-77 cases `load_not_loaded` with a filesystem loader (T28.82, RT-77, binding B2.379): the interface `loader` names `blocking_io` with the default false, and `Loader::blocking_io` returns `Result<bool, LoadError>`; the interface named only `load`, so an `FsLoader` passed as `options.loader` answered false and a render failed with `load_not_found`.
 - A render without `env.now` on `wasm32-unknown-unknown` takes the time of the JavaScript host (T28.89, FUN-42): `SystemTime::now` panics on that target, so every such render of the WebAssembly binding panicked.
 - `make test-binding-go-vet` also vets the Go module outside the workspace with its own `go.sum` (T28.101): in the workspace a `go.sum` that missed a sum passed.

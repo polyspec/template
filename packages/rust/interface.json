@@ -3499,7 +3499,8 @@
                   "async_allowed": false
                 }
               },
-              "required": true
+              "required": true,
+              "keeps": true
             }
           ],
           "returns": "none",
@@ -3509,7 +3510,8 @@
           "wait": "none",
           "core": {
             "path": "polyspec_template::AstProgram::register_function",
-            "receiver": "&mut self"
+            "receiver": "&mut self",
+            "failure": true
           }
         },
         {
@@ -3555,7 +3557,8 @@
                   "async_allowed": false
                 }
               },
-              "required": true
+              "required": true,
+              "keeps": true
             }
           ],
           "returns": "none",
@@ -3565,7 +3568,8 @@
           "wait": "none",
           "core": {
             "path": "polyspec_template::AstProgram::register_class_function",
-            "receiver": "&mut self"
+            "receiver": "&mut self",
+            "failure": true
           }
         },
         {
