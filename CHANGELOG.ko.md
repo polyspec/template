@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- kit 0.0.116을 고정한다(T28.102).
 - script는 cargo를 checkout의 `var/tmp` 아래 임시 workspace에서 kit의 `link cargo`로 돌린다(T28.99). 전에는 시스템 임시 디렉터리에서 plain cargo를 돌려서, `.links`가 있어도 검사가 binding의 pin된 tag로 빌드했다.
 - Makefile은 cargo를 kit의 `link cargo`로 돌린다(T28.98). 전에는 `.links`로 binding을 연결해도 crate가 연결한 checkout이 아니라 `polyspec-binding-core`의 tag로 빌드됐다.
 - 계약에서 `engine.register`와 `engine.register_class`는 host 함수를 보관한다(T28.87, binding GN-6aa, GN-7). 그 parameter는 `keeps: true`, core는 `failure: true`를 갖는다. 그래서 생성 시험은 보관한 함수의 오류를 render에서 검사한다. 생성 Go 시험은 `Register`가 그 오류를 돌려주기를 요구했다.

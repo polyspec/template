@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- kit 0.0.116 is pinned (T28.102).
 - The scripts run cargo through `link cargo` of kit in temporary workspaces under `var/tmp` of the checkout (T28.99): they ran plain cargo in the system temporary directory, so with `.links` a check still built the pinned tag of binding.
 - The Makefile runs cargo through `link cargo` of kit (T28.98): with binding linked by `.links`, the crates built the tag of `polyspec-binding-core`, not the linked checkout.
 - `engine.register` and `engine.register_class` keep the host function in the contract (T28.87, binding GN-6aa, GN-7): their parameter has `keeps: true` and their core `failure: true`, so the generated tests check the error of a kept function at the render; the generated Go tests required `Register` to return it.
