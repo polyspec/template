@@ -1212,11 +1212,23 @@ checkout-python-native-venv: bindings
 	$(KIT_TOOLS)/mise/shims/python3 -m venv --clear $(BINDING_VAR)/checkout-venv
 checkout-python-native: checkout-python-native-venv
 	cd packages/python && VIRTUAL_ENV=$(BINDING_VAR)/checkout-venv MATURIN=$(MATURIN) $(NODE) $(KIT_LINK) maturin $(CURDIR)/packages/python develop --skip-install --release --locked
-# Both native artifacts of a linked checkout in one run: each target writes its artifact into a generated folder that make
-# bindings writes again, so two runs of the targets one after the other leave only the second artifact, and one make run
-# makes bindings once, before both (T28.108).
+# The WebAssembly module and its glue in packages/ts/wasm/generated, which the entries . (browser) and ./wasm of
+# @polyspec/template import, for a linked checkout (T28.110), on the principle of checkout-node-addon: built through link cargo
+# of kit, in the release profile without test features, with the wasm-bindgen of mise.toml at the release of
+# packages/ts/wasm/Cargo.toml.
+.PHONY: checkout-wasm-bindgen-check checkout-wasm-build checkout-wasm
+checkout-wasm-bindgen-check: bindings
+	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
+checkout-wasm-build: checkout-wasm-bindgen-check
+	$(CARGO) build --locked --release -p polyspec-template-wasm --target wasm32-unknown-unknown
+checkout-wasm: checkout-wasm-build
+	$(BINDING_WASM_BINDGEN) --target web --out-dir packages/ts/wasm/generated --out-name template_wasm target/wasm32-unknown-unknown/release/polyspec_template_wasm.wasm
+# Every entry that package.json of packages/ts exports and the Python package, for a consumer that links this checkout, in one
+# run: each artifact lies in a folder that make bindings writes again, so separate runs of the targets one after the other
+# leave only the last artifact, and one make run makes bindings once, before all (T28.108); the renderer of ./render and
+# ./decode is built into packages/ts/render (T28.110).
 .PHONY: checkout
-checkout: checkout-node-addon checkout-python-native
+checkout: checkout-node-addon checkout-wasm template-build-ts-render checkout-python-native
 BINDING_WASM_BINDGEN_RELEASE := $(shell sed -n 's/^wasm-bindgen = "=\(.*\)"$$/\1/p' packages/ts/wasm/Cargo.toml)
 binding-node-package-wasm-bindgen-check: bindings template-build-ts
 	test "$$($(BINDING_WASM_BINDGEN) --version)" = "wasm-bindgen $(BINDING_WASM_BINDGEN_RELEASE)"
