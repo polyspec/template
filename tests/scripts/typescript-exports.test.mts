@@ -74,6 +74,7 @@ test('RT-80: @polyspec/template exports the TypeScript renderer under ./render w
       files: { type: 'array', items: { type: 'string' } } },
   }).read('packages/ts/package.json');
   assert.deepEqual(manifest.exports['./render'], { types: './render/render.d.ts', import: './render/render.mjs', require: './render/render.cjs' });
+  assert.deepEqual(manifest.exports['./decode'], { types: './render/decode.d.ts', import: './render/decode.mjs', require: './render/decode.cjs' }, 'RT-80: ./decode exports decodeTemplate as release 0.0.27 did');
   assert.ok(manifest.files.includes('render'), 'files of packages/ts/package.json names render');
   assert.ok(!JSON.stringify(manifest.exports['.']).includes('render'), 'the generated binding (.) does not export the renderer');
   const declarations = 'packages/ts/render/render.d.ts';

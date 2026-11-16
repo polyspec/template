@@ -17,9 +17,9 @@ const MINIFIED_BUDGET = 90_000;
 const GZIP_BUDGET = 7_900;
 
 /** The minified and gzip sizes of a browser bundle that imports only decodeTemplate from `specifier`. */
-async function bundleOf(specifier: string): Promise<{ minified: number; gzip: number }> {
+async function bundleOf(specifier: string, resolveDir: string): Promise<{ minified: number; gzip: number }> {
   const result = await build({
-    stdin: { contents: `import { decodeTemplate } from ${JSON.stringify(specifier)};\nglobalThis.decodeTemplate = decodeTemplate;\n`, resolveDir: ROOT, loader: 'js' },
+    stdin: { contents: `import { decodeTemplate } from ${JSON.stringify(specifier)};\nglobalThis.decodeTemplate = decodeTemplate;\n`, resolveDir, loader: 'js' },
     bundle: true,
     format: 'esm',
     platform: 'browser',
@@ -32,9 +32,11 @@ async function bundleOf(specifier: string): Promise<{ minified: number; gzip: nu
   return { minified: output.contents.byteLength, gzip: gzipSync(output.contents, { level: 9 }).byteLength };
 }
 
-for (const specifier of ['@polyspec/template-legacy/decode', '@polyspec/template-legacy/render']) {
+// @polyspec/template/decode is the same entry as the package of a release exports it (RT-80), which esbuild resolves from
+// packages/ts by the self-reference of the package name.
+for (const [specifier, from] of [['@polyspec/template-legacy/decode', ROOT], ['@polyspec/template-legacy/render', ROOT], ['@polyspec/template/decode', path.join(ROOT, 'packages/ts')]] as const) {
   test(`a browser bundle of decodeTemplate from ${specifier} stays within ${MINIFIED_BUDGET} bytes minified and ${GZIP_BUDGET} gzip`, async () => {
-    const size = await bundleOf(specifier);
+    const size = await bundleOf(specifier, from);
     assert.ok(size.minified <= MINIFIED_BUDGET && size.gzip <= GZIP_BUDGET, `${specifier}: ${size.minified} bytes minified, ${size.gzip} gzip`);
   });
 }

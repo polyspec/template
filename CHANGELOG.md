@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `@polyspec/template` exports `decodeTemplate` under `./decode` again, as release 0.0.27 did (T28.107): the release left the subpath out, and a browser consumer that imports it failed.
 - kit 0.0.116 is pinned (T28.102).
 - The scripts run cargo through `link cargo` of kit in temporary workspaces under `var/tmp` of the checkout (T28.99): they ran plain cargo in the system temporary directory, so with `.links` a check still built the pinned tag of binding.
 - The Makefile runs cargo through `link cargo` of kit (T28.98): with binding linked by `.links`, the crates built the tag of `polyspec-binding-core`, not the linked checkout.

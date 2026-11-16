@@ -24,6 +24,11 @@
       "types": "./render/render.d.ts",
       "import": "./render/render.mjs",
       "require": "./render/render.cjs"
+    },
+    "./decode": {
+      "types": "./render/decode.d.ts",
+      "import": "./render/decode.mjs",
+      "require": "./render/decode.cjs"
     }
   },
   "files": [
