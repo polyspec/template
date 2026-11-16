@@ -128,16 +128,16 @@ function checkRust() {
   cpSync(join(root, 'examples/showcase/adapters/generated/typed/scope-precedence.rust'), join(directory, 'generated.rs'));
   writeFileSync(join(directory, 'Cargo.toml'), `[package]\nname="install-check"\nversion="0.0.1"\nedition="2024"\n[dependencies]\npolyspec-template={path=${JSON.stringify(join(source, 'packages/rust'))}}\n`);
   // The install project builds with the locked versions of the package and the toolchain of the checkout. Its lock starts as
-  // the root Cargo.lock, and an offline cargo metadata leaves in it the packages that the install project resolves, its features
-  // and the development dependencies of a path dependency included as cargo judges them, at their locked versions; cargo run
-  // --locked then refuses any other change.
+  // the root Cargo.lock, and an offline cargo update of the workspace leaves in it the packages that the install project
+  // resolves, as cargo judges its features and the development dependencies of a path dependency, at their locked versions;
+  // cargo run --locked then refuses any other change.
   cpSync(join(root, 'Cargo.lock'), join(directory, 'Cargo.lock'));
   cpSync(join(root, 'rust-toolchain.toml'), join(directory, 'rust-toolchain.toml'));
   writeFileSync(join(directory, 'src/main.rs'), `mod generated { include!(concat!(env!("CARGO_MANIFEST_DIR"), "/generated.rs")); }
 use polyspec_template::{AstProgram, Engine, EngineOptions, FsLoader, RenderOptions, RenderTarget};
 fn main(){ let assign=polyspec_template::read_json(include_str!("../data.json")).unwrap(); let raw=polyspec_template::read_json(include_str!("../define.json")).unwrap(); let mut options=RenderOptions::default(); options.define=Some(polyspec_template::defines_from_json(&raw).unwrap()); let expected=include_str!("../expected.html"); let ast=Engine::new(AstProgram::new(EngineOptions{loader:Some(Box::new(FsLoader::new("templates"))),..Default::default()}).unwrap()).prepare(RenderTarget::Name("layout"),&assign,&options).unwrap().render().unwrap(); let program=generated::GeneratedProgram::new(EngineOptions::default()).unwrap(); let direct=program.render("layout",&assign,&options).unwrap(); assert_eq!(ast,expected);assert_eq!(direct,expected);assert_eq!(ast,direct); }
 `);
-  run(CARGO, ['metadata', '--offline', '--format-version', '1'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
+  run(CARGO, ['update', '--offline', '--workspace'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
   run(CARGO, ['run', '--quiet', '--locked'], { cwd: directory, env: { CARGO_TARGET_DIR: join(temporary, 'cargo-install-target') } });
 }
 
