@@ -1134,13 +1134,23 @@ check-declarations: check-declarations-node
 # The tools of the job bindings beyond those of make install-tools: maturin and the wasm-bindgen CLI of mise.toml at the
 # digests of mise.lock, the crates of every Cargo.lock, the Go modules of go.work and PHPUnit of composer.lock, which runs
 # the generated tests of the PHP extension.
-template-install-bindings: template-install-bindings-python-deps
-.PHONY: template-install-bindings-tools template-install-bindings-python-deps
+template-install-bindings: template-install-bindings-python-deps template-install-bindings-php-deps
+.PHONY: template-install-bindings-tools template-install-bindings-python-deps template-install-bindings-php-deps
 template-install-bindings-tools: template-install-rust template-install-go template-install-php
-	$(ONLINE) $(KIT_TOOLS)/bin/mise install --locked github:PyO3/maturin github:wasm-bindgen/wasm-bindgen
+	$(ONLINE) $(KIT_TOOLS)/bin/mise install --locked github:PyO3/maturin github:wasm-bindgen/wasm-bindgen http:pie
 # The wheels of json of packages/python/requirements-bindings.txt, which pip downloads and checks by their sha256.
 template-install-bindings-python-deps: template-install-bindings-tools
 	$(ONLINE) $(KIT_TOOLS)/mise/shims/python3 -m pip download -q --require-hashes --no-deps -r packages/python/requirements-bindings.txt -d $(BINDING_VAR)/deps/python
+# The PHP extension of json that packages/php-ext/composer.json requires (ext-polyspec_json, polyspec/json at its version):
+# PIE resolves it in the Composer repository of that json release and downloads the prebuilt archive for the PHP of PATH
+# (.php-version) into BINDING_PIE. `pie download` installs nothing into the PHP; the tests load the library with -d extension.
+PIE := $(KIT_TOOLS)/mise/shims/pie
+BINDING_PIE = $(BINDING_VAR)/deps/php
+BINDING_JSON_PHP = $(shell $(NODE) -p 'require("./packages/php-ext/composer.json").require["polyspec/json"]')
+template-install-bindings-php-deps: template-install-bindings-tools
+	rm -rf $(BINDING_PIE)
+	$(ONLINE) env PIE_WORKING_DIRECTORY=$(BINDING_PIE) $(PIE) repository:add composer https://github.com/polyspec/json/releases/download/v$(BINDING_JSON_PHP)/packages.json --no-interaction
+	$(ONLINE) env PIE_WORKING_DIRECTORY=$(BINDING_PIE) $(PIE) download polyspec/json:$(BINDING_JSON_PHP) --no-interaction
 MATURIN := $(KIT_TOOLS)/mise/shims/maturin
 BINDING_WASM_BINDGEN := $(KIT_TOOLS)/mise/shims/wasm-bindgen
 BINDING_GOFMT := $(KIT_TOOLS)/mise/shims/gofmt
@@ -1155,7 +1165,7 @@ BINDING_DYLIB := $(if $(filter Darwin,$(shell uname -s)),dylib,so)
 # A linked checkout gives those that its provider built (docs/operations/development.md).
 BINDING_PYTHON_FIND_LINKS ?= $(BINDING_VAR)/deps/python
 BINDING_NODE_DEPS ?= $(CURDIR)/node_modules/@polyspec/json $(CURDIR)/node_modules/@polyspec/json-$(BINDING_PLATFORM)
-BINDING_PHP_EXTENSIONS ?=
+BINDING_PHP_EXTENSIONS ?= $(wildcard $(BINDING_PIE)/*/vendor/polyspec/json/polyspec_json.so)
 # The test features of a binding crate: every feature of its manifest (binding GN-5), joined by commas.
 binding_features = $(shell sed -n '/^\[features\]/,/^\[/s/^\([a-z][a-z0-9-]*\) = .*/\1/p' $(1) | paste -sd, -)
 

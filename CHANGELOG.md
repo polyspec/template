@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- `make template-install-bindings` installs the PHP extension of json with PIE, and `make test-binding-php` loads it (T28.97): no recipe installed it, so the generated PHP tests failed with `Class "Polyspec\Json\OrderedMap" not found`.
 - The README of the legacy Python package installs it from a checkout and names jsonschema (T28.96): it named a release wheel that no release holds.
 - `make template-install-check` installs the Rust crate as its release does, from the tracked files at a path with `cargo run --locked` (T28.95): its `cargo package`, the archive of crates.io, failed since binding-core is a git dependency.
 - The legacy Python package is the distribution `polyspec-template-legacy` (T28.93), import name `polyspec.template` unchanged: it shared the distribution name `polyspec-template` with the Python binding, so `make link` found two providers of one package.
