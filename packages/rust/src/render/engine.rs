@@ -86,7 +86,15 @@ pub struct RenderOptions {
     pub env: Option<Env>,
 }
 
+/// The current time in seconds since the Unix epoch (FUN-42): on wasm32-unknown-unknown, whose standard library has no
+/// clock, the `Date.now` of the JavaScript host.
+#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+fn current_time() -> Result<f64, BindError> {
+    Ok((js_sys::Date::now() / 1000.0).floor())
+}
+
 /// The current time in seconds since the Unix epoch; a clock before the epoch is an error, not zero.
+#[cfg(not(all(target_arch = "wasm32", target_os = "unknown")))]
 fn current_time() -> Result<f64, BindError> {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)

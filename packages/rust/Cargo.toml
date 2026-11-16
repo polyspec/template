@@ -84,6 +84,11 @@ clap = { version = "4", features = ["derive"], optional = true }
 [target.'cfg(windows)'.dependencies]
 winapi-util = "0.1.11"
 
+# The clock of the host on wasm32-unknown-unknown, whose standard library has none and panics in SystemTime::now: the
+# current time of a render without env.now (FUN-42) is Date.now of the JavaScript host.
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+js-sys = "0.3.107"
+
 [dev-dependencies]
 # Only generated code makes a Raised; the tests make one through the feature `construct` to check that it reaches the
 # caller unchanged (FUN-46).

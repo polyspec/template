@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- A render without `env.now` on `wasm32-unknown-unknown` takes the time of the JavaScript host (T28.89, FUN-42): `SystemTime::now` panics on that target, so every such render of the WebAssembly binding panicked.
 - `make test-binding-go-vet` also vets the Go module outside the workspace with its own `go.sum` (T28.101): in the workspace a `go.sum` that missed a sum passed.
 - `make bindings-check` writes the release recipes before binding check (T28.100): it compared the `packages/release.mk` of an earlier run and failed with CK-94 after a change of binding.
 - `make template-install-bindings` installs the PHP extension of json with PIE, and `make test-binding-php` loads it (T28.97): no recipe installed it, so the generated PHP tests failed with `Class "Polyspec\Json\OrderedMap" not found`.

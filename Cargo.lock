@@ -1155,6 +1155,7 @@ name = "polyspec-template"
 version = "0.0.28"
 dependencies = [
  "clap",
+ "js-sys",
  "libtest-mimic",
  "polyspec-binding-core",
  "polyspec-json",
