@@ -1,6 +1,6 @@
 <!-- doc-id: packages-template-php-readme -->
 <!-- source-sha256: ea9419ebbd8ea0ff2fc078ceadf48fb9900fb2571c19aef11ce0ab5cee740276 -->
-# polyspec/template
+# polyspec/template-legacy
 
 [English](README.md).
 
@@ -9,7 +9,7 @@
 ## 설치
 
 ```sh
-composer require polyspec/template
+composer require polyspec/template-legacy
 ```
 
 ## 렌더

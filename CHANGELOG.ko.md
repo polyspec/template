@@ -19,6 +19,7 @@
 - legacy Python package의 README는 체크아웃에서 설치하라고 안내하고 jsonschema를 이름한다(T28.96). 어느 release에도 없는 wheel을 이름했다.
 - `make template-install-check`는 Rust crate를 release와 같은 형태로, 추적 파일의 경로에서 `cargo run --locked`로 설치한다(T28.95). crates.io archive인 `cargo package`가 binding-core가 git 의존이 된 뒤로 실패했다.
 - legacy Python package의 배포명은 `polyspec-template-legacy`다(T28.93). import 이름 `polyspec.template`은 그대로다. Python binding과 배포명 `polyspec-template`을 함께 써서, `make link`가 한 package에 provider 둘을 찾았다.
+- legacy PHP library의 Composer package 이름은 `polyspec/template-legacy`다(T28.112). namespace `Polyspec\Template`은 그대로다. PHP binding `packages/php-ext`와 이름 `polyspec/template`을 함께 써서, kit의 `link providers`가 한 Composer package에 provider 둘을 찾았다.
 - `.gitignore`는 root 아래 모든 Go module의 `go.work`와 `go.work.sum`을 무시한다(T28.94). module `packages/go`의 줄이 없어서 `make link`가 그 `go.work`에서 실패했다.
 - kit 0.0.115를 pin한다(T28.92).
 - binding-core 0.0.13 위의 json 0.0.32를 pin한다(T28.91). crate, `packages/go/go.sum`에 sum을 둔 Go module, composer·Python·npm 요구, `package-lock.json`, `packages/python/requirements-bindings.txt`의 wheel hash가 대상이다.

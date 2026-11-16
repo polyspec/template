@@ -1,5 +1,5 @@
 <!-- doc-id: packages-template-php-readme -->
-# polyspec/template
+# polyspec/template-legacy
 
 [한국어](README.ko.md).
 
@@ -8,7 +8,7 @@ PHP implementation of the template language: lexer, parser, renderer, built-in f
 ## Install
 
 ```sh
-composer require polyspec/template
+composer require polyspec/template-legacy
 ```
 
 ## Render

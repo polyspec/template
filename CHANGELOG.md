@@ -18,6 +18,7 @@
 - The README of the legacy Python package installs it from a checkout and names jsonschema (T28.96): it named a release wheel that no release holds.
 - `make template-install-check` installs the Rust crate as its release does, from the tracked files at a path with `cargo run --locked` (T28.95): its `cargo package`, the archive of crates.io, failed since binding-core is a git dependency.
 - The legacy Python package is the distribution `polyspec-template-legacy` (T28.93), import name `polyspec.template` unchanged: it shared the distribution name `polyspec-template` with the Python binding, so `make link` found two providers of one package.
+- The legacy PHP library is the Composer package `polyspec/template-legacy` (T28.112), namespace `Polyspec\Template` unchanged: it shared the name `polyspec/template` with the PHP binding `packages/php-ext`, so `link providers` of kit found two providers of one Composer package.
 - `.gitignore` ignores the `go.work` and `go.work.sum` of every Go module below the root (T28.94): the module `packages/go` had no line, so `make link` failed on its `go.work`.
 - Pin kit 0.0.115 (T28.92).
 - Pin json 0.0.32 on binding-core 0.0.13 (T28.91): the crates, the Go module with its sums in `packages/go/go.sum`, composer, Python and npm requirements, `package-lock.json` and the wheel hashes of `packages/python/requirements-bindings.txt`.

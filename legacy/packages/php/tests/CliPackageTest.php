@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * The command line is an application package of its own (K433): it lives in legacy/packages/cli/php, a Composer project
- * that requires polyspec/template, and the library holds no command line of its own.
+ * that requires polyspec/template-legacy, and the library holds no command line of its own.
  */
 final class CliPackageTest extends TestCase
 {
@@ -19,7 +19,7 @@ final class CliPackageTest extends TestCase
         $this->assertFileExists($manifest);
         $composer = json_decode((string) file_get_contents($manifest), true, 512, JSON_THROW_ON_ERROR);
         $this->assertSame('project', $composer['type']);
-        $this->assertArrayHasKey('polyspec/template', $composer['require']);
+        $this->assertArrayHasKey('polyspec/template-legacy', $composer['require']);
         $this->assertArrayHasKey('symfony/console', $composer['require']);
     }
 
