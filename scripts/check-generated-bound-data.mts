@@ -34,7 +34,7 @@ try {
       runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), join(temporary, 'bound.ts')], root);
       const tsRunner = join(temporary, 'bound.mjs');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/bound.js';
-import { RuntimeEnvironment, bind, merge } from '@polyspec/template';
+import { RuntimeEnvironment, bind, merge } from '@polyspec/template-legacy';
 const cases = ${json(cases)};
 const check = (actual, expected, label) => { if (actual !== expected) throw new Error('TypeScript generated ' + label + ': ' + JSON.stringify(actual)); };
 const program = new GeneratedProgram(new RuntimeEnvironment());

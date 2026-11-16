@@ -47,7 +47,7 @@ try {
       runChecked('node', [tsc, '--ignoreConfig', '--strict', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
       const runner = join(temporary, 'typed.mjs');
       writeFileSync(runner, `import { GeneratedProgram } from './ts/typed.js';
-import { RuntimeEnvironment, TemplateError } from '@polyspec/template';
+import { RuntimeEnvironment, TemplateError } from '@polyspec/template-legacy';
 const assign = { page: { title: 'T' }, rows: [{ name: 'a' }, { name: 'b' }] };
 const runtime = new RuntimeEnvironment();
 runtime.register('label', ([title]) => title + '!');

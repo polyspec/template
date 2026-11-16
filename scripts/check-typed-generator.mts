@@ -75,7 +75,7 @@ function checkTypeScript() {
   const output = join(temporary, 'typescript');
   mkdirSync(output);
   run('node', [tsc, ...options, '--outDir', output, ...sources]);
-  const imports = `import { RuntimeEnvironment } from '@polyspec/template';\n` + scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
+  const imports = `import { RuntimeEnvironment } from '@polyspec/template-legacy';\n` + scenarios.map((id, index) => `import { GeneratedProgram as Program${index} } from './${id}.js';`).join('\n');
   const cases = scenarios.map((id, index) => `{
     const actual = new Program${index}().render(${JSON.stringify(target(id))}, ${fixture(id, 'data.json')}, { define: ${fixture(id, 'define.json')}${fixtureExists(id, 'env.json') ? `, env: ${fixture(id, 'env.json')}` : ''} });
     if (actual !== ${JSON.stringify(expected(id))}) throw new Error(${JSON.stringify(`${id}: TypeScript GeneratedProgram output differs`)});

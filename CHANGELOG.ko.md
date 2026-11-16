@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- 생성된 TypeScript는 TypeScript backend가 typed program으로 옮겨지기 전까지 legacy 런타임 `@polyspec/template-legacy`를 import한다(T28.78, compiler Transition). 이전에는 checkout이 더는 설치하지 않는 `@polyspec/template`을 import해서 showcase, `make contract-check`, `make benchmark-smoke`가 `Cannot find package '@polyspec/template'`으로 실패했다.
 - `make contract-check`는 Rust showcase를 typed program으로 검사한다(T28.77, U-4). 생성된 program은 선언 검사 뒤에 artifact의 AST 위의 `AstProgram`으로 render하고, adapter는 그 program을 만든다. 이 검사는 typed program이 대체한 생성 실행의 trait `Program`과 `Engine`을 요구해 `rust: generated execution is not connected through a Program`으로 실패했다.
 - `make lint-ts`가 통과한다(T28.76). 시험 RT-80은 oxlint가 거부한 `any`에서의 단언 대신 JSON Schema로 `packages/ts/package.json`을 읽는다. knip은 Makefile이 생성 binding 시험을 위해 설치하고 어떤 module도 import하지 않는 `@polyspec/json`을 쓰이는 것으로 본다.
 - Rust core는 call의 field 쓰기, node와 expression의 span 검사, load 실패 생성을 각각 한 곳에서 한다(T28.75, P34). `make duplication-check`가 `ast_json.rs`와 `render/engine.rs`에서 각각 두 번 있는 것을 찾았다.

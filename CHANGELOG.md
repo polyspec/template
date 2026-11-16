@@ -5,6 +5,7 @@
 
 ## Unreleased
 
+- The generated TypeScript imports the legacy runtime `@polyspec/template-legacy` until the TypeScript backend moves to typed programs (T28.78, compiler Transition): it imported `@polyspec/template`, which the checkout no longer installs, so the showcase, `make contract-check` and `make benchmark-smoke` failed with `Cannot find package '@polyspec/template'`.
 - `make contract-check` checks the Rust showcase as a typed program (T28.77, U-4): its generated program renders through an `AstProgram` over the AST of its artifact after the check of the declarations, and the adapter builds that program; the check required the trait `Program` and an `Engine` of the generated execution that the typed programs replaced, and failed with `rust: generated execution is not connected through a Program`.
 - `make lint-ts` passes (T28.76): the test RT-80 reads `packages/ts/package.json` through its JSON Schema instead of an assertion from `any`, which oxlint refused, and knip takes `@polyspec/json`, which the Makefile installs for the generated binding tests and no module imports, as used.
 - The Rust core writes the fields of a call, checks the span of a node and of an expression and gives the failure of a load each in one place (T28.75, P34): `make duplication-check` found each of them twice in `ast_json.rs` and `render/engine.rs`.
