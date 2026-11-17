@@ -11,7 +11,6 @@
 // for a browser without it, the line leaves this file.
 import { copyFileSync, createReadStream, existsSync, mkdirSync } from 'node:fs';
 import { createServer, type Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
@@ -31,7 +30,11 @@ const wasmFolder = (entry: string): string => dirname(fileURLToPath(import.meta.
 function listen(server: Server): Promise<number> {
   return new Promise((done, failed) => {
     server.once('error', failed);
-    server.listen(0, '127.0.0.1', () => done((server.address() as AddressInfo).port));
+    server.listen(0, '127.0.0.1', () => {
+      const address = server.address();
+      if (address === null || typeof address === 'string') failed(new Error('the server of the page listens on no port'));
+      else done(address.port);
+    });
   });
 }
 
