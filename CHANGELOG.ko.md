@@ -7,6 +7,7 @@
 ## Unreleased
 
 - `@polyspec/template`은 release 0.0.27처럼 `decodeTemplate`을 `./decode`로 다시 내보낸다(T28.107). release가 그 subpath를 빠뜨려서, 그것을 import하는 브라우저 소비자가 실패했다.
+- kit 0.0.119를 고정한다(T28.116). 그 `link cargo`가 cargo의 출력을 cargo가 쓰는 순서대로 쓰므로(K1283), 생성 conformance의 Rust runner가 다시 각 시험을 그 파일 이름으로 부른다.
 - kit 0.0.116을 고정한다(T28.102).
 - script는 cargo를 checkout의 `var/tmp` 아래 임시 workspace에서 kit의 `link cargo`로 돌린다(T28.99). 전에는 시스템 임시 디렉터리에서 plain cargo를 돌려서, `.links`가 있어도 검사가 binding의 pin된 tag로 빌드했다.
 - Makefile은 cargo를 kit의 `link cargo`로 돌린다(T28.98). 전에는 `.links`로 binding을 연결해도 crate가 연결한 checkout이 아니라 `polyspec-binding-core`의 tag로 빌드됐다.
