@@ -364,11 +364,16 @@ ci-php: ## The job php: Composer and the PHP dependency graph for the PHP on PAT
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-php-format test-php conformance-php"
-ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency graph, then the tests of the extension; ONLINE
+ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency graph, then the tests of the extension and the consumer check of its stub (T28.141); ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="php composer"
 	$(MAKE) --no-print-directory install-symbols EXTRACTORS=php
 	$(MAKE) --no-print-directory template-install-php
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-ext"
+	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory template-install-go
+	$(MAKE) --no-print-directory install-wasm-bindgen
+	$(MAKE) --no-print-directory consumer-phpstan-ci
 ci-bindings: ## The job bindings: the tools, the graphs and the release recipes, then the binding checks; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
 	$(MAKE) --no-print-directory template-install-bindings
@@ -1402,6 +1407,13 @@ BINDING_RUN := $(NODE) $(BINDING)
 release-recipes:
 	$(BINDING_RUN) release-recipes --root $(CURDIR)
 -include packages/release.mk
+
+# The job php-ext runs the consumer check on the candidate archives of the committed HEAD for the version of the first section of
+# CHANGELOG.md, which is the released version before a release commit and the version of that commit after it (T28.141).
+.PHONY: consumer-phpstan-ci
+consumer-phpstan-ci: ## The consumer check of the job php-ext: the candidate archives of the first section of CHANGELOG.md, then consumer-phpstan-check; ONLINE
+	$(MAKE) --no-print-directory release-candidate-assets VERSION="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
+	$(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
 
 # The consumer check of the stub (T28.141): the PHP extension archive of release-candidate-assets (VERSION) carries the stub
 # that binding generates; PHPStan of a consumer reads the classes of the extension from it with scanFiles. The probe must fail
