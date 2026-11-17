@@ -7,7 +7,7 @@ Build-time compiler of template sources ([typed compiler](../../docs/spec/compil
 
 | Entry point | Use |
 | --- | --- |
-| `@polyspec/template-compiler/ast-artifact.mjs` | `compileAst({ root, output, entry, refresh, typeManifest, delimiters })` compiles a source directory into a canonical AST graph with its `manifest.json` |
+| `@polyspec/template-compiler/ast-artifact.mjs` | `compileAst({ root, output, entry, refresh, typeManifest, delimiters })` compiles a source directory into a canonical AST graph with its `manifest.json`; `parse(bytes, name, options)` parses one template, and a source that does not parse is a `SourceError` |
 | `@polyspec/template-compiler/type-manifest.mjs` | `deriveTypeManifest(templates, define)` derives the input type manifest of parsed templates |
 | `@polyspec/template-compiler/compiler.mjs` | `compileSource(graph, manifest, language, options)` compiles an AST graph and a type manifest into a program of the target language |
 | `@polyspec/template-compiler/functions.json` | the machine-readable function contract ([functions](../../docs/spec/functions.md)) |
@@ -17,4 +17,4 @@ node node_modules/@polyspec/template-compiler/dist/compiler.mjs --graph compiled
   --lang go --output generated.go --refresh true
 ```
 
-The package is written in strict TypeScript (`src/`); `make template-build-compiler` bundles it with tsup into `dist/`, which the entry points export with their declarations. The parser is `@polyspec/template` of the same version, and the compiler validates the documents that it reads (AST artifacts, type manifests) with ajv. Each artifact records the digest of the compiler that wrote it, and a refresh compiles it again when that digest changes.
+The package is written in strict TypeScript (`src/`); `make template-build-compiler` bundles it with tsup into `dist/`, which the entry points export with their declarations. The parser is the Rust core of `@polyspec/template` of the same version, through its WebAssembly entry, and the compiler validates the documents that it reads (AST artifacts, type manifests) with ajv. Each artifact records the digest of the compiler that wrote it, and a refresh compiles it again when that digest changes.
