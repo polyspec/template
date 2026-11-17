@@ -90,14 +90,14 @@ export function assetWorkflowFindings(text: string, minors: readonly string[], m
     if (bootstraps.length !== 1 || (bootstraps[0] ?? -1) <= (checkouts[0] ?? -1) || (bootstraps[0] ?? Infinity) >= runAt) failures.push(`${name}: locked bootstrap must precede its builds`);
     const commands = commandsOf(job, makefile);
     const build = commands.indexOf(BUILDS[name] ?? '');
-    const required = ['make install-tools TOOLS="rust"', 'make template-install-rust', 'make release-recipes', RELEASE_CHECK,
+    const required = ['make install-tools TOOLS="rust go"', 'make template-install-rust', 'make release-recipes', RELEASE_CHECK,
       ...(name === 'platform' ? ['make install-tools TOOLS="uv python"'] : []),
       ...(name === 'npm' ? ['make install-wasm-bindgen'] : [])];
     for (const command of required) {
       const found = commands.flatMap((line, index) => line === command ? [index] : []);
       if (found.length !== 1 || (found[0] ?? Infinity) >= build) failures.push(`${name}: ${command} must run once in the recipe before its builds`);
     }
-    for (const [before, after] of [['make install-tools TOOLS="rust"', 'make template-install-rust'], ['make template-install-rust', 'make release-recipes'], ['make release-recipes', RELEASE_CHECK]] as const) {
+    for (const [before, after] of [['make install-tools TOOLS="rust go"', 'make template-install-rust'], ['make template-install-rust', 'make release-recipes'], ['make release-recipes', RELEASE_CHECK]] as const) {
       if (commands.indexOf(before) >= commands.indexOf(after)) failures.push(`${name}: ${before} must precede ${after}`);
     }
     if (name === 'php') {
