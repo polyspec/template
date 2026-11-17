@@ -18,7 +18,7 @@ const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
 
 // The parts of config/release.json that the tests read.
 interface ReleaseConfig {
-  packages: { kind: string; directory: string; name: string; product: string; runtime: string }[];
+  packages: { kind: string; directory: string; name: string; product: string; runtime: string; generated?: { kind: string; target: string; outputs: string[] }[] }[];
   manifests: Record<string, string>;
   notReleased: Record<string, string>;
   goModules: Record<string, string>;
@@ -33,6 +33,16 @@ const RELEASE_SCHEMA: JSONSchemaType<ReleaseConfig> = {
         type: 'object',
         properties: {
           kind: { type: 'string' }, directory: { type: 'string' }, name: { type: 'string' }, product: { type: 'string' }, runtime: { type: 'string' },
+          generated: {
+            type: 'array',
+            nullable: true,
+            items: {
+              type: 'object',
+              properties: { kind: { type: 'string' }, target: { type: 'string' }, outputs: { type: 'array', items: { type: 'string' } } },
+              required: ['kind', 'target', 'outputs'],
+              additionalProperties: false,
+            },
+          },
         },
         required: ['kind', 'directory', 'name', 'product', 'runtime'],
         additionalProperties: false,
@@ -91,8 +101,9 @@ test('the legacy language packages are no release target, and the release carrie
   const php = isJsonObject(contract.packages) && isJsonObject(contract.packages.php) ? contract.packages.php.package : undefined;
   assert.equal(typeof php, 'string', 'packages/rust/interface.json names no packages.php.package');
   assert.deepEqual(CONFIG.packages.filter(item => item.directory === 'packages/php-ext'), [
-    { kind: 'composer', directory: 'packages/php-ext', name: php, product: 'template', runtime: 'php-ext' },
-  ], 'config/release.json releases the Composer package of the PHP extension');
+    // The stub that binding generates is an output of make bindings; the archive carries it beside the sources (T28.141).
+    { kind: 'composer', directory: 'packages/php-ext', name: php, product: 'template', runtime: 'php-ext', generated: [{ kind: 'make', target: 'bindings', outputs: ['generated/polyspec_template.stub.php'] }] },
+  ], 'config/release.json releases the Composer package of the PHP extension with its stub');
   assert.deepEqual(CONFIG.goModules, {});
 });
 
