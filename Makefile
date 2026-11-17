@@ -712,7 +712,9 @@ template-build-php:
 test-ts: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests ## TypeScript unit tests and type check
 
 .PHONY: template-test-ts-unit template-test-ts-types template-test-ts-types-node template-test-ts-types-tests
-template-test-ts-unit: build-ts
+# Two unit tests of legacy/packages/ts compile artifacts with the compiler, which parses with the WebAssembly module of the
+# core (T28.140), so the unit tests build that module first.
+template-test-ts-unit: build-ts checkout-wasm
 	$(NODE) $(KIT)/run-tests.$(KIT_EXT) vitest --cwd $(TS_DIR)
 template-test-ts-types: build-ts
 	$(TSC) --noEmit -p $(TS_DIR)/tsconfig.json

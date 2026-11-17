@@ -47,8 +47,11 @@ const LANGUAGE_BUILD = /\/build-package\.mts --package language\b/u;
 const WASM_MODULE = /\/shims\/wasm-bindgen --target web --out-dir packages\/ts\/wasm\/generated\b/u;
 // The compiler parses with the Rust core through the same module (T28.140): packages/compiler/src/core.mts imports it. A
 // command runs the compiler when it builds the package of the compiler, whose declarations tsc writes from that module, or
-// when it names a script of the repository whose relative imports reach packages/compiler/src/core.mts.
+// when it names a script of the repository whose relative imports reach packages/compiler/src/core.mts. The unit tests of
+// legacy/packages/ts compile artifacts with the compiler (tests/artifact-store.test.ts, tests/artifact-runtime.test.ts), so
+// a vitest run of that package runs the compiler too.
 const COMPILER_BUILD = /\/build-package\.mts --package compiler\b/u;
+const LEGACY_UNIT_TESTS = /\bvitest --cwd legacy\/packages\/ts(?:\s|$)/u;
 const COMPILER_CORE = 'packages/compiler/src/core.mts';
 const SCRIPT = /(?<=\s)(?:scripts|tests|examples)\/[\w./-]+\.m[jt]s\b/gu;
 const RELATIVE_IMPORT = /(?:from|import)\s*\(?\s*["'](\.\.?\/[^"']+)["']/gu;
@@ -66,8 +69,9 @@ const loadsCompilerCore = (file: string): boolean => {
   reaches.set(file, found);
   return found;
 };
-/** Whether the command builds the compiler or runs a script that loads its parser. */
-const runsCompiler = (command: string): boolean => COMPILER_BUILD.test(command) || (command.match(SCRIPT) ?? []).some(loadsCompilerCore);
+/** Whether the command builds the compiler, runs a script that loads its parser or runs the unit tests of legacy/packages/ts. */
+const runsCompiler = (command: string): boolean => COMPILER_BUILD.test(command) || LEGACY_UNIT_TESTS.test(command)
+  || (command.match(SCRIPT) ?? []).some(loadsCompilerCore);
 const BINDING_CHECK = /\/binding check \S/u;
 const GO_MODULES = /-u GOPROXY .*\/shims\/go mod download\b/u;
 
@@ -135,9 +139,9 @@ test('every target whose recipe runs the compiler builds the WebAssembly module 
   for (const line of readFileSync(path.join(ROOT, 'Makefile'), 'utf8').split('\n')) {
     const header = /^([a-z][a-z0-9-]*(?: [a-z][a-z0-9-]*)*):(?!=)/u.exec(line);
     if (header) rule = (header[1] ?? '').split(' ');
-    else if (line.startsWith('\t') && runsCompiler(line.replace('$(NODE)', 'node'))) for (const target of rule) targets.add(target);
+    else if (line.startsWith('\t') && runsCompiler(line.replace('$(NODE)', 'node').replace('$(TS_DIR)', 'legacy/packages/ts'))) for (const target of rule) targets.add(target);
   }
-  assert.ok(targets.has('template-build-compiler') && targets.has('conformance-generated-ts') && targets.has('showcase-compile'), `targets: ${[...targets].join(' ')}`);
+  assert.ok(targets.has('template-build-compiler') && targets.has('conformance-generated-ts') && targets.has('showcase-compile') && targets.has('template-test-ts-unit'), `targets: ${[...targets].join(' ')}`);
   const unbuilt = [...targets].sort().filter(target => {
     const commands = dryRun([target], 'false');
     const compiler = commands.findIndex(runsCompiler);
