@@ -9,7 +9,6 @@ import { rustString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
 import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
-import { knownFailureVerdict } from './known-failures.mts';
 import { runStep, stepProgress } from './bounded.mts';
 import { rustBuildArgs, rustRunArgs } from './rust-steps.mts';
 import { root } from './drivers.mts';
@@ -23,19 +22,6 @@ const integrationTest = workspace.test('generated_conformance_check');
 // Paths and expected output are embedded as exact Rust string literals.
 const quote = rustString;
 
-// The cases that this runner is known to fail, with the reason; docs/spec/compiler.md#transition states the list. The
-// compiler parses with the legacy TypeScript runtime, which reads a lone surrogate escape as U+FFFD, where EXP-3 makes it
-// parse_invalid_escape, so the AST of these cases holds no error. Remove the entries when the compiler parses with the
-// Node binding (T28.4). The run fails when a case outside the list fails and when a case of the list passes.
-const KNOWN_FAILURE_REASON = 'the compiler parses with the legacy TypeScript runtime, which reads a lone surrogate escape as U+FFFD (EXP-3); removed when the compiler parses with the Node binding (T28.4)';
-const KNOWN_FAILURES: ReadonlyMap<string, string> = new Map([
-  'errors/high-surrogate-at-quote-escape',
-  'errors/high-surrogate-before-pair-escape',
-  'errors/lone-high-surrogate-escape',
-  'errors/lone-low-surrogate-escape',
-].map(id => [id, KNOWN_FAILURE_REASON]));
-// The known failures that this run observed.
-let knownFailed = 0;
 
 const failures: string[] = [];
 const runnable: { testCase: TestCase; sourcePath: string; name: string }[] = [];
@@ -121,20 +107,12 @@ ${tests}
     } else {
       const run = await runCaseTests(rustRunArgs('generated_conformance_check', temporary), { cwd: root, env },
         new Map(runnable.map(({ testCase, name }) => [name, testCase.id])));
-      // A failure outside the list fails the run, and so does a case of the list that passes; a failure before any case
-      // failed is reported as it is.
-      const verdict = knownFailureVerdict(runnable.map(({ testCase }) => testCase.id), run.failed, new Set(KNOWN_FAILURES.keys()));
-      failures.push(...caseTestFailures('Rust', { ...run, failed: verdict.unexpected, status: run.failed.length > 0 && verdict.unexpected.length === 0 ? 0 : run.status }));
-      if (run.status === 0 || run.failed.length > 0) {
-        executed = runnable.length - run.failed.length;
-        knownFailed = verdict.observed;
-        failures.push(...verdict.passed.map(id => `${id}: a known failure passed; remove it from KNOWN_FAILURES (${KNOWN_FAILURE_REASON})`));
-      }
+      failures.push(...caseTestFailures('Rust', run));
+      if (run.status === 0 || run.failed.length > 0) executed = runnable.length - run.failed.length;
     }
   }
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }
 
-process.stdout.write(`known failures ${knownFailed}: ${[...KNOWN_FAILURES.keys()].join(', ')} (${KNOWN_FAILURE_REASON})\n`);
 finishRun('Rust', compilePassed + executed, cases.length, failures);

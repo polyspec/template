@@ -7,6 +7,7 @@ import { parse } from '../../legacy/packages/ts/dist/index.mjs';
 import { stepProgress } from './bounded.mts';
 import { errorField, generatedCases, type TestCase, typeDefinitions } from './cases.mts';
 import { type CaseResult, errorDifference } from './generated-errors.mts';
+import { differencePassed, legacyRuntimeDifferences, type LegacyTarget } from './legacy-runtime-differences.mts';
 
 /** The parsed `.tpl` files of the case directory, by their names relative to it. */
 function parsedTemplates(testCase: TestCase): Map<string, ReturnType<typeof parse>> {
@@ -61,9 +62,17 @@ export function renderFailure(testCase: TestCase, rendered: { html?: string | un
  * process and returns the result that the process printed (its `html` decoded). The run prints each case with its elapsed time,
  * removes `temporary` and exits with the status of the run.
  */
-export async function runProcessCases(label: string, temporary: string, execute: (testCase: TestCase, id: string) => Promise<CaseResult>, directory: string): Promise<never> {
+export async function runProcessCases(label: string, target: LegacyTarget, temporary: string, execute: (testCase: TestCase, id: string) => Promise<CaseResult>, directory: string): Promise<never> {
   const failures: string[] = [];
   let passed = 0;
+  // A case in which the legacy runtime differs is judged by its difference: the program renders where the case expects an error.
+  const differences = legacyRuntimeDifferences(target);
+  const judged = (testCase: TestCase, failure: string | null): string | null => {
+    const rule = differences.get(testCase.id);
+    if (rule === undefined || testCase.expectedError === null) return failure;
+    if (failure === null) return differencePassed(target, testCase.id, rule);
+    return failure === `${testCase.id}: expected ${testCase.expectedError.code}, generated execution succeeded` ? null : failure;
+  };
   const { cases, filtered } = generatedCases(process.argv.slice(2), directory);
   const progress = stepProgress();
   try {
@@ -72,10 +81,10 @@ export async function runProcessCases(label: string, temporary: string, execute:
       progress.start(testCase.id);
       try {
         const actual = await execute(testCase, testCase.id.replaceAll('/', '--'));
-        const failure = actual.failure ? `${testCase.id}: ${actual.failure}` : renderFailure(testCase, actual);
+        const failure = judged(testCase, actual.failure ? `${testCase.id}: ${actual.failure}` : renderFailure(testCase, actual));
         if (failure) failures.push(failure); else passed++;
       } catch (error) {
-        const failure = compileFailure(testCase, error);
+        const failure = judged(testCase, compileFailure(testCase, error));
         if (failure) failures.push(failure); else passed++;
       }
       if (failures.length > failed) progress.fail(testCase.id, undefined, failures.slice(failed).join('\n'));

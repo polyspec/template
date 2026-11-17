@@ -7,8 +7,10 @@ import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { goString } from '../../packages/compiler/src/backend-support.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { caseTestFailures, expectedHtml, generatedCases, runCaseTests, type TestCase } from './cases.mts';
-import { legacyCasesDir } from './case-list.mts';
+import { casesDir } from './case-list.mts';
 import { caseTypeManifest, compileStep, finishRun } from './generated-cases.mts';
+import { knownFailureVerdict } from './known-failures.mts';
+import { differencePassed, legacyRuntimeDifferences } from './legacy-runtime-differences.mts';
 import { stepProgress } from './bounded.mts';
 import { root } from './drivers.mts';
 import { legacyName } from '../../scripts/generate-error-codes.mts';
@@ -21,8 +23,10 @@ const q = goString;
 const failures: string[] = [];
 const runnable: TestCase[] = [];
 let passed = 0;
-// The generated code runs on the legacy package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
-const { cases } = generatedCases(process.argv.slice(2), legacyCasesDir);
+// The generated code runs on the legacy package and the current cases: tests/runner/legacy-runtime-differences.mts holds
+// the cases in which that runtime differs.
+const { cases } = generatedCases(process.argv.slice(2), casesDir);
+const differences = legacyRuntimeDifferences('go');
 const progress = stepProgress();
 try {
   for (const testCase of cases) {
@@ -55,8 +59,14 @@ func TestGeneratedConformance(t *testing.T) { data,_:=base64.StdEncoding.DecodeS
     // The package of a case is named after the case: case_<case id> of the temporary module.
     const names = new Map(runnable.map(testCase => [`case_${testCase.id.replaceAll(/[^A-Za-z0-9]+/g, '_')}`, testCase.id]));
     const run = await runCaseTests(['go', '--cwd', temporary, '--', '-count=1', '-timeout=0', '-run', '^TestGeneratedConformance$', './...'], { cwd: root }, names);
-    failures.push(...caseTestFailures('Go', run));
-    if (run.status === 0 || run.failed.length > 0) passed += runnable.length - run.failed.length;
+    // A case of the list is expected to differ: a failure outside the list fails the run, and so does a case of the list
+    // that passes.
+    const verdict = knownFailureVerdict(runnable.map(testCase => testCase.id), run.failed, new Set(differences.keys()));
+    failures.push(...caseTestFailures('Go', { ...run, failed: verdict.unexpected, status: run.failed.length > 0 && verdict.unexpected.length === 0 ? 0 : run.status }));
+    if (run.status === 0 || run.failed.length > 0) {
+      passed += runnable.length - verdict.unexpected.length;
+      failures.push(...verdict.passed.map(id => differencePassed('go', id, differences.get(id) ?? '')));
+    }
   }
 } finally { rmSync(temporary, { recursive: true, force: true }); }
 finishRun('Go', passed, cases.length, failures);
