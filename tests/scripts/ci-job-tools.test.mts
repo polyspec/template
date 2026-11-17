@@ -13,21 +13,24 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A make started from a recipe takes no flags or level of that make.
 // The workflows give the jobs of a release their inputs as make variables and the actor of the run as GITHUB_ACTOR; the dry run
-// gives them values of their form. RELEASE is the boolean input release of assets.yml, which a release sets to true, so the
-// dry run takes the steps that only a release runs, such as release-binding-check (T28.118).
+// gives them values of their form. RELEASE is the boolean input release of assets.yml, true in a release and false in CI, and
+// a recipe chooses its check of binding by it, so the test reads the commands of both (T28.118, T28.121).
 const { MAKEFLAGS: _flags, MFLAGS: _mflags, MAKELEVEL: _level, ...own } = process.env;
 const ENV = { ...own, GITHUB_ACTOR: 'ci' };
-const INPUTS = ['TAG=v0.0.0', 'VERSION=0.0.0', 'RELEASE=true', 'RUN=0', 'EXPECTED_PHP_MINOR=8.4', 'REPOSITORY=polyspec/template'];
+const INPUTS = ['TAG=v0.0.0', 'VERSION=0.0.0', 'RUN=0', 'EXPECTED_PHP_MINOR=8.4', 'REPOSITORY=polyspec/template'];
 
-const dryRun = (targets: readonly string[]): string[] =>
-  execFileSync('make', ['--no-print-directory', '-n', '-B', ...INPUTS, ...targets], { cwd: ROOT, env: ENV, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).split('\n');
+const dryRun = (targets: readonly string[], release: string): string[] =>
+  execFileSync('make', ['--no-print-directory', '-n', '-B', ...INPUTS, `RELEASE=${release}`, ...targets], { cwd: ROOT, env: ENV, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).split('\n');
 
-/** The commands of the target `job`, with those of the targets it hands to ci-targets. */
-const commandsOf = (job: string): string[] => {
-  const lines = dryRun([job]);
+/** The commands of the target `job` with RELEASE at `release`, with those of the targets it hands to ci-targets. */
+const commandsWith = (job: string, release: string): string[] => {
+  const lines = dryRun([job], release);
   const handed = lines.flatMap(line => /\/ci-targets\.m[jt]s -k \S+ (.+)$/u.exec(line)?.[1]?.trim().split(/\s+/u) ?? []);
-  return handed.length ? [...lines, ...dryRun(handed)] : lines;
+  return handed.length ? [...lines, ...dryRun(handed, release)] : lines;
 };
+
+/** The commands of the target `job` in a release and in CI. */
+const commandsOf = (job: string): string[] => ['true', 'false'].flatMap(release => commandsWith(job, release));
 
 /** The tools that the commands install: the names after install-tools of kit, or every tool when it names none. */
 const installed = (lines: readonly string[]): Set<string> | 'all' => {
@@ -45,8 +48,9 @@ const installed = (lines: readonly string[]): Set<string> | 'all' => {
 const NEEDS: readonly { tool: string; runs: RegExp }[] = [
   { tool: 'rust', runs: /\blink\.m[jt]s cargo\b|\/shims\/(?:cargo|maturin|rustup)\b/u },
   { tool: 'go', runs: /\/shims\/go\b/u },
-  // The check of the binding scaffold runs go mod download inside binding, so the dry run shows only the command of binding.
-  { tool: 'go', runs: /\/binding check \S+ --release\b/u },
+  // The check of the binding scaffold runs go mod download inside binding, with --release and without it, so the dry run shows
+  // only the command of binding.
+  { tool: 'go', runs: /\/binding check \S/u },
 ];
 
 // The jobs are the rules ci-<job> of the Makefile, but ci-targets and ci-passed, which run the targets and judge the results.

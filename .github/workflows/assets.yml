@@ -1,6 +1,7 @@
 # The assets of each platform of the bindings (binding GN-19a, GN-19i). The workflow ci calls it for the commit of its run, and
 # the workflow release calls it for the tree of the tag that it releases, with release true, which runs the release check of
-# binding before a job builds (make release-binding-check, GN-19g). Every recipe that builds an asset is in packages/release.mk,
+# binding before a job builds (make release-binding-check, GN-19g); for ci each job runs the check of binding without the rule
+# of a release (make bindings-check), which needs the same tools, so a job that lacks one fails before a tag exists. Every recipe that builds an asset is in packages/release.mk,
 # which binding release-recipes writes and Git ignores, so each job first runs make release-recipes.
 #
 # The jobs platform and php run on the runner of their platform, ubuntu-26.04, ubuntu-26.04-arm or macos-15, the one exception to the

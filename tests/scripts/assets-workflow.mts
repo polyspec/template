@@ -20,7 +20,7 @@ export const PHP_BUILD = 'make release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPE
 export const PLATFORM_BUILD = 'make ci-targets TARGETS="release-go-static release-wheel release-npm-platform"';
 export const NPM_BUILD = 'make release-npm';
 // The release check runs only when the workflow release calls assets.yml with release true.
-export const RELEASE_CHECK = '$(if $(filter true,$(RELEASE)),make release-binding-check)';
+export const RELEASE_CHECK = '$(if $(filter true,$(RELEASE)),make release-binding-check,make bindings-check)';
 const BUILDS: Record<string, string> = { platform: PLATFORM_BUILD, php: PHP_BUILD, npm: NPM_BUILD };
 const CONTINUE = '${{ !cancelled() }}';
 const SETUP = 'shivammathur/setup-php@';

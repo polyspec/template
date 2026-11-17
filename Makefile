@@ -350,7 +350,7 @@ ci-assets-platform: ## The job platform of assets.yml: the Go static library, th
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory install-tools TOOLS="uv python"
 	$(MAKE) --no-print-directory release-recipes
-	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
+	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check,$(MAKE) --no-print-directory bindings-check)
 	$(MAKE) --no-print-directory ci-targets TARGETS="release-go-static release-wheel release-npm-platform"
 # The job provisions the LLVM of config/toolchain.json before this recipe (binding GN-19i): the ubuntu-26.04 images hold it at
 # /usr/lib/llvm-<major>, the default LLVM_ROOT of packages/release.mk, and on macOS install-llvm-action installs it and sets
@@ -363,14 +363,14 @@ ci-assets-php: ## The job php of assets.yml: the PHP extension for the PHP on PA
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory release-recipes
-	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
+	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check,$(MAKE) --no-print-directory bindings-check)
 	$(MAKE) --no-print-directory release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR) $(if $(LLVM_PATH),LLVM_ROOT=$(LLVM_PATH))
 ci-assets-npm: ## The job npm of assets.yml: the npm package with the wasm-bindgen of mise.toml; RELEASE=true; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
-	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check)
+	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check,$(MAKE) --no-print-directory bindings-check)
 	$(MAKE) --no-print-directory release-npm
 
 # ---- Release (.github/workflows/release.yml, config/release.json) -----------------------------------------------------------
