@@ -1,5 +1,6 @@
 // The values that a script requires: a value that is missing fails with an error that names it, instead of a default
 // that hides it (no silent fallback).
+import { existsSync } from 'node:fs';
 
 /** `value`, or an error that names `what` when it is undefined or null. */
 export function required<T>(value: T | null | undefined, what: string): T {
@@ -13,4 +14,12 @@ export function captured(match: RegExpMatchArray | null, index: number, what: st
   const value = match[index];
   if (value === undefined) throw new Error(`${what} is missing: group ${index} of ${JSON.stringify(match[0])} took no part in the match`);
   return value;
+}
+
+/**
+ * Fails with the make target that builds `file` when the build output `file` (a path relative to the working directory) is
+ * missing: a test that reads a build names its target and builds nothing itself (HR-85).
+ */
+export function requireBuilt(file: string, target: string): void {
+  if (!existsSync(file)) throw new Error(`${file} is missing; build first: make ${target}`);
 }

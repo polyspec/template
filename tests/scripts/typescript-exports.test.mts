@@ -5,9 +5,13 @@ import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { jsonDocument } from '../../scripts/json-document.mts';
+import { requireBuilt } from '../../scripts/required.mts';
 import { typescriptExports } from '../../scripts/typescript-exports.mts';
 
 test('a package consumer can name the types in public signatures', { timeout: 30_000 }, () => {
+  // The fixture imports the declarations of the legacy package and of the language service.
+  requireBuilt('legacy/packages/ts/dist/index.d.ts', 'build-ts');
+  requireBuilt('packages/language/dist/index.d.ts', 'template-build-language');
   const result = spawnSync('node_modules/.bin/tsc', ['-p', 'tests/fixtures/public-types/tsconfig.json'], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stdout + result.stderr);
 });
@@ -22,6 +26,8 @@ function declarationModel(config: string) {
 }
 
 test('the public declaration model has no inaccessible signature types', { timeout: 30_000 }, () => {
+  // The entry point of legacy/packages/ts/api-extractor.json.
+  requireBuilt('legacy/packages/ts/dist/node/index.d.ts', 'build-ts');
   const result = declarationModel('legacy/packages/ts/api-extractor.json');
   assert.equal(result.status, 0, result.stdout + result.stderr);
   interface Item { canonicalReference?: string; members?: Item[] }
