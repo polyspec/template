@@ -2,7 +2,6 @@
 // - the generated Go and Rust conformance runners name each failed case instead of "the failed cases are listed above";
 // - the run-tests of @polyspec/kit fails with a message that names a tool that cannot start, instead of an unhandled `error`
 //   event; the wording is kit's, not a contract of template;
-// - a CLI call of the conformance drivers that outlives its limit names the limit and the command;
 // - the Go and PHP install projects print the expected and the actual output.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -13,8 +12,6 @@ import test, { type TestContext } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 import { caseTestFailures, runCaseTests } from '../runner/cases.mts';
-import { importDriverCopy } from './driver-copy.mts';
-import { copyDriverFiles } from './driver-fixture.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const read = (file: string) => readFileSync(path.join(ROOT, file), 'utf8');
@@ -49,16 +46,6 @@ test('a tool that cannot start fails with its command and the install fix', (t) 
   assert.equal(run.status, 1, run.stdout + run.stderr);
   assert.doesNotMatch(run.stderr, /Unhandled 'error' event/);
   assert.match(run.stdout + run.stderr, /\bcargo\b[^\n]*\bENOENT\b/u, 'the failure names cargo and that it cannot start');
-});
-
-test('a CLI call of the drivers that outlives its limit names the limit and the command', async (t) => {
-  const copy = directory(t, 'template-drivers-limit-');
-  copyDriverFiles(copy);
-  const { drivers, invoke } = await importDriverCopy(copy);
-  drivers.go.command = () => ['sleep', ['5']];
-  const result = invoke('go', [], copy, { timeoutMs: 200 });
-  assert.equal(result.status, -1);
-  assert.equal(result.stderr, 'sleep 5 did not finish within its limit of 0.2 s');
 });
 
 test('the Go and PHP install projects print the expected and the actual output', () => {

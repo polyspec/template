@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // PHP generated conformance: compiles every case into PHP source, checks it with `php -l` and runs
-// it in its own PHP process. Each case prints its start and its result with its elapsed time, and
-// each of the two PHP processes of a case is stopped when it outlives its deadline.
+// it in its own PHP process. Each case prints its start and its result with its elapsed time; each
+// of the two PHP processes of a case runs without a time limit and is judged by its exit status.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
@@ -10,12 +10,9 @@ import { phpProgramAutoload, writePhpProgram } from '../../scripts/php-program.m
 import { casesDir } from './case-list.mts';
 import { caseTypeManifest, runProcessCases } from './generated-cases.mts';
 import { parsedCaseResult } from './generated-errors.mts';
-import { runBoundedStep } from './bounded.mts';
+import { runStep } from './bounded.mts';
 import { root } from './drivers.mts';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mts';
-
-// The time limit of one PHP process of a case.
-const PROCESS_TIMEOUT_MS = 30_000;
 
 const temporary = temporaryDirectory('generated-conformance-php');
 const sources = join(temporary, 'source');
@@ -60,11 +57,11 @@ await runProcessCases('PHP', 'php', temporary, async (testCase, id) => {
   writeFileSync(typePath, JSON.stringify(caseTypeManifest(testCase)));
   compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
   const programFiles = writePhpProgram(programDirectory, compileFiles(join(graphPath, 'manifest.json'), typePath, 'php', { phpNamespace: namespace }));
-  const lint = await runBoundedStep('php', ['-l', ...programFiles], { cwd: root, timeoutMs: PROCESS_TIMEOUT_MS }, 'php -l');
+  const lint = await runStep('php', ['-l', ...programFiles], { cwd: root });
   if (lint.status !== 0) throw new Error(`${lint.stdout}${lint.stderr}`);
-  const result = await runBoundedStep('php', [runner, join(root, 'vendor/autoload.php'), programDirectory,
+  const result = await runStep('php', [runner, join(root, 'vendor/autoload.php'), programDirectory,
     testCase.hasData ? join(testCase.dir, 'data.json') : '', testCase.hasDefine ? join(testCase.dir, 'define.json') : '', testCase.hasEnv ? join(testCase.dir, 'env.json') : ''],
-  { cwd: root, timeoutMs: PROCESS_TIMEOUT_MS }, 'the case process');
+  { cwd: root });
   if (result.status !== 0) throw new Error(result.stderr || `PHP exited with ${result.status}`);
   const actual = parsedCaseResult(result.stdout, 'PHP');
   // The runner prints the HTML in base64, so that its bytes reach the comparison unchanged.

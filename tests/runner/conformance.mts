@@ -4,7 +4,7 @@
 // (CNF-9). A case whose input parses (expected.ast.json) compares tokens and formatted text in every language; an
 // implementation without the subcommand fails the case.
 // Each case prints `<case> [<lang>] pass|fail (<ms> ms)` when it finishes in a language; the
-// summary table follows the last case. Each CLI call has its own timeout (drivers.mts). Rust runs the cases of tests/,
+// summary table follows the last case. No CLI call has a time limit (drivers.mts). Rust runs the cases of tests/,
 // and the legacy language packages run the copy of the cases that they passed when they moved (legacy/tests/,
 // docs/spec/runtime.md#transition); a case that one set does not hold shows `-` for its languages.
 //

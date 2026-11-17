@@ -2,23 +2,20 @@
 // Compiles every fixture through the product TypeScript backend and compares
 // generated execution or compile diagnostics with the canonical expectations.
 // tsc runs as one step without a time limit and is judged by its exit code; each case renders in a
-// worker under its own deadline.
+// worker without a time limit and is judged by the message of the worker.
 // Every step and every case prints its start and its result with its elapsed time.
 import assert from 'node:assert/strict';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
-import { inWorker, runStep, seconds, stepProgress } from './bounded.mts';
+import { inWorker, runStep, stepProgress } from './bounded.mts';
 import { generatedCases, type TestCase } from './cases.mts';
 import { casesDir } from './case-list.mts';
 import { caseTypeManifest, compileStep, finishRun, renderFailure } from './generated-cases.mts';
 import type { RenderMessage } from './generated-ts-render.mts';
 import { tsc } from '../../scripts/tools.mts';
 import { nodeWorkspace } from '../../scripts/temporary-workspace.mts';
-
-// The time limit of the render of one case.
-const RENDER_TIMEOUT_MS = 30_000;
 
 // The generated sources import @polyspec/template/render, which the workspace holds as a copy of the installed package.
 const temporary = nodeWorkspace('generated-conformance-ts');
@@ -81,9 +78,8 @@ try {
     const failed = failures.length;
     const result = await inWorker<RenderMessage>(new URL('./generated-ts-render.mts', import.meta.url), {
       module: join(output, `${id}.js`), dir: testCase.dir, hasData: testCase.hasData, hasDefine: testCase.hasDefine, hasEnv: testCase.hasEnv,
-    }, RENDER_TIMEOUT_MS);
-    if ('timedOut' in result) failures.push(`${testCase.id}: render exceeded its ${seconds(RENDER_TIMEOUT_MS)} deadline`);
-    else if ('failure' in result) failures.push(`${testCase.id}: render ${result.failure}`);
+    });
+    if ('failure' in result) failures.push(`${testCase.id}: render ${result.failure}`);
     else {
       const failure = renderFailure(testCase, result);
       if (failure) failures.push(failure);

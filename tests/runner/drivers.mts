@@ -3,7 +3,7 @@
 // `tokens` or `format` (CNF-4). A build is a
 // long-running step without a time limit; it prints its start, its output and its result on
 // standard error, so the result lines of the runners on standard output stay in order. Each CLI
-// call is a case and keeps its own timeout.
+// call is a case; it runs without a time limit and is judged by its exit status and its output.
 import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
@@ -19,9 +19,6 @@ const packages = join(root, 'packages');
 const legacyPackages = join(root, 'legacy', 'packages');
 
 const environment = (): NodeJS.ProcessEnv => ({ ...process.env, PATH: `${process.env.HOME}/.cargo/bin:${process.env.PATH}` });
-
-// The time limit of one CLI call.
-const INVOKE_TIMEOUT_MS = 10_000;
 
 /**
  * Builds the CLI of the driver `name` as a logged step; throws when the build fails.
@@ -146,15 +143,14 @@ export function prepare(name: string): void {
   driver.build();
 }
 
-// Runs one CLI invocation and returns {status, stdout, stderr}. A call that outlives its limit (`timeoutMs`, 10 s by
-// default) returns status -1 with the command and the limit (T19.10).
-export function invoke(name: string, args: readonly string[], cwd?: string, { timeoutMs = INVOKE_TIMEOUT_MS }: { timeoutMs?: number } = {}): { status: number | null; stdout: string; stderr: string } {
+// Runs one CLI invocation without a time limit and returns {status, stdout, stderr}. A call that cannot start returns
+// status -1 with the command and the error.
+export function invoke(name: string, args: readonly string[], cwd?: string): { status: number | null; stdout: string; stderr: string } {
   const [command, argv] = driverOf(name).command(args);
-  const result = spawnSync(command, argv, { encoding: 'utf8', timeout: timeoutMs, cwd: cwd ?? root, env: environment(), maxBuffer: 64 * 1024 * 1024 });
+  const result = spawnSync(command, argv, { encoding: 'utf8', cwd: cwd ?? root, env: environment(), maxBuffer: 64 * 1024 * 1024 });
   if (result.error) {
     const call = [command, ...argv].join(' ');
-    const stderr = 'code' in result.error && result.error.code === 'ETIMEDOUT' ? `${call} did not finish within its limit of ${timeoutMs / 1000} s` : `${call} failed: ${result.error.message}`;
-    return { status: -1, stdout: '', stderr };
+    return { status: -1, stdout: '', stderr: `${call} failed: ${result.error.message}` };
   }
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
 }

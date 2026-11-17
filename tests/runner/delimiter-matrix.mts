@@ -3,7 +3,7 @@
 // This is deliberately data-driven: a new delimiter character cannot be
 // accepted by one implementation accidentally while another rejects it.
 // Each pair prints `<pair> [<lang>] pass|fail (<ms> ms)` when it finishes in a language, and the
-// summary follows the last pair. Each CLI call has its own timeout (drivers.mts).
+// summary follows the last pair. No CLI call has a time limit (drivers.mts).
 import { mkdtempSync, writeFileSync, rmSync, realpathSync } from 'node:fs';
 import { constants, tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -22,7 +22,7 @@ for (const language of languages) prepare(language);
 
 const root = realpathSync(mkdtempSync(join(tmpdir(), 'template-delimiter-matrix-')));
 // HR-87: the directory of the run does not outlive it, however the run ends; a directory that cannot be removed fails
-// the run. A run that a signal stops, such as the timeout of its caller, removes it before it exits: the CLI calls are
+// the run. A run that a signal stops, such as an interrupt, removes it before it exits: the CLI calls are
 // synchronous, so the run yields to the event loop after each pair, where the handler of the signal runs.
 const remove = () => rmSync(root, { recursive: true });
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {

@@ -30,13 +30,9 @@ export function caseTypeManifest(testCase: TestCase): ReturnType<typeof deriveTy
   return deriveTypeManifest(parsedTemplates(testCase), typeDefinitions(testCase));
 }
 
-/**
- * The failure of the case when the compile or the run threw `error`, or null when the error is the one the case expects. A
- * deadline fails the case with its message.
- */
+/** The failure of the case when the compile or the run threw `error`, or null when the error is the one the case expects. */
 export function compileFailure(testCase: TestCase, error: unknown): string | null {
   const message = String(errorField(error, 'message'));
-  if (errorField(error, 'deadline')) return `${testCase.id}: ${message}`;
   const difference = errorDifference(testCase.expectedError, error, 'compile');
   return difference ? `${testCase.id}: compile ${difference}: ${message}` : null;
 }

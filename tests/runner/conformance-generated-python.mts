@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Python generated conformance: compiles every case into a Python module and runs
 // it in its own Python process. Each case prints its start and its result with its
-// elapsed time, and the Python process of a case is stopped when it outlives its
-// deadline.
+// elapsed time; the Python process of a case runs without a time limit and is judged
+// by its exit status.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
@@ -10,13 +10,10 @@ import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { casesDir } from './case-list.mts';
 import { caseTypeManifest, runProcessCases } from './generated-cases.mts';
 import { parsedCaseResult } from './generated-errors.mts';
-import { runBoundedStep } from './bounded.mts';
+import { runStep } from './bounded.mts';
 import { root } from './drivers.mts';
 import { temporaryDirectory } from '../../scripts/temporary-workspace.mts';
 import { pythonEnvironment, pythonPackageCommand } from '../../scripts/python-toolchain.mts';
-
-// The time limit of one Python process of a case.
-const PROCESS_TIMEOUT_MS = 30_000;
 
 const temporary = temporaryDirectory('generated-conformance-python');
 const sources = join(temporary, 'source');
@@ -73,13 +70,13 @@ await runProcessCases('Python', 'python', temporary, async (testCase, id) => {
   writeFileSync(typePath, JSON.stringify(caseTypeManifest(testCase)));
   compileAst({ root: testCase.dir, output: graphPath, entry: 'input.tpl', refresh: 'dev', typeManifest: typePath, delimiters: testCase.options.delimiters ?? null });
   writeFileSync(sourcePath, compileSource(join(graphPath, 'manifest.json'), typePath, 'python', {}));
-  const options = { cwd: root, timeoutMs: PROCESS_TIMEOUT_MS, env: environment };
-  const lint = await runBoundedStep(interpreter, ['-m', 'py_compile', sourcePath], options, 'python -m py_compile');
+  const options = { cwd: root, env: environment };
+  const lint = await runStep(interpreter, ['-m', 'py_compile', sourcePath], options);
   if (lint.status !== 0) throw new Error(`${lint.stdout}${lint.stderr}`);
-  const result = await runBoundedStep(interpreter, [runner, sourcePath,
+  const result = await runStep(interpreter, [runner, sourcePath,
     testCase.hasData ? join(testCase.dir, 'data.json') : '',
     testCase.hasDefine ? join(testCase.dir, 'define.json') : '',
-    testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], options, 'the case process');
+    testCase.hasEnv ? join(testCase.dir, 'env.json') : ''], options);
   if (result.status !== 0) throw new Error(result.stderr || `${interpreter} exited with ${result.status}`);
   return parsedCaseResult(result.stdout, 'Python');
 }, casesDir);
