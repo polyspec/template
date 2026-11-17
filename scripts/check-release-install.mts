@@ -2,11 +2,13 @@
 // Installs the npm archives that a release carries, from what releases carry alone, and imports them (T28.129).
 //
 // A consumer installs the archive of @polyspec/template that make release-npm packs, the archives of the language
-// service and of the language server, and the archive of @polyspec/json of its release, which @polyspec/template
-// requires and no registry holds. The folder of the consumer is empty but for .npmrc with allow-remote=root, which npm 12
-// needs to take an archive by its URL. The check then imports the WebAssembly entry of @polyspec/template and both
-// packages. An archive that requires a package that no release carries fails the install: the language archive of the
-// tree of 0.0.28 required @polyspec/template-legacy, and no check found it.
+// service, of the language server and of the compiler, and the archive of @polyspec/json of its release, which
+// @polyspec/template requires and no registry holds. The folder of the consumer is empty but for .npmrc with
+// allow-remote=root, which npm 12 needs to take an archive by its URL. The check then imports the WebAssembly entry of
+// @polyspec/template and the three packages, and compiles one template with the installed compiler (T28.140): its AST
+// artifact, its type manifest and its TypeScript program, whose import names the renderer of the installed
+// @polyspec/template. An archive that requires a package that no release carries fails the install: the language archive
+// of the tree of 0.0.28 and the compiler archive of 0.0.27 required @polyspec/template-legacy, and no check found it.
 //
 // The WebAssembly entry needs no platform package, so the check also requires that the install holds none.
 //
@@ -50,6 +52,26 @@ assert.equal(failed.ok, false);
 assert.equal(failed.error.code, 'parse_unexpected_token');
 const server = await import('@polyspec/template-lsp');
 assert.equal(typeof server.TAG_RANGES_METHOD, 'string');
+const { mkdirSync, readFileSync, writeFileSync } = await import('node:fs');
+const artifact = await import('@polyspec/template-compiler/ast-artifact.mjs');
+const compiler = await import('@polyspec/template-compiler/compiler.mjs');
+const manifests = await import('@polyspec/template-compiler/type-manifest.mjs');
+mkdirSync('templates');
+writeFileSync('templates/input.tpl', '{= a}');
+const types = manifests.deriveTypeManifest(new Map([['input.tpl', artifact.parse(readFileSync('templates/input.tpl'), 'input.tpl')]]), {});
+writeFileSync('types.json', JSON.stringify(types));
+const graph = artifact.compileAst({ root: 'templates', output: 'compiled', entry: 'input.tpl', refresh: 'dev', typeManifest: 'types.json' });
+assert.equal(graph.entry, 'input.tpl');
+assert.equal(JSON.parse(readFileSync('compiled/' + graph.files['input.tpl'].path, 'utf8')).body[0].type, 'Echo');
+const program = compiler.compileSource('compiled/manifest.json', 'types.json', 'ts');
+const renderImport = " } from '@polyspec/template/render';";
+const imported = program.split('\\n').find(line => line.startsWith('import { ') && line.endsWith(renderImport));
+assert.notEqual(imported, undefined, 'the TypeScript program imports the renderer of @polyspec/template');
+const renderer = await import('@polyspec/template/render');
+for (const name of imported.slice('import { '.length, -renderImport.length).split(', ').filter(name => !name.startsWith('type '))) assert.ok(name in renderer, name + ' is no export of @polyspec/template/render');
+writeFileSync('templates/input.tpl', '{= }');
+assert.throws(() => artifact.compileAst({ root: 'templates', output: 'compiled', entry: 'input.tpl', refresh: 'dev', typeManifest: 'types.json' }),
+  error => error instanceof artifact.SourceError && error.code === 'E_PARSE_UNEXPECTED_TOKEN' && error.template === 'input.tpl' && error.line === 1 && error.col === 4);
 `;
 
 const work = mkdtempSync(join(tmpdir(), 'template-release-install-'));
@@ -58,11 +80,11 @@ try {
   const consumer = join(work, 'consumer');
   mkdirSync(archives);
   mkdirSync(consumer);
-  for (const name of ['language', 'lsp']) run('npm', ['pack', '--ignore-scripts', '--pack-destination', archives], join(root, 'packages', name));
+  for (const name of ['language', 'lsp', 'compiler']) run('npm', ['pack', '--ignore-scripts', '--pack-destination', archives], join(root, 'packages', name));
   writeFileSync(join(consumer, 'package.json'), `${JSON.stringify({ private: true, type: 'module' }, null, 2)}\n`);
   writeFileSync(join(consumer, '.npmrc'), 'allow-remote=root\n');
   run('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', template, ...readdirSync(archives).sort().map(file => join(archives, file)), json], consumer);
-  assert.deepEqual(readdirSync(join(consumer, 'node_modules', '@polyspec')).sort(), ['json', 'template', 'template-language', 'template-lsp'], 'the install holds the four packages and no platform package');
+  assert.deepEqual(readdirSync(join(consumer, 'node_modules', '@polyspec')).sort(), ['json', 'template', 'template-compiler', 'template-language', 'template-lsp'], 'the install holds the five packages and no platform package');
   writeFileSync(join(consumer, 'probe.mjs'), PROBE);
   run(process.execPath, ['probe.mjs'], consumer);
   console.error('[release-install] the archives install from what releases carry and their entries load');
