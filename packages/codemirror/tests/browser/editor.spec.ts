@@ -1,10 +1,13 @@
 // The template extension in Chromium: typing indentation, token classes, tag backgrounds, diagnostics and formatting.
 import { expect, test, type Page } from '@playwright/test';
-import { pageScript } from './setup.js';
+import { ORIGIN } from './setup.js';
 
 async function mount(page: Page, doc: string, dark: boolean): Promise<void> {
-  await page.setContent('<!doctype html><html><body><div id="editor"></div></body></html>');
-  await page.addScriptTag({ path: pageScript });
+  const origin = process.env[ORIGIN];
+  if (origin === undefined) throw new Error(`${ORIGIN} is not set: the global setup serves the page`);
+  // The page script is a module that loads the WebAssembly module of the core at its import; mount exists after it.
+  await page.goto(origin);
+  await page.waitForFunction(() => typeof window.mount === 'function');
   await page.evaluate(([text, mode]) => window.mount(text, mode), [doc, dark] as const);
 }
 

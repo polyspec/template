@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
-// The global setup bundles the test page script into dist/browser; the tests load it into a blank page.
+// The global setup bundles the test page script into dist/browser and serves that folder; the tests load its page.
 export default defineConfig({
   testDir: 'tests/browser',
   globalSetup: './tests/browser/setup.ts',
