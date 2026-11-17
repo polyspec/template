@@ -372,8 +372,9 @@ ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory template-install-go
+	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
-	$(MAKE) --no-print-directory consumer-phpstan-ci
+	$(MAKE) --no-print-directory ci-targets TARGETS="consumer-phpstan-ci"
 ci-bindings: ## The job bindings: the tools, the graphs and the release recipes, then the binding checks; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
 	$(MAKE) --no-print-directory template-install-bindings
