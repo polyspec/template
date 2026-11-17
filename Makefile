@@ -1402,3 +1402,22 @@ BINDING_RUN := $(NODE) $(BINDING)
 release-recipes:
 	$(BINDING_RUN) release-recipes --root $(CURDIR)
 -include packages/release.mk
+
+# The consumer check of the stub (T28.141): the PHP extension archive of release-candidate-assets (VERSION) carries the stub
+# that binding generates; PHPStan of a consumer reads the classes of the extension from it with scanFiles. The probe must fail
+# without the stub and pass with it. CONSUMER_PHP is the PHP 8.4 of the checkout (.php-version); composer installs phpstan.
+CONSUMER_PHP ?= php
+CONSUMER_DIR := var/consumer-phpstan
+.PHONY: consumer-phpstan-check
+consumer-phpstan-check: ## Check that PHPStan of a consumer resolves the classes of the PHP extension from the stub in its release archive (T28.141); needs VERSION and release-candidate-assets; offline
+	@test -n "$(VERSION)" || { echo 'consumer-phpstan-check: VERSION is required, for example make consumer-phpstan-check VERSION=0.0.31' >&2; exit 2; }
+	@zip=var/release/assets/polyspec-template-php-ext-$(VERSION).zip; test -f "$$zip" || { echo "consumer-phpstan-check: $$zip is missing; run make release-candidate-assets VERSION=$(VERSION) first" >&2; exit 2; }
+	rm -rf $(CONSUMER_DIR)
+	mkdir -p $(CONSUMER_DIR)/stub $(CONSUMER_DIR)/src
+	unzip -q "var/release/assets/polyspec-template-php-ext-$(VERSION).zip" generated/polyspec_template.stub.php -d $(CONSUMER_DIR)/unpacked
+	mv $(CONSUMER_DIR)/unpacked/generated/polyspec_template.stub.php $(CONSUMER_DIR)/stub/polyspec_template.stub.php
+	cp tests/fixtures/consumer-phpstan/probe.php $(CONSUMER_DIR)/src/probe.php
+	cp tests/fixtures/consumer-phpstan/phpstan-with-stub.neon tests/fixtures/consumer-phpstan/phpstan-without-stub.neon $(CONSUMER_DIR)/
+	@cd $(CONSUMER_DIR) && if $(CONSUMER_PHP) $(CURDIR)/vendor/bin/phpstan analyse -c phpstan-without-stub.neon --no-progress >without-stub.log 2>&1; then echo 'consumer-phpstan-check: the probe passed without the stub; it must fail' >&2; exit 1; fi
+	@cd $(CONSUMER_DIR) && $(CONSUMER_PHP) $(CURDIR)/vendor/bin/phpstan analyse -c phpstan-with-stub.neon --no-progress
+	@echo "consumer-phpstan-check: the probe fails without the stub and passes with the stub of $(VERSION)"

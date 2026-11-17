@@ -1,0 +1,7 @@
+# The stub of the extension is declared for the analysis with scanFiles (stubFiles reads no declaration of it).
+parameters:
+    level: 5
+    paths:
+        - src
+    scanFiles:
+        - stub/polyspec_template.stub.php

@@ -1,0 +1,5 @@
+# The same analysis without the stub: the seven names do not resolve, so the analysis fails.
+parameters:
+    level: 5
+    paths:
+        - src

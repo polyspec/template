@@ -83,6 +83,19 @@ rules:
   - id: php-ext-stub-place
     paths: ["**/*.stub.php", "!packages/php-ext/src/*.stub.php", "!legacy/packages/php-ext/src/*.stub.php"]
 
+  # S9 exception: tests/fixtures/consumer-phpstan holds the probe that PHPStan of a consumer analyses against the stub of the
+  # PHP extension (make consumer-phpstan-check, T28.141). The probe is data of that analysis, not infrastructure, as the
+  # fixture checkouts of kit are.
+  - id: layout-infrastructure-typescript
+    kind: file_absent
+    level: error
+    paths:
+      - "scripts/**/*.{js,mjs,cjs,py,sh,bash,zsh,rb,pl,php,go,rs,ps1,bat,cmd}"
+      - "tests/**/*.{js,mjs,cjs,py,sh,bash,zsh,rb,pl,php,go,rs,ps1,bat,cmd}"
+      - "!tests/kit/fixture/**"
+      - "!tests/fixtures/consumer-phpstan/**"
+    message: "S9: cross-language infrastructure is TypeScript; port the script, or declare its S9 exception with the reason in config/layout.yml"
+
   # The manifests of the binding crates are files that binding scaffold writes with lints of their own, which deny unsafe
   # code outside the FFI sites and an allow attribute without its reason; bindings-check compares them with what binding
   # writes (CK-19), so they do not take the lints of the workspace.
