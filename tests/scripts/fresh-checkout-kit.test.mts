@@ -7,17 +7,25 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 
 const root = resolve(new URL('../..', import.meta.url).pathname);
 const MESSAGE = 'the kit of node_modules is missing';
 
+const made: string[] = [];
+after(() => {
+  for (const dir of made) rmSync(dir, { recursive: true, force: true });
+});
+
 function freshCheckout(): string {
   const dir = mkdtempSync(join(tmpdir(), 'template-fresh-checkout-'));
+  made.push(dir);
   mkdirSync(dir, { recursive: true });
-  const archive = spawnSync('git', ['archive', 'HEAD'], { cwd: root });
+  // The archive goes to a file: its size is past the output buffer of spawnSync.
+  const file = join(dir, 'head.tar');
+  const archive = spawnSync('git', ['archive', '-o', file, 'HEAD'], { cwd: root });
   if (archive.status !== 0) throw new Error(`git archive HEAD exited with ${archive.status ?? archive.signal}`);
-  const extract = spawnSync('tar', ['-x', '-C', dir], { input: archive.stdout });
+  const extract = spawnSync('tar', ['-x', '-f', file, '-C', dir]);
   if (extract.status !== 0) throw new Error(`tar -x exited with ${extract.status ?? extract.signal}`);
   return dir;
 }
