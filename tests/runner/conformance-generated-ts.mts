@@ -11,7 +11,7 @@ import { compileAst } from '../../packages/compiler/src/ast-artifact.mts';
 import { compileSource } from '../../packages/compiler/src/compiler.mts';
 import { inWorker, runStep, seconds, stepProgress } from './bounded.mts';
 import { generatedCases, type TestCase } from './cases.mts';
-import { legacyCasesDir } from './case-list.mts';
+import { casesDir } from './case-list.mts';
 import { caseTypeManifest, compileStep, finishRun, renderFailure } from './generated-cases.mts';
 import type { RenderMessage } from './generated-ts-render.mts';
 import { tsc } from '../../scripts/tools.mts';
@@ -30,7 +30,7 @@ const pending: { testCase: TestCase; id: string; sourcePath: string }[] = [];
 const failures: string[] = [];
 let passed = 0;
 // The generated code runs on the legacy package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
-const { cases } = generatedCases(process.argv.slice(2), legacyCasesDir);
+const { cases } = generatedCases(process.argv.slice(2), casesDir);
 const progress = stepProgress();
 try {
   for (const testCase of cases) {

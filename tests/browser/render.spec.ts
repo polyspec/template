@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
+import { expectedErrorDocument, type ExpectedError } from '../../scripts/conformance-case-files.mts';
 
 declare global {
   interface Window {
@@ -12,8 +13,9 @@ declare global {
 }
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
-// The browser build is the legacy TypeScript package, which runs the legacy copy of the cases (docs/spec/runtime.md#transition).
-const casesDir = join(root, 'legacy', 'tests', 'cases');
+// The browser build is the TypeScript renderer that @polyspec/template carries as ./render and a browser host runs, so it
+// runs the current cases, as the Rust core does (T28.119): a copy of the cases would hold the rules of the day it was made.
+const casesDir = join(root, 'tests', 'cases');
 const CASE_FILES = new Set(['case.json', 'data.json', 'define.json', 'env.json', 'options.json']);
 
 interface BrowserCase {
@@ -25,7 +27,7 @@ interface BrowserCase {
   env?: string;
   delimiters?: string;
   expectedHtml?: string;
-  expectedError?: unknown;
+  expectedError?: ExpectedError;
 }
 
 function collectTemplates(dir: string, prefix: string, into: Record<string, string>): void {
@@ -66,7 +68,8 @@ function loadCases(): BrowserCase[] {
       const html = read('expected.html');
       const error = read('expected.error.json');
       if (html !== undefined) item.expectedHtml = html;
-      if (error !== undefined) item.expectedError = JSON.parse(error);
+      // The cases name an error by its kind (ERR-1), which the one reader of the case files gives.
+      if (error !== undefined) item.expectedError = expectedErrorDocument.read(join(dir, 'expected.error.json'));
       cases.push(item);
     }
   }
@@ -78,6 +81,15 @@ interface RenderResult {
   id: string;
   html?: string;
   error?: unknown;
+}
+
+// The error of a result as the cases write it: the renderer names a code `E_` and the kind in capitals (ERR-1), and
+// conformance compares the kind, the template and the position (ERR-3).
+function errorOf(value: unknown): ExpectedError | undefined {
+  if (typeof value !== 'object' || value === null) return undefined;
+  if (!('code' in value) || typeof value.code !== 'string' || !('template' in value) || typeof value.template !== 'string') return undefined;
+  if (!('line' in value) || typeof value.line !== 'number' || !('col' in value) || typeof value.col !== 'number') return undefined;
+  return { code: (value.code.startsWith('E_') ? value.code.slice(2) : value.code).toLowerCase(), template: value.template, line: value.line, col: value.col };
 }
 
 function isRenderResult(value: unknown): value is RenderResult {
@@ -103,7 +115,9 @@ test('renders every fixture case in the browser', async ({ page, baseURL }) => {
     const result = results[index];
     if (result === undefined) throw new Error(`no result for ${item.id}`);
     if (item.expectedError !== undefined) {
-      if (JSON.stringify(result.error) !== JSON.stringify(item.expectedError)) failures.push(`${item.id}: expected error ${JSON.stringify(item.expectedError)}, got ${JSON.stringify(result)}`);
+      const found = errorOf(result.error);
+      const expected = item.expectedError;
+      if (found?.code !== expected.code || found.template !== expected.template || found.line !== expected.line || found.col !== expected.col) failures.push(`${item.id}: expected error ${JSON.stringify(item.expectedError)}, got ${JSON.stringify(result)}`);
     } else if (result.html !== item.expectedHtml) {
       failures.push(`${item.id}: html differs: ${JSON.stringify(result.error ?? result.html?.slice(0, 80))}`);
     }
