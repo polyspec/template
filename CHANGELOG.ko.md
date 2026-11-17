@@ -6,6 +6,16 @@
 
 ## Unreleased
 
+- release 0.0.27의 소비자가 이 release를 받으려면 할 일. 패키지는 Rust 코어와 binding이 그것에서 생성한 바인딩의 것이다. 0.0.27의 손으로 쓴 패키지는 legacy 패키지이며 release되지 않는다.
+  - npm `@polyspec/template`: archive `polyspec-template-0.0.27.tgz`는 TypeScript runtime을 담았다. 이 release는 생성 바인딩의 패키지, 곧 asset `polyspec-template-ts-X.Y.Z`를 싣는다. root는 Node addon이고, WebAssembly entry는 `./wasm`이며, TypeScript renderer는 `./render`와 `./decode` 아래에 있다. darwin-arm64, linux-arm64-gnu, linux-x64-gnu마다 addon의 platform 패키지 하나, 곧 asset `polyspec-template-ts-X.Y.Z-<platform>`도 싣는다. 소비자는 그 archive, `@polyspec/json` release의 archive(URL로, `.npmrc`에 `allow-remote=root`), 그리고 Node.js에서 root를 import하면 자기 host의 platform archive를 적는다. WebAssembly entry에는 platform 패키지가 필요 없다. renderer의 이름은 `@polyspec/template/render`에서 import한다.
+  - npm `@polyspec/template-language`와 `@polyspec/template-lsp`: 같은 archive이며, 이제 WebAssembly entry 때문에 `@polyspec/template`을 요구한다. 소비자는 위의 두 archive와 함께 적는다.
+  - npm `@polyspec/template-codemirror`: 싣지 않는다. 그 소비자는 archive가 돌아올 때까지 0.0.27에 머문다(T28.129).
+  - npm `@polyspec/template-compiler`: 싣지 않는다. compiler는 아직 TypeScript runtime을 legacy 패키지로 받으므로 그 archive는 설치할 수 없다. 그 소비자는 compiler가 `@polyspec/template` 위에서 빌드될 때까지 0.0.27에 머문다(T28.140).
+  - Composer: library `polyspec/template`, `polyspec/template-cli`, C 확장 `polyspec/template-php-ext`의 archive는 싣지 않는다. 이 release는 type이 `php-ext`인 Composer 패키지 `polyspec/template`을 싣는다. 그 class는 확장 `polyspec_template` 안에 있고, 그 확장은 `polyspec/json`의 확장을 요구한다. PHP 8.4와 8.5의 확장 binary를 platform마다, 곧 asset `polyspec-template-php-ext-X.Y.Z-php<minor>-<platform>`으로 싣고 PIE가 그것을 설치한다. 정적 분석을 위한 class의 stub은 아직 싣지 않는다(T28.141).
+  - Python: 손으로 쓴 패키지의 wheel `py3-none-any`는 싣지 않는다. 이 release는 생성 바인딩의 wheel을 platform마다 하나, `cp314-abi3`로, 곧 asset `polyspec-template-python-X.Y.Z-<platform>`으로 싣는다. 그것은 json release의 버전의 `polyspec-json`을 요구한다.
+  - Go: module `github.com/polyspec/template/packages/go`는 경로를 유지한다. tag는 `packages/go/vX.Y.Z`다. 전에는 `legacy/packages/go/vX.Y.Z`였다. module은 각 platform의 static library를 담은 생성 바인딩이며 json의 Go module을 요구한다.
+  - Cargo: crate `polyspec-template`은 전처럼 Git tag `vX.Y.Z`로 받는다. `polyspec-binding-core`와 `polyspec-json`을 그 release의 tag로 요구한다.
+
 ## 0.0.29
 
 - kit 0.0.121을 고정하고, `make release-rehearsal`이 tag 없이 release를 준비한다(T28.138). make의 환경에서 kit의 `release-run prepare`를 이 파일 첫 절의 버전으로 부르고, asset은 checkout 밖의 폴더에 둔다.
