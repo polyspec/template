@@ -369,7 +369,7 @@ ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency
 	$(MAKE) --no-print-directory install-symbols EXTRACTORS=php
 	$(MAKE) --no-print-directory template-install-php
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-ext"
-	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
+	$(MAKE) --no-print-directory install-tools TOOLS="rust go uv"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory template-install-go
 	$(MAKE) --no-print-directory release-recipes

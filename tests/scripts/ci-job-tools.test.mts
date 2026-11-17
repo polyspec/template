@@ -94,6 +94,8 @@ const NEEDS: readonly { tool: string; runs: RegExp }[] = [
   { tool: 'rust', runs: /\blink\.m[jt]s cargo\b|\/shims\/(?:cargo|maturin|rustup)\b/u },
   { tool: 'go', runs: /\/shims\/go\b/u },
   { tool: 'wasm-bindgen', runs: /\/shims\/wasm-bindgen\b/u },
+  // The candidate assets of a release link the Python projects of the repository with uv (kit uvLink, T28.141).
+  { tool: 'uv', runs: /\/release\.m[jt]s candidate-assets\b|\/shims\/uv\b/u },
   // The check of the binding scaffold runs go mod download inside binding, with --release and without it, so the dry run shows
   // only the command of binding.
   { tool: 'go', runs: /\/binding check \S/u },
