@@ -179,3 +179,21 @@ describe('error object', () => {
     expect(new TemplateError(missing).toObject()).toEqual(missing);
   });
 });
+
+// EXP-3, ERR-2: a \uXXXX escape of a surrogate without its pair is parse_invalid_escape at that escape, so the span of the
+// error is the six bytes of the escape, from its backslash, as the Rust core gives it.
+describe('the span of a lone surrogate escape', () => {
+  it.each([
+    ['{= "\\udc00"}', 4, 10],
+    ["{= 'a\\uDBFF'}", 5, 11],
+  ])('%s is parse_invalid_escape over the escape', (source, offset, end) => {
+    let error: unknown;
+    try {
+      parse(source, 'x.tpl');
+    } catch (thrown) {
+      error = thrown;
+    }
+    expect(error).toBeInstanceOf(TemplateError);
+    expect(error).toMatchObject({ code: 'E_PARSE_INVALID_ESCAPE', offset, end, message: 'a \\u escape leaves a surrogate unpaired' });
+  });
+});
