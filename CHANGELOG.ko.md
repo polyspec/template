@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- asset job이 binding check 앞에서 Go module을 내려받는다(T28.124). 그 check는 network를 끈 채 module을 읽는데 새 runner에는 module이 없다. 그래서 CI의 모든 asset job이 실패했고, release의 job도 그랬을 것이다.
+
 ## 0.0.29
 
 - CI의 asset job이 contract에 대한 binding check를 돌린다(T28.121). release의 job이 release check를 돌리는 것과 같다. 그래서 그 check의 도구가 없는 asset job은 tag가 생기기 전에 CI에서 실패한다.

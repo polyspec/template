@@ -32,7 +32,7 @@ const initial: Fixture = { jobs: {
 const specimen = JSON.stringify(initial);
 // The recipes of the jobs, as the Makefile writes them.
 const recipe = (target: string, lines: string[]) => `${target}: ## the job\n${lines.map(line => `\t${line.replace(/^make /, '$(MAKE) --no-print-directory ').replace(',make ', ',$(MAKE) --no-print-directory ')}\n`).join('')}`;
-const prepared = ['make install-tools TOOLS="rust go"', 'make template-install-rust'];
+const prepared = ['make install-tools TOOLS="rust go"', 'make template-install-rust', 'make template-install-go'];
 const recipes = {
   platform: [...prepared, 'make install-tools TOOLS="uv python"', 'make release-recipes', RELEASE_CHECK, PLATFORM_BUILD],
   php: ['@test -n "$(EXPECTED_PHP_MINOR)" || exit 2', ...prepared, 'make release-recipes', RELEASE_CHECK, PHP_BUILD],

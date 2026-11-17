@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The asset jobs download the Go modules before the check of binding (T28.124): the check reads them with the network off, and a new runner holds none, so every asset job of CI failed, as the jobs of a release would have.
+
 ## 0.0.29
 
 - The asset jobs of CI run the check of binding on the contract (T28.121), as the jobs of a release run its release check, so an asset job that lacks a tool of the check fails in CI, before a tag exists.

@@ -23,14 +23,26 @@ const dryRun = (targets: readonly string[], release: string): string[] =>
   execFileSync('make', ['--no-print-directory', '-n', '-B', ...INPUTS, `RELEASE=${release}`, ...targets], { cwd: ROOT, env: ENV, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).split('\n');
 
 /** The commands of the target `job` with RELEASE at `release`, with those of the targets it hands to ci-targets. */
+const read = new Map<string, string[]>();
 const commandsWith = (job: string, release: string): string[] => {
+  const known = read.get(`${job} ${release}`);
+  if (known) return known;
   const lines = dryRun([job], release);
   const handed = lines.flatMap(line => /\/ci-targets\.m[jt]s -k \S+ (.+)$/u.exec(line)?.[1]?.trim().split(/\s+/u) ?? []);
-  return handed.length ? [...lines, ...dryRun(handed, release)] : lines;
+  const commands = handed.length ? [...lines, ...dryRun(handed, release)] : lines;
+  read.set(`${job} ${release}`, commands);
+  return commands;
 };
 
+const RELEASES = ['true', 'false'];
+
 /** The commands of the target `job` in a release and in CI. */
-const commandsOf = (job: string): string[] => ['true', 'false'].flatMap(release => commandsWith(job, release));
+const commandsOf = (job: string): string[] => RELEASES.flatMap(release => commandsWith(job, release));
+
+// The check of binding runs go mod download with the network off (GOPROXY=off of the Makefile), so it reads the modules from
+// the cache, which a new runner holds only after the job downloaded them with the network on (T28.124).
+const BINDING_CHECK = /\/binding check \S/u;
+const GO_MODULES = /-u GOPROXY .*\/shims\/go mod download\b/u;
 
 /** The tools that the commands install: the names after install-tools of kit, or every tool when it names none. */
 const installed = (lines: readonly string[]): Set<string> | 'all' => {
@@ -68,5 +80,11 @@ for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool th
   for (const { tool, runs } of NEEDS) {
     const line = lines.find(command => runs.test(command));
     assert.ok(line === undefined || tools.has(tool), `${job} runs ${tool} without installing it: ${line?.slice(0, 200)}`);
+  }
+  for (const release of RELEASES) {
+    const commands = commandsWith(job, release);
+    const check = commands.findIndex(command => BINDING_CHECK.test(command));
+    const modules = commands.findIndex(command => GO_MODULES.test(command));
+    assert.ok(check < 0 || (modules >= 0 && modules < check), `${job} with RELEASE=${release} runs the check of binding before it downloads the Go modules`);
   }
 });
