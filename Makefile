@@ -462,6 +462,7 @@ ci-release-release: ## The job release of release.yml: build, carry and publish 
 	mkdir -p var/release/assets && cp -R var/release/downloaded/. var/release/assets/
 	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS=go
 	$(RELEASE_IDENTITY) $(RELEASE_PATH) $(MAKE) --no-print-directory release-go-module
+	$(RELEASE_IDENTITY) $(RELEASE_PATH) $(MAKE) --no-print-directory release-go-module-push
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-publish
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-platform-assets
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-undraft
