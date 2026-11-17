@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.31
+
 - The release carries the stub `polyspec_template.stub.php` that binding generates beside the sources of the Composer package `polyspec/template` (T28.141): `config/release.json` declares the output of `make bindings` as `generated` of `packages/php-ext`, which the kit packs into the archive, so a static analysis of a consumer reads the classes of the extension from it.
 
 - `make consumer-phpstan-check VERSION=X.Y.Z` checks that PHPStan of a consumer reads the classes of the PHP extension from the stub of the release archive (T28.141): the probe fails without the stub and passes with it, with the stub declared through `scanFiles`, which PHPStan 2.3 reads where `stubFiles` does not. The job php-ext runs it on the candidate archives of the first section of this file (`consumer-phpstan-ci`), so a release without the stub fails in CI.

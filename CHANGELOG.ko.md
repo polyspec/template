@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+## 0.0.31
+
 - release는 binding이 만드는 stub `polyspec_template.stub.php`를 Composer package `polyspec/template`의 source 곁에 싣는다(T28.141). `config/release.json`이 `make bindings`의 출력을 `packages/php-ext`의 `generated`로 적고 kit가 그것을 archive에 담으므로, consumer의 정적 분석이 확장의 class를 archive에서 읽는다.
 
 - `make consumer-phpstan-check VERSION=X.Y.Z`는 PHPStan 소비자가 release archive의 stub에서 확장의 class를 읽는지 확인한다(T28.141). probe는 stub이 없으면 실패하고 stub이 있으면 통과한다. stub은 `scanFiles`로 선언하며, PHPStan 2.3은 그 선언을 `stubFiles`로 읽지 않는다. job php-ext가 이 파일 첫 절의 candidate archive에서 `consumer-phpstan-ci`로 그것을 돌리므로, stub이 없는 release는 CI에서 실패한다.
