@@ -32,7 +32,14 @@
       "directory": "packages/php-ext",
       "name": "polyspec/template",
       "product": "template",
-      "runtime": "php-ext"
+      "runtime": "php-ext",
+      "generated": [
+        {
+          "kind": "make",
+          "target": "bindings",
+          "outputs": ["generated/polyspec_template.stub.php"]
+        }
+      ]
     }
   ],
   "manifests": {

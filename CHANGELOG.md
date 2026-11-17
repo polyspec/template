@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The release carries the stub `polyspec_template.stub.php` that binding generates beside the sources of the Composer package `polyspec/template` (T28.141): `config/release.json` declares the output of `make bindings` as `generated` of `packages/php-ext`, which the kit packs into the archive, so a static analysis of a consumer reads the classes of the extension from it.
+
 ## 0.0.30
 
 - The job release of release.yml pushes the tag of the Go module after release-go-module records it (T28.152): the job never called release-go-module-push, so the Go tag of a release did not reach the remote.
@@ -23,7 +25,7 @@
   - npm `@polyspec/template-language` and `@polyspec/template-lsp`: the same archives, which now require `@polyspec/template` for its WebAssembly entry; a consumer lists them with the two archives above.
   - npm `@polyspec/template-codemirror`: not carried. A consumer of it stays at 0.0.27 until the archive returns (T28.129).
   - npm `@polyspec/template-compiler`: not carried. The compiler still takes the TypeScript runtime as a legacy package, so its archive could not be installed; a consumer of it stays at 0.0.27 until the compiler builds on `@polyspec/template` (T28.140).
-  - Composer: the archives of the library `polyspec/template`, of `polyspec/template-cli` and of the C extension `polyspec/template-php-ext` are not carried. The release carries the Composer package `polyspec/template` of the type `php-ext`, whose classes are in the extension `polyspec_template`, which requires the extension of `polyspec/json`, and a binary of the extension for PHP 8.4 and 8.5 on each platform, the assets `polyspec-template-php-ext-X.Y.Z-php<minor>-<platform>`, which PIE installs. The release carries no stub of the classes for a static analysis yet (T28.141).
+  - Composer: the archives of the library `polyspec/template`, of `polyspec/template-cli` and of the C extension `polyspec/template-php-ext` are not carried. The release carries the Composer package `polyspec/template` of the type `php-ext`, whose classes are in the extension `polyspec_template`, which requires the extension of `polyspec/json`, and a binary of the extension for PHP 8.4 and 8.5 on each platform, the assets `polyspec-template-php-ext-X.Y.Z-php<minor>-<platform>`, which PIE installs.
   - Python: the wheel `py3-none-any` of the hand-written package is not carried. The release carries one wheel of the generated binding for each platform, `cp314-abi3`, the assets `polyspec-template-python-X.Y.Z-<platform>`, which require `polyspec-json` at the version of the release of json.
   - Go: the module `github.com/polyspec/template/packages/go` keeps its path. Its tag is `packages/go/vX.Y.Z`, where it was `legacy/packages/go/vX.Y.Z`, and the module is the generated binding with the static library of each platform; it requires the Go module of json.
   - Cargo: the crate `polyspec-template` is taken by the Git tag `vX.Y.Z` as before; it requires `polyspec-binding-core` and `polyspec-json` by the tags of their releases.

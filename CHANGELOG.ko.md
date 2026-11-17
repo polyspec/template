@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- release는 binding이 만드는 stub `polyspec_template.stub.php`를 Composer package `polyspec/template`의 source 곁에 싣는다(T28.141). `config/release.json`이 `make bindings`의 출력을 `packages/php-ext`의 `generated`로 적고 kit가 그것을 archive에 담으므로, consumer의 정적 분석이 확장의 class를 archive에서 읽는다.
+
 ## 0.0.30
 
 - release.yml의 job release는 release-go-module이 기록한 뒤 Go 모듈의 tag를 push한다(T28.152). job이 release-go-module-push를 부르지 않아, 릴리스의 Go tag가 remote에 닿지 않았다.
@@ -24,7 +26,7 @@
   - npm `@polyspec/template-language`와 `@polyspec/template-lsp`: 같은 archive이며, 이제 WebAssembly entry 때문에 `@polyspec/template`을 요구한다. 소비자는 위의 두 archive와 함께 적는다.
   - npm `@polyspec/template-codemirror`: 싣지 않는다. 그 소비자는 archive가 돌아올 때까지 0.0.27에 머문다(T28.129).
   - npm `@polyspec/template-compiler`: 싣지 않는다. compiler는 아직 TypeScript runtime을 legacy 패키지로 받으므로 그 archive는 설치할 수 없다. 그 소비자는 compiler가 `@polyspec/template` 위에서 빌드될 때까지 0.0.27에 머문다(T28.140).
-  - Composer: library `polyspec/template`, `polyspec/template-cli`, C 확장 `polyspec/template-php-ext`의 archive는 싣지 않는다. 이 release는 type이 `php-ext`인 Composer 패키지 `polyspec/template`을 싣는다. 그 class는 확장 `polyspec_template` 안에 있고, 그 확장은 `polyspec/json`의 확장을 요구한다. PHP 8.4와 8.5의 확장 binary를 platform마다, 곧 asset `polyspec-template-php-ext-X.Y.Z-php<minor>-<platform>`으로 싣고 PIE가 그것을 설치한다. 정적 분석을 위한 class의 stub은 아직 싣지 않는다(T28.141).
+  - Composer: library `polyspec/template`, `polyspec/template-cli`, C 확장 `polyspec/template-php-ext`의 archive는 싣지 않는다. 이 release는 type이 `php-ext`인 Composer 패키지 `polyspec/template`을 싣는다. 그 class는 확장 `polyspec_template` 안에 있고, 그 확장은 `polyspec/json`의 확장을 요구한다. PHP 8.4와 8.5의 확장 binary를 platform마다, 곧 asset `polyspec-template-php-ext-X.Y.Z-php<minor>-<platform>`으로 싣고 PIE가 그것을 설치한다.
   - Python: 손으로 쓴 패키지의 wheel `py3-none-any`는 싣지 않는다. 이 release는 생성 바인딩의 wheel을 platform마다 하나, `cp314-abi3`로, 곧 asset `polyspec-template-python-X.Y.Z-<platform>`으로 싣는다. 그것은 json release의 버전의 `polyspec-json`을 요구한다.
   - Go: module `github.com/polyspec/template/packages/go`는 경로를 유지한다. tag는 `packages/go/vX.Y.Z`다. 전에는 `legacy/packages/go/vX.Y.Z`였다. module은 각 platform의 static library를 담은 생성 바인딩이며 json의 Go module을 요구한다.
   - Cargo: crate `polyspec-template`은 전처럼 Git tag `vX.Y.Z`로 받는다. `polyspec-binding-core`와 `polyspec-json`을 그 release의 tag로 요구한다.
