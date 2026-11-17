@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-publication -->
-<!-- source-sha256: 03c8ebf742c4a1f5cdc0b7671644f49eb48554624f2a402b2bdddcdfee045006 -->
+<!-- source-sha256: b819208933cb3d32d366dbb3efceed4eed6963e87612a75551c146507c449d90 -->
 # 발행
 
 Native asset job의 분리와 소유권 계약은 [Release asset workflow](../spec/release-assets.md)에 있다. 독립 PHP minor job source는 T28.60에서 검사하며 expected minor를 강제하는 generated recipe 채택과 native CI 증명은 아직 남아 있다.
@@ -78,7 +78,7 @@ release workflow는 dispatch마다 한 번 실행된다. `make release-tag`가 G
 
 tag는 환경 변수 `TAG`로 step에 전달된다. kit은 자기 저장소에서 fixture 저장소로 자기 step을 test한다. `make release-coverage`는 모든 추적 manifest가 tag의 릴리스 방식(`archive`, `version`, Rust crate처럼 git tag로 사용하는 `git-tag`)과 함께 `config/release.json`의 `manifests`에 있거나 이유와 함께 `notReleased`에 있기를 요구하고, kit은 자기 release workflow의 trigger, 권한, step의 순서를 test한다.
 
-assets의 job npm은 consumer가 하듯 npm archive를 설치한다(`make release-install-check`, `scripts/check-release-install.mts`). 자기가 pack한 `@polyspec/template`의 archive, language service와 언어 서버의 archive, `@polyspec/json` 릴리스의 archive를 빈 폴더에 설치하고, WebAssembly entry와 두 패키지를 import한다. CI가 commit마다 같은 job을 돌리므로, 어느 릴리스도 싣지 않는 패키지를 요구하는 archive는 tag가 생기기 전에 실패한다. 다른 archive는 어떤 step도 설치하지 않으며 consumer가 자기 package manager로 확인한다. 릴리스는 릴리스 0.0.27이 싣던 `@polyspec/template-codemirror`의 archive를 싣지 않고, `@polyspec/template-compiler`의 archive도 싣지 않는다. CodeMirror adapter는 browser가 코어의 WebAssembly module을 load할 조건을 갖추면 돌아오고(T28.129), compiler는 legacy TypeScript runtime을 떠나면 돌아온다. `tests/scripts/release-config.test.mts`는 `config/release.json`이 패키지들을 manifest가 선언한 대로 적었는지 검사한다.
+`make release-rehearsal ASSETS=<checkout 밖의 폴더>`는 tag 없이 릴리스를 준비한다. kit의 `release-run prepare`가 하듯, 커밋된 HEAD의 후보 asset을 `CHANGELOG.md` 첫 절의 버전으로 make가 export하는 환경에서 빌드한다. assets의 job npm은 consumer가 하듯 npm archive를 설치한다(`make release-install-check`, `scripts/check-release-install.mts`). 자기가 pack한 `@polyspec/template`의 archive, language service와 언어 서버의 archive, `@polyspec/json` 릴리스의 archive를 빈 폴더에 설치하고, WebAssembly entry와 두 패키지를 import한다. CI가 commit마다 같은 job을 돌리므로, 어느 릴리스도 싣지 않는 패키지를 요구하는 archive는 tag가 생기기 전에 실패한다. 다른 archive는 어떤 step도 설치하지 않으며 consumer가 자기 package manager로 확인한다. 릴리스는 릴리스 0.0.27이 싣던 `@polyspec/template-codemirror`의 archive를 싣지 않고, `@polyspec/template-compiler`의 archive도 싣지 않는다. CodeMirror adapter는 browser가 코어의 WebAssembly module을 load할 조건을 갖추면 돌아오고(T28.129), compiler는 legacy TypeScript runtime을 떠나면 돌아온다. `tests/scripts/release-config.test.mts`는 `config/release.json`이 패키지들을 manifest가 선언한 대로 적었는지 검사한다.
 
 ## 릴리스 asset 설치
 

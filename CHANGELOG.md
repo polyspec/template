@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- kit 0.0.121 is pinned, and `make release-rehearsal` prepares a release without a tag (T28.138): it calls `release-run prepare` of kit in the environment of make for the version of the first section of this file, with the assets in a folder outside the checkout.
+
 - A key of a native object that is not a string is `runtime_type` in VAL-19 too, as EXP-19 gives it (T28.137), and the text of that error names a number as `a number`, where it said `a fractional number` of an integer.
 
 ## 0.0.29

@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- kit 0.0.121을 고정하고, `make release-rehearsal`이 tag 없이 release를 준비한다(T28.138). make의 환경에서 kit의 `release-run prepare`를 이 파일 첫 절의 버전으로 부르고, asset은 checkout 밖의 폴더에 둔다.
+
 - native object의 string이 아닌 키는 EXP-19가 주는 대로 VAL-19에서도 `runtime_type`이다(T28.137). 그 오류의 text는 수를 `a number`로 부른다. 전에는 정수에도 `a fractional number`라고 했다.
 
 ## 0.0.29

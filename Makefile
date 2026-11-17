@@ -462,6 +462,14 @@ release-assets: ## Build the archive of every package of TAG and packages.json o
 release-candidate-assets: ## Build the archive of every package from the committed HEAD for VERSION into var/release/assets; ONLINE
 	@test -n "$$VERSION" || { echo "release-candidate-assets: VERSION is required, for example make release-candidate-assets VERSION=0.0.1"; exit 1; }
 	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) candidate-assets "$$VERSION"
+# release-rehearsal runs the preparation of a release of kit without a tag (T28.138): release-run prepare builds the candidate
+# assets of the committed HEAD for the version of the first section ## X.Y.Z of CHANGELOG.md, in the environment that make
+# exports, into the folder ASSETS, which lies outside the checkout. A call of the script of kit outside make has no
+# environment of mise and fails on the mise.toml of the checkout.
+.PHONY: release-rehearsal
+release-rehearsal: build-ts template-build-language template-build-lsp template-build-compiler ## Prepare the release of the version of CHANGELOG.md from the committed HEAD without a tag, with its assets in ASSETS outside the checkout; ONLINE
+	@test -n "$$ASSETS" || { echo "release-rehearsal: ASSETS is required, a folder outside the checkout, for example make release-rehearsal ASSETS=/tmp/template-candidate"; exit 1; }
+	RELEASE_ASSETS="$$ASSETS" $(ONLINE) $(NODE) $(KIT)/release-run.$(KIT_EXT) prepare "$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
 release-publish: ## Create the GitHub Release of TAG as a draft with the notes and the files of release-assets
 	@test -n "$$TAG" || { echo "release-publish: TAG is required, for example make release-publish TAG=v0.0.1"; exit 1; }
 	RELEASE_ASSETS=var/release/assets RELEASE_RECORDS=var/release $(NODE) $(KIT)/release.$(KIT_EXT) publish "$$TAG"
@@ -854,7 +862,7 @@ vscode-package: template-build-vscode ## Build the .vsix
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
-conformance: build-ts template-build-language build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
+conformance: build-ts template-build-language python-package build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
 	$(NODE) tests/runner/conformance.mts
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
@@ -886,7 +894,7 @@ conformance-generated-rust: build-ts ## Rust generated compiler conformance suit
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-php.mts
 
-conformance-python: build-ts template-build-language ## Conformance suite of TypeScript and Python
+conformance-python: build-ts template-build-language python-package ## Conformance suite of TypeScript and Python
 	$(NODE) tests/runner/conformance.mts --langs ts,python
 
 # The Python package is installed, non-editable, into the virtual environment PYTHON_VENV (scripts/python-venv.mts). The link
@@ -940,7 +948,7 @@ conformance-generated-python: build-ts python-package ## Python generated compil
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
 
-conformance-cases: build-ts template-build-language build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
+conformance-cases: build-ts template-build-language python-package build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
 	$(NODE) scripts/conformance-cases.mts $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
