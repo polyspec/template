@@ -462,9 +462,11 @@ ci-pages-pages: ## The job pages of pages.yml: build the documentation site unde
 release-assets: ## Build the archive of every package of TAG and packages.json of its Composer packages into var/release/assets; ONLINE
 	@test -n "$$TAG" || { echo "release-assets: TAG is required, for example make release-assets TAG=v0.0.1"; exit 1; }
 	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) assets "$$TAG"
+	$(MAKE) --no-print-directory release-packages-check
 release-candidate-assets: ## Build the archive of every package from the committed HEAD for VERSION into var/release/assets; ONLINE
 	@test -n "$$VERSION" || { echo "release-candidate-assets: VERSION is required, for example make release-candidate-assets VERSION=0.0.1"; exit 1; }
 	RELEASE_ASSETS=var/release/assets $(ONLINE) $(NODE) $(KIT)/release.$(KIT_EXT) candidate-assets "$$VERSION"
+	$(MAKE) --no-print-directory release-packages-check
 # release-rehearsal runs the preparation of a release of kit without a tag (T28.138): release-run prepare builds the candidate
 # assets of the committed HEAD for the version of the first section ## X.Y.Z of CHANGELOG.md, in the environment that make
 # exports, into the folder ASSETS, which lies outside the checkout. A call of the script of kit outside make has no
@@ -976,6 +978,12 @@ package-installs-check: typed-generator
 .PHONY: release-install-check
 release-install-check: template-build-lsp template-build-compiler ## Install the npm archives of a release in an empty folder and import them, after make release-npm; ONLINE
 	$(ONLINE) $(NODE) scripts/check-release-install.mts --template var/release/assets/npm/polyspec-template-$$($(NODE) -p 'require("./packages/ts/package.json").version').tgz
+
+# The packages.json of the Composer packages of the release names the shasum of every dist (T28.149): run after the
+# assets are built, before the release, so that a dist without its shasum stops the release (HR-80).
+.PHONY: release-packages-check
+release-packages-check: ## Check that every dist of the packages.json of var/release/assets names its shasum
+	$(NODE) scripts/check-release-packages.mts var/release/assets/packages.json
 
 # scripts/generate-error-codes.mts writes the error-code list of each implementation from the code tables of
 # docs/spec/errors.md (T22.6-15); error-codes-check checks that every list is current.
