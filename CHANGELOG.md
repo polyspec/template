@@ -5,10 +5,13 @@
 
 ## Unreleased
 
-## 0.0.28
+## 0.0.29
 
 - The asset jobs of a release install the Go of `mise.toml` (T28.118): the check of the binding scaffold that each runs calls `go mod download`, which fell back to the Go of the runner, older than the module needs.
 
+## 0.0.28
+
+- The tag v0.0.28 is at the commit 93119fc4 and has no release and no assets: every asset job of its release run failed (T28.118), and a tag does not move. Release 0.0.29 carries the entries of this section.
 - `@polyspec/template` exports `decodeTemplate` under `./decode` again, as release 0.0.27 did (T28.107): the release left the subpath out, and a browser consumer that imports it failed.
 - kit 0.0.119 is pinned (T28.116): its `link cargo` writes the output of cargo as cargo writes it (K1283), so the Rust runner of the generated conformance names each test after its file again.
 - kit 0.0.116 is pinned (T28.102).
