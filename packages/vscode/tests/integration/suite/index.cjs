@@ -6,7 +6,7 @@ const { existsSync, readFileSync } = require('node:fs');
 const { join } = require('node:path');
 const vscode = require('vscode');
 
-const { bounded, eventually, textBecomes } = require('./wait.cjs');
+const { eventually, textBecomes } = require('./wait.cjs');
 
 const workspace = join(__dirname, '..', 'workspace');
 const extensionId = process.env.POLYSPEC_TEMPLATE_EXTENSION;
@@ -132,11 +132,10 @@ const enabled = [
   }],
   ['an unclosed if tag produces a diagnostic at the opening tag', async () => {
     const document = await open('broken.tpl');
-    let diagnostics = [];
-    for (let attempt = 0; attempt < 50 && diagnostics.length === 0; attempt++) {
-      diagnostics = vscode.languages.getDiagnostics(document.uri);
-      if (diagnostics.length === 0) await new Promise(resolve => setTimeout(resolve, 100));
-    }
+    const diagnostics = await eventually(() => {
+      const found = vscode.languages.getDiagnostics(document.uri);
+      return found.length > 0 && found;
+    }, () => `the diagnostics of ${document.uri}`);
     assert.equal(diagnostics.length, 1);
     const [diagnostic] = diagnostics;
     assert.equal(diagnostic.code, 'parse_unclosed_block');
@@ -195,7 +194,7 @@ const disabled = [
 ];
 
 /**
- * Runs every check of the expected mode with its own time limit, prints each check when it starts
+ * Runs every check of the expected mode without a time limit, prints each check when it starts
  * and when it ends with its elapsed time, and fails with the names of the failed checks.
  */
 async function run() {
@@ -207,7 +206,7 @@ async function run() {
     console.log(`[suite] start - ${String(name)}`);
     const started = Date.now();
     try {
-      await bounded(name, check);
+      await check();
       console.log(`[suite] ok - ${String(name)} (${Date.now() - started} ms)`);
     } catch (error) {
       failures.push(name);

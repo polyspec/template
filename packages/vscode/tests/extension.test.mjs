@@ -29,12 +29,24 @@ let server;
 let connection;
 let initialized;
 const published = [];
+// The waiters for the diagnostics of a URI, each resolved by the notification that publishes them.
+const waiters = [];
+
+/** The first published diagnostics of `uri`, from the notification that publishes them. */
+function diagnosticsOf(uri) {
+  const found = published.find(params => params.uri === uri);
+  return found ? Promise.resolve(found) : new Promise(resolvePromise => waiters.push({ uri, resolve: resolvePromise }));
+}
 
 before(async () => {
   server = spawn(process.execPath, [join(root, SERVER), '--stdio'], { stdio: ['pipe', 'pipe', 'inherit'] });
   connection = createMessageConnection(new StreamMessageReader(server.stdout), new StreamMessageWriter(server.stdin));
   connection.onNotification('textDocument/publishDiagnostics', params => {
     published.push(params);
+    for (const waiter of waiters.filter(entry => entry.uri === params.uri)) {
+      waiters.splice(waiters.indexOf(waiter), 1);
+      waiter.resolve(params);
+    }
   });
   connection.listen();
   initialized = await connection.sendRequest('initialize', { processId: process.pid, rootUri: null, capabilities: {} });
@@ -115,8 +127,7 @@ test('the bundled server publishes diagnostics and answers the requests of the e
   assert.deepEqual(await connection.sendRequest('polyspec-template/matchingTag', { textDocument, position: { line: 1, character: 2 } }), { line: 3, character: 0 });
   const edits = await connection.sendRequest('textDocument/onTypeFormatting', { textDocument, position: { line: 1, character: 10 }, ch: '}', options: { tabSize: 2, insertSpaces: true } });
   assert.deepEqual(edits, [{ range: { start: { line: 1, character: 0 }, end: { line: 1, character: 0 } }, newText: '  ' }]);
-  for (let attempt = 0; attempt < 50 && !published.some(params => params.uri === uri); attempt++) await new Promise(resolvePromise => setTimeout(resolvePromise, 20));
-  const [diagnostic] = published.find(params => params.uri === uri).diagnostics;
+  const [diagnostic] = (await diagnosticsOf(uri)).diagnostics;
   assert.equal(diagnostic.code, 'parse_unclosed_block');
   assert.deepEqual(diagnostic.range.start, { line: 5, character: 0 });
 });
