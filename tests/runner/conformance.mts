@@ -47,7 +47,7 @@ for (let i = 0; i < argv.length; i++) {
 // The filesystem cases (CNF-16) run after the fixture cases, from file trees in a temporary directory; --update writes
 // only the expected files of fixture cases.
 /** The case set that a language runs: the legacy packages run the legacy copy. */
-const setOf = (language: string): 'current' | 'legacy' => (language === 'rust' ? 'current' : 'legacy');
+const setOf = (language: string): 'current' | 'legacy' => (language === 'rust' || language === 'ts' ? 'current' : 'legacy');
 const fixtureCases = listCases(options.case);
 const filesystem = filesystemCases(options.case);
 const legacyFixtureCases = listCases(options.case, CASE_SETS.legacy.cases);

@@ -93,7 +93,16 @@ export function lexStringLiteral(source: Source, start: number, template: string
       case 'u': {
         const hex = text.slice(index + 2, index + 6);
         if (!/^[0-9a-fA-F]{4}$/.test(hex)) throw fail('E_PARSE_INVALID_ESCAPE', index, index + 2, 'invalid escape sequence');
-        decoded += String.fromCharCode(parseInt(hex, 16));
+        const unit = parseInt(hex, 16);
+        // EXP-3: a surrogate escape is one half of a pair of two consecutive escapes; alone it names no code point.
+        if (unit >= 0xd800 && unit <= 0xdfff) {
+          const low = /^\\u([dD][c-fC-F][0-9a-fA-F]{2})$/.exec(text.slice(index + 6, index + 12))?.[1];
+          if (unit > 0xdbff || low === undefined) throw fail('E_PARSE_INVALID_ESCAPE', index, index + 2, 'invalid escape sequence');
+          decoded += String.fromCharCode(unit, parseInt(low, 16));
+          index += 12;
+          break;
+        }
+        decoded += String.fromCharCode(unit);
         index += 6;
         break;
       }

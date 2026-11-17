@@ -1,7 +1,7 @@
 // date and now (FUN-37 to FUN-42).
 import { defined, elementAt } from '../checked.js';
 import { isString, textOf, type Value } from '../value/value.js';
-import { argString, typeError, type BuiltIn, type FunctionContext } from './helpers.js';
+import { argInteger, argString, typeError, type BuiltIn, type FunctionContext } from './helpers.js';
 
 const DAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -44,11 +44,18 @@ function civilFromDays(days: number): { year: number; month: number; day: number
   return { year: month <= 2 ? y + 1 : y, month, day };
 }
 
+/** The days of `month` of `year` in the proleptic Gregorian calendar (FUN-37). */
+function daysInMonth(year: number, month: number): number {
+  if (month === 2) return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28;
+  return month === 4 || month === 6 || month === 9 || month === 11 ? 30 : 31;
+}
+
 const DATE_TEXT = /^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}):(\d{2}))?(Z|[+-]\d{2}:\d{2})?$/;
 
 // Unix seconds of a date value (FUN-37).
 export function toUnixSeconds(value: Value, envOffset: number): number {
-  if (typeof value === 'number') return Math.trunc(value);
+  // FUN-37, FUN-50: an integer number of seconds; a fraction is not truncated.
+  if (typeof value === 'number') return argInteger(value, 'date');
   if (isString(value)) {
     const match = DATE_TEXT.exec(textOf(value));
     if (!match) throw typeError(`${JSON.stringify(textOf(value))} is not a date`);
@@ -58,7 +65,8 @@ export function toUnixSeconds(value: Value, envOffset: number): number {
     const hour = match[4] === undefined ? 0 : Number(match[4]);
     const minute = match[5] === undefined ? 0 : Number(match[5]);
     const second = match[6] === undefined ? 0 : Number(match[6]);
-    if (month < 1 || month > 12 || day < 1 || day > 31 || hour > 23 || minute > 59 || second > 59) {
+    // FUN-37: the day is a day of its month in the proleptic Gregorian calendar.
+    if (month < 1 || month > 12 || day < 1 || day > daysInMonth(year, month) || hour > 23 || minute > 59 || second > 59) {
       throw typeError(`${JSON.stringify(textOf(value))} is not a date`);
     }
     // An offset outside the ranges of `parseOffset`, such as `+25:00`, makes the text no date (FUN-38).

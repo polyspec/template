@@ -16,9 +16,9 @@ export class FsLoader implements Loader {
     this.root = resolve(root);
   }
 
-  // Returns the file of a name, or null when no regular file exists for the name or the name leaves
-  // the directory. A symbolic link at any component of the name, a regular file that cannot be read
-  // and a file that the loader read under another name are failures.
+  // Returns the file of a name, or null when no entry exists for the name or the name leaves the
+  // directory. A symbolic link at any component of the name, an entry that is no regular file, a
+  // regular file that cannot be read and a file that the loader read under another name are failures.
   load(name: string): LoadResult | null {
     const path = resolve(this.root, ...name.split('/'));
     if (path !== this.root && !path.startsWith(this.root + sep)) return null;
@@ -30,7 +30,9 @@ export class FsLoader implements Loader {
       if (stats.isSymbolicLink()) throw new Error(`${segments.slice(0, index + 1).join('/')} is a symbolic link`);
       if (index < segments.length - 1 && !stats.isDirectory()) return null;
     }
-    if (stats === undefined || !stats.isFile()) return null;
+    if (stats === undefined) return null;
+    // RT-10: an entry that is no regular file, such as a directory, is a failure, not an absent name.
+    if (!stats.isFile()) throw new Error(`${name} is not a regular file`);
     const identity = `${stats.dev}:${stats.ino}`;
     const owner = this.files.get(identity) ?? name;
     if (owner !== name) throw new Error(`${name} is the file of ${owner}`);

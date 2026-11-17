@@ -1,7 +1,7 @@
 // upper, lower, trim, replace, split, truncate, contains, starts_with, ends_with (FUN-12, FUN-13).
 import { defined, elementAt } from '../checked.js';
 import { codePointLength, codePoints, looseEquals, isString, textOf } from '../value/value.js';
-import { argInteger, argString, typeError, type BuiltIn } from './helpers.js';
+import { argCount, argString, typeError, type BuiltIn } from './helpers.js';
 
 function asciiUpper(text: string): string {
   return text.replace(/[a-z]/g, char => String.fromCharCode(char.charCodeAt(0) - 32));
@@ -54,10 +54,10 @@ export const stringFunctions: Record<string, BuiltIn> = {
     max: 3,
     call: ([s, n, suffix]) => {
       const text = argString(defined(s, 'an argument of truncate'), 'truncate');
-      const limit = argInteger(defined(n, 'an argument of truncate'), 'truncate');
+      const limit = argCount(defined(n, 'an argument of truncate'), 'truncate');
       const tail = suffix === undefined ? '...' : argString(suffix, 'truncate');
       const points = codePoints(text);
-      return points.length > limit ? points.slice(0, Math.max(0, limit)).join('') + tail : text;
+      return points.length > limit ? points.slice(0, limit).join('') + tail : text;
     },
   },
   contains: {

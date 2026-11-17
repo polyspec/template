@@ -140,16 +140,18 @@ export class RuntimeBindings {
     if (container instanceof Map) {
       if (isString(key)) return container.get(textOf(key)) ?? null;
       if (typeof key === 'number' && Number.isInteger(key)) return container.get(String(key)) ?? null;
-      return null;
+      throw this.keyType(frame, span, 'a map key is a string or an integer', key);
     }
     if (Array.isArray(container)) {
       let position: number | null = null;
       if (typeof key === 'number' && Number.isInteger(key)) position = key;
       else if (isString(key) && /^(0|[1-9][0-9]*)$/.test(textOf(key))) position = Number(textOf(key));
+      else if (!isString(key) && !(typeof key === 'number' && Number.isInteger(key))) throw this.keyType(frame, span, 'a list index is an integer or an index text', key);
       if (position === null || position < 0 || position >= container.length) return null;
       return elementAt(container, position);
     }
-    if (container instanceof NativeObject && isString(key)) {
+    if (container instanceof NativeObject) {
+      if (!isString(key)) throw this.keyType(frame, span, 'a member name of a native object is a string', key);
       const name = textOf(key);
       const target = container.target;
       if (!publicField(target, name)) return null;
@@ -163,6 +165,11 @@ export class RuntimeBindings {
       return bound(this, field, frame, span);
     }
     return null;
+  }
+
+  /** EXP-19: a key whose type names no entry of its container is runtime_type. */
+  private keyType(frame: Frame, span: Span, expected: string, key: Value): TemplateError {
+    return this.error(frame, span, 'E_RUNTIME_TYPE', `${expected}, not ${typeof key === 'number' ? 'a fractional number' : typeOf(key)}`);
   }
 
   /** Checks the depth of a value that a list or map literal built (VAL-20). */

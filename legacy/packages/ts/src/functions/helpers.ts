@@ -60,8 +60,19 @@ export function argNumber(value: Value, _name: string): number {
   return toNumber(value);
 }
 
+/** FUN-50: an integer argument has no fractional part (runtime_type) and a magnitude of at most 2^53 − 1 (runtime_limit); it is never truncated. */
 export function argInteger(value: Value, name: string): number {
-  return Math.trunc(argNumber(value, name));
+  const number = argNumber(value, name);
+  if (!Number.isInteger(number)) throw typeError(`${number} is not an integer`);
+  if (Math.abs(number) > Number.MAX_SAFE_INTEGER) throw new FunctionError('E_RUNTIME_LIMIT', `${number} is outside the integer range of an argument`);
+  return number;
+}
+
+/** FUN-50: a count is an integer argument that is not negative (runtime_type). */
+export function argCount(value: Value, name: string): number {
+  const count = argInteger(value, name);
+  if (count < 0) throw typeError(`${count} is not a count`);
+  return count;
 }
 
 export function stringifyArg(value: Value): string {
