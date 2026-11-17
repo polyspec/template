@@ -15,6 +15,11 @@ import type { Frame, RenderContext } from './context.js';
 // The expression or iteration counter charged by runtime evaluation (RT-35).
 export type RuntimeLimit = 'expression' | 'iteration';
 
+/** EXP-19: the error of a key whose type names no entry of its container, runtime_type. */
+function keyType(bindings: RuntimeBindings, frame: Frame, span: Span, expected: string, key: Value): TemplateError {
+  return bindings.error(frame, span, 'E_RUNTIME_TYPE', `${expected}, not ${typeof key !== 'number' ? typeOf(key) : expected.startsWith('a member name') ? 'a number' : 'a fractional number'}`);
+}
+
 /** One implementation of the observable value semantics used by both compiler modes. */
 export class RuntimeBindings {
   /** Binds observable value semantics to one render context. */
@@ -140,18 +145,18 @@ export class RuntimeBindings {
     if (container instanceof Map) {
       if (isString(key)) return container.get(textOf(key)) ?? null;
       if (typeof key === 'number' && Number.isInteger(key)) return container.get(String(key)) ?? null;
-      throw this.keyType(frame, span, 'a map key is a string or an integer', key);
+      throw keyType(this, frame, span, 'a map key is a string or an integer', key);
     }
     if (Array.isArray(container)) {
       let position: number | null = null;
       if (typeof key === 'number' && Number.isInteger(key)) position = key;
       else if (isString(key) && /^(0|[1-9][0-9]*)$/.test(textOf(key))) position = Number(textOf(key));
-      else if (!isString(key) && !(typeof key === 'number' && Number.isInteger(key))) throw this.keyType(frame, span, 'a list index is an integer or an index text', key);
+      else if (!isString(key) && !(typeof key === 'number' && Number.isInteger(key))) throw keyType(this, frame, span, 'a list index is an integer or an index text', key);
       if (position === null || position < 0 || position >= container.length) return null;
       return elementAt(container, position);
     }
     if (container instanceof NativeObject) {
-      if (!isString(key)) throw this.keyType(frame, span, 'a member name of a native object is a string', key);
+      if (!isString(key)) throw keyType(this, frame, span, 'a member name of a native object is a string', key);
       const name = textOf(key);
       const target = container.target;
       if (!publicField(target, name)) return null;
@@ -167,10 +172,6 @@ export class RuntimeBindings {
     return null;
   }
 
-  /** EXP-19: a key whose type names no entry of its container is runtime_type. */
-  private keyType(frame: Frame, span: Span, expected: string, key: Value): TemplateError {
-    return this.error(frame, span, 'E_RUNTIME_TYPE', `${expected}, not ${typeof key !== 'number' ? typeOf(key) : expected.startsWith('a member name') ? 'a number' : 'a fractional number'}`);
-  }
 
   /** Checks the depth of a value that a list or map literal built (VAL-20). */
   depth(value: Value, frame: Frame, span: Span): Value {
