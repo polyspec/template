@@ -23,6 +23,7 @@
   },
   "workspaces": [
     "legacy/packages/ts",
+    "packages/ts",
     "packages/language",
     "packages/lsp",
     "packages/codemirror",

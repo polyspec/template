@@ -1,5 +1,5 @@
 // Token spacing rules of the formatting style, over expression tokens with the classes the parser gives them (EDT-8).
-import type { SyntaxToken } from '@polyspec/template-legacy';
+import type { SyntaxToken } from '../src/core.js';
 import { describe, expect, it } from 'vitest';
 import { joinTokens } from '../src/expression.js';
 

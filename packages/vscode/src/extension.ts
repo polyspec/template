@@ -15,9 +15,9 @@ export interface PolyspecTemplateApi {
   tagRanges(document: vscode.TextDocument): Promise<vscode.Range[] | null>;
 }
 
-/** Starts the language client of the bundled server `dist/server.cjs` and registers the editor features of the extension. */
+/** Starts the language client of the bundled server `dist/server.mjs` and registers the editor features of the extension. */
 export async function activate(context: vscode.ExtensionContext): Promise<PolyspecTemplateApi> {
-  const module = context.asAbsolutePath('dist/server.cjs');
+  const module = context.asAbsolutePath('dist/server.mjs');
   const started = new LanguageClient(
     LANGUAGE,
     'Polyspec Template',

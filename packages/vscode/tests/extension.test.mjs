@@ -10,7 +10,7 @@ import { createMessageConnection, StreamMessageReader, StreamMessageWriter } fro
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifest = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-const SERVER = 'dist/server.cjs';
+const SERVER = 'dist/server.mjs';
 
 // The semantic token types that VS Code defines; other types of the server legend must be contributed.
 const STANDARD_TOKEN_TYPES = new Set(['namespace', 'class', 'enum', 'interface', 'struct', 'typeParameter', 'type', 'parameter', 'variable', 'property', 'enumMember', 'decorator', 'event', 'function', 'method', 'macro', 'label', 'comment', 'string', 'keyword', 'number', 'regexp', 'operator']);
@@ -19,7 +19,7 @@ const builtins = new Set(builtinModules.flatMap(name => [name, `node:${name}`]))
 // The modules that a bundle loads at run time: the imports that esbuild left external, as its metafile records them for
 // each output (scripts/build-package.mts writes dist/<bundle>.meta.json with the bundle, the paths relative to dist).
 const externalsOf = bundle => {
-  const metafile = JSON.parse(readFileSync(join(root, bundle.replace(/\.cjs$/, '.meta.json')), 'utf8'));
+  const metafile = JSON.parse(readFileSync(join(root, bundle.replace(/\.[cm]js$/, '.meta.json')), 'utf8'));
   const output = metafile.outputs[basename(bundle)];
   assert.ok(output, `the metafile of ${bundle} records no output ${basename(bundle)}`);
   return [...new Set(output.imports.filter(entry => entry.external).map(entry => entry.path))];
@@ -97,11 +97,12 @@ test('manifest contributes every token type of the server legend that VS Code do
 test('the bundles load no workspace package at run time and are packaged', () => {
   assert.deepEqual(externalsOf(manifest.main).filter(name => !builtins.has(name)), ['vscode']);
   assert.deepEqual(externalsOf(SERVER).filter(name => !builtins.has(name)), []);
-  // The files that vsce packages: of dist, the two bundles only, not their metafiles.
+  // The files that vsce packages: of dist, the two bundles and the two WebAssembly modules that the server reads beside
+  // itself, the core and the JSON module that the core imports, not the metafiles.
   const listed = spawnSync(join(root, '../../node_modules/.bin/vsce'), ['ls', '--no-dependencies'], { cwd: root, encoding: 'utf8' });
   assert.equal(listed.status, 0, listed.stderr);
   const packaged = listed.stdout.split('\n').filter(path => path.startsWith('dist/')).sort();
-  assert.deepEqual(packaged, [manifest.main.replace(/^\.\//, ''), SERVER].sort());
+  assert.deepEqual(packaged, [manifest.main.replace(/^\.\//, ''), SERVER, 'dist/template_wasm_bg.wasm', 'dist/json_wasm_bg.wasm'].sort());
 });
 
 test('the bundled server publishes diagnostics and answers the requests of the extension', async () => {

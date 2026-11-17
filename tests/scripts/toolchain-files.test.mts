@@ -365,8 +365,9 @@ test('every CI step runs its tools through make, so the recipes give them their 
 });
 
 test('every CI job runs its targets past failures and uploads their report, also after a failure', () => {
-  // release-recipes writes packages/release.mk, the setup of the job bindings.
-  const SETUP = new Set(['install', 'install-tools', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'install-symbols', 'release-recipes', ...['node', 'go', 'rust', 'php', 'python', 'parity', 'bindings'].map(language => `template-install-${language}`)]);
+  // release-recipes writes packages/release.mk, the setup of the job bindings; install-wasm-bindgen of that file installs the
+  // wasm-bindgen CLI, with which the job editor builds the WebAssembly module of the core before the language service (T28.122).
+  const SETUP = new Set(['install', 'install-tools', 'install-wasm-bindgen', 'install-packages', 'hooks', 'template-install-vscode', 'template-install-browsers', 'install-symbols', 'release-recipes', ...['node', 'go', 'rust', 'php', 'python', 'parity', 'bindings'].map(language => `template-install-${language}`)]);
   const REPORTS: Record<string, string> = { 'ci-targets': 'var/report/ci-targets/' };
   const problems: string[] = [];
   // The job assets calls assets.yml, which builds the binding assets and runs no check of the suite.

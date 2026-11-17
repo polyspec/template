@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- The language service `@polyspec/template-language`, and the language server and the VS Code extension over it, parse with the Rust core through the WebAssembly entry of `@polyspec/template` (T28.122), where they parsed with the TypeScript parser of `@polyspec/template-legacy`, a package that no release carries: an install of the archives of 0.0.28 could not have found it. The codes, the positions and the ranges that the packages give are the same; an invalid delimiters option now has the code `argument_delimiters`, where it had none, and its message is that of the core. The language server of the VS Code extension is `dist/server.mjs` with two WebAssembly modules beside it.
+
 - The asset jobs download the Go modules before the check of binding (T28.124): the check reads them with the network off, and a new runner holds none, so every asset job of CI failed, as the jobs of a release would have.
 
 ## 0.0.29

@@ -1,5 +1,5 @@
 // Language service document: one analysis of a template text and every editor result of the document.
-import { analyzePrefix, type SyntaxTag, type TemplateError } from '@polyspec/template-legacy';
+import { analyzePrefix, type SourceErrorObject, type SyntaxTag, type Template } from './core.js';
 import { format, kindOf, type FormatOptions, type FormatResult } from './format.js';
 import { lineIndentations } from './indent.js';
 import { indexOfByte } from './positions.js';
@@ -81,7 +81,7 @@ export class TemplateDocument {
     this.root = options.location === undefined ? null : findRoot(options.location);
     this.diagnostics = analysis.error !== null
       ? [diagnosticOf(source, analysis.error, shift)]
-      : pathDiagnostics(analysis.ast, options.location, this.root).map(item => rangeOf(source, item.span[0], item.span[1], item.code, item.message, shift));
+      : pathDiagnostics(astOf(analysis.ast, name), options.location, this.root).map(item => rangeOf(source, item.span[0], item.span[1], item.code, item.message, shift));
     this.tags = this.accepted.filter(tag => tag.kind !== 'comment');
     this.tokens = analysis.tokens.map(token => ({ start: token.start + shift, end: token.end + shift, type: token.kind }));
     this.constructs = constructsOf(this.accepted);
@@ -166,7 +166,13 @@ export function openDocument(text: string, options: DocumentOptions = {}): Templ
   return new TemplateDocument(text, options);
 }
 
-function diagnosticOf(source: string, error: TemplateError, shift: number): Diagnostic {
+// A source without an error has an AST (EDT-11).
+function astOf(ast: Template | null, name: string): Template {
+  if (ast === null) throw new Error(`${name}: the core gave no AST and no error`);
+  return ast;
+}
+
+function diagnosticOf(source: string, error: SourceErrorObject, shift: number): Diagnostic {
   return rangeOf(source, error.offset, error.end, kindOf(error.code), error.message, shift);
 }
 

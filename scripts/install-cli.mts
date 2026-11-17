@@ -36,11 +36,14 @@ if (action === 'uninstall') {
   mkdirSync(next, { recursive: true });
   try {
     const language = join(root, 'packages', 'language');
-    const template = join(root, 'legacy', 'packages', 'ts');
+    // The formatter parses with the Rust core: the package @polyspec/template of the checkout, whose WebAssembly entry the
+    // language service imports, and the JSON package that it requires, which the checkout installed from its release.
+    const template = join(root, 'packages', 'ts');
+    const json = join(root, 'node_modules', '@polyspec', 'json');
     writeFileSync(join(next, 'package.json'), `${JSON.stringify({
       private: true,
-      dependencies: { '@polyspec/template-language': `file:${language}`, '@polyspec/template-legacy': `file:${template}` },
-      overrides: { '@polyspec/template-legacy': `file:${template}` },
+      dependencies: { '@polyspec/template-language': `file:${language}`, '@polyspec/template': `file:${template}`, '@polyspec/json': `file:${json}` },
+      overrides: { '@polyspec/template': `file:${template}`, '@polyspec/json': `file:${json}` },
     }, null, 2)}\n`);
     writeFileSync(join(next, '.npmrc'), 'install-links=true\nbin-links=false\n');
     process.stdout.write(`install-cli: npm install in ${next}\n`);

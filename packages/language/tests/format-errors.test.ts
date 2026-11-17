@@ -2,8 +2,8 @@
 // any other failure instead of reporting it as an error of the source.
 import { describe, expect, it, vi } from 'vitest';
 
-vi.mock('@polyspec/template-legacy', async original => {
-  const actual = await original<typeof import('@polyspec/template-legacy')>();
+vi.mock('../src/core.js', async original => {
+  const actual = await original<typeof import('../src/core.js')>();
   return {
     ...actual,
     analyze: (...args: Parameters<typeof actual.analyze>) => {
@@ -20,9 +20,9 @@ describe('format errors', () => {
     expect(() => format('{= a}', { name: 'broken.tpl' })).toThrow(TypeError);
   });
 
-  it('reports an invalid delimiters option as a parse error without a code', () => {
+  it('reports an invalid delimiters option as a parse error of the kind argument_delimiters, without a position', () => {
     const result = format('{= a}', { delimiters: 'x' });
-    expect(result).toMatchObject({ ok: false, error: { reason: 'parse', code: null, message: '"x" is not a delimiter pair' } });
+    expect(result).toMatchObject({ ok: false, error: { reason: 'parse', code: 'argument_delimiters', line: 0, col: 0 } });
   });
 
   it('reports a source that does not parse with the code of the parser', () => {

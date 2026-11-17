@@ -1,5 +1,5 @@
 // Formatter entry: formats every tag and the indentation of every line, and refuses a result whose AST differs from the source AST.
-import { analyze, DelimiterOptionError, parse, TemplateError } from '@polyspec/template-legacy';
+import { analyze, DelimiterError, parse, SourceError } from './core.js';
 import { formatBody } from './body.js';
 import { indentEdits } from './indent.js';
 import { sameTree, withoutLineIndentation } from './invariant.js';
@@ -73,7 +73,7 @@ export function format(source: string, options: FormatOptions = {}): FormatResul
   } catch (error) {
     // FMT-14: a source that does not parse, and an invalid delimiters option, are the parse result; any other failure is the
     // formatter's own and is thrown, not reported as an error of the source.
-    if (error instanceof TemplateError || error instanceof DelimiterOptionError) return { ok: false, error: parseError(error) };
+    if (error instanceof SourceError || error instanceof DelimiterError) return { ok: false, error: parseError(error) };
     throw error;
   }
 
@@ -125,18 +125,19 @@ function apply(text: string, edits: readonly Edit[]): string {
 }
 
 /**
- * The kind of a code of the legacy parser (ERR-1): the legacy TypeScript package names a code `E_` followed by its kind
- * in capitals, and every code that this package gives is the kind in lowercase snake_case.
+ * The kind of a code (ERR-1): every code that this package gives is the kind in lowercase snake_case, as the Rust core
+ * names it. A legacy package names a code `E_` followed by its kind in capitals.
  */
 export function kindOf(code: string): string {
   return (code.startsWith('E_') ? code.slice(2) : code).toLowerCase();
 }
 
-function parseError(error: TemplateError | DelimiterOptionError): FormatError {
-  if (error instanceof TemplateError) {
+function parseError(error: SourceError | DelimiterError): FormatError {
+  if (error instanceof SourceError) {
     return { reason: 'parse', code: kindOf(error.code), line: error.line, col: error.col, message: error.message };
   }
-  return { reason: 'parse', code: null, line: 0, col: 0, message: error.message };
+  // ERR-1, ERR-15: an invalid delimiters option is an argument error of the kind argument_delimiters, which has no position.
+  return { reason: 'parse', code: 'argument_delimiters', line: 0, col: 0, message: error.message };
 }
 
 // The 1-based line and byte column of a string index, counted as the parser counts them.

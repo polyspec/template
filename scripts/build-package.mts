@@ -20,7 +20,7 @@
 //        compiler|vscode> [--dist <directory>] [--force] [--print-inputs]
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -71,11 +71,19 @@ function run(command: string, args: string[], options: { cwd: string }): void {
 if (values['esbuild-vscode']) {
   const next = values['esbuild-vscode'];
   const vscode = join(root, 'packages/vscode');
-  const common = ['--bundle', '--platform=node', '--format=cjs', '--target=node24'];
-  const bundle = (name: string): string[] => [`--outfile=${name}.cjs`, `--metafile=${name}.meta.json`];
+  const common = ['--bundle', '--platform=node', '--target=node24'];
+  const bundle = (name: string, extension: string): string[] => [`--outfile=${name}.${extension}`, `--metafile=${name}.meta.json`];
   const server = createRequire(join(vscode, 'package.json')).resolve('@polyspec/template-lsp/server');
-  run(ESBUILD, [join(vscode, 'src/extension.ts'), ...common, '--external:vscode', ...bundle('extension')], { cwd: next });
-  run(ESBUILD, [server, ...common, ...bundle('server')], { cwd: next });
+  run(ESBUILD, [join(vscode, 'src/extension.ts'), ...common, '--format=cjs', '--external:vscode', ...bundle('extension', 'cjs')], { cwd: next });
+  // The server parses with the Rust core, whose WebAssembly binding loads at its import (a top-level await), which only an
+  // ES module holds, and reads each .wasm file beside the module that imports it: the bundle is dist/server.mjs with the
+  // two files beside it. The packages of CommonJS that the bundle holds call require, which the banner gives the module.
+  const banner = `--banner:js=import { createRequire as createRequireOfBundle } from 'node:module'; const require = createRequireOfBundle(import.meta.url);`;
+  run(ESBUILD, [server, ...common, '--format=esm', banner, ...bundle('server', 'mjs')], { cwd: next });
+  const template = dirname(createRequire(join(root, 'packages/language/package.json')).resolve('@polyspec/template/wasm'));
+  const json = dirname(createRequire(join(root, 'packages/ts/package.json')).resolve('@polyspec/json/wasm'));
+  copyFileSync(join(template, 'template_wasm_bg.wasm'), join(next, 'template_wasm_bg.wasm'));
+  copyFileSync(join(json, 'json_wasm_bg.wasm'), join(next, 'json_wasm_bg.wasm'));
   process.exit(0);
 }
 

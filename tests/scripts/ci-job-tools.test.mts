@@ -41,6 +41,10 @@ const commandsOf = (job: string): string[] => RELEASES.flatMap(release => comman
 
 // The check of binding runs go mod download with the network off (GOPROXY=off of the Makefile), so it reads the modules from
 // the cache, which a new runner holds only after the job downloaded them with the network on (T28.124).
+// The language service parses with the Rust core through the WebAssembly module of packages/ts, a build output that Git
+// ignores, so a job that builds the language service builds that module first (T28.122).
+const LANGUAGE_BUILD = /\/build-package\.mts --package language\b/u;
+const WASM_MODULE = /\/shims\/wasm-bindgen --target web --out-dir packages\/ts\/wasm\/generated\b/u;
 const BINDING_CHECK = /\/binding check \S/u;
 const GO_MODULES = /-u GOPROXY .*\/shims\/go mod download\b/u;
 
@@ -54,12 +58,15 @@ const installed = (lines: readonly string[]): Set<string> | 'all' => {
     if (!names.length) return 'all';
     for (const name of names) tools.add(name);
   }
+  // install-wasm-bindgen of packages/release.mk installs the wasm-bindgen CLI alone with mise.
+  if (lines.some(line => /\/mise install --locked (?:\S+ )*github:wasm-bindgen\/wasm-bindgen\b/u.test(line))) tools.add('wasm-bindgen');
   return tools;
 };
 
 const NEEDS: readonly { tool: string; runs: RegExp }[] = [
   { tool: 'rust', runs: /\blink\.m[jt]s cargo\b|\/shims\/(?:cargo|maturin|rustup)\b/u },
   { tool: 'go', runs: /\/shims\/go\b/u },
+  { tool: 'wasm-bindgen', runs: /\/shims\/wasm-bindgen\b/u },
   // The check of the binding scaffold runs go mod download inside binding, with --release and without it, so the dry run shows
   // only the command of binding.
   { tool: 'go', runs: /\/binding check \S/u },
@@ -76,15 +83,20 @@ test('the Makefile has the jobs of CI', { timeout: 60_000 }, () => {
 for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool that its commands run`, { timeout: 120_000 }, () => {
   const lines = commandsOf(job);
   const tools = installed(lines);
-  if (tools === 'all') return;
-  for (const { tool, runs } of NEEDS) {
-    const line = lines.find(command => runs.test(command));
-    assert.ok(line === undefined || tools.has(tool), `${job} runs ${tool} without installing it: ${line?.slice(0, 200)}`);
+  // A whole make install installs every tool of mise.toml; the order of the commands is judged of every job.
+  if (tools !== 'all') {
+    for (const { tool, runs } of NEEDS) {
+      const line = lines.find(command => runs.test(command));
+      assert.ok(line === undefined || tools.has(tool), `${job} runs ${tool} without installing it: ${line?.slice(0, 200)}`);
+    }
   }
   for (const release of RELEASES) {
     const commands = commandsWith(job, release);
     const check = commands.findIndex(command => BINDING_CHECK.test(command));
     const modules = commands.findIndex(command => GO_MODULES.test(command));
     assert.ok(check < 0 || (modules >= 0 && modules < check), `${job} with RELEASE=${release} runs the check of binding before it downloads the Go modules`);
+    const language = commands.findIndex(command => LANGUAGE_BUILD.test(command));
+    const wasm = commands.findIndex(command => WASM_MODULE.test(command));
+    assert.ok(language < 0 || (wasm >= 0 && wasm < language), `${job} with RELEASE=${release} builds the language service before the WebAssembly module of the core`);
   }
 });

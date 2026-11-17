@@ -314,8 +314,11 @@ ci-python: ## The job python: Python, uv and the Python environment, then the Py
 	$(MAKE) --no-print-directory template-install-python
 	$(MAKE) --no-print-directory ci-targets TARGETS="test-python conformance-python conformance-generated-python"
 ci-editor: ## The job editor: the Node.js packages, the browsers and VS Code, then the editor tests on a virtual display; ONLINE
-	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	$(MAKE) --no-print-directory install-tools TOOLS="node rust"
 	$(MAKE) --no-print-directory template-install-node
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory template-install-browsers
 	$(MAKE) --no-print-directory template-install-vscode
 	$(MAKE) --no-print-directory ci-targets VIRTUAL_DISPLAY=1 TARGETS="editor-boundary-check template-test-language format-check template-test-lsp template-test-codemirror template-test-vscode template-test-vscode-integration"
@@ -415,12 +418,13 @@ ci-release-release: ## The job release of release.yml: build, carry and publish 
 	@command -v zip >/dev/null || { echo 'ci-release-release: Info-ZIP is required for Composer release archives; install the zip package on the Ubuntu runner' >&2; exit 1; }
 	$(MAKE) --no-print-directory release-prepare
 	$(MAKE) --no-print-directory release-tools
-	$(RELEASE_PATH) $(MAKE) --no-print-directory release-assets
-	mkdir -p var/release/assets && cp -R var/release/downloaded/. var/release/assets/
 	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS="rust"
 	$(RELEASE_PATH) $(MAKE) --no-print-directory template-install-rust
-	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS=go
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-recipes
+	$(RELEASE_PATH) $(MAKE) --no-print-directory install-wasm-bindgen
+	$(RELEASE_PATH) $(MAKE) --no-print-directory release-assets
+	mkdir -p var/release/assets && cp -R var/release/downloaded/. var/release/assets/
+	$(RELEASE_PATH) $(MAKE) --no-print-directory install-tools TOOLS=go
 	$(RELEASE_IDENTITY) $(RELEASE_PATH) $(MAKE) --no-print-directory release-go-module
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-publish
 	$(RELEASE_PATH) $(MAKE) --no-print-directory release-platform-assets
@@ -754,7 +758,10 @@ build: build-ts build-go build-rust build-php build-php-ext template-build-langu
 
 test: test-ts test-go test-rust test-php test-python test-php-ext ## Unit tests of every package
 
-template-build-language: build-ts ## Build the formatter library and the template-fmt CLI
+# The language service parses with the Rust core through the WebAssembly module of packages/ts (T28.122), a build output that
+# Git ignores, so its build makes that module first: checkout-wasm runs make bindings, which writes the generated folders of
+# every binding again, so a checkout that a consumer links runs make checkout after it.
+template-build-language: build-ts checkout-wasm ## Build the formatter library and the template-fmt CLI, after the WebAssembly module of the core
 	$(NODE) scripts/build-package.mts --package language
 
 template-test-language: template-test-language-unit template-test-language-types ## Formatter, safety invariant and CLI tests, type check

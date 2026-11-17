@@ -2,9 +2,9 @@
 // indentation, and the agreement of its constructs with the AST spans.
 import { readFileSync } from 'node:fs';
 import { dirname, relative } from 'node:path';
-import { parse, TemplateError, type Node } from '@polyspec/template-legacy';
+import { parse, SourceError, type Node } from '../src/core.js';
 import { describe, expect, it } from 'vitest';
-import { caseOptions, legacyCasesDir as casesDir } from '../../../tests/runner/case-list.mts';
+import { caseOptions, casesDir } from '../../../tests/runner/case-list.mts';
 import { openDocument, type TemplateDocument } from '../src/index.js';
 import { repositoryRoot, templateFiles } from './helpers.js';
 
@@ -184,10 +184,10 @@ describe('line indentation', () => {
 });
 
 // Collects the [start, end] byte spans of block nodes and of if-branch opening tags.
-function blockSpans(nodes: readonly Node[], blocks: string[], branches: string[]): void {
+function blockSpans(nodes: Iterable<Node>, blocks: string[], branches: string[]): void {
   for (const node of nodes) {
     // The nested bodies of a node: the branches and else of an if, the body and empty of a for, the body and else of an ifblock.
-    let children: (Node[] | null)[];
+    let children: (Iterable<Node> | null | undefined)[];
     switch (node.type) {
       case 'If':
         blocks.push(JSON.stringify(node.span));
@@ -208,7 +208,7 @@ function blockSpans(nodes: readonly Node[], blocks: string[], branches: string[]
       default:
         children = [];
     }
-    for (const child of children) if (child !== null) blockSpans(child, blocks, branches);
+    for (const child of children) if (child !== null && child !== undefined) blockSpans(child, blocks, branches);
   }
 }
 
@@ -225,7 +225,7 @@ describe('agreement with the AST', () => {
         ast = parse(source, 'x.tpl', options);
       } catch (error) {
         // A text that does not parse fails with a template error; any other error fails the test.
-        if (!(error instanceof TemplateError)) throw error;
+        if (!(error instanceof SourceError)) throw error;
         expect(document.diagnostics).toHaveLength(1);
         return;
       }

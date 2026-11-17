@@ -1,7 +1,7 @@
 // Template root: the marker `template-root.json`, the root of a document by nearest ancestor and the
 // diagnostics of the include and block paths that name no regular file under the root. Files are reached only through
 // an injected host, so the language service stays free of Node.js.
-import { PathError, resolvePath, type Template } from '@polyspec/template-legacy';
+import { OutsideRootError, resolvePath, type Template } from './core.js';
 import type { Diagnostic } from './document.js';
 
 /** The file name of the marker that declares a template root. */
@@ -100,7 +100,7 @@ function resolveTag(path: string, name: string, base: string, host: RootHost): {
   try {
     target = resolvePath(name, path);
   } catch (error) {
-    if (!(error instanceof PathError)) throw error;
+    if (!(error instanceof OutsideRootError)) throw error;
     return { code: 'load_outside_root', message: `${JSON.stringify(path)} leaves the template root` };
   }
   const missing = { code: 'load_not_found', message: `template ${target} does not exist` };

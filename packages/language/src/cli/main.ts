@@ -1,7 +1,7 @@
 // Command line interface template-fmt: prints, rewrites or checks formatted templates.
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { buffer } from 'node:stream/consumers';
-import { parse, TemplateError } from '@polyspec/template-legacy';
+import { parse, SourceError } from '../core.js';
 import { format, kindOf, type FormatOptions, type FormatResult } from '../format.js';
 import { parseArguments, USAGE } from './args.js';
 import { collectFiles } from './files.js';
@@ -82,7 +82,7 @@ export function formatBytes(bytes: Uint8Array, name: string, options: FormatOpti
     try {
       parse(bytes, name, options.delimiters === undefined ? {} : { delimiters: options.delimiters });
     } catch (error) {
-      if (!(error instanceof TemplateError)) throw error;
+      if (!(error instanceof SourceError)) throw error;
       return { ok: false, error: { reason: 'parse', code: kindOf(error.code), line: error.line, col: error.col, message: error.message } };
     }
     throw new Error(`${name}: the parser accepted bytes that are not UTF-8`, { cause: decodeError });

@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- language service `@polyspec/template-language`와 그 위의 언어 서버, VS Code 확장이 `@polyspec/template`의 WebAssembly entry를 통해 Rust 코어로 파싱한다(T28.122). 전에는 어느 release도 싣지 않는 패키지 `@polyspec/template-legacy`의 TypeScript parser로 파싱했다. 0.0.28의 archive를 설치했다면 그 패키지를 찾지 못했을 것이다. 패키지가 주는 code, 위치, 범위는 같다. 잘못된 delimiters 옵션은 전에는 code가 없었고 이제 `argument_delimiters`이며, 그 message는 코어의 것이다. VS Code 확장의 언어 서버는 `dist/server.mjs`이고 WebAssembly module 둘이 그 옆에 있다.
+
 - asset job이 binding check 앞에서 Go module을 내려받는다(T28.124). 그 check는 network를 끈 채 module을 읽는데 새 runner에는 module이 없다. 그래서 CI의 모든 asset job이 실패했고, release의 job도 그랬을 것이다.
 
 ## 0.0.29

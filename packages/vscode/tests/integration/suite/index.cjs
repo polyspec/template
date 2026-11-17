@@ -88,7 +88,7 @@ const enabled = [
   }],
   ['the extension starts the bundled language server', async () => {
     const extension = vscode.extensions.getExtension(extensionId);
-    assert.ok(existsSync(join(extension.extensionPath, 'dist', 'server.cjs')));
+    assert.ok(existsSync(join(extension.extensionPath, 'dist', 'server.mjs')));
     assert.equal(typeof extension.exports.tagRanges, 'function');
   }],
   ['tag backgrounds cover every tag except comments and the tags accepted before a parse error', async () => {
