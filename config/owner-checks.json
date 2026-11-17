@@ -1303,6 +1303,10 @@
         "tests/scripts/toolchain-files.test.mts"
       ],
       "targets": []
+    },
+    {
+      "paths": ["tests/fixtures/consumer-phpstan/**"],
+      "targets": ["consumer-phpstan-ci"]
     }
   ],
   "inputs": [
