@@ -364,22 +364,22 @@ ci-php: ## The job php: Composer and the PHP dependency graph for the PHP on PAT
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-php-format test-php conformance-php"
-ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency graph, then the tests of the extension and the consumer check of its stub (T28.141); ONLINE
+ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency graph, then the tests of the extension; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="php composer"
 	$(MAKE) --no-print-directory install-symbols EXTRACTORS=php
 	$(MAKE) --no-print-directory template-install-php
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-ext"
-	$(MAKE) --no-print-directory install-tools TOOLS="rust go uv"
+	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory template-install-go
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
-	$(MAKE) --no-print-directory ci-targets TARGETS="consumer-phpstan-ci"
-ci-bindings: ## The job bindings: the tools, the graphs and the release recipes, then the binding checks; ONLINE
+ci-bindings: ## The job bindings: the tools, the graphs and the release recipes, then the binding checks and the consumer check of the stub in the platform zip of the PHP extension (T28.157); ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
 	$(MAKE) --no-print-directory template-install-bindings
 	$(MAKE) --no-print-directory release-recipes
-	$(MAKE) --no-print-directory ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go"
+	$(MAKE) --no-print-directory release-php-ext PHP=php
+	$(MAKE) --no-print-directory ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go consumer-phpstan-ci"
 
 # A job whose targets run the conformance of TypeScript builds the language service, and with it the WebAssembly module of the
 # core (T28.122): it installs Rust and its crates, writes the release recipes, which hold install-wasm-bindgen, and installs
@@ -1423,11 +1423,11 @@ CONSUMER_DIR := var/consumer-phpstan
 .PHONY: consumer-phpstan-check
 consumer-phpstan-check: ## Check that PHPStan of a consumer resolves the classes of the PHP extension from the stub in its release archive (T28.141); needs VERSION and release-candidate-assets; offline
 	@test -n "$(VERSION)" || { echo 'consumer-phpstan-check: VERSION is required, for example make consumer-phpstan-check VERSION=0.0.31' >&2; exit 2; }
-	@zip=var/release/assets/polyspec-template-php-ext-$(VERSION).zip; test -f "$$zip" || { echo "consumer-phpstan-check: $$zip is missing; run make release-candidate-assets VERSION=$(VERSION) first" >&2; exit 2; }
+	@test -n "$(firstword $(wildcard var/release/assets/php-ext/php_polyspec_template-v$(VERSION)_php*.zip))" || { echo "consumer-phpstan-check: no platform zip of $(VERSION) in var/release/assets/php-ext; run make release-php-ext PHP=php first" >&2; exit 2; }
 	rm -rf $(CONSUMER_DIR)
 	mkdir -p $(CONSUMER_DIR)/stub $(CONSUMER_DIR)/src
-	unzip -q "var/release/assets/polyspec-template-php-ext-$(VERSION).zip" generated/polyspec_template.stub.php -d $(CONSUMER_DIR)/unpacked
-	mv $(CONSUMER_DIR)/unpacked/generated/polyspec_template.stub.php $(CONSUMER_DIR)/stub/polyspec_template.stub.php
+	unzip -q "$(firstword $(wildcard var/release/assets/php-ext/php_polyspec_template-v$(VERSION)_php*.zip))" polyspec_template.stub.php -d $(CONSUMER_DIR)/unpacked
+	mv $(CONSUMER_DIR)/unpacked/polyspec_template.stub.php $(CONSUMER_DIR)/stub/polyspec_template.stub.php
 	cp tests/fixtures/consumer-phpstan/probe.php $(CONSUMER_DIR)/src/probe.php
 	cp tests/fixtures/consumer-phpstan/phpstan-with-stub.neon tests/fixtures/consumer-phpstan/phpstan-without-stub.neon $(CONSUMER_DIR)/
 	@cd $(CONSUMER_DIR) && if $(CONSUMER_PHP) $(CURDIR)/vendor/bin/phpstan analyse -c phpstan-without-stub.neon --no-progress >without-stub.log 2>&1; then echo 'consumer-phpstan-check: the probe passed without the stub; it must fail' >&2; exit 1; fi
