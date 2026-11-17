@@ -1,11 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 143b2decf1b1f9389f752c631121c2ba412393fe4f4916bf447c92407e5bd598 -->
+<!-- source-sha256: 0c6a5783569129a10b4e3c08098663b4c3d5cdc4106beb44fe3d8deb20220f1b -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
 
+- template의 어떤 시험도 시간으로 끊기지 않는다(T28.146). node 시험은 `timeout`을 두지 않고, vitest 설정 다섯은 기본값 5 s와 10 s 대신 `testTimeout: 0`과 `hookTimeout: 0`을 두며, Playwright의 timeout은 0이고, `legacy/packages/php`와 `legacy/packages/cli/php`의 PHPUnit 설정은 10 s의 시간 제한을 더는 강제하지 않는다. conformance 러너는 CLI 호출, 케이스의 PHP와 Python process, TypeScript 케이스의 render를 시간 제한 없이 실행하고 exit status, 출력, worker의 message로 판정한다. 전에는 호출이 10 s 뒤에, 케이스가 30 s 뒤에 실패했다. VS Code integration suite의 wait는 시간 제한 없이 조건을 polling하며 무엇을 기다리는지 log로 남기고, bundle된 server의 시험은 diagnostics를 게시하는 notification을 기다린다.
 
 
 ## 0.0.29
