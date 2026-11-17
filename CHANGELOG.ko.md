@@ -5,6 +5,7 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+- release.yml의 job release는 release-go-module이 기록한 뒤 Go 모듈의 tag를 push한다(T28.152). job이 release-go-module-push를 부르지 않아, 릴리스의 Go tag가 remote에 닿지 않았다.
 
 - CI는 editor 확장을 검증하지 않는다. job `editor`를 ci.yml과 `ci-passed`의 needs에서 뺐다(T28.147). `make ci-editor`는 로컬에서 실행하며, 그 VS Code는 `make template-install-vscode`에서 온다.
 - template의 어떤 시험도 시간으로 끊기지 않는다(T28.146). node 시험은 `timeout`을 두지 않고, vitest 설정 다섯은 기본값 5 s와 10 s 대신 `testTimeout: 0`과 `hookTimeout: 0`을 두며, Playwright의 timeout은 0이고, `legacy/packages/php`와 `legacy/packages/cli/php`의 PHPUnit 설정은 10 s의 시간 제한을 더는 강제하지 않는다. conformance 러너는 CLI 호출, 케이스의 PHP와 Python process, TypeScript 케이스의 render를 시간 제한 없이 실행하고 exit status, 출력, worker의 message로 판정한다. 전에는 호출이 10 s 뒤에, 케이스가 30 s 뒤에 실패했다. VS Code integration suite의 wait는 시간 제한 없이 조건을 polling하며 무엇을 기다리는지 log로 남기고, bundle된 server의 시험은 diagnostics를 게시하는 notification을 기다린다.

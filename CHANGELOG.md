@@ -4,6 +4,7 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+- The job release of release.yml pushes the tag of the Go module after release-go-module records it (T28.152): the job never called release-go-module-push, so the Go tag of a release did not reach the remote.
 
 - CI does not verify the editor extension: the job `editor` is removed from ci.yml and from the needs of `ci-passed` (T28.147). `make ci-editor` runs locally, and its VS Code comes from `make template-install-vscode`.
 - No test of template is cut off by time (T28.146). The node tests set no `timeout`, the five vitest configurations set `testTimeout: 0` and `hookTimeout: 0` in place of the defaults of 5 s and 10 s, Playwright has the timeout 0, and the PHPUnit configurations of `legacy/packages/php` and `legacy/packages/cli/php` no longer enforce a time limit of 10 s. The conformance runners run each CLI call, each PHP and Python process of a case and each render of a TypeScript case without a time limit and judge it by its exit status, its output or the message of its worker, where a call failed after 10 s and a case after 30 s. The waits of the VS Code integration suite poll their condition without a time limit and log what they wait for, and the test of the bundled server waits for the notification that publishes the diagnostics.
