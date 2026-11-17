@@ -14,7 +14,7 @@ import { jsonDocument } from '../../scripts/json-document.mts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-test('make test-binding-go names the test features of the Go binding with the library of the contract', { timeout: 60_000 }, () => {
+test('make test-binding-go names the test features of the Go binding with the library of the contract', () => {
   const { library } = jsonDocument<{ library: string }>('interface contract', {
     type: 'object', required: ['library'], properties: { library: { type: 'string' } },
   }).read(path.join(ROOT, 'packages/rust/interface.json'));

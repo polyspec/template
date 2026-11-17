@@ -21,18 +21,18 @@ function compile(file: string) {
   }
 }
 
-test('a Go consumer can name the host callback context through the SDK', { timeout: 30_000 }, () => {
+test('a Go consumer can name the host callback context through the SDK', () => {
   const result = compile('public-host-function.go');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Go consumer can name parser analysis types through the SDK', { timeout: 30_000 }, () => {
+test('a Go consumer can name parser analysis types through the SDK', () => {
   const result = compile('public-parser.go');
   assert.equal(result.status, 0, result.stderr);
 });
 
 for (const file of ['private-builtins.go', 'internal-builtins.go', 'private-lexer.go', 'private-parser.go', 'private-expression.go', 'private-evaluator.go', 'private-renderer.go']) {
-  test(`a Go consumer cannot import an implementation through ${file}`, { timeout: 30_000 }, () => {
+  test(`a Go consumer cannot import an implementation through ${file}`, () => {
     const result = compile(file);
     assert.equal(result.error, undefined);
     assert.notEqual(result.status, null);

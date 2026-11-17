@@ -11,9 +11,8 @@ import test from 'node:test';
 
 import { stopProcessGroup, type Kill } from '../../scripts/process-group.mts';
 
-// Each attempt starts writers, stops them and removes their directory; 20 attempts under the load of a full run take
-// longer than the default 30 s of one test (T20.3-1).
-test('a stopped process group writes nothing into a directory that is then removed', { timeout: 300_000 }, async () => {
+// Each attempt starts writers, stops them and removes their directory, 20 attempts in all (T20.3-1).
+test('a stopped process group writes nothing into a directory that is then removed', async () => {
   const failures: string[] = [];
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const directory = mkdtempSync(path.join(tmpdir(), 'template-process-group-'));
@@ -37,7 +36,7 @@ test('a stopped process group writes nothing into a directory that is then remov
 // after the leader has exited. Through the kill seam the group answers the probe until the member ends, and a second
 // SIGKILL to the group ends it. The stop must send that second signal; the fake member ends after 200 probes so that a
 // stop without the second signal fails with an assertion, not a hang.
-test('stopProcessGroup signals the group again while a member is still running', { timeout: 30_000 }, async () => {
+test('stopProcessGroup signals the group again while a member is still running', async () => {
   const pgid = 4242;
   const sent: (NodeJS.Signals | number)[] = [];
   let probes = 0;

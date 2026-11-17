@@ -18,7 +18,7 @@ function isLintModule(value: unknown): value is { lintSteps: (root: string, args
   return typeof value === 'object' && value !== null && 'lintSteps' in value && typeof value.lintSteps === 'function';
 }
 
-test('make lint-go writes the Go binding before it lints the module packages/go', { timeout: 60_000 }, async () => {
+test('make lint-go writes the Go binding before it lints the module packages/go', async () => {
   const lines = execFileSync('make', ['--no-print-directory', '-n', 'lint-go'], { cwd: ROOT, encoding: 'utf8' }).split('\n');
   const lint = lines.findIndex(text => /\/lint-go\.m?[jt]s\b/u.test(text));
   assert.ok(lint >= 0, `the dry run of make lint-go runs no lint-go utility:\n${lines.join('\n')}`);

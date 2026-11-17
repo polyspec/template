@@ -41,7 +41,7 @@ function isLintModule(value: unknown): value is { lintSteps: (root: string, args
   return typeof value === 'object' && value !== null && 'lintSteps' in value && typeof value.lintSteps === 'function';
 }
 
-test('every package that make lint-rust excludes is a package of the workspace of its step', { timeout: 60_000 }, async () => {
+test('every package that make lint-rust excludes is a package of the workspace of its step', async () => {
   const { script, args } = recipe();
   const loaded: unknown = await import(pathToFileURL(script).href);
   assert.ok(isLintModule(loaded), `${script} exports no lintSteps`);

@@ -23,7 +23,7 @@ function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-test('native decoder round-trip fixtures exercise every AST shape and field', { timeout: 30_000 }, () => {
+test('native decoder round-trip fixtures exercise every AST shape and field', () => {
   const found = new Map<string, Set<string>>();
   function visit(value: unknown): void {
     if (Array.isArray(value)) { for (const item of value) visit(item); return; }
@@ -50,7 +50,7 @@ test('native decoder round-trip fixtures exercise every AST shape and field', { 
   }
 });
 
-test('TypeScript AST public interfaces expose exactly the schema fields', { timeout: 30_000 }, () => {
+test('TypeScript AST public interfaces expose exactly the schema fields', () => {
   const { program, errors } = parseSync('ast.ts', readFileSync('legacy/packages/ts/src/ast.ts', 'utf8'));
   assert.deepEqual(errors, []);
   const interfaces = new Map(program.body.flatMap(statement => {
@@ -71,7 +71,7 @@ test('TypeScript AST public interfaces expose exactly the schema fields', { time
 
 // The same committed data is decoded by all six SDKs, so adding a schema literal
 // without exercising it through the public decoders must fail this unit.
-test('the shared enum fixture covers every canonical AST literal', { timeout: 5000 }, () => {
+test('the shared enum fixture covers every canonical AST literal', () => {
   const fixture: unknown = JSON.parse(readFileSync('tests/fixtures/ast-decode/enum-literals.json', 'utf8'));
   assert.ok(record(fixture) && Array.isArray(fixture.body));
   for (const [name, field] of [['Binary', 'op'], ['Unary', 'op'], ['LoopMeta', 'field']] as const) {
@@ -91,7 +91,7 @@ test('the shared enum fixture covers every canonical AST literal', { timeout: 50
 });
 
 // AST-4: native literal carriers preserve every scalar alternative, including false.
-test('the shared AST value fixture covers scalar carriers and map spread', { timeout: 5000 }, () => {
+test('the shared AST value fixture covers scalar carriers and map spread', () => {
   const fixture: unknown = JSON.parse(readFileSync('tests/fixtures/ast-decode/enum-literals.json', 'utf8'));
   assert.ok(record(fixture) && Array.isArray(fixture.body));
   const expressions = fixture.body.map((node: unknown) => { assert.ok(record(node) && record(node.expr)); return node.expr; });

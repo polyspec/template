@@ -28,7 +28,7 @@ function links(directory: string): string[] {
   });
 }
 
-test('install-cli writes a copy and a script without a symbolic link, and uninstall-cli removes both', { timeout: 120_000 }, t => {
+test('install-cli writes a copy and a script without a symbolic link, and uninstall-cli removes both', t => {
   const prefix = mkdtempSync(path.join(tmpdir(), 'template-cli-'));
   t.after(() => rmSync(prefix, { recursive: true, force: true }));
   const install = spawnSync(process.execPath, [SCRIPT, 'install', '--prefix', prefix], { cwd: ROOT, encoding: 'utf8' });

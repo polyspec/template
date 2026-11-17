@@ -100,20 +100,8 @@ function temporary(t: TestContext) {
   return path.join(directory, 'dist');
 }
 
-// The limits of the build tests protect against a hang: a build, a reader or an install that never ends. A limit is
-// 100 times the expected time of its test, and a slow pass on a loaded machine is a pass; the limits do not judge speed.
-// The ts reader has an expected time of 33 s, the mean of three runs alone on a loaded machine (28.6 s, 32.3 s,
-// 37.9 s). The other limits are 100 times the elapsed time of their test in one run of tests/scripts under load (about
-// 60). vscode keeps the runner default, which is 24 times its measured time.
-const LIMITS_MS: Record<string, { reader: number; unchanged: number }> = {
-  'ts': { reader: 3_300_000, unchanged: 1_160_000 },
-  'language': { reader: 1_670_000, unchanged: 650_000 },
-  'lsp': { reader: 600_000, unchanged: 340_000 },
-  'codemirror': { reader: 1_110_000, unchanged: 1_110_000 },
-};
-
 for (const name of PACKAGES) {
-  test(`${name}: a reader of dist never misses a file during a build, and the same inputs give the same files`, { timeout: LIMITS_MS[name]?.reader }, async (t) => {
+  test(`${name}: a reader of dist never misses a file during a build, and the same inputs give the same files`, async (t) => {
     const dist = temporary(t);
     const first = build(name, dist, '--force');
     assert.equal(first.status, 0, first.stdout + first.stderr);
@@ -127,7 +115,7 @@ for (const name of PACKAGES) {
     assert.equal(readdirSync(path.dirname(dist)).filter(entry => entry.includes('.next-')).length, 0);
   });
 
-  test(`${name}: a build whose inputs are unchanged does not build`, { timeout: LIMITS_MS[name]?.unchanged }, (t) => {
+  test(`${name}: a build whose inputs are unchanged does not build`, (t) => {
     const dist = temporary(t);
     const first = build(name, dist);
     assert.equal(first.status, 0, first.stdout + first.stderr);

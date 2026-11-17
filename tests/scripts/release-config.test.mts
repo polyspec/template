@@ -103,7 +103,7 @@ test('the legacy TypeScript package is private under its own name', () => {
   assert.equal(manifest.private, true, `${file}: npm publishes no legacy package`);
 });
 
-test('the PHP extension reports the version of its composer.json', { timeout: 1000 }, () => {
+test('the PHP extension reports the version of its composer.json', () => {
   const header = 'legacy/packages/php-ext/src/php_polyspec_template.h';
   const manifest = 'legacy/packages/php-ext/composer.json';
   const reported = /^#define PHP_POLYSPEC_TEMPLATE_VERSION "([^"]*)"$/m.exec(read(header))?.[1];

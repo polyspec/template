@@ -24,30 +24,30 @@ function literals(files: string[], quote: string): { place: string; code: string
     .flatMap((line, index) => [...line.matchAll(pattern)].map(match => ({ place: `${file}:${index + 1}`, code: match[1] ?? '' }))));
 }
 
-test('the catalog holds the 49 codes of the tables of docs/spec/errors.md in their order, each with its condition', { timeout: 10_000 }, () => {
+test('the catalog holds the 49 codes of the tables of docs/spec/errors.md in their order, each with its condition', () => {
   assert.equal(catalog.length, 49);
   assert.deepEqual(catalog[0], { code: 'E_LEX_INVALID_UTF8', kind: 'lex_invalid_utf8', condition: 'The source is not valid UTF-8.' });
   assert.equal(catalog.at(-1)?.code, 'E_INTERNAL');
 });
 
-test('a malformed code row, a repeated code or a catalog without codes fails the generator', { timeout: 10_000 }, () => {
+test('a malformed code row, a repeated code or a catalog without codes fails the generator', () => {
   assert.throws(() => parseCatalog('| `a` | no position |\n'), /is no \| code \| condition \| position \| row/);
   assert.throws(() => parseCatalog('| `a` | a | b |\n| `a` | c | d |\n'), /names E_A twice/);
   assert.throws(() => parseCatalog('| Code | Condition | Position |\n'), /names no code/);
 });
 
-test('a row whose first cell is no code identifier, such as a point of ERR-16, is no code row', { timeout: 10_000 }, () => {
+test('a row whose first cell is no code identifier, such as a point of ERR-16, is no code row', () => {
   assert.deepEqual(parseCatalog('| `a` | b | c |\n| `template.internal` | branch | `internal` (ERR-13) |\n'),
     [{ code: 'E_A', kind: 'a', condition: 'b' }]);
 });
 
-test('the Go identifier of each code is the constant that the Go package declares for it', { timeout: 10_000 }, () => {
+test('the Go identifier of each code is the constant that the Go package declares for it', () => {
   const declared = new Map([...readFileSync(path.join(ROOT, 'legacy/packages/go/errs/errs.go'), 'utf8').matchAll(/(\w+)\s+Code = "(E_\w+)"/g)]
     .map(match => [match[2], match[1]]));
   for (const { code } of catalog) assert.equal(goName(code), declared.get(code), code);
 });
 
-test('replaceBlocks writes each block between its markers, keeps the markers and fails without them', { timeout: 10_000 }, () => {
+test('replaceBlocks writes each block between its markers, keeps the markers and fails without them', () => {
   const block = { comment: '//', indent: '', lines: () => ['new'] };
   const source = 'a\n// BEGIN GENERATED ERROR CODES\nold\n// END GENERATED ERROR CODES\nb\n// BEGIN GENERATED ERROR CODES\n// END GENERATED ERROR CODES\nc';
   assert.equal(replaceBlocks(source, [block, block], catalog, 'x'),
@@ -56,12 +56,12 @@ test('replaceBlocks writes each block between its markers, keeps the markers and
   assert.throws(() => replaceBlocks(source, [block], catalog, 'x'), /x holds 2 blocks of generated error codes; the generator writes 1/);
 });
 
-test('the Rust variant of a kind is its words in UpperCamelCase, whose snake_case is the kind', { timeout: 10_000 }, () => {
+test('the Rust variant of a kind is its words in UpperCamelCase, whose snake_case is the kind', () => {
   for (const { kind } of catalog) assert.equal(rustName(kind).replace(/(?<=[a-z0-9])(?=[A-Z])/g, '_').toLowerCase(), kind);
   assert.equal(rustName('lex_invalid_utf8'), 'LexInvalidUtf8');
 });
 
-test('every list is stable on a second render and holds a code that the catalog adds', { timeout: 10_000 }, () => {
+test('every list is stable on a second render and holds a code that the catalog adds', () => {
   const grown = [...catalog, { code: 'E_EXTRA_CODE', kind: 'extra_code', condition: 'An added code.' }];
   for (const artifact of ARTIFACTS) {
     const current = readFileSync(path.join(ROOT, artifact.file), 'utf8');
@@ -72,11 +72,11 @@ test('every list is stable on a second render and holds a code that the catalog 
   }
 });
 
-test('every list of the tree matches the catalog', { timeout: 10_000 }, () => {
+test('every list of the tree matches the catalog', () => {
   assert.deepEqual(run(ROOT, true), []);
 });
 
-test('the PHP package and the PHP extension raise each error through the generated constants', { timeout: 10_000 }, () => {
+test('the PHP package and the PHP extension raise each error through the generated constants', () => {
   const php = sources('legacy/packages/php/src', ['.php']).filter(file => file !== 'legacy/packages/php/src/ErrorCode.php');
   // The generated declarations of ErrorCode in the arginfo header raise nothing; gen_stub writes them from the stub.
   const ext = sources('legacy/packages/php-ext/src', ['.c', '.h'])
@@ -84,7 +84,7 @@ test('the PHP package and the PHP extension raise each error through the generat
   assert.deepEqual([...literals(php, "'"), ...literals(php, '"'), ...literals(ext, '"')], []);
 });
 
-test('the Python package raises only codes of the catalog', { timeout: 10_000 }, () => {
+test('the Python package raises only codes of the catalog', () => {
   const python = literals(sources('legacy/packages/python/src/polyspec/template', ['.py']), '"');
   assert.ok(python.length > 0, 'the Python package names its codes as string literals');
   assert.deepEqual(python.filter(({ code }) => !codes.has(code)), []);

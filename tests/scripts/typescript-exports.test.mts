@@ -8,7 +8,7 @@ import { jsonDocument } from '../../scripts/json-document.mts';
 import { requireBuilt } from '../../scripts/required.mts';
 import { typescriptExports } from '../../scripts/typescript-exports.mts';
 
-test('a package consumer can name the types in public signatures', { timeout: 30_000 }, () => {
+test('a package consumer can name the types in public signatures', () => {
   // The fixture imports the declarations of the legacy package and of the language service.
   requireBuilt('legacy/packages/ts/dist/index.d.ts', 'build-ts');
   requireBuilt('packages/language/dist/index.d.ts', 'template-build-language');
@@ -25,7 +25,7 @@ function declarationModel(config: string) {
   return spawnSync(command, ['run', '--local', '--config', config], { encoding: 'utf8' });
 }
 
-test('the public declaration model has no inaccessible signature types', { timeout: 30_000 }, () => {
+test('the public declaration model has no inaccessible signature types', () => {
   // The entry point of legacy/packages/ts/api-extractor.json.
   requireBuilt('legacy/packages/ts/dist/node/index.d.ts', 'build-ts');
   const result = declarationModel('legacy/packages/ts/api-extractor.json');
@@ -46,13 +46,13 @@ test('the public declaration model has no inaccessible signature types', { timeo
   assert.ok(!references.has('@polyspec/template-legacy!BoundMap:constructor(1)'), 'bound maps are created only by bind and merge');
 });
 
-test('the declaration check rejects a public class with a private implementation base', { timeout: 30_000 }, () => {
+test('the declaration check rejects a public class with a private implementation base', () => {
   const result = declarationModel('tests/fixtures/public-types/private-api-extractor.json');
   assert.notEqual(result.status, 0);
   assert.match(result.stdout + result.stderr, /\(ae-forgotten-export\)/);
 });
 
-test('star re-exports expose runtime and type names through cycles without a default export', { timeout: 1000 }, () => {
+test('star re-exports expose runtime and type names through cycles without a default export', () => {
   const entry = resolve('entry.ts');
   const render = resolve('render.ts');
   const files = new Map([
@@ -67,7 +67,7 @@ test('star re-exports expose runtime and type names through cycles without a def
   assert.deepEqual([...typescriptExports(entry, read)].sort(), ['BoundMap', 'bind', 'merge', 'parse']);
 });
 
-test('namespace re-exports expose the namespace name', { timeout: 1000 }, () => {
+test('namespace re-exports expose the namespace name', () => {
   assert.deepEqual([...typescriptExports(resolve('entry.ts'), () => 'export * as runtime from "./render.js";')], ['runtime']);
 });
 

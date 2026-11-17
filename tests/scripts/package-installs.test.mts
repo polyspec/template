@@ -118,7 +118,7 @@ function stubs(directory: string) {
   return { bin, cargo: path.join(cargoBin, 'cargo'), home: path.join(directory, 'home'), log: path.join(directory, 'calls.jsonl') };
 }
 
-test('the install projects read no network source and use the pinned toolchains and locks', { timeout: 4_980_000 }, (t) => {
+test('the install projects read no network source and use the pinned toolchains and locks', (t) => {
   const directory = mkdtempSync(path.join(tmpdir(), 'template-installs-test-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const stub = stubs(directory);

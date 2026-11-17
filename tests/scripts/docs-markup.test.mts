@@ -21,7 +21,7 @@ const render = markdown.render;
 const files = execFileSync('git', ['ls-files', '-z', '--', 'docs/plans/**/*.md'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
 
 for (const file of files) {
-  test(`${file} contains valid template markup`, { timeout: 5000 }, () => {
+  test(`${file} contains valid template markup`, () => {
     const failures: string[] = [];
     const html: unknown = Reflect.apply(render, markdown, [readFileSync(new URL(file, new URL('../../', import.meta.url)), 'utf8')]);
     assert.equal(typeof html, 'string');
@@ -31,7 +31,7 @@ for (const file of files) {
   });
 }
 
-test('documentation links target locale routes instead of Korean source filenames', { timeout: 5000 }, () => {
+test('documentation links target locale routes instead of Korean source filenames', () => {
   const documents = execFileSync('git', ['ls-files', '-z', '--', 'docs/*.md', 'docs/**/*.md'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
   for (const file of documents) {
     const source = readFileSync(new URL(file, new URL('../../', import.meta.url)), 'utf8');

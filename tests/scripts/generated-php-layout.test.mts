@@ -37,7 +37,7 @@ test('the generated PHP of long operator chains fits in 120 columns, one operand
   }
 });
 
-test('the split program evaluates the right operand only when it is needed', { timeout: 300_000 }, () => {
+test('the split program evaluates the right operand only when it is needed', () => {
   const run = spawnSync(process.execPath, [path.join(ROOT, 'tests/runner/conformance-generated-php.mts'), '--case', 'expr/lazy-long-operands'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, `${run.stdout}${run.stderr}`);
   assert.match(run.stdout, /1\/1 PHP generated conformance cases passed/);

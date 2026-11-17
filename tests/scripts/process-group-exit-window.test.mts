@@ -40,7 +40,7 @@ const killIfRunning = (pid: number) => {
   }
 };
 
-test('stopProcessGroup resolves only after the member of a group whose leader exited is gone', { timeout: 30_000 }, async t => {
+test('stopProcessGroup resolves only after the member of a group whose leader exited is gone', async t => {
   const directory = mkdtempSync(path.join(tmpdir(), 'template-exit-window-'));
   const pids: number[] = [];
   t.after(() => {

@@ -201,7 +201,7 @@ test('npm is the npm:npm of mise.toml that devEngines of package.json names, fro
   assert.equal(actual, expected, `npm of the recipes: expected ${expected} (devEngines of package.json), actual ${actual}; run make install-tools`);
 });
 
-test('every recipe line runs the npm of var/tools/bin and the go of mise, with every make on PATH', { timeout: 240_000 }, () => {
+test('every recipe line runs the npm of var/tools/bin and the go of mise, with every make on PATH', () => {
   // GNU Make 3.81 starts a line without shell syntax itself, with the PATH that make started with, also when SHELL names
   // another shell: the line `npm --version` printed the npm of the machine. The recipes start npm as $(NPM), the path of
   // its wrapper, go as $(GO), the path of its shim, and gofmt only in lines with shell syntax, which the shell runs with

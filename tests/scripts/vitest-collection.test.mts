@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SMOKE = 'legacy/packages/ts/tests/smoke.test.ts';
 
-test('vitest collects no test file under var/ and runs the smoke test once', { timeout: 120000 }, () => {
+test('vitest collects no test file under var/ and runs the smoke test once', () => {
   const vitest = path.join(ROOT, 'node_modules/vitest/vitest.mjs');
   const run = spawnSync(process.execPath, [vitest, 'list', '--filesOnly'], { cwd: ROOT, encoding: 'utf8' });
   assert.equal(run.status, 0, `vitest list failed: ${run.stderr}`);

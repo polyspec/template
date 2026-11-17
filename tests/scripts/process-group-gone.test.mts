@@ -30,7 +30,7 @@ function fakeKill(behave: (n: number, signal: NodeJS.Signals | number) => string
 
 const signals = (calls: KillCall[]) => calls.filter(call => call.signal !== 0);
 
-test('EPERM on the group probe means exiting: no signal is sent, and the wait ends at ESRCH', { timeout: 5000 }, async () => {
+test('EPERM on the group probe means exiting: no signal is sent, and the wait ends at ESRCH', async () => {
   const fake = fakeKill(n => (n <= 3 ? 'EPERM' : 'ESRCH'));
   await stopProcessGroup(exitedChild(), 'SIGKILL', fake.kill);
   assert.equal(fake.capped(), false, 'the wait kept probing after the group had ended');
@@ -38,7 +38,7 @@ test('EPERM on the group probe means exiting: no signal is sent, and the wait en
   assert.equal(fake.calls.length, 4, 'the wait did not probe again after EPERM until ESRCH');
 });
 
-test('EPERM on the signal after a successful probe sends no further signal, and the wait ends at ESRCH', { timeout: 5000 }, async () => {
+test('EPERM on the signal after a successful probe sends no further signal, and the wait ends at ESRCH', async () => {
   const fake = fakeKill((n, signal) => {
     if (n === 1) return undefined;
     if (signal === 'SIGKILL') return 'EPERM';
@@ -49,14 +49,14 @@ test('EPERM on the signal after a successful probe sends no further signal, and 
   assert.equal(signals(fake.calls).length, 1, 'a signal was sent after the group reported EPERM');
 });
 
-test('ESRCH on the group probe means the group has ended, so no signal is sent', { timeout: 5000 }, async () => {
+test('ESRCH on the group probe means the group has ended, so no signal is sent', async () => {
   const fake = fakeKill(() => 'ESRCH');
   await stopProcessGroup(exitedChild(), 'SIGKILL', fake.kill);
   assert.equal(fake.capped(), false, 'the wait kept probing a group that had ended');
   assert.deepEqual(signals(fake.calls), []);
 });
 
-test('EPERM that persists past the deadline is an error naming the pgid, the errno and the elapsed time', { timeout: 5000 }, async () => {
+test('EPERM that persists past the deadline is an error naming the pgid, the errno and the elapsed time', async () => {
   const fake = fakeKill(() => 'EPERM');
   const error = await stopProcessGroup(exitedChild(), 'SIGKILL', fake.kill, 50).then(() => undefined, (rejection: unknown) => rejection);
   assert.equal(fake.capped(), false, 'the wait did not stop at its deadline');
@@ -68,7 +68,7 @@ test('EPERM that persists past the deadline is an error naming the pgid, the err
   assert.deepEqual(signals(fake.calls), [], 'a signal was sent to a group that is exiting');
 });
 
-test('any other error of the group probe is thrown', { timeout: 5000 }, async () => {
+test('any other error of the group probe is thrown', async () => {
   const fake = fakeKill(() => 'EINVAL');
   await assert.rejects(stopProcessGroup(exitedChild(), 'SIGKILL', fake.kill), { code: 'EINVAL' });
 });

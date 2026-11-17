@@ -29,13 +29,13 @@ function read(path: string): Record<string, unknown> {
 }
 const never = (): string => { throw new Error('the artifact is current, so nothing compiles'); };
 
-test('the AST manifest records its inputs and files and no compiler (T27.1-78)', { timeout: 30_000 }, () => {
+test('the AST manifest records its inputs and files and no compiler (T27.1-78)', () => {
   const manifest = read(graphManifest);
   assert.deepEqual(Object.keys(manifest).sort(), ['contractDigest', 'delimiters', 'entry', 'files', 'mode', 'schema', 'sourceDigest', 'target', 'typeDigest']);
   assert.equal(manifest.schema, 4);
 });
 
-test('refresh true reuses an AST artifact of the same inputs and rebuilds one of schema 3 (T27.1-78)', { timeout: 30_000 }, () => {
+test('refresh true reuses an AST artifact of the same inputs and rebuilds one of schema 3 (T27.1-78)', () => {
   const bytes = readFileSync(graphManifest, 'utf8');
   compileAst({ root: sources, output: graph, entry: 'page.tpl', refresh: 'true', typeManifest: types });
   assert.equal(readFileSync(graphManifest, 'utf8'), bytes, 'the same inputs reuse the artifact');
@@ -44,7 +44,7 @@ test('refresh true reuses an AST artifact of the same inputs and rebuilds one of
   assert.equal(readFileSync(graphManifest, 'utf8'), bytes, 'a schema 3 manifest is stale and rebuilt');
 });
 
-test('the generated manifest records its inputs and files, refresh true judges the inputs only, and check compares the bytes (T27.1-78)', { timeout: 30_000 }, () => {
+test('the generated manifest records its inputs and files, refresh true judges the inputs only, and check compares the bytes (T27.1-78)', () => {
   const output = join(temporary, 'page.ts');
   const options = { graphPath: graphManifest, typeManifestPath: types, target: 'ts', output };
   compileGeneratedArtifact({ ...options, refresh: 'dev', compile: () => 'export {};\n' });

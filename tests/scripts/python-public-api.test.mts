@@ -43,7 +43,7 @@ function missingReferences(references: string[]): string[] {
   return jsonDocument<string[]>('Missing Python SDK references', { type: 'array', items: { type: 'string' } }).parse(result.stdout, 'Python consumer');
 }
 
-test('the Python SDK consumer rejects nonexistent module and class members', { timeout: 30_000 }, () => {
+test('the Python SDK consumer rejects nonexistent module and class members', () => {
   const missing = ['polyspec.template.nonexistent_sdk_module.member', 'polyspec.template.engine.Engine.nonexistent_sdk_member'];
   assert.deepEqual(missingReferences(missing), missing);
 });

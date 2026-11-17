@@ -17,7 +17,7 @@ import { temporaryDirectory } from '../../scripts/temporary-workspace.mts';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CASE = path.join(ROOT, 'tests/cases/expr/lazy-long-operands');
 
-test('the generated TypeScript imports the runtime @polyspec/template/render', { timeout: 60_000 }, t => {
+test('the generated TypeScript imports the runtime @polyspec/template/render', t => {
   const directory = temporaryDirectory('generated-ts-runtime');
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const types = path.join(directory, 'types.json');

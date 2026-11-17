@@ -103,11 +103,11 @@ const NEEDS: readonly { tool: string; runs: RegExp }[] = [
 const jobs = readFileSync(path.join(ROOT, 'Makefile'), 'utf8').split('\n')
   .flatMap(line => /^(ci-(?!targets:|passed:)[a-z0-9-]+):/u.exec(line)?.[1] ?? []);
 
-test('the Makefile has the jobs of CI', { timeout: 60_000 }, () => {
+test('the Makefile has the jobs of CI', () => {
   assert.ok(jobs.includes('ci-go') && jobs.includes('ci-rust'), `jobs: ${jobs.join(' ')}`);
 });
 
-for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool that its commands run`, { timeout: 120_000 }, () => {
+for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool that its commands run`, () => {
   const lines = commandsOf(job);
   const tools = installed(lines);
   // A whole make install installs every tool of mise.toml; the order of the commands is judged of every job.
@@ -133,7 +133,7 @@ for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool th
 // A target whose own recipe runs the compiler names the build of the WebAssembly module among its prerequisites, so make
 // builds the module whichever target a job or a developer starts with (T28.140). The targets are the rules of the Makefile
 // with such a recipe line; the dry run of each shows the commands of its prerequisites before its own.
-test('every target whose recipe runs the compiler builds the WebAssembly module of the core first', { timeout: 600_000 }, () => {
+test('every target whose recipe runs the compiler builds the WebAssembly module of the core first', () => {
   const targets = new Set<string>();
   let rule: string[] = [];
   for (const line of readFileSync(path.join(ROOT, 'Makefile'), 'utf8').split('\n')) {
@@ -153,7 +153,7 @@ test('every target whose recipe runs the compiler builds the WebAssembly module 
 
 // make expands `$(...)` of a recipe itself and gives the shell only `$$(...)`: the name of the archive of
 // @polyspec/template holds the version that the shell reads, so the command of the dry run keeps the substitution (T28.129).
-test('the check of the npm archives of a release names the archive of the version of the package', { timeout: 120_000 }, () => {
+test('the check of the npm archives of a release names the archive of the version of the package', () => {
   const command = dryRun(['release-install-check'], 'false').find(line => /\/check-release-install\.mts\b/u.test(line));
   assert.match(command ?? '', /--template var\/release\/assets\/npm\/polyspec-template-\$\(.+ -p '.+\.version'\)\.tgz$/u);
 });

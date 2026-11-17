@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-test('make bindings-check writes the release recipes before binding check', { timeout: 60_000 }, () => {
+test('make bindings-check writes the release recipes before binding check', () => {
   const lines = execFileSync('make', ['--no-print-directory', '-n', 'bindings-check'], { cwd: ROOT, encoding: 'utf8' }).split('\n');
   const recipes = lines.findIndex(text => /\srelease-recipes --root\s/u.test(text));
   const check = lines.findIndex(text => /\scheck \S*packages\/rust\/interface\.json/u.test(text));

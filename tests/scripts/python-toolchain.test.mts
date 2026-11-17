@@ -36,7 +36,7 @@ test('the python that imports the package is the python of legacy/packages/pytho
   assert.equal(pythonPackageCommand(), pythonPackageInterpreter, 'run make python-package');
 });
 
-test('make reads the Python environment without a shared BOOTSTRAP_NODE variable', { timeout: 5000 }, () => {
+test('make reads the Python environment without a shared BOOTSTRAP_NODE variable', () => {
   const result = spawnSync('make', ['--no-print-directory', '-n', 'python-package', 'BOOTSTRAP_NODE='], { encoding: 'utf8' });
   assert.equal(result.status, 0, result.stderr);
   assert.doesNotMatch(result.stderr, /Permission denied|read no environment/);

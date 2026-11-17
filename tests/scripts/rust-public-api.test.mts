@@ -32,30 +32,30 @@ function compile(file: string) {
   }
 }
 
-test('a Rust consumer can use the public host callback types', { timeout: 30_000 }, () => {
+test('a Rust consumer can use the public host callback types', () => {
   const result = compile('public-host-function.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer cannot access the built-in implementation registry', { timeout: 30_000 }, () => {
+test('a Rust consumer cannot access the built-in implementation registry', () => {
   const result = compile('private-builtins.rs');
   assert.notEqual(result.status, 0, 'the implementation registry is publicly accessible');
   const errors = result.stderr.split('\n').filter(Boolean).map(line => diagnostic.parse(line, 'rustc stderr').code?.code);
   assert.ok(errors.includes('E0603'), result.stderr);
 });
 
-test('a Rust consumer can use the root parser and analysis types', { timeout: 30_000 }, () => {
+test('a Rust consumer can use the root parser and analysis types', () => {
   const result = compile('public-parser.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can use compiler runtime services through the SDK', { timeout: 30_000 }, () => {
+test('a Rust consumer can use compiler runtime services through the SDK', () => {
   const result = compile('public-runtime.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
 for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.rs', 'private-expression.rs', 'private-source.rs', 'private-ast.rs', 'private-values.rs', 'private-formatter.rs', 'private-errors.rs']) {
-  test(`a Rust consumer cannot import the implementation through ${file}`, { timeout: 30_000 }, () => {
+  test(`a Rust consumer cannot import the implementation through ${file}`, () => {
     const result = compile(file);
     assert.notEqual(result.status, 0, 'the implementation is publicly accessible');
     const errors = result.stderr.split('\n').filter(Boolean).map(line => diagnostic.parse(line, 'rustc stderr').code?.code);
@@ -63,37 +63,37 @@ for (const file of ['private-scanner.rs', 'private-escape.rs', 'private-render.r
   });
 }
 
-test('a Rust consumer can construct and inspect AST data through the SDK root', { timeout: 30_000 }, () => {
+test('a Rust consumer can construct and inspect AST data through the SDK root', () => {
   const result = compile('public-ast.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can bind and inspect values through the SDK root', { timeout: 30_000 }, () => {
+test('a Rust consumer can bind and inspect values through the SDK root', () => {
   const result = compile('public-values.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can format through the default SDK root', { timeout: 30_000 }, () => {
+test('a Rust consumer can format through the default SDK root', () => {
   const result = compile('public-formatter.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can construct positioned errors through the SDK root', { timeout: 30_000 }, () => {
+test('a Rust consumer can construct positioned errors through the SDK root', () => {
   const result = compile('public-errors.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can use the public source context', { timeout: 30_000 }, () => {
+test('a Rust consumer can use the public source context', () => {
   const result = compile('public-source.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can name every canonical AST literal', { timeout: 30_000 }, () => {
+test('a Rust consumer can name every canonical AST literal', () => {
   const result = compile('public-ast-literals.rs');
   assert.equal(result.status, 0, result.stderr);
 });
 
-test('a Rust consumer can name the prefix analysis result and its fields', { timeout: 30_000 }, () => {
+test('a Rust consumer can name the prefix analysis result and its fields', () => {
   const result = compile('public-prefix-analysis.rs');
   assert.equal(result.status, 0, result.stderr);
 });

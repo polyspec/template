@@ -20,7 +20,7 @@ before(() => {
   }
 });
 
-test('a failed install-cli keeps the previous install, and a successful one leaves no prepared directory', { timeout: 690_000 }, (t) => {
+test('a failed install-cli keeps the previous install, and a successful one leaves no prepared directory', (t) => {
   const prefix = mkdtempSync(path.join(tmpdir(), 'template-cli-atomic-'));
   t.after(() => rmSync(prefix, { recursive: true, force: true }));
   const install = (env: NodeJS.ProcessEnv) => spawnSync(process.execPath, [SCRIPT, 'install', '--prefix', prefix], { cwd: ROOT, encoding: 'utf8', env });
