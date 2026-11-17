@@ -1413,8 +1413,7 @@ release-recipes:
 # CHANGELOG.md, which is the released version before a release commit and the version of that commit after it (T28.141).
 .PHONY: consumer-phpstan-ci
 consumer-phpstan-ci: ## The consumer check of the job php-ext: the candidate archives of the first section of CHANGELOG.md, then consumer-phpstan-check; ONLINE
-	$(MAKE) --no-print-directory release-candidate-assets VERSION="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
-	$(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
+	v="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"; $(MAKE) --no-print-directory release-candidate-assets VERSION="$$v" && $(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$v"
 
 # The consumer check of the stub (T28.141): the PHP extension archive of release-candidate-assets (VERSION) carries the stub
 # that binding generates; PHPStan of a consumer reads the classes of the extension from it with scanFiles. The probe must fail
