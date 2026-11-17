@@ -4,19 +4,19 @@
 // operators as canonical values (VAL-21, EXP-34, docs/spec/compiler.md). The AST program renders the
 // same template with the same data to the same output.
 import { readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { compileFiles, compileSource } from '../packages/compiler/src/compiler.mts';
 import { phpProgramAutoload, writePhpProgram } from './php-program.mts';
 import { goString, phpString, rustString } from '../packages/compiler/src/backend-support.mts';
 import { root } from '../tests/runner/drivers.mts';
 import { goWorkspace, nodeWorkspace, runChecked, runPythonCheck, rustWorkspace } from './temporary-workspace.mts';
 import { compileFixtureGraph } from './fixture-graph.mts';
+import { astManifestDocument } from '../packages/compiler/src/documents.mts';
 import { checkLanguages } from './language-checks.mts';
 import { tsc } from './tools.mts';
 
 const fixture = join(root, 'tests/fixtures/typed-values');
 const types = join(fixture, 'types.json');
-const source = readFileSync(join(fixture, 'input.tpl'), 'utf8');
 const expected = readFileSync(join(fixture, 'expected.html'), 'utf8');
 // The workspaces of this check are directories of the system temporary directory, never of the checkout (T20.1).
 const temporary = nodeWorkspace('generated-typed-values');
@@ -44,15 +44,20 @@ try {
       writeFileSync(tsSource, compileSource(graphManifest, types, 'ts'));
       runChecked('node', [tsc, '--ignoreConfig', '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--outDir', join(temporary, 'ts'), tsSource], root);
       const tsRunner = join(temporary, 'typed.mjs');
+      // The reference renders the canonical AST that the compiler wrote for the fixture: the renderer of
+      // @polyspec/template/render renders parsed templates only (RT-80), so its loader holds the decoded artifact.
+      const artifact = astManifestDocument.read(graphManifest).files['input.tpl'];
+      if (artifact === undefined) throw new Error(`${graphManifest} names no AST of input.tpl`);
+      const astText = readFileSync(join(dirname(graphManifest), artifact.path), 'utf8');
       writeFileSync(tsRunner, `import { GeneratedProgram } from './ts/typed.js';
-import { AstProgram, MapLoader, RuntimeEnvironment } from '@polyspec/template/render';
+import { AstProgram, MapLoader, RuntimeEnvironment, decodeTemplate } from '@polyspec/template/render';
 ${tsDescribe}
 const expected = ${JSON.stringify(expected)};
 const runtime = new RuntimeEnvironment();
 runtime.register('describe', describe);
 const generated = new GeneratedProgram(runtime).render('input.tpl', ${assign});
 if (generated !== expected) throw new Error('TypeScript generated typed values differ: ' + JSON.stringify(generated));
-const ast = new AstProgram({ loader: new MapLoader({ 'input.tpl': ${JSON.stringify(source)} }) });
+const ast = new AstProgram({ loader: new MapLoader({ 'input.tpl': decodeTemplate(${JSON.stringify(astText)}) }) });
 ast.register('describe', describe);
 const reference = ast.render('input.tpl', ${assign});
 if (reference !== expected) throw new Error('TypeScript AST typed values differ: ' + JSON.stringify(reference));
