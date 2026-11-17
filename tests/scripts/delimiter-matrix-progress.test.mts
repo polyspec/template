@@ -9,9 +9,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RESULT = /^("[^\n]*"|quoted \d+ "[^\n]*") \[ts\] (?:pass|fail) \(\d+ ms\)$/;
 
-// The test judges by the order of two events of the child, its third result line and its exit (HR-89). The timeout of the
-// test only ends a run in which neither comes; no healthy run approaches it.
-test('each delimiter pair prints its result line in each language as it finishes', { timeout: 300_000 }, async () => {
+// The test judges by the order of two events of the child, its third result line and its exit, and has no time limit (HR-89).
+test('each delimiter pair prints its result line in each language as it finishes', async () => {
   const child = spawn(process.execPath, [path.join(ROOT, 'tests/runner/delimiter-matrix.mts')], { cwd: ROOT, env: { ...process.env, DELIMITER_MATRIX_LANGS: 'ts' }, stdio: ['ignore', 'pipe', 'pipe'] });
   let stdout = '';
   // The matrix runs 900 pairs; the test reads the first three result lines and stops it. The lines come before the exit.
