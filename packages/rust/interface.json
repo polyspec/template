@@ -377,6 +377,9 @@
       "visibility": "public",
       "origin": "value",
       "core_type": "polyspec_template::Value",
+      "sequence_keys": {
+        "keys": "text"
+      },
       "core": {
         "in": "polyspec_template::value_in",
         "out": "polyspec_template::value_out"
