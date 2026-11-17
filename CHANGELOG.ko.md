@@ -6,10 +6,9 @@
 
 ## Unreleased
 
-- CI의 asset job이 contract에 대한 binding check를 돌린다(T28.121). release의 job이 release check를 돌리는 것과 같다. 그래서 그 check의 도구가 없는 asset job은 tag가 생기기 전에 CI에서 실패한다.
-
 ## 0.0.29
 
+- CI의 asset job이 contract에 대한 binding check를 돌린다(T28.121). release의 job이 release check를 돌리는 것과 같다. 그래서 그 check의 도구가 없는 asset job은 tag가 생기기 전에 CI에서 실패한다.
 - release의 asset job이 `mise.toml`의 Go를 설치한다(T28.118). 각 job이 돌리는 binding scaffold check가 `go mod download`를 부르는데, 그것이 module이 요구하는 것보다 오래된 runner의 Go로 떨어졌다.
 
 ## 0.0.28
