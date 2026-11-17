@@ -1,38 +1,55 @@
 #!/usr/bin/env node
-// Checks the packages.json of the Composer packages of a release (T28.149) against the assets of the release.
+// Checks the packages.json of the Composer packages of a candidate (T28.149) before the tag, by the names of its
+// pre-packaged PHP extension (kit release.mjs composerRepository, K1261): PIE replaces such a dist by the platform zip of
+// the consumer, so the dist names no shasum, and the name of each platform zip must be the one that the release makes.
 //
-// Every dist names the sha1 shasum of its archive, so that a consumer can check what Composer downloads against an
-// integrity pin (HR-80). The one exception is a dist of a PHP extension whose php-ext.download-url-method holds
-// pre-packaged-binary: PIE replaces that dist by the platform zip of the consumer, so the shasum of the source zip would
-// name the wrong file (kit release.mjs composerRepository, K1261). For that dist the check requires the platform zips
-// instead: one per PHP minor of config/toolchain.json and per native platform of the release, with the label that
-// make release-php-ext names them by. Consumers then check each platform zip against the digest of its release asset.
+// Two sets of names must be equal, the names of the platform zips that the packages.json implies and the names that the
+// release makes: the dist url basename (the label of the archive) with -php<minor>-<platform>.zip for every pair of the
+// php job of assets.yml (platform x PHP minor), against the rule of make release-php-ext in packages/release.mk
+// (polyspec-template-php-ext-<version>-php<minor>-<platform>.zip). The pairs must also be the PHP minors of
+// config/toolchain.json times the platforms of packages/release.mk. The files of the assets are not looked at: the
+// consumer's install checks each platform zip by the digest of its release asset (hyper H35.51).
 //
-// usage: node scripts/check-release-packages.mts <packages.json> <assets folder>
+// Every other dist names the sha1 shasum of its archive, as before.
+//
+// usage: node scripts/check-release-packages.mts <packages.json>
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
 const { positionals } = parseArgs({ allowPositionals: true, options: {} });
-if (positionals.length !== 2) {
-  console.error('check-release-packages: two arguments, the packages.json of the release and the folder of its assets');
+if (positionals.length !== 1) {
+  console.error('check-release-packages: one argument, the packages.json of the candidate');
   process.exit(2);
 }
-const [file, assets] = [resolve(positionals[0]), resolve(positionals[1])];
+const file = resolve(positionals[0]);
 const root = resolve(new URL('..', import.meta.url).pathname);
-const PLATFORMS = ['linux-x64-gnu', 'linux-arm64-gnu', 'darwin-arm64'];
+const read = (path: string): string => readFileSync(join(root, path), 'utf8');
 
 const manifest: unknown = JSON.parse(readFileSync(file, 'utf8'));
 const packages = typeof manifest === 'object' && manifest !== null && 'packages' in manifest ? manifest.packages : undefined;
 assert.equal(typeof packages, 'object', `${file} names no packages`);
-const toolchain: { phpExtension: { minors: string[] } } = JSON.parse(readFileSync(join(root, 'config', 'toolchain.json'), 'utf8'));
-const minors = toolchain.phpExtension.minors;
 
-const failures: string[] = [];
+// The names that the php job of assets.yml builds: its matrix holds platform and php pairs, in lines of their own.
+const phpJob = read('.github/workflows/assets.yml').split(/^  php:$/m)[1]?.split(/^    runs-on:/m)[0] ?? '';
+const matrix = [...phpJob.matchAll(/- platform: (\S+)\n(?:\s+\S+: .*\n)*?\s+php: '([0-9.]+)'/g)].map(([, platform, minor]) => ({ platform, minor }));
+assert.ok(matrix.length > 0, 'assets.yml names no php matrix');
+// The platforms that make release-php-ext names, and the PHP minors of config/toolchain.json.
+const platforms = [...new Set([...read('packages/release.mk').matchAll(/platform=(\S+) ;;/g)].map(([, platform]) => platform))].sort();
+const minors = (JSON.parse(read('config/toolchain.json')) as { phpExtension: { minors: string[] } }).phpExtension.minors;
+const pairKey = (platform: string, minor: string): string => `${platform} php${minor}`;
+assert.deepEqual(
+  matrix.map(({ platform, minor }) => pairKey(platform, minor)).sort(),
+  platforms.flatMap(platform => minors.map(minor => pairKey(platform, minor))).sort(),
+  'the php job of assets.yml holds every platform of release-php-ext and every PHP minor of config/toolchain.json',
+);
+
+const implied: string[] = [];
+const made: string[] = [];
 let dists = 0;
-let platformChecks = 0;
-for (const [name, versions] of Object.entries(packages as Record<string, Record<string, { version?: string; dist?: { url?: unknown; shasum?: unknown }; 'php-ext'?: { 'download-url-method'?: string[] } }>>)) {
+const failures: string[] = [];
+for (const [name, versions] of Object.entries(packages as Record<string, Record<string, { dist?: { url?: unknown; shasum?: unknown }; 'php-ext'?: { 'download-url-method'?: string[] } }>>)) {
   for (const [tag, meta] of Object.entries(versions)) {
     dists += 1;
     const dist = meta.dist;
@@ -41,23 +58,19 @@ for (const [name, versions] of Object.entries(packages as Record<string, Record<
       continue;
     }
     if (typeof dist.shasum === 'string' && /^[0-9a-f]{40}$/.test(dist.shasum)) continue;
-    const prePackaged = meta['php-ext']?.['download-url-method']?.includes('pre-packaged-binary') === true;
-    if (!prePackaged) {
+    if (meta['php-ext']?.['download-url-method']?.includes('pre-packaged-binary') !== true) {
       failures.push(`${name} ${tag}: no sha1 shasum and no pre-packaged-binary php-ext`);
       continue;
     }
-    // The platform zips are named by the label of the archive of the dist, with the PHP minor and the platform after it:
-    // <label>-php<minor>-<platform>.zip (make release-php-ext names them polyspec-template-php-ext-<version>-php<minor>-<platform>).
-    const label = decodeURIComponent(new URL(dist.url).pathname.split('/').pop() ?? '').replace(/\.zip$/, '');
-    for (const minor of minors) {
-      for (const platform of PLATFORMS) {
-        platformChecks += 1;
-        const zip = `${label}-php${minor}-${platform}.zip`;
-        if (!existsSync(join(assets, zip))) failures.push(`${name} ${tag}: the platform zip ${zip} is no asset of the release`);
-      }
+    const base = decodeURIComponent(new URL(dist.url).pathname.split('/').pop() ?? '').replace(/\.zip$/, '');
+    const version = tag.replace(/^v/, '');
+    for (const { platform, minor } of matrix) {
+      implied.push(`${base}-php${minor}-${platform}.zip`);
+      made.push(`polyspec-template-php-ext-${version}-php${minor}-${platform}.zip`);
     }
   }
 }
 assert.ok(dists > 0, `${file} names no dist`);
-assert.deepEqual(failures, [], 'every dist names its shasum, or is a pre-packaged php-ext whose platform zips are assets');
-console.error(`[release-packages] ${dists} dists of ${file}; ${platformChecks} platform zips of ${assets} present`);
+assert.deepEqual(failures, [], 'every dist names its sha1 shasum, or is a pre-packaged php-ext');
+assert.deepEqual(implied.sort(), made.sort(), 'the platform zips that the packages.json implies are the names that make release-php-ext makes');
+console.error(`[release-packages] ${dists} dists of ${file}; ${implied.length} platform zip names agree with release-php-ext`);
