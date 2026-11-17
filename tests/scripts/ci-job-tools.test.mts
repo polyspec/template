@@ -100,3 +100,31 @@ for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool th
     assert.ok(language < 0 || (wasm >= 0 && wasm < language), `${job} with RELEASE=${release} builds the language service before the WebAssembly module of the core`);
   }
 });
+
+// make expands `$(...)` of a recipe itself and gives the shell only `$$(...)`: the name of the archive of
+// @polyspec/template holds the version that the shell reads, so the command of the dry run keeps the substitution (T28.129).
+test('the check of the npm archives of a release names the archive of the version of the package', { timeout: 120_000 }, () => {
+  const command = dryRun(['release-install-check'], 'false').find(line => /\/check-release-install\.mts\b/u.test(line));
+  assert.match(command ?? '', /--template var\/release\/assets\/npm\/polyspec-template-\$\(.+ -p '.+\.version'\)\.tgz$/u);
+});
+
+// In a recipe make expands `$(name)` and `$(function ...)` itself; a command substitution of the shell is `$$(...)`. A
+// `$(` of a recipe line that opens neither a variable nor a function of make is a substitution that make empties before
+// the shell runs, as the name of the archive lost its version (T28.129). The functions are those of GNU make.
+const MAKE_FUNCTIONS = new Set(['abspath', 'addprefix', 'addsuffix', 'and', 'basename', 'call', 'dir', 'error', 'eval', 'file', 'filter', 'filter-out', 'findstring', 'firstword',
+  'flavor', 'foreach', 'if', 'info', 'intcmp', 'join', 'lastword', 'let', 'notdir', 'or', 'origin', 'patsubst', 'realpath', 'shell', 'sort', 'strip', 'subst', 'suffix', 'value',
+  'warning', 'wildcard', 'word', 'wordlist', 'words']);
+
+test('no recipe of the Makefile gives make a command substitution of the shell', () => {
+  const emptied: string[] = [];
+  for (const [index, line] of readFileSync(path.join(ROOT, 'Makefile'), 'utf8').split('\n').entries()) {
+    if (!line.startsWith('\t')) continue;
+    for (const match of line.matchAll(/(?<!\$)\$\(([^()\s,:]*)(.?)/gu)) {
+      const [, name = '', next = ''] = match;
+      const variable = /^[A-Za-z_][A-Za-z0-9_.-]*$/u.test(name) && (next === ')' || next === ':');
+      const called = MAKE_FUNCTIONS.has(name) && (next === ' ' || next === ',');
+      if (!variable && !called) emptied.push(`Makefile:${index + 1}: ${line.slice(match.index, match.index + 60)}`);
+    }
+  }
+  assert.deepEqual(emptied, []);
+});

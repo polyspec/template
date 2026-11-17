@@ -301,8 +301,11 @@ ci-docs: ## The job docs: make install and make hooks, then the hooks check and 
 	$(MAKE) --no-print-directory hooks
 	$(MAKE) --no-print-directory ci-targets TARGETS="hooks-check typecheck template-test-compiler-types"
 ci-typescript: ## The job typescript: the Node.js packages, then their tests; ONLINE
-	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	$(MAKE) --no-print-directory install-tools TOOLS="node rust"
 	$(MAKE) --no-print-directory template-install-node
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="test-ts conformance-ts"
 ci-browser: ## The job browser: the Node.js packages and the browsers, then the browser tests; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="node"
@@ -310,8 +313,11 @@ ci-browser: ## The job browser: the Node.js packages and the browsers, then the 
 	$(MAKE) --no-print-directory template-install-browsers
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-browser"
 ci-python: ## The job python: Python, uv and the Python environment, then the Python tests; ONLINE
-	$(MAKE) --no-print-directory install-tools TOOLS="python uv"
+	$(MAKE) --no-print-directory install-tools TOOLS="python uv rust"
 	$(MAKE) --no-print-directory template-install-python
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="test-python conformance-python conformance-generated-python"
 ci-editor: ## The job editor: the Node.js packages, the browsers and VS Code, then the editor tests on a virtual display; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="node rust"
@@ -326,14 +332,21 @@ ci-go: ## The job go: Go, the modules of go.work, the Rust toolchain and the cra
 	$(MAKE) --no-print-directory install-tools TOOLS="go rust"
 	$(MAKE) --no-print-directory template-install-go
 	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-go-format template-lint-go-modules test-go conformance-go"
 ci-rust: ## The job rust: the Rust toolchain and the crates, then the Rust checks; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust"
 	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="fmt-check test-rust conformance-rust"
 ci-php: ## The job php: Composer and the PHP dependency graph for the PHP on PATH, then the PHP checks; ONLINE
-	$(MAKE) --no-print-directory install-tools TOOLS="php composer"
+	$(MAKE) --no-print-directory install-tools TOOLS="php composer rust"
 	$(MAKE) --no-print-directory template-install-php
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-lint-php-format test-php conformance-php"
 ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency graph, then the tests of the extension; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="php composer"
@@ -346,6 +359,9 @@ ci-bindings: ## The job bindings: the tools, the graphs and the release recipes,
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go"
 
+# A job whose targets run the conformance of TypeScript builds the language service, and with it the WebAssembly module of the
+# core (T28.122): it installs Rust and its crates, writes the release recipes, which hold install-wasm-bindgen, and installs
+# the wasm-bindgen CLI. The jobs typescript, python, go, rust and php do so.
 # The jobs of assets.yml. Each writes the release recipes, and with RELEASE=true, the input release of assets.yml that the
 # workflow release passes, runs the release check of binding before it builds; the builds run each to its end.
 ci-assets-platform: ## The job platform of assets.yml: the Go static library, the wheel and the npm platform package of this host; RELEASE=true; ONLINE
@@ -838,21 +854,24 @@ vscode-package: template-build-vscode ## Build the .vsix
 vscode-install: vscode-package ## Install the .vsix into the local VS Code
 	code --install-extension $(VSIX) --force
 
-conformance: build-ts build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
+conformance: build-ts template-build-language build-go build-rust build-php build-php-ext ## Cross-language conformance suite (builds every implementation first)
 	$(NODE) tests/runner/conformance.mts
 
 # The conformance of TypeScript and one other language, as the language jobs of CI run it (T20.1-8).
+# The driver of TypeScript formats with the language service, which it builds with make template-build-language when it
+# runs (tests/runner/drivers.mts); each target names that build as its prerequisite, so make and the dry run of a job know
+# that the conformance needs the WebAssembly module of the core (T28.122).
 .PHONY: conformance-ts conformance-go conformance-rust conformance-php conformance-python
-conformance-ts: build-ts ## Conformance suite of TypeScript
+conformance-ts: build-ts template-build-language ## Conformance suite of TypeScript
 	$(NODE) tests/runner/conformance.mts --langs ts
-conformance-go: build-ts build-go ## Conformance suite of TypeScript and Go
+conformance-go: build-ts template-build-language build-go ## Conformance suite of TypeScript and Go
 	$(NODE) tests/runner/conformance.mts --langs ts,go
-conformance-rust: build-ts build-rust ## Conformance suite of TypeScript and Rust
+conformance-rust: build-ts template-build-language build-rust ## Conformance suite of TypeScript and Rust
 	$(NODE) tests/runner/conformance.mts --langs ts,rust
-conformance-php: build-ts build-php ## Conformance suite of TypeScript and PHP
+conformance-php: build-ts template-build-language build-php ## Conformance suite of TypeScript and PHP
 	$(NODE) tests/runner/conformance.mts --langs ts,php
 
-delimiter-matrix: build-ts build-go build-rust build-php ## Exercise every valid delimiter pair in every language
+delimiter-matrix: build-ts template-build-language build-go build-rust build-php ## Exercise every valid delimiter pair in every language
 	$(NODE) tests/runner/delimiter-matrix.mts
 
 conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
@@ -867,7 +886,7 @@ conformance-generated-rust: build-ts ## Rust generated compiler conformance suit
 conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-php.mts
 
-conformance-python: build-ts ## Conformance suite of TypeScript and Python
+conformance-python: build-ts template-build-language ## Conformance suite of TypeScript and Python
 	$(NODE) tests/runner/conformance.mts --langs ts,python
 
 # The Python package is installed, non-editable, into the virtual environment PYTHON_VENV (scripts/python-venv.mts). The link
@@ -921,7 +940,7 @@ conformance-generated-python: build-ts python-package ## Python generated compil
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
 
-conformance-cases: build-ts build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
+conformance-cases: build-ts template-build-language build-go build-rust build-php build-php-ext ## AST and generated conformance in every language for the cases of CASES only
 	$(NODE) scripts/conformance-cases.mts $(CASES)
 
 function-inventory-check: ## Inventory the function-shaped calls of the fixture template
@@ -939,7 +958,7 @@ package-installs-check: typed-generator
 # language server, and the archive of @polyspec/json of its release, which the install fetches.
 .PHONY: release-install-check
 release-install-check: template-build-lsp ## Install the npm archives of a release in an empty folder and import them, after make release-npm; ONLINE
-	$(ONLINE) $(NODE) scripts/check-release-install.mts --template var/release/assets/npm/polyspec-template-$($(NODE) -p 'require("./packages/ts/package.json").version').tgz
+	$(ONLINE) $(NODE) scripts/check-release-install.mts --template var/release/assets/npm/polyspec-template-$$($(NODE) -p 'require("./packages/ts/package.json").version').tgz
 
 # scripts/generate-error-codes.mts writes the error-code list of each implementation from the code tables of
 # docs/spec/errors.md (T22.6-15); error-codes-check checks that every list is current.

@@ -20,7 +20,7 @@
 //        compiler|vscode> [--dist <directory>] [--force] [--print-inputs]
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, posix, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -134,10 +134,31 @@ function workspacePackages(dependencies: Record<string, string> | undefined, see
   return [...seen.values()].sort(compareText);
 }
 
+// The built files of a workspace package that a build of another package reads: the files that its manifest publishes
+// (`files`), where a folder is every file under it and `folder/*.ext` the files of that folder with that ending, or its
+// folder dist when the manifest names none. The package of the Rust core has no dist: its builds are its generated
+// binding, its WebAssembly module and the renderer, which the manifest names (T28.122).
+function builtFiles(directory: string): string[] {
+  const document: unknown = JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
+  const published = typeof document === 'object' && document !== null && 'files' in document && Array.isArray(document.files) ? document.files.filter(entry => typeof entry === 'string') : undefined;
+  if (published === undefined) return existsSync(join(directory, 'dist')) ? files(join(directory, 'dist')) : [];
+  return published.flatMap((entry): string[] => {
+    const star = entry.lastIndexOf('/*');
+    if (star >= 0) {
+      const folder = join(directory, entry.slice(0, star));
+      const ending = entry.slice(star + 2);
+      return existsSync(folder) ? readdirSync(folder, { withFileTypes: true }).filter(item => item.isFile() && item.name.endsWith(ending)).map(item => join(folder, item.name)) : [];
+    }
+    const path = join(directory, entry);
+    if (!existsSync(path)) return [];
+    return statSync(path).isDirectory() ? files(path) : [path];
+  });
+}
+
 // The input files of the build, sorted: with this script, which holds the build commands of each package.
 function inputFiles(): string[] {
   const own = [...files(join(pkg, 'src')), ...CONFIGURATION.map(name => join(pkg, name)).filter(existsSync), fileURLToPath(import.meta.url)];
-  const dependencies = workspacePackages(manifest.dependencies).flatMap(directory => [join(directory, 'package.json'), ...(existsSync(join(directory, 'dist')) ? files(join(directory, 'dist')) : [])]);
+  const dependencies = workspacePackages(manifest.dependencies).flatMap(directory => [join(directory, 'package.json'), ...builtFiles(directory)]);
   return [...own, join(root, 'package-lock.json'), ...dependencies].map(file => relative(root, file)).sort();
 }
 
