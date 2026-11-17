@@ -1,10 +1,12 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 04aecc26fe54a746473a02853d442ad81b369a74217e90e415480b8f7de0104b -->
+<!-- source-sha256: 33825928dd41e72afc9063c352714a63ba85ed95617dfa0943a64fe2a5eef9d8 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.29
 
 - release 0.0.27의 소비자가 이 release를 받으려면 할 일. 패키지는 Rust 코어와 binding이 그것에서 생성한 바인딩의 것이다. 0.0.27의 손으로 쓴 패키지는 legacy 패키지이며 release되지 않는다.
   - npm `@polyspec/template`: archive `polyspec-template-0.0.27.tgz`는 TypeScript runtime을 담았다. 이 release는 생성 바인딩의 패키지, 곧 asset `polyspec-template-ts-X.Y.Z`를 싣는다. root는 Node addon이고, WebAssembly entry는 `./wasm`이며, TypeScript renderer는 `./render`와 `./decode` 아래에 있다. darwin-arm64, linux-arm64-gnu, linux-x64-gnu마다 addon의 platform 패키지 하나, 곧 asset `polyspec-template-ts-X.Y.Z-<platform>`도 싣는다. 소비자는 그 archive, `@polyspec/json` release의 archive(URL로, `.npmrc`에 `allow-remote=root`), 그리고 Node.js에서 root를 import하면 자기 host의 platform archive를 적는다. WebAssembly entry에는 platform 패키지가 필요 없다. renderer의 이름은 `@polyspec/template/render`에서 import한다.
@@ -15,8 +17,6 @@
   - Python: 손으로 쓴 패키지의 wheel `py3-none-any`는 싣지 않는다. 이 release는 생성 바인딩의 wheel을 platform마다 하나, `cp314-abi3`로, 곧 asset `polyspec-template-python-X.Y.Z-<platform>`으로 싣는다. 그것은 json release의 버전의 `polyspec-json`을 요구한다.
   - Go: module `github.com/polyspec/template/packages/go`는 경로를 유지한다. tag는 `packages/go/vX.Y.Z`다. 전에는 `legacy/packages/go/vX.Y.Z`였다. module은 각 platform의 static library를 담은 생성 바인딩이며 json의 Go module을 요구한다.
   - Cargo: crate `polyspec-template`은 전처럼 Git tag `vX.Y.Z`로 받는다. `polyspec-binding-core`와 `polyspec-json`을 그 release의 tag로 요구한다.
-
-## 0.0.29
 
 - kit 0.0.121을 고정하고, `make release-rehearsal`이 tag 없이 release를 준비한다(T28.138). make의 환경에서 kit의 `release-run prepare`를 이 파일 첫 절의 버전으로 부르고, asset은 checkout 밖의 폴더에 둔다.
 

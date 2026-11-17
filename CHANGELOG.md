@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.29
+
 - What a consumer of release 0.0.27 does to take this release. The packages are those of the Rust core and of the bindings that binding generates from it; the hand-written packages of 0.0.27 are the legacy packages and are not released.
   - npm `@polyspec/template`: the archive `polyspec-template-0.0.27.tgz` held the TypeScript runtime. The release carries the package of the generated binding, the asset `polyspec-template-ts-X.Y.Z`, with the Node addon as the root, the WebAssembly entry `./wasm`, and the TypeScript renderer under `./render` and `./decode`, and one platform package of the addon for each of darwin-arm64, linux-arm64-gnu and linux-x64-gnu, the assets `polyspec-template-ts-X.Y.Z-<platform>`. A consumer lists the archive, the archive of `@polyspec/json` of its release by its URL with `allow-remote=root` in `.npmrc`, and the platform archive of its host when it imports the root under Node.js; the WebAssembly entry needs no platform package. The names of the renderer are imported from `@polyspec/template/render`.
   - npm `@polyspec/template-language` and `@polyspec/template-lsp`: the same archives, which now require `@polyspec/template` for its WebAssembly entry; a consumer lists them with the two archives above.
@@ -14,8 +16,6 @@
   - Python: the wheel `py3-none-any` of the hand-written package is not carried. The release carries one wheel of the generated binding for each platform, `cp314-abi3`, the assets `polyspec-template-python-X.Y.Z-<platform>`, which require `polyspec-json` at the version of the release of json.
   - Go: the module `github.com/polyspec/template/packages/go` keeps its path. Its tag is `packages/go/vX.Y.Z`, where it was `legacy/packages/go/vX.Y.Z`, and the module is the generated binding with the static library of each platform; it requires the Go module of json.
   - Cargo: the crate `polyspec-template` is taken by the Git tag `vX.Y.Z` as before; it requires `polyspec-binding-core` and `polyspec-json` by the tags of their releases.
-
-## 0.0.29
 
 - kit 0.0.121 is pinned, and `make release-rehearsal` prepares a release without a tag (T28.138): it calls `release-run prepare` of kit in the environment of make for the version of the first section of this file, with the assets in a folder outside the checkout.
 
