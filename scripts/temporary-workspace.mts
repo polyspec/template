@@ -4,10 +4,10 @@
 // in the checkout so that cargo runs through link cargo of kit with the .links of the checkout (T28.99): a directory
 // outside every checkout has no .links, and link cargo runs plain cargo there.
 //
-// - nodeWorkspace: an ES module directory whose node_modules holds copies of installed packages of this repository, so
-//   that tsc and Node.js resolve the runtime that generated code imports from it as from the checkout. No symbolic link
-//   (AGENTS). Until the TypeScript backend moves to typed programs (docs/spec/compiler.md, Transition), that runtime is
-//   the legacy package `@polyspec/template-legacy`.
+// - nodeWorkspace: an ES module directory whose node_modules holds a copy of the renderer of the installed package
+//   `@polyspec/template`, so that tsc and Node.js resolve the runtime that generated code imports from it as from the
+//   checkout. No symbolic link (AGENTS). Until the TypeScript backend moves to typed programs (docs/spec/compiler.md,
+//   Transition), that runtime is the entry `@polyspec/template/render`.
 // - rustWorkspace: a crate of its own workspace that depends on packages/rust by path, with the versions of its Cargo.lock
 //   and the rust-toolchain.toml of the repository; its tests build into the target of packages/rust, the target of this
 //   checkout (T18.7).
@@ -46,15 +46,16 @@ export function temporaryDirectory(name: string): string {
   return mkdtempSync(join(TEMPORARY, `template-${name}-`));
 }
 
-/** A temporary ES module directory with copies of the installed `packages`. */
-export function nodeWorkspace(name: string, packages: readonly (readonly [string, string])[] = [['@polyspec/template-legacy', '@polyspec/template-legacy']]): string {
+/**
+ * A temporary ES module directory with a copy of the renderer of the installed `@polyspec/template`: its package.json and
+ * its folder render, which the entries ./render and ./decode name.
+ */
+export function nodeWorkspace(name: string): string {
+  const installed = join(root, 'node_modules/@polyspec/template');
+  if (!existsSync(join(installed, 'render/render.mjs'))) throw new Error(`${relative(root, installed)} has no render; make build-ts builds it`);
   const directory = temporaryDirectory(name);
   writeFileSync(join(directory, 'package.json'), `${JSON.stringify({ private: true, type: 'module' })}\n`);
-  for (const [name, as] of packages) {
-    const installed = join(root, 'node_modules', name);
-    if (!existsSync(join(installed, 'dist'))) throw new Error(`${relative(root, installed)} has no dist; make build-ts builds and installs it`);
-    cpSync(installed, join(directory, 'node_modules', as), { recursive: true });
-  }
+  for (const entry of ['package.json', 'render']) cpSync(join(installed, entry), join(directory, 'node_modules/@polyspec/template', entry), { recursive: true });
   return directory;
 }
 

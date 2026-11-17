@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { deriveTypeManifest } from '../../packages/compiler/src/type-manifest.mts';
-import { parse } from '../../legacy/packages/ts/dist/index.mjs';
+import { parse } from '../../packages/compiler/src/core.mts';
 import { stepProgress } from './bounded.mts';
 import { errorField, generatedCases, type TestCase, typeDefinitions } from './cases.mts';
 import { type CaseResult, errorDifference } from './generated-errors.mts';

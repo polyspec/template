@@ -1,9 +1,14 @@
 // Builds and verifies one canonical AST artifact graph.
 import { existsSync, mkdirSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, posix, relative, resolve } from 'node:path';
-import { parse, type Node, type Template } from '@polyspec/template-legacy';
+import type { Node, Template } from '@polyspec/template/render';
 import { astManifestDocument, DocumentSchemaError, type AstFile, type AstManifest } from './documents.mts';
 import { contractPath, hash, json } from './artifact-support.mts';
+import { parse } from './core.mts';
+
+// The parser of the compiler, whose AST deriveTypeManifest reads, and the errors of a source that it and compileAst throw.
+export { parse, DelimiterError, SourceError, type ParseOptions } from './core.mts';
+
 const lineIndex = (bytes: Buffer): number[] => {
   const starts = [0];
   for (let index = 0; index < bytes.length; index++) if (bytes[index] === 0x0a) starts.push(index + 1);

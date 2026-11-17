@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, relative } from 'node:path';
-import { parse, TemplateError } from '../legacy/packages/ts/dist/index.mjs';
+import { parse, SourceError } from '../packages/compiler/src/core.mts';
 import { listCases, typeDefinitions } from '../tests/runner/cases.mts';
 import { deriveTypeManifest } from '../packages/compiler/src/type-manifest.mts';
 import { legacyName } from './generate-error-codes.mts';
@@ -26,9 +26,9 @@ for (const testCase of parseableCases) {
           templates.set(name, parse(readFileSync(path), name, testCase.options));
         } catch (error) {
           // A partial that does not parse is part of a case only when the case expects that very error: the case names its
-          // kind (ERR-1), and the legacy parser gives the capital name of that kind.
+          // kind (ERR-1), and the parser of the compiler gives the capital name of that kind.
           const expected = testCase.expectedError;
-          if (!(error instanceof TemplateError) || expected === null || expected.template !== name || legacyName(expected.code) !== error.code) throw error;
+          if (!(error instanceof SourceError) || expected === null || expected.template !== name || legacyName(expected.code) !== error.code) throw error;
         }
       }
     }
