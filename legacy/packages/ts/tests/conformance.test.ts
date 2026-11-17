@@ -4,8 +4,9 @@ import { join } from 'node:path';
 import { expect, it } from 'vitest';
 import { AstProgram, BindError, Engine, parse, parseJsonBytes, TemplateError, type DefineInput, type RenderOptions } from '../src/index.js';
 import { FsLoader } from '../src/node/index.js';
+import { expectedErrorDocument } from '../../../../scripts/conformance-case-files.mts';
 import { jsonDocument } from '../../../../scripts/json-document.mts';
-import { caseIds, caseOptions, legacyCasesDir as casesDir } from '../../../../tests/runner/case-list.mts';
+import { caseIds, caseOptions, casesDir } from '../../../../tests/runner/case-list.mts';
 import { toJsonValue } from './helpers.js';
 
 interface Case {
@@ -77,8 +78,9 @@ it.each(listCases().map(testCase => [testCase.id, testCase] as const))('%s', (_i
   }
   const result = run(testCase);
   if (expectedError) {
-    const expected: unknown = JSON.parse(new TextDecoder().decode(expectedError));
-    expect('error' in result ? { code: result.error.code, template: result.error.template, line: result.error.line, col: result.error.col } : result).toEqual(expected);
+    // The cases name an error by its kind (ERR-1); this package names the code `E_` and the kind in capitals.
+    const expected = expectedErrorDocument.read(join(testCase.dir, 'expected.error.json'));
+    expect('error' in result ? { code: result.error.code.slice(2).toLowerCase(), template: result.error.template, line: result.error.line, col: result.error.col } : result).toEqual(expected);
   } else {
     if (expectedHtml === null) throw new Error(`${testCase.id} has neither expected.html nor expected.error.json`);
     expect('html' in result ? result.html : result.error.toObject()).toEqual(new TextDecoder().decode(expectedHtml));

@@ -194,7 +194,7 @@ describe('loader failures', () => {
   });
 
   // RT-9, RT-10: an unreadable regular file is E_LOAD_FAILED; a directory and a missing name do not exist, E_LOAD_NOT_FOUND.
-  it('reports an unreadable regular file as E_LOAD_FAILED and a directory as E_LOAD_NOT_FOUND (RT-10)', () => {
+  it('reports an unreadable regular file and a directory as E_LOAD_FAILED and an absent name as E_LOAD_NOT_FOUND (RT-10)', () => {
     const root = mkdtempSync(join(tmpdir(), 'template-loader-'));
     try {
       writeFileSync(join(root, 'locked.tpl'), 'x');
@@ -213,7 +213,8 @@ describe('loader failures', () => {
       expect(readable).toBe(process.getuid?.() === 0);
       if (readable) expect(files.render('locked.tpl', {})).toBe('x');
       else expect(code(() => files.render('locked.tpl', {}))).toBe('E_LOAD_FAILED');
-      expect(code(() => files.render('folder.tpl', {}))).toBe('E_LOAD_NOT_FOUND');
+      // RT-10: an entry that is no regular file is a failure; only the absence of an entry is a name that does not exist.
+      expect(code(() => files.render('folder.tpl', {}))).toBe('E_LOAD_FAILED');
       expect(code(() => files.render('missing.tpl', {}))).toBe('E_LOAD_NOT_FOUND');
     } finally {
       chmodSync(join(root, 'locked.tpl'), 0o600);

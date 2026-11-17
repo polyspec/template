@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { AstDecodeError, decodeTemplate, parse } from '../src/index.js';
 import { AstProgram, Engine, MapLoader, decodeTemplate as renderDecodeTemplate } from '../src/render.js';
-import { caseIds, legacyCasesDir as casesDir } from '../../../../tests/runner/case-list.mts';
+import { caseIds, casesDir } from '../../../../tests/runner/case-list.mts';
 import { repoRoot } from './helpers.js';
 
 // The invalid ASTs that every runtime fails with the same JSON Pointer (AST-10).
