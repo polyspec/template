@@ -109,6 +109,29 @@ fn member_and_result_binding_failures_point_at_the_expression() {
     }
 }
 
+/// EXP-19: a key whose type names no entry of its container is runtime_type, and the text names what the key is: a number
+/// is no member name of a native object, whether it has a fraction or not; a map and a list take a number without a
+/// fraction, so there the key that names no entry is a fractional number.
+#[test]
+fn a_key_of_a_type_that_names_no_entry_is_named_in_the_text() {
+    let order = Arc::new(Order { total: 1.0 });
+    let mut root = order_root(&order);
+    root.insert("items".to_string(), Value::List(vec![Value::Number(1.0)].into()));
+    let cases = [
+        ("{= order[1]}", "a member name of a native object is a string, not a number"),
+        ("{= order[1.5]}", "a member name of a native object is a string, not a number"),
+        ("{= order[true]}", "a member name of a native object is a string, not bool"),
+        (
+            "{= items[1.5]}",
+            "a list index is an integer or an index text, not a fractional number",
+        ),
+    ];
+    for (source, message) in cases {
+        let error = render(&program(&[source]), 0, root.clone()).unwrap_err();
+        assert_eq!((error.code, error.message.as_str()), (ErrorCode::RuntimeType, message), "{source}");
+    }
+}
+
 fn is_the_object(value: Option<&Value>, expected: &Arc<Order>) -> bool {
     value
         .and_then(Value::downcast_object::<Order>)

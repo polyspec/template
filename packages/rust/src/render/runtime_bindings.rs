@@ -503,6 +503,9 @@ fn key_type(
     span: Span,
 ) -> RenderError {
     let found = match key {
+        // A map and a list take a number without a fraction, so the number that reaches here has one; a native object takes
+        // no number.
+        Value::Number(_) if container == "native object" => "a number",
         Value::Number(_) => "a fractional number",
         other => other.value_type().name(),
     };

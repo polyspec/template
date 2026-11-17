@@ -169,7 +169,7 @@ export class RuntimeBindings {
 
   /** EXP-19: a key whose type names no entry of its container is runtime_type. */
   private keyType(frame: Frame, span: Span, expected: string, key: Value): TemplateError {
-    return this.error(frame, span, 'E_RUNTIME_TYPE', `${expected}, not ${typeof key === 'number' ? 'a fractional number' : typeOf(key)}`);
+    return this.error(frame, span, 'E_RUNTIME_TYPE', `${expected}, not ${typeof key !== 'number' ? typeOf(key) : expected.startsWith('a member name') ? 'a number' : 'a fractional number'}`);
   }
 
   /** Checks the depth of a value that a list or map literal built (VAL-20). */

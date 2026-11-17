@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-data-model -->
-<!-- source-sha256: e8b73649779467e52c0628b4714e270d3abb2cc7cfd5e0a8f9e4bdd1171b8a51 -->
+<!-- source-sha256: 4d63701cd8f45c6a2670da0c621fbfb39895585fc76afccd993cb2b9fcf0483c -->
 # 데이터 모델
 
 [English](/spec/data-model).
@@ -195,7 +195,7 @@ bound map(VAL-22)은 별도 type이고 위 입력 어느 것도 그것을 담을
 
 - **VAL-19** Native object는 템플릿의 불투명한 값이다. Truthy이며 stringify·반복·spread할 수 없고 JSON으로 쓸 수 없다(FUN-26): 그것을 echo하면 `runtime_stringify`로 실패하고, 그것에 대한 loop, 그것의 spread, 그것을 담은 값의 `json`은 `runtime_type`으로 실패한다.
 
-- string 키의 lookup(`o.name`, `o['name']`, EXP-18)은 원본 인스턴스의 public field 또는 property를 읽고 그 값을 바인딩한다(VAL-11). public field나 property가 아닌 이름은 `null`을 반환하며 string이 아닌 모든 키도 같다. 바인딩할 수 없는 field 값은 그 `data_*` 코드로 실패하고, accessor의 오류는 바뀌지 않고 호출자에게 도달한다(FUN-46). 바인딩 오류는 lookup 표현식을 가리킨다(ERR-5).
+- string 키의 lookup(`o.name`, `o['name']`, EXP-18)은 원본 인스턴스의 public field 또는 property를 읽고 그 값을 바인딩한다(VAL-11). public field나 property가 아닌 이름은 `null`을 반환한다. string이 아닌 키는 수를 포함해 어떤 member도 가리키지 않으며 runtime_type이다(EXP-19). `null`을 주면 type이 틀린 키가 숨는다. 바인딩할 수 없는 field 값은 그 `data_*` 코드로 실패하고, accessor의 오류는 바뀌지 않고 호출자에게 도달한다(FUN-46). 바인딩 오류는 lookup 표현식을 가리킨다(ERR-5).
 - Member call `o.name(args)`은 원본 인스턴스의 public method를 인자와 함께 호출하고(VAL-18) 결과를 바인딩한다. public method가 아닌 이름은 runtime_unknown_function이며, private 또는 protected method와 PHP `__call` 같은 동적 dispatch hook만 처리하는 이름도 포함한다. 인자를 거부하거나 오류를 발생시킨 method의 오류는 바뀌지 않고 호출자에게 도달한다(FUN-46). 바인딩할 수 없는 결과는 그 `data_*` 코드로 호출 위치에서 실패한다.
 - 가시성은 선언의 속성이다. `render`를 호출하는 코드에 의존하지 않는다. 객체의 class 안에서 `render`를 호출해도 템플릿은 같은 member를 본다.
 

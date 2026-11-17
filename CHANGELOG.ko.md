@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- native object의 string이 아닌 키는 EXP-19가 주는 대로 VAL-19에서도 `runtime_type`이다(T28.137). 그 오류의 text는 수를 `a number`로 부른다. 전에는 정수에도 `a fractional number`라고 했다.
+
 ## 0.0.29
 
 - release가 release 0.0.27이 싣던 `@polyspec/template-codemirror`의 archive를 싣지 않는다(T28.129). language service가 이제 코어의 WebAssembly module로 파싱하는데, browser가 그것을 쓸 조건이 아직 없다. 바인딩의 entry가 browser용으로 묶이고, browser에서 그것을 load하는 시험이 있고, 크기와 키 입력당 분석 시간이 측정되면 그 archive를 다시 싣는다. assets의 job npm이 release의 npm archive를 `@polyspec/json` 릴리스의 archive와 `allow-remote=root`로 빈 폴더에 설치하고 import한다. CI가 commit마다 그것을 돌린다. consumer가 적을 것은 `docs/operations/publication.md`가 적는다.

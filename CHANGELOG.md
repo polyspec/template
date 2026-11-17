@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+- A key of a native object that is not a string is `runtime_type` in VAL-19 too, as EXP-19 gives it (T28.137), and the text of that error names a number as `a number`, where it said `a fractional number` of an integer.
+
 ## 0.0.29
 
 - The release carries no archive of `@polyspec/template-codemirror`, which release 0.0.27 carried (T28.129): a browser has no condition yet to use the WebAssembly module of the core, with which the language service now parses. The archive returns when the entry of the binding bundles for a browser, a test loads it in a browser and the size and the time of an analysis per key are measured. The job npm of the assets installs the npm archives of a release in an empty folder, with the archive of `@polyspec/json` of its release and `allow-remote=root`, and imports them, in CI on every commit; `docs/operations/publication.md` names what a consumer lists.
