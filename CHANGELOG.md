@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.28
+
 - `@polyspec/template` exports `decodeTemplate` under `./decode` again, as release 0.0.27 did (T28.107): the release left the subpath out, and a browser consumer that imports it failed.
 - kit 0.0.119 is pinned (T28.116): its `link cargo` writes the output of cargo as cargo writes it (K1283), so the Rust runner of the generated conformance names each test after its file again.
 - kit 0.0.116 is pinned (T28.102).

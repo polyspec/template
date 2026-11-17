@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+## 0.0.28
+
 - `@polyspec/template`은 release 0.0.27처럼 `decodeTemplate`을 `./decode`로 다시 내보낸다(T28.107). release가 그 subpath를 빠뜨려서, 그것을 import하는 브라우저 소비자가 실패했다.
 - kit 0.0.119를 고정한다(T28.116). 그 `link cargo`가 cargo의 출력을 cargo가 쓰는 순서대로 쓰므로(K1283), 생성 conformance의 Rust runner가 다시 각 시험을 그 파일 이름으로 부른다.
 - kit 0.0.116을 고정한다(T28.102).
