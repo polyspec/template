@@ -1,6 +1,6 @@
 // Command line contract of the conformance command template-language (docs/operations/conformance.md): format [--indent none|tab|N]
 // [--delimiters OC] FILE prints the formatted text, or the format error as JSON on standard error with exit status 2.
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,6 +13,20 @@ const bin = join(packageRoot, 'bin', 'template-language.mjs');
 function run(args: string[]): { status: number | null; stdout: string; stderr: string } {
   const result = spawnSync(process.execPath, [bin, ...args], { encoding: 'utf8' });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
+}
+
+// Runs the command as run does and resolves on its exit event, so a test waits for the exit and no limit decides (HR-89).
+function runAsync(args: string[]): Promise<{ status: number | null; stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [bin, ...args]);
+    let stdout = '';
+    let stderr = '';
+    child.stdout.setEncoding('utf8').on('data', (data: string) => { stdout += data; });
+    child.stderr.setEncoding('utf8').on('data', (data: string) => { stderr += data; });
+    child.on('error', reject);
+    child.on('close', status => resolve({ status, stdout, stderr }));
+    child.stdin.end();
+  });
 }
 
 let work: string;
@@ -62,20 +76,16 @@ describe('template-language format', () => {
     expect(JSON.parse(bytes.stderr)).toMatchObject({ reason: 'parse', code: 'lex_invalid_utf8', line: 2, col: 2 });
   });
 
-  it('exits with status 1 on a usage error', () => {
-    expect(run([]).status).toBe(1);
-    expect(run(['parse', file('x')]).status).toBe(1);
-    expect(run(['format']).status).toBe(1);
-    expect(run(['format', '--indent', 'keep', file('x')]).status).toBe(1);
-    expect(run(['format', '--indent', '9', file('x')]).status).toBe(1);
-    expect(run(['format', '--indent', file('x')]).status).toBe(1);
-    expect(run(['format', '--delimiters', '[', file('x')]).status).toBe(1);
-    expect(run(['format', '--template-blocks', 'flat', file('x')]).status).toBe(1);
-    expect(run(['format', file('x'), file('x')]).status).toBe(1);
-    const missing = run(['format', join(work, 'missing.tpl')]);
+  // The timeout is a hang guard only: the test waits for the exit of every process (HR-89).
+  it('exits with status 1 on a usage error', async () => {
+    const usage = [[], ['parse', file('x')], ['format'], ['format', '--indent', 'keep', file('x')], ['format', '--indent', '9', file('x')],
+      ['format', '--indent', file('x')], ['format', '--delimiters', '[', file('x')], ['format', '--template-blocks', 'flat', file('x')],
+      ['format', file('x'), file('x')]];
+    const [missing, ...results] = await Promise.all([runAsync(['format', join(work, 'missing.tpl')]), ...usage.map(args => runAsync(args))]);
+    usage.forEach((args, index) => expect({ args, status: results[index]?.status }).toEqual({ args, status: 1 }));
     expect(missing.status).toBe(1);
     expect(missing.stderr).toMatch(/cannot read .*missing\.tpl: ENOENT/);
-  });
+  }, 300_000);
 
 });
 

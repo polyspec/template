@@ -1,5 +1,5 @@
 // Command line behavior of template-fmt: standard output, --write, --check, standard input, failures and directories.
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -11,6 +11,20 @@ const bin = join(packageRoot, 'bin', 'template-fmt.mjs');
 function run(args: string[], input?: string): { status: number | null; stdout: string; stderr: string } {
   const result = spawnSync(process.execPath, [bin, ...args], { input: input ?? '', encoding: 'utf8' });
   return { status: result.status, stdout: result.stdout, stderr: result.stderr };
+}
+
+// Runs the command as run does and resolves on its exit event, so a test waits for the exit and no limit decides (HR-89).
+function runAsync(args: string[], input?: string): Promise<{ status: number | null; stdout: string; stderr: string }> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [bin, ...args]);
+    let stdout = '';
+    let stderr = '';
+    child.stdout.setEncoding('utf8').on('data', (data: string) => { stdout += data; });
+    child.stderr.setEncoding('utf8').on('data', (data: string) => { stderr += data; });
+    child.on('error', reject);
+    child.on('close', status => resolve({ status, stdout, stderr }));
+    child.stdin.end(input ?? '');
+  });
 }
 
 let work: string;
@@ -134,15 +148,11 @@ describe('template-fmt', () => {
     expect(result.stdout).toMatch(/^usage: template-fmt /);
   });
 
-  it('rejects invalid arguments with status 2', () => {
-    expect(run(['--unknown']).status).toBe(2);
-    expect(run(['--write', '--check', work]).status).toBe(2);
-    expect(run(['--write']).status).toBe(2);
-    expect(run([work]).status).toBe(2);
-    expect(run(['--check', join(work, 'missing.tpl')]).status).toBe(2);
-    expect(run(['--indent', 'keep']).status).toBe(2);
-    for (const value of ['0', '9', 'x', '2.5']) expect(run(['--indent', value]).status).toBe(2);
-    expect(run(['--indent']).status).toBe(2);
-    expect(run(['--template-blocks', 'deep']).status).toBe(2);
-  });
+  // The timeout is a hang guard only: the test waits for the exit of every process (HR-89).
+  it('rejects invalid arguments with status 2', async () => {
+    const invalid = [['--unknown'], ['--write', '--check', work], ['--write'], [work], ['--check', join(work, 'missing.tpl')], ['--indent', 'keep'],
+      ...['0', '9', 'x', '2.5'].map(value => ['--indent', value]), ['--indent'], ['--template-blocks', 'deep']];
+    const results = await Promise.all(invalid.map(args => runAsync(args)));
+    invalid.forEach((args, index) => expect({ args, status: results[index]?.status }).toEqual({ args, status: 2 }));
+  }, 300_000);
 });
