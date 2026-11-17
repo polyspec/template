@@ -396,6 +396,9 @@ ci-assets-npm: ## The job npm of assets.yml: the npm package with the wasm-bindg
 	$(MAKE) --no-print-directory release-npm
 	$(MAKE) --no-print-directory release-install-check
 
+# The archive of @polyspec/template carries the render entry (T28.148): its folder render is built before release-npm packs it.
+release-npm: template-build-ts-render
+
 # ---- Release (.github/workflows/release.yml, config/release.json) -----------------------------------------------------------
 # release-tag tags the commit of the successful CI run RUN with vX.Y.Z, X.Y.Z the newest section of the change log of that
 # commit, and the Go module tags, and appends TAG and VERSION to GITHUB_ENV (kit K911, K924, K987).

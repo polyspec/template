@@ -40,6 +40,17 @@ const json = typeof manifest === 'object' && manifest !== null && 'devDependenci
   && '@polyspec/json' in manifest.devDependencies ? manifest.devDependencies['@polyspec/json'] : undefined;
 if (typeof json !== 'string' || !json.startsWith('https://')) throw new Error('package.json names no release archive of @polyspec/json in devDependencies');
 
+// The paths that package.json declares (exports and files) must be in the archive of @polyspec/template (T28.148):
+// the 0.0.29 archive declared ./render and lacked its folder, and no check compared the two.
+const pkg: { exports: unknown; files: string[] } = JSON.parse(readFileSync(join(root, 'packages', 'ts', 'package.json'), 'utf8'));
+const targets = (value: unknown): string[] => typeof value === 'string' ? [value] : typeof value === 'object' && value !== null ? Object.values(value).flatMap(targets) : [];
+const listing = spawnSync('tar', ['-tzf', template], { encoding: 'utf8' });
+if (listing.status !== 0) throw new Error(`tar -tzf ${template} exited with ${listing.status ?? listing.signal}`);
+const packed = new Set(listing.stdout.split('\n').filter(entry => entry !== '').map(entry => entry.replace(/^package\//, '')));
+const declared = [...targets(pkg.exports), ...pkg.files];
+const missing = declared.map(path => path.replace(/^\.\//, '')).filter(path => !/[*]/.test(path) && ![...packed].some(entry => entry === path || entry.startsWith(path + '/')));
+assert.deepEqual(missing, [], 'the archive of @polyspec/template lacks paths that its package.json declares');
+
 const PROBE = `
 import assert from 'node:assert/strict';
 const core = await import('@polyspec/template/wasm');
@@ -52,6 +63,8 @@ assert.equal(failed.ok, false);
 assert.equal(failed.error.code, 'parse_unexpected_token');
 const server = await import('@polyspec/template-lsp');
 assert.equal(typeof server.TAG_RANGES_METHOD, 'string');
+await import('@polyspec/template/render');
+await import('@polyspec/template/decode');
 const { mkdirSync, readFileSync, writeFileSync } = await import('node:fs');
 const artifact = await import('@polyspec/template-compiler/ast-artifact.mjs');
 const compiler = await import('@polyspec/template-compiler/compiler.mjs');
