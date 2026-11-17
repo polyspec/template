@@ -186,6 +186,10 @@
       "kind": "ecosystem",
       "tool": "npm packs and installs the archives of npm of a release in an empty folder, and node loads their entries"
     },
+    "scripts/check-release-packages.mts": {
+      "kind": "ecosystem",
+      "tool": "reads the packages.json of a release candidate and checks the names of the platform zips of its pre-packaged PHP extension against the php job of assets.yml and make release-php-ext"
+    },
     "scripts/check-rules.mts": {
       "kind": "policy",
       "reason": "polyspec rule CNF-2, CNF-3: the stage of a conformance case is 1, 2 or 3; kit checks its requirements"

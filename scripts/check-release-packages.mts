@@ -23,21 +23,27 @@ if (positionals.length !== 1) {
   console.error('check-release-packages: one argument, the packages.json of the candidate');
   process.exit(2);
 }
-const file = resolve(positionals[0]);
+const file = resolve(positionals[0] ?? '');
 const root = resolve(new URL('..', import.meta.url).pathname);
 const read = (path: string): string => readFileSync(join(root, path), 'utf8');
 
 const manifest: unknown = JSON.parse(readFileSync(file, 'utf8'));
-const packages = typeof manifest === 'object' && manifest !== null && 'packages' in manifest ? manifest.packages : undefined;
+const packages: unknown = typeof manifest === 'object' && manifest !== null && 'packages' in manifest ? manifest.packages : undefined;
 assert.equal(typeof packages, 'object', `${file} names no packages`);
+assert.ok(packages !== null, `${file} names no packages`);
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
 // The names that the php job of assets.yml builds: its matrix holds platform and php pairs, in lines of their own.
 const phpJob = read('.github/workflows/assets.yml').split(/^  php:$/m)[1]?.split(/^    runs-on:/m)[0] ?? '';
-const matrix = [...phpJob.matchAll(/- platform: (\S+)\n(?:\s+\S+: .*\n)*?\s+php: '([0-9.]+)'/g)].map(([, platform, minor]) => ({ platform, minor }));
+const matrix = [...phpJob.matchAll(/- platform: (\S+)\n(?:\s+\S+: .*\n)*?\s+php: '([0-9.]+)'/g)].map(([, platform = '', minor = '']) => ({ platform, minor }));
 assert.ok(matrix.length > 0, 'assets.yml names no php matrix');
 // The platforms that make release-php-ext names, and the PHP minors of config/toolchain.json.
-const platforms = [...new Set([...read('packages/release.mk').matchAll(/platform=(\S+) ;;/g)].map(([, platform]) => platform))].sort();
-const minors = (JSON.parse(read('config/toolchain.json')) as { phpExtension: { minors: string[] } }).phpExtension.minors;
+const platforms = [...new Set([...read('packages/release.mk').matchAll(/platform=(\S+) ;;/g)].map(([, platform = '']) => platform))].sort();
+const toolchain: unknown = JSON.parse(read('config/toolchain.json'));
+const minors = isRecord(toolchain) && isRecord(toolchain.phpExtension) && Array.isArray(toolchain.phpExtension.minors)
+  ? toolchain.phpExtension.minors.filter((minor): minor is string => typeof minor === 'string')
+  : [];
+assert.ok(minors.length > 0, 'config/toolchain.json names no phpExtension.minors');
 const pairKey = (platform: string, minor: string): string => `${platform} php${minor}`;
 assert.deepEqual(
   matrix.map(({ platform, minor }) => pairKey(platform, minor)).sort(),
@@ -49,20 +55,28 @@ const implied: string[] = [];
 const made: string[] = [];
 let dists = 0;
 const failures: string[] = [];
-for (const [name, versions] of Object.entries(packages as Record<string, Record<string, { dist?: { url?: unknown; shasum?: unknown }; 'php-ext'?: { 'download-url-method'?: string[] } }>>)) {
+for (const [name, versions] of Object.entries(isRecord(packages) ? packages : {})) {
+  if (!isRecord(versions)) {
+    failures.push(`${name}: no versions`);
+    continue;
+  }
   for (const [tag, meta] of Object.entries(versions)) {
     dists += 1;
-    const dist = meta.dist;
-    if (typeof dist?.url !== 'string') {
+    const entry: Record<string, unknown> = isRecord(meta) ? meta : {};
+    const dist: Record<string, unknown> = isRecord(entry.dist) ? entry.dist : {};
+    const url = dist.url;
+    if (typeof url !== 'string') {
       failures.push(`${name} ${tag}: no url`);
       continue;
     }
     if (typeof dist.shasum === 'string' && /^[0-9a-f]{40}$/.test(dist.shasum)) continue;
-    if (meta['php-ext']?.['download-url-method']?.includes('pre-packaged-binary') !== true) {
+    const phpExt: Record<string, unknown> = isRecord(entry['php-ext']) ? entry['php-ext'] : {};
+    const methods = phpExt['download-url-method'];
+    if (!Array.isArray(methods) || !methods.includes('pre-packaged-binary')) {
       failures.push(`${name} ${tag}: no sha1 shasum and no pre-packaged-binary php-ext`);
       continue;
     }
-    const base = decodeURIComponent(new URL(dist.url).pathname.split('/').pop() ?? '').replace(/\.zip$/, '');
+    const base = decodeURIComponent(new URL(url).pathname.split('/').pop() ?? '').replace(/\.zip$/, '');
     const version = tag.replace(/^v/, '');
     for (const { platform, minor } of matrix) {
       implied.push(`${base}-php${minor}-${platform}.zip`);

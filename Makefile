@@ -313,18 +313,21 @@ ci-docs: ## The job docs: make install and make hooks, then the hooks check and 
 	$(MAKE) --no-print-directory install
 	$(MAKE) --no-print-directory hooks
 	$(MAKE) --no-print-directory ci-targets TARGETS="hooks-check typecheck template-test-compiler-types"
-ci-typescript: ## The job typescript: the Node.js packages, then their tests; ONLINE
+ci-typescript: ## The job typescript: the Node.js packages, then their tests and the checks of the editor layers and formatter; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="node rust"
 	$(MAKE) --no-print-directory template-install-node
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
-	$(MAKE) --no-print-directory ci-targets TARGETS="test-ts conformance-ts"
-ci-browser: ## The job browser: the Node.js packages and the browsers, then the browser tests; ONLINE
-	$(MAKE) --no-print-directory install-tools TOOLS="node"
+	$(MAKE) --no-print-directory ci-targets TARGETS="test-ts conformance-ts editor-boundary-check format-check template-test-language template-test-lsp"
+ci-browser: ## The job browser: the Node.js packages, the Rust toolchain and the browsers, then the browser tests and the CodeMirror tests; ONLINE
+	$(MAKE) --no-print-directory install-tools TOOLS="node rust"
 	$(MAKE) --no-print-directory template-install-node
+	$(MAKE) --no-print-directory template-install-rust
+	$(MAKE) --no-print-directory release-recipes
+	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory template-install-browsers
-	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-browser"
+	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-browser template-test-codemirror"
 ci-python: ## The job python: Python, uv and the Python environment, then the Python tests; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="python uv rust"
 	$(MAKE) --no-print-directory template-install-python
@@ -599,7 +602,7 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as the checks of the job gates, lint-ts
 # and conformance-ts. The list stays on one line: the owner-check utility of @polyspec/kit reads it.
-CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check template-test-vscode template-test-vscode-integration test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go
+CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go
 
 .PHONY: lint build test
 lint: lint-ts lint-go lint-rust lint-php lint-python lint-php-ext template-lint-go-format template-lint-go-modules fmt-check template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets and the format checks
