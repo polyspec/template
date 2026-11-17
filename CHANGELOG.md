@@ -5,6 +5,8 @@
 
 ## Unreleased
 
+## 0.0.29
+
 - The release carries no archive of `@polyspec/template-codemirror`, which release 0.0.27 carried (T28.129): a browser has no condition yet to use the WebAssembly module of the core, with which the language service now parses. The archive returns when the entry of the binding bundles for a browser, a test loads it in a browser and the size and the time of an analysis per key are measured. The job npm of the assets installs the npm archives of a release in an empty folder, with the archive of `@polyspec/json` of its release and `allow-remote=root`, and imports them, in CI on every commit; `docs/operations/publication.md` names what a consumer lists.
 
 - The TypeScript renderer that `@polyspec/template` carries as `./render` gives the errors of the specification where it rendered (T28.119): a key of a map, a list or a native object whose type names no entry is `runtime_type` (EXP-19), so `{= a[1.5]}` fails as it does in the Rust core, where it gave an empty text; an integer argument with a fraction and a negative count are `runtime_type` and a magnitude above 2^53 − 1 or more than 100 decimals is `runtime_limit` (FUN-50, FUN-20); a date text names a day of its month (FUN-37); a `\uXXXX` escape of a surrogate without its pair is `parse_invalid_escape` (EXP-3); and the filesystem loader reports a directory as `load_failed` (RT-10). The renderer runs the current conformance cases, where it ran a copy of 263 of the 281.
@@ -12,8 +14,6 @@
 - The language service `@polyspec/template-language`, and the language server and the VS Code extension over it, parse with the Rust core through the WebAssembly entry of `@polyspec/template` (T28.122), where they parsed with the TypeScript parser of `@polyspec/template-legacy`, a package that no release carries: an install of the archives of 0.0.28 could not have found it. The codes, the positions and the ranges that the packages give are the same; an invalid delimiters option now has the code `argument_delimiters`, where it had none, and its message is that of the core. The language server of the VS Code extension is `dist/server.mjs` with two WebAssembly modules beside it.
 
 - The asset jobs download the Go modules before the check of binding (T28.124): the check reads them with the network off, and a new runner holds none, so every asset job of CI failed, as the jobs of a release would have.
-
-## 0.0.29
 
 - The asset jobs of CI run the check of binding on the contract (T28.121), as the jobs of a release run its release check, so an asset job that lacks a tool of the check fails in CI, before a tag exists.
 - The asset jobs of a release install the Go of `mise.toml` (T28.118): the check of the binding scaffold that each runs calls `go mod download`, which fell back to the Go of the runner, older than the module needs.
