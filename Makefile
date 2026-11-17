@@ -93,10 +93,23 @@ COMPOSER_TOOL_ENV = COMPOSER_HOME=$(CURDIR)/var/tools/composer/home COMPOSER_CAC
 # the bootstrap of kit, which imports only Node.js built-ins, with the node of the machine.
 install-tools: ## Install every tool of mise.toml at the digests of mise.lock, or the tool names of TOOLS; TOOLS=npm installs mise and the node and npm of mise.toml; ONLINE
 ifeq ($(TOOLS),npm)
+	@test -f "$(KIT)/bootstrap/bootstrap.$(KIT_EXT)" || { echo "install-tools: the kit of node_modules is missing; a fresh checkout runs make bootstrap first (the steps of the kit-bootstrap action, T28.150)" >&2; exit 2; }
 	$(ONLINE) $(BOOTSTRAP_NODE) $(KIT)/bootstrap/bootstrap.$(KIT_EXT)
 else
+	@test -f "$(KIT)/install-tools.$(KIT_EXT)" || { echo "install-tools: the kit of node_modules is missing; a fresh checkout runs make bootstrap first (the steps of the kit-bootstrap action, T28.150)" >&2; exit 2; }
 	$(COMPOSER_TOOL_ENV) $(ONLINE) $(NODE) $(KIT)/install-tools.$(KIT_EXT) --no-self-update $(TOOLS)
 endif
+
+# The steps of the kit-bootstrap action of CI for a fresh checkout, as one target (T28.150): npm of devEngines installs the
+# packages of package-lock.json with --prefix at the checkout (npm 11 refuses the devEngines of npm 12), then install-tools
+# TOOLS=npm and install-packages run.
+.PHONY: bootstrap
+bootstrap: ## The kit-bootstrap steps of a fresh checkout: npm ci with the npm of devEngines, install-tools TOOLS=npm, install-packages; ONLINE
+	@root="$(CURDIR)"; version="$$($(BOOTSTRAP_NODE) -p 'require("./package.json").devEngines.packageManager.version')"; \
+	test -n "$$version" || { echo 'bootstrap: package.json names no devEngines npm version' >&2; exit 2; }; \
+	(cd "$${RUNNER_TEMP:-$${TMPDIR:-/tmp}}" && npm_config_cache="$$root/var/bootstrap/npm-cache" $(ONLINE) npm exec --yes --package="npm@$$version" -- npm --prefix "$$root" ci --ignore-scripts)
+	$(MAKE) --no-print-directory install-tools TOOLS=npm
+	$(MAKE) --no-print-directory install-packages
 
 # mise lock with the mise of config/toolchain.json for each platform that has the archives of the tools (kit K836). mise locks a
 # pypi: tool with uv, so it locks and installs uv and python first, and names that Python as UV_PYTHON for the full lock.
@@ -669,8 +682,13 @@ template-install-vscode: ## Install the VS Code of the integration test into var
 
 # The release steps are the release targets above (config/release.json). The archives are built from the
 # built npm packages, so the targets that build them run those builds first.
-release-candidate-assets: build-ts template-build-language template-build-lsp template-build-compiler
-release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-compiler)
+# kit-check stops the release targets first when the kit of node_modules is missing (T28.151): their prerequisites would
+# otherwise fail with the errors of the missing node of var/tools, and no check would name the kit.
+.PHONY: kit-check
+kit-check: ## Fail with the step that makes kit when node_modules holds no kit (a fresh checkout runs make bootstrap first)
+	@test -f "$(KIT)/release.$(KIT_EXT)" || { echo "kit-check: the kit of node_modules is missing; a fresh checkout runs make bootstrap first (the steps of the kit-bootstrap action, T28.150)" >&2; exit 2; }
+release-candidate-assets: kit-check build-ts template-build-language template-build-lsp template-build-compiler
+release-assets: kit-check $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-compiler)
 
 template-install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
