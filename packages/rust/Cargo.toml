@@ -73,7 +73,7 @@ workspace = true
 # The JSON values of assign data, definitions and the environment, the JSON text of `json` and the text of a number
 # (VAL-9, VAL-12, FUN-26), the AST JSON (AST-7, AST-10), the artifact manifest (RT-56) and the output of the command
 # line: the one JSON reader and writer of polyspec.
-polyspec-json = { git = "https://github.com/polyspec/json.git", tag = "v0.0.34" }
+polyspec-json = { git = "https://github.com/polyspec/json.git", tag = "v0.0.37" }
 # The kind interface that the generated bindings read from the core error (binding design E-1, I-2 (3)), at the tag of the
 # release of binding, the source of the generated binding crates too (binding CK-20, CK-70).
 polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", tag = "v0.0.21" }
