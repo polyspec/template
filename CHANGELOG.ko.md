@@ -5,6 +5,9 @@
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.30
+
 - release.yml의 job release는 release-go-module이 기록한 뒤 Go 모듈의 tag를 push한다(T28.152). job이 release-go-module-push를 부르지 않아, 릴리스의 Go tag가 remote에 닿지 않았다.
 
 - CI는 editor 확장을 검증하지 않는다. job `editor`를 ci.yml과 `ci-passed`의 needs에서 뺐다(T28.147). `make ci-editor`는 로컬에서 실행하며, 그 VS Code는 `make template-install-vscode`에서 온다.

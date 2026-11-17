@@ -4,6 +4,9 @@
 [한국어](CHANGELOG.ko.md).
 
 ## Unreleased
+
+## 0.0.30
+
 - The job release of release.yml pushes the tag of the Go module after release-go-module records it (T28.152): the job never called release-go-module-push, so the Go tag of a release did not reach the remote.
 
 - CI does not verify the editor extension: the job `editor` is removed from ci.yml and from the needs of `ci-passed` (T28.147). `make ci-editor` runs locally, and its VS Code comes from `make template-install-vscode`.
