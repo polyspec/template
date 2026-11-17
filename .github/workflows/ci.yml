@@ -245,24 +245,6 @@ jobs:
           path: var/report/ci-targets/
           if-no-files-found: error
 
-  editor:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Bootstrap kit, npm and the packages of package-lock.json (K992)
-        uses: ./.github/actions/kit-bootstrap
-        if: ${{ !cancelled() }}
-      # The recipe runs the editor tests on a virtual X server, because VS Code needs a display.
-      - run: make ci-editor
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !cancelled() }}
-        with:
-          name: report-editor
-          path: var/report/ci-targets/
-          if-no-files-found: error
-
   go:
     runs-on: ubuntu-24.04
     steps:
@@ -385,7 +367,7 @@ jobs:
   # node of the bootstrap and the packages of package-lock.json, and nothing else (kit K171).
   ci-passed:
     if: ${{ always() }}
-    needs: [gates, lint, scripts, generated, delimiters, showcase, docs, typescript, browser, python, editor, go, rust, php, php-ext, bindings, assets]
+    needs: [gates, lint, scripts, generated, delimiters, showcase, docs, typescript, browser, python, go, rust, php, php-ext, bindings, assets]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

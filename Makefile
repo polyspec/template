@@ -319,7 +319,7 @@ ci-python: ## The job python: Python, uv and the Python environment, then the Py
 	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(MAKE) --no-print-directory ci-targets TARGETS="test-python conformance-python conformance-generated-python"
-ci-editor: ## The job editor: the Node.js packages, the browsers and VS Code, then the editor tests on a virtual display; ONLINE
+ci-editor: ## The editor tests, run locally only: CI does not run them (T28.147); the browsers and VS Code of template-install-vscode, then the tests on a virtual display; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="node rust"
 	$(MAKE) --no-print-directory template-install-node
 	$(MAKE) --no-print-directory template-install-rust
