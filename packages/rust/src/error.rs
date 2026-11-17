@@ -331,7 +331,14 @@ impl TemplateError {
 /// ERR-1: writes the text of an error, the one place that writes it. An error without a template and without a
 /// position is `kind: message`; an error with a template or a position is `kind in template at line:col: message`,
 /// also at the position 0:0 of an error that has a template and no position (ERR-5, ERR-6).
-pub(crate) fn write_text(f: &mut fmt::Formatter<'_>, code: ErrorCode, template: &str, line: usize, col: usize, message: &str) -> fmt::Result {
+pub(crate) fn write_text(
+    f: &mut fmt::Formatter<'_>,
+    code: ErrorCode,
+    template: &str,
+    line: usize,
+    col: usize,
+    message: &str,
+) -> fmt::Result {
     if template.is_empty() && line == 0 && col == 0 {
         write!(f, "{}: {message}", code.as_str())
     } else {
