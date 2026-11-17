@@ -37,13 +37,24 @@ fn load_or_refresh_follows_its_policy() {
     );
 }
 
+/// The temporary directory of a test.
+struct TempDirectory(std::path::PathBuf);
+
+impl Drop for TempDirectory {
+    fn drop(&mut self) {
+        // HR-87: the directory of the test does not outlive it; a directory that cannot be removed fails the run.
+        std::fs::remove_dir_all(&self.0).expect("the directory of the test is removed");
+    }
+}
+
 #[test]
 fn true_fails_on_a_broken_manifest() {
-    let directory = std::env::temp_dir().join(format!("artifact-store-broken-{}", std::process::id()));
-    std::fs::create_dir_all(&directory).expect("create the directory");
+    let temporary = TempDirectory(std::env::temp_dir().join(format!("artifact-store-broken-{}", std::process::id())));
+    let directory = &temporary.0;
+    std::fs::create_dir_all(directory).expect("create the directory");
     std::fs::write(directory.join("manifest.json"), "not json").expect("write the manifest");
     let builds = Cell::new(0);
-    let result = load_or_refresh(&directory, ArtifactRefresh::True, |_: &std::path::Path| {
+    let result = load_or_refresh(directory, ArtifactRefresh::True, |_: &std::path::Path| {
         builds.set(builds.get() + 1);
         Ok(())
     });

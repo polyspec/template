@@ -1,14 +1,21 @@
 // RT-56 ArtifactStore.loadOrRefresh: the refresh policies build or reuse an artifact (docs/spec/runtime.md).
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { compileAst } from '../../../../packages/compiler/src/ast-artifact.mts';
 import { compileGeneratedArtifact, generatedManifestPath } from '../../../../packages/compiler/src/generated-artifact.mts';
 import { loadOrRefresh } from '../src/node/index.js';
 
+// HR-87: the directory of a test does not outlive it; a directory that cannot be removed fails the test.
+const roots: string[] = [];
+afterEach(() => {
+  for (const root of roots.splice(0)) rmSync(root, { recursive: true });
+});
+
 function fixtureRoot(): { source: string; output: string } {
   const root = mkdtempSync(join(tmpdir(), 'artifact-store-'));
+  roots.push(root);
   const source = join(root, 'source');
   mkdirSync(source);
   writeFileSync(join(source, 'page.tpl'), '<p>{= x}</p>');

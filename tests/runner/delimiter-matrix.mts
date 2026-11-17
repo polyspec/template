@@ -5,8 +5,9 @@
 // Each pair prints `<pair> [<lang>] pass|fail (<ms> ms)` when it finishes in a language, and the
 // summary follows the last pair. Each CLI call has its own timeout (drivers.mts).
 import { mkdtempSync, writeFileSync, rmSync, realpathSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { constants, tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { setImmediate } from 'node:timers/promises';
 import { invoke, prepare, selectLanguages } from './drivers.mts';
 
 const delimiterChars: string[] = [];
@@ -20,6 +21,16 @@ const languages = selectLanguages(process.env.DELIMITER_MATRIX_LANGS);
 for (const language of languages) prepare(language);
 
 const root = realpathSync(mkdtempSync(join(tmpdir(), 'template-delimiter-matrix-')));
+// HR-87: the directory of the run does not outlive it, however the run ends; a directory that cannot be removed fails
+// the run. A run that a signal stops, such as the timeout of its caller, removes it before it exits: the CLI calls are
+// synchronous, so the run yields to the event loop after each pair, where the handler of the signal runs.
+const remove = () => rmSync(root, { recursive: true });
+for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP'] as const) {
+  process.on(signal, () => {
+    remove();
+    process.exit(128 + constants.signals[signal]);
+  });
+}
 const input = join(root, 'input.tpl');
 const failures: string[] = [];
 const quoted: [string, string, string][] = [
@@ -46,15 +57,17 @@ try {
       const source = `L${open}:a=1${close}R${open}=a${close}E`;
       writeFileSync(input, source);
       for (const language of languages) check(JSON.stringify(open + close), language, `${open}${close}`, 'LR1E');
+      await setImmediate();
     }
   }
 
   for (const [index, [pair, source, expected]] of quoted.entries()) {
     writeFileSync(input, source);
     for (const language of languages) check(`quoted ${index + 1} ${JSON.stringify(pair)}`, language, pair, expected);
+    await setImmediate();
   }
 } finally {
-  rmSync(root, { recursive: true, force: true });
+  remove();
 }
 
 const pairCount = delimiterChars.length ** 2;

@@ -14,12 +14,41 @@ use Polyspec\Template\Loader\ArtifactStaleException;
  */
 final class ArtifactStoreTest extends TestCase
 {
-    public function testTrueFailsOnABrokenManifestAndDoesNotBuild(): void
+    /** @var list<string> the temporary directories of the test */
+    private array $directories = [];
+
+    /**
+     * HR-87: the directory of a test does not outlive it; a directory that cannot be removed fails the test.
+     */
+    protected function tearDown(): void
     {
-        $directory = sys_get_temp_dir() . '/artifact-store-broken-' . getmypid();
+        foreach ($this->directories as $directory) {
+            foreach (scandir($directory) ?: [] as $name) {
+                if ($name !== '.' && $name !== '..' && !unlink($directory . '/' . $name)) {
+                    self::fail("the file {$name} of {$directory} is not removed");
+                }
+            }
+            if (!rmdir($directory)) {
+                self::fail("the directory {$directory} is not removed");
+            }
+        }
+        $this->directories = [];
+    }
+
+    private function temporaryDirectory(string $prefix): string
+    {
+        $directory = sys_get_temp_dir() . '/' . $prefix . getmypid();
         if (!is_dir($directory)) {
             mkdir($directory);
         }
+        $this->directories[] = $directory;
+
+        return $directory;
+    }
+
+    public function testTrueFailsOnABrokenManifestAndDoesNotBuild(): void
+    {
+        $directory = $this->temporaryDirectory('artifact-store-broken-');
         file_put_contents($directory . '/manifest.json', 'not json');
         $builds = 0;
         try {
@@ -34,10 +63,7 @@ final class ArtifactStoreTest extends TestCase
 
     public function testTrueFailsOnAnUnreadableManifestAndDoesNotBuild(): void
     {
-        $directory = sys_get_temp_dir() . '/artifact-store-unreadable-' . getmypid();
-        if (!is_dir($directory)) {
-            mkdir($directory);
-        }
+        $directory = $this->temporaryDirectory('artifact-store-unreadable-');
         file_put_contents($directory . '/manifest.json', '{}');
         chmod($directory . '/manifest.json', 0);
         $builds = 0;
