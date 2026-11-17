@@ -19,7 +19,8 @@ pub struct BindError {
 
 impl fmt::Display for BindError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}: {}", self.code.as_str(), self.message)
+        // ERR-1: a binding error has no template and no position; its text is that of the error with neither.
+        crate::error::write_text(f, self.code, "", 0, 0, &self.message)
     }
 }
 
