@@ -981,8 +981,8 @@ release-install-check: template-build-lsp template-build-compiler ## Install the
 # The packages.json of the Composer packages of the release names the shasum of every dist (T28.149): run after the
 # assets are built, before the release, so that a dist without its shasum stops the release (HR-80).
 .PHONY: release-packages-check
-release-packages-check: ## Check that every dist of the packages.json of var/release/assets names its shasum
-	$(NODE) scripts/check-release-packages.mts var/release/assets/packages.json
+release-packages-check: ## Check the packages.json of var/release/assets: every dist names its sha1, or is a pre-packaged php-ext whose platform zips are assets
+	$(NODE) scripts/check-release-packages.mts var/release/assets/packages.json var/release/assets
 
 # scripts/generate-error-codes.mts writes the error-code list of each implementation from the code tables of
 # docs/spec/errors.md (T22.6-15); error-codes-check checks that every list is current.
