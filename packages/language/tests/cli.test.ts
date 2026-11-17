@@ -148,11 +148,11 @@ describe('template-fmt', () => {
     expect(result.stdout).toMatch(/^usage: template-fmt /);
   });
 
-  // The test waits for the exit of every process and has no time limit: the timeout 0 turns off the default of vitest (HR-89).
+  // The test waits for the exit of every process (HR-89).
   it('rejects invalid arguments with status 2', async () => {
     const invalid = [['--unknown'], ['--write', '--check', work], ['--write'], [work], ['--check', join(work, 'missing.tpl')], ['--indent', 'keep'],
       ...['0', '9', 'x', '2.5'].map(value => ['--indent', value]), ['--indent'], ['--template-blocks', 'deep']];
     const results = await Promise.all(invalid.map(args => runAsync(args)));
     invalid.forEach((args, index) => expect({ args, status: results[index]?.status }).toEqual({ args, status: 2 }));
-  }, 0);
+  });
 });

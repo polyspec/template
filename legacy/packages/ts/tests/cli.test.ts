@@ -9,12 +9,11 @@ import { casesDir, repoRoot } from './helpers.js';
 const bin = join(repoRoot, 'legacy', 'packages', 'ts', 'bin', 'template.mjs');
 
 // The command line runs the build in dist. The test builds it itself instead of skipping when it is absent (T19.4);
-// scripts/build-package.mts does nothing when its inputs are unchanged. The build is a long-running step and has no
-// time limit (timeout 0).
+// scripts/build-package.mts does nothing when its inputs are unchanged. The build is a long-running step.
 beforeAll(() => {
   const build = spawnSync(process.execPath, [join(repoRoot, 'scripts', 'build-package.mts'), '--package', 'ts'], { cwd: repoRoot, stdio: 'inherit' });
   if (build.status !== 0) throw new Error(`node scripts/build-package.mts --package ts failed with status ${build.status}`);
-}, 0);
+});
 
 function run(args: string[]) {
   return spawnSync('node', [bin, ...args], { encoding: 'utf8' });

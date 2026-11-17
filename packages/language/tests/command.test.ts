@@ -76,7 +76,7 @@ describe('template-language format', () => {
     expect(JSON.parse(bytes.stderr)).toMatchObject({ reason: 'parse', code: 'lex_invalid_utf8', line: 2, col: 2 });
   });
 
-  // The test waits for the exit of every process and has no time limit: the timeout 0 turns off the default of vitest (HR-89).
+  // The test waits for the exit of every process (HR-89).
   it('exits with status 1 on a usage error', async () => {
     const usage = [[], ['parse', file('x')], ['format'], ['format', '--indent', 'keep', file('x')], ['format', '--indent', '9', file('x')],
       ['format', '--indent', file('x')], ['format', '--delimiters', '[', file('x')], ['format', '--template-blocks', 'flat', file('x')],
@@ -85,7 +85,7 @@ describe('template-language format', () => {
     usage.forEach((args, index) => expect({ args, status: results[index]?.status }).toEqual({ args, status: 1 }));
     expect(missing.status).toBe(1);
     expect(missing.stderr).toMatch(/cannot read .*missing\.tpl: ENOENT/);
-  }, 0);
+  });
 
 });
 
