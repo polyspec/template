@@ -80,7 +80,7 @@ test('RT-80: @polyspec/template exports the TypeScript renderer under ./render w
   const declarations = 'packages/ts/render/render.d.ts';
   assert.ok(existsSync(declarations), `${declarations} is missing; run make build-ts`);
   const text = readFileSync(declarations, 'utf8');
-  const names = ['AstProgram', 'bind', 'BindError', 'BindErrorCode', 'bindValue', 'BoundMap', 'decodeTemplate', 'Engine', 'HostFunction', 'Loader', 'LoadResult', 'MapLoader', 'MapValue', 'merge', 'NativeObject', 'parseJson', 'resolvePath', 'SafeString', 'Template', 'Value', 'Expr', 'Node'];
+  const names = ['AstProgram', 'bind', 'BindError', 'BindErrorCode', 'bindValue', 'BoundMap', 'decodeTemplate', 'Engine', 'HostFunction', 'Loader', 'LoadResult', 'MapLoader', 'MapValue', 'merge', 'NativeObject', 'parseJson', 'resolvePath', 'SafeString', 'Template', 'Value', 'Expr', 'Node', 'PreparedRender'];
   const missing = names.filter(name => !new RegExp(`\\b${name}\\b`).test(text));
   assert.deepEqual(missing, [], `${declarations} exports every name of release 0.0.27`);
 });

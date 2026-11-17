@@ -19,7 +19,7 @@ export type { HostFunction, Env, FunctionContext } from './functions/index.js';
 export type { BindErrorCode } from './value/bind.js';
 export type { LoadedAst, LoadedSource } from './loader.js';
 export type { LineIndex, Span as SourceSpan } from './errors.js';
-export type { ParseFunction } from './render/engine.js';
+export type { ParseFunction, PreparedRender } from './render/engine.js';
 export type { DefineEntry, LoopMeta as RuntimeLoopMeta } from './render/context.js';
 export type { RuntimeLimit } from './render/runtime-bindings.js';
 export type { Output } from './output.js';

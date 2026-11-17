@@ -8,6 +8,8 @@
 
 
 ## 0.0.29
+- `@polyspec/template/render` exports the type `PreparedRender`, the result of `prepare` that the generated TypeScript programs implement (T28.140).
+
 - The compiler `@polyspec/template-compiler` builds on `@polyspec/template` alone and the release carries its archive again, which release 0.0.29 did not carry (T28.140). It parses with the Rust core, `parse` of the WebAssembly entry `@polyspec/template/wasm`, and reads that AST through the canonical text with `decodeTemplate` of `@polyspec/template/render`, where it parsed with the TypeScript parser of `@polyspec/template-legacy`, a package that no release carries. A generated TypeScript program imports the renderer from `@polyspec/template/render`, where it imported `@polyspec/template-legacy`. `ast-artifact.mjs` exports the parser `parse(bytes, name, options)`, whose AST `deriveTypeManifest` reads, and the errors `SourceError` and `DelimiterError`: a source that does not parse is a `SourceError` with `code`, `template`, `line`, `col`, `offset` and `end`, the code in the form `E_PARSE_UNEXPECTED_TOKEN` as before, where it was a `TemplateError` of the legacy package, and a delimiters option that names no pair is a `DelimiterError` with the message of the core. The job npm of the assets packs, installs and imports the archive and compiles one template with it.
 
 - What a consumer of release 0.0.27 does to take this release. The packages are those of the Rust core and of the bindings that binding generates from it; the hand-written packages of 0.0.27 are the legacy packages and are not released.

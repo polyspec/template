@@ -1,5 +1,5 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: d7f9b261478bac7f05a536ffbec2b2c021b156697d2f74504c930e3f4ce95842 -->
+<!-- source-sha256: 143b2decf1b1f9389f752c631121c2ba412393fe4f4916bf447c92407e5bd598 -->
 # 변경 기록
 
 [English](CHANGELOG.md).
@@ -9,6 +9,8 @@
 
 
 ## 0.0.29
+- `@polyspec/template/render`가 type `PreparedRender`를 export한다. 생성된 TypeScript 프로그램이 구현하는 `prepare`의 결과다(T28.140).
+
 - compiler `@polyspec/template-compiler`는 `@polyspec/template` 하나 위에서 빌드되고, release 0.0.29가 싣지 않던 그 archive를 release가 다시 싣는다(T28.140). Rust 코어로 parse한다. 곧 WebAssembly entry `@polyspec/template/wasm`의 `parse`를 쓰고, 그 AST를 canonical text를 거쳐 `@polyspec/template/render`의 `decodeTemplate`으로 읽는다. 전에는 어느 release도 싣지 않는 패키지 `@polyspec/template-legacy`의 TypeScript parser로 parse했다. 생성된 TypeScript 프로그램은 renderer를 `@polyspec/template/render`에서 import하며, 전에는 `@polyspec/template-legacy`를 import했다. `ast-artifact.mjs`는 `deriveTypeManifest`가 읽는 AST를 만드는 parser `parse(bytes, name, options)`와 오류 `SourceError`, `DelimiterError`를 export한다. parse되지 않는 source는 `code`, `template`, `line`, `col`, `offset`, `end`를 가진 `SourceError`이고 code는 전처럼 `E_PARSE_UNEXPECTED_TOKEN` 형태다. 전에는 legacy 패키지의 `TemplateError`였다. 어떤 쌍도 가리키지 않는 delimiters 옵션은 코어의 message를 가진 `DelimiterError`다. assets의 job npm은 그 archive를 pack하고 설치하고 import하며 그것으로 템플릿 하나를 컴파일한다.
 
 - release 0.0.27의 소비자가 이 release를 받으려면 할 일. 패키지는 Rust 코어와 binding이 그것에서 생성한 바인딩의 것이다. 0.0.27의 손으로 쓴 패키지는 legacy 패키지이며 release되지 않는다.
