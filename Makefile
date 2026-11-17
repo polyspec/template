@@ -1280,11 +1280,6 @@ BINDING_ADDON := template.$(BINDING_PLATFORM).node
 # installed (`./template.<platform>.node`), so a consumer that links this checkout with .links runs the Node binding of its
 # source (T28.106): the release build of the crate, as release-npm-platform builds it, without test features. binding 0.0.16
 # gives this recipe as checkout-node-addon (B2.407).
-.PHONY: checkout-node-addon-build checkout-node-addon
-checkout-node-addon-build: bindings
-	$(CARGO) build --locked --release -p polyspec-template-node
-checkout-node-addon: checkout-node-addon-build
-	cp target/release/libpolyspec_template_node.$(BINDING_DYLIB) packages/ts/generated/$(BINDING_ADDON)
 # The native module of the Python binding in python-source of packages/python (polyspec/template/_native), which the package
 # imports, so a consumer that links this checkout with .links imports the Python binding of its source (T28.108), on the
 # principle of checkout-node-addon: maturin develop builds it in place with --skip-install, which installs nothing into the
