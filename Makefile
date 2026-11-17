@@ -378,7 +378,6 @@ ci-bindings: ## The job bindings: the tools, the graphs and the release recipes,
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
 	$(MAKE) --no-print-directory template-install-bindings
 	$(MAKE) --no-print-directory release-recipes
-	$(MAKE) --no-print-directory release-php-ext PHP=php
 	$(MAKE) --no-print-directory ci-targets TARGETS="lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go consumer-phpstan-ci"
 
 # A job whose targets run the conformance of TypeScript builds the language service, and with it the WebAssembly module of the
@@ -1412,8 +1411,8 @@ release-recipes:
 # The job php-ext runs the consumer check on the candidate archives of the committed HEAD for the version of the first section of
 # CHANGELOG.md, which is the released version before a release commit and the version of that commit after it (T28.141).
 .PHONY: consumer-phpstan-ci
-consumer-phpstan-ci: ## The consumer check of the job php-ext: the candidate archives of the first section of CHANGELOG.md, then consumer-phpstan-check; ONLINE
-	v="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"; $(MAKE) --no-print-directory release-candidate-assets VERSION="$$v" && $(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$v"
+consumer-phpstan-ci: ## The consumer check of the job bindings: the candidate archives of the first section of CHANGELOG.md, then its platform zip of the PHP extension (release-php-ext, after the candidate step, which clears var/release/assets), then consumer-phpstan-check; ONLINE
+	v="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"; $(MAKE) --no-print-directory release-candidate-assets VERSION="$$v" && $(MAKE) --no-print-directory release-php-ext PHP=php && $(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$v"
 
 # The consumer check of the stub (T28.141): the PHP extension archive of release-candidate-assets (VERSION) carries the stub
 # that binding generates; PHPStan of a consumer reads the classes of the extension from it with scanFiles. The probe must fail
