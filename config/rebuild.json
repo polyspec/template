@@ -182,6 +182,10 @@
       "kind": "ecosystem",
       "tool": "npm pack and install, go mod, cargo and composer install the packages of the repository outside the workspace"
     },
+    "scripts/check-release-install.mts": {
+      "kind": "ecosystem",
+      "tool": "npm packs and installs the archives of npm of a release in an empty folder, and node loads their entries"
+    },
     "scripts/check-rules.mts": {
       "kind": "policy",
       "reason": "polyspec rule CNF-2, CNF-3: the stage of a conformance case is 1, 2 or 3; kit checks its requirements"

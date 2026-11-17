@@ -378,6 +378,7 @@ ci-assets-npm: ## The job npm of assets.yml: the npm package with the wasm-bindg
 	$(MAKE) --no-print-directory install-wasm-bindgen
 	$(if $(filter true,$(RELEASE)),$(MAKE) --no-print-directory release-binding-check,$(MAKE) --no-print-directory bindings-check)
 	$(MAKE) --no-print-directory release-npm
+	$(MAKE) --no-print-directory release-install-check
 
 # ---- Release (.github/workflows/release.yml, config/release.json) -----------------------------------------------------------
 # release-tag tags the commit of the successful CI run RUN with vX.Y.Z, X.Y.Z the newest section of the change log of that
@@ -640,8 +641,8 @@ template-install-vscode: ## Install the VS Code of the integration test into var
 
 # The release steps are the release targets above (config/release.json). The archives are built from the
 # built npm packages, so the targets that build them run those builds first.
-release-candidate-assets: build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler
-release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-codemirror template-build-compiler)
+release-candidate-assets: build-ts template-build-language template-build-lsp template-build-compiler
+release-assets: $(if $(findstring /,$(TAG)),,build-ts template-build-language template-build-lsp template-build-compiler)
 
 template-install-browsers: ## Install the Chromium of Playwright and its system packages, after make install
 	$(ONLINE) $(PLAYWRIGHT) install --with-deps chromium
@@ -933,6 +934,12 @@ template-install-workspace-check:
 	$(NODE) scripts/check-install-workspace.mts
 package-installs-check: typed-generator
 	$(NODE) scripts/check-package-installs.mts
+# The archives of npm that a release carries install from what releases carry alone (T28.129): the archive of
+# @polyspec/template that make release-npm packed into var/release/assets/npm, the archives of the language service and the
+# language server, and the archive of @polyspec/json of its release, which the install fetches.
+.PHONY: release-install-check
+release-install-check: template-build-lsp ## Install the npm archives of a release in an empty folder and import them, after make release-npm; ONLINE
+	$(ONLINE) $(NODE) scripts/check-release-install.mts --template var/release/assets/npm/polyspec-template-$($(NODE) -p 'require("./packages/ts/package.json").version').tgz
 
 # scripts/generate-error-codes.mts writes the error-code list of each implementation from the code tables of
 # docs/spec/errors.md (T22.6-15); error-codes-check checks that every list is current.

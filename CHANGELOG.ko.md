@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+- release가 release 0.0.27이 싣던 `@polyspec/template-codemirror`의 archive를 싣지 않는다(T28.129). language service가 이제 코어의 WebAssembly module로 파싱하는데, browser가 그것을 쓸 조건이 아직 없다. 바인딩의 entry가 browser용으로 묶이고, browser에서 그것을 load하는 시험이 있고, 크기와 키 입력당 분석 시간이 측정되면 그 archive를 다시 싣는다. assets의 job npm이 release의 npm archive를 `@polyspec/json` 릴리스의 archive와 `allow-remote=root`로 빈 폴더에 설치하고 import한다. CI가 commit마다 그것을 돌린다. consumer가 적을 것은 `docs/operations/publication.md`가 적는다.
+
 - `@polyspec/template`이 `./render`로 싣는 TypeScript renderer가 렌더하던 자리에서 명세의 오류를 낸다(T28.119). map, list, native object에서 type이 어떤 항목도 가리키지 않는 key는 `runtime_type`이다(EXP-19). 그래서 `{= a[1.5]}`는 Rust 코어에서처럼 실패한다. 전에는 빈 text를 냈다. 소수부가 있는 정수 인자와 음수 count는 `runtime_type`이고, 2^53 − 1을 넘는 크기나 100을 넘는 소수 자릿수는 `runtime_limit`이다(FUN-50, FUN-20). 날짜 text는 그 달의 날을 가리켜야 한다(FUN-37). 짝 없는 surrogate의 `\uXXXX` escape는 `parse_invalid_escape`다(EXP-3). filesystem loader는 directory를 `load_failed`로 알린다(RT-10). renderer는 현재 conformance case를 돈다. 전에는 281개 가운데 263개의 사본을 돌았다.
 
 - language service `@polyspec/template-language`와 그 위의 언어 서버, VS Code 확장이 `@polyspec/template`의 WebAssembly entry를 통해 Rust 코어로 파싱한다(T28.122). 전에는 어느 release도 싣지 않는 패키지 `@polyspec/template-legacy`의 TypeScript parser로 파싱했다. 0.0.28의 archive를 설치했다면 그 패키지를 찾지 못했을 것이다. 패키지가 주는 code, 위치, 범위는 같다. 잘못된 delimiters 옵션은 전에는 code가 없었고 이제 `argument_delimiters`이며, 그 message는 코어의 것이다. VS Code 확장의 언어 서버는 `dist/server.mjs`이고 WebAssembly module 둘이 그 옆에 있다.

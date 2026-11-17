@@ -19,6 +19,8 @@ export const RUNS: Record<string, string> = {
 export const PHP_BUILD = 'make release-php-ext PHP=php EXPECTED_PHP_MINOR=$(EXPECTED_PHP_MINOR) $(if $(LLVM_PATH),LLVM_ROOT=$(LLVM_PATH))';
 export const PLATFORM_BUILD = 'make ci-targets TARGETS="release-go-static release-wheel release-npm-platform"';
 export const NPM_BUILD = 'make release-npm';
+/** The check that installs the npm archives of a release, which the job npm runs after its build (T28.129). */
+export const NPM_INSTALL_CHECK = 'make release-install-check';
 // The release check runs only when the workflow release calls assets.yml with release true.
 export const RELEASE_CHECK = '$(if $(filter true,$(RELEASE)),make release-binding-check,make bindings-check)';
 const BUILDS: Record<string, string> = { platform: PLATFORM_BUILD, php: PHP_BUILD, npm: NPM_BUILD };
@@ -99,6 +101,11 @@ export function assetWorkflowFindings(text: string, minors: readonly string[], m
     }
     for (const [before, after] of [['make install-tools TOOLS="rust go"', 'make template-install-rust'], ['make template-install-rust', 'make release-recipes'], ['make template-install-go', RELEASE_CHECK], ['make release-recipes', RELEASE_CHECK]] as const) {
       if (commands.indexOf(before) >= commands.indexOf(after)) failures.push(`${name}: ${before} must precede ${after}`);
+    }
+    // The archives of npm of a release install from what releases carry: the job npm checks it after it packed @polyspec/template.
+    if (name === 'npm') {
+      const checks = commands.flatMap((line, index) => line === NPM_INSTALL_CHECK ? [index] : []);
+      if (checks.length !== 1 || (checks[0] ?? -1) <= build) failures.push(`${name}: ${NPM_INSTALL_CHECK} must run once in the recipe after its build`);
     }
     if (name === 'php') {
       const setup = job.steps.flatMap((step, index) => step.uses?.startsWith(SETUP) ? [index] : []);

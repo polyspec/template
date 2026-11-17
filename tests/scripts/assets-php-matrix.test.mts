@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
-import { assetWorkflowFindings, NPM_BUILD, PHP_BUILD, PLATFORM_BUILD, RELEASE_CHECK, RUNS } from './assets-workflow.mts';
+import { assetWorkflowFindings, NPM_BUILD, NPM_INSTALL_CHECK, PHP_BUILD, PLATFORM_BUILD, RELEASE_CHECK, RUNS } from './assets-workflow.mts';
 import { ROOT } from './workflows.mts';
 import { isJsonObject } from '../runner/checked.mts';
 
@@ -36,7 +36,7 @@ const prepared = ['make install-tools TOOLS="rust go"', 'make template-install-r
 const recipes = {
   platform: [...prepared, 'make install-tools TOOLS="uv python"', 'make release-recipes', RELEASE_CHECK, PLATFORM_BUILD],
   php: ['@test -n "$(EXPECTED_PHP_MINOR)" || exit 2', ...prepared, 'make release-recipes', RELEASE_CHECK, PHP_BUILD],
-  npm: [...prepared, 'make release-recipes', 'make install-wasm-bindgen', RELEASE_CHECK, NPM_BUILD],
+  npm: [...prepared, 'make release-recipes', 'make install-wasm-bindgen', RELEASE_CHECK, NPM_BUILD, NPM_INSTALL_CHECK],
 };
 type Recipes = typeof recipes & { extra?: string[] };
 const makefileOf = (value: Recipes) => Object.entries(value).map(([name, lines]) => recipe(`ci-assets-${name}`, lines)).join('');
@@ -99,6 +99,8 @@ const recipeMutations: [string, (value: Recipes) => void][] = [
   ['missing build', value => { value.php = without(value.php, PHP_BUILD); }],
   ['missing crate inputs', value => { value.php = without(value.php, 'make template-install-rust'); }],
   ['missing release recipes', value => { value.npm = without(value.npm, 'make release-recipes'); }],
+  ['missing install check of the npm archives', value => { value.npm = without(value.npm, NPM_INSTALL_CHECK); }],
+  ['install check of the npm archives before the build', value => { value.npm = [NPM_INSTALL_CHECK, ...without(value.npm, NPM_INSTALL_CHECK)]; }],
   ['release check ignores release input', value => { value.php = value.php.map(line => line === RELEASE_CHECK ? 'make release-binding-check' : line); }],
   ['release check after the build', value => { value.php = [...without(value.php, RELEASE_CHECK), RELEASE_CHECK]; }],
   ['install after the build', value => { value.platform = [...without(value.platform, 'make install-tools TOOLS="uv python"'), 'make install-tools TOOLS="uv python"']; }],

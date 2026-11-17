@@ -21,13 +21,6 @@
       "runtime": "ts"
     },
     {
-      "kind": "npm",
-      "directory": "packages/codemirror",
-      "name": "@polyspec/template-codemirror",
-      "product": "template-codemirror",
-      "runtime": "ts"
-    },
-    {
       "kind": "composer",
       "directory": "packages/php-ext",
       "name": "polyspec/template",
@@ -39,7 +32,7 @@
     "package.json": "version",
     "packages/language/package.json": "archive",
     "packages/lsp/package.json": "archive",
-    "packages/codemirror/package.json": "archive",
+    "packages/codemirror/package.json": "version",
     "packages/vscode/package.json": "version",
     "packages/rust/Cargo.toml": "git-tag",
     "packages/ts/package.json": "version",
