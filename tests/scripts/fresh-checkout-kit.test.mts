@@ -1,5 +1,5 @@
 // Tests that a fresh checkout, the tracked files of HEAD without node_modules, does not reach a missing script path or
-// an exit 0 without an asset when kit is missing (T28.150, T28.151): the install stops with the step that makes kit
+// an exit 0 without an asset when kit is missing (T28.150): the install stops with the step that makes kit
 // (make bootstrap), and the release targets stop with the same message. The test reads the tracked files of HEAD, so it
 // judges what is committed, and writes the checkout that it runs in.
 import assert from 'node:assert/strict';

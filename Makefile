@@ -682,7 +682,7 @@ template-install-vscode: ## Install the VS Code of the integration test into var
 
 # The release steps are the release targets above (config/release.json). The archives are built from the
 # built npm packages, so the targets that build them run those builds first.
-# kit-check stops the release targets first when the kit of node_modules is missing (T28.151): their prerequisites would
+# kit-check stops the release targets first when the kit of node_modules is missing (T28.150): their prerequisites would
 # otherwise fail with the errors of the missing node of var/tools, and no check would name the kit.
 .PHONY: kit-check
 kit-check: ## Fail with the step that makes kit when node_modules holds no kit (a fresh checkout runs make bootstrap first)
