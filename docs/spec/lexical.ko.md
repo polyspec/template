@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-lexical -->
-<!-- source-sha256: 951cbefa1e33bda862b8dcd1abf2aaa00c11498b06274bbddc368f6c19f39b83 -->
+<!-- source-sha256: e899b31c27853f649e3245a3cfbb59ee273b9183c72170051c564040d2bedd55 -->
 # 렉시컬 규칙
 
 [English](/spec/lexical).
@@ -255,4 +255,4 @@ var page = {"id":7};
 
 Source span과 AST span은 바이트 offset 두 개로 이루어진 네이티브 값이다. 오류 코드는 네이티브 타입 문자열·enum 텍스트 접근자·상수 목록에서 catalog 텍스트를 유지한다. 저장한 검증된 줄 시작 sequence는 네이티브 배열·list·slice 형식 또는 Rust의 `LineIndex::from_starts`로 복원하여 같은 바이트 위치 조회에 사용할 수 있다. 이 데이터 형식은 공개 SDK import를 통해 공통 source fixture와 비교한다.
 
-네이티브 parse 설정은 TypeScript·Go·Rust·Python의 `ParseOptions`와 PHP·PHP 확장의 선택적 parse 인자로 구분자 설정을 명명한다. 구분자 쌍 데이터는 TypeScript의 `{open, close}`, Go·Rust·PHP·PHP 확장의 두 문자로 인코딩한 설정, Python의 기본 구분자 tuple이다. 각 형식은 같은 여는 문자·닫는 문자를 뜻하며 parsing 시 LEX-21/22에 따라 설정을 검증한다. 요청 실패는 템플릿 오류(ERR-1)와 네이티브 인자 실패(ERR-13)를 구분한다. Rust는 둘 다 `TemplateError`로 알리며 인자 실패는 `argument_*` kind다(ERR-15). Go는 네이티브 오류를 반환하며 TypeScript·PHP·PHP 확장·Python은 네이티브 예외를 던진다. legacy TypeScript 패키지는 잘못된 parse 구분자를 `DelimiterOptionError`로 명명하고 Rust는 kind `argument_delimiters`로 명명한다. 생성 바인딩은 그 kind를 value 오류의 kind로 주고, language service는 format 오류의 code로 준다. 다른 identity는 네이티브 형식을 유지하며 템플릿 오류 코드는 아니다.
+네이티브 parse 설정은 TypeScript·Go·Rust·Python의 `ParseOptions`와 PHP·PHP 확장의 선택적 parse 인자로 구분자 설정을 명명한다. 구분자 쌍 데이터는 TypeScript의 `{open, close}`, Go·Rust·PHP·PHP 확장의 두 문자로 인코딩한 설정, Python의 기본 구분자 tuple이다. 이것은 Rust 코어와 legacy 패키지의 꼴이다. 생성 바인딩은 모든 target에서 그 설정을 text 하나인 `delimiters`로 받는다. TypeScript와 Go에서는 `ParseOptions`의 member이고, Python과 PHP 확장에서는 함수의 parameter다. 각 형식은 같은 여는 문자·닫는 문자를 뜻하며 parsing 시 LEX-21/22에 따라 설정을 검증한다. 요청 실패는 템플릿 오류(ERR-1)와 네이티브 인자 실패(ERR-13)를 구분한다. Rust는 둘 다 `TemplateError`로 알리며 인자 실패는 `argument_*` kind다(ERR-15). Go는 네이티브 오류를 반환하며 TypeScript·PHP·PHP 확장·Python은 네이티브 예외를 던진다. legacy TypeScript 패키지는 잘못된 parse 구분자를 `DelimiterOptionError`로 명명하고 Rust는 kind `argument_delimiters`로 명명한다. 생성 바인딩은 그 kind를 value 오류의 kind로 주고, language service는 format 오류의 code로 준다. 다른 identity는 네이티브 형식을 유지하며 템플릿 오류 코드는 아니다.

@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-formatting -->
-<!-- source-sha256: 9378e90c472fde3e88cf8f35acd46e19253dfb74a9f41069e103b6920d409735 -->
+<!-- source-sha256: 30849d96a49d9d0253da3b8a0ce8c4d8e0bb287ae4814cf2b943b1266f56b453 -->
 # 포맷
 
 [English](/spec/formatting).
@@ -107,4 +107,4 @@
 
 - **FMT-16** 모든 SDK는 formatter의 호출 signature, 옵션과 성공·실패 결과를 공개한다. 이름 있는 callable 계약으로 같은 SDK의 다른 진입점에서 공개한 구현을 기술할 수 있다. 공개 구현은 formatting 동작을 바꾸는 adapter 없이 이 계약을 충족한다. 옵션, 결과, callable 계약은 구현을 공개하는 패키지에 속한다. `@polyspec/template-language`의 TypeScript 포매터는 `Formatter`, `FormatOptions`, `FormatResult`, `FormatError`를 FMT-17과 FMT-18의 옵션으로 직접 선언하고, legacy TypeScript 패키지의 타입을 받지 않는다. legacy 패키지의 `Formatter`는 물린 FMT-9의 옵션을 적으며 이 저장소의 어떤 구현도 기술하지 않는다. 이유: 옵션 타입을 다른 패키지에서 받는 패키지는 그 패키지가 옵션을 유지하는 동안 옵션을 바꿀 수 없다.
 
-공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `keepIndentation`, `templateBlocks`를 제공한다. `legacy/`의 패키지에는 `keepIndentation`이 없다(FMT-9). TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.
+공개 옵션 데이터는 네이티브 필드 표기로 `name`, `delimiters`, `range`, `indent`, `keepIndentation`, `templateBlocks`를 제공한다. `legacy/`의 패키지에는 `keepIndentation`이 없다(FMT-9). TypeScript는 interface와 판별 결과 union을, Go는 루트 alias·네이티브 `format` record·오류 반환을 사용한다. Rust는 struct·`Result`·`TemplateError`·`TemplateBlocks`를, PHP와 PHP 확장은 옵션 배열과 `FormatResult`·`FormatError` 값을, Python은 공개 dataclass를 사용한다. 이것은 Rust 코어와 legacy 패키지의 꼴이다. 생성 바인딩은 함수 `format`을 target의 이름으로 준다. 그 함수는 옵션을 레코드 `FormatOptions`로 받고 Python과 PHP 확장에서는 함수의 parameter로 받으며, `text`와 `changed`를 담은 레코드 `Formatted`를 반환한다. 실패는 code를 `kind`로 담은 바인딩의 오류이고(ERR-1) `format`이 반환하는 값이 아니다. Go의 `KeepIndentation`은 null indent를 나타내며 범위 record는 `Start`·`End`를 제공한다. 성공은 `text`와 `changed`, 실패는 `reason`·`code`·`line`·`col`·자유로운 영어 `message`를 제공한다. 오류 이유 세 개와 블록 모드 두 개의 정규 리터럴은 모든 SDK에서 같다. 공개 facade와 네이티브 이름은 같은 데이터와 formatter를 가리킨다. Go alias의 대입 호환성과 두 진입점의 호출, Python 재수출의 동일성을 공유 SDK 결과와 함께 검증한다. PHP의 static `Formatter` 클래스는 네이티브 formatter provider다.

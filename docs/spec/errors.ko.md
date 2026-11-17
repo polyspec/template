@@ -1,5 +1,5 @@
 <!-- doc-id: docs-spec-errors -->
-<!-- source-sha256: eeb60284f8fdaeaefd4c89786994fd7eed3c1a294ef2dc5938fe72a27965cd67 -->
+<!-- source-sha256: 35df6bb22aaf9a84c12c7b6dfca11e10d363b48bace7cb32d08189337a63ca85 -->
 # 오류
 
 [English](/spec/errors).
@@ -8,7 +8,7 @@
 
 - **ERR-1** 오류는 `code`, `template`, `line`, `col`, `offset`, `end`, `message` 필드를 가진 객체다. `code`는 이 문서에 나열된 코드 중 하나이며 오류의 kind로, 소문자 snake_case로 쓴다: 모든 polyspec 라이브러리의 kind가 같은 형식이므로 여러 라이브러리의 오류를 다루는 host는 한 kind 형식으로 오류를 구별한다. TypeScript, Go, PHP, PHP extension, Python의 legacy 구현은 없어질 때까지 코드를 `E_`와 대문자 kind로 적는다(`data_depth`는 `E_DATA_DEPTH`). language service `packages/language`와 그 위의 편집기 패키지(`packages/lsp`, `packages/vscode`, `packages/codemirror`)는 자기가 공개하는 모든 code, 즉 format 오류의 code, diagnostic의 code, 명령 출력 줄의 code에 kind를 준다. language service는 `@polyspec/template`의 WebAssembly 바인딩을 통해 Rust 코어로 파싱하고 코어의 code를 준다. 그래서 편집기와 Rust 코어는 하나의 오류를 하나의 text로 부른다. 잘못된 delimiters 옵션의 code는 `argument_delimiters`다(ERR-15). 생성 바인딩이 던진 오류는 kind만 담고 위치를 담지 않는다. 그래서 language service는 파싱 오류의 위치를 prefix 분석의 오류 객체에서 읽는다(EDT-11). 짝 없는 surrogate를 담은 text와 UTF-8이 아닌 바이트는 바인딩을 지나 코어에 닿지 않는다. 그래서 language service가 host의 text에서 그 위치를 찾아 거기에 `lex_invalid_utf8`을 준다(LEX-17). `template`은 오류가 위치한 템플릿의 이름이다. `message`는 영어 자유 텍스트다. Rust 코어의 오류 text는 한 곳에서 쓰며 세 형식이 있다. `template`이 비어 있고 위치가 없는, 즉 `line`이 0이고 `col`이 0인 오류의 text는 `kind: message`다. `template` 이름이 있고 `line`이 0, `col`이 0인 오류의 text는 `kind in template at 0:0: message`다(ERR-5, ERR-6). 위치가 있는 오류의 text는 `kind in template at line:col: message`다. 이유: 한 오류는 그것을 거부하는 모든 자리에서 한 text를 가지며, template도 위치도 없는 오류는 보일 것이 둘 다 없다.
 
-SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 필드를 제공한다. TypeScript는 `ErrorObject`와 `TemplateError.toObject`, Go는 `errs.Error`의 공개 필드와 `JSON`, Rust는 `TemplateError` 필드와 직렬화 구현을 사용한다. PHP와 PHP 확장은 `TemplateError.toArray`를 사용하며 속성 이름은 `errorCode`, `errorLine`, `errorCol`이고 메시지는 네이티브 예외에서 읽는다. Python은 `TemplateError` 속성과 `to_object`를 사용한다. 네이티브 생성자나 구조체 리터럴은 같은 값을 만든다. 위치 factory는 바이트 span과 줄 인덱스를 받고, 위치 없는 factory 또는 위치에 0을 넣는 TypeScript 생성자는 위치 필드 네 개에 모두 0을 유지한다.
+SDK는 네이티브 오류 값과 일반 데이터 변환을 통해 이 일곱 필드를 제공한다. 생성 바인딩에는 class `TemplateError`가 없다. 생성 바인딩이 던지는 오류는 자기 category의 class, 곧 `TemplateValueError`, `TemplateTypeError`, `TemplateIoError`, `TemplateStoreError`, `TemplateBusyError`, `TemplateInternalError` 가운데 하나의 인스턴스이고, kind를 `kind`로 담으며 위치를 담지 않는다(ERR-1). 일곱 필드는 prefix 분석의 `error`인 레코드 `TemplateErrorObject`다(EDT-11). 아래의 꼴은 Rust 코어와 legacy 패키지의 것이다. TypeScript는 `ErrorObject`와 `TemplateError.toObject`, Go는 `errs.Error`의 공개 필드와 `JSON`, Rust는 `TemplateError` 필드와 직렬화 구현을 사용한다. PHP와 PHP 확장은 `TemplateError.toArray`를 사용하며 속성 이름은 `errorCode`, `errorLine`, `errorCol`이고 메시지는 네이티브 예외에서 읽는다. Python은 `TemplateError` 속성과 `to_object`를 사용한다. 네이티브 생성자나 구조체 리터럴은 같은 값을 만든다. 위치 factory는 바이트 span과 줄 인덱스를 받고, 위치 없는 factory 또는 위치에 0을 넣는 TypeScript 생성자는 위치 필드 네 개에 모두 0을 유지한다.
 
 - **ERR-2** `line`은 1부터 시작하며 오류 위치 앞의 `\n` 바이트 수를 센다. `col`은 그 줄의 시작부터 오류 위치까지의 1부터 시작하는 바이트 오프셋이다. `offset`과 `end`는 오류가 가리키는 토큰 또는 노드의 바이트 범위 `[offset, end)`다. `offset`이 오류 위치다.
 
