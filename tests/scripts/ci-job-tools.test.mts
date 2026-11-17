@@ -5,7 +5,7 @@
 // The job go lacked the Rust toolchain after binding generate started to read the crates with cargo metadata (T28.105-1).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +45,29 @@ const commandsOf = (job: string): string[] => RELEASES.flatMap(release => comman
 // ignores, so a job that builds the language service builds that module first (T28.122).
 const LANGUAGE_BUILD = /\/build-package\.mts --package language\b/u;
 const WASM_MODULE = /\/shims\/wasm-bindgen --target web --out-dir packages\/ts\/wasm\/generated\b/u;
+// The compiler parses with the Rust core through the same module (T28.140): packages/compiler/src/core.mts imports it. A
+// command runs the compiler when it builds the package of the compiler, whose declarations tsc writes from that module, or
+// when it names a script of the repository whose relative imports reach packages/compiler/src/core.mts.
+const COMPILER_BUILD = /\/build-package\.mts --package compiler\b/u;
+const COMPILER_CORE = 'packages/compiler/src/core.mts';
+const SCRIPT = /(?<=\s)(?:scripts|tests|examples)\/[\w./-]+\.m[jt]s\b/gu;
+const RELATIVE_IMPORT = /(?:from|import)\s*\(?\s*["'](\.\.?\/[^"']+)["']/gu;
+const reaches = new Map<string, boolean>();
+/** Whether the relative imports of the module `file` of the repository reach the parser of the compiler. */
+const loadsCompilerCore = (file: string): boolean => {
+  if (file === COMPILER_CORE) return true;
+  const known = reaches.get(file);
+  if (known !== undefined) return known;
+  // A module that imports itself through others is judged by its other imports.
+  reaches.set(file, false);
+  const source = path.join(ROOT, file);
+  const found = existsSync(source) && [...readFileSync(source, 'utf8').matchAll(RELATIVE_IMPORT)]
+    .some(match => loadsCompilerCore(path.posix.join(path.posix.dirname(file), match[1] ?? '')));
+  reaches.set(file, found);
+  return found;
+};
+/** Whether the command builds the compiler or runs a script that loads its parser. */
+const runsCompiler = (command: string): boolean => COMPILER_BUILD.test(command) || (command.match(SCRIPT) ?? []).some(loadsCompilerCore);
 const BINDING_CHECK = /\/binding check \S/u;
 const GO_MODULES = /-u GOPROXY .*\/shims\/go mod download\b/u;
 
@@ -98,7 +121,30 @@ for (const job of [...new Set(jobs)].sort()) test(`${job} installs every tool th
     const language = commands.findIndex(command => LANGUAGE_BUILD.test(command));
     const wasm = commands.findIndex(command => WASM_MODULE.test(command));
     assert.ok(language < 0 || (wasm >= 0 && wasm < language), `${job} with RELEASE=${release} builds the language service before the WebAssembly module of the core`);
+    const compiler = commands.findIndex(runsCompiler);
+    assert.ok(compiler < 0 || (wasm >= 0 && wasm < compiler), `${job} with RELEASE=${release} runs the compiler before the WebAssembly module of the core: ${commands[compiler]?.slice(0, 200)}`);
   }
+});
+
+// A target whose own recipe runs the compiler names the build of the WebAssembly module among its prerequisites, so make
+// builds the module whichever target a job or a developer starts with (T28.140). The targets are the rules of the Makefile
+// with such a recipe line; the dry run of each shows the commands of its prerequisites before its own.
+test('every target whose recipe runs the compiler builds the WebAssembly module of the core first', { timeout: 600_000 }, () => {
+  const targets = new Set<string>();
+  let rule: string[] = [];
+  for (const line of readFileSync(path.join(ROOT, 'Makefile'), 'utf8').split('\n')) {
+    const header = /^([a-z][a-z0-9-]*(?: [a-z][a-z0-9-]*)*):(?!=)/u.exec(line);
+    if (header) rule = (header[1] ?? '').split(' ');
+    else if (line.startsWith('\t') && runsCompiler(line.replace('$(NODE)', 'node'))) for (const target of rule) targets.add(target);
+  }
+  assert.ok(targets.has('template-build-compiler') && targets.has('conformance-generated-ts') && targets.has('showcase-compile'), `targets: ${[...targets].join(' ')}`);
+  const unbuilt = [...targets].sort().filter(target => {
+    const commands = dryRun([target], 'false');
+    const compiler = commands.findIndex(runsCompiler);
+    const wasm = commands.findIndex(command => WASM_MODULE.test(command));
+    return compiler < 0 || wasm < 0 || wasm > compiler;
+  });
+  assert.deepEqual(unbuilt, []);
 });
 
 // make expands `$(...)` of a recipe itself and gives the shell only `$$(...)`: the name of the archive of

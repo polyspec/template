@@ -817,7 +817,11 @@ format-external-check: template-build-language ## Run the formatter safety invar
 
 # The repository runs the TypeScript of packages/compiler/src by type stripping; the published package ships the build of
 # dist/ that tsup bundles from it, with the declarations of tsc (S9).
-template-build-compiler: build-ts ## Build the compiler package @polyspec/template-compiler
+# The compiler parses with the Rust core through the WebAssembly module of packages/ts and reads the AST with the renderer of
+# packages/ts/render (T28.140): build-ts builds the renderer and checkout-wasm the module, as the language service has them.
+# Every target whose recipe runs the compiler from its sources names checkout-wasm too, so make and the dry run of a job
+# know that it needs the module (tests/scripts/ci-job-tools.test.mts).
+template-build-compiler: build-ts checkout-wasm ## Build the compiler package @polyspec/template-compiler, after the WebAssembly module of the core
 	$(NODE) scripts/build-package.mts --package compiler
 
 template-test-compiler-types: template-build-compiler ## Build the compiler package and type check its sources
@@ -882,16 +886,16 @@ conformance-php: build-ts template-build-language build-php ## Conformance suite
 delimiter-matrix: build-ts template-build-language build-go build-rust build-php ## Exercise every valid delimiter pair in every language
 	$(NODE) tests/runner/delimiter-matrix.mts
 
-conformance-generated-ts: build-ts ## TypeScript generated compiler conformance suite
+conformance-generated-ts: build-ts checkout-wasm ## TypeScript generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-ts.mts
 
-conformance-generated-go: build-ts ## Go generated compiler conformance suite
+conformance-generated-go: build-ts checkout-wasm ## Go generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-go.mts
 
-conformance-generated-rust: build-ts ## Rust generated compiler conformance suite
+conformance-generated-rust: build-ts checkout-wasm ## Rust generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-rust.mts
 
-conformance-generated-php: build-ts build-php ## PHP generated compiler conformance suite
+conformance-generated-php: build-ts checkout-wasm build-php ## PHP generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-php.mts
 
 conformance-python: build-ts template-build-language python-package ## Conformance suite of TypeScript and Python
@@ -943,7 +947,7 @@ test-python: template-test-python ## Unit tests of the Python package
 template-test-python: python-package
 	PYTHONUNBUFFERED=1 NO_COLOR=1 PYTHON_COLORS=0 $(NODE) $(KIT)/run-tests.$(KIT_EXT) python --venv $(PYTHON_VENV) -- discover -s $(PYTHON_PACKAGE)/tests -t $(PYTHON_PACKAGE)
 
-conformance-generated-python: build-ts python-package ## Python generated compiler conformance suite
+conformance-generated-python: build-ts checkout-wasm python-package ## Python generated compiler conformance suite
 	$(NODE) tests/runner/conformance-generated-python.mts
 
 conformance-all-modes: conformance conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python ## AST and generated conformance in every language
@@ -962,10 +966,10 @@ template-install-workspace-check:
 package-installs-check: typed-generator
 	$(NODE) scripts/check-package-installs.mts
 # The archives of npm that a release carries install from what releases carry alone (T28.129): the archive of
-# @polyspec/template that make release-npm packed into var/release/assets/npm, the archives of the language service and the
-# language server, and the archive of @polyspec/json of its release, which the install fetches.
+# @polyspec/template that make release-npm packed into var/release/assets/npm, the archives of the language service, the
+# language server and the compiler (T28.140), and the archive of @polyspec/json of its release, which the install fetches.
 .PHONY: release-install-check
-release-install-check: template-build-lsp ## Install the npm archives of a release in an empty folder and import them, after make release-npm; ONLINE
+release-install-check: template-build-lsp template-build-compiler ## Install the npm archives of a release in an empty folder and import them, after make release-npm; ONLINE
 	$(ONLINE) $(NODE) scripts/check-release-install.mts --template var/release/assets/npm/polyspec-template-$$($(NODE) -p 'require("./packages/ts/package.json").version').tgz
 
 # scripts/generate-error-codes.mts writes the error-code list of each implementation from the code tables of
@@ -1092,21 +1096,21 @@ showcase-site-check: showcase-build-check
 showcase-html-check: showcase-site-check
 	$(NODE) scripts/check-showcase-html.mts
 
-showcase-compile: build-ts ## Build the canonical AST artifacts of the showcase
+showcase-compile: build-ts checkout-wasm ## Build the canonical AST artifacts of the showcase
 	$(NODE) examples/showcase/compile.mts --refresh true
 
 generated-native-check: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check ## Execute generated member and class calls with native, typed and bound values, typed locals that decode once, and typed request argument errors, in every core language
 
 .PHONY: generated-native-calls-check generated-typed-values-check generated-typed-locals-check generated-arguments-check generated-bound-data-check
-generated-native-calls-check: build-ts build-php python-package
+generated-native-calls-check: build-ts checkout-wasm build-php python-package
 	$(NODE) scripts/check-generated-native-calls.mts
-generated-typed-values-check: build-ts build-php python-package
+generated-typed-values-check: build-ts checkout-wasm build-php python-package
 	$(NODE) scripts/check-generated-typed-values.mts
-generated-typed-locals-check: build-ts
+generated-typed-locals-check: build-ts checkout-wasm
 	$(NODE) scripts/check-generated-typed-locals.mts
-generated-arguments-check: build-ts build-php python-package
+generated-arguments-check: build-ts checkout-wasm build-php python-package
 	$(NODE) scripts/check-generated-arguments.mts
-generated-bound-data-check: build-ts build-php python-package
+generated-bound-data-check: build-ts checkout-wasm build-php python-package
 	$(NODE) scripts/check-generated-bound-data.mts
 
 typed-generator: showcase-compile contract-generate ## Generate type-fixed host source from canonical AST and the contract declarations of the adapters
@@ -1118,13 +1122,13 @@ typed-generator-check: typed-generator ## Verify type-fixed generated source is 
 compiler-ir-check: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check ## Verify canonical AST coverage and type/scope rejection in the shared compiler IR
 
 .PHONY: ast-artifact-check generated-artifact-check compiler-ir-rules-check conformance-type-manifest-check
-ast-artifact-check: build-ts
+ast-artifact-check: build-ts checkout-wasm
 	$(NODE) scripts/check-ast-artifact.mts
 generated-artifact-check: build-ts showcase-compile
 	$(NODE) scripts/check-generated-artifact.mts
 compiler-ir-rules-check: build-ts
 	$(NODE) scripts/check-compiler-ir.mts
-conformance-type-manifest-check: build-ts
+conformance-type-manifest-check: build-ts checkout-wasm
 	$(NODE) scripts/check-conformance-type-manifest.mts
 
 typed-generator-compile-check: build-php python-package compiler-ir-check typed-generator-check ## Compile-check all type-fixed generated sources
