@@ -1152,7 +1152,7 @@ dependencies = [
 
 [[package]]
 name = "polyspec-template"
-version = "0.0.31"
+version = "0.0.32"
 dependencies = [
  "clap",
  "js-sys",
@@ -1168,7 +1168,7 @@ dependencies = [
 
 [[package]]
 name = "polyspec-template-go"
-version = "0.0.31"
+version = "0.0.32"
 dependencies = [
  "polyspec-binding-core",
  "polyspec-json",
@@ -1177,7 +1177,7 @@ dependencies = [
 
 [[package]]
 name = "polyspec-template-node"
-version = "0.0.31"
+version = "0.0.32"
 dependencies = [
  "napi",
  "napi-build",
@@ -1189,7 +1189,7 @@ dependencies = [
 
 [[package]]
 name = "polyspec-template-php-ext"
-version = "0.0.31"
+version = "0.0.32"
 dependencies = [
  "ext-php-rs",
  "polyspec-binding-core",
@@ -1199,7 +1199,7 @@ dependencies = [
 
 [[package]]
 name = "polyspec-template-python"
-version = "0.0.31"
+version = "0.0.32"
 dependencies = [
  "polyspec-binding-core",
  "polyspec-json",
@@ -1209,7 +1209,7 @@ dependencies = [
 
 [[package]]
 name = "polyspec-template-wasm"
-version = "0.0.31"
+version = "0.0.32"
 dependencies = [
  "js-sys",
  "polyspec-binding-core",

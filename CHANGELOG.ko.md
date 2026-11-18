@@ -6,6 +6,8 @@
 
 ## Unreleased
 
+## 0.0.32
+
 - Rust crate, npm 패키지, Python 패키지, PHP 확장, Go 모듈의 polyspec/binding을 0.0.22, polyspec/json을 0.0.40으로 고정합니다 (T28.156, T28.161). Python wheel은 polyspec-json==0.0.40을, PHP 확장은 polyspec/json 0.0.40을 요구합니다.
 - packages/python/requirements-bindings.txt의 json wheel digest를 손으로 쓰지 않고 pip hash로 씁니다. Go 모듈의 json 고정도 0.0.40으로 옮깁니다 (T28.161).
 - Python binding wheel을 kit의 link로 빌드하므로, link된 binding checkout은 자기 core로 빌드합니다 (T28.159).
