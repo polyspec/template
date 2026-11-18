@@ -1269,7 +1269,7 @@ test-binding-python-venv: bindings
 test-binding-python-clean: test-binding-python-venv
 	rm -rf $(BINDING_VAR)/wheels
 test-binding-python-wheel: test-binding-python-clean
-	cd packages/python && $(MATURIN) build --locked --interpreter $(BINDING_VAR)/venv/bin/python --features $(call binding_features,packages/python/Cargo.toml) --out $(BINDING_VAR)/wheels
+	cd packages/python && MATURIN=$(MATURIN) $(NODE) $(KIT_LINK) maturin $(CURDIR)/packages/python build --locked --interpreter $(BINDING_VAR)/venv/bin/python --features $(call binding_features,packages/python/Cargo.toml) --out $(BINDING_VAR)/wheels
 test-binding-python-install: test-binding-python-wheel
 	$(BINDING_VAR)/venv/bin/python -m pip install -q --no-index --find-links $(BINDING_PYTHON_FIND_LINKS) --force-reinstall $(BINDING_VAR)/wheels/*.whl
 test-binding-python: test-binding-python-install
