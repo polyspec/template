@@ -73,10 +73,10 @@ workspace = true
 # The JSON values of assign data, definitions and the environment, the JSON text of `json` and the text of a number
 # (VAL-9, VAL-12, FUN-26), the AST JSON (AST-7, AST-10), the artifact manifest (RT-56) and the output of the command
 # line: the one JSON reader and writer of polyspec.
-polyspec-json = { git = "https://github.com/polyspec/json.git", tag = "v0.0.38" }
+polyspec-json = { git = "https://github.com/polyspec/json.git", tag = "v0.0.40" }
 # The kind interface that the generated bindings read from the core error (binding design E-1, I-2 (3)), at the tag of the
 # release of binding, the source of the generated binding crates too (binding CK-20, CK-70).
-polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", tag = "v0.0.21" }
+polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", tag = "v0.0.22" }
 clap = { version = "4", features = ["derive"], optional = true }
 
 # The volume serial number and file index of an open file, the identity of a file of FsLoader on Windows; the standard
@@ -92,7 +92,7 @@ js-sys = "0.3.107"
 [dev-dependencies]
 # Only generated code makes a Raised; the tests make one through the feature `construct` to check that it reaches the
 # caller unchanged (FUN-46).
-polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", tag = "v0.0.21", features = ["construct"] }
+polyspec-binding-core = { git = "https://github.com/polyspec/binding.git", tag = "v0.0.22", features = ["construct"] }
 # tests/contract_cases.rs arms the fault injection points of the cases that name them, as a generated binding test does.
 # The core is its own dev-dependency with fault-test, so every test build of the core, a plain cargo test included, has
 # the points (binding GN-5).
