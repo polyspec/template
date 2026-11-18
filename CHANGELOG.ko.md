@@ -6,6 +6,13 @@
 
 ## Unreleased
 
+- Rust crate, npm 패키지, Python 패키지, PHP 확장, Go 모듈의 polyspec/binding을 0.0.22, polyspec/json을 0.0.40으로 고정합니다 (T28.156, T28.161). Python wheel은 polyspec-json==0.0.40을, PHP 확장은 polyspec/json 0.0.40을 요구합니다.
+- packages/python/requirements-bindings.txt의 json wheel digest를 손으로 쓰지 않고 pip hash로 씁니다. Go 모듈의 json 고정도 0.0.40으로 옮깁니다 (T28.161).
+- Python binding wheel을 kit의 link로 빌드하므로, link된 binding checkout은 자기 core로 빌드합니다 (T28.159).
+- test-binding-crates는 시험이 없는 binding crate의 시험 binary를 실행 없이 컴파일합니다 (T28.160).
+- 소비자 확인의 candidate 단계 뒤에 플랫폼 zip을 만들어 각 zip이 stub을 담습니다 (T28.157).
+- 개발 의존성의 peer React 19를 위해 @docsearch/react를 3.9.0으로 override합니다 (T28.155).
+
 ## 0.0.31
 
 - release는 binding이 만드는 stub `polyspec_template.stub.php`를 Composer package `polyspec/template`의 source 곁에 싣는다(T28.141). `config/release.json`이 `make bindings`의 출력을 `packages/php-ext`의 `generated`로 적고 kit가 그것을 archive에 담으므로, consumer의 정적 분석이 확장의 class를 archive에서 읽는다.

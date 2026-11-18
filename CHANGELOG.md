@@ -5,6 +5,13 @@
 
 ## Unreleased
 
+- Pin polyspec/binding 0.0.22 and polyspec/json 0.0.40 in the Rust crates, the npm and Python packages, the PHP extension and the Go module (T28.156, T28.161); the Python wheel requires polyspec-json==0.0.40 and the PHP extension requires polyspec/json 0.0.40.
+- Write the json wheel digests of packages/python/requirements-bindings.txt with their pip hash instead of by hand, and move the Go module pin of json to 0.0.40 (T28.161).
+- Build the Python binding wheel through the link of kit, so a linked binding checkout builds its own core (T28.159).
+- test-binding-crates compiles the test binaries of the binding crates without running a test, since they have none (T28.160).
+- Build the platform zip after the candidate step of the consumer check, so each zip carries the stub (T28.157).
+- Override @docsearch/react to 3.9.0 for the peer React 19 of the development dependencies (T28.155).
+
 ## 0.0.31
 
 - The release carries the stub `polyspec_template.stub.php` that binding generates beside the sources of the Composer package `polyspec/template` (T28.141): `config/release.json` declares the output of `make bindings` as `generated` of `packages/php-ext`, which the kit packs into the archive, so a static analysis of a consumer reads the classes of the extension from it.
