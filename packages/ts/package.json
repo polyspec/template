@@ -50,6 +50,6 @@
     ]
   },
   "dependencies": {
-    "@polyspec/json": "https://github.com/polyspec/json/releases/download/v0.0.40/polyspec-json-0.0.40.tgz"
+    "@polyspec/json": "0.0.40"
   }
 }
