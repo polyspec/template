@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-// A consumer of the PHP extension of polyspec/template: the seven names of its public API must resolve through the stub.
+// A consumer of the PHP extension: its seven public names must resolve through the stub.
 
 use Polyspec\Template\BoundMap;
 use Polyspec\Template\DefineInput;

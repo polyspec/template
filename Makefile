@@ -369,11 +369,12 @@ ci-php-ext: ## The job php-ext: Composer, the PHP symbols and the PHP dependency
 	$(MAKE) --no-print-directory install-symbols EXTRACTORS=php
 	$(MAKE) --no-print-directory template-install-php
 	$(MAKE) --no-print-directory ci-targets TARGETS="template-test-ext"
-	$(MAKE) --no-print-directory install-tools TOOLS="rust go"
+	$(MAKE) --no-print-directory install-tools TOOLS="rust go uv"
 	$(MAKE) --no-print-directory template-install-rust
 	$(MAKE) --no-print-directory template-install-go
+	$(MAKE) --no-print-directory release-recipes
 	$(MAKE) --no-print-directory install-wasm-bindgen
-	$(MAKE) --no-print-directory consumer-phpstan-ci
+	$(MAKE) --no-print-directory ci-targets TARGETS="consumer-phpstan-ci"
 ci-bindings: ## The job bindings: the tools, the graphs and the release recipes, then the binding checks; ONLINE
 	$(MAKE) --no-print-directory install-tools TOOLS="rust go php composer python uv"
 	$(MAKE) --no-print-directory template-install-bindings
@@ -608,7 +609,7 @@ help: ## List targets
 # The targets of the full suite. The jobs of the CI workflow run each target of the list in exactly one job with `make
 # ci-targets` (T17.1-10), so the list names the targets that the jobs run, such as the checks of the job gates, lint-ts
 # and conformance-ts. The list stays on one line: the owner-check utility of @polyspec/kit reads it.
-CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go
+CHECK_TARGETS := layout-check docs-check rules-check owner-validate rebuild-check language-check duplication-check suppression-check lint-ts lint-go lint-rust lint-php lint-python lint-php-ext test-php-ext hooks-check typecheck template-test-compiler-types docs-static-check template-test-scripts editor-boundary-check compiler-interface-check contract-check function-contract-check function-inventory-check benchmark-check template-lint-go-format template-lint-go-modules fmt-check template-lint-showcase-format template-lint-showcase-warnings template-lint-php-format test-ts template-test-language template-test-lsp template-test-codemirror format-check test-go test-rust test-php conformance-ts conformance-go conformance-rust conformance-php conformance-python test-python conformance-generated-ts conformance-generated-go conformance-generated-rust conformance-generated-php conformance-generated-python delimiter-matrix generated-native-check template-test-ext typed-generator-compile-check generated-lint-check template-install-check template-test-browser showcase-check benchmark-smoke docs-verify-idempotent lint-bindings check-declarations test-binding-crates test-binding-php test-binding-python test-binding-node test-binding-wasm test-binding-go consumer-phpstan-ci
 
 .PHONY: lint build test
 lint: lint-ts lint-go lint-rust lint-php lint-python lint-php-ext template-lint-go-format template-lint-go-modules fmt-check template-lint-php-format template-lint-showcase-format template-lint-showcase-warnings ## Lint every package: the lint targets and the format checks
@@ -1412,8 +1413,7 @@ release-recipes:
 # CHANGELOG.md, which is the released version before a release commit and the version of that commit after it (T28.141).
 .PHONY: consumer-phpstan-ci
 consumer-phpstan-ci: ## The consumer check of the job php-ext: the candidate archives of the first section of CHANGELOG.md, then consumer-phpstan-check; ONLINE
-	$(MAKE) --no-print-directory release-candidate-assets VERSION="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
-	$(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"
+	v="$$(sed -n 's/^## \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)$$/\1/p' CHANGELOG.md | head -1)"; $(MAKE) --no-print-directory release-candidate-assets VERSION="$$v" && $(MAKE) --no-print-directory consumer-phpstan-check VERSION="$$v"
 
 # The consumer check of the stub (T28.141): the PHP extension archive of release-candidate-assets (VERSION) carries the stub
 # that binding generates; PHPStan of a consumer reads the classes of the extension from it with scanFiles. The probe must fail

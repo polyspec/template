@@ -79,6 +79,7 @@
     },
     "@azure/identity": {
       "@azure/msal-node": "7.1.0"
-    }
+    },
+    "@docsearch/react": "3.9.0"
   }
 }

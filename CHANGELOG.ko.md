@@ -12,6 +12,8 @@
 
 - `make consumer-phpstan-check VERSION=X.Y.Z`는 PHPStan 소비자가 release archive의 stub에서 확장의 class를 읽는지 확인한다(T28.141). probe는 stub이 없으면 실패하고 stub이 있으면 통과한다. stub은 `scanFiles`로 선언하며, PHPStan 2.3은 그 선언을 `stubFiles`로 읽지 않는다. job php-ext가 이 파일 첫 절의 candidate archive에서 `consumer-phpstan-ci`로 그것을 돌리므로, stub이 없는 release는 CI에서 실패한다.
 
+- job `ci-php-ext`이 consumer check `consumer-phpstan-ci`가 필요로 하는 uv를 설치한다. `release-candidate-assets`가 저장소의 Python 프로젝트를 uv로 연결한다(T28.141).
+
 ## 0.0.30
 
 - release.yml의 job release는 release-go-module이 기록한 뒤 Go 모듈의 tag를 push한다(T28.152). job이 release-go-module-push를 부르지 않아, 릴리스의 Go tag가 remote에 닿지 않았다.

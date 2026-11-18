@@ -1,5 +1,5 @@
 <!-- doc-id: docs-operations-dependencies -->
-<!-- source-sha256: a85c890cbeb8e2332c19c39802b7a2c6d555ef000e96acc9442000e46728dae3 -->
+<!-- source-sha256: c5d9c2b5bc109ae3fd7369aa7ddb684c8d14f3135fe2e752385de3cba3c7aa0d -->
 # 의존성 정책
 
 [English](/operations/dependencies).
@@ -17,6 +17,7 @@ Registry 의존성은 registry가 해석하는 직접 의존성이다. 루트 `p
 이전 안정 release는 이 절에 기록한다. 각 항목은 manifest(루트 `package.json` 또는 Composer manifest)로 지정한 registry 의존성, 재현한 비호환성, 고정을 해제할 조건, 그 조건을 보호하는 test를 기록한다.
 
 - `package.json`의 `@types/vscode`: vsce는 `@types/vscode`가 `engines.vscode`(`^1.138.0`)보다 새로운 extension의 packaging을 거부한다: "@types/vscode ^1.140.0 greater than engines.vscode ^1.138.0". extension은 VS Code 1.138 이후에 추가된 API를 쓰지 않으므로 `engines.vscode`를 올리면 VS Code 1.138과 1.139만 제외된다. extension이 최신 `@types/vscode` release의 API를 필요로 해 `engines.vscode`를 그 release로 올리고 `make vscode-package`와 `make template-test-vscode-integration`이 통과하면 고정을 해제한다.
+- `package.json`의 `overrides`, `@docsearch/react`를 `3.9.0`으로: 최신 안정 release인 `vitepress` 1.6.4는 `@docsearch/js` 3.8.2를 거쳐 `@docsearch/react` 3.8.2에 닿고, 이 release는 그 버전을 정확히 고정한다. 이 release는 peer를 `react`, `react-dom`, `@types/react`에 대해 `>= 16.8.0 < 19.0.0`으로 선언하는데 루트는 React 19.3.x를 고정하므로 `npm ls --package-lock-only --all`이 `ELSPROBLEMS`(`invalid: react@19.3.1`)로 실패한다. Override는 peer가 `>= 16.8.0 < 20.0.0`인 3.9.0을 고른다. 고정은 최신 안정 `vitepress` release가 자체 범위로 React 19를 받는 `@docsearch/js`에 의존할 때 해제한다. 그때 override를 지우고, override 없이 `npm ls --package-lock-only --all`이 exit 0이어야 한다. Release의 검사가 이 조건을 보호한다. `package.json`의 `packageManager`로 실행하는 그 `npm ls`다.
 
 이 정책은 도구뿐 아니라 지원 runtime에도 적용한다. Test 의존성이 package가 지원한다고 선언한 runtime보다 새 버전을 요구할 수 없다. Composer manifest는 `config.platform.php`를 kit PHP pin의 platform인 `8.4.1`으로 지정해 lockfile을 해석한다. CI는 PHP package와 확장을 PHP 8.4에서 검사한다.
 

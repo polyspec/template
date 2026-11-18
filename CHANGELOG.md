@@ -11,6 +11,8 @@
 
 - `make consumer-phpstan-check VERSION=X.Y.Z` checks that PHPStan of a consumer reads the classes of the PHP extension from the stub of the release archive (T28.141): the probe fails without the stub and passes with it, with the stub declared through `scanFiles`, which PHPStan 2.3 reads where `stubFiles` does not. The job php-ext runs it on the candidate archives of the first section of this file (`consumer-phpstan-ci`), so a release without the stub fails in CI.
 
+- The job `ci-php-ext` installs uv, which the consumer check `consumer-phpstan-ci` needs: `release-candidate-assets` links the Python project of the repository with uv (T28.141).
+
 ## 0.0.30
 
 - The job release of release.yml pushes the tag of the Go module after release-go-module records it (T28.152): the job never called release-go-module-push, so the Go tag of a release did not reach the remote.

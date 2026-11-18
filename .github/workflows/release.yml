@@ -1,9 +1,11 @@
 # The release workflow of template, its own copy of the example of kit (T27.1-64, kit K1052).
 #
 # The workflow starts by itself when a push run of the CI workflow ci succeeds on main (K987): it checks out the head_sha of that
-# run, and release-tag with AUTO releases it only when it is the version commit of the top ## X.Y.Z of its change log, which is
-# the tip of its push; a commit whose top version is tagged elsewhere ends green with nothing to release, and a top version that
-# no run released fails and names its version commit. A concurrency group of the job runs one release of the repository at a time.
+# run, and release-tag with AUTO releases the top ## X.Y.Z of its change log at that commit (K988, K990), unless that version is
+# tagged already: a commit whose top version is tagged on its line ends green with nothing to release. A commit whose ## Unreleased
+# is empty releases its top version at once, so a green commit after the version commit releases it. A commit with entries under
+# ## Unreleased waits for the CI run of its version commit, whose success releases the version; when no run released it, the run
+# fails and names the version commit. A concurrency group of the job runs one release of the repository at a time.
 # A dispatch of the workflow with the id of a successful CI run releases the commit of that run (K911): it tags the commit with
 # the version of the newest section ## X.Y.Z of its change log (K924) and creates the GitHub Release of the tag as a draft with
 # its archives, and makes it public. The run is the evidence; the release runs no test again. The steps run in order and stop at
