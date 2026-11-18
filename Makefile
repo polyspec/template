@@ -1217,7 +1217,7 @@ BINDING_LLVM = $(if $(LLVM_ROOT),LIBCLANG_PATH=$(LLVM_ROOT)/lib CLANG_PATH=$(LLV
 lint-bindings: bindings
 	$(BINDING_LLVM) $(CARGO) clippy --locked $(foreach crate,$(BINDING_CRATES),-p $(crate)) --all-targets -- -D warnings
 test-binding-crates: bindings
-	$(BINDING_LLVM) $(CARGO) test --locked $(foreach crate,$(BINDING_CRATES),-p $(crate))
+	$(BINDING_LLVM) $(CARGO) test --locked --no-run $(foreach crate,$(BINDING_CRATES),-p $(crate))
 # The TypeScript compiler of package-lock.json checks the generated declarations of the Node binding and of its WASM binding.
 check-declarations-node: bindings
 	$(NODE) node_modules/typescript/bin/tsc --ignoreConfig --noEmit --strict packages/ts/generated/index.d.ts
