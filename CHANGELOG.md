@@ -5,6 +5,10 @@
 
 ## Unreleased
 
+## 0.0.33
+
+- Pin polyspec/binding 0.0.24 and polyspec/json 0.0.41 in the Rust crates, the npm and Python packages, the PHP extension and the Go module: the Python wheel requires polyspec-json==0.0.41, the PHP extension requires polyspec/json 0.0.41, and the json wheel digests of packages/python/requirements-bindings.txt are those of the 0.0.41 release assets. The binding pin moves with json, whose generated packages require binding 0.0.24.
+
 ## 0.0.32
 
 - Set `@polyspec/json` of `packages/ts/package.json` to the range `0.0.40`, as it was before the pin: the URL form broke the offline install of the binding packages (T28.156).

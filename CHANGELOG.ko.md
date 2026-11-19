@@ -1,10 +1,14 @@
 <!-- doc-id: changelog -->
-<!-- source-sha256: 0c6a5783569129a10b4e3c08098663b4c3d5cdc4106beb44fe3d8deb20220f1b -->
+<!-- source-sha256: 3c31a10783af2360524b21e68e6d7521ab1822caab5326cffe10855986c138ca -->
 # 변경 기록
 
 [English](CHANGELOG.md).
 
 ## Unreleased
+
+## 0.0.33
+
+- Rust crate, npm 및 Python 패키지, PHP 확장, Go 모듈의 binding을 0.0.24, json을 0.0.41로 pin했다. Python wheel은 `polyspec-json==0.0.41`을, PHP 확장은 `polyspec/json` 0.0.41을 요구하며, `packages/python/requirements-bindings.txt`의 json wheel digest는 0.0.41 release asset의 것이다. json의 생성 패키지가 binding 0.0.24를 요구하므로 binding pin도 함께 옮겼다.
 
 ## 0.0.32
 
